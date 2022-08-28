@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <LangVersion>preview</LangVersion>
+        <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Loqui" Version="2.50.1" />
+      <PackageReference Include="Mutagen.Bethesda.Core" Version="0.39.4-pr001" />
+      <PackageReference Include="MutagenLibrary" Version="1.0.114" />
+      <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
+      <PackageReference Include="ReactiveUI" Version="18.3.1" />
+      <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
+      <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
+      <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
+      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="20.2.0.45" />
+      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="20.2.0.45" />
+      <PackageReference Include="Syncfusion.Tools.WPF" Version="20.2.0.45" />
+      <PackageReference Include="System.Reactive" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+</Project>

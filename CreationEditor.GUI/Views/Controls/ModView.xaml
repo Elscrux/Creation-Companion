@@ -1,0 +1,65 @@
+﻿<controls:ModDetailsViewBase x:Class="CreationEditor.GUI.Views.Controls.ModDetails"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels"
+                          xmlns:converters="clr-namespace:MutagenLibrary.WPF.Converters;assembly=MutagenLibrary"
+                          xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+                          xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls"
+                          xmlns:behaviors="clr-namespace:MutagenLibrary.WPF.Decorators.Behaviors;assembly=MutagenLibrary"
+                          mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:IModGetterVM}"
+                          d:DesignHeight="500" d:DesignWidth="500">
+    <controls:ModDetailsViewBase.Resources>
+        <converters:BooleanNegateConverter x:Key="BooleanNegateConverter" />
+    </controls:ModDetailsViewBase.Resources>
+    <StackPanel Margin="5">
+        <Label Content="Name" />
+        <TextBox Text="{Binding Name}" MinHeight="25"
+                 IsReadOnly="{Binding IsReadOnly}" />
+        <Label Content="Author" />
+        <TextBox Text="{Binding Author}" MinHeight="25"
+                 IsReadOnly="{Binding IsReadOnly}" />
+
+        <Grid MinHeight="100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Column="0">
+                <StackPanel>
+                    <Label Content="Description" />
+                    <TextBox Text="{Binding Description}"
+                             TextWrapping="Wrap" VerticalContentAlignment="Top"
+                             IsReadOnly="{Binding IsReadOnly}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1">
+                <StackPanel>
+                    <Label Content="Masters" />
+                    <ListView ItemsSource="{Binding Masters}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Expander Header="Details">
+            <StackPanel>
+                <Label Content="Mod Type" />
+                <TextBox Text="{Binding Type}" MinHeight="25"
+                         IsReadOnly="{Binding IsReadOnly}" />
+                <Label Content="Form Version" />
+                <TextBox Text="{Binding FormVersion}" MinHeight="25"
+                         IsReadOnly="{Binding IsReadOnly}">
+                    <b:Interaction.Behaviors>
+                        <behaviors:RegExTextBoxBehavior RegularExpression="-?[0-9]+" MaxLength="9" />
+                    </b:Interaction.Behaviors>
+                </TextBox>
+                <Label Content="Localization Enabled" />
+                <CheckBox IsChecked="{Binding Localization}" MinHeight="25"
+                          IsEnabled="{Binding IsReadOnly, Converter={StaticResource BooleanNegateConverter}}" />
+            </StackPanel>
+        </Expander>
+    </StackPanel>
+</controls:ModDetailsViewBase>

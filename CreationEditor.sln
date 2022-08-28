@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.GUI", "CreationEditor.GUI\CreationEditor.GUI.csproj", "{323EBCE6-2FC9-4704-B535-F34B33F30B15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor", "CreationEditor\CreationEditor.csproj", "{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{323EBCE6-2FC9-4704-B535-F34B33F30B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{323EBCE6-2FC9-4704-B535-F34B33F30B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{323EBCE6-2FC9-4704-B535-F34B33F30B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{323EBCE6-2FC9-4704-B535-F34B33F30B15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

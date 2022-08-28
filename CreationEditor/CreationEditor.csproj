@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MutagenLibrary" Version="1.0.114" />
+      <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Backup" />
+    </ItemGroup>
+
+</Project>
