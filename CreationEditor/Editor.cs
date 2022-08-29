@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Mutagen.Bethesda.Environments;
+﻿using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
@@ -10,33 +9,32 @@ namespace CreationEditor;
 public class Editor {
     public static Editor Instance = new();
 
+    public static readonly ReferenceQuery ReferenceQuery = new();
+    
     public readonly IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment;
-    public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache;
-    public readonly ReferenceQuery ReferenceQuery;
+    public ILinkCache<ISkyrimMod, ISkyrimModGetter> LinkCache => Environment.LinkCache;
 
-    public readonly IEnumerable<ModKey> LoadedMods;
+    public IEnumerable<ModKey> LoadedMods => Environment.LoadOrder.Keys;
 
     public readonly SkyrimMod ActiveMod;
 
     public static event EventHandler? ActiveModChanged;
-    public static event EventHandler? EditorFinishLoading;
+    public static event EventHandler? EditorInitialized;
 
     //Null editor constructor
     private Editor() {
         ActiveMod = new SkyrimMod(ModKey.Null, Constants.SkyrimRelease);
-        Environment = (IGameEnvironment<ISkyrimMod, ISkyrimModGetter>) FormatterServices.GetUninitializedObject(typeof(GameEnvironmentState<ISkyrimMod, ISkyrimModGetter>));
-        LinkCache = ActiveMod.ToImmutableLinkCache();
-        LoadedMods = new List<ModKey>();
-        ReferenceQuery = new ReferenceQuery();
+
+        Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
+            .Create(Constants.GameRelease)
+            .WithLoadOrder(ActiveMod.ModKey)
+            .Build();
     }
     
     private Editor(IEnumerable<ModKey> modKeys, ModKey? activeMod = null, INotifier? notifier = null) {
-        ActiveModChanged?.Invoke(this, EventArgs.Empty);
-        
-        notifier?.Notify("Building Environment");
-        
         ActiveMod = new SkyrimMod(activeMod ?? ModKey.Null, Constants.SkyrimRelease);
         if (activeMod != null) {
+            notifier?.Notify($"Preparing {activeMod.Value.FileName}");
             ActiveMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
                 .Create(Constants.GameRelease)
                 .WithLoadOrder(activeMod.Value)
@@ -44,21 +42,20 @@ public class Editor {
                 .LoadOrder[^1].Mod!);
         }
         
+        notifier?.Notify("Building Environment");
         Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(Constants.GameRelease)
             .WithLoadOrder(modKeys.ToArray())
             .WithOutputMod(ActiveMod, OutputModTrimming.Self)
             .Build();
 
-        LinkCache = Environment.LinkCache;
-        LoadedMods = Environment.LoadOrder.Keys;
-        
         notifier?.Notify("Loading References");
-
-        ReferenceQuery = new ReferenceQuery(Environment, notifier);
-        
-        EditorFinishLoading?.Invoke(this, EventArgs.Empty);
+        // ReferenceQuery.LoadModReferences(Environment, notifier);// todo reenable
     }
     
-    public static void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null, INotifier? load = null) => Instance = new Editor(modKeys, activeMod, load);
+    public static void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null, INotifier? load = null) {
+        Instance = new Editor(modKeys, activeMod, load);
+        ActiveModChanged?.Invoke(Instance, EventArgs.Empty);
+        EditorInitialized?.Invoke(Instance, EventArgs.Empty);
+    }
 }

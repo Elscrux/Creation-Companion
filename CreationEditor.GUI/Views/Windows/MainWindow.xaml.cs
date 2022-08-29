@@ -7,5 +7,7 @@ public partial class MainWindow {
         InitializeComponent();
         
         DataContext = MainVM.Instance;
+        
+        DockingManager.LoadDockState();
     }
 }

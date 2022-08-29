@@ -46,6 +46,7 @@ public class MainVM : ViewModel, INotificationReceiver {
         Save = ReactiveCommand.Create(() => {});
         
         OpenLog = ReactiveCommand.Create((DockingManager dockingManager) => dockingManager.AddControl<LogView>("Log", DockSide.Bottom, DockState.Dock));
+        OpenRecordBrowser = ReactiveCommand.Create((DockingManager dockingManager) => dockingManager.AddControl<RecordBrowser>("Record Browser", DockSide.Left, DockState.Dock, 500));
         
         Editor.ActiveModChanged += EditorOnActiveModChanged;
 

@@ -28,4 +28,8 @@
       <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Views\Controls\Record\RecordEditor" />
+    </ItemGroup>
+
 </Project>

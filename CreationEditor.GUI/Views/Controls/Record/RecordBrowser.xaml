@@ -1,0 +1,40 @@
+﻿<recordControl:RecordBrowserViewBase x:Class="CreationEditor.GUI.Views.Controls.Record.RecordBrowser"
+                                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:self="clr-namespace:CreationEditor.GUI.Models.Record"
+                                xmlns:recordModel="clr-namespace:CreationEditor.GUI.ViewModels.Record"
+                                xmlns:recordControl="clr-namespace:CreationEditor.GUI.Views.Controls.Record"
+                                mc:Ignorable="d" d:DataContext="{d:DesignInstance recordModel:IRecordBrowserVM}"
+                                d:DesignHeight="720" d:DesignWidth="480">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <TreeView ItemsSource="{Binding RecordTypeGroups}">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type self:RecordTypeGroup}"
+                                              ItemsSource="{Binding RecordTypes}">
+                        <TextBlock Text="{Binding GroupName}" />
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type self:RecordTypeListing}">
+                        <Button
+                            Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=recordControl:RecordBrowser}}"
+                            CommandParameter="{Binding}">
+                            <TextBlock Text="{Binding RecordTypeName}" />
+                        </Button>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Width="5" />
+
+        <ContentControl Grid.Column="2" Content="{Binding RecordList.View}"/>
+    </Grid>
+</recordControl:RecordBrowserViewBase>

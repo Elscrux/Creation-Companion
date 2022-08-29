@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="CreationEditor.GUI.Views.Controls.Record.RecordList.SkyrimNpcList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:recordList="clr-namespace:CreationEditor.GUI.ViewModels.Record.RecordList"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance recordList:SkyrimNpcListVM}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <syncfusion:SfDataGrid ItemsSource="{Binding Records}"
+                           AllowDraggingColumns="True" AllowResizingColumns="True"
+                           AutoGenerateColumns="False"
+                           EnableDataVirtualization="True">
+        <syncfusion:SfDataGrid.Columns>
+            <syncfusion:GridTextColumn HeaderText="EditorID" MappingName="EditorID"
+                                       AllowFiltering="True" AllowSorting="True"/>
+            <syncfusion:GridTextColumn HeaderText="FormKey" MappingName="FormKey"
+                                       AllowFiltering="True" AllowSorting="True"/>
+            <syncfusion:GridTextColumn HeaderText="Name" MappingName="Name.String"
+                                       AllowFiltering="True" AllowSorting="True"/>
+        </syncfusion:SfDataGrid.Columns>
+    </syncfusion:SfDataGrid>
+</UserControl>

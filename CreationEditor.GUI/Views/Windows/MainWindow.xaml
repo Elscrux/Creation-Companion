@@ -10,6 +10,7 @@
         xmlns:loadSpinner="clr-namespace:MutagenLibrary.WPF.CustomElements.LoadSpinner;assembly=MutagenLibrary"
         xmlns:windows="clr-namespace:CreationEditor.GUI.Views.Windows"
         xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls"
+        xmlns:record="clr-namespace:CreationEditor.GUI.Views.Controls.Record"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
         Title="{Binding WindowTitle}" MinHeight="480" MinWidth="720">
     <Window.Resources>
@@ -31,6 +32,9 @@
                 <syncfusion:MenuItemAdv Header="View">
                     <syncfusion:MenuItemAdv Header="Log"
                                             Command="{Binding OpenLog}"
+                                            CommandParameter="{Binding ElementName=DockingManager}" />
+                    <syncfusion:MenuItemAdv Header="Record Browser"
+                                            Command="{Binding OpenRecordBrowser}"
                                             CommandParameter="{Binding ElementName=DockingManager}" />
                 </syncfusion:MenuItemAdv>
             </syncfusion:MenuAdv>
