@@ -35,7 +35,8 @@
                 </syncfusion:MenuItemAdv>
             </syncfusion:MenuAdv>
 
-            <syncfusion:DockingManager x:Name="DockingManager">
+            <syncfusion:DockingManager x:Name="DockingManager" PersistState="True">
+                <record:RecordBrowser syncfusion:DockingManager.DesiredWidthInDockedMode="500"/>
             </syncfusion:DockingManager>
         </DockPanel>
 

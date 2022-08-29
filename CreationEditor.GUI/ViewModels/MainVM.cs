@@ -2,9 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Windows;
-using System.Windows.Controls;
 using CreationEditor.GUI.Logging;
 using CreationEditor.GUI.Models;
+using CreationEditor.GUI.ViewModels.Mod;
+using CreationEditor.GUI.Views.Controls.Record;
 using CreationEditor.GUI.Views.Windows;
 using Mutagen.Bethesda;
 using MutagenLibrary.Notification;
@@ -31,7 +32,8 @@ public class MainVM : ViewModel, INotificationReceiver {
 
     public ReactiveCommand<Window, Unit> OpenSelectMods { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
-    public ReactiveCommand<DockingManager, Unit> OpenLog { get; }
+    public ReactiveCommand<DockingManager, LogView> OpenLog { get; }
+    public ReactiveCommand<DockingManager, RecordBrowser> OpenRecordBrowser { get; }
 
     private MainVM() {
         _modSelectionVM = new ModSelectionVM(GameRelease, Notifier);
@@ -64,15 +66,5 @@ public class MainVM : ViewModel, INotificationReceiver {
         if (LoadingItems.Count > level) {
             LoadingItems[level].LoadProgress = progress;
         }
-    }
-}
-public static class DockingManagerExtension {
-    public static void AddControl<TControl>(this DockingManager dockingManager, string header = "", DockSide dockSide = DockSide.Tabbed, DockState dockState = DockState.Document) where TControl : UserControl, new() {
-        var control = new ContentControl { Content = new TControl() };
-        control.SetValue(DockingManager.HeaderProperty, header);
-        control.SetValue(DockingManager.SideInDockedModeProperty, dockSide);
-        control.SetValue(DockingManager.StateProperty, dockState);
-
-        dockingManager.Children.Add(control);
     }
 }
