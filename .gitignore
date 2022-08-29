@@ -1,3 +1,8 @@
+.vs/*
+.idea/*
+*/[Bb]in/*
+*/[Oo]bj/*
+*/Properties/launchSettings.json
 bin/
 obj/
 /packages/
