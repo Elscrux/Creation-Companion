@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using CreationEditor.GUI.Models;
+using CreationEditor.GUI.Models.Mod;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda;
@@ -22,7 +22,7 @@ using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels;
+namespace CreationEditor.GUI.ViewModels.Mod;
 
 public class ModSelectionVM : ViewModel {
     private readonly IGameEnvironment _environment;

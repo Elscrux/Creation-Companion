@@ -1,4 +1,4 @@
-﻿using CreationEditor.GUI.ViewModels;
+﻿using CreationEditor.GUI.ViewModels.Mod;
 namespace CreationEditor.GUI.Views.Windows; 
 
 public partial class ModSelectionWindow {

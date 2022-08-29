@@ -1,6 +1,6 @@
-﻿using CreationEditor.GUI.ViewModels;
+﻿using CreationEditor.GUI.ViewModels.Mod;
 using ReactiveUI;
-namespace CreationEditor.GUI.Views.Controls; 
+namespace CreationEditor.GUI.Views.Controls.Mod; 
 
 public class ModDetailsViewBase : ReactiveUserControl<IModGetterVM> { }
 

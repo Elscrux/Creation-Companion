@@ -1,13 +1,13 @@
-﻿<controls:ModDetailsViewBase x:Class="CreationEditor.GUI.Views.Controls.ModDetails"
+﻿<controls:ModDetailsViewBase x:Class="CreationEditor.GUI.Views.Controls.Mod.ModDetails"
                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                          xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels"
                           xmlns:converters="clr-namespace:MutagenLibrary.WPF.Converters;assembly=MutagenLibrary"
                           xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-                          xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls"
                           xmlns:behaviors="clr-namespace:MutagenLibrary.WPF.Decorators.Behaviors;assembly=MutagenLibrary"
+                          xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
+                          xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls.Mod"
                           mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:IModGetterVM}"
                           d:DesignHeight="500" d:DesignWidth="500">
     <controls:ModDetailsViewBase.Resources>

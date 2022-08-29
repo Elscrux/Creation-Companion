@@ -3,7 +3,7 @@ using System.Linq;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog.WPF;
-namespace CreationEditor.GUI.ViewModels; 
+namespace CreationEditor.GUI.ViewModels.Mod; 
 
 public interface IModGetterVM {
     public bool IsReadOnly { get; set; }

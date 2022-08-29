@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins;
 using MutagenLibrary.WPF.UtilityTypes;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Models; 
+namespace CreationEditor.GUI.Models.Mod; 
 
 public class ActivatableModItem : ModItem {
     [Reactive] public bool IsActive { get; set; }
