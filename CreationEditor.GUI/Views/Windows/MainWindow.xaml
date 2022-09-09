@@ -6,27 +6,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels"
-        xmlns:converters="clr-namespace:MutagenLibrary.WPF.Converters;assembly=MutagenLibrary"
-        xmlns:loadSpinner="clr-namespace:MutagenLibrary.WPF.CustomElements.LoadSpinner;assembly=MutagenLibrary"
         xmlns:windows="clr-namespace:CreationEditor.GUI.Views.Windows"
         xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls"
-        xmlns:record="clr-namespace:CreationEditor.GUI.Views.Controls.Record"
+        xmlns:loading="clr-namespace:Elscrux.WPF.Views.Loading;assembly=Elscrux.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
         Title="{Binding WindowTitle}" MinHeight="480" MinWidth="720">
-    <Window.Resources>
-        <converters:BooleanToBlurConverter x:Key="BooleanToBlurConverter" />
-        <syncfusion:BoolNegationConverter x:Key="BoolNegationConverter" />
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </Window.Resources>
     <Grid>
-        <DockPanel Effect="{Binding IsLoading, Converter={StaticResource BooleanToBlurConverter}}"
-                   IsHitTestVisible="{Binding IsLoading, Converter={StaticResource BoolNegationConverter}}">
+        <DockPanel Effect="{Binding BusyService.IsBusy, Converter={StaticResource BooleanToBlurConverter}}"
+                   IsHitTestVisible="{Binding BusyService.IsBusy, Converter={StaticResource BoolNegationConverter}}">
             <syncfusion:MenuAdv DockPanel.Dock="Top">
                 <syncfusion:MenuItemAdv Header="File">
-                    <syncfusion:MenuItemAdv Header="Mods" 
+                    <syncfusion:MenuItemAdv Header="Mods"
                                             Command="{Binding OpenSelectMods}"
                                             CommandParameter="{Binding ElementName=Window}" />
-                    <syncfusion:MenuItemAdv Header="Save" 
+                    <syncfusion:MenuItemAdv Header="Save"
                                             Command="{Binding Save}" />
                 </syncfusion:MenuItemAdv>
                 <syncfusion:MenuItemAdv Header="View">
@@ -40,25 +33,24 @@
             </syncfusion:MenuAdv>
 
             <syncfusion:DockingManager x:Name="DockingManager" PersistState="True">
-                <record:RecordBrowser syncfusion:DockingManager.DesiredWidthInDockedMode="500"/>
             </syncfusion:DockingManager>
         </DockPanel>
 
-        <loadSpinner:LoadSpinner HorizontalAlignment="Center" VerticalAlignment="Center"
-                                 Height="500" Width="800"
-                                 EllipseSize="32" SpinnerSize="64"
-                                 Visibility="{Binding DataContext.IsLoading,
+        <loading:LoadSpinner HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Height="500" Width="800"
+                             EllipseSize="32" SpinnerSize="64"
+                             Visibility="{Binding DataContext.BusyService.IsBusy,
                                     RelativeSource={RelativeSource AncestorType=windows:MainWindow},
                                     Converter={StaticResource BooleanToVisibilityConverter}}" />
-        
+
         <ItemsControl ItemsSource="{Binding LoadingItems}"
-                      HorizontalAlignment="Center" VerticalAlignment="Center" 
-                      Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Visibility="{Binding BusyService.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                       Margin="0, 256, 0, 0">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <controls:LoadingView DataContext="{Binding}"/>
+                        <controls:LoadingView DataContext="{Binding}" />
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

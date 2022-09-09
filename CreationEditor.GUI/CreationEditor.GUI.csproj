@@ -10,17 +10,23 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Autofac" Version="6.4.0" />
       <PackageReference Include="Loqui" Version="2.50.1" />
-      <PackageReference Include="Mutagen.Bethesda.Core" Version="0.39.4-pr001" />
-      <PackageReference Include="MutagenLibrary" Version="1.0.114" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.39.4" />
+      <PackageReference Include="Mutagen.Bethesda.WPF" Version="0.39.4" />
+      <PackageReference Include="MutagenLibrary.WPF" Version="1.0.3" />
       <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
+      <PackageReference Include="Noggog.WPF" Version="2.50.1" />
       <PackageReference Include="ReactiveUI" Version="18.3.1" />
       <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
       <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
       <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
-      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="20.2.0.45" />
-      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="20.2.0.45" />
-      <PackageReference Include="Syncfusion.Tools.WPF" Version="20.2.0.45" />
+      <PackageReference Include="Serilog" Version="2.12.0-dev-01559" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+      <PackageReference Include="Syncfusion.SfGrid.WPF" Version="20.2.0.48" />
+      <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="20.2.0.48" />
+      <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="20.2.0.48" />
+      <PackageReference Include="Syncfusion.Tools.WPF" Version="20.2.0.48" />
       <PackageReference Include="System.Reactive" Version="5.0.0" />
     </ItemGroup>
 

@@ -8,8 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MutagenLibrary" Version="1.0.114" />
+      <PackageReference Include="Autofac" Version="6.4.0" />
+      <PackageReference Include="Elscrux" Version="1.0.3" />
       <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
+      <PackageReference Include="MutagenLibrary.Core" Version="1.0.3" />
+      <PackageReference Include="MutagenLibrary.References" Version="1.0.3" />
     </ItemGroup>
 
     <ItemGroup>

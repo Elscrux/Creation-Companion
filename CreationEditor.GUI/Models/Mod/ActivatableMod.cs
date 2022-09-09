@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Mutagen.Bethesda.Plugins;
-using MutagenLibrary.WPF.UtilityTypes;
+using MutagenLibrary.WPF.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.GUI.Models.Mod; 

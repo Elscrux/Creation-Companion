@@ -3,11 +3,13 @@ using System.Collections;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using CreationEditor.GUI.Models.Record;
+using CreationEditor.GUI.Models.Record.RecordBrowser;
 using CreationEditor.GUI.Views.Controls.Record.RecordList;
 using DynamicData;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
+using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -17,32 +19,52 @@ public interface IRecordListVM {
     public UserControl View { get; set; }
     
     public Type Type { get; set; }
-    [Reactive] public ILinkCache Scope { get; set; }
     [Reactive] public IEnumerable Records { get; set; }
+    [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
+    
+    [Reactive] public bool IsBusy { get; set; }
 }
 
 public class MajorRecordListVM : ViewModel, IRecordListVM {
+    private readonly IReferenceQuery _referenceQuery;
     public UserControl View { get; set; }
     
     public Type Type { get; set; }
-    [Reactive] public ILinkCache Scope { get; set; }
     [Reactive] public IEnumerable Records { get; set; }
+    [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
     
-    public MajorRecordListVM(ILinkCache scope, Type type) {
-        Scope = scope;
+    [Reactive] public bool IsBusy { get; set; }
+
+    public MajorRecordListVM(Type type, IRecordBrowserSettings recordBrowserSettings, IReferenceQuery referenceQuery) {
+        _referenceQuery = referenceQuery;
         Type = type;
+        RecordBrowserSettings = recordBrowserSettings;
         View = new GenericRecordList(this);
 
-        Records = this.WhenAnyValue(x => x.Scope, x => x.Type)
+        Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
+            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
-                    foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item2)) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
-                        obs.OnNext(recordIdentifier);
+                IsBusy = true;
+                return Observable.Create<ReferencedRecord<IMajorRecordIdentifier>>((obs, cancel) => {
+                    try {
+                        foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item3)) {
+                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
+
+                            //Skip when browser settings don't match
+                            if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
+
+                            var formLinks = _referenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
+                            var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier>(recordIdentifier, formLinks);
+
+                            obs.OnNext(referencedRecord);
+                        }
+
+                        obs.OnCompleted();
+                        return Task.CompletedTask;
+                    } finally {
+                        IsBusy = false;
                     }
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
                 });
             })
             .Select(x => x.ToObservableChangeSet())
@@ -51,30 +73,46 @@ public class MajorRecordListVM : ViewModel, IRecordListVM {
     }
 }
 
-
 public abstract class RecordListVM<TMajorRecordGetter> : ViewModel, IRecordListVM
     where TMajorRecordGetter : class, IMajorRecordGetter {
+    private readonly IReferenceQuery _referenceQuery;
     public UserControl View { get; set; } = null!;
     
     public Type Type { get; set; }
-    [Reactive] public ILinkCache Scope { get; set; }
     [Reactive] public IEnumerable Records { get; set; }
-
-    protected RecordListVM(ILinkCache scope) {
-        Scope = scope;
+    [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
+    
+    [Reactive] public bool IsBusy { get; set; }
+    
+    protected RecordListVM(IRecordBrowserSettings recordBrowserSettings, IReferenceQuery referenceQuery) {
+        _referenceQuery = referenceQuery;
+        RecordBrowserSettings = recordBrowserSettings;
         Type = typeof(TMajorRecordGetter);
 
         Records = this
-            .WhenAnyValue(x => x.Scope)
+            .WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
+            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(linkCache => {
-                return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
-                    foreach (var recordIdentifier in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
-                        obs.OnNext(recordIdentifier);
+            .Select(x => {
+                IsBusy = true;
+                return Observable.Create<ReferencedRecord<TMajorRecordGetter>>((obs, cancel) => {
+                    try {
+                        foreach (var recordIdentifier in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
+                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
+
+                            //Skip when browser settings don't match
+                            if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
+
+                            var formLinks = _referenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
+                            var referencedRecord = new ReferencedRecord<TMajorRecordGetter>(recordIdentifier, formLinks);
+
+                            obs.OnNext(referencedRecord);
+                        }
+                        obs.OnCompleted();
+                        return Task.CompletedTask;
+                    } finally {
+                        IsBusy = false;
                     }
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
                 });
             })
             .Select(x => x.ToObservableChangeSet())

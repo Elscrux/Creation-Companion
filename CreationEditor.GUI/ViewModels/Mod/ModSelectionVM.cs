@@ -8,16 +8,18 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using CreationEditor.GUI.Models.Mod;
+using CreationEditor.GUI.Services;
+using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
-using Mutagen.Bethesda;
+using Elscrux.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
 using Mutagen.Bethesda.Skyrim;
-using MutagenLibrary.Notification;
+using MutagenLibrary.Core.Plugins;
 using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
@@ -25,10 +27,14 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.GUI.ViewModels.Mod;
 
 public class ModSelectionVM : ViewModel {
+    private readonly INotifier _notifier;
+    private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
+    private readonly IEditorEnvironment _editorEnvironment;
+    public IBusyService BusyService { get; }
     private readonly IGameEnvironment _environment;
 
     [Reactive] public ObservableCollection<ActivatableModItem> Mods { get; set; }
-    public readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> MasterInfos = new();
+    private readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> _masterInfos = new();
 
     [Reactive] public ActivatableModItem? SelectedMod { get; set; }
     [Reactive] public IModGetterVM? SelectedModDetails { get; private set; }
@@ -44,19 +50,23 @@ public class ModSelectionVM : ViewModel {
     public ICommand SetAsActive { get; }
     public Func<ISelectable, bool> CanSelect { get; } = selectable => selectable is ActivatableModItem { MastersValid: true };
 
-    public ModSelectionVM(GameRelease gameRelease, INotifier? notifier = null) {
-        _environment = GameEnvironment.Typical.Construct(gameRelease, LinkCachePreferences.OnlyIdentifiers());
+    public ModSelectionVM(
+        INotifier notifier,
+        ISimpleEnvironmentContext simpleEnvironmentContext,
+        IEditorEnvironment editorEnvironment,
+        IBusyService busyService) {
+        _notifier = notifier;
+        _simpleEnvironmentContext = simpleEnvironmentContext;
+        _editorEnvironment = editorEnvironment;
+        BusyService = busyService;
 
-        var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(Constants.GameRelease));
+        _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
+
+        var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(_simpleEnvironmentContext.GameReleaseContext.Release));
         if (!File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
 
-        // if (!GameLocations.TryGetDataFolder(gameRelease, out var dataDirectory)) {
-        //     MessageBox.Show($"Could not detect {gameRelease} game directory.");
-        // }
-        // var loadOrder = LoadOrder.GetLoadOrderListings(gameRelease, dataDirectory, false);
-
         UpdateMasterInfos();
-        Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, MasterInfos[modKey].Valid, MasterInfos[modKey].Masters)));
+        Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid, _masterInfos[modKey].Masters)));
 
         _anyModsLoaded = Mods.ToObservableChangeSet()
             .AutoRefresh(x => x.IsSelected)
@@ -84,8 +94,8 @@ public class ModSelectionVM : ViewModel {
         Confirm = ReactiveCommand.Create(async (Window window) => {
             window.Close();
 
-            MainVM.Instance.IsLoading = true;
-            await Task.Run(() => {
+            BusyService.IsBusy = true;
+            await Task.Run(async () => {
                 //Load all mods that are selected, or masters of selected mods
                 var loadedMods = new HashSet<ModKey>();
                 var missingMods = new Queue<ModKey>(SelectedMods);
@@ -95,15 +105,15 @@ public class ModSelectionVM : ViewModel {
                     var modKey = missingMods.Dequeue();
                     loadedMods.Add(modKey);
 
-                    foreach (var master in MasterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
+                    foreach (var master in _masterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
                         missingMods.Enqueue(master);
                     }
                 }
 
                 var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-                Editor.Build(orderedMods, ActiveMod, notifier);
+                _editorEnvironment.Build(orderedMods, ActiveMod);
             });
-            MainVM.Instance.IsLoading = false;
+            BusyService.IsBusy = false;
         });
 
         this.WhenAnyValue(x => x.SelectedMod)
@@ -121,12 +131,12 @@ public class ModSelectionVM : ViewModel {
     }
     
     public void UpdateMasterInfos() {
-        MasterInfos.Clear();
+        _masterInfos.Clear();
         var modKeys = _environment.LoadOrder.Keys.ToHashSet();
 
         foreach (var listing in _environment.LoadOrder.Items) {
             if (listing.Mod == null) {
-                MasterInfos.Add(listing.ModKey, (new HashSet<ModKey>(), false));
+                _masterInfos.Add(listing.ModKey, (new HashSet<ModKey>(), false));
             } else {
                 var directMasters = listing.Mod.MasterReferences.Select(m => m.Master).ToList();
                 var masters = new HashSet<ModKey>(directMasters);
@@ -134,7 +144,7 @@ public class ModSelectionVM : ViewModel {
                 
                 //Check that all masters are valid and compile list of all recursive masters
                 foreach (var master in directMasters) {
-                    if (MasterInfos.TryGetValue(master, out var masterInfo)) {
+                    if (_masterInfos.TryGetValue(master, out var masterInfo)) {
                         if (masterInfo.Valid) {
                             masters.Add(masterInfo.Masters);
                             continue;
@@ -147,7 +157,7 @@ public class ModSelectionVM : ViewModel {
 
                 if (!valid) masters.Clear();
                 masters = masters.OrderBy(key => modKeys.IndexOf(key)).ToHashSet();
-                MasterInfos.Add(listing.ModKey, (masters, valid));
+                _masterInfos.Add(listing.ModKey, (masters, valid));
             }
         }
     }

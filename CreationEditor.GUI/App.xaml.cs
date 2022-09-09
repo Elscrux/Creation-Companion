@@ -2,6 +2,11 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using Autofac;
+using CreationEditor.GUI.Modules;
+using CreationEditor.GUI.Services.Startup;
+using CreationEditor.GUI.Views.Windows;
+using Elscrux.Notification;
 using Microsoft.Win32;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Themes.MaterialDark.WPF;
@@ -22,7 +27,30 @@ public partial class App {
         using var log = new StreamWriter(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CrashLog.txt"), false);
         log.WriteLine(exception);
     }
-    
+
+    protected override void OnStartup(StartupEventArgs e) {
+        base.OnStartup(e);
+        
+        var window = new MainWindow();
+
+        var builder = new ContainerBuilder();
+        
+        builder.RegisterModule<MainModule>();
+        builder.RegisterModule<NotificationModule>();
+        builder.RegisterModule<LoggingModule>();
+        // builder.RegisterModule<MutagenModule>();
+        builder.RegisterModule<SkyrimModule>();
+        
+        builder.RegisterInstance(window).As<IMainWindow>();
+        
+        var container = builder.Build();
+        
+        container.Resolve<IStartup>()
+            .Start();
+
+        window.Show();
+    }
+
     private enum WindowsTheme { Light, Dark }
 
     private static WindowsTheme GetTheme() {

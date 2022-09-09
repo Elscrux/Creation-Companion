@@ -11,3 +11,10 @@ public partial class GenericRecordList {
         DataContext = ViewModel = recordListVM;
     }
 }
+
+public class GenericRecordList<TRecordListVM> : ReactiveUserControl<IRecordListVM> 
+    where TRecordListVM : IRecordListVM {
+    public GenericRecordList(TRecordListVM recordListVM) {
+        DataContext = ViewModel = recordListVM;
+    }
+}

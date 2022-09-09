@@ -1,12 +1,13 @@
-﻿using CreationEditor.GUI.ViewModels;
-namespace CreationEditor.GUI.Views.Windows; 
+﻿namespace CreationEditor.GUI.Views.Windows; 
 
-public partial class MainWindow {
+public interface IMainWindow {
+    public object DataContext { get; set; }
+}
+
+public partial class MainWindow : IMainWindow {
     public MainWindow() {
         App.UpdateTheme(this);
         InitializeComponent();
-        
-        DataContext = MainVM.Instance;
         
         DockingManager.LoadDockState();
     }

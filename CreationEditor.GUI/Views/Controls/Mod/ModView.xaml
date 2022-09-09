@@ -3,16 +3,12 @@
                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                          xmlns:converters="clr-namespace:MutagenLibrary.WPF.Converters;assembly=MutagenLibrary"
                           xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-                          xmlns:behaviors="clr-namespace:MutagenLibrary.WPF.Decorators.Behaviors;assembly=MutagenLibrary"
                           xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
                           xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls.Mod"
+                          xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
                           mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:IModGetterVM}"
                           d:DesignHeight="500" d:DesignWidth="500">
-    <controls:ModDetailsViewBase.Resources>
-        <converters:BooleanNegateConverter x:Key="BooleanNegateConverter" />
-    </controls:ModDetailsViewBase.Resources>
     <StackPanel Margin="5">
         <Label Content="Name" />
         <TextBox Text="{Binding Name}" MinHeight="25"
@@ -58,7 +54,7 @@
                 </TextBox>
                 <Label Content="Localization Enabled" />
                 <CheckBox IsChecked="{Binding Localization}" MinHeight="25"
-                          IsEnabled="{Binding IsReadOnly, Converter={StaticResource BooleanNegateConverter}}" />
+                          IsEnabled="{Binding IsReadOnly, Converter={StaticResource BoolNegationConverter}}" />
             </StackPanel>
         </Expander>
     </StackPanel>

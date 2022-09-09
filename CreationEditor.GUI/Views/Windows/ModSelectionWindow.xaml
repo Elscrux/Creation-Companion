@@ -6,17 +6,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:MutagenLibrary.WPF.Decorators.Behaviors;assembly=MutagenLibrary"
         xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
         xmlns:models="clr-namespace:CreationEditor.GUI.Models.Mod"
         xmlns:controls="clr-namespace:CreationEditor.GUI.Views.Controls.Mod"
+        xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:ModSelectionVM}"
         d:DesignHeight="500" d:DesignWidth="750"
         MinHeight="480" MinWidth="720" Height="480" Width="720"
         Title="Select Mods">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="A" Command="{Binding SetAsActive}" />
     </Window.InputBindings>
@@ -31,7 +28,7 @@
                 <RowDefinition />
                 <RowDefinition Height="35" />
             </Grid.RowDefinitions>
-            
+
             <syncfusion:SfDataGrid Grid.Row="0"
                                    ItemsSource="{Binding Mods}"
                                    SelectedItem="{Binding SelectedMod}"
@@ -58,7 +55,7 @@
                 </syncfusion:SfDataGrid.ContextMenu>
                 <b:Interaction.Behaviors>
                     <behaviors:SfDataGridSelectionBehavior EnabledMapping="MastersValid"
-                                                           SelectionGuard="{Binding CanSelect}"/>
+                                                           SelectionGuard="{Binding CanSelect}" />
                 </b:Interaction.Behaviors>
                 <syncfusion:SfDataGrid.Columns>
                     <syncfusion:GridTextColumn HeaderText="Name" MappingName="ModKey" />
@@ -67,7 +64,7 @@
             </syncfusion:SfDataGrid>
 
             <Border Grid.Row="1"
-                    BorderThickness="1" Style="{StaticResource BorderBrush}">
+                    BorderThickness="1">
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Button Padding="5" VerticalAlignment="Center"
                             IsEnabled="{Binding AnyModsLoaded}"

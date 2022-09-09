@@ -4,12 +4,9 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:local="clr-namespace:CreationEditor.GUI.Views.Controls"
-                 xmlns:models="clr-namespace:CreationEditor.GUI.Models"
-                 mc:Ignorable="d" d:DataContext="{d:DesignInstance models:LoadingItem}"
+                 xmlns:models1="clr-namespace:Elscrux.WPF.Models;assembly=Elscrux.WPF"
+                 mc:Ignorable="d" d:DataContext="{d:DesignInstance models1:NotificationItem}"
                  d:DesignHeight="300" d:DesignWidth="300">
-    <local:LoadingViewBase.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </local:LoadingViewBase.Resources>
     <StackPanel>
         <TextBlock FontSize="16" Text="{Binding LoadText}"
                    TextAlignment="Center"/>

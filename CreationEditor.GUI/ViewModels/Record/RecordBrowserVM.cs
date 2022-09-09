@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using CreationEditor.GUI.Models.Record;
+using CreationEditor.GUI.Models.Record.RecordBrowser;
 using CreationEditor.GUI.ViewModels.Record.RecordList;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -14,24 +13,30 @@ public interface IRecordBrowserVM {
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
     [Reactive] public IRecordListVM RecordList { get; set; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
-    public BrowserScope BrowserScope { get; set; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 }
 
 public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
-    public BrowserScope BrowserScope { get; set; } = BrowserScope.Environment;
-    
+    private readonly IReferenceQuery _referenceQuery;
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
+
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
-    [Reactive] public IRecordListVM? RecordList { get; set; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
 
-    public SkyrimRecordBrowserVM() {
+    [Reactive] public IRecordListVM? RecordList { get; set; }
+    
+
+    public SkyrimRecordBrowserVM(
+        IReferenceQuery referenceQuery,
+        IRecordBrowserSettings recordBrowserSettings) {
+        _referenceQuery = referenceQuery;
+        RecordBrowserSettings = recordBrowserSettings;
+
         SelectRecordType = ReactiveCommand.Create((RecordTypeListing recordType) => {
             if (RecordList != null && RecordList.Type == recordType.Registration.GetterType) return;
-            
-            var linkCache = GetScopedLinkCache();
 
             RecordList = recordType.Registration.GetterType.Name switch {
-                nameof(INpcGetter) => new SkyrimNpcListVM(linkCache),
+                nameof(INpcGetter) => new SkyrimNpcListVM(RecordBrowserSettings, _referenceQuery),
                 // nameof(IActionRecordGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
                 // nameof(IBodyPartDataGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
                 // nameof(ILeveledNpcGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
@@ -50,7 +55,7 @@ public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
                 // nameof(IRelationshipGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
                 // nameof(IStoryManagerEventNodeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
                 // nameof(IVoiceTypeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                _ => new MajorRecordListVM(linkCache, recordType.Registration.GetterType),
+                _ => new MajorRecordListVM(recordType.Registration.GetterType, RecordBrowserSettings, _referenceQuery),
             };
         });
         
@@ -91,21 +96,5 @@ public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
                     new(IVoiceTypeGetter.StaticRegistration),
                 }),
         };
-        
-        Editor.EditorInitialized += (_, _) => UpdateScope();
-    }
-    
-    private ILinkCache GetScopedLinkCache() {
-        return BrowserScope switch {
-            BrowserScope.Environment => Editor.Instance.LinkCache,
-            BrowserScope.ActiveMod => Editor.Instance.ActiveMod.ToImmutableLinkCache(),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    private void UpdateScope() {
-        if (RecordList == null) return;
-
-        RecordList.Scope = GetScopedLinkCache();
     }
 }

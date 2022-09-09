@@ -5,9 +5,9 @@ namespace CreationEditor.GUI.Views.Controls.Record;
 public class RecordBrowserViewBase : ReactiveUserControl<IRecordBrowserVM> { }
 
 public partial class RecordBrowser {
-    public RecordBrowser() {
+    public RecordBrowser(IRecordBrowserVM recordBrowserVM) {
         InitializeComponent();
 
-        DataContext = ViewModel = new SkyrimRecordBrowserVM();
+        DataContext = ViewModel = recordBrowserVM;
     }
 }
