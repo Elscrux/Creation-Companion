@@ -1,22 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net6.0-windows</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
         <LangVersion>preview</LangVersion>
-        <UseWpf>true</UseWpf>
+        <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
+        <RootNamespace>CreationEditor.GUI.Skyrim</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
-        <PackageReference Include="MutagenLibrary.WPF" Version="1.0.4" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\CreationEditor.GUI\CreationEditor.GUI.csproj" />
+        <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
         <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
     </ItemGroup>
 

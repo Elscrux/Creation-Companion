@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
+using System.IO.Abstractions;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Mod;
 using CreationEditor.GUI.Services;
-using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
 using Elscrux.Notification;
@@ -18,7 +14,6 @@ using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
-using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
 using Noggog;
 using Noggog.WPF;
@@ -37,7 +32,7 @@ public class ModSelectionVM : ViewModel {
     private readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> _masterInfos = new();
 
     [Reactive] public ActivatableModItem? SelectedMod { get; set; }
-    [Reactive] public IModGetterVM? SelectedModDetails { get; private set; }
+    [Reactive] public IModGetterVM SelectedModDetails { get; private set; }
 
     public ModKey? ActiveMod => Mods.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => Mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
@@ -54,16 +49,19 @@ public class ModSelectionVM : ViewModel {
         INotifier notifier,
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IEditorEnvironment editorEnvironment,
+        IFileSystem fileSystem,
+        IModGetterVM modGetterVM,
         IBusyService busyService) {
         _notifier = notifier;
         _simpleEnvironmentContext = simpleEnvironmentContext;
         _editorEnvironment = editorEnvironment;
+        SelectedModDetails = modGetterVM;
         BusyService = busyService;
 
         _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
         var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(_simpleEnvironmentContext.GameReleaseContext.Release));
-        if (!File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
+        if (!fileSystem.File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
 
         UpdateMasterInfos();
         Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid, _masterInfos[modKey].Masters)));
@@ -122,11 +120,8 @@ public class ModSelectionVM : ViewModel {
 
                 var mod = _environment.LoadOrder.First(l => l.Key == SelectedMod.ModKey).Value.Mod;
                 if (mod == null) return;
-
-                SelectedModDetails = mod switch {
-                    ISkyrimModGetter skyrimMod => new SkyrimModGetterVM(mod.ModKey, skyrimMod.ModHeader),
-                    _ => throw new ArgumentOutOfRangeException(nameof(mod))
-                };
+                
+                SelectedModDetails.SetTo(mod);
             });
     }
     

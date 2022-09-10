@@ -6,7 +6,7 @@ namespace CreationEditor.GUI.Modules;
 
 public class LoggingModule : Module {
     protected override void Load(ContainerBuilder builder) {
-        var outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
+        const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
 
         var logVM = new LogVM();
         builder.RegisterInstance(logVM)

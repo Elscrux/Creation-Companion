@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
@@ -9,10 +9,10 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="6.4.0" />
-      <PackageReference Include="Elscrux" Version="1.0.3" />
+      <PackageReference Include="Elscrux" Version="1.0.4" />
       <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
-      <PackageReference Include="MutagenLibrary.Core" Version="1.0.3" />
-      <PackageReference Include="MutagenLibrary.References" Version="1.0.3" />
+      <PackageReference Include="MutagenLibrary.Core" Version="1.0.4" />
+      <PackageReference Include="MutagenLibrary.References" Version="1.0.4" />
     </ItemGroup>
 
     <ItemGroup>

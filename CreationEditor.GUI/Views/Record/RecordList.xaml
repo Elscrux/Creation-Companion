@@ -1,0 +1,34 @@
+﻿<record:RecordListViewBase x:Class="CreationEditor.GUI.Views.Record.RecordList"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+                           xmlns:loading="clr-namespace:Elscrux.WPF.Views.Loading;assembly=Elscrux.WPF"
+                           xmlns:record="clr-namespace:CreationEditor.GUI.Views.Record"
+                           xmlns:record1="clr-namespace:CreationEditor.GUI.ViewModels.Record"
+                           mc:Ignorable="d" d:DataContext="{d:DesignInstance record1:MajorRecordListVM}"
+                           d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <syncfusion:SfDataGrid ItemsSource="{Binding Records}"
+                               AllowFiltering="True" AllowSorting="True"
+                               AllowDraggingColumns="True" AllowResizingColumns="True"
+                               AutoGenerateColumns="False"
+                               EnableDataVirtualization="True">
+            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:GridTextColumn HeaderText="EditorID" MappingName="Record.EditorID"
+                                           AllowFiltering="True" AllowSorting="True" />
+                <syncfusion:GridTextColumn HeaderText="FormKey" MappingName="Record.FormKey"
+                                           AllowFiltering="True" AllowSorting="True" />
+                <syncfusion:GridTextColumn HeaderText="Use Info" MappingName="References.Count"
+                                           AllowFiltering="True" AllowSorting="True" />
+            </syncfusion:SfDataGrid.Columns>
+        </syncfusion:SfDataGrid>
+
+        <loading:LoadSpinner HorizontalAlignment="Left" VerticalAlignment="Top"
+                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                             Height="250" Width="400"
+                             EllipseSize="16" SpinnerSize="32"
+                             IsLoading="{Binding IsBusy}" />
+    </Grid>
+</record:RecordListViewBase>

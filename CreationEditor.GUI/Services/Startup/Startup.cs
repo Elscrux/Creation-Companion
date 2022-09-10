@@ -1,6 +1,5 @@
-﻿using System;
-using CreationEditor.GUI.ViewModels;
-using CreationEditor.GUI.Views.Windows;
+﻿using CreationEditor.GUI.ViewModels;
+using CreationEditor.GUI.Views;
 using Elscrux.Logging;
 using Elscrux.Notification;
 using Serilog;
