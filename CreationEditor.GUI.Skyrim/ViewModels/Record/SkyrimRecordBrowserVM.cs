@@ -1,17 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Skyrim.ViewModels.Record.List;
 using CreationEditor.GUI.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
-using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.GUI.Skyrim.ViewModels.Record;
 
 public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
-    private readonly IReferenceQuery _referenceQuery;
+    private readonly IRecordListFactory _recordListFactory;
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
@@ -21,36 +19,16 @@ public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     
 
     public SkyrimRecordBrowserVM(
-        IReferenceQuery referenceQuery,
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettings recordBrowserSettings) {
-        _referenceQuery = referenceQuery;
+        _recordListFactory = recordListFactory;
         RecordBrowserSettings = recordBrowserSettings;
 
-        SelectRecordType = ReactiveCommand.Create((RecordTypeListing recordType) => {
-            if (RecordList != null && RecordList.Type == recordType.Registration.GetterType) return;
+        SelectRecordType = ReactiveCommand.Create((RecordTypeListing recordTypeListing) => {
+            var recordType = recordTypeListing.Registration.GetterType;
+            if (RecordList != null && RecordList.Type == recordType) return;
 
-            RecordList = recordType.Registration.GetterType.Name switch {
-                nameof(INpcGetter) => new SkyrimNpcListVM(RecordBrowserSettings, _referenceQuery),
-                // nameof(IActionRecordGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IBodyPartDataGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(ILeveledNpcGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IPerkGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(ITalkingActivatorGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                
-                // nameof(IAssociationTypeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IClassGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IEquipTypeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IFactionGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IHeadPartGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IMovementTypeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IPackageGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IQuestGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IRaceGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IRelationshipGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IStoryManagerEventNodeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                // nameof(IVoiceTypeGetter) => new MajorRecordListVM(recordType.Registration.GetterType),
-                _ => new MajorRecordListVM(recordType.Registration.GetterType, RecordBrowserSettings, _referenceQuery),
-            };
+            RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettings);
         });
         
         RecordTypeGroups = new ObservableCollection<RecordTypeGroup> {

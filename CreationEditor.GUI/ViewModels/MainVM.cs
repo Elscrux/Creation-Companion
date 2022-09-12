@@ -54,14 +54,12 @@ public class MainVM : NotifiedVM {
         Save = ReactiveCommand.Create(() => {});
         
         OpenLog = ReactiveCommand.Create((DockingManager dockingManager) => {
-            using var scope = _lifetimeScope.BeginLifetimeScope();
-            var recordBrowser = new LogView(scope.Resolve<ILogVM>());
+            var recordBrowser = new LogView(_lifetimeScope.Resolve<ILogVM>());
             return dockingManager.AddControl(recordBrowser, "Log", DockSide.Bottom, DockState.Dock);
         });
         
         OpenRecordBrowser = ReactiveCommand.Create((DockingManager dockingManager) => {
-            using var scope = _lifetimeScope.BeginLifetimeScope();
-            var recordBrowser = new RecordBrowser(scope.Resolve<IRecordBrowserVM>());
+            var recordBrowser = new RecordBrowser(_lifetimeScope.Resolve<IRecordBrowserVM>());
             return dockingManager.AddControl(recordBrowser, "Record Browser", DockSide.Left, DockState.Dock, 500);
         });
         

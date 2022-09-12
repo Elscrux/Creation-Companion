@@ -5,6 +5,7 @@ using CreationEditor.GUI.Services;
 using CreationEditor.GUI.Services.Startup;
 using CreationEditor.GUI.ViewModels;
 using CreationEditor.GUI.ViewModels.Mod;
+using CreationEditor.GUI.ViewModels.Record;
 using MutagenLibrary.References.ReferenceCache;
 namespace CreationEditor.GUI.Modules; 
 
@@ -32,6 +33,9 @@ public class MainModule : Module {
 
         builder.RegisterType<RecordBrowserSettings>()
             .As<IRecordBrowserSettings>();
+
+        builder.RegisterType<MajorRecordListVM>()
+            .AsSelf();
         
         //VMs
         builder.RegisterType<ModSelectionVM>();
