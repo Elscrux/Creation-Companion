@@ -1,12 +1,15 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog.WPF;
+using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.GUI.Models.Record;
 
-public record ReferencedRecord<TMajorRecord, TMajorRecordGetter> where TMajorRecord : IMajorRecordIdentifier
+public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ViewModel
+    where TMajorRecord : IMajorRecordIdentifier
     where TMajorRecordGetter : IMajorRecordIdentifier {
     
-    public TMajorRecordGetter Record { get; init; }
-    public HashSet<IFormLinkIdentifier> References { get; init; }
+    [Reactive] public TMajorRecordGetter Record { get; init; }
+    [Reactive] public HashSet<IFormLinkIdentifier> References { get; init; }
     
     public ReferencedRecord(TMajorRecordGetter record, HashSet<IFormLinkIdentifier>? references = null) {
         Record = record;

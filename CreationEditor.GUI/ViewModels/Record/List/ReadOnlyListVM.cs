@@ -10,15 +10,15 @@ using Noggog.WPF;
 using ReactiveUI;
 namespace CreationEditor.GUI.ViewModels.Record;
 
-public class MajorRecordListVM : RecordListVM {
-    public MajorRecordListVM(
+public class ReadOnlyListVM : RecordListVM {
+    public ReadOnlyListVM(
         Type type,
         IRecordBrowserSettings recordBrowserSettings,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
         : base(recordBrowserSettings, referenceQuery, recordController) {
         Type = type;
-        View = new RecordList(this);
+        View = new ReadOnlyRecordList(this);
 
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)

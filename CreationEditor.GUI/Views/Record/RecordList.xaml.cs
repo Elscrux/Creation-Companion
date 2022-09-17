@@ -1,13 +1,16 @@
 ﻿using CreationEditor.GUI.ViewModels.Record;
-using ReactiveUI;
+using Syncfusion.UI.Xaml.Grid;
 namespace CreationEditor.GUI.Views.Record; 
 
-public class RecordListViewBase : ReactiveUserControl<IRecordListVM> { }
-
 public partial class RecordList {
-    public RecordList(IRecordListVM recordListVM) {
+    protected readonly SfDataGrid RecordGrid;
+    
+    public RecordList(RecordListVM recordListVM) {
         InitializeComponent();
 
-        DataContext = ViewModel = recordListVM;
+        RecordGrid = RecordGridControl;
+
+        DataContext = recordListVM;
     }
 }
+

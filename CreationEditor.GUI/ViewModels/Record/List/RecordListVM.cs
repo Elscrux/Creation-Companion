@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
+using CreationEditor.GUI.Services.Record;
+using CreationEditor.GUI.Views.Record;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda;
@@ -38,10 +40,10 @@ public abstract class RecordListVM : ViewModel, IRecordListVM {
     }
 }
 
-public abstract class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
+public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
-    private readonly IRecordEditorFactory _recordEditorFactory;
+    private readonly IRecordEditorController _recordEditorController;
 
     public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
     public ReactiveCommand<Unit, TMajorRecord> NewRecord { get; }
@@ -51,14 +53,14 @@ public abstract class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordLis
 
     [Reactive] public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; set; }
 
-    protected RecordListVM(
+    public RecordListVM(
+        IReferenceQuery referenceQuery,
         IRecordBrowserSettings recordBrowserSettings,
-        IReferenceQuery referenceQuery, 
-        IRecordEditorFactory recordEditorFactory, 
+        IRecordEditorController recordEditorController,
         IRecordController recordController)
         : base(recordBrowserSettings, referenceQuery, recordController) {
-        _recordEditorFactory = recordEditorFactory;
-
+        _recordEditorController = recordEditorController;
+        View = new RecordList(this);
         Type = typeof(TMajorRecordGetter);
         
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
@@ -96,8 +98,8 @@ public abstract class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordLis
             var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
             Application.Current.Dispatcher.Invoke(() => Records.Add(referencedRecord));
             
-            //open editor ui
-            
+            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
+
             return newRecord;
         });
         
@@ -105,9 +107,7 @@ public abstract class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordLis
             if (SelectedRecord == null) return;
 
             var newOverride = RecordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            
-            //open editor ui
-            // var recordEditorVM = _recordEditorFactory.Get<TMajorRecord, TMajorRecordGetter>();
+            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
         });
         
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {

@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.GUI.Models.Record.Browser;
 using CreationEditor.GUI.Services.Record;
+using CreationEditor.GUI.Skyrim.ViewModels.Record;
 using CreationEditor.GUI.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
@@ -23,7 +24,7 @@ public class SkyrimRecordListFactory : IRecordListFactory {
         var browserSettingsParam = TypedParameter.From(browserSettings);
         
         return type.Name switch {
-            nameof(INpcGetter) => _lifetimeScope.Resolve<RecordListVM<Npc, INpcGetter>>(browserSettingsParam),
+            nameof(INpcGetter) => _lifetimeScope.Resolve<NpcListVM>(browserSettingsParam),
             nameof(IActionRecordGetter) => _lifetimeScope.Resolve<RecordListVM<ActionRecord, IActionRecordGetter>>(browserSettingsParam),
             nameof(IBodyPartDataGetter) => _lifetimeScope.Resolve<RecordListVM<BodyPartData, IBodyPartDataGetter>>(browserSettingsParam),
             nameof(ILeveledNpcGetter) => _lifetimeScope.Resolve<RecordListVM<LeveledNpc, ILeveledNpcGetter>>(browserSettingsParam),
@@ -42,7 +43,7 @@ public class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IAssociationTypeGetter) => _lifetimeScope.Resolve<RecordListVM<AssociationType, IAssociationTypeGetter>>(browserSettingsParam),
             nameof(IClassGetter) => _lifetimeScope.Resolve<RecordListVM<Class, IClassGetter>>(browserSettingsParam),
             nameof(IEquipTypeGetter) => _lifetimeScope.Resolve<RecordListVM<EquipType, IEquipTypeGetter>>(browserSettingsParam),
-            nameof(IFactionGetter) => _lifetimeScope.Resolve<RecordListVM<Faction, IFactionGetter>>(browserSettingsParam),
+            nameof(IFactionGetter) => _lifetimeScope.Resolve<FactionListVM>(browserSettingsParam),
             nameof(IHeadPartGetter) => _lifetimeScope.Resolve<RecordListVM<HeadPart, IHeadPartGetter>>(browserSettingsParam),
             nameof(IMovementTypeGetter) => _lifetimeScope.Resolve<RecordListVM<MovementType, IMovementTypeGetter>>(browserSettingsParam),
             nameof(IPackageGetter) => _lifetimeScope.Resolve<RecordListVM<Package, IPackageGetter>>(browserSettingsParam),
