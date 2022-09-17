@@ -10,6 +10,8 @@ using MutagenLibrary.References.ReferenceCache;
 namespace CreationEditor.Skyrim.Environment;
 
 public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
+    private static readonly ModKey NewModKey = new("NewMod", ModType.Plugin);
+    
     private readonly IReferenceQuery _referenceQuery;
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly INotifier _notifier;
@@ -46,7 +48,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         _simpleEnvironmentContext = simpleEnvironmentContext;
         _notifier = notifier;
 
-        _activeMod = new SkyrimMod(ModKey.Null, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
         
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
@@ -56,7 +58,8 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     }
 
     public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null) {
-        _activeMod = new SkyrimMod(activeMod ?? ModKey.Null, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         var linearNotifier = new LinearNotifier(_notifier, activeMod == null ? 2 : 3);
         
