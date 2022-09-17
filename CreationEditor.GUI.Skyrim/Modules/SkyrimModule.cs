@@ -39,5 +39,14 @@ public class SkyrimModule : Module {
         builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()
             .As<IRecordController>()
             .SingleInstance();
+        
+        builder.RegisterType<SkyrimRecordEditorController>()
+            .As<IRecordEditorController>()
+            .SingleInstance();
+        
+        builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
+            .InNamespaceOf<FactionEditorVM>()
+            .Where(x => x.Name.Contains("EditorVM"))
+            .AsImplementedInterfaces();
     }
 }
