@@ -60,7 +60,7 @@ public class MainVM : NotifiedVM {
         
         OpenRecordBrowser = ReactiveCommand.Create((DockingManager dockingManager) => {
             var recordBrowser = new RecordBrowser(_lifetimeScope.Resolve<IRecordBrowserVM>());
-            return dockingManager.AddControl(recordBrowser, "Record Browser", DockSide.Left, DockState.Dock, 500);
+            return dockingManager.AddControl(recordBrowser, "Record Browser", DockSide.Left, DockState.Dock, 750);
         });
         
         _editorEnvironment.ActiveModChanged += EditorOnActiveModChanged;

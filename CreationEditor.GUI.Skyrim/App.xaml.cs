@@ -3,10 +3,12 @@ using System.IO;
 using System.Windows;
 using Autofac;
 using CreationEditor.GUI.Modules;
+using CreationEditor.GUI.Services.Docking;
 using CreationEditor.GUI.Services.Startup;
 using CreationEditor.GUI.Skyrim.Modules;
 using CreationEditor.GUI.Views;
 using Elscrux.Notification;
+using Syncfusion.Windows.Tools.Controls;
 namespace CreationEditor.GUI.Skyrim;
 
 public partial class App {
@@ -24,8 +26,6 @@ public partial class App {
     protected override void OnStartup(StartupEventArgs e) {
         base.OnStartup(e);
         
-        var window = new MainWindow();
-
         var builder = new ContainerBuilder();
         
         builder.RegisterModule<MainModule>();
@@ -34,7 +34,11 @@ public partial class App {
         // builder.RegisterModule<MutagenModule>();
         builder.RegisterModule<SkyrimModule>();
         
+        var window = new MainWindow();
         builder.RegisterInstance(window).As<IMainWindow>();
+
+        var dockingManagerService = new DockingManagerService(DockingManager.GetDockingManager(window));
+        builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
         
         var container = builder.Build();
         

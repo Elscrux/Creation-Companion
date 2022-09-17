@@ -34,7 +34,7 @@ public class MainModule : Module {
         builder.RegisterType<RecordBrowserSettings>()
             .As<IRecordBrowserSettings>();
 
-        builder.RegisterType<MajorRecordListVM>()
+        builder.RegisterType<ReadOnlyListVM>()
             .AsSelf();
         
         //VMs

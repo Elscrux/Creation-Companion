@@ -1,5 +1,7 @@
 ﻿using Autofac;
 using CreationEditor.Environment;
+using CreationEditor.GUI.Services.Record;
+using CreationEditor.GUI.Skyrim.Services.Record;
 using CreationEditor.GUI.Skyrim.ViewModels.Mod;
 using CreationEditor.GUI.Skyrim.ViewModels.Record;
 using CreationEditor.GUI.ViewModels.Mod;
@@ -26,8 +28,12 @@ public class SkyrimModule : Module {
         
         builder.RegisterType<SkyrimRecordListFactory>().As<IRecordListFactory>();
 
-        builder.RegisterAssemblyTypes(typeof(SkyrimRecordListFactory).Assembly)
-            .InNamespaceOf<SkyrimRecordListFactory>()
+        builder.RegisterGeneric(typeof(RecordListVM<,>))
+            .As(typeof(RecordListVM<,>));
+
+        builder.RegisterAssemblyTypes(typeof(FactionListVM).Assembly)
+            .InNamespaceOf<FactionListVM>()
+            .Where(x => x.Name.Contains("ListVM"))
             .AsSelf();
         
         builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()

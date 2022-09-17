@@ -24,14 +24,14 @@
                 <syncfusion:MenuItemAdv Header="View">
                     <syncfusion:MenuItemAdv Header="Log"
                                             Command="{Binding OpenLog}"
-                                            CommandParameter="{Binding ElementName=DockingManager}" />
+                                            CommandParameter="{Binding ElementName=MainDockingManager}" />
                     <syncfusion:MenuItemAdv Header="Record Browser"
                                             Command="{Binding OpenRecordBrowser}"
-                                            CommandParameter="{Binding ElementName=DockingManager}" />
+                                            CommandParameter="{Binding ElementName=MainDockingManager}" />
                 </syncfusion:MenuItemAdv>
             </syncfusion:MenuAdv>
 
-            <syncfusion:DockingManager x:Name="DockingManager" PersistState="True">
+            <syncfusion:DockingManager x:Name="MainDockingManager" PersistState="True">
             </syncfusion:DockingManager>
         </DockPanel>
 
