@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="CreationEditor.GUI.Skyrim.Views.Record.FactionEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
+             xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:FactionEditorVM}"
+             d:DesignHeight="900" d:DesignWidth="900">
+    <ScrollViewer>
+        <StackPanel>
+            <TextBlock Text="EditorID" />
+            <TextBox Text="{Binding EditableRecord.EditorID}" 
+                     Width="250"
+                     HorizontalAlignment="Left" />
+            
+            <TextBlock Text="Name" />
+            <TextBox Text="{Binding EditableRecord.NameStr}" 
+                     Width="250"
+                     HorizontalAlignment="Left" />
+
+            <TabControl>
+                <TabItem Header="General">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Content="Hidden from PC"
+                                      ToolTip="MISSING EXPLANATION"
+                                      IsChecked="{Binding EditableRecord.HiddenFromPc}"
+                                      Margin="5" />
+                            
+                            <CheckBox Content="Special Combat"
+                                      ToolTip="MISSING EXPLANATION"
+                                      IsChecked="{Binding EditableRecord.SpecialCombat}"
+                                      Margin="5" />
+                            
+                            <CheckBox Content="Can Be Owner"
+                                      ToolTip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
+                                      IsChecked="{Binding EditableRecord.CanBeOwner}"
+                                      Margin="5" />
+                        </StackPanel>
+
+                        <GroupBox Header="Interfaction Relations" FontSize="12">
+                            <ListView ItemsSource="{Binding EditableRecord.Relations}"
+                                      MinHeight="250">
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Add" Command="{Binding AddRelation}" />
+                                        <MenuItem Header="Remove" Command="{Binding RemoveSelectedRelations}" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <view:RelationEditor Record="{Binding}"
+                                                             LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource AncestorType=view:FactionEditor}}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </GroupBox>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="Ranks">
+
+                </TabItem>
+
+                <TabItem Header="Crime">
+
+                </TabItem>
+
+                <TabItem Header="Vendor">
+
+                </TabItem>
+            </TabControl>
+
+            <Button Content="Save" Command="{Binding Save}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
