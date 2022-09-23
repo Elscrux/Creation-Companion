@@ -2,7 +2,6 @@
 using CreationEditor.GUI.Models.Record.Browser;
 using CreationEditor.GUI.Services.Record;
 using CreationEditor.GUI.ViewModels.Record;
-using CreationEditor.GUI.Views.Record;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.References.ReferenceCache;
 using Syncfusion.UI.Xaml.Grid;
@@ -15,15 +14,7 @@ public class NpcListVM : RecordListVM<Npc, INpcGetter> {
         IRecordEditorController recordEditorControllerController,
         IRecordController recordController)
         : base(referenceQuery, recordBrowserSettings, recordEditorControllerController, recordController) {
-        View = new NpcList(this);
-    }
-}
-
-public class NpcList : RecordList {
-    public NpcList(RecordListVM recordListVM) : base(recordListVM) {
-        InitializeComponent();
-        
-        RecordGrid.Columns.Add(new GridTemplateColumn {
+        ExtraColumns.Add(new GridTextColumn {
             HeaderText = "Name",
             MappingName = "Record.Name.String",
             AllowFiltering = true,

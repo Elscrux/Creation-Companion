@@ -1,9 +1,7 @@
-﻿using System.Windows;
-using CreationEditor.Environment;
+﻿using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record.Browser;
 using CreationEditor.GUI.Services.Record;
 using CreationEditor.GUI.ViewModels.Record;
-using CreationEditor.GUI.Views.Record;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.References.ReferenceCache;
 using Syncfusion.UI.Xaml.Grid;
@@ -16,15 +14,7 @@ public class FactionListVM : RecordListVM<Faction, IFactionGetter> {
         IRecordEditorController recordEditorControllerController,
         IRecordController recordController)
         : base(referenceQuery, recordBrowserSettings, recordEditorControllerController, recordController) {
-        View = new FactionList(this);
-    }
-}
-
-public class FactionList : RecordList {
-    public FactionList(RecordListVM recordListVM) : base(recordListVM) {
-        InitializeComponent();
-        
-        RecordGrid.Columns.Add(new GridTemplateColumn {
+        ExtraColumns.Add(new GridTextColumn {
             HeaderText = "Name",
             MappingName = "Record.Name.String",
             AllowFiltering = true,

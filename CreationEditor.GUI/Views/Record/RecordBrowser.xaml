@@ -44,6 +44,6 @@
 
         <GridSplitter Grid.Column="1" Width="5" />
 
-        <ContentControl Grid.Column="2" Content="{Binding RecordList.View}" />
+        <ContentControl Grid.Column="2" Content="{Binding RecordList}" />
     </Grid>
 </record:RecordBrowserViewBase>

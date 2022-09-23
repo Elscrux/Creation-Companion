@@ -2,7 +2,6 @@
 using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Views.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
@@ -10,15 +9,14 @@ using Noggog.WPF;
 using ReactiveUI;
 namespace CreationEditor.GUI.ViewModels.Record;
 
-public class ReadOnlyListVM : RecordListVM {
-    public ReadOnlyListVM(
+public class RecordListVMReadOnly : RecordListVM {
+    public RecordListVMReadOnly(
         Type type,
         IRecordBrowserSettings recordBrowserSettings,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
-        : base(recordBrowserSettings, referenceQuery, recordController) {
+        : base(recordBrowserSettings, referenceQuery, recordController, true) {
         Type = type;
-        View = new ReadOnlyRecordList(this);
 
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)

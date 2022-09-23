@@ -2,41 +2,57 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
 using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.Views.Record;
 using DynamicData;
 using DynamicData.Binding;
+using Elscrux.WPF.ViewModels;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Syncfusion.UI.Xaml.Grid;
 namespace CreationEditor.GUI.ViewModels.Record;
 
-public abstract class RecordListVM : ViewModel, IRecordListVM {
+public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
+    public const string RecordReadOnlyListStyle = "RecordReadOnlyListStyle";
+    public const string RecordListStyle = "RecordListStyle";
+    
     protected readonly IReferenceQuery ReferenceQuery;
     protected readonly IRecordController RecordController;
-
-    public UserControl View { get; set; } = null!;
 
     public Type Type { get; set; } = null!;
     [Reactive] public IEnumerable Records { get; set; } = null!;
     [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
 
     [Reactive] public bool IsBusy { get; set; }
+    protected readonly List<GridColumn> ExtraColumns = new();
 
     protected RecordListVM(
         IRecordBrowserSettings recordBrowserSettings,
         IReferenceQuery referenceQuery, 
-        IRecordController recordController) {
+        IRecordController recordController,
+        bool isReadOnly) {
         ReferenceQuery = referenceQuery;
         RecordController = recordController;
         RecordBrowserSettings = recordBrowserSettings;
+        
+        SetResourceReference(StyleProperty, isReadOnly ? RecordReadOnlyListStyle : RecordListStyle);
+    }
+
+    public override void OnApplyTemplate() {
+        base.OnApplyTemplate();
+
+        var findName = Template.FindName("RecordGrid", this);
+        if (findName is SfDataGrid dataGrid) {
+            foreach (var column in ExtraColumns) {
+                dataGrid?.Columns.Add(column);
+            }
+        }
     }
 }
 
@@ -58,9 +74,8 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         IRecordBrowserSettings recordBrowserSettings,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordBrowserSettings, referenceQuery, recordController) {
+        : base(recordBrowserSettings, referenceQuery, recordController, false) {
         _recordEditorController = recordEditorController;
-        View = new RecordList(this);
         Type = typeof(TMajorRecordGetter);
         
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
@@ -71,14 +86,14 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                 return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
                     Records?.Clear();
                     try {
-                        foreach (var recordIdentifier in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
+                        foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
                             if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
                             //Skip when browser settings don't match
-                            if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
+                            if (!RecordBrowserSettings.Filter(record)) continue;
 
-                            var formLinks = ReferenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
-                            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(recordIdentifier, formLinks);
+                            var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
+                            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
 
                             obs.OnNext(referencedRecord);
                         }

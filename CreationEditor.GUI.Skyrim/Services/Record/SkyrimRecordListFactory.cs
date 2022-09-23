@@ -125,7 +125,7 @@ public class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IStaticGetter) => _lifetimeScope.Resolve<RecordListVM<Static, IStaticGetter>>(browserSettingsParam),
             nameof(ITreeGetter) => _lifetimeScope.Resolve<RecordListVM<Tree, ITreeGetter>>(browserSettingsParam),
             
-            _ => _lifetimeScope.Resolve<ReadOnlyListVM>(TypedParameter.From(type),browserSettingsParam)
+            _ => _lifetimeScope.Resolve<RecordListVMReadOnly>(TypedParameter.From(type),browserSettingsParam)
         };
     }
 }
