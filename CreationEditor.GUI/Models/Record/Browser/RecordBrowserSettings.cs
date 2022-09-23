@@ -48,6 +48,8 @@ public class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     }
 
     public bool Filter(IMajorRecordIdentifier record) {
-        return SearchTerm.IsNullOrWhitespace() || record.EditorID != null && SearchTerm.Split(SplitChar).All(term => record.EditorID.Contains(term, StringComparison.OrdinalIgnoreCase));
+        var editorID = record.EditorID;
+    
+        return SearchTerm.IsNullOrWhitespace() || editorID != null && SearchTerm.Split(SplitChar).All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 }
