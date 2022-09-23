@@ -41,7 +41,15 @@
 
                         <GroupBox Header="Interfaction Relations" FontSize="12">
                             <ListView ItemsSource="{Binding EditableRecord.Relations}"
+                                      SelectionMode="Single"
+                                      SelectedItem="{Binding SelectedRelation}"
                                       MinHeight="250">
+                                <ListView.InputBindings>
+                                    <KeyBinding Key="Add"
+                                                  Command="{Binding AddRelation}" />
+                                    <KeyBinding Key="Delete"
+                                                Command="{Binding RemoveSelectedRelations}" />
+                                </ListView.InputBindings>
                                 <ListView.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add" Command="{Binding AddRelation}" />

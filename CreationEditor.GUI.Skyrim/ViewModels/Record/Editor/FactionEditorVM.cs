@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Windows.Controls;
 using CreationEditor.Environment;
 using CreationEditor.GUI.Services.Record;
@@ -27,7 +25,7 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
     public ReactiveCommand<Unit, Unit> AddRelation { get; }
     public ReactiveCommand<Unit, Unit> RemoveSelectedRelations { get; }
     
-    public ObservableCollection<object> SelectedRelations { get; set; } = new();
+    public Relation? SelectedRelation { get; set; }
 
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
@@ -46,7 +44,7 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
         });
         
         RemoveSelectedRelations = ReactiveCommand.Create(() => {
-            EditableRecord.Relations.RemoveWhere(relation => SelectedRelations.Any(selected => Equals(selected, relation)));
+            EditableRecord.Relations.RemoveWhere(relation => SelectedRelation.Equals(relation));
         });
     }
     
