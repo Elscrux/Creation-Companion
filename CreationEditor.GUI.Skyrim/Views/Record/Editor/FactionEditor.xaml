@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
              xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:FactionEditorVM}"
              d:DesignHeight="900" d:DesignWidth="900">
     <ScrollViewer>
@@ -68,7 +69,49 @@
                 </TabItem>
 
                 <TabItem Header="Ranks">
-
+                    <GroupBox Header="Ranks" FontSize="12">
+                        <syncfusion:SfDataGrid x:Name="RankGrid"
+                                               ItemsSource="{Binding EditableRecord.Ranks}"
+                                               AllowEditing="True"
+                                               AllowSorting="False" AllowFiltering="False"
+                                               AutoGenerateColumns="False"
+                                               AllowResizingColumns="True"
+                                               AllowDraggingRows="True" RowDropIndicatorMode="Line"
+                                               SelectionUnit="Row" SelectionMode="Extended"
+                                               SelectedItems="{Binding SelectedRanks}"
+                                               MinHeight="250">
+                            <syncfusion:SfDataGrid.InputBindings>
+                                <KeyBinding Key="Add"
+                                            Command="{Binding AddRank}" />
+                                <KeyBinding Key="Delete"
+                                            Command="{Binding RemoveSelectedRank}" />
+                            </syncfusion:SfDataGrid.InputBindings>
+                            <syncfusion:SfDataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add" Command="{Binding AddRank}" />
+                                    <MenuItem Header="Remove" Command="{Binding RemoveSelectedRank}" />
+                                </ContextMenu>
+                            </syncfusion:SfDataGrid.ContextMenu>
+                            <syncfusion:SfDataGrid.Columns>
+                                <syncfusion:GridTextColumn HeaderText="Male Title" MappingName="Title.Male.String"
+                                                           ShowHeaderToolTip="True">
+                                    <syncfusion:GridTextColumn.HeaderToolTipTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Male Title name, not visible in game"/>
+                                        </DataTemplate>
+                                    </syncfusion:GridTextColumn.HeaderToolTipTemplate>
+                                </syncfusion:GridTextColumn>
+                                <syncfusion:GridTextColumn HeaderText="Female Title" MappingName="Title.Female.String"
+                                                           ShowHeaderToolTip="True">
+                                    <syncfusion:GridTextColumn.HeaderToolTipTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Female Title name, not visible in game"/>
+                                        </DataTemplate>
+                                    </syncfusion:GridTextColumn.HeaderToolTipTemplate>
+                                </syncfusion:GridTextColumn>
+                            </syncfusion:SfDataGrid.Columns>
+                        </syncfusion:SfDataGrid>
+                    </GroupBox>
                 </TabItem>
 
                 <TabItem Header="Crime">

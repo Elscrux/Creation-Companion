@@ -5,6 +5,7 @@ namespace CreationEditor.Skyrim.Models.Records;
 
 public sealed class EditableFaction : Faction {
     public new ObservableCollection<Relation> Relations { get; set; }
+    public new ObservableCollection<Rank> Ranks { get; set; }
 
     public bool HiddenFromPc {
         get => (Flags & FactionFlag.HiddenFromPC) != 0;
@@ -32,6 +33,7 @@ public sealed class EditableFaction : Faction {
         FormKey = parent.FormKey;
         Flags = parent.Flags;
         Relations = new ObservableCollection<Relation>(parent.Relations);
+        Ranks = new ObservableCollection<Rank>(parent.Ranks);
     }
 
     public void SetFaction(Faction faction) {
@@ -39,5 +41,8 @@ public sealed class EditableFaction : Faction {
         faction.Name = Name;
         faction.Flags = Flags;
         faction.Relations.SetTo(Relations);
+        
+        for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
+        faction.Ranks.SetTo(Ranks);
     }
 }
