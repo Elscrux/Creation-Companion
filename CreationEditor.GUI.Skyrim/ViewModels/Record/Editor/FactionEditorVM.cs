@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Windows.Controls;
@@ -33,7 +35,10 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
     
     public Relation? SelectedRelation { get; set; }
     public ObservableCollection<object> SelectedRanks { get; set; } = new();
-
+    
+    public IEnumerable<Type> OutfitTypes { get; } = typeof(IOutfitGetter).AsEnumerable();
+    public IEnumerable<Type> FormListTypes { get; } = typeof(IFormListGetter).AsEnumerable();
+    
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
         IEditorEnvironment editorEnvironment) {

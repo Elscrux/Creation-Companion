@@ -6,10 +6,16 @@
              xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
              xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:render="clr-namespace:CreationEditor.GUI.Views.Render;assembly=CreationEditor.GUI"
+             xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:FactionEditorVM}"
              d:DesignHeight="900" d:DesignWidth="900">
     <ScrollViewer>
         <StackPanel>
+            <Menu>
+                <MenuItem Header="Save" Command="{Binding Save}"/>
+            </Menu>
+            
             <TextBlock Text="EditorID" />
             <TextBox Text="{Binding EditableRecord.EditorID}" 
                      Width="250"
@@ -115,15 +121,236 @@
                 </TabItem>
 
                 <TabItem Header="Crime">
+                    <StackPanel>
+                        <GroupBox Header="Ignored Crimes" FontSize="12">
+                            <StackPanel Orientation="Horizontal">
+                                <GroupBox Header="Against non-members" FontSize="12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <CheckBox Grid.Row="0" Grid.Column="0"
+                                                  Content="Ignore Murder"
+                                                  ToolTip="Major Crime: Killing a guard or civilian"
+                                                  IsChecked="{Binding EditableRecord.IgnoreMurder}"
+                                                  Margin="5" />
 
+                                        <CheckBox Grid.Row="0" Grid.Column="1"
+                                                  Content="Ignore Assault"
+                                                  ToolTip="Major Crime: Attacking a guard or civilian"
+                                                  IsChecked="{Binding EditableRecord.IgnoreAssault}"
+                                                  Margin="5" />
+
+                                        <CheckBox Grid.Row="0" Grid.Column="2"
+                                                  Content="Ignore Pickpocket"
+                                                  ToolTip="Minor Crime: Trying and failing to pickpocket an item in another actor's inventory"
+                                                  IsChecked="{Binding EditableRecord.IgnorePickpocket}"
+                                                  Margin="5" />
+
+                                        <CheckBox Grid.Row="1" Grid.Column="0"
+                                                  Content="Ignore Stealing"
+                                                  ToolTip="Minor Crime: Taking an item marked 'Steal'."
+                                                  IsChecked="{Binding EditableRecord.IgnoreStealing}"
+                                                  Margin="5" />
+
+                                        <CheckBox Grid.Row="1" Grid.Column="1"
+                                                  Content="Ignore Trespass"
+                                                  ToolTip="Minor Crime: Entering a cell marked 'Off Limits', or failing to leave an owned cell when instructed to do so by the owner."
+                                                  IsChecked="{Binding EditableRecord.IgnoreTrespass}"
+                                                  Margin="5" />
+
+                                        <CheckBox Grid.Row="1" Grid.Column="2"
+                                                  Content="Ignore Werewolf"
+                                                  ToolTip="Special Crime: Being in or transforming to/from Beast Form in sight of a guard or civilian."
+                                                  IsChecked="{Binding EditableRecord.IgnoreWerewolf}"
+                                                  Margin="5" />
+                                    </Grid>
+                                </GroupBox>
+
+                                <GroupBox Header="Against members" FontSize="12">
+                                    <CheckBox Content="Ignore all crimes"
+                                              ToolTip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
+                                              IsChecked="{Binding EditableRecord.DoNotReportCrimesAgainstMembers}"
+                                              Margin="5" />
+                                </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
+                        
+                        <GroupBox Header="Crime" FontSize="12">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="Track Crime"
+                                              ToolTip="If a faction is flagged to track crime, its members will remember crimes against it."
+                                              IsChecked="{Binding EditableRecord.TrackCrime}"
+                                              Margin="5" />
+                                </DataTemplate>   
+                            </GroupBox.HeaderTemplate>
+                            
+                            <StackPanel>
+                                <TextBlock Text="Exterior Jail Marker"
+                                           ToolTip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building."/>
+                                <render:PlacedPicker/>
+                                
+                                <TextBlock Text="Follow Wait Marker"
+                                           ToolTip="A marker near which followers will wait if the player gets sent to jail."/>
+                                <render:PlacedPicker/>
+                                
+                                <TextBlock Text="Stolen Goods Container"
+                                           ToolTip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference."/>
+                                <render:PlacedPicker/>
+                                
+                                <TextBlock Text="Player Inventory Container"
+                                           ToolTip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference."/>
+                                <render:PlacedPicker/>
+                                
+                                <TextBlock Text="Jail Outfit"
+                                           ToolTip="The clothes given to the player in prison. Usually BeggarOutfit."/>
+                                <plugins:FormKeyPicker FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
+                                                       ScopedTypes="{Binding OutfitTypes}"
+                                                       LinkCache="{Binding LinkCache}" />
+                                                                
+                                <TextBlock Text="Shared Crime Faction List"
+                                           ToolTip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown."/>
+                                <plugins:FormKeyPicker FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
+                                                       ScopedTypes="{Binding FormListTypes}"
+                                                       LinkCache="{Binding LinkCache}" />
+                                
+                                <CheckBox Content="Attack on Sight"
+                                          ToolTip="If checked, guards will attack the player on sight if crime gold is high enough."
+                                          IsChecked="{Binding EditableRecord.CrimeValues.AttackOnSight}"
+                                          Margin="5" />
+                                
+                                <CheckBox Content="Arrest"
+                                          ToolTip="If checked, guards will try to arrest the player."
+                                          IsChecked="{Binding EditableRecord.CrimeValues.Arrest}"
+                                          Margin="5" />
+                                
+                                <GroupBox Header="Crime Gold" FontSize="12"
+                                          ToolTip="Allows you to specify bounty amounts allocated for specific crimes.">
+                                    <GroupBox.HeaderTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="Use Defaults"
+                                                      IsChecked="{Binding EditableRecord.CrimeGoldUseDefaults}"
+                                                      Margin="5" />
+                                        </DataTemplate>   
+                                    </GroupBox.HeaderTemplate>
+                            
+                                    <StackPanel IsEnabled="{Binding EditableRecord.CrimeGoldUseDefaults, Converter={StaticResource BoolNegationConverter}}">
+                                       <TextBlock Text="Murder"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Murder}"
+                                                                  MinValue="0" />
+                                       
+                                       <TextBlock Text="Assault"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Assault}"
+                                                                  MinValue="0" />
+                                       
+                                       <TextBlock Text="Pickpocket"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Pickpocket}"
+                                                                  MinValue="0" />
+                                       
+                                       <TextBlock Text="Trespass"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Trespass}"
+                                                                  MinValue="0" />
+                                       
+                                       <TextBlock Text="Steal Mult"/> 
+                                       <syncfusion:DoubleTextBox Value="{Binding EditableRecord.CrimeValues.StealMult}"
+                                                                 MinValue="0" />
+                                       
+                                       <TextBlock Text="Escape"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Escape}"
+                                                                  MinValue="0" />
+                                       
+                                       <TextBlock Text="Werewolf"/> 
+                                       <syncfusion:IntegerTextBox Value="{Binding EditableRecord.CrimeValues.Werewolf}"
+                                                                  MinValue="0" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
                 </TabItem>
 
                 <TabItem Header="Vendor">
-
+                    <GroupBox Header="Vendor" FontSize="12">
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="Vendor"
+                                          ToolTip="Allows you to specify bounty amounts allocated for specific crimes. "
+                                          IsChecked="{Binding EditableRecord.Vendor}"
+                                          Margin="5" />
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+                        
+                        <StackPanel>
+                            <GroupBox Header="Limitations" FontSize="12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Start Hour"/>
+                                        <syncfusion:IntegerTextBox Value="{Binding EditableRecord.VendorValues.StartHour}"
+                                                                   MinValue="0"
+                                                                   MaxValue="{Binding EditableRecord.VendorValues.EndHour}"/>
+                            
+                                        <TextBlock Text="End Hour"/>
+                                        <syncfusion:IntegerTextBox Value="{Binding EditableRecord.VendorValues.EndHour}"
+                                                                   MinValue="{Binding EditableRecord.VendorValues.StartHour}"
+                                                                   MaxValue="24"/>
+                                    </StackPanel>
+                                    
+                                    <TextBlock Text="Vendor Conditions" 
+                                               ToolTip="Further limitations when the vendor offers goods."/>
+                                    <view:ConditionsEditor/>
+                                </StackPanel>
+                            </GroupBox>
+                            
+                            <GroupBox Header="Vendor Location" FontSize="12">
+                                <StackPanel>
+                                    <TextBlock Text="Location" 
+                                               ToolTip="Used to set where the vendor needs to be to sell goods."/>
+                                    <render:PlacedPicker/>
+                            
+                                    <TextBlock Text="Radius"
+                                               ToolTip="How close the merchant needs to be to the set location."/>
+                                    <syncfusion:IntegerTextBox Value="{Binding EditableRecord.VendorValues.Radius}"
+                                                               MinValue="0"/>
+                                </StackPanel>
+                            </GroupBox>
+                            
+                            <GroupBox Header="Vendor Buy/Sell List" FontSize="12">
+                                <StackPanel>
+                                    <CheckBox Content="Not Buy/Sell"
+                                              ToolTip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list."
+                                              IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                              Margin="5" />
+                                    
+                                    <TextBlock Text="List"
+                                               ToolTip="The merchant will buy and sell any items which are tagged with keywords contained in this list."/>
+                                    <plugins:FormKeyPicker FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
+                                                           ScopedTypes="{Binding FormListTypes}"
+                                                           LinkCache="{Binding LinkCache}" />
+                                </StackPanel>
+                            </GroupBox>
+                            
+                            <TextBlock Text="Vendor Chest"
+                                       ToolTip="Sets what container the merchant will sell goods from.\n
+                                       Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above."/>
+                            <render:PlacedPicker/>
+                            
+                            <CheckBox Content="Only Buy Stolen Items"
+                                      ToolTip="Sets this vendor up to only pay for stolen items the player wants to fence."
+                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      Margin="5" />
+                        </StackPanel>
+                    </GroupBox>
                 </TabItem>
             </TabControl>
-
-            <Button Content="Save" Command="{Binding Save}"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
