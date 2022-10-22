@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
+using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record.Browser;
 using CreationEditor.GUI.Services;
 using CreationEditor.GUI.Services.Startup;
@@ -22,8 +23,11 @@ public class MainModule : Module {
             .As<IFileSystem>()
             .SingleInstance();
         
+        builder.RegisterType<BackgroundTaskManager>()
+            .As<IBackgroundTaskManager>()
+            .SingleInstance();
         
-        builder.RegisterType<ReferenceQuery>()
+        builder.RegisterType<BackgroundReferenceQuery>()
             .As<IReferenceQuery>()
             .SingleInstance();
 

@@ -3,6 +3,7 @@ using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
 using DynamicData;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
@@ -31,8 +32,8 @@ public class RecordListVMReadOnly : RecordListVM {
                         //Skip when browser settings don't match
                         if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
 
-                            var formLinks = ReferenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
-                            var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(recordIdentifier, formLinks);
+                        var formLinks = ReferenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
+                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(recordIdentifier, formLinks);
 
                         obs.OnNext(referencedRecord);
                     }

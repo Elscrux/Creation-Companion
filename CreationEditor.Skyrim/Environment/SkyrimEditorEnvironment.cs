@@ -14,6 +14,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     
     private readonly IReferenceQuery _referenceQuery;
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
+    private readonly IBackgroundTaskManager _backgroundTaskManager;
     private readonly INotifier _notifier;
 
     private IGameEnvironment<ISkyrimMod, ISkyrimModGetter> _gameEnvironment;
@@ -43,9 +44,11 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     public SkyrimEditorEnvironment(
         IReferenceQuery referenceQuery,
         ISimpleEnvironmentContext simpleEnvironmentContext,
+        IBackgroundTaskManager backgroundTaskManager,
         INotifier notifier) {
         _referenceQuery = referenceQuery;
         _simpleEnvironmentContext = simpleEnvironmentContext;
+        _backgroundTaskManager = backgroundTaskManager;
         _notifier = notifier;
 
         _activeMod = new SkyrimMod(NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
@@ -58,6 +61,8 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     }
 
     public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null) {
+        _backgroundTaskManager.ReferencesLoaded = false;
+        
         _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
@@ -91,7 +96,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
 
         linearNotifier.Next("Loading References");
         await Task.Run(() => _referenceQuery.LoadModReferences(_gameEnvironment));
-        _backgroundLoading.ReferencesLoaded = true;
+        _backgroundTaskManager.ReferencesLoaded = true;
         linearNotifier.Stop();
     }
 }

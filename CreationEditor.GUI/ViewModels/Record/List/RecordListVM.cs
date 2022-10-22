@@ -97,8 +97,8 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                         //Skip when browser settings don't match
                         if (!RecordBrowserSettings.Filter(record)) continue;
 
-                            var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
-                            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
+                        var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
+                        var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
 
                         obs.OnNext(referencedRecord);
                     }
