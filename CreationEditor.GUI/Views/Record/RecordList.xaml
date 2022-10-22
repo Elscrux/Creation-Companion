@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-                    xmlns:loading="clr-namespace:Elscrux.WPF.Views.Loading;assembly=Elscrux.WPF"
-                    xmlns:vm="clr-namespace:CreationEditor.GUI.ViewModels.Record">
+                    xmlns:vm="clr-namespace:CreationEditor.GUI.ViewModels.Record"
+                    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls">
     <Style x:Key="{x:Static vm:RecordListVM.RecordListStyle}" TargetType="{x:Type vm:RecordListVM}">
         <Setter Property="Template">
             <Setter.Value>
@@ -46,11 +46,11 @@
                             </syncfusion:SfDataGrid.Columns>
                         </syncfusion:SfDataGrid>
 
-                        <loading:LoadSpinner HorizontalAlignment="Left" VerticalAlignment="Top"
-                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                             Height="250" Width="400"
-                                             EllipseSize="16" SpinnerSize="32"
-                                             IsLoading="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}" />
+                        <mah:ProgressRing IsActive="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Left" VerticalAlignment="Top"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                          Width="200" Height="200"
+                                          Margin="50"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -79,11 +79,11 @@
                             </syncfusion:SfDataGrid.Columns>
                         </syncfusion:SfDataGrid>
 
-                        <loading:LoadSpinner HorizontalAlignment="Left" VerticalAlignment="Top"
-                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                             Height="250" Width="400"
-                                             EllipseSize="16" SpinnerSize="32"
-                                             IsLoading="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}" />
+                        <mah:ProgressRing IsActive="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Left" VerticalAlignment="Top"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                          Width="200" Height="200"
+                                          Margin="50"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

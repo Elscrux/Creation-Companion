@@ -22,6 +22,8 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     public const string RecordReadOnlyListStyle = "RecordReadOnlyListStyle";
     public const string RecordListStyle = "RecordListStyle";
     
+    public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(nameof(IsBusy), typeof(bool), typeof(RecordListVM));
+    
     protected readonly IReferenceQuery ReferenceQuery;
     protected readonly IRecordController RecordController;
 
@@ -29,7 +31,11 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     [Reactive] public IEnumerable Records { get; set; } = null!;
     [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
 
-    [Reactive] public bool IsBusy { get; set; }
+    public bool IsBusy {
+        get => (bool) GetValue(IsBusyProperty);
+        set => SetValue(IsBusyProperty, value);
+    }
+    
     protected readonly List<GridColumn> ExtraColumns = new();
 
     protected RecordListVM(
@@ -80,30 +86,28 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                IsBusy = true;
                 return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
                     Records?.Clear();
-                    try {
-                        foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                    foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
+                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
-                            //Skip when browser settings don't match
-                            if (!RecordBrowserSettings.Filter(record)) continue;
+                        //Skip when browser settings don't match
+                        if (!RecordBrowserSettings.Filter(record)) continue;
 
                             var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
                             var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
 
-                            obs.OnNext(referencedRecord);
-                        }
-                        obs.OnCompleted();
-                        return Task.CompletedTask;
-                    } finally {
-                        IsBusy = false;
+                        obs.OnNext(referencedRecord);
                     }
+                    obs.OnCompleted();
+                    return Task.CompletedTask;
                 });
             })
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Do(x => IsBusy = false)
             .Select(x => x.ToObservableChangeSet())
             .Switch()
             .ToObservableCollection(this);

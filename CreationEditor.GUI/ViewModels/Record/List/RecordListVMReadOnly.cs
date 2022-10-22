@@ -20,30 +20,29 @@ public class RecordListVMReadOnly : RecordListVM {
 
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 IsBusy = true;
                 return Observable.Create<ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>>((obs, cancel) => {
-                    try {
-                        foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item3)) {
-                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                    foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item3)) {
+                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
-                            //Skip when browser settings don't match
-                            if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
+                        //Skip when browser settings don't match
+                        if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
 
                             var formLinks = ReferenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
                             var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(recordIdentifier, formLinks);
 
-                            obs.OnNext(referencedRecord);
-                        }
-
-                        obs.OnCompleted();
-                        return Task.CompletedTask;
-                    } finally {
-                        IsBusy = false;
+                        obs.OnNext(referencedRecord);
                     }
+
+                    obs.OnCompleted();
+                    return Task.CompletedTask;
                 });
             })
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Do(x => IsBusy = false)
             .Select(x => x.ToObservableChangeSet())
             .Switch()
             .ToObservableCollection(this);

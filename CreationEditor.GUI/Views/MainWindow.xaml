@@ -7,7 +7,8 @@
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels;assembly=CreationEditor.GUI"
         xmlns:views="clr-namespace:CreationEditor.GUI.Views"
-        xmlns:loading="clr-namespace:Elscrux.WPF.Views.Loading;assembly=Elscrux.WPF"
+        xmlns:models="clr-namespace:Elscrux.WPF.Models;assembly=Elscrux.WPF"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
         Title="{Binding WindowTitle}" MinHeight="480" MinWidth="720">
     <Grid>
@@ -35,10 +36,9 @@
             </syncfusion:DockingManager>
         </DockPanel>
 
-
-        <loading:LoadSpinner HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Height="500" Width="800"
-                             IsLoading="{Binding BusyService.IsBusy}" />
+        <mah:ProgressRing IsActive="{Binding BusyService.IsBusy}"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Width="500" Height="500"/>
 
         <ItemsControl ItemsSource="{Binding LoadingItems}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"
