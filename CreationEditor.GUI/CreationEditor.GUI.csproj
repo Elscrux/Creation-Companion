@@ -15,6 +15,7 @@
         <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
         <PackageReference Include="MutagenLibrary.WPF" Version="1.0.7" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00896" />
+        <PackageReference Include="Serilog.Sinks.File" Version="4.1.1-dev-00896" />
     </ItemGroup>
 
     <ItemGroup>

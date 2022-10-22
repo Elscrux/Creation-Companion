@@ -17,6 +17,7 @@ public class LoggingModule : Module {
             .Enrich.FromLogContext()
             .WriteTo.Sink(logVM)
             .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
+            .WriteTo.File("log.txt", LogEventLevel.Verbose, outputTemplate)
             .CreateLogger();
 
         builder.RegisterInstance(logger)
