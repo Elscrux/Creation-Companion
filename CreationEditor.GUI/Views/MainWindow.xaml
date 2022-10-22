@@ -14,7 +14,14 @@
     <Grid>
         <DockPanel Effect="{Binding BusyService.IsBusy, Converter={StaticResource BooleanToBlurConverter}}"
                    IsHitTestVisible="{Binding BusyService.IsBusy, Converter={StaticResource BoolNegationConverter}}">
-            <syncfusion:MenuAdv DockPanel.Dock="Top">
+            <syncfusion:MenuAdv DockPanel.Dock="Top"
+                                Height="30"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <syncfusion:MenuAdv.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <DockPanel HorizontalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </syncfusion:MenuAdv.ItemsPanel>
                 <syncfusion:MenuItemAdv Header="File">
                     <syncfusion:MenuItemAdv Header="Mods"
                                             Command="{Binding OpenSelectMods}"
@@ -30,9 +37,6 @@
                                             Command="{Binding OpenRecordBrowser}"
                                             CommandParameter="{Binding ElementName=MainDockingManager}" />
                 </syncfusion:MenuItemAdv>
-            </syncfusion:MenuAdv>
-            
-            <syncfusion:MenuAdv DockPanel.Dock="Bottom" HorizontalAlignment="Stretch">
                 <syncfusion:MenuItemAdv Visibility="{Binding AnyLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
                                         HorizontalAlignment="Right"
                                         Header="{Binding LatestNotification}"
