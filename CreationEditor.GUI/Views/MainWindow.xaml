@@ -31,6 +31,32 @@
                                             CommandParameter="{Binding ElementName=MainDockingManager}" />
                 </syncfusion:MenuItemAdv>
             </syncfusion:MenuAdv>
+            
+            <syncfusion:MenuAdv DockPanel.Dock="Bottom" HorizontalAlignment="Stretch">
+                <syncfusion:MenuItemAdv Visibility="{Binding AnyLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        HorizontalAlignment="Right"
+                                        Header="{Binding LatestNotification}"
+                                        ItemsSource="{Binding LoadingItems}">
+                    <syncfusion:MenuItemAdv.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel d:DataContext="{d:DesignInstance models:NotificationItem}">
+                                <TextBlock Text="{Binding LoadText}" />
+                                <ProgressBar Minimum="0" Maximum="1"
+                                             Value="{Binding  LoadProgress}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </syncfusion:MenuItemAdv.HeaderTemplate>
+                    <syncfusion:MenuItemAdv.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding LoadText}"/>
+                                <ProgressBar Minimum="0" Maximum="1" 
+                                             Value="{Binding  LoadProgress}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </syncfusion:MenuItemAdv.ItemTemplate>
+                </syncfusion:MenuItemAdv>
+            </syncfusion:MenuAdv>
 
             <syncfusion:DockingManager x:Name="MainDockingManager" PersistState="True">
             </syncfusion:DockingManager>

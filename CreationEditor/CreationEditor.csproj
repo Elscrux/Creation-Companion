@@ -9,11 +9,11 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="6.4.0" />
-      <PackageReference Include="Elscrux" Version="1.0.6" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.39.5-pr001" />
+      <PackageReference Include="Elscrux" Version="1.0.7" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.39.6" />
       <PackageReference Include="Noggog.CSharpExt" Version="2.50.1" />
-      <PackageReference Include="MutagenLibrary.Core" Version="1.0.6" />
-      <PackageReference Include="MutagenLibrary.References" Version="1.0.6" />
+      <PackageReference Include="MutagenLibrary.Core" Version="1.0.7" />
+      <PackageReference Include="MutagenLibrary.References" Version="1.0.7" />
     </ItemGroup>
 
     <ItemGroup>

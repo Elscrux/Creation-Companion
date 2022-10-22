@@ -61,7 +61,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
-        var linearNotifier = new LinearNotifier(_notifier, activeMod == null ? 2 : 3);
+        var linearNotifier = new LinearNotifier(_notifier, activeMod == null ? 1 : 2);
         
         if (activeMod != null) {
             linearNotifier.Next($"Preparing {activeMod.Value.FileName}");
@@ -78,11 +78,20 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
             .WithLoadOrder(modKeys.ToArray())
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();
-
-        linearNotifier.Next("Loading References");
-        _referenceQuery.LoadModReferences(_gameEnvironment);
+        linearNotifier.Stop();
         
         ActiveModChanged?.Invoke(this, EventArgs.Empty);
         EditorInitialized?.Invoke(this, EventArgs.Empty);
+
+        Prepare();
+    }
+
+    private async void Prepare() {
+        var linearNotifier = new LinearNotifier(_notifier, 1);
+
+        linearNotifier.Next("Loading References");
+        await Task.Run(() => _referenceQuery.LoadModReferences(_gameEnvironment));
+        _backgroundLoading.ReferencesLoaded = true;
+        linearNotifier.Stop();
     }
 }
