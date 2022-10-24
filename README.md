@@ -28,3 +28,8 @@ Create custom scripts that can be recompiled at runtime to perform actions in ba
 
 ### Plugins
 There should be support for custom 3rd party extensions or integrations that people can install.
+
+## Setup
+- Clone
+- Add NuGet source: https://gitlab.com/api/v4/projects/32329418/packages/nuget/index.json
+- Build
