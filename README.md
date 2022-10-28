@@ -6,7 +6,7 @@
 - Build
 
 ## Contribute
-Join the [Mutagen]([url](https://discord.gg/GdKZ3SH)) server and ping me there @Elscrux, so we can talk about the project. A basic project setup with issues is already in place and pull requests are always welcome.
+Join the [Mutagen Discord](https://discord.gg/GdKZ3SH) and ping me there @Elscrux, so we can talk about the project. A basic project setup with issues is already in place and pull requests are always welcome.
 
 ## Overview
 The goal is to create a modern IDE that replaces the Creation Kit for mod creation in Skyrim modding and potentially other Bethesda games.
