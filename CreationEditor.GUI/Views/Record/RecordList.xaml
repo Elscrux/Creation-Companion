@@ -38,11 +38,14 @@
                             </syncfusion:SfDataGrid.ContextMenu>
                             <syncfusion:SfDataGrid.Columns>
                                 <syncfusion:GridTextColumn HeaderText="EditorID" MappingName="Record.EditorID"
-                                                           AllowFiltering="True" AllowSorting="True" />
+                                                           AllowFiltering="True" AllowSorting="True"
+                                                           ColumnSizer="Star" />
                                 <syncfusion:GridTextColumn HeaderText="FormKey" MappingName="Record.FormKey"
-                                                           AllowFiltering="True" AllowSorting="True" />
+                                                           AllowFiltering="True" AllowSorting="True" 
+                                                           ColumnSizer="Star" />
                                 <syncfusion:GridTextColumn HeaderText="Use Info" MappingName="References.Count"
-                                                           AllowFiltering="True" AllowSorting="True" />
+                                                           AllowFiltering="True" AllowSorting="True"
+                                                           ColumnSizer="Star" />
                             </syncfusion:SfDataGrid.Columns>
                         </syncfusion:SfDataGrid>
 
