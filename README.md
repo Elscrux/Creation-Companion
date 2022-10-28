@@ -1,4 +1,14 @@
 # Creation-Editor (wip name)
+
+## Build from Source
+- Clone
+- Add NuGet source: https://gitlab.com/api/v4/projects/32329418/packages/nuget/index.json
+- Build
+
+## Contribute
+Join the [Mutagen]([url](https://discord.gg/GdKZ3SH)) server and ping me there @Elscrux, so we can talk about the project. A basic project setup with issues is already in place and pull requests are always welcome.
+
+## Overview
 The goal is to create a modern IDE that replaces the Creation Kit for mod creation in Skyrim modding and potentially other Bethesda games.
 
 The are many tools like xEdit that do a similar job, but nothing goes as far as trying to replace the Creation Kit itself. This is supposed to change with the power of [Mutagen](https://github.com/Mutagen-Modding/Mutagen "Mutagen"). Mutagen is the starting point for the development of the editor which would otherwise be a much larger undertaking.
@@ -28,8 +38,3 @@ Create custom scripts that can be recompiled at runtime to perform actions in ba
 
 ### Plugins
 There should be support for custom 3rd party extensions or integrations that people can install.
-
-## Setup
-- Clone
-- Add NuGet source: https://gitlab.com/api/v4/projects/32329418/packages/nuget/index.json
-- Build
