@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.GUI.Skyrim", "CreationEditor.GUI.Skyrim\CreationEditor.GUI.Skyrim.csproj", "{323EBCE6-2FC9-4704-B535-F34B33F30B15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.WPF.Skyrim", "CreationEditor.WPF.Skyrim\CreationEditor.WPF.Skyrim.csproj", "{323EBCE6-2FC9-4704-B535-F34B33F30B15}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor", "CreationEditor\CreationEditor.csproj", "{1D2E9B64-B54B-4BCE-A74C-CA977A7FE510}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.Skyrim", "CreationEditor.Skyrim\CreationEditor.Skyrim.csproj", "{511DED90-D7B1-49A4-9D31-9ECD3C05AF3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.GUI", "CreationEditor.GUI\CreationEditor.GUI.csproj", "{AA82CD3B-8670-42DF-9756-32E5510AA183}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreationEditor.WPF", "CreationEditor.WPF\CreationEditor.WPF.csproj", "{AA82CD3B-8670-42DF-9756-32E5510AA183}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

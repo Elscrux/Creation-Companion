@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CreationEditor.GUI\CreationEditor.GUI.csproj" />
+        <ProjectReference Include="..\CreationEditor.WPF\CreationEditor.WPF.csproj" />
         <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
         <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
     </ItemGroup>

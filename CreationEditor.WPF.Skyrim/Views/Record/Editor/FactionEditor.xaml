@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
              xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
-             xmlns:render="clr-namespace:CreationEditor.GUI.Views.Render;assembly=CreationEditor.GUI"
+             xmlns:render="clr-namespace:CreationEditor.GUI.Views.Render;assembly=CreationEditor.WPF"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"

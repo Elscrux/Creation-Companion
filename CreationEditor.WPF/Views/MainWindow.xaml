@@ -4,7 +4,7 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels;assembly=CreationEditor.GUI"
+                 xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels;assembly=CreationEditor.WPF"
                  xmlns:views="clr-namespace:CreationEditor.GUI.Views"
                  xmlns:models="clr-namespace:Elscrux.WPF.Models;assembly=Elscrux.WPF"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"

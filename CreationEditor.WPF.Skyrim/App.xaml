@@ -10,7 +10,7 @@
              <converters:BooleanNegatedConverter x:Key="BooleanNegatedConverter" />
              
              <ResourceDictionary.MergedDictionaries>
-                 <ResourceDictionary Source="/CreationEditor.GUI;component/Views/Record/RecordList.xaml" />
+                 <ResourceDictionary Source="/CreationEditor.WPF;component/Views/Record/RecordList.xaml" />
                  
                  <!--  MahApps.Metro resource dictionaries.  -->
                  <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
