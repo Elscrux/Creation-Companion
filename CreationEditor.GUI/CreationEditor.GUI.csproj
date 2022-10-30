@@ -9,13 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.39.6" />
+        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr001" />
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
-        <PackageReference Include="MutagenLibrary.WPF" Version="1.0.7" />
+        <PackageReference Include="MutagenLibrary.WPF" Version="1.1.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00896" />
-        <PackageReference Include="Serilog.Sinks.File" Version="4.1.1-dev-00896" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
     </ItemGroup>
 
     <ItemGroup>
