@@ -3,7 +3,6 @@ using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
 using DynamicData;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
@@ -24,7 +23,6 @@ public class RecordListVMReadOnly : RecordListVM {
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                IsBusy = true;
                 return Observable.Create<ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>>((obs, cancel) => {
                     foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item3)) {
                         if (cancel.IsCancellationRequested) return Task.CompletedTask;
@@ -42,10 +40,11 @@ public class RecordListVMReadOnly : RecordListVM {
                     return Task.CompletedTask;
                 });
             })
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Do(x => IsBusy = false)
             .Select(x => x.ToObservableChangeSet())
             .Switch()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Do(_ => IsBusy = false)
+            .ObserveOn(RxApp.TaskpoolScheduler)
             .ToObservableCollection(this);
     }
 }

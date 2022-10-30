@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using CreationEditor.Environment;
 using CreationEditor.GUI.Models.Record;
 using CreationEditor.GUI.Models.Record.Browser;
@@ -15,9 +16,9 @@ using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Syncfusion.UI.Xaml.Grid;
 namespace CreationEditor.GUI.ViewModels.Record;
 
+[TemplatePart(Name = "PART_RecordGrid", Type = typeof(DataGrid))]
 public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     public const string RecordReadOnlyListStyle = "RecordReadOnlyListStyle";
     public const string RecordListStyle = "RecordListStyle";
@@ -36,7 +37,7 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
         set => SetValue(IsBusyProperty, value);
     }
     
-    protected readonly List<GridColumn> ExtraColumns = new();
+    protected readonly List<DataGridTextColumn> ExtraColumns = new();
 
     protected RecordListVM(
         IRecordBrowserSettings recordBrowserSettings,
@@ -53,11 +54,9 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     public override void OnApplyTemplate() {
         base.OnApplyTemplate();
 
-        var findName = Template.FindName("RecordGrid", this);
-        if (findName is SfDataGrid dataGrid) {
-            foreach (var column in ExtraColumns) {
-                dataGrid?.Columns.Add(column);
-            }
+        var dataGrid = GetTemplateChild("PART_RecordGrid") as DataGrid;
+        foreach (var column in ExtraColumns) {
+            dataGrid?.Columns.Add(column);
         }
     }
 }
@@ -90,7 +89,6 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
-                    Records?.Clear();
                     foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
                         if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
@@ -106,10 +104,11 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                     return Task.CompletedTask;
                 });
             })
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Do(x => IsBusy = false)
             .Select(x => x.ToObservableChangeSet())
             .Switch()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Do(_ => IsBusy = false)
+            .ObserveOn(RxApp.TaskpoolScheduler)
             .ToObservableCollection(this);
 
         NewRecord = ReactiveCommand.Create(() => {

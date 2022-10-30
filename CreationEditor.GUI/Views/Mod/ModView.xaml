@@ -54,7 +54,7 @@
                 </TextBox>
                 <Label Content="Localization Enabled" />
                 <CheckBox IsChecked="{Binding Localization}" MinHeight="25"
-                          IsEnabled="{Binding IsReadOnly, Converter={StaticResource BoolNegationConverter}}" />
+                          IsEnabled="{Binding IsReadOnly, Converter={StaticResource BooleanNegatedConverter}}" />
             </StackPanel>
         </Expander>
     </StackPanel>

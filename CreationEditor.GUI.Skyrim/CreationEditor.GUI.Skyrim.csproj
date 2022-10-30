@@ -14,7 +14,6 @@
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
-        <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.3.0.50" />
     </ItemGroup>
 
     <ItemGroup>

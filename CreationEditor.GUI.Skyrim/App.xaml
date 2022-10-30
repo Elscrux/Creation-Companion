@@ -1,17 +1,13 @@
 ﻿<Application x:Class="CreationEditor.GUI.Skyrim.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
              xmlns:converters="clr-namespace:Elscrux.WPF.Converters;assembly=Elscrux.WPF">
     <Application.Resources>
          <ResourceDictionary>
-             <Style x:Key="BorderBrush" TargetType="{x:Type Border}">
-                 <Setter Property="BorderBrush" Value="#FF373737"/>
-             </Style>
-             
              <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+             <converters:NegatedBooleanToVisibilityConverter x:Key="NegatedBooleanToVisibilityConverter" />
              <converters:BooleanToBlurConverter x:Key="BooleanToBlurConverter" />
-             <syncfusion:BoolNegationConverter x:Key="BoolNegationConverter" />
+             <converters:BooleanNegatedConverter x:Key="BooleanNegatedConverter" />
              
              <ResourceDictionary.MergedDictionaries>
                  <ResourceDictionary Source="/CreationEditor.GUI;component/Views/Record/RecordList.xaml" />

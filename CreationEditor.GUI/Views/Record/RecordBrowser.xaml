@@ -26,8 +26,10 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Margin="5">
-                <TextBlock Text="Filter" />
-                <TextBox Padding="1" Text="{Binding RecordBrowserSettings.SearchTerm, UpdateSourceTrigger=PropertyChanged}" />
+                <HeaderedContentControl Header="Filter">
+                    <TextBox Padding="1" 
+                             Text="{Binding RecordBrowserSettings.SearchTerm, UpdateSourceTrigger=PropertyChanged}" />
+                </HeaderedContentControl>
             </StackPanel>
             <CheckBox
                 Grid.Row="1"
@@ -40,7 +42,9 @@
                         <TextBlock Text="{Binding GroupName}" />
                     </HierarchicalDataTemplate>
                     <DataTemplate DataType="{x:Type recordBrowser:RecordTypeListing}">
-                        <Button Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=record:RecordBrowser}}" CommandParameter="{Binding}">
+                        <Button Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=record:RecordBrowser}}"
+                                CommandParameter="{Binding}"
+                                HorizontalContentAlignment="Left">
                             <TextBlock Text="{Binding RecordTypeName}" />
                         </Button>
                     </DataTemplate>

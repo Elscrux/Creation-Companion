@@ -8,7 +8,6 @@ using CreationEditor.GUI.Services.Startup;
 using CreationEditor.GUI.Skyrim.Modules;
 using CreationEditor.GUI.Views;
 using Elscrux.Notification;
-using Syncfusion.Windows.Tools.Controls;
 namespace CreationEditor.GUI.Skyrim;
 
 public partial class App {
@@ -37,7 +36,7 @@ public partial class App {
         var window = new MainWindow();
         builder.RegisterInstance(window).As<IMainWindow>();
 
-        var dockingManagerService = new DockingManagerService(DockingManager.GetDockingManager(window));
+        var dockingManagerService = new DockingManagerService(window.DockingManager);
         builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
         
         var container = builder.Build();

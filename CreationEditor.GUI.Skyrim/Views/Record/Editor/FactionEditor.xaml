@@ -5,26 +5,34 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
              xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
-             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
              xmlns:render="clr-namespace:CreationEditor.GUI.Views.Render;assembly=CreationEditor.GUI"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:converter="clr-namespace:CreationEditor.GUI.Skyrim.Converter"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:FactionEditorVM}"
              d:DesignHeight="900" d:DesignWidth="900">
+    <UserControl.Resources>
+        <converter:CombatReactionTooltip x:Key="CombatReactionTooltip" />
+    </UserControl.Resources>
     <ScrollViewer>
         <StackPanel>
             <Menu>
                 <MenuItem Header="Save" Command="{Binding Save}"/>
             </Menu>
             
-            <TextBlock Text="EditorID" />
-            <TextBox Text="{Binding EditableRecord.EditorID}" 
-                     Width="400"
-                     HorizontalAlignment="Left" />
+            <HeaderedContentControl Header="EditorID">
+                <TextBox Text="{Binding EditableRecord.EditorID}" 
+                         Width="400"
+                         HorizontalAlignment="Left" />
+            </HeaderedContentControl>
             
-            <TextBlock Text="Name" />
-            <TextBox Text="{Binding EditableRecord.NameStr}" 
-                     Width="400"
-                     HorizontalAlignment="Left" />
+            <HeaderedContentControl Header="Name">
+                <TextBox Text="{Binding EditableRecord.NameStr}" 
+                         Width="400"
+                         HorizontalAlignment="Left" />
+            </HeaderedContentControl>
 
             <TabControl>
                 <TabItem Header="General">
@@ -47,76 +55,108 @@
                         </StackPanel>
 
                         <GroupBox Header="Interfaction Relations" FontSize="12">
-                            <ListView ItemsSource="{Binding EditableRecord.Relations}"
-                                      SelectionMode="Single"
+                            <DataGrid ItemsSource="{Binding EditableRecord.Relations}"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="True" CanUserResizeRows="False"
+                                      CanUserSortColumns="True"
+                                      AutoGenerateColumns="False"
+                                      AllowDrop="True"
+                                      dd:DragDrop.IsDragSource="True"
+                                      dd:DragDrop.IsDropTarget="True"
+                                      dd:DragDrop.DropScrollingMode="VerticalOnly"
+                                      dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
+                                      dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                      SelectionUnit="FullRow" SelectionMode="Single"
                                       SelectedIndex="{Binding SelectedRelationIndex}"
                                       MinHeight="250">
-                                <ListView.InputBindings>
+                                <DataGrid.InputBindings>
                                     <KeyBinding Key="Add"
                                                 Command="{Binding AddRelation}" />
                                     <KeyBinding Key="Delete"
                                                 Command="{Binding RemoveSelectedRelations}" />
-                                </ListView.InputBindings>
-                                <ListView.ContextMenu>
+                                </DataGrid.InputBindings>
+                                <DataGrid.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add" Command="{Binding AddRelation}" />
                                         <MenuItem Header="Remove" Command="{Binding RemoveSelectedRelations}" />
                                     </ContextMenu>
-                                </ListView.ContextMenu>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <view:RelationEditor Record="{Binding}"
-                                                             LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource AncestorType=view:FactionEditor}}" />
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                                </DataGrid.ContextMenu>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn SortMemberPath="Reaction">
+                                        <DataGridTemplateColumn.Header>
+                                            <TextBlock Text="Combat Reaction"
+                                                       ToolTip="Determines the combat reaction to members of the target faction"/>
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding DataContext.CombatReactions, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}"
+                                                          ToolTip="{Binding Reaction, Converter={StaticResource CombatReactionTooltip}}"
+                                                          SelectedItem="{Binding Reaction}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="300">
+                                        <DataGridTemplateColumn.Header>
+                                            <TextBlock Text="Target Faction"
+                                                       ToolTip="Faction to set combat reaction for"/>
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <plugins:FormKeyPicker FormKey="{Binding Target.FormKey}"
+                                                                       ScopedTypes="{Binding DataContext.RelationTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}"
+                                                                       LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </GroupBox>
                     </StackPanel>
                 </TabItem>
                 
                 <TabItem Header="Ranks">
                     <GroupBox Header="Ranks" FontSize="12">
-                        <syncfusion:SfDataGrid x:Name="RankGrid"
-                                               ItemsSource="{Binding EditableRecord.Ranks}"
-                                               AllowEditing="True"
-                                               AllowSorting="False" AllowFiltering="False"
-                                               AutoGenerateColumns="False"
-                                               AllowResizingColumns="True"
-                                               AllowDraggingRows="True" RowDropIndicatorMode="Line"
-                                               SelectionUnit="Row" SelectionMode="Extended"
-                                               SelectedIndex="{Binding SelectedRankIndex}"
-                                               MinHeight="250">
-                            <syncfusion:SfDataGrid.InputBindings>
+                        <DataGrid ItemsSource="{Binding EditableRecord.Ranks}"
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeColumns="True" CanUserResizeRows="False"
+                                  CanUserSortColumns="False"
+                                  AutoGenerateColumns="False"
+                                  AllowDrop="True"
+                                  dd:DragDrop.IsDragSource="True"
+                                  dd:DragDrop.IsDropTarget="True"
+                                  dd:DragDrop.DropScrollingMode="VerticalOnly"
+                                  dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
+                                  dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                                  SelectionUnit="FullRow" SelectionMode="Single"
+                                  SelectedIndex="{Binding SelectedRankIndex}"
+                                  MinHeight="250">
+                            <DataGrid.InputBindings>
                                 <KeyBinding Key="Add"
                                             Command="{Binding AddRank}" />
                                 <KeyBinding Key="Delete"
                                             Command="{Binding RemoveSelectedRank}" />
-                            </syncfusion:SfDataGrid.InputBindings>
-                            <syncfusion:SfDataGrid.ContextMenu>
+                            </DataGrid.InputBindings>
+                            <DataGrid.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add" Command="{Binding AddRank}" />
                                     <MenuItem Header="Remove" Command="{Binding RemoveSelectedRank}" />
                                 </ContextMenu>
-                            </syncfusion:SfDataGrid.ContextMenu>
-                            <syncfusion:SfDataGrid.Columns>
-                                <syncfusion:GridTextColumn HeaderText="Male Title" MappingName="Title.Male.String"
-                                                           ShowHeaderToolTip="True">
-                                    <syncfusion:GridTextColumn.HeaderToolTipTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="Male Title name, not visible in game"/>
-                                        </DataTemplate>
-                                    </syncfusion:GridTextColumn.HeaderToolTipTemplate>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn HeaderText="Female Title" MappingName="Title.Female.String"
-                                                           ShowHeaderToolTip="True">
-                                    <syncfusion:GridTextColumn.HeaderToolTipTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="Female Title name, not visible in game"/>
-                                        </DataTemplate>
-                                    </syncfusion:GridTextColumn.HeaderToolTipTemplate>
-                                </syncfusion:GridTextColumn>
-                            </syncfusion:SfDataGrid.Columns>
-                        </syncfusion:SfDataGrid>
+                            </DataGrid.ContextMenu>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Binding="{Binding Title.Male.String}" >
+                                    <DataGridTextColumn.Header>
+                                        <TextBlock Text="Male Title" ToolTip="Male Title name, not visible in game"/>
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding Title.Female.String}">
+                                    <DataGridTextColumn.Header>
+                                        <TextBlock Text="Female Title" ToolTip="Female Title name, not visible in game" />
+                                    </DataGridTextColumn.Header>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </GroupBox>
                 </TabItem>
 
@@ -196,33 +236,39 @@
                             </GroupBox.HeaderTemplate>
                             
                             <StackPanel IsEnabled="{Binding EditableRecord.TrackCrime}">
-                                <TextBlock Text="Exterior Jail Marker"
-                                           ToolTip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building."/>
-                                <render:PlacedPicker/>
+                                <HeaderedContentControl Header="Exterior Jail Marker"
+                                                        ToolTip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building.">
+                                    <render:PlacedPicker/>
+                                </HeaderedContentControl>
                                 
-                                <TextBlock Text="Follow Wait Marker"
-                                           ToolTip="A marker near which followers will wait if the player gets sent to jail."/>
-                                <render:PlacedPicker/>
+                                <HeaderedContentControl Header="Follow Wait Marker"
+                                                        ToolTip="A marker near which followers will wait if the player gets sent to jail.">
+                                    <render:PlacedPicker/>
+                                </HeaderedContentControl>
                                 
-                                <TextBlock Text="Stolen Goods Container"
-                                           ToolTip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference."/>
-                                <render:PlacedPicker/>
+                                <HeaderedContentControl Header="Stolen Goods Container"
+                                                        ToolTip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference.">
+                                    <render:PlacedPicker/>
+                                </HeaderedContentControl>
                                 
-                                <TextBlock Text="Player Inventory Container"
-                                           ToolTip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference."/>
-                                <render:PlacedPicker/>
+                                <HeaderedContentControl Header="Player Inventory Container"
+                                                        ToolTip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference.">
+                                    <render:PlacedPicker/>
+                                </HeaderedContentControl>
                                 
-                                <TextBlock Text="Jail Outfit"
-                                           ToolTip="The clothes given to the player in prison. Usually BeggarOutfit."/>
-                                <plugins:FormKeyPicker FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
-                                                       ScopedTypes="{Binding OutfitTypes}"
-                                                       LinkCache="{Binding LinkCache}" />
-                                                                
-                                <TextBlock Text="Shared Crime Faction List"
-                                           ToolTip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown."/>
-                                <plugins:FormKeyPicker FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
-                                                       ScopedTypes="{Binding FormListTypes}"
-                                                       LinkCache="{Binding LinkCache}" />
+                                <HeaderedContentControl Header="Jail Outfit"
+                                                        ToolTip="The clothes given to the player in prison. Usually BeggarOutfit.">
+                                    <plugins:FormKeyPicker FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
+                                                           ScopedTypes="{Binding OutfitTypes}"
+                                                           LinkCache="{Binding LinkCache}" />
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Header="Shared Crime Faction List"
+                                                        ToolTip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown.">
+                                    <plugins:FormKeyPicker FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
+                                                           ScopedTypes="{Binding FormListTypes}"
+                                                           LinkCache="{Binding LinkCache}" />
+                                </HeaderedContentControl>
                                 
                                 <CheckBox Content="Attack on Sight"
                                           ToolTip="If checked, guards will attack the player on sight if crime gold is high enough."
@@ -247,41 +293,57 @@
                                         </GroupBox.HeaderTemplate>
 
                                         <StackPanel
-                                            IsEnabled="{Binding EditableRecord.CrimeGoldUseDefaults, Converter={StaticResource BoolNegationConverter}}">
-                                            <TextBlock Text="Murder" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Murder}"
-                                                MinValue="0"/>
-
-                                            <TextBlock Text="Assault" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Assault}"
-                                                MinValue="0" />
-
-                                            <TextBlock Text="Pickpocket" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Pickpocket}"
-                                                MinValue="0" />
-
-                                            <TextBlock Text="Trespass" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Trespass}"
-                                                MinValue="0" />
-
-                                            <TextBlock Text="Steal Mult" />
-                                            <syncfusion:DoubleTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.StealMult}"
-                                                MinValue="0" />
-
-                                            <TextBlock Text="Escape" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Escape}"
-                                                MinValue="0" />
-
-                                            <TextBlock Text="Werewolf" />
-                                            <syncfusion:IntegerTextBox
-                                                Value="{Binding EditableRecord.CrimeValues.Werewolf}"
-                                                MinValue="0" />
+                                            IsEnabled="{Binding EditableRecord.CrimeGoldUseDefaults, Converter={StaticResource BooleanNegatedConverter}}">
+                                            
+                                            <HeaderedContentControl Header="Murder">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Murder}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="Assault">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Assault}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="Pickpocket">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Pickpocket}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="Trespass">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Trespass}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="StealMult">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.StealMult}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   Interval="0.1"
+                                                                   StringFormat="N4" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="Escape">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Escape}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
+                                            
+                                            <HeaderedContentControl Header="Werewolf">
+                                                <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Werewolf}"
+                                                                   Minimum="0"
+                                                                   Maximum="65535"
+                                                                   StringFormat="N0" />
+                                            </HeaderedContentControl>
                                         </StackPanel>
                                     </GroupBox>
                                 </GroupBox>
@@ -305,33 +367,36 @@
                         <StackPanel IsEnabled="{Binding EditableRecord.Vendor}">
                             <GroupBox Header="Limitations" FontSize="12">
                                 <StackPanel>
-                                    <TextBlock Text="Vendor Time Window"/>
-                                    <syncfusion:SfRangeSlider Minimum="0" Maximum="24"
-                                                              ShowRange="True"
-                                                              AllowRangeDrag="True"
-                                                              RangeStart="{Binding EditableRecord.VendorValues.StartHour, Mode=TwoWay}"
-                                                              RangeEnd="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}"
-                                                              SnapsTo="StepValues"
-                                                              ShowValueLabels="True" ValuePlacement="TopLeft"
-                                                              TickFrequency="1" TickPlacement="Inline"
-                                                              TickLength="10" TickStrokeThickness="5"/>
+                                    <HeaderedContentControl Header="Vendor Time Window">
+                                        <xctk:RangeSlider Minimum="0" Maximum="24"
+                                                          LowerValue="{Binding EditableRecord.VendorValues.StartHour, Mode=TwoWay}"
+                                                          HigherValue="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}"
+                                                          AutoToolTipPlacement="TopLeft"
+                                                          IsSnapToTickEnabled="True"
+                                                          RangeBackground="{StaticResource MahApps.Brushes.Accent}"
+                                                          TickFrequency="1" TickPlacement="TopLeft" />
+                                    </HeaderedContentControl>
                                     
-                                    <TextBlock Text="Vendor Conditions" 
-                                               ToolTip="Further limitations when the vendor offers goods."/>
-                                    <view:ConditionsEditor/>
+                                    <HeaderedContentControl Header="Vendor Conditions" 
+                                                            ToolTip="Further limitations when the vendor offers goods.">
+                                        <view:ConditionsEditor/>
+                                    </HeaderedContentControl>
                                 </StackPanel>
                             </GroupBox>
                             
                             <GroupBox Header="Vendor Location" FontSize="12">
                                 <StackPanel>
-                                    <TextBlock Text="Location" 
-                                               ToolTip="Used to set where the vendor needs to be to sell goods."/>
-                                    <render:PlacedPicker/>
+                                    <HeaderedContentControl Header="Location"
+                                                            ToolTip="Used to set where the vendor needs to be to sell goods.">
+                                        <render:PlacedPicker />
+                                    </HeaderedContentControl>
                             
-                                    <TextBlock Text="Radius"
-                                               ToolTip="How close the merchant needs to be to the set location."/>
-                                    <syncfusion:IntegerTextBox Value="{Binding EditableRecord.VendorValues.Radius}"
-                                                               MinValue="0"/>
+                                    <HeaderedContentControl Header="Radius" ToolTip="How close the merchant needs to be to the set location.">
+                                        <mah:NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
+                                                           Minimum="0"
+                                                           Maximum="65535"
+                                                           StringFormat="N0" />
+                                    </HeaderedContentControl>
                                 </StackPanel>
                             </GroupBox>
                             
@@ -342,18 +407,20 @@
                                               IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                               Margin="5" />
                                     
-                                    <TextBlock Text="List"
-                                               ToolTip="The merchant will buy and sell any items which are tagged with keywords contained in this list."/>
-                                    <plugins:FormKeyPicker FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
-                                                           ScopedTypes="{Binding FormListTypes}"
-                                                           LinkCache="{Binding LinkCache}" />
+                                    <HeaderedContentControl Header="List"
+                                                            ToolTip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
+                                        <plugins:FormKeyPicker FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
+                                                               ScopedTypes="{Binding FormListTypes}"
+                                                               LinkCache="{Binding LinkCache}" />
+                                    </HeaderedContentControl>
                                 </StackPanel>
                             </GroupBox>
                             
-                            <TextBlock Text="Vendor Chest"
-                                       ToolTip="Sets what container the merchant will sell goods from.\n
-                                       Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above."/>
-                            <render:PlacedPicker/>
+                            <HeaderedContentControl Header="Vendor Chest"
+                                                    ToolTip="Sets what container the merchant will sell goods from.\n
+                                       Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above.">
+                                <render:PlacedPicker/>
+                            </HeaderedContentControl>
                             
                             <CheckBox Content="Only Buy Stolen Items"
                                       ToolTip="Sets this vendor up to only pay for stolen items the player wants to fence."

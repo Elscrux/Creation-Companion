@@ -4,18 +4,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
-        xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
         xmlns:view="clr-namespace:CreationEditor.GUI.Views.Mod"
-        xmlns:model="clr-namespace:CreationEditor.GUI.Models.Mod"
+        xmlns:mod="clr-namespace:CreationEditor.GUI.Models.Mod"
+        xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:ModSelectionVM}"
         d:DesignHeight="500" d:DesignWidth="750"
         MinHeight="480" MinWidth="720" Height="480" Width="720"
         Title="Select Mods">
     <Window.InputBindings>
-        <KeyBinding Key="A" Command="{Binding SetAsActive}" />
+        <KeyBinding Key="A" Command="{Binding ToggleActive}" />
     </Window.InputBindings>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -29,39 +28,41 @@
                 <RowDefinition Height="35" />
             </Grid.RowDefinitions>
 
-            <syncfusion:SfDataGrid Grid.Row="0"
-                                   ItemsSource="{Binding Mods}"
-                                   SelectedItem="{Binding SelectedMod}"
-                                   AllowSorting="False" AllowResizingColumns="True" AllowFiltering="True"
-                                   AllowGrouping="False"
-                                   SelectionMode="Single" RowSelectionBrush="Transparent"
-                                   RowHoverHighlightingBrush="#7A999999"
-                                   GridLinesVisibility="None" AutoGenerateColumns="False">
-                <syncfusion:SfDataGrid.RowStyle>
-                    <Style TargetType="syncfusion:VirtualizingCellsControl">
+            <DataGrid Grid.Row="0"
+                      ItemsSource="{Binding Mods}"
+                      SelectedItem="{Binding SelectedMod}"
+                      CanUserAddRows="False" CanUserDeleteRows="False"
+                      CanUserReorderColumns="False" CanUserResizeColumns="True"
+                      CanUserSortColumns="False"
+                      CanUserResizeRows="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single" SelectionUnit="FullRow"
+                      GridLinesVisibility="None" AutoGenerateColumns="False">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
                         <Style.Triggers>
-                            <DataTrigger d:DataContext="{d:DesignInstance model:ActivatableModItem}"
+                            <DataTrigger d:DataContext="{d:DesignInstance mod:ActivatableModItem}"
                                          Binding="{Binding IsActive}" Value="true">
                                 <Setter Property="Background" Value="ForestGreen" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </syncfusion:SfDataGrid.RowStyle>
-                <syncfusion:SfDataGrid.ContextMenu>
+                </DataGrid.RowStyle>
+                <DataGrid.ContextMenu>
                     <ContextMenu>
                         <Separator />
-                        <MenuItem Header="Toggle Active" Command="{Binding SetAsActive}" />
+                        <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}" />
                     </ContextMenu>
-                </syncfusion:SfDataGrid.ContextMenu>
+                </DataGrid.ContextMenu>
                 <b:Interaction.Behaviors>
-                    <behaviors:SfDataGridSelectionBehavior EnabledMapping="MastersValid"
-                                                           SelectionGuard="{Binding CanSelect}" />
+                    <behaviors:DataGridSelectionBehavior EnabledMapping="MastersValid"
+                                                          SelectionGuard="{Binding CanSelect}" />
                 </b:Interaction.Behaviors>
-                <syncfusion:SfDataGrid.Columns>
-                    <syncfusion:GridTextColumn HeaderText="Name" MappingName="ModKey" />
-                    <syncfusion:GridTextColumn HeaderText="Type" MappingName="ModKey.Type" />
-                </syncfusion:SfDataGrid.Columns>
-            </syncfusion:SfDataGrid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding ModKey}" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding ModKey.Type}" />
+                </DataGrid.Columns>
+            </DataGrid>
 
             <Border Grid.Row="1"
                     BorderThickness="1">

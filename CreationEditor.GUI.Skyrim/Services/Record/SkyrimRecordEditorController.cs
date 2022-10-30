@@ -4,13 +4,13 @@ using System.Windows.Controls;
 using Autofac;
 using CreationEditor.GUI.Services.Docking;
 using CreationEditor.GUI.Services.Record;
+using CreationEditor.GUI.ViewModels.Docking;
 using CreationEditor.GUI.ViewModels.Record;
 using Elscrux.Logging;
-using Elscrux.WPF.Extensions;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
-using Syncfusion.Windows.Tools.Controls;
+using DocumentClosedEventArgs = AvalonDock.DocumentClosedEventArgs;
 namespace CreationEditor.GUI.Skyrim.Services.Record;
 
 public class SkyrimRecordEditorController : IRecordEditorController {
@@ -28,7 +28,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         _lifetimeScope = lifetimeScope;
         _dockingManagerService = dockingManagerService;
         
-        _dockingManagerService.GetDockingManager().CloseButtonClick += OnClosed;
+        _dockingManagerService.DockingManager.DocumentClosed += OnClosed;
     }
 
     public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)
@@ -37,14 +37,13 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         
         if (_recordEditors.TryGetValue(record.FormKey, out var editor)) {
             // Select editor as active
-            _dockingManagerService.GetDockingManager().ActiveWindow = editor;
+            _dockingManagerService.SetActiveControl(editor);
         } else {
             // Open new editor
             if (_lifetimeScope.TryResolve<IRecordEditorVM<TMajorRecord, TMajorRecordGetter>>(out var recordEditorVM)) {
                 var editorControl = recordEditorVM.CreateUserControl(record);
-            
-            
-                _dockingManagerService.GetDockingManager().AddControl(editorControl, record.ToString() ?? string.Empty);
+
+                _dockingManagerService.AddDocumentControl(editorControl, record.EditorID ?? record.FormKey.ToString());
                 _recordEditors.Add(record.FormKey, editorControl);
             } else {
                 _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", typeof(TMajorRecord));
@@ -54,15 +53,15 @@ public class SkyrimRecordEditorController : IRecordEditorController {
     
     public void CloseEditor(IMajorRecord record) {
         if (_recordEditors.TryGetValue(record.FormKey, out var editor)) {
-            _dockingManagerService.GetDockingManager().ExecuteClose(editor);
-            
+            _dockingManagerService.RemoveControl(editor);
+
             RemoveEditorCache(editor);
         }
     }
 
-    private void OnClosed(object sender, CloseButtonEventArgs e) {
-        if (e.TargetItem is UserControl editor) {
-            RemoveEditorCache(editor);
+    private void OnClosed(object? sender, DocumentClosedEventArgs e) {
+        if (e.Document.Content is PaneVM paneVM) {
+            RemoveEditorCache(paneVM.Control);
         }
     }
     

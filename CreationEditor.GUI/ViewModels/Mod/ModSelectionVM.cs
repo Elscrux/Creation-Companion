@@ -11,6 +11,7 @@ using DynamicData.Binding;
 using Elscrux.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
+using Mutagen.Bethesda.Installs.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
@@ -42,7 +43,7 @@ public class ModSelectionVM : ViewModel {
     public bool AnyModsLoaded => _anyModsLoaded.Value;
 
     public ICommand Confirm { get; }
-    public ICommand SetAsActive { get; }
+    public ICommand ToggleActive { get; }
     public Func<ISelectable, bool> CanSelect { get; } = selectable => selectable is ActivatableModItem { MastersValid: true };
 
     public ModSelectionVM(
@@ -60,7 +61,7 @@ public class ModSelectionVM : ViewModel {
 
         _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
-        var pathProvider = new PluginListingsPathProvider(new GameReleaseInjection(_simpleEnvironmentContext.GameReleaseContext.Release));
+        var pathProvider = new PluginListingsPathProvider(new GameInstallModeProvider(new GameLocator(), new GameReleaseInjection(_simpleEnvironmentContext.GameReleaseContext.Release)), _simpleEnvironmentContext.GameReleaseContext);
         if (!fileSystem.File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
 
         UpdateMasterInfos();
@@ -72,7 +73,7 @@ public class ModSelectionVM : ViewModel {
             .Select(x => x.Any(mod => mod.IsSelected))
             .ToProperty(this, x => x.AnyModsLoaded);
 
-        SetAsActive = ReactiveCommand.Create(
+        ToggleActive = ReactiveCommand.Create(
             canExecute: this
                 .WhenAnyValue(x => x.SelectedMod)
                 .NotNull()
@@ -93,7 +94,7 @@ public class ModSelectionVM : ViewModel {
             window.Close();
 
             BusyService.IsBusy = true;
-            await Task.Run(async () => {
+            await Task.Run(() => {
                 //Load all mods that are selected, or masters of selected mods
                 var loadedMods = new HashSet<ModKey>();
                 var missingMods = new Queue<ModKey>(SelectedMods);

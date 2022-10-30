@@ -9,6 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dirkster.AvalonDock" Version="4.70.2" />
+        <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.70.2" />
+        <PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
         <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr001" />
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
