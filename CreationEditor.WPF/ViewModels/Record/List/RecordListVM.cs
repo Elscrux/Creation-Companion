@@ -143,5 +143,16 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             Application.Current.Dispatcher.Invoke(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
             Records.Remove(SelectedRecord);
         });
+
+        _recordEditorController.RecordChanged += (sender, e) => {
+            if (e.Record is not TMajorRecordGetter record) return;
+
+            var recordFormKey = e.Record.FormKey;
+            var listRecord = Records.FirstOrDefault(r => recordFormKey == r.Record.FormKey);
+            if (listRecord != null) {
+                listRecord.Record = record;
+                listRecord.RaisePropertyChanged(nameof(ReferencedRecord<TMajorRecord, TMajorRecordGetter>.Record));
+            }
+        };
     }
 }

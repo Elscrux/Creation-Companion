@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using Autofac;
@@ -19,6 +20,8 @@ public class SkyrimRecordEditorController : IRecordEditorController {
     private readonly IDockingManagerService _dockingManagerService;
 
     private readonly Dictionary<FormKey, UserControl> _recordEditors = new();
+    
+    public event EventHandler<RecordEventArgs>? RecordChanged;
 
     public SkyrimRecordEditorController(
         ILogger logger,
@@ -55,6 +58,8 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         if (_recordEditors.TryGetValue(record.FormKey, out var editor)) {
             _dockingManagerService.RemoveControl(editor);
 
+            RecordChanged?.Invoke(this, new RecordEventArgs(record));
+            
             RemoveEditorCache(editor);
         }
     }
@@ -63,6 +68,9 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         if (e.Document.Content is PaneVM paneVM) {
             _dockingManagerService.RemoveControl(paneVM.Control);
             RemoveEditorCache(paneVM.Control);
+            if (paneVM.Control.DataContext is IRecordEditorVM recordEditorVM) {
+                RecordChanged?.Invoke(this, new RecordEventArgs(recordEditorVM.Record));
+            }
         }
     }
     

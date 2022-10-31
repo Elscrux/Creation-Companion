@@ -4,8 +4,12 @@ using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.WPF.ViewModels.Record;
 
-public interface ISubRecordEditorVM<TRecord> {
-    public TRecord Record { get; set; }
+public interface IRecordEditorVM {
+    public IMajorRecordGetter Record { get; }
+}
+
+public interface ISubRecordEditorVM<TRecord> : IRecordEditorVM {
+    public new TRecord Record { get; set; }
 }
 
 public interface IRecordEditorVM<TMajorRecord, TMajorRecordGetter> : ISubRecordEditorVM<TMajorRecord>, IDisposable

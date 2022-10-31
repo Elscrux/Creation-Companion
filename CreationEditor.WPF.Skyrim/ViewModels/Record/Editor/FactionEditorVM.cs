@@ -21,6 +21,7 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
     private readonly IRecordEditorController _recordEditorController;
     private readonly IEditorEnvironment _editorEnvironment;
     
+    IMajorRecordGetter IRecordEditorVM.Record => Record;
     public Faction Record { get; set; } = null!;
     [Reactive] public EditableFaction EditableRecord { get; set; } = null!;
 

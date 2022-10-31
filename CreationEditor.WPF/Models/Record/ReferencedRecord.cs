@@ -8,8 +8,8 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ViewModel
     where TMajorRecord : IMajorRecordIdentifier
     where TMajorRecordGetter : IMajorRecordIdentifier {
     
-    [Reactive] public TMajorRecordGetter Record { get; init; }
-    [Reactive] public HashSet<IFormLinkIdentifier> References { get; init; }
+    [Reactive] public TMajorRecordGetter Record { get; set; }
+    [Reactive] public HashSet<IFormLinkIdentifier> References { get; set; }
     
     public ReferencedRecord(TMajorRecordGetter record, HashSet<IFormLinkIdentifier>? references = null) {
         Record = record;
