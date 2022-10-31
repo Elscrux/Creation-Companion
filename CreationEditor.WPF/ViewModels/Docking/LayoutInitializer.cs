@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using AvalonDock.Layout;
-namespace CreationEditor.GUI.ViewModels.Docking;
+namespace CreationEditor.WPF.ViewModels.Docking;
 
 public class LayoutInitializer : ILayoutUpdateStrategy {
     public bool BeforeInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableToShow, ILayoutContainer? destinationContainer) {

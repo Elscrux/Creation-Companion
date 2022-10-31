@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.GUI.Skyrim.Converter; 
+namespace CreationEditor.WPF.Skyrim.Converter; 
 
 public class CombatReactionTooltip : IValueConverter {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {

@@ -1,13 +1,13 @@
 ﻿<record:RecordBrowserViewBase
-    x:Class="CreationEditor.GUI.Views.Record.RecordBrowser"
+    x:Class="CreationEditor.WPF.Views.Record.RecordBrowser"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:record="clr-namespace:CreationEditor.GUI.Views.Record"
-    xmlns:recordBrowser="clr-namespace:CreationEditor.GUI.Models.Record.Browser"
-    xmlns:recordModel="clr-namespace:CreationEditor.GUI.ViewModels.Record"
-    d:DataContext="{d:DesignInstance recordModel:IRecordBrowserVM}"
+    xmlns:record="clr-namespace:CreationEditor.WPF.Views.Record"
+    xmlns:recordBrowser="clr-namespace:CreationEditor.WPF.Models.Record.Browser"
+    xmlns:recordVm="clr-namespace:CreationEditor.WPF.ViewModels.Record"
+    d:DataContext="{d:DesignInstance recordVm:IRecordBrowserVM}"
     d:DesignHeight="720"
     d:DesignWidth="480"
     mc:Ignorable="d">

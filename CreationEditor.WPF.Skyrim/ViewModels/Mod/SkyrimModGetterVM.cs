@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using CreationEditor.GUI.ViewModels.Mod;
+using CreationEditor.WPF.ViewModels.Mod;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog.WPF;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Skyrim.ViewModels.Mod; 
+namespace CreationEditor.WPF.Skyrim.ViewModels.Mod; 
 
 public class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
     [Reactive] public bool IsReadOnly { get; set; } = true;

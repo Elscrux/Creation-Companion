@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.GUI.Services.Record;
+namespace CreationEditor.WPF.Services.Record;
 
 public interface IRecordEditorController {
     public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)

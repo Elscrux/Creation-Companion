@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.GUI.ViewModels.Docking;
+﻿namespace CreationEditor.WPF.ViewModels.Docking;
 
 public class RecordPaneVM : PaneVM {
     

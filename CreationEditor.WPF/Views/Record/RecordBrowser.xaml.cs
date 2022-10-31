@@ -1,6 +1,6 @@
-﻿using CreationEditor.GUI.ViewModels.Record;
+﻿using CreationEditor.WPF.ViewModels.Record;
 using ReactiveUI;
-namespace CreationEditor.GUI.Views.Record; 
+namespace CreationEditor.WPF.Views.Record; 
 
 public class RecordBrowserViewBase : ReactiveUserControl<IRecordBrowserVM> { }
 

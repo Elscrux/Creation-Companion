@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Models.Record.Browser;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Skyrim.ViewModels.Record;
+namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
 public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;

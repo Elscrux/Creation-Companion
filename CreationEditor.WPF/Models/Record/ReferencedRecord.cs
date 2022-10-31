@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog.WPF;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Models.Record;
+namespace CreationEditor.WPF.Models.Record;
 
 public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ViewModel
     where TMajorRecord : IMajorRecordIdentifier

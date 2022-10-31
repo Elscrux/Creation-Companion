@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using CreationEditor.GUI.Models.Record.Browser;
+using CreationEditor.WPF.Models.Record.Browser;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels.Record;
+namespace CreationEditor.WPF.ViewModels.Record;
 
 public interface IRecordBrowserVM {
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }

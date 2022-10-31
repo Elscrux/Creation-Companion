@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.GUI.Views;
+﻿namespace CreationEditor.WPF.Views;
 
 public class Test {
     public struct vec3 {

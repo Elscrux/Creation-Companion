@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.GUI.Views.Render; 
+﻿namespace CreationEditor.WPF.Views.Render; 
 
 public partial class PlacedPicker {
     public PlacedPicker() {

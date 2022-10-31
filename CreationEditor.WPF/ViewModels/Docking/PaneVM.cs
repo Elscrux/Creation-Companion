@@ -1,7 +1,7 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Media;
 using Noggog.WPF;
-namespace CreationEditor.GUI.ViewModels.Docking;
+namespace CreationEditor.WPF.ViewModels.Docking;
 
 public class PaneVM : ViewModel {
     public UserControl Control { get; set; } = null!;

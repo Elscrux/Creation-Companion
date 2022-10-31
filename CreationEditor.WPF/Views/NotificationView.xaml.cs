@@ -1,6 +1,6 @@
 ﻿using Elscrux.WPF.Models;
 using ReactiveUI;
-namespace CreationEditor.GUI.Views; 
+namespace CreationEditor.WPF.Views; 
 
 public class NotificationViewBase : ReactiveUserControl<NotificationItem> { }
 

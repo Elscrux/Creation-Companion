@@ -7,7 +7,6 @@
         <UseWPF>true</UseWPF>
         <LangVersion>preview</LangVersion>
         <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
-        <RootNamespace>CreationEditor.GUI.Skyrim</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

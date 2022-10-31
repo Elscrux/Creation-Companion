@@ -1,6 +1,6 @@
 ﻿using AvalonDock;
 using MahApps.Metro.Controls.Dialogs;
-namespace CreationEditor.GUI.Views;
+namespace CreationEditor.WPF.Views;
 
 public partial class MainWindow : IMainWindow {
     public DockingManager DockingManager => MainDockingManager;

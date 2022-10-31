@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.GUI.Skyrim.Models.Records; 
+namespace CreationEditor.WPF.Skyrim.Models.Records; 
 
 public sealed class EditableCondition : Condition, INotifyPropertyChanged {
     public override ConditionData Data { get; set; }

@@ -2,13 +2,13 @@
 using System.IO;
 using System.Windows;
 using Autofac;
-using CreationEditor.GUI.Modules;
-using CreationEditor.GUI.Services.Docking;
-using CreationEditor.GUI.Services.Startup;
-using CreationEditor.GUI.Skyrim.Modules;
-using CreationEditor.GUI.Views;
+using CreationEditor.WPF.Modules;
+using CreationEditor.WPF.Services.Docking;
+using CreationEditor.WPF.Services.Startup;
+using CreationEditor.WPF.Skyrim.Modules;
+using CreationEditor.WPF.Views;
 using Elscrux.Notification;
-namespace CreationEditor.GUI.Skyrim;
+namespace CreationEditor.WPF.Skyrim;
 
 public partial class App {
     public App() {

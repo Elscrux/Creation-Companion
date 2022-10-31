@@ -1,16 +1,16 @@
 ﻿using Autofac;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.Skyrim.Services.Record;
-using CreationEditor.GUI.Skyrim.ViewModels.Mod;
-using CreationEditor.GUI.Skyrim.ViewModels.Record;
-using CreationEditor.GUI.ViewModels.Mod;
-using CreationEditor.GUI.ViewModels.Record;
 using CreationEditor.Skyrim.Environment;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.Skyrim.Services.Record;
+using CreationEditor.WPF.Skyrim.ViewModels.Mod;
+using CreationEditor.WPF.Skyrim.ViewModels.Record;
+using CreationEditor.WPF.ViewModels.Mod;
+using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
-namespace CreationEditor.GUI.Skyrim.Modules; 
+namespace CreationEditor.WPF.Skyrim.Modules; 
 
 public class SkyrimModule : Module {
     protected override void Load(ContainerBuilder builder) {

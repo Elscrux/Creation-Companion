@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.GUI.Models.Record.Browser;
+﻿namespace CreationEditor.WPF.Models.Record.Browser;
 
 public enum BrowserScope {
     Environment,

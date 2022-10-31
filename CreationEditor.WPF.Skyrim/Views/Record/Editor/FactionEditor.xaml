@@ -1,17 +1,17 @@
-﻿<UserControl x:Class="CreationEditor.GUI.Skyrim.Views.Record.FactionEditor"
+﻿<UserControl x:Class="CreationEditor.WPF.Skyrim.Views.Record.FactionEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:vm="clr-namespace:CreationEditor.GUI.Skyrim.ViewModels.Record"
-             xmlns:view="clr-namespace:CreationEditor.GUI.Skyrim.Views.Record"
-             xmlns:render="clr-namespace:CreationEditor.GUI.Views.Render;assembly=CreationEditor.WPF"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.WPF.Plugins;assembly=Mutagen.Bethesda.WPF"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:converter="clr-namespace:CreationEditor.GUI.Skyrim.Converter"
-             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:FactionEditorVM}"
+             xmlns:render="clr-namespace:CreationEditor.WPF.Views.Render;assembly=CreationEditor.WPF"
+             xmlns:converter="clr-namespace:CreationEditor.WPF.Skyrim.Converter"
+             xmlns:record="clr-namespace:CreationEditor.WPF.Skyrim.Views.Record"
+             xmlns:recordVm="clr-namespace:CreationEditor.WPF.Skyrim.ViewModels.Record"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance recordVm:FactionEditorVM}"
              d:DesignHeight="900" d:DesignWidth="900">
     <UserControl.Resources>
         <converter:CombatReactionTooltip x:Key="CombatReactionTooltip" />
@@ -90,7 +90,7 @@
                                         </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <ComboBox ItemsSource="{Binding DataContext.CombatReactions, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}"
+                                                <ComboBox ItemsSource="{Binding DataContext.CombatReactions, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}"
                                                           ToolTip="{Binding Reaction, Converter={StaticResource CombatReactionTooltip}}"
                                                           SelectedItem="{Binding Reaction}"/>
                                             </DataTemplate>
@@ -104,8 +104,8 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <plugins:FormKeyPicker FormKey="{Binding Target.FormKey}"
-                                                                       ScopedTypes="{Binding DataContext.RelationTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}"
-                                                                       LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=view:FactionEditor}}" />
+                                                                       ScopedTypes="{Binding DataContext.RelationTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}"
+                                                                       LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -379,7 +379,7 @@
                                     
                                     <HeaderedContentControl Header="Vendor Conditions" 
                                                             ToolTip="Further limitations when the vendor offers goods.">
-                                        <view:ConditionsEditor/>
+                                        <record:ConditionsEditor/>
                                     </HeaderedContentControl>
                                 </StackPanel>
                             </GroupBox>

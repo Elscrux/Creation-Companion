@@ -1,13 +1,13 @@
-﻿<view:ModDetailsViewBase x:Class="CreationEditor.GUI.Views.Mod.ModDetails"
+﻿<mod:ModDetailsViewBase x:Class="CreationEditor.WPF.Views.Mod.ModDetails"
                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
                          xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
-                         xmlns:view="clr-namespace:CreationEditor.GUI.Views.Mod"
-                         xmlns:vm="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
-                         mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:IModGetterVM}"
+                         xmlns:mod="clr-namespace:CreationEditor.WPF.Views.Mod"
+                         xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
+                         mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:IModGetterVM}"
                          d:DesignHeight="500" d:DesignWidth="500">
     <StackPanel Margin="5">
         <Label Content="Name" />
@@ -58,4 +58,4 @@
             </StackPanel>
         </Expander>
     </StackPanel>
-</view:ModDetailsViewBase>
+</mod:ModDetailsViewBase>

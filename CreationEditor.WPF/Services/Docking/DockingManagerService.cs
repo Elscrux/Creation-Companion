@@ -1,11 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using CreationEditor.GUI.ViewModels.Docking;
-using Noggog;
-using Noggog.WPF;
 using AvalonDock;
 using AvalonDock.Layout.Serialization;
-namespace CreationEditor.GUI.Services.Docking;
+using CreationEditor.WPF.ViewModels.Docking;
+using Noggog;
+using Noggog.WPF;
+namespace CreationEditor.WPF.Services.Docking;
 
 public interface IDockingManagerService {
     public DockingManager DockingManager { get; }

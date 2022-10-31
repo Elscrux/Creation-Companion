@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.GUI.Skyrim.Views.Record; 
+﻿namespace CreationEditor.WPF.Skyrim.Views.Record; 
 
 public partial class ConditionsEditor {
     public ConditionsEditor() {

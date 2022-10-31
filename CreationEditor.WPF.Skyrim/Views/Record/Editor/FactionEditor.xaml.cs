@@ -1,5 +1,5 @@
-﻿using CreationEditor.GUI.Skyrim.ViewModels.Record;
-namespace CreationEditor.GUI.Skyrim.Views.Record;
+﻿using CreationEditor.WPF.Skyrim.ViewModels.Record;
+namespace CreationEditor.WPF.Skyrim.Views.Record;
 
 public partial class FactionEditor {
     public FactionEditor(FactionEditorVM vm) {

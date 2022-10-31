@@ -1,15 +1,15 @@
-﻿<Window x:Class="CreationEditor.GUI.Views.Mod.ModSelectionWindow"
+﻿<Window x:Class="CreationEditor.WPF.Views.Mod.ModSelectionWindow"
         x:Name="Window"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:viewModels="clr-namespace:CreationEditor.GUI.ViewModels.Mod"
-        xmlns:view="clr-namespace:CreationEditor.GUI.Views.Mod"
-        xmlns:mod="clr-namespace:CreationEditor.GUI.Models.Mod"
         xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
-        mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:ModSelectionVM}"
+        xmlns:mod="clr-namespace:CreationEditor.WPF.Views.Mod"
+        xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
+        xmlns:modModel="clr-namespace:CreationEditor.WPF.Models.Mod"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:ModSelectionVM}"
         d:DesignHeight="500" d:DesignWidth="750"
         MinHeight="480" MinWidth="720" Height="480" Width="720"
         Title="Select Mods">
@@ -41,7 +41,7 @@
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
                         <Style.Triggers>
-                            <DataTrigger d:DataContext="{d:DesignInstance mod:ActivatableModItem}"
+                            <DataTrigger d:DataContext="{d:DesignInstance modModel:ActivatableModItem}"
                                          Binding="{Binding IsActive}" Value="true">
                                 <Setter Property="Background" Value="ForestGreen" />
                             </DataTrigger>
@@ -81,6 +81,6 @@
             </Border>
         </Grid>
 
-        <view:ModDetails Grid.Column="1" DataContext="{Binding SelectedModDetails}" />
+        <mod:ModDetails Grid.Column="1" DataContext="{Binding SelectedModDetails}" />
     </Grid>
 </Window>

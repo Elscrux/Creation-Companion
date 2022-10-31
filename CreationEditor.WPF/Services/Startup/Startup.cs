@@ -1,9 +1,9 @@
-﻿using CreationEditor.GUI.ViewModels;
-using CreationEditor.GUI.Views;
+﻿using CreationEditor.WPF.ViewModels;
+using CreationEditor.WPF.Views;
 using Elscrux.Logging;
 using Elscrux.Notification;
 using Serilog;
-namespace CreationEditor.GUI.Services.Startup;
+namespace CreationEditor.WPF.Services.Startup;
 
 public interface IStartup {
     void Start();

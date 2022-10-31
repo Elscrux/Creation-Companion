@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels.Mod; 
+namespace CreationEditor.WPF.ViewModels.Mod; 
 
 public interface IModGetterVM {
     [Reactive] public bool IsReadOnly { get; set; }

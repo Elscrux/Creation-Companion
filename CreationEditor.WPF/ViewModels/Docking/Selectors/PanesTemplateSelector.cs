@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-namespace CreationEditor.GUI.ViewModels.Docking.Selectors;
+namespace CreationEditor.WPF.ViewModels.Docking.Selectors;
 
 public class PanesTemplateSelector : DataTemplateSelector {
     public DataTemplate ContentControl { get; set; } = null!;

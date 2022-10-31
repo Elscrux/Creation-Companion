@@ -2,16 +2,16 @@
 using System.Linq;
 using System.Windows.Controls;
 using Autofac;
-using CreationEditor.GUI.Services.Docking;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.ViewModels.Docking;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Services.Docking;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.ViewModels.Docking;
+using CreationEditor.WPF.ViewModels.Record;
 using Elscrux.Logging;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 using DocumentClosedEventArgs = AvalonDock.DocumentClosedEventArgs;
-namespace CreationEditor.GUI.Skyrim.Services.Record;
+namespace CreationEditor.WPF.Skyrim.Services.Record;
 
 public class SkyrimRecordEditorController : IRecordEditorController {
     private readonly ILogger _logger;

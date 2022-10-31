@@ -1,5 +1,5 @@
 ﻿using AvalonDock.Layout;
-namespace CreationEditor.GUI.ViewModels.Docking;
+namespace CreationEditor.WPF.ViewModels.Docking;
 
 public struct DockingStatus {
     public DockingStatus() {}

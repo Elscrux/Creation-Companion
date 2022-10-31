@@ -4,9 +4,9 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Models.Record;
-using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Services.Record;
+using CreationEditor.WPF.Models.Record;
+using CreationEditor.WPF.Models.Record.Browser;
+using CreationEditor.WPF.Services.Record;
 using DynamicData;
 using DynamicData.Binding;
 using Elscrux.WPF.ViewModels;
@@ -16,7 +16,7 @@ using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels.Record;
+namespace CreationEditor.WPF.ViewModels.Record;
 
 [TemplatePart(Name = "PART_RecordGrid", Type = typeof(DataGrid))]
 public abstract class RecordListVM : DisposableUserControl, IRecordListVM {

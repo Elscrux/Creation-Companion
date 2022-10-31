@@ -5,7 +5,7 @@ using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Models.Record.Browser;
+namespace CreationEditor.WPF.Models.Record.Browser;
 
 public interface IRecordBrowserSettings {
     [Reactive] public bool OnlyActive { get; set; }

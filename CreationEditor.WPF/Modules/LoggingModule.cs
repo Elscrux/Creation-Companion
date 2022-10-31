@@ -2,7 +2,7 @@
 using Elscrux.WPF.ViewModels;
 using Serilog;
 using Serilog.Events;
-namespace CreationEditor.GUI.Modules;
+namespace CreationEditor.WPF.Modules;
 
 public class LoggingModule : Module {
     protected override void Load(ContainerBuilder builder) {

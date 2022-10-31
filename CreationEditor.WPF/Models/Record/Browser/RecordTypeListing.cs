@@ -1,5 +1,5 @@
 ﻿using Loqui;
-namespace CreationEditor.GUI.Models.Record.Browser; 
+namespace CreationEditor.WPF.Models.Record.Browser; 
 
 public class RecordTypeListing {
     public ILoquiRegistration Registration { get; }

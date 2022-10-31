@@ -1,24 +1,24 @@
 ﻿using System.Reactive;
 using System.Windows;
 using Autofac;
+using AvalonDock.Layout;
+using AvalonDock.Themes;
+using ControlzEx.Theming;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Services;
-using CreationEditor.GUI.Services.Docking;
-using CreationEditor.GUI.ViewModels.Docking;
-using CreationEditor.GUI.ViewModels.Mod;
-using CreationEditor.GUI.ViewModels.Record;
-using CreationEditor.GUI.Views.Mod;
-using CreationEditor.GUI.Views.Record;
+using CreationEditor.WPF.Services;
+using CreationEditor.WPF.Services.Docking;
+using CreationEditor.WPF.ViewModels.Docking;
+using CreationEditor.WPF.ViewModels.Mod;
+using CreationEditor.WPF.ViewModels.Record;
+using CreationEditor.WPF.Views.Mod;
+using CreationEditor.WPF.Views.Record;
 using Elscrux.Notification;
 using Elscrux.WPF.ViewModels;
 using Elscrux.WPF.Views.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using AvalonDock.Layout;
-using AvalonDock.Themes;
-using ControlzEx.Theming;
 using Theme = AvalonDock.Themes.Theme;
-namespace CreationEditor.GUI.ViewModels;
+namespace CreationEditor.WPF.ViewModels;
 
 public class MainVM : NotifiedVM {
     public const string BaseWindowTitle = "Creation Editor";

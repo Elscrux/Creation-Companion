@@ -4,8 +4,8 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Models.Mod;
-using CreationEditor.GUI.Services;
+using CreationEditor.WPF.Models.Mod;
+using CreationEditor.WPF.Services;
 using DynamicData;
 using DynamicData.Binding;
 using Elscrux.Notification;
@@ -20,7 +20,7 @@ using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels.Mod;
+namespace CreationEditor.WPF.ViewModels.Mod;
 
 public class ModSelectionVM : ViewModel {
     private readonly INotifier _notifier;

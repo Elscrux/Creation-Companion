@@ -1,7 +1,7 @@
 ﻿using System.Collections;
-using CreationEditor.GUI.Models.Record.Browser;
+using CreationEditor.WPF.Models.Record.Browser;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.ViewModels.Record;
+namespace CreationEditor.WPF.ViewModels.Record;
 
 public interface IRecordListVM {
     public Type Type { get; set; }

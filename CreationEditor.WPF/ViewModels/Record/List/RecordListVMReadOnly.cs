@@ -1,13 +1,13 @@
 ﻿using System.Reactive.Linq;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Models.Record;
-using CreationEditor.GUI.Models.Record.Browser;
+using CreationEditor.WPF.Models.Record;
+using CreationEditor.WPF.Models.Record.Browser;
 using DynamicData;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
 using Noggog.WPF;
 using ReactiveUI;
-namespace CreationEditor.GUI.ViewModels.Record;
+namespace CreationEditor.WPF.ViewModels.Record;
 
 public class RecordListVMReadOnly : RecordListVM {
     public RecordListVMReadOnly(

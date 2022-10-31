@@ -1,12 +1,12 @@
 ﻿using System;
 using Autofac;
-using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.Skyrim.ViewModels.Record;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Models.Record.Browser;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.Skyrim.ViewModels.Record;
+using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
-namespace CreationEditor.GUI.Skyrim.Services.Record;
+namespace CreationEditor.WPF.Skyrim.Services.Record;
 
 public class SkyrimRecordListFactory : IRecordListFactory {
     private readonly ILifetimeScope _lifetimeScope;

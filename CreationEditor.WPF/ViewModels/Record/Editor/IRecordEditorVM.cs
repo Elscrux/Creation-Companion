@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
-namespace CreationEditor.GUI.ViewModels.Record;
+namespace CreationEditor.WPF.ViewModels.Record;
 
 public interface ISubRecordEditorVM<TRecord> {
     public TRecord Record { get; set; }

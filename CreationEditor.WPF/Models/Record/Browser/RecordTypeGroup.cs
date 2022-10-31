@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-namespace CreationEditor.GUI.Models.Record.Browser; 
+namespace CreationEditor.WPF.Models.Record.Browser; 
 
 public class RecordTypeGroup {
     public string GroupName { get; }

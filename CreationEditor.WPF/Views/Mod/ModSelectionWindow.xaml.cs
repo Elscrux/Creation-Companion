@@ -1,5 +1,5 @@
-﻿using CreationEditor.GUI.ViewModels.Mod;
-namespace CreationEditor.GUI.Views.Mod; 
+﻿using CreationEditor.WPF.ViewModels.Mod;
+namespace CreationEditor.WPF.Views.Mod; 
 
 public partial class ModSelectionWindow {
     public ModSelectionWindow(ModSelectionVM modSelectionVM) {

@@ -1,14 +1,14 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Services;
-using CreationEditor.GUI.Services.Startup;
-using CreationEditor.GUI.ViewModels;
-using CreationEditor.GUI.ViewModels.Mod;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Models.Record.Browser;
+using CreationEditor.WPF.Services;
+using CreationEditor.WPF.Services.Startup;
+using CreationEditor.WPF.ViewModels;
+using CreationEditor.WPF.ViewModels.Mod;
+using CreationEditor.WPF.ViewModels.Record;
 using MutagenLibrary.References.ReferenceCache;
-namespace CreationEditor.GUI.Modules; 
+namespace CreationEditor.WPF.Modules; 
 
 public class MainModule : Module {
     protected override void Load(ContainerBuilder builder) {

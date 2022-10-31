@@ -1,5 +1,5 @@
 ﻿using Noggog.WPF;
-namespace CreationEditor.GUI.ViewModels.Render; 
+namespace CreationEditor.WPF.ViewModels.Render; 
 
 public class PlacedPickerVM : ViewModel {
     

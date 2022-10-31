@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Windows.Controls;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.Skyrim.Models.Records;
-using CreationEditor.GUI.Skyrim.Views.Record;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.Skyrim.Models.Records;
+using CreationEditor.WPF.Skyrim.Views.Record;
+using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -15,7 +15,7 @@ using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.GUI.Skyrim.ViewModels.Record;
+namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
 public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
     private readonly IRecordEditorController _recordEditorController;

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.GUI.Skyrim.Models.Records; 
+namespace CreationEditor.WPF.Skyrim.Models.Records; 
 
 public sealed class EditableFaction : Faction, INotifyPropertyChanged {
     public new ObservableCollection<Relation> Relations { get; set; }

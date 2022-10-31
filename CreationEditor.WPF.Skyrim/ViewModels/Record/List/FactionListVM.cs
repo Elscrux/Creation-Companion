@@ -1,12 +1,12 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Data;
 using CreationEditor.Environment;
-using CreationEditor.GUI.Models.Record.Browser;
-using CreationEditor.GUI.Services.Record;
-using CreationEditor.GUI.ViewModels.Record;
+using CreationEditor.WPF.Models.Record.Browser;
+using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.References.ReferenceCache;
-namespace CreationEditor.GUI.Skyrim.ViewModels.Record;
+namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
 public class FactionListVM : RecordListVM<Faction, IFactionGetter> {
     public FactionListVM(
