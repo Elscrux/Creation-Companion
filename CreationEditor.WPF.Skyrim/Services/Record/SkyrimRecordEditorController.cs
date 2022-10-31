@@ -61,6 +61,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
 
     private void OnClosed(object? sender, DocumentClosedEventArgs e) {
         if (e.Document.Content is PaneVM paneVM) {
+            _dockingManagerService.RemoveControl(paneVM.Control);
             RemoveEditorCache(paneVM.Control);
         }
     }
