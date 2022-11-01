@@ -88,9 +88,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
+                return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>(async (obs, cancel) => {
                     foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                        if (cancel.IsCancellationRequested) return;
 
                         //Skip when browser settings don't match
                         if (!RecordBrowserSettings.Filter(record)) continue;
@@ -101,10 +101,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                         obs.OnNext(referencedRecord);
                     }
                     obs.OnCompleted();
-                    return Task.CompletedTask;
                 });
             })
-            .Select(x => x.AsObservableChangeSet(x => x.Record.FormKey))
+            .Select(x => x.ToObservableChangeSet(x => x.Record.FormKey))
             .Switch()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = false)
