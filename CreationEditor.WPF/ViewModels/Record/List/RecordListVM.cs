@@ -74,7 +74,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
-    private IObservableCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> _recordCache;
+    protected static readonly SourceCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> _updateCache = new(x => x.Record.FormKey);
 
     [Reactive] public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; set; }
 
@@ -90,6 +90,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = RecordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
+            
+            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
+            _updateCache.AddOrUpdate(referencedRecord);
         });
         
         EditSelectedRecord = ReactiveCommand.Create(() => {
@@ -101,22 +104,20 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
-            RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
+            var duplicate = RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
+            
+            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(duplicate);
+            _updateCache.AddOrUpdate(referencedRecord);
         });
         
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
             
             Application.Current.Dispatcher.Invoke(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
-            Records.Remove(SelectedRecord);
+            Records!.Remove(SelectedRecord);
         });
         
-        _recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
-            .RepublishLatestOnSignal(
-                Observable.Merge(
-                    NewRecord.EndingExecution(),
-                    DuplicateSelectedRecord.EndingExecution(),
-                    DeleteSelectedRecord.EndingExecution()))
+        var recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
@@ -136,21 +137,28 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                     obs.OnCompleted();
                 });
             })
-            .Select(x => x.ToObservableChangeSet(x => x.Record.FormKey))
+            .Select(x => x.ToObservableChangeSet(refRecord => refRecord.Record.FormKey))
             .Switch()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = false)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .AsObservableCache();
 
-        Records = _recordCache.Connect()
+        var finalCache = Observable.Merge(
+            recordCache.Connect(),
+            _updateCache.Connect())
+            .AsObservableCache();
+        
+        Records = finalCache
+            .Connect()
             .ToObservableCollection(this);
 
         _recordEditorController.RecordChanged
             .Subscribe(e => {
                 if (e.Record is not TMajorRecordGetter record) return;
-                if (!_recordCache.TryGetValue(e.Record.FormKey, out var listRecord)) return;
+                if (!finalCache.TryGetValue(e.Record.FormKey, out var listRecord)) return;
                 listRecord.Record = record;
+                _updateCache.AddOrUpdate(listRecord);
             });
     }
 }
