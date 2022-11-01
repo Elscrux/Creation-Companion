@@ -69,9 +69,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     private readonly IRecordEditorController _recordEditorController;
 
     public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
-    public ReactiveCommand<Unit, TMajorRecord> NewRecord { get; }
+    public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
-    public ReactiveCommand<Unit, TMajorRecord?> DuplicateSelectedRecord { get; }
+    public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
     private IObservableCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> _recordCache;
@@ -86,8 +86,37 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         : base(recordBrowserSettings, referenceQuery, recordController, false) {
         _recordEditorController = recordEditorController;
         Type = typeof(TMajorRecordGetter);
+        
+        NewRecord = ReactiveCommand.Create(() => {
+            var newRecord = RecordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
+            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
+        });
+        
+        EditSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord == null) return;
 
+            var newOverride = RecordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
+            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
+        });
+        
+        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord == null) return;
+            RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
+        });
+        
+        DeleteSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord == null) return;
+            
+            Application.Current.Dispatcher.Invoke(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
+            Records.Remove(SelectedRecord);
+        });
+        
         _recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
+            .RepublishLatestOnSignal(
+                Observable.Merge(
+                    NewRecord.EndingExecution(),
+                    DuplicateSelectedRecord.EndingExecution(),
+                    DeleteSelectedRecord.EndingExecution()))
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
@@ -116,39 +145,6 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
 
         Records = _recordCache.Connect()
             .ToObservableCollection(this);
-
-        NewRecord = ReactiveCommand.Create(() => {
-            var newRecord = RecordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
-            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
-            Application.Current.Dispatcher.Invoke(() => Records.Add(referencedRecord));
-            
-            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
-
-            return newRecord;
-        });
-        
-        EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
-
-            var newOverride = RecordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            _recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
-        });
-        
-        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return null;
-            
-            var newRecord = RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
-            Application.Current.Dispatcher.Invoke(() => Records.Add(referencedRecord));
-            return newRecord;
-        });
-        
-        DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
-            
-            Application.Current.Dispatcher.Invoke(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
-            Records.Remove(SelectedRecord);
-        });
 
         _recordEditorController.RecordChanged
             .Subscribe(e => {
