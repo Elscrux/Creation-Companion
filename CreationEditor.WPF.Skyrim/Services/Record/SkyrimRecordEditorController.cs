@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Controls;
 using Autofac;
 using CreationEditor.WPF.Services.Docking;
@@ -20,8 +21,9 @@ public class SkyrimRecordEditorController : IRecordEditorController {
     private readonly IDockingManagerService _dockingManagerService;
 
     private readonly Dictionary<FormKey, UserControl> _recordEditors = new();
-    
-    public event EventHandler<RecordEventArgs>? RecordChanged;
+
+    public readonly Subject<RecordEventArgs> _recordChanged = new();
+    public IObservable<RecordEventArgs> RecordChanged => _recordChanged;
 
     public SkyrimRecordEditorController(
         ILogger logger,
@@ -58,7 +60,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         if (_recordEditors.TryGetValue(record.FormKey, out var editor)) {
             _dockingManagerService.RemoveControl(editor);
 
-            RecordChanged?.Invoke(this, new RecordEventArgs(record));
+            _recordChanged.OnNext(new RecordEventArgs(record));
             
             RemoveEditorCache(editor);
         }
@@ -69,7 +71,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
             _dockingManagerService.RemoveControl(paneVM.Control);
             RemoveEditorCache(paneVM.Control);
             if (paneVM.Control.DataContext is IRecordEditorVM recordEditorVM) {
-                RecordChanged?.Invoke(this, new RecordEventArgs(recordEditorVM.Record));
+                _recordChanged.OnNext(new RecordEventArgs(recordEditorVM.Record));
             }
         }
     }

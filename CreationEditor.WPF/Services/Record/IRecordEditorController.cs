@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Plugins.Records;
+﻿using System.Reactive.Subjects;
+using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.WPF.Services.Record;
 
 public class RecordEventArgs : EventArgs {
@@ -13,6 +14,6 @@ public interface IRecordEditorController {
         where TMajorRecordGetter : class, IMajorRecordGetter;
 
     public void CloseEditor(IMajorRecord record);
-    
-    public event EventHandler<RecordEventArgs>? RecordChanged; 
+
+    public IObservable<RecordEventArgs> RecordChanged { get; }
 }

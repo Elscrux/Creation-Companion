@@ -11,8 +11,10 @@ using DynamicData;
 using DynamicData.Binding;
 using Elscrux.WPF.ViewModels;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
+using Noggog;
 using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -72,6 +74,8 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     public ReactiveCommand<Unit, TMajorRecord?> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
+    private IObservableCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> _recordCache;
+
     [Reactive] public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; set; }
 
     public RecordListVM(
@@ -82,8 +86,8 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         : base(recordBrowserSettings, referenceQuery, recordController, false) {
         _recordEditorController = recordEditorController;
         Type = typeof(TMajorRecordGetter);
-        
-        Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
+
+        _recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
@@ -108,6 +112,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = false)
             .ObserveOn(RxApp.TaskpoolScheduler)
+            .AsObservableCache();
+
+        Records = _recordCache.Connect()
             .ToObservableCollection(this);
 
         NewRecord = ReactiveCommand.Create(() => {
@@ -143,15 +150,11 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             Records.Remove(SelectedRecord);
         });
 
-        _recordEditorController.RecordChanged += (sender, e) => {
-            if (e.Record is not TMajorRecordGetter record) return;
-
-            var recordFormKey = e.Record.FormKey;
-            var listRecord = Records.FirstOrDefault(r => recordFormKey == r.Record.FormKey);
-            if (listRecord != null) {
+        _recordEditorController.RecordChanged
+            .Subscribe(e => {
+                if (e.Record is not TMajorRecordGetter record) return;
+                if (!_recordCache.TryGetValue(e.Record.FormKey, out var listRecord)) return;
                 listRecord.Record = record;
-                listRecord.RaisePropertyChanged(nameof(ReferencedRecord<TMajorRecord, TMajorRecordGetter>.Record));
-            }
-        };
+            });
     }
 }
