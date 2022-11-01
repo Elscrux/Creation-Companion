@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
@@ -104,7 +104,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                     return Task.CompletedTask;
                 });
             })
-            .Select(x => x.ToObservableChangeSet())
+            .Select(x => x.AsObservableChangeSet(x => x.Record.FormKey))
             .Switch()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(_ => IsBusy = false)
