@@ -8,6 +8,8 @@ using CreationEditor.WPF.Services.Startup;
 using CreationEditor.WPF.Skyrim.Modules;
 using CreationEditor.WPF.Views;
 using Elscrux.Notification;
+using Mutagen.Bethesda.Autofac;
+using Mutagen.Bethesda.Installs.DI;
 namespace CreationEditor.WPF.Skyrim;
 
 public partial class App {
@@ -30,8 +32,13 @@ public partial class App {
         builder.RegisterModule<MainModule>();
         builder.RegisterModule<NotificationModule>();
         builder.RegisterModule<LoggingModule>();
-        // builder.RegisterModule<MutagenModule>();
+        builder.RegisterModule<MutagenModule>();
         builder.RegisterModule<SkyrimModule>();
+        
+        // ToDo
+        // Remove
+        builder.RegisterType<GameInstallModeProvider>().AsImplementedInterfaces();
+        builder.RegisterType<GameLocator>().As<IGameInstallLookup>();
         
         var window = new MainWindow();
         builder.RegisterInstance(window).As<IMainWindow>();

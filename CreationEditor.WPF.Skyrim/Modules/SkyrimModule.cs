@@ -8,6 +8,7 @@ using CreationEditor.WPF.Skyrim.ViewModels.Record;
 using CreationEditor.WPF.ViewModels.Mod;
 using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
 namespace CreationEditor.WPF.Skyrim.Modules; 
@@ -20,6 +21,9 @@ public class SkyrimModule : Module {
             .SingleInstance();
 
         var environmentProvider = SimpleEnvironmentContext.Build(GameRelease.SkyrimSE);
+        
+        builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE)).AsImplementedInterfaces();
+        
         builder.RegisterInstance(environmentProvider).As<ISimpleEnvironmentContext>();
         
         builder.RegisterType<SkyrimRecordBrowserVM>().As<IRecordBrowserVM>();

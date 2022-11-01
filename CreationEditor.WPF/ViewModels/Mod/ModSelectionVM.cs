@@ -52,6 +52,7 @@ public class ModSelectionVM : ViewModel {
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
+        IPluginListingsPathProvider pluginListingsProvider,
         IBusyService busyService) {
         _notifier = notifier;
         _simpleEnvironmentContext = simpleEnvironmentContext;
@@ -61,8 +62,7 @@ public class ModSelectionVM : ViewModel {
 
         _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
-        var pathProvider = new PluginListingsPathProvider(new GameInstallModeProvider(new GameLocator(), new GameReleaseInjection(_simpleEnvironmentContext.GameReleaseContext.Release)), _simpleEnvironmentContext.GameReleaseContext);
-        if (!fileSystem.File.Exists(pathProvider.Path)) MessageBox.Show($"Make sure {pathProvider.Path} exists.");
+        if (!fileSystem.File.Exists(pluginListingsProvider.Path)) MessageBox.Show($"Make sure {pluginListingsProvider.Path} exists.");
 
         UpdateMasterInfos();
         Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid, _masterInfos[modKey].Masters)));
