@@ -34,11 +34,6 @@ public class SkyrimModule : Module {
 
         builder.RegisterGeneric(typeof(RecordListVM<,>))
             .As(typeof(RecordListVM<,>));
-
-        builder.RegisterAssemblyTypes(typeof(FactionListVM).Assembly)
-            .InNamespaceOf<FactionListVM>()
-            .Where(x => x.Name.Contains("ListVM"))
-            .AsSelf();
         
         builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()
             .As<IRecordController>()

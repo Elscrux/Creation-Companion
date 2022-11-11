@@ -3,6 +3,7 @@ using Autofac;
 using CreationEditor.Environment;
 using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services;
+using CreationEditor.WPF.Services.Record;
 using CreationEditor.WPF.Services.Startup;
 using CreationEditor.WPF.ViewModels;
 using CreationEditor.WPF.ViewModels.Mod;
@@ -40,6 +41,9 @@ public class MainModule : Module {
 
         builder.RegisterType<RecordListVMReadOnly>()
             .AsSelf();
+
+        builder.RegisterType<ExtraColumnProvider>()
+            .As<IExtraColumnProvider>();
         
         //VMs
         builder.RegisterType<ModSelectionVM>();

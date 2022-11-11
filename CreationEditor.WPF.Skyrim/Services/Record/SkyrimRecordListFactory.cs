@@ -2,7 +2,6 @@
 using Autofac;
 using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services.Record;
-using CreationEditor.WPF.Skyrim.ViewModels.Record;
 using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
@@ -11,20 +10,23 @@ namespace CreationEditor.WPF.Skyrim.Services.Record;
 public class SkyrimRecordListFactory : IRecordListFactory {
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IRecordBrowserSettings _defaultRecordBrowserSettings;
+    private readonly IExtraColumnProvider _extraColumnProvider;
 
     public SkyrimRecordListFactory(
         ILifetimeScope lifetimeScope,
-        IRecordBrowserSettings defaultRecordBrowserSettings) {
+        IRecordBrowserSettings defaultRecordBrowserSettings,
+        IExtraColumnProvider extraColumnProvider) {
         _lifetimeScope = lifetimeScope;
         _defaultRecordBrowserSettings = defaultRecordBrowserSettings;
+        _extraColumnProvider = extraColumnProvider;
     }
     
     public IRecordListVM FromType(Type type, IRecordBrowserSettings? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettings;
         var browserSettingsParam = TypedParameter.From(browserSettings);
         
-        return type.Name switch {
-            nameof(INpcGetter) => _lifetimeScope.Resolve<NpcListVM>(browserSettingsParam),
+        RecordListVM recordList = type.Name switch {
+            nameof(INpcGetter) => _lifetimeScope.Resolve<RecordListVM<Npc, INpcGetter>>(browserSettingsParam),
             nameof(IActionRecordGetter) => _lifetimeScope.Resolve<RecordListVM<ActionRecord, IActionRecordGetter>>(browserSettingsParam),
             nameof(IBodyPartDataGetter) => _lifetimeScope.Resolve<RecordListVM<BodyPartData, IBodyPartDataGetter>>(browserSettingsParam),
             nameof(ILeveledNpcGetter) => _lifetimeScope.Resolve<RecordListVM<LeveledNpc, ILeveledNpcGetter>>(browserSettingsParam),
@@ -43,7 +45,7 @@ public class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IAssociationTypeGetter) => _lifetimeScope.Resolve<RecordListVM<AssociationType, IAssociationTypeGetter>>(browserSettingsParam),
             nameof(IClassGetter) => _lifetimeScope.Resolve<RecordListVM<Class, IClassGetter>>(browserSettingsParam),
             nameof(IEquipTypeGetter) => _lifetimeScope.Resolve<RecordListVM<EquipType, IEquipTypeGetter>>(browserSettingsParam),
-            nameof(IFactionGetter) => _lifetimeScope.Resolve<FactionListVM>(browserSettingsParam),
+            nameof(IFactionGetter) => _lifetimeScope.Resolve<RecordListVM<Faction, IFactionGetter>>(browserSettingsParam),
             nameof(IHeadPartGetter) => _lifetimeScope.Resolve<RecordListVM<HeadPart, IHeadPartGetter>>(browserSettingsParam),
             nameof(IMovementTypeGetter) => _lifetimeScope.Resolve<RecordListVM<MovementType, IMovementTypeGetter>>(browserSettingsParam),
             nameof(IPackageGetter) => _lifetimeScope.Resolve<RecordListVM<Package, IPackageGetter>>(browserSettingsParam),
@@ -127,5 +129,10 @@ public class SkyrimRecordListFactory : IRecordListFactory {
             
             _ => _lifetimeScope.Resolve<RecordListVMReadOnly>(TypedParameter.From(type),browserSettingsParam)
         };
+        
+        _extraColumnProvider.GetColumns(type)
+            .ForEach(recordList.AddColumn);
+        
+        return recordList;
     }
 }

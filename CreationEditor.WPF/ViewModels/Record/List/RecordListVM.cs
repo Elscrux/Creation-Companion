@@ -38,8 +38,8 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
         get => (bool) GetValue(IsBusyProperty);
         set => SetValue(IsBusyProperty, value);
     }
-    
-    protected readonly List<DataGridTextColumn> ExtraColumns = new();
+
+    protected readonly List<DataGridColumn> ExtraColumns = new();
 
     protected RecordListVM(
         IRecordBrowserSettings recordBrowserSettings,
@@ -51,6 +51,10 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
         RecordBrowserSettings = recordBrowserSettings;
         
         SetResourceReference(StyleProperty, isReadOnly ? RecordReadOnlyListStyle : RecordListStyle);
+    }
+    
+    public void AddColumn(DataGridColumn column) {
+        ExtraColumns.Add(column);
     }
 
     public override void OnApplyTemplate() {
