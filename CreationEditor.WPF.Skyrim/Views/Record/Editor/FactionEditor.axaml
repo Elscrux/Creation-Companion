@@ -1,0 +1,429 @@
+﻿<UserControl x:Class="CreationEditor.WPF.Skyrim.Views.Record.FactionEditor"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converter="clr-namespace:CreationEditor.WPF.Skyrim.Converter"
+             xmlns:recordVm="clr-namespace:CreationEditor.WPF.Skyrim.ViewModels.Record"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance recordVm:FactionEditorVM}"
+             d:DesignHeight="900" d:DesignWidth="900">
+    <UserControl.Resources>
+        <converter:CombatReactionTooltip x:Key="CombatReactionTooltip" />
+    </UserControl.Resources>
+    <ScrollViewer>
+        <StackPanel>
+            <Menu>
+                <MenuItem Header="Save" Command="{Binding Save}"/>
+            </Menu>
+            
+            <HeaderedContentControl Header="EditorID">
+                <TextBox Text="{Binding EditableRecord.EditorID}" 
+                         Width="400"
+                         HorizontalAlignment="Left" />
+            </HeaderedContentControl>
+            
+            <HeaderedContentControl Header="Name">
+                <TextBox Text="{Binding EditableRecord.NameStr}" 
+                         Width="400"
+                         HorizontalAlignment="Left" />
+            </HeaderedContentControl>
+
+            <!-- <TabControl> -->
+            <!--     <TabItem Header="General"> -->
+            <!--         <StackPanel> -->
+            <!--             <StackPanel Orientation="Horizontal"> -->
+            <!--                 <CheckBox Content="Hidden from PC" -->
+            <!--                           ToolTip="MISSING EXPLANATION" -->
+            <!--                           IsChecked="{Binding EditableRecord.HiddenFromPc}" -->
+            <!--                           Margin="5" /> -->
+            <!--                  -->
+            <!--                 <CheckBox Content="Special Combat" -->
+            <!--                           ToolTip="MISSING EXPLANATION" -->
+            <!--                           IsChecked="{Binding EditableRecord.SpecialCombat}" -->
+            <!--                           Margin="5" /> -->
+            <!--                  -->
+            <!--                 <CheckBox Content="Can Be Owner" -->
+            <!--                           ToolTip="If checked, the faction can be selected as owner of interiors cells, items or placed objects" -->
+            <!--                           IsChecked="{Binding EditableRecord.CanBeOwner}" -->
+            <!--                           Margin="5" /> -->
+            <!--             </StackPanel> -->
+            <!-- -->
+            <!--             <GroupBox Header="Interfaction Relations" FontSize="12"> -->
+            <!--                 <DataGrid ItemsSource="{Binding EditableRecord.Relations}" -->
+            <!--                           CanUserAddRows="False" CanUserDeleteRows="False" -->
+            <!--                           CanUserReorderColumns="False" -->
+            <!--                           CanUserResizeColumns="True" CanUserResizeRows="False" -->
+            <!--                           CanUserSortColumns="True" -->
+            <!--                           AutoGenerateColumns="False" -->
+            <!--                           AllowDrop="True" -->
+            <!--                           dd:DragDrop.IsDragSource="True" -->
+            <!--                           dd:DragDrop.IsDropTarget="True" -->
+            <!--                           dd:DragDrop.DropScrollingMode="VerticalOnly" -->
+            <!--                           dd:DragDrop.ShowAlwaysDropTargetAdorner="True" -->
+            <!--                           dd:DragDrop.UseDefaultEffectDataTemplate="True" -->
+            <!--                           SelectionUnit="FullRow" SelectionMode="Single" -->
+            <!--                           SelectedIndex="{Binding SelectedRelationIndex}" -->
+            <!--                           MinHeight="250"> -->
+            <!--                     <DataGrid.InputBindings> -->
+            <!--                         <KeyBinding Key="Add" -->
+            <!--                                     Command="{Binding AddRelation}" /> -->
+            <!--                         <KeyBinding Key="Delete" -->
+            <!--                                     Command="{Binding RemoveSelectedRelations}" /> -->
+            <!--                     </DataGrid.InputBindings> -->
+            <!--                     <DataGrid.ContextMenu> -->
+            <!--                         <ContextMenu> -->
+            <!--                             <MenuItem Header="Add" Command="{Binding AddRelation}" /> -->
+            <!--                             <MenuItem Header="Remove" Command="{Binding RemoveSelectedRelations}" /> -->
+            <!--                         </ContextMenu> -->
+            <!--                     </DataGrid.ContextMenu> -->
+            <!--                     <DataGrid.Columns> -->
+            <!--                         <DataGridTemplateColumn SortMemberPath="Reaction"> -->
+            <!--                             <DataGridTemplateColumn.Header> -->
+            <!--                                 <TextBlock Text="Combat Reaction" -->
+            <!--                                            ToolTip="Determines the combat reaction to members of the target faction"/> -->
+            <!--                             </DataGridTemplateColumn.Header> -->
+            <!--                             <DataGridTemplateColumn.CellTemplate> -->
+            <!--                                 <DataTemplate> -->
+            <!--                                     <ComboBox ItemsSource="{Binding DataContext.CombatReactions, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}" -->
+            <!--                                               ToolTip="{Binding Reaction, Converter={StaticResource CombatReactionTooltip}}" -->
+            <!--                                               SelectedItem="{Binding Reaction}"/> -->
+            <!--                                 </DataTemplate> -->
+            <!--                             </DataGridTemplateColumn.CellTemplate> -->
+            <!--                         </DataGridTemplateColumn> -->
+            <!--                         <DataGridTemplateColumn Width="300"> -->
+            <!--                             <DataGridTemplateColumn.Header> -->
+            <!--                                 <TextBlock Text="Target Faction" -->
+            <!--                                            ToolTip="Faction to set combat reaction for"/> -->
+            <!--                             </DataGridTemplateColumn.Header> -->
+            <!--                             <DataGridTemplateColumn.CellTemplate> -->
+            <!--                                 <DataTemplate> -->
+            <!--                                     ~1~ <plugins:FormKeyPicker FormKey="{Binding Target.FormKey}" @1@ -->
+            <!--                                     ~1~                        ScopedTypes="{Binding DataContext.RelationTypes, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}" @1@ -->
+            <!--                                     ~1~                        LinkCache="{Binding DataContext.LinkCache, RelativeSource={RelativeSource FindAncestor, AncestorType=record:FactionEditor}}" /> @1@ -->
+            <!--                                 </DataTemplate> -->
+            <!--                             </DataGridTemplateColumn.CellTemplate> -->
+            <!--                         </DataGridTemplateColumn> -->
+            <!--                     </DataGrid.Columns> -->
+            <!--                 </DataGrid> -->
+            <!--             </GroupBox> -->
+            <!--         </StackPanel> -->
+            <!--     </TabItem> -->
+            <!--      -->
+            <!--     <TabItem Header="Ranks"> -->
+            <!--         <GroupBox Header="Ranks" FontSize="12"> -->
+            <!--             <DataGrid ItemsSource="{Binding EditableRecord.Ranks}" -->
+            <!--                       CanUserAddRows="False" CanUserDeleteRows="False" -->
+            <!--                       CanUserReorderColumns="False" -->
+            <!--                       CanUserResizeColumns="True" CanUserResizeRows="False" -->
+            <!--                       CanUserSortColumns="False" -->
+            <!--                       AutoGenerateColumns="False" -->
+            <!--                       AllowDrop="True" -->
+            <!--                       dd:DragDrop.IsDragSource="True" -->
+            <!--                       dd:DragDrop.IsDropTarget="True" -->
+            <!--                       dd:DragDrop.DropScrollingMode="VerticalOnly" -->
+            <!--                       dd:DragDrop.ShowAlwaysDropTargetAdorner="True" -->
+            <!--                       dd:DragDrop.UseDefaultEffectDataTemplate="True" -->
+            <!--                       SelectionUnit="FullRow" SelectionMode="Single" -->
+            <!--                       SelectedIndex="{Binding SelectedRankIndex}" -->
+            <!--                       MinHeight="250"> -->
+            <!--                 <DataGrid.InputBindings> -->
+            <!--                     <KeyBinding Key="Add" -->
+            <!--                                 Command="{Binding AddRank}" /> -->
+            <!--                     <KeyBinding Key="Delete" -->
+            <!--                                 Command="{Binding RemoveSelectedRank}" /> -->
+            <!--                 </DataGrid.InputBindings> -->
+            <!--                 <DataGrid.ContextMenu> -->
+            <!--                     <ContextMenu> -->
+            <!--                         <MenuItem Header="Add" Command="{Binding AddRank}" /> -->
+            <!--                         <MenuItem Header="Remove" Command="{Binding RemoveSelectedRank}" /> -->
+            <!--                     </ContextMenu> -->
+            <!--                 </DataGrid.ContextMenu> -->
+            <!--                 <DataGrid.Columns> -->
+            <!--                     <DataGridTextColumn Binding="{Binding Title.Male.String}" > -->
+            <!--                         <DataGridTextColumn.Header> -->
+            <!--                             <TextBlock Text="Male Title" ToolTip="Male Title name, not visible in game"/> -->
+            <!--                         </DataGridTextColumn.Header> -->
+            <!--                     </DataGridTextColumn> -->
+            <!--                     <DataGridTextColumn Binding="{Binding Title.Female.String}"> -->
+            <!--                         <DataGridTextColumn.Header> -->
+            <!--                             <TextBlock Text="Female Title" ToolTip="Female Title name, not visible in game" /> -->
+            <!--                         </DataGridTextColumn.Header> -->
+            <!--                     </DataGridTextColumn> -->
+            <!--                 </DataGrid.Columns> -->
+            <!--             </DataGrid> -->
+            <!--         </GroupBox> -->
+            <!--     </TabItem> -->
+            <!-- -->
+            <!--     <TabItem Header="Crime"> -->
+            <!--         <StackPanel> -->
+            <!--             <GroupBox Header="Ignored Crimes" FontSize="12"> -->
+            <!--                 <StackPanel Orientation="Horizontal"> -->
+            <!--                     <GroupBox Header="Against non-members" FontSize="12"> -->
+            <!--                         <Grid> -->
+            <!--                             <Grid.ColumnDefinitions> -->
+            <!--                                 <ColumnDefinition/> -->
+            <!--                                 <ColumnDefinition/> -->
+            <!--                                 <ColumnDefinition/> -->
+            <!--                             </Grid.ColumnDefinitions> -->
+            <!--                              -->
+            <!--                             <Grid.RowDefinitions> -->
+            <!--                                 <RowDefinition/> -->
+            <!--                                 <RowDefinition/> -->
+            <!--                             </Grid.RowDefinitions> -->
+            <!--                              -->
+            <!--                             <CheckBox Grid.Row="0" Grid.Column="0" -->
+            <!--                                       Content="Ignore Murder" -->
+            <!--                                       ToolTip="Major Crime: Killing a guard or civilian" -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnoreMurder}" -->
+            <!--                                       Margin="5" /> -->
+            <!-- -->
+            <!--                             <CheckBox Grid.Row="0" Grid.Column="1" -->
+            <!--                                       Content="Ignore Assault" -->
+            <!--                                       ToolTip="Major Crime: Attacking a guard or civilian" -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnoreAssault}" -->
+            <!--                                       Margin="5" /> -->
+            <!-- -->
+            <!--                             <CheckBox Grid.Row="0" Grid.Column="2" -->
+            <!--                                       Content="Ignore Pickpocket" -->
+            <!--                                       ToolTip="Minor Crime: Trying and failing to pickpocket an item in another actor's inventory" -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnorePickpocket}" -->
+            <!--                                       Margin="5" /> -->
+            <!-- -->
+            <!--                             <CheckBox Grid.Row="1" Grid.Column="0" -->
+            <!--                                       Content="Ignore Stealing" -->
+            <!--                                       ToolTip="Minor Crime: Taking an item marked 'Steal'." -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnoreStealing}" -->
+            <!--                                       Margin="5" /> -->
+            <!-- -->
+            <!--                             <CheckBox Grid.Row="1" Grid.Column="1" -->
+            <!--                                       Content="Ignore Trespass" -->
+            <!--                                       ToolTip="Minor Crime: Entering a cell marked 'Off Limits', or failing to leave an owned cell when instructed to do so by the owner." -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnoreTrespass}" -->
+            <!--                                       Margin="5" /> -->
+            <!-- -->
+            <!--                             <CheckBox Grid.Row="1" Grid.Column="2" -->
+            <!--                                       Content="Ignore Werewolf" -->
+            <!--                                       ToolTip="Special Crime: Being in or transforming to/from Beast Form in sight of a guard or civilian." -->
+            <!--                                       IsChecked="{Binding EditableRecord.IgnoreWerewolf}" -->
+            <!--                                       Margin="5" /> -->
+            <!--                         </Grid> -->
+            <!--                     </GroupBox> -->
+            <!-- -->
+            <!--                     <GroupBox Header="Against members" FontSize="12"> -->
+            <!--                         <CheckBox Content="Ignore all crimes" -->
+            <!--                                   ToolTip="If checked, the faction can be selected as owner of interiors cells, items or placed objects" -->
+            <!--                                   IsChecked="{Binding EditableRecord.DoNotReportCrimesAgainstMembers}" -->
+            <!--                                   Margin="5" /> -->
+            <!--                     </GroupBox> -->
+            <!--                 </StackPanel> -->
+            <!--             </GroupBox> -->
+            <!--              -->
+            <!--             <GroupBox Header="Crime" FontSize="12"> -->
+            <!--                 <GroupBox.HeaderTemplate> -->
+            <!--                     <DataTemplate> -->
+            <!--                         <CheckBox Content="Track Crime" -->
+            <!--                                   ToolTip="If a faction is flagged to track crime, its members will remember crimes against it." -->
+            <!--                                   DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=GroupBox}}" -->
+            <!--                                   IsChecked="{Binding EditableRecord.TrackCrime}" -->
+            <!--                                   Margin="5" /> -->
+            <!--                     </DataTemplate>    -->
+            <!--                 </GroupBox.HeaderTemplate> -->
+            <!--                  -->
+            <!--                 <StackPanel IsEnabled="{Binding EditableRecord.TrackCrime}"> -->
+            <!--                     <HeaderedContentControl Header="Exterior Jail Marker" -->
+            <!--                                             ToolTip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building."> -->
+            <!--                         <render:PlacedPicker/> -->
+            <!--                     </HeaderedContentControl> -->
+            <!--                      -->
+            <!--                     <HeaderedContentControl Header="Follow Wait Marker" -->
+            <!--                                             ToolTip="A marker near which followers will wait if the player gets sent to jail."> -->
+            <!--                         <render:PlacedPicker/> -->
+            <!--                     </HeaderedContentControl> -->
+            <!--                      -->
+            <!--                     <HeaderedContentControl Header="Stolen Goods Container" -->
+            <!--                                             ToolTip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference."> -->
+            <!--                         <render:PlacedPicker/> -->
+            <!--                     </HeaderedContentControl> -->
+            <!--                      -->
+            <!--                     <HeaderedContentControl Header="Player Inventory Container" -->
+            <!--                                             ToolTip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference."> -->
+            <!--                         <render:PlacedPicker/> -->
+            <!--                     </HeaderedContentControl> -->
+            <!--                      -->
+            <!--                     <HeaderedContentControl Header="Jail Outfit" -->
+            <!--                                             ToolTip="The clothes given to the player in prison. Usually BeggarOutfit."> -->
+            <!--                         ~1~ <plugins:FormKeyPicker FormKey="{Binding EditableRecord.JailOutfit.FormKey}" @1@ -->
+            <!--                         ~1~                        ScopedTypes="{Binding OutfitTypes}" @1@ -->
+            <!--                         ~1~                        LinkCache="{Binding LinkCache}" /> @1@ -->
+            <!--                     </HeaderedContentControl> -->
+            <!-- -->
+            <!--                     <HeaderedContentControl Header="Shared Crime Faction List" -->
+            <!--                                             ToolTip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown."> -->
+            <!--                         ~1~ <plugins:FormKeyPicker FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}" @1@ -->
+            <!--                         ~1~                        ScopedTypes="{Binding FormListTypes}" @1@ -->
+            <!--                         ~1~                        LinkCache="{Binding LinkCache}" /> @1@ -->
+            <!--                     </HeaderedContentControl> -->
+            <!--                      -->
+            <!--                     <CheckBox Content="Attack on Sight" -->
+            <!--                               ToolTip="If checked, guards will attack the player on sight if crime gold is high enough." -->
+            <!--                               IsChecked="{Binding EditableRecord.CrimeValues.AttackOnSight}" -->
+            <!--                               Margin="5" /> -->
+            <!--                      -->
+            <!--                     <CheckBox Content="Arrest" -->
+            <!--                               ToolTip="If checked, guards will try to arrest the player." -->
+            <!--                               IsChecked="{Binding EditableRecord.CrimeValues.Arrest}" -->
+            <!--                               Margin="5" /> -->
+            <!-- -->
+            <!--                     <GroupBox Header="Crime Gold" FontSize="12" -->
+            <!--                               ToolTip="Allows you to specify bounty amounts allocated for specific crimes."> -->
+            <!--                         <GroupBox> -->
+            <!--                             <GroupBox.HeaderTemplate> -->
+            <!--                                 <DataTemplate> -->
+            <!--                                     <CheckBox Content="Use Defaults" -->
+            <!--                                               DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=GroupBox}}" -->
+            <!--                                               IsChecked="{Binding EditableRecord.CrimeGoldUseDefaults}" -->
+            <!--                                               Margin="5" /> -->
+            <!--                                 </DataTemplate> -->
+            <!--                             </GroupBox.HeaderTemplate> -->
+            <!-- -->
+            <!--                             <StackPanel -->
+            <!--                                 IsEnabled="{Binding EditableRecord.CrimeGoldUseDefaults, Converter={StaticResource BooleanNegatedConverter}}"> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Murder"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Murder}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Assault"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Assault}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Pickpocket"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Pickpocket}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Trespass"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Trespass}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="StealMult"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.StealMult}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        Interval="0.1" -->
+            <!--                                                        StringFormat="N4" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Escape"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Escape}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                                  -->
+            <!--                                 <HeaderedContentControl Header="Werewolf"> -->
+            <!--                                     <mah:NumericUpDown Value="{Binding EditableRecord.CrimeValues.Werewolf}" -->
+            <!--                                                        Minimum="0" -->
+            <!--                                                        Maximum="65535" -->
+            <!--                                                        StringFormat="N0" /> -->
+            <!--                                 </HeaderedContentControl> -->
+            <!--                             </StackPanel> -->
+            <!--                         </GroupBox> -->
+            <!--                     </GroupBox> -->
+            <!--                 </StackPanel> -->
+            <!--             </GroupBox> -->
+            <!--         </StackPanel> -->
+            <!--     </TabItem> -->
+            <!-- -->
+            <!--     <TabItem Header="Vendor"> -->
+            <!--         <GroupBox Header="Vendor" FontSize="12"> -->
+            <!--             <GroupBox.HeaderTemplate> -->
+            <!--                 <DataTemplate> -->
+            <!--                     <CheckBox Content="Vendor" -->
+            <!--                               ToolTip="Allows you to specify bounty amounts allocated for specific crimes. " -->
+            <!--                               DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=GroupBox}}" -->
+            <!--                               IsChecked="{Binding EditableRecord.Vendor}" -->
+            <!--                               Margin="5" /> -->
+            <!--                 </DataTemplate> -->
+            <!--             </GroupBox.HeaderTemplate> -->
+            <!--              -->
+            <!--             <StackPanel IsEnabled="{Binding EditableRecord.Vendor}"> -->
+            <!--                 <GroupBox Header="Limitations" FontSize="12"> -->
+            <!--                     <StackPanel> -->
+            <!--                         <HeaderedContentControl Header="Vendor Time Window"> -->
+            <!--                             <xctk:RangeSlider Minimum="0" Maximum="24" -->
+            <!--                                               LowerValue="{Binding EditableRecord.VendorValues.StartHour, Mode=TwoWay}" -->
+            <!--                                               HigherValue="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}" -->
+            <!--                                               AutoToolTipPlacement="TopLeft" -->
+            <!--                                               IsSnapToTickEnabled="True" -->
+            <!--                                               RangeBackground="{StaticResource MahApps.Brushes.Accent}" -->
+            <!--                                               TickFrequency="1" TickPlacement="TopLeft" /> -->
+            <!--                         </HeaderedContentControl> -->
+            <!--                          -->
+            <!--                         <HeaderedContentControl Header="Vendor Conditions"  -->
+            <!--                                                 ToolTip="Further limitations when the vendor offers goods."> -->
+            <!--                             <record:ConditionsEditor/> -->
+            <!--                         </HeaderedContentControl> -->
+            <!--                     </StackPanel> -->
+            <!--                 </GroupBox> -->
+            <!--                  -->
+            <!--                 <GroupBox Header="Vendor Location" FontSize="12"> -->
+            <!--                     <StackPanel> -->
+            <!--                         <HeaderedContentControl Header="Location" -->
+            <!--                                                 ToolTip="Used to set where the vendor needs to be to sell goods."> -->
+            <!--                             <render:PlacedPicker /> -->
+            <!--                         </HeaderedContentControl> -->
+            <!--                  -->
+            <!--                         <HeaderedContentControl Header="Radius" ToolTip="How close the merchant needs to be to the set location."> -->
+            <!--                             <mah:NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}" -->
+            <!--                                                Minimum="0" -->
+            <!--                                                Maximum="65535" -->
+            <!--                                                StringFormat="N0" /> -->
+            <!--                         </HeaderedContentControl> -->
+            <!--                     </StackPanel> -->
+            <!--                 </GroupBox> -->
+            <!--                  -->
+            <!--                 <GroupBox Header="Vendor Buy/Sell List" FontSize="12"> -->
+            <!--                     <StackPanel> -->
+            <!--                         <CheckBox Content="Not Buy/Sell" -->
+            <!--                                   ToolTip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list." -->
+            <!--                                   IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}" -->
+            <!--                                   Margin="5" /> -->
+            <!--                          -->
+            <!--                         <HeaderedContentControl Header="List" -->
+            <!--                                                 ToolTip="The merchant will buy and sell any items which are tagged with keywords contained in this list."> -->
+            <!--                             ~1~ <plugins:FormKeyPicker FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}" @1@ -->
+            <!--                             ~1~                        ScopedTypes="{Binding FormListTypes}" @1@ -->
+            <!--                             ~1~                        LinkCache="{Binding LinkCache}" /> @1@ -->
+            <!--                         </HeaderedContentControl> -->
+            <!--                     </StackPanel> -->
+            <!--                 </GroupBox> -->
+            <!--                  -->
+            <!--                 <HeaderedContentControl Header="Vendor Chest" -->
+            <!--                                         ToolTip="Sets what container the merchant will sell goods from.\n -->
+            <!--                            Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above."> -->
+            <!--                     <render:PlacedPicker/> -->
+            <!--                 </HeaderedContentControl> -->
+            <!--                  -->
+            <!--                 <CheckBox Content="Only Buy Stolen Items" -->
+            <!--                           ToolTip="Sets this vendor up to only pay for stolen items the player wants to fence." -->
+            <!--                           IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}" -->
+            <!--                           Margin="5" /> -->
+            <!--             </StackPanel> -->
+            <!--         </GroupBox> -->
+            <!--     </TabItem> -->
+            <!-- </TabControl> -->
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

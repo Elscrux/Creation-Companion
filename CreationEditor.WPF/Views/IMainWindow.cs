@@ -1,5 +1,5 @@
 ﻿namespace CreationEditor.WPF.Views;
 
 public interface IMainWindow {
-    public object DataContext { get; set; }
+    public object? DataContext { get; set; }
 }

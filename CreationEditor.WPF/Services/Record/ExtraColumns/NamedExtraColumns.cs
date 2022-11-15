@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using System.Windows.Data;
+﻿using Avalonia.Controls;
+using Avalonia.Data;
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.WPF.Services.Record;
 
@@ -11,7 +11,7 @@ public class NamedExtraColumns : ExtraColumns<INamed, INamedGetter> {
                     Header = "Name",
                     Binding = new Binding("Record.Name.String"),
                     CanUserSort = true,
-                    Width = 100,
+                    Width = new DataGridLength(100),
                 },
                 99);
         }

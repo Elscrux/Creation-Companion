@@ -1,66 +1,59 @@
 ﻿<Window x:Class="CreationEditor.WPF.Views.Mod.ModSelectionWindow"
         x:Name="Window"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:Elscrux.WPF.Decorators.Behaviors;assembly=Elscrux.WPF"
         xmlns:mod="clr-namespace:CreationEditor.WPF.Views.Mod"
         xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
-        xmlns:modModel="clr-namespace:CreationEditor.WPF.Models.Mod"
+        xmlns:mod1="clr-namespace:CreationEditor.WPF.Models.Mod"
+        xmlns:wpf="clr-namespace:CreationEditor.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:ModSelectionVM}"
         d:DesignHeight="500" d:DesignWidth="750"
+        x:CompileBindings="True" x:DataType="modVm:ModSelectionVM"
         MinHeight="480" MinWidth="720" Height="480" Width="720"
         Title="Select Mods">
-    <Window.InputBindings>
-        <KeyBinding Key="A" Command="{Binding ToggleActive}" />
-    </Window.InputBindings>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
-
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="35" />
-            </Grid.RowDefinitions>
-
+    <!-- <Window.InputBindings> -->
+    <!--     <KeyBinding Key="A" Command="{Binding ToggleActive}" /> -->
+    <!-- </Window.InputBindings> -->
+    <Grid ColumnDefinitions="2*,1*">
+        <Grid RowDefinitions="*,Auto">
             <DataGrid Grid.Row="0"
-                      ItemsSource="{Binding Mods}"
+                      Items="{Binding Mods}"
                       SelectedItem="{Binding SelectedMod}"
-                      CanUserAddRows="False" CanUserDeleteRows="False"
                       CanUserReorderColumns="False" CanUserResizeColumns="True"
                       CanUserSortColumns="False"
-                      CanUserResizeRows="False"
                       IsReadOnly="True"
-                      SelectionMode="Single" SelectionUnit="FullRow"
+                      SelectionMode="Single"
                       GridLinesVisibility="None" AutoGenerateColumns="False">
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
-                        <Style.Triggers>
-                            <DataTrigger d:DataContext="{d:DesignInstance modModel:ActivatableModItem}"
-                                         Binding="{Binding IsActive}" Value="true">
-                                <Setter Property="Background" Value="ForestGreen" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.RowStyle>
+                <!-- <DataGrid.Styles> -->
+                <!--     <Style> -->
+                <!--         <Style. -->
+                <!--     </Style> -->
+                <!-- </DataGrid.Styles> -->
+                <!-- <DataGrid.RowStyle> -->
+                <!--     <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}"> -->
+                <!--         <Style.Triggers> -->
+                <!--             <DataTrigger d:DataContext="{d:DesignInstance modModel:ActivatableModItem}" -->
+                <!--                          Binding="{Binding IsActive}" Value="true"> -->
+                <!--                 <Setter Property="Background" Value="ForestGreen" /> -->
+                <!--             </DataTrigger> -->
+                <!--         </Style.Triggers> -->
+                <!--     </Style> -->
+                <!-- </DataGrid.RowStyle> -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <Separator />
                         <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>
-                <b:Interaction.Behaviors>
-                    <behaviors:DataGridSelectionBehavior EnabledMapping="MastersValid"
-                                                          SelectionGuard="{Binding CanSelect}" />
-                </b:Interaction.Behaviors>
+                <Interaction.Behaviors>
+                    <wpf:DataGridSelectionBehavior EnabledMapping="MastersValid"
+                                                   SelectionGuard="{Binding CanSelect}" />
+                </Interaction.Behaviors>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding ModKey}" />
-                    <DataGridTextColumn Header="Type" Binding="{Binding ModKey.Type}" />
+                    <DataGridTextColumn Header="Name" Binding="{Binding ModKey}" x:DataType="mod1:ActivatableModItem" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding ModKey.Type}" x:DataType="mod1:ActivatableModItem" />
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -74,7 +67,7 @@
                             CommandParameter="{Binding ElementName=Window}" />
 
                     <TextBlock Padding="5" VerticalAlignment="Center"
-                               Visibility="{Binding NoActiveMod, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               IsVisible="{Binding NoActiveMod}"
                                Foreground="IndianRed"
                                Text="No Active Mod Selected" />
                 </StackPanel>

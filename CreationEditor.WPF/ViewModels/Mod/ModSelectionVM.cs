@@ -1,28 +1,27 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Input;
+using Avalonia.Controls;
 using CreationEditor.Environment;
 using CreationEditor.WPF.Models.Mod;
 using CreationEditor.WPF.Services;
 using DynamicData;
 using DynamicData.Binding;
 using Elscrux.Notification;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Installs.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
 using MutagenLibrary.Core.Plugins;
 using Noggog;
-using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ISelectable = Noggog.ISelectable;
 namespace CreationEditor.WPF.ViewModels.Mod;
 
-public class ModSelectionVM : ViewModel {
+public class ModSelectionVM : ReactiveObject {
     private readonly INotifier _notifier;
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IEditorEnvironment _editorEnvironment;
@@ -62,7 +61,9 @@ public class ModSelectionVM : ViewModel {
 
         _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
-        if (!fileSystem.File.Exists(pluginListingsProvider.Path)) MessageBox.Show($"Make sure {pluginListingsProvider.Path} exists.");
+
+        var filePath = pluginListingsProvider.Get(simpleEnvironmentContext.GameReleaseContext.Release, GameInstallMode.Steam);
+        if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
         Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid, _masterInfos[modKey].Masters)));

@@ -4,12 +4,11 @@ using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services.Record;
 using CreationEditor.WPF.ViewModels.Record;
 using Mutagen.Bethesda.Skyrim;
-using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
-public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
+public class SkyrimRecordBrowserVM : ReactiveObject, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 

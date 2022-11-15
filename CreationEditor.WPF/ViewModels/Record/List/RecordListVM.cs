@@ -1,31 +1,48 @@
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Primitives;
+using Avalonia.Threading;
 using CreationEditor.Environment;
 using CreationEditor.WPF.Models.Record;
 using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services.Record;
 using DynamicData;
 using DynamicData.Binding;
-using Elscrux.WPF.ViewModels;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
 using Noggog;
-using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.ViewModels.Record;
+
+public class DisposableUserControl : UserControl, IDisposableDropoff {
+    private readonly Lazy<CompositeDisposable> _compositeDisposable = new();
+
+    public virtual void Dispose() {
+        if (!_compositeDisposable.IsValueCreated)
+            return;
+
+        _compositeDisposable.Value.Dispose();
+    }
+
+    public void Add(IDisposable disposable) {
+        _compositeDisposable.Value.Add(disposable);
+    }
+}
 
 [TemplatePart(Name = "PART_RecordGrid", Type = typeof(DataGrid))]
 public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     public const string RecordReadOnlyListStyle = "RecordReadOnlyListStyle";
     public const string RecordListStyle = "RecordListStyle";
     
-    public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(nameof(IsBusy), typeof(bool), typeof(RecordListVM));
+    // public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(nameof(IsBusy), typeof(bool), typeof(RecordListVM));
     
     protected readonly IReferenceQuery ReferenceQuery;
     protected readonly IRecordController RecordController;
@@ -35,8 +52,8 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
     [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
 
     public bool IsBusy {
-        get => (bool) GetValue(IsBusyProperty);
-        set => SetValue(IsBusyProperty, value);
+        get;
+        set;
     }
 
     protected readonly List<DataGridColumn> ExtraColumns = new();
@@ -50,17 +67,17 @@ public abstract class RecordListVM : DisposableUserControl, IRecordListVM {
         RecordController = recordController;
         RecordBrowserSettings = recordBrowserSettings;
         
-        SetResourceReference(StyleProperty, isReadOnly ? RecordReadOnlyListStyle : RecordListStyle);
+        // SetResourceReference(StyleProperty, isReadOnly ? RecordReadOnlyListStyle : RecordListStyle);
     }
     
     public void AddColumn(DataGridColumn column) {
         ExtraColumns.Add(column);
     }
 
-    public override void OnApplyTemplate() {
-        base.OnApplyTemplate();
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
+        base.OnApplyTemplate(e);
 
-        var dataGrid = GetTemplateChild("PART_RecordGrid") as DataGrid;
+        var dataGrid = e.NameScope.Find<DataGrid>("PART_RecordGrid");
         foreach (var column in ExtraColumns) {
             dataGrid?.Columns.Add(column);
         }
@@ -117,7 +134,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
             
-            Application.Current.Dispatcher.Invoke(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
+            Dispatcher.UIThread.Post(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
             Records!.Remove(SelectedRecord);
         });
         
@@ -126,9 +143,9 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>(async (obs, cancel) => {
+                return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
                     foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        if (cancel.IsCancellationRequested) return;
+                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
                         //Skip when browser settings don't match
                         if (!RecordBrowserSettings.Filter(record)) continue;
@@ -139,6 +156,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                         obs.OnNext(referencedRecord);
                     }
                     obs.OnCompleted();
+                    return Task.CompletedTask;
                 });
             })
             .Select(x => x.ToObservableChangeSet(refRecord => refRecord.Record.FormKey))
@@ -164,5 +182,28 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                 listRecord.Record = record;
                 _updateCache.AddOrUpdate(listRecord);
             });
+    }
+}
+
+public static class X {
+    public static IObservable<T> ObserveOnGui<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.MainThreadScheduler);
+
+    public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
+        this IObservable<IChangeSet<TObj, TKey>> changeSet,
+        IDisposableDropoff disposable)
+        where TKey : notnull {
+        var destination = new ObservableCollectionExtended<TObj>();
+        
+        changeSet.ObserveOnGui().Bind(destination).Subscribe().DisposeWith(disposable);
+        return destination;
+    }
+
+    public static ReadOnlyObservableCollection<TObj> ToObservableCollection<TObj>(
+        this IObservable<IChangeSet<TObj>> changeSet,
+        IDisposableDropoff disposable)
+    {
+        ReadOnlyObservableCollection<TObj> readOnlyObservableCollection;
+        changeSet.ObserveOnGui().Bind<TObj>(out readOnlyObservableCollection).Subscribe().DisposeWith(disposable);
+        return readOnlyObservableCollection;
     }
 }

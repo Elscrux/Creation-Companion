@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
-using System.Windows.Controls;
+using Avalonia.Controls;
 using CreationEditor.Environment;
 using CreationEditor.WPF.Services.Record;
 using CreationEditor.WPF.Skyrim.Models.Records;
@@ -12,12 +12,11 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 using Noggog;
-using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
-public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
+public class FactionEditorVM : ReactiveObject, IRecordEditorVM<Faction, IFactionGetter> {
     private readonly IRecordEditorController _recordEditorController;
     private readonly IEditorEnvironment _editorEnvironment;
     
@@ -79,5 +78,8 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
         EditableRecord = new EditableFaction(record);
         
         return new FactionEditor(this);
+    }
+    public void Dispose() {
+        throw new NotImplementedException();
     }
 }

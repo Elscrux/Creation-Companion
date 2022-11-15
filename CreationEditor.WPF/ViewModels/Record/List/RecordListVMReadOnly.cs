@@ -5,7 +5,6 @@ using CreationEditor.WPF.Models.Record.Browser;
 using DynamicData;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.References.ReferenceCache;
-using Noggog.WPF;
 using ReactiveUI;
 namespace CreationEditor.WPF.ViewModels.Record;
 

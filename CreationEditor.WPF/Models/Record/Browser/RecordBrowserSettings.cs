@@ -2,7 +2,6 @@
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-using Noggog.WPF;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Models.Record.Browser;
@@ -16,7 +15,7 @@ public interface IRecordBrowserSettings {
     public bool Filter(IMajorRecordIdentifier record);
 }
 
-public class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
+public class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettings {
     private const char SplitChar = '*';
     
     private readonly IEditorEnvironment _editorEnvironment;

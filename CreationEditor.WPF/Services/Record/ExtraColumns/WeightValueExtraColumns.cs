@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using System.Windows.Data;
+﻿using Avalonia.Controls;
+using Avalonia.Data;
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.WPF.Services.Record;
 
@@ -11,14 +11,14 @@ public class WeightValueExtraColumns : ExtraColumns<IWeightValue, IWeightValueGe
                     Header = "Weight",
                     Binding = new Binding("Record.Weight"),
                     CanUserSort = true,
-                    Width = 75,
+                    Width = new DataGridLength(75),
                 }, 10);
             yield return new ExtraColumn(
                 new DataGridTextColumn {
                     Header = "Value",
                     Binding = new Binding("Record.Value"),
                     CanUserSort = true,
-                    Width = 75,
+                    Width = new DataGridLength(75),
                 }, 11);
         }
     }

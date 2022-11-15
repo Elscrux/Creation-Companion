@@ -5,11 +5,11 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using Noggog.WPF;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Skyrim.ViewModels.Mod; 
 
-public class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
+public class SkyrimModGetterVM : ReactiveObject, IModGetterVM<ISkyrimModGetter> {
     [Reactive] public bool IsReadOnly { get; set; } = true;
 
     [Reactive] public string Name { get; set; } = string.Empty;

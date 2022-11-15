@@ -1,0 +1,59 @@
+﻿<UserControl
+    x:Class="CreationEditor.WPF.Views.Record.RecordBrowser"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:recordVm="clr-namespace:CreationEditor.WPF.ViewModels.Record"
+    d:DataContext="{d:DesignInstance recordVm:IRecordBrowserVM}"
+    d:DesignHeight="720"
+    d:DesignWidth="480"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition MinWidth="5" MaxWidth="5" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
+            <StackPanel Grid.Row="0" Margin="5">
+                <HeaderedContentControl Header="Filter">
+                    <TextBox Padding="1"
+                             Text="{Binding RecordBrowserSettings.SearchTerm}" />
+                </HeaderedContentControl>
+            </StackPanel>
+            <CheckBox
+                Grid.Row="1"
+                Margin="5"
+                Content="Show Only Active"
+                IsChecked="{Binding RecordBrowserSettings.OnlyActive}" />
+            <!-- <TreeView Grid.Row="2" Items="{Binding RecordTypeGroups}"> -->
+            <!--     <TreeView.Resources> -->
+            <!--         ~1~ <av:HierarchicalDataTemplate DataType="{x:Type recordBrowser:RecordTypeGroup}" @1@ -->
+            <!--         ~1~                           ItemsSource="{Binding RecordTypes}"> @1@ -->
+            <!--         ~1~     <TextBlock Text="{Binding GroupName}" /> @1@ -->
+            <!--         ~1~ </av:HierarchicalDataTemplate> @1@ -->
+            <!--         <DataTemplate DataType="{x:Type recordBrowser:RecordTypeListing}"> -->
+            <!--             <Button -->
+            <!--                 Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=record:RecordBrowser}}" -->
+            <!--                 CommandParameter="{Binding}" -->
+            <!--                 HorizontalContentAlignment="Left"> -->
+            <!--                 <TextBlock Text="{Binding RecordTypeName}" /> -->
+            <!--             </Button> -->
+            <!--         </DataTemplate> -->
+            <!--     </TreeView.Resources> -->
+            <!-- </TreeView> -->
+        </Grid>
+
+        <GridSplitter
+            Grid.Column="1"
+            Width="5"
+            HorizontalAlignment="Stretch" />
+
+        <ContentControl
+            Grid.Column="2"
+            HorizontalAlignment="Stretch"
+            Content="{Binding RecordList}" />
+    </Grid>
+</UserControl>

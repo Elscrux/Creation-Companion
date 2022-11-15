@@ -1,5 +1,5 @@
 ﻿using System.Reactive;
-using System.Windows.Controls;
+using Avalonia.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.WPF.ViewModels.Record;

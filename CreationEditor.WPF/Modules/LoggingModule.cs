@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using Elscrux.WPF.ViewModels;
+using CreationEditor.WPF.ViewModels;
 using Serilog;
 using Serilog.Events;
 namespace CreationEditor.WPF.Modules;

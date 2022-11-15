@@ -1,10 +1,10 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog.WPF;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Models.Record;
 
-public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ViewModel
+public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
     where TMajorRecord : IMajorRecordIdentifier
     where TMajorRecordGetter : IMajorRecordIdentifier {
     

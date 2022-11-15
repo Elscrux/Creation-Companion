@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
-using System.Windows.Controls;
 using Autofac;
+using Avalonia.Controls;
 using CreationEditor.WPF.Services.Docking;
 using CreationEditor.WPF.Services.Record;
-using CreationEditor.WPF.ViewModels.Docking;
 using CreationEditor.WPF.ViewModels.Record;
 using Elscrux.Logging;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
-using DocumentClosedEventArgs = AvalonDock.DocumentClosedEventArgs;
 namespace CreationEditor.WPF.Skyrim.Services.Record;
 
 public class SkyrimRecordEditorController : IRecordEditorController {
@@ -33,7 +31,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         _lifetimeScope = lifetimeScope;
         _dockingManagerService = dockingManagerService;
         
-        _dockingManagerService.DockingManager.DocumentClosed += OnClosed;
+        // _dockingManagerService.DockingManager.DocumentClosed += OnClosed;
     }
 
     public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)
@@ -48,7 +46,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
             if (_lifetimeScope.TryResolve<IRecordEditorVM<TMajorRecord, TMajorRecordGetter>>(out var recordEditorVM)) {
                 var editorControl = recordEditorVM.CreateUserControl(record);
 
-                _dockingManagerService.AddDocumentControl(editorControl, record.EditorID ?? record.FormKey.ToString());
+                // _dockingManagerService.AddDocumentControl(editorControl, record.EditorID ?? record.FormKey.ToString());
                 _recordEditors.Add(record.FormKey, editorControl);
             } else {
                 _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", typeof(TMajorRecord));
@@ -66,15 +64,15 @@ public class SkyrimRecordEditorController : IRecordEditorController {
         }
     }
 
-    private void OnClosed(object? sender, DocumentClosedEventArgs e) {
-        if (e.Document.Content is PaneVM paneVM) {
-            _dockingManagerService.RemoveControl(paneVM.Control);
-            RemoveEditorCache(paneVM.Control);
-            if (paneVM.Control.DataContext is IRecordEditorVM recordEditorVM) {
-                _recordChanged.OnNext(new RecordEventArgs(recordEditorVM.Record));
-            }
-        }
-    }
+    // private void OnClosed(object? sender, DocumentClosedEventArgs e) {
+    //     if (e.Document.Content is PaneVM paneVM) {
+    //         _dockingManagerService.RemoveControl(paneVM.Control);
+    //         RemoveEditorCache(paneVM.Control);
+    //         if (paneVM.Control.DataContext is IRecordEditorVM recordEditorVM) {
+    //             _recordChanged.OnNext(new RecordEventArgs(recordEditorVM.Record));
+    //         }
+    //     }
+    // }
     
     private void RemoveEditorCache(UserControl editor) {
         var editorsToRemove = _recordEditors

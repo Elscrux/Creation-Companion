@@ -2,24 +2,32 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <UseWPF>true</UseWPF>
         <LangVersion>preview</LangVersion>
         <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.39.6" />
+        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.40.0-pr002" />
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
-        <PackageReference Include="ReactiveUI.WPF" Version="18.3.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\CreationEditor.WPF\CreationEditor.WPF.csproj" />
         <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
         <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Views\Record\Editor\Subrecord" />
     </ItemGroup>
 
 </Project>
