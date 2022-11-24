@@ -1,12 +1,11 @@
 ﻿using System.IO.Abstractions;
-using Elscrux.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.Core.Plugins;
-using MutagenLibrary.References.ReferenceCache;
 using Serilog;
+using INotifier = CreationEditor.Notification.INotifier;
 namespace CreationEditor.Environment; 
 
 public class BackgroundReferenceQuery : IReferenceQuery {

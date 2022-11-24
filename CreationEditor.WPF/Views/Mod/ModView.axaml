@@ -1,11 +1,9 @@
 ﻿<UserControl x:Class="CreationEditor.WPF.Views.Mod.ModDetails"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
-             mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:IModGetterVM}"
+             xmlns:mod="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
+             x:CompileBindings="True" x:DataType="mod:IModGetterVM"
              d:DesignHeight="500" d:DesignWidth="500">
     <StackPanel Margin="5">
         <Label Content="Name" />
@@ -15,12 +13,7 @@
         <TextBox Text="{Binding Author}" MinHeight="25"
                  IsReadOnly="{Binding IsReadOnly}" />
 
-        <Grid MinHeight="100">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-
+        <Grid MinHeight="100" ColumnDefinitions="*,*">
             <Border Grid.Column="0">
                 <StackPanel>
                     <Label Content="Description" />
@@ -44,12 +37,9 @@
                 <TextBox Text="{Binding Type}" MinHeight="25"
                          IsReadOnly="{Binding IsReadOnly}" />
                 <Label Content="Form Version" />
-                <TextBox Text="{Binding FormVersion}" MinHeight="25"
-                         IsReadOnly="{Binding IsReadOnly}">
-                    <!-- <b:Interaction.Behaviors> -->
-                    <!--     <behaviors:RegExTextBoxBehavior RegularExpression="-?[0-9]+" MaxLength="9" /> -->
-                    <!-- </b:Interaction.Behaviors> -->
-                </TextBox>
+                <NumericUpDown Value="{Binding FormVersion}"
+                               MinHeight="25"
+                               IsReadOnly="{Binding IsReadOnly}"/>
                 <Label Content="Localization Enabled" />
                 <CheckBox IsChecked="{Binding Localization}" MinHeight="25"
                           IsEnabled="{Binding !IsReadOnly}" />

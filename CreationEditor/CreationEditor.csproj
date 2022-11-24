@@ -1,23 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Autofac" Version="6.4.0" />
+      <PackageReference Include="Autofac" Version="6.5.0" />
       <PackageReference Include="Elscrux" Version="1.1.0" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr002" />
-      <PackageReference Include="Noggog.CSharpExt" Version="2.51.0" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr005" />
+      <PackageReference Include="Noggog.CSharpExt" Version="2.52.0" />
       <PackageReference Include="MutagenLibrary.Core" Version="1.1.0" />
       <PackageReference Include="MutagenLibrary.References" Version="1.1.0" />
+      <PackageReference Include="ReactiveUI" Version="18.3.1" />
+      <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Backup" />
+      <Compile Update="Notification\ChainedNotifier.cs">
+        <DependentUpon>ANotificationContext.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Notification\CountingNotifier.cs">
+        <DependentUpon>ANotificationContext.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Notification\LinearNotifier.cs">
+        <DependentUpon>ANotificationContext.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Notification\Notifier.cs">
+        <DependentUpon>INotifier.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

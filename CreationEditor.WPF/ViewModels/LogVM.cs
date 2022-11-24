@@ -19,7 +19,7 @@ public interface ILogVM : ILogListSink {
     public static ISolidColorBrush FatalBrush { get; } =   Brushes.DarkRed;
 }
 
-public class LogVM : ReactiveObject, ILogVM {
+public class LogVM : ViewModel, ILogVM {
     private const int MaxLogCount = 500;
 
     public ObservableCollection<ILogItem> LogItems { get; set; } = new();

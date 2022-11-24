@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 namespace CreationEditor.WPF.Views;
 
 public partial class MainWindow : Window, IMainWindow {
-    // public DockingManager DockingManager => MainDockingManager;
+    // public IUniDockService DockingManager => this.FindControl<RootDockGroup>("DockingManager").TheDockManager;
 
     public MainWindow() {
         InitializeComponent();

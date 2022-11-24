@@ -48,7 +48,7 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
     }
     
     public EditableCondition(ICondition parent) {
-        
+        Data = parent.Data;
     }
 
     public void SetCondition(Condition condition) {

@@ -14,8 +14,8 @@ public interface IEditorEnvironment {
     
     public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null);
     
-    public event EventHandler? ActiveModChanged;
-    public event EventHandler? EditorInitialized;
+    public IObservable<ModKey> ActiveModChanged { get; }
+    public IObservable<List<ModKey>> LoadOrderChanged { get; }
 }
 
 public interface IEditorEnvironment<TMod, TModGetter> : IEditorEnvironment

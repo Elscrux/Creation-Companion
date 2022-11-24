@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using CreationEditor.WPF.ViewModels;
 using CreationEditor.WPF.ViewModels.Mod;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -9,7 +10,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Skyrim.ViewModels.Mod; 
 
-public class SkyrimModGetterVM : ReactiveObject, IModGetterVM<ISkyrimModGetter> {
+public class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
     [Reactive] public bool IsReadOnly { get; set; } = true;
 
     [Reactive] public string Name { get; set; } = string.Empty;

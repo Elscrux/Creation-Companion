@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Win32.WinRT;
-namespace CreationEditor.WPF.Converters; 
+namespace CreationEditor.WPF.Utility.Converters; 
 
 public class BooleanToBlurConverter : IValueConverter {
     private const BlurEffect Blur = new();

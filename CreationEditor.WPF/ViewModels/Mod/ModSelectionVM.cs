@@ -21,7 +21,7 @@ using ReactiveUI.Fody.Helpers;
 using ISelectable = Noggog.ISelectable;
 namespace CreationEditor.WPF.ViewModels.Mod;
 
-public class ModSelectionVM : ReactiveObject {
+public class ModSelectionVM : ViewModel {
     private readonly INotifier _notifier;
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IEditorEnvironment _editorEnvironment;
@@ -32,14 +32,16 @@ public class ModSelectionVM : ReactiveObject {
     private readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> _masterInfos = new();
 
     [Reactive] public ActivatableModItem? SelectedMod { get; set; }
-    [Reactive] public IModGetterVM SelectedModDetails { get; private set; }
+    [Reactive] public IModGetterVM SelectedModDetails { get; init; }
 
     public ModKey? ActiveMod => Mods.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => Mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
-    [Reactive] public bool NoActiveMod { get; set; } = true;
 
     private readonly ObservableAsPropertyHelper<bool> _anyModsLoaded;
     public bool AnyModsLoaded => _anyModsLoaded.Value;
+
+    private readonly ObservableAsPropertyHelper<bool> _anyModsActive;
+    public bool AnyModsActive => _anyModsActive.Value;
 
     public ICommand Confirm { get; }
     public ICommand ToggleActive { get; }
@@ -66,13 +68,35 @@ public class ModSelectionVM : ReactiveObject {
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
-        Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid, _masterInfos[modKey].Masters)));
+        Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid)));
 
-        _anyModsLoaded = Mods.ToObservableChangeSet()
-            .AutoRefresh(x => x.IsSelected)
+        var observableMods = Mods.ToObservableChangeSet();
+
+        var modSelected = observableMods
+            .AutoRefresh(modItem => modItem.IsSelected);
+        
+        _anyModsLoaded = modSelected
             .ToCollection()
-            .Select(x => x.Any(mod => mod.IsSelected))
-            .ToProperty(this, x => x.AnyModsLoaded);
+            .Select(collection => collection.Any(mod => mod.IsSelected))
+            .ToProperty(this, vm => vm.AnyModsLoaded);
+
+        var modActivated = observableMods
+            .AutoRefresh(modItem => modItem.IsActive);
+
+        _anyModsActive = modActivated
+            .ToCollection()
+            .Select(collection => collection.Any(mod => mod.IsActive))
+            .ToProperty(this, vm => vm.AnyModsActive);
+
+        modActivated.Subscribe(changedMods => {
+            foreach (var change in changedMods) {
+                var changedMod = change.Item.Current;
+                if (changedMod is { IsActive: true }) {
+                    Mods?.Where(mod => mod != changedMod)
+                        .ForEach(modItem => modItem.IsActive = false);
+                }
+            }
+        });
 
         ToggleActive = ReactiveCommand.Create(
             canExecute: this
@@ -81,17 +105,10 @@ public class ModSelectionVM : ReactiveObject {
                 .Select(mod => mod.MastersValid),
             execute: () => {
                 if (SelectedMod == null) return;
-
-                NoActiveMod = SelectedMod.IsActive;
-                if (NoActiveMod) {
-                    SelectedMod.IsActive = false;
-                } else {
-                    Mods.ForEach(modItem => modItem.IsActive = false);
-                    SelectedMod.IsActive = true;
-                }
+                SelectedMod.IsActive = !SelectedMod.IsActive;
             });
 
-        Confirm = ReactiveCommand.Create(async (Window window) => {
+        Confirm = ReactiveCommand.Create<Window>(async window => {
             window.Close();
 
             BusyService.IsBusy = true;
@@ -117,17 +134,19 @@ public class ModSelectionVM : ReactiveObject {
         });
 
         this.WhenAnyValue(x => x.SelectedMod)
-            .Subscribe(_ => {
-                if (SelectedMod == null) return;
-
-                var mod = _environment.LoadOrder.First(l => l.Key == SelectedMod.ModKey).Value.Mod;
+            .NotNull()
+            .Subscribe(selectedMod => {
+                var mod = _environment.LoadOrder.First(l => l.Key == selectedMod.ModKey).Value.Mod;
                 if (mod == null) return;
                 
                 SelectedModDetails.SetTo(mod);
             });
     }
     
-    public void UpdateMasterInfos() {
+    /// <summary>
+    /// Build Dictionary _masterInfos with all masters of a single plugin recursively
+    /// </summary>
+    private void UpdateMasterInfos() {
         _masterInfos.Clear();
         var modKeys = _environment.LoadOrder.Keys.ToHashSet();
 

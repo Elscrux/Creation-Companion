@@ -2,20 +2,14 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
-        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.40.0-pr002" />
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.40.0-pr005" />
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
     </ItemGroup>

@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:views="clr-namespace:CreationEditor.WPF.Views"
         xmlns:viewModels="clr-namespace:CreationEditor.WPF.ViewModels"
+        xmlns:notification="clr-namespace:CreationEditor.Notification;assembly=CreationEditor"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
         x:Name="Window"
         Title="{Binding WindowTitle}" MinHeight="480" MinWidth="720">
@@ -30,88 +31,39 @@
                     <MenuItem Header="Record Browser"
                               Command="{Binding OpenRecordBrowser}" />
                 </MenuItem>
-                <MenuItem IsVisible="{Binding AnyLoading}"
+                <MenuItem IsVisible="{Binding !!LoadingItems.Count}"
                           HorizontalAlignment="Right"
-                          Header="{Binding LatestNotification}"
                           Items="{Binding LoadingItems}">
-                    <!-- <MenuItem.HeaderPresenter> -->
-                    <!--     <DataTemplate> -->
-                    <!--         <StackPanel d:DataContext="{d:DesignInstance models:NotificationItem}"> -->
-                    <!--             <TextBlock Text="{Binding LoadText}" /> -->
-                    <!--             <ProgressBar Minimum="0" Maximum="1" -->
-                    <!--                          Value="{Binding  LoadProgress}" /> -->
-                    <!--         </StackPanel> -->
-                    <!--     </DataTemplate> -->
-                    <!-- </MenuItem.HeaderPresenter> -->
-                    <MenuItem.ItemTemplate>
-                        <DataTemplate>
-                            <Grid RowDefinitions="*,*">
-                                <TextBlock Grid.Row="0"
-                                           Text="{Binding LoadText}" />
-                                <ProgressBar Grid.Row="1"
-                                             Minimum="0" Maximum="1"
-                                             Value="{Binding  LoadProgress}" />
-                            </Grid>
+                    <MenuItem.Header>
+                        <views:NotificationView DataContext="{Binding LatestNotification}" />
+                    </MenuItem.Header>
+                    <MenuItem.DataTemplates>
+                        <DataTemplate DataType="notification:NotificationItem">
+                            <views:NotificationView DataContext="{Binding}" />
                         </DataTemplate>
-                    </MenuItem.ItemTemplate>
+                    </MenuItem.DataTemplates>
                 </MenuItem>
             </Menu>
 
-            <!-- <DockingManager x:Name="MainDockingManager" -->
-            <!--                 Theme="{Binding Theme}" -->
-            <!--                 ActiveContent="{Binding DockingManagerService.ActiveDocument}" -->
-            <!--                 AnchorablesSource="{Binding DockingManagerService.Anchorables}" -->
-            <!--                 DocumentsSource="{Binding DockingManagerService.Documents}"> -->
-            <!--     ~1~ Item Container Styling @1@ -->
-            <!--     <DockingManager.LayoutItemContainerStyleSelector> -->
-            <!--         <selectors:PanesStyleSelector> -->
-            <!--             <selectors:PanesStyleSelector.GenericStyle> -->
-            <!--                 <Style TargetType="{x:Type LayoutItem}"> -->
-            <!--                     <Setter Property="ContentId" Value="{Binding Model.ContentId}" /> -->
-            <!--                     <Setter Property="Title" Value="{Binding Model.Title}" /> -->
-            <!--                     <Setter Property="ToolTip" Value="{Binding Model.ToolTip}" /> -->
-            <!--                     <Setter Property="IconSource" Value="{Binding Model.IconSource}" /> -->
-            <!--                     <Setter Property="CanClose" Value="{Binding Model.CanClose}" /> -->
-            <!--                     <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}" /> -->
-            <!--                     <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}" /> -->
-            <!--                 </Style> -->
-            <!--             </selectors:PanesStyleSelector.GenericStyle> -->
-            <!--             <selectors:PanesStyleSelector.RecordStyle> -->
-            <!--                 <Style TargetType="{x:Type LayoutItem}"> -->
-            <!--                     <Setter Property="ContentId" Value="{Binding Model.ContentId}" /> -->
-            <!--                     <Setter Property="Title" Value="{Binding Model.Title}" /> -->
-            <!--                     <Setter Property="ToolTip" Value="{Binding Model.ToolTip}" /> -->
-            <!--                     <Setter Property="IconSource" Value="{Binding Model.IconSource}" /> -->
-            <!--                     <Setter Property="CanClose" Value="{Binding Model.CanClose}" /> -->
-            <!--                     <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" /> -->
-            <!--                     <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}" /> -->
-            <!--                     <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}" /> -->
-            <!--                 </Style> -->
-            <!--             </selectors:PanesStyleSelector.RecordStyle> -->
-            <!--         </selectors:PanesStyleSelector> -->
-            <!--     </DockingManager.LayoutItemContainerStyleSelector> -->
-            <!-- -->
-            <!--     ~1~ Item Template Styling @1@ -->
-            <!--     <DockingManager.LayoutItemTemplateSelector> -->
-            <!--         <selectors:PanesTemplateSelector> -->
-            <!--             <selectors:PanesTemplateSelector.PaneTemplate> -->
-            <!--                 <DataTemplate> -->
-            <!--                     <ContentControl Content="{Binding Control}" d:DataContext="{d:DesignInstance docking:PaneVM}" /> -->
-            <!--                 </DataTemplate> -->
-            <!--             </selectors:PanesTemplateSelector.PaneTemplate> -->
-            <!--             <selectors:PanesTemplateSelector.ContentControl> -->
-            <!--                 <DataTemplate> -->
-            <!--                     <ContentControl Content="{Binding Content.Control}" d:DataContext="{d:DesignInstance ContentPresenter}" /> -->
-            <!--                 </DataTemplate> -->
-            <!--             </selectors:PanesTemplateSelector.ContentControl> -->
-            <!--         </selectors:PanesTemplateSelector> -->
-            <!--     </DockingManager.LayoutItemTemplateSelector> -->
-            <!-- -->
-            <!--     ~1~ Handle setup @1@ -->
-            <!--     <DockingManager.LayoutUpdateStrategy> -->
-            <!--         <docking:LayoutInitializer /> -->
-            <!--     </DockingManager.LayoutUpdateStrategy> -->
-            <!-- </DockingManager> -->
+            <!-- <uniDock:RootDockGroup TheDockManager="{StaticResource TheDockManager}" -->
+            <!--                        VerticalAlignment="Stretch" -->
+            <!--                        x:Name="DockingManager" -->
+            <!--                        IsStableGroup="True"> -->
+            <!--     <uniDock:StackDockGroup> -->
+            <!--         <uniDock:StackDockGroup IsStableGroup="True" DockId="Top" /> -->
+            <!--         <uniDock:StackDockGroup> -->
+            <!--             ~1~ <uniDock:StackDockGroup TheOrientation="Vertical"> @1@ -->
+            <!--             <uniDock:StackDockGroup IsStableGroup="True" DockId="Left" /> -->
+            <!--             <uniDock:TabbedDockGroup IsStableGroup="True" DockId="Center" /> -->
+            <!--             <uniDock:StackDockGroup IsStableGroup="True" DockId="Right" /> -->
+            <!--         </uniDock:StackDockGroup> -->
+            <!--         <uniDock:StackDockGroup IsStableGroup="True" DockId="Bottom" /> -->
+            <!--     </uniDock:StackDockGroup> -->
+            <!-- </uniDock:RootDockGroup> -->
+            
+            <DockControl Layout="{Binding DockingManagerService.DockingManager}">
+                
+            </DockControl>
         </DockPanel>
 
         <!-- <mah:ProgressRing IsActive="{Binding BusyService.IsBusy}" -->
@@ -123,7 +75,7 @@
                       IsVisible="{Binding BusyService.IsBusy}"
                       Margin="0, 256, 0, 0">
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate DataType="notification:NotificationItem">
                     <StackPanel>
                         <views:NotificationView DataContext="{Binding}" />
                     </StackPanel>

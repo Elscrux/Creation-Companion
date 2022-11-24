@@ -3,7 +3,7 @@ using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.WPF.ViewModels; 
+namespace CreationEditor.WPF;
 
 public class ViewModel : ReactiveObject, IDisposableDropoff {
     private readonly Lazy<CompositeDisposable> _compositeDisposable = new();
@@ -18,7 +18,7 @@ public class ViewModel : ReactiveObject, IDisposableDropoff {
         if (EqualityComparer<T>.Default.Equals(item, newItem)) return;
 
         item = newItem;
-        this.RaisePropertyChanged<ViewModel>(propertyName);
+        this.RaisePropertyChanged(propertyName);
     }
 
     protected void RaiseAndSetIfChanged<T>(

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.WPF.Skyrim.Converter; 
+namespace CreationEditor.WPF.Skyrim.Utility.Converter; 
 
 public class CombatReactionTooltip : IValueConverter {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
@@ -15,9 +15,12 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
         <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.0-preview4" />
+        <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0-preview20221106001" />
+        <PackageReference Include="Dock.Avalonia" Version="11.0.0-preview4" />
+        <PackageReference Include="Dock.Model.ReactiveUI" Version="11.0.0-preview4" />
         <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview4" />
         <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2" />
-        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr002" />
+        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr005" />
         <PackageReference Include="ReactiveUI" Version="18.3.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00896" />
@@ -30,6 +33,17 @@
 
     <ItemGroup>
       <Folder Include="Views\Render" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Docking\ToolDockView.axaml.cs">
+        <DependentUpon>ToolDockView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Docking\DocumentDockView.axaml.cs">
+        <DependentUpon>DocumentDockView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>

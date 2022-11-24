@@ -2,21 +2,24 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:skyrim="clr-namespace:CreationEditor.WPF.Skyrim"
-             xmlns:converters1="clr-namespace:CreationEditor.WPF.Converters;assembly=CreationEditor.WPF">
+             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
+             xmlns:converters="clr-namespace:CreationEditor.WPF.Utility.Converters;assembly=CreationEditor.WPF">
     <Application.DataTemplates>
         <skyrim:ViewLocator />
     </Application.DataTemplates>
 
     <Application.Styles>
-        <FluentTheme/>
-        <!-- <styling:FluentAvaloniaTheme /> -->
-        <!-- <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" /> -->
-        <!-- <StyleInclude Source="/CreationEditor.WPF;component/Views/Record/RecordList.axaml" /> -->
+        <!-- Base Avalonia Style -->
+        <styling:FluentAvaloniaTheme PreferSystemTheme="True" />
+        
+        <!-- Avalonia Addons Style -->
+        <DockFluentTheme/>
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
     </Application.Styles>
 
     <Application.Resources>
         <ResourceDictionary>
-            <converters1:BooleanToBlurConverter x:Key="BooleanToBlurConverter" />
+            <converters:BooleanToBlurConverter x:Key="BooleanToBlurConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -10,12 +10,11 @@
         xmlns:wpf="clr-namespace:CreationEditor.WPF"
         mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:ModSelectionVM}"
         d:DesignHeight="500" d:DesignWidth="750"
-        x:CompileBindings="True" x:DataType="modVm:ModSelectionVM"
         MinHeight="480" MinWidth="720" Height="480" Width="720"
         Title="Select Mods">
-    <!-- <Window.InputBindings> -->
-    <!--     <KeyBinding Key="A" Command="{Binding ToggleActive}" /> -->
-    <!-- </Window.InputBindings> -->
+    <Window.KeyBindings>
+        <KeyBinding Gesture="A" Command="{Binding ToggleActive}" />
+    </Window.KeyBindings>
     <Grid ColumnDefinitions="2*,1*">
         <Grid RowDefinitions="*,Auto">
             <DataGrid Grid.Row="0"
@@ -26,34 +25,32 @@
                       IsReadOnly="True"
                       SelectionMode="Single"
                       GridLinesVisibility="None" AutoGenerateColumns="False">
-                <!-- <DataGrid.Styles> -->
-                <!--     <Style> -->
-                <!--         <Style. -->
-                <!--     </Style> -->
-                <!-- </DataGrid.Styles> -->
-                <!-- <DataGrid.RowStyle> -->
-                <!--     <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}"> -->
-                <!--         <Style.Triggers> -->
-                <!--             <DataTrigger d:DataContext="{d:DesignInstance modModel:ActivatableModItem}" -->
-                <!--                          Binding="{Binding IsActive}" Value="true"> -->
-                <!--                 <Setter Property="Background" Value="ForestGreen" /> -->
-                <!--             </DataTrigger> -->
-                <!--         </Style.Triggers> -->
-                <!--     </Style> -->
-                <!-- </DataGrid.RowStyle> -->
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <Separator />
+                <DataGrid.ContextFlyout>
+                    <MenuFlyout>
                         <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}" />
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
+                    </MenuFlyout>
+                </DataGrid.ContextFlyout>
                 <Interaction.Behaviors>
                     <wpf:DataGridSelectionBehavior EnabledMapping="MastersValid"
                                                    SelectionGuard="{Binding CanSelect}" />
+                    <EventTriggerBehavior />
                 </Interaction.Behaviors>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding ModKey}" x:DataType="mod1:ActivatableModItem" />
-                    <DataGridTextColumn Header="Type" Binding="{Binding ModKey.Type}" x:DataType="mod1:ActivatableModItem" />
+                    <DataGridTextColumn Header="Name"
+                                        Binding="{Binding ModKey.FileName.String}"
+                                        IsReadOnly="True"
+                                        d:DataContext="{d:DesignInstance mod1:ActivatableModItem}" />
+                    <DataGridTextColumn Header="Type"
+                                        Binding="{Binding ModKey.Type}"
+                                        IsReadOnly="True"
+                                        d:DataContext="{d:DesignInstance mod1:ActivatableModItem}" />
+                    <DataGridTemplateColumn Header="Active">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="mod1:ActivatableModItem">
+                                <CheckBox IsChecked="{Binding IsActive}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -67,7 +64,7 @@
                             CommandParameter="{Binding ElementName=Window}" />
 
                     <TextBlock Padding="5" VerticalAlignment="Center"
-                               IsVisible="{Binding NoActiveMod}"
+                               IsVisible="{Binding !AnyModsActive}"
                                Foreground="IndianRed"
                                Text="No Active Mod Selected" />
                 </StackPanel>

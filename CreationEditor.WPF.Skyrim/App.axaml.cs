@@ -37,6 +37,7 @@ public partial class App : Application {
         
             builder.RegisterModule<MainModule>();
             builder.RegisterModule<NotificationModule>();
+            builder.RegisterModule<Notification.NotificationModule>();
             builder.RegisterModule<LoggingModule>();
             builder.RegisterModule<MutagenModule>();
             builder.RegisterModule<SkyrimModule>();

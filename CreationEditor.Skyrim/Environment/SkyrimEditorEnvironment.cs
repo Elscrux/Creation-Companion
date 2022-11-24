@@ -1,12 +1,12 @@
-﻿using CreationEditor.Environment;
-using Elscrux.Notification;
+﻿using System.Reactive.Subjects;
+using CreationEditor.Environment;
+using CreationEditor.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
-using MutagenLibrary.References.ReferenceCache;
 namespace CreationEditor.Skyrim.Environment;
 
 public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
@@ -37,9 +37,12 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         get => _activeModLinkCache;
         set => _activeModLinkCache = value;
     }
-
-    public event EventHandler? ActiveModChanged;
-    public event EventHandler? EditorInitialized;
+    
+    private readonly Subject<ModKey> _activeModChanged = new();
+    public IObservable<ModKey> ActiveModChanged => _activeModChanged;
+    
+    private readonly Subject<List<ModKey>> _loadOrderChanged = new();
+    public IObservable<List<ModKey>> LoadOrderChanged => _loadOrderChanged;
     
     public SkyrimEditorEnvironment(
         IReferenceQuery referenceQuery,
@@ -85,8 +88,8 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
             .Build();
         linearNotifier.Stop();
         
-        ActiveModChanged?.Invoke(this, EventArgs.Empty);
-        EditorInitialized?.Invoke(this, EventArgs.Empty);
+        _activeModChanged.OnNext(_activeMod.ModKey);
+        _loadOrderChanged.OnNext(_gameEnvironment.LoadOrder.Select(x => x.Key).ToList());
 
         Prepare();
     }

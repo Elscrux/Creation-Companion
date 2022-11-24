@@ -4,7 +4,6 @@ using CreationEditor.WPF.Models.Record;
 using CreationEditor.WPF.Models.Record.Browser;
 using DynamicData;
 using Mutagen.Bethesda.Plugins.Records;
-using MutagenLibrary.References.ReferenceCache;
 using ReactiveUI;
 namespace CreationEditor.WPF.ViewModels.Record;
 
@@ -14,11 +13,12 @@ public class RecordListVMReadOnly : RecordListVM {
         IRecordBrowserSettings recordBrowserSettings,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
-        : base(recordBrowserSettings, referenceQuery, recordController, true) {
+        : base(recordBrowserSettings, referenceQuery, recordController) {
         Type = type;
 
         Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .Where(x => x.Item1.ListedOrder.Count > 0)
             .Do(_ => IsBusy = true)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {

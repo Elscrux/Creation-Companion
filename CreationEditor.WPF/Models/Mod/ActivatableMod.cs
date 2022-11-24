@@ -21,20 +21,20 @@ public class ModItem : ReactiveObject, ISelectable {
 public class ActivatableModItem : ModItem {
     [Reactive] public bool IsActive { get; set; }
     [Reactive] public bool MastersValid { get; set; }
-    [Reactive] public HashSet<ModKey> Masters { get; set; }
 
-    public ActivatableModItem(ModKey modKey, bool mastersValid, HashSet<ModKey> masters) : base(modKey) {
+    public ActivatableModItem(ModKey modKey, bool mastersValid) : base(modKey) {
         MastersValid = mastersValid;
-        Masters = masters;
         
         this.WhenAnyValue(x => x.IsSelected)
-            .Subscribe(_ => {
-                if (!IsSelected) IsActive = false;
+            .ObserveOnGui()
+            .Subscribe(isSelected => {
+                if (!isSelected) IsActive = false;
             });
         
         this.WhenAnyValue(x => x.IsActive)
-            .Subscribe(_ => {
-                if (IsActive) IsSelected = true;
+            .ObserveOnGui()
+            .Subscribe(isActive => {
+                if (isActive) IsSelected = true;
             });
     }
 }

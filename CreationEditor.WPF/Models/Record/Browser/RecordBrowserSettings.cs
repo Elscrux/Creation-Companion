@@ -30,12 +30,16 @@ public class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettings {
         _editorEnvironment = editorEnvironment;
         
         this.WhenAnyValue(x => x.OnlyActive)
+            .ObserveOnGui()
             .Subscribe(_ => Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment);
 
         this.WhenAnyValue(x => x.Scope)
+            .ObserveOnGui()
             .Subscribe(_ => UpdateScope());
 
-        editorEnvironment.EditorInitialized += (_, _) =>  UpdateScope();
+        editorEnvironment.LoadOrderChanged
+            .ObserveOnGui()
+            .Subscribe(_ => UpdateScope());
     }
     
     private void UpdateScope() {

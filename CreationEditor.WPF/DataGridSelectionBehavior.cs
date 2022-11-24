@@ -1,29 +1,31 @@
 ﻿using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml.Templates;
+using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
 using Noggog;
+using ReactiveUI;
 using ISelectable = Noggog.ISelectable;
 namespace CreationEditor.WPF;
 
 public class DataGridSelectionBehavior : Behavior<DataGrid> {
-    public static readonly StyledProperty<bool> AllCheckedProperty = AvaloniaProperty.Register<DataGrid, bool>(nameof(AllChecked));
-    public static readonly StyledProperty<Func<ISelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<ISelectable, bool>>(nameof(AllChecked), (_ => true));
+    public static readonly StyledProperty<bool?> AllCheckedProperty = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
+    public static readonly StyledProperty<Func<ISelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<ISelectable, bool>>(nameof(SelectionGuard), (_ => true));
 
     private bool _isProcessing;
 
-    public string? EnabledMapping { get; set; }
+    public string? EnabledMapping { get; init; }
 
-    public bool AddColumn { get; set; } = true;
-    public bool AddCommands { get; set; } = true;
-    public bool AddKeyBind { get; set; } = true;
+    public bool AddColumn { get; init; } = true;
+    public bool AddContextFlyout { get; init; } = true;
+    public bool AddKeyBind { get; init; } = true;
 
-    public Key KeyBindKey { get; set; } = Key.Space;
-    public string KeyBindEventName { get; set; } = "KeyUp";
+    public Key ToggleSelectionKeyBinding { get; init; } = Key.Space;
 
     public bool? AllChecked {
         get => GetValue(AllCheckedProperty);
@@ -39,86 +41,76 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         base.OnAttached();
 
         if (AddColumn) AddSelectionColumn();
-        if (AddCommands) AddSelectionMenu();
+        if (AddContextFlyout) AddSelectionMenu();
         if (AddKeyBind) AddKeyBindings();
     }
     
     private void AddSelectionColumn() {
-        var cellCheckBox = new CheckBox();
-        cellCheckBox.AddHandler(ToggleButton.CheckedEvent, UpdateAllChecked);
-        cellCheckBox.AddHandler(ToggleButton.UncheckedEvent, UpdateAllChecked);
-        cellCheckBox.SetValue(Layoutable.VerticalAlignmentProperty, VerticalAlignment.Center);
-        cellCheckBox.SetValue(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-        cellCheckBox.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(ISelectable.IsSelected)));
-        if (EnabledMapping != null) cellCheckBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
-        
-        var columnCheckBox = new CheckBox();
-        columnCheckBox.AddHandler(ToggleButton.CheckedEvent, SelectAllItems);
-        columnCheckBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => SelectAllItems(false));
-        columnCheckBox.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(AllChecked)));
-        
-        // var column = new DataGridTemplateColumn {
-        //     // HeaderTemplate = new DataTemplate { Content = columnCheckBox, DataType = typeof(CheckBox) },
-        //     // CellTemplate = new DataTemplate { Content = cellCheckBox, DataType = typeof(CheckBox) },
-        //     // HeaderTemplate = new DataTemplate(typeof(CheckBox)) { VisualTree = columnCheckBox },
-        //     // CellTemplate = new DataTemplate(typeof(CheckBox)) { VisualTree = cellCheckBox },
-        //     CanUserResize = false,
-        //     CanUserSort = false,
-        //     CanUserReorder = false,
-        //     Width = new DataGridLength(40)
-        // };
-
+        const double columnWidth = 25;
         AssociatedObject?.Columns.Insert(0, new DataGridTemplateColumn {
-            Header = "test",
-            CellTemplate = new DataTemplate { Content = cellCheckBox, DataType = typeof(CheckBox) },
+            HeaderTemplate = new FuncDataTemplate<ISelectable>((_, _) => {
+                var checkBox = new CheckBox {
+                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
+                    MinWidth = columnWidth,
+                    DataContext = this,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                };
+                
+                checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => SelectAllItems());
+                checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => SelectAllItems(false));
+                
+                return checkBox;
+            }),
+            CellTemplate = new FuncDataTemplate<ISelectable>(((_, _) => {
+                var checkBox = new CheckBox {
+                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ISelectable.IsSelected)),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    MinWidth = columnWidth,
+                    Classes = new Classes("CenteredBorder"),
+                    Styles = { new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
+                        Setters = { new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center) }
+                    } }
+                };
+                
+                checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => UpdateAllChecked(true));
+                checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => UpdateAllChecked(false));
+                
+                if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
+                
+                return checkBox;
+            })),
             CanUserResize = false,
             CanUserSort = false,
             CanUserReorder = false,
-            Width = new DataGridLength(250),
+            IsReadOnly = true,
+            Width = new DataGridLength(columnWidth)
         });
     }
 
     private void AddSelectionMenu() {
         if (AssociatedObject == null) return;
 
-        // AssociatedObject.ContextMenu ??= new ContextMenu();
-        // if (AssociatedObject.ContextMenu.Items is not IList x) return;
-        //
-        // var selectAllMenu = new MenuItem {
-        //     Header = "Select All",
-        //     Command = ReactiveCommand.Create(() => SelectDynamic())
-        // };
-        //     
-        // x.Insert(0, selectAllMenu);
-        //
-        // var invertMenu = new MenuItem {
-        //     Header = "Invert",
-        //     Command = ReactiveCommand.Create(InvertAll)
-        // };
-        // x.Insert(0, invertMenu);
+        AssociatedObject.ContextFlyout ??= new MenuFlyout();
+        if (AssociatedObject.ContextFlyout is not MenuFlyout { Items: AvaloniaList<object> menuList }) return;
+        
+        menuList.InsertRange(0, new TemplatedControl[] {
+            new MenuItem {
+                Header = "Select All",
+                Command = ReactiveCommand.Create(() => SelectDynamic())
+            },
+            new MenuItem {
+                Header = "Invert",
+                Command = ReactiveCommand.Create(InvertAll),
+            },
+            new Separator(),
+        });
     }
 
     private void AddKeyBindings() {
-        if (AssociatedObject == null) return;
-        
-        // var eventTrigger = new EventTriggerBehavior {
-        //     EventName = KeyBindEventName,
-        //     Actions = {
-        //         new InvokeCommandAction {
-        //             Command = ReactiveCommand.Create((KeyEventArgs args) => {
-        //                 if (args.Key == KeyBindKey) {
-        //                     ToggleSelection();
-        //                 }
-        //             }),
-        //             PassEventArgsToCommand = true
-        //         }
-        //     }
-        // };
-
-        // var behaviorCollection = Interaction.GetBehaviors(AssociatedObject);
-        //
-        // // behaviorCollection.Add(eventTrigger);
-        // Interaction.SetBehaviors(AssociatedObject, behaviorCollection);
+        AssociatedObject?.KeyBindings.Add(new KeyBinding {
+            Command = ReactiveCommand.Create(ToggleSelection),
+            Gesture = new KeyGesture(ToggleSelectionKeyBinding),
+        });
     }
 
     private void TryProcess(Action action) {
@@ -129,7 +121,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         _isProcessing = false;
     }
 
-    private void UpdateAllChecked() {
+    private void UpdateAllChecked(bool? lastWasChecked = null) {
         if (AssociatedObject == null) return;
         
         TryProcess(() => {
@@ -139,6 +131,15 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
                 totalCount++;
                 if (selectable.IsSelected) selectedCount++;
             }
+
+            // The checked/unchecked event comes before the IsSelected binding is updated, so we need to cheat
+            // When we know that something was set to checked, we add one selected count and the other way around for unchecked
+            // We don't do anything when the bindings aren't affected
+            selectedCount += lastWasChecked switch {
+                true => 1,
+                false => -1,
+                null => 0
+            };
 
             if (selectedCount == totalCount) {
                 AllChecked = true;
@@ -155,8 +156,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         
         TryProcess(() => {
             _isProcessing = true;
-            foreach (var selectedItem in AssociatedObject.SelectedItems) {
-                var selectable = (ISelectable) selectedItem;
+            foreach (var selectable in AssociatedObject.SelectedItems.Cast<ISelectable>()) {
                 selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
             }
         });
@@ -179,10 +179,10 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         if (AssociatedObject == null) return;
         
         if (AssociatedObject.SelectedItems.Count > 1) {
-            //Only select records in selection if multiple are selected
+            // Only select records in selection if multiple are selected
             SelectSelectedItems(newState);
         } else {
-            //Otherwise select all records
+            // Otherwise select all records
             SelectAllItems(newState);
         }
     }

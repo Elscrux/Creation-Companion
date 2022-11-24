@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Avalonia.Controls;
 using CreationEditor.WPF.Models.Record.Browser;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.ViewModels.Record;
@@ -10,6 +9,4 @@ public interface IRecordListVM {
     [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
     
     [Reactive] public bool IsBusy { get; set; }
-
-    public void AddColumn(DataGridColumn column);
 }

@@ -1,107 +1,66 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:CreationEditor.WPF.Views.Record">
-    <Design.PreviewWith>
-        <controls:RecordList />
-    </Design.PreviewWith>
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:comparer="clr-namespace:CreationEditor.WPF.Utility.Comparer"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:model="clr-namespace:CreationEditor.WPF.Models.Record"
+             mc:Ignorable="d"
+             x:Class="CreationEditor.WPF.Views.Record.RecordList">
+    <UserControl.Resources>
+        <comparer:ReferencedFormKeyComparer x:Key="FormKeySorter" />
+        <comparer:ReferencedEditorIDComparer x:Key="EditorIDSorter" />
+    </UserControl.Resources>
+    <Grid>
+        <DataGrid x:Name="PART_RecordGrid"
+                  Items="{Binding Records}"
+                  SelectedItem="{ReflectionBinding SelectedRecord}"
+                  CanUserSortColumns="True"
+                  CanUserReorderColumns="True" CanUserResizeColumns="True"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
+            <DataGrid.KeyBindings>
+                <KeyBinding Gesture="Delete"
+                            Command="{ReflectionBinding DeleteSelectedRecord}" />
+                <KeyBinding Gesture="Ctrl+D"
+                            Command="{ReflectionBinding DuplicateSelectedRecord}" />
+            </DataGrid.KeyBindings>
+            <DataGrid.ContextFlyout>
+                <MenuFlyout>
+                    <MenuItem Header="New"
+                              Command="{ReflectionBinding NewRecord}" />
+                    <MenuItem Header="Edit"
+                              Command="{ReflectionBinding EditSelectedRecord}" />
+                    <MenuItem Header="Duplicate"
+                              Command="{ReflectionBinding DuplicateSelectedRecord}" />
+                    <MenuItem Header="Delete"
+                              Command="{ReflectionBinding DeleteSelectedRecord}" />
+                </MenuFlyout>
+            </DataGrid.ContextFlyout>
+            <DataGrid.Columns>
+                <DataGridTextColumn x:DataType="model:IReferencedRecord"
+                                    Header="EditorID"
+                                    Binding="{Binding Record.EditorID, Mode=OneWay}"
+                                    Width="200"
+                                    CanUserSort="True"
+                                    CustomSortComparer="{StaticResource EditorIDSorter}" />
+                <DataGridTextColumn x:DataType="model:IReferencedRecord"
+                                    Header="FormKey"
+                                    Binding="{Binding Record.FormKey, Mode=OneWay}"
+                                    Width="100"
+                                    CanUserSort="True"
+                                    CustomSortComparer="{StaticResource FormKeySorter}" />
+                <DataGridTextColumn x:DataType="model:IReferencedRecord"
+                                    Header="Use Info"
+                                    Binding="{Binding References.Count, Mode=OneWay}"
+                                    Width="90"
+                                    CanUserSort="True" />
+            </DataGrid.Columns>
+        </DataGrid>
 
-    <Style Selector="controls|RecordList">
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Grid>
-                    <DataGrid x:Name="PART_RecordGrid"
-                              Items="{Binding Records, RelativeSource={RelativeSource TemplatedParent}}"
-                              SelectedItem="{Binding SelectedRecord, RelativeSource={RelativeSource TemplatedParent}}"
-                              CanUserSortColumns="True"
-                              CanUserReorderColumns="True" CanUserResizeColumns="True"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True">
-                        <!-- <DataGrid.InputBindings> -->
-                        <!--     <MouseBinding MouseAction="LeftDoubleClick" -->
-                        <!--                   Command="{Binding EditSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" /> -->
-                        <!--     <KeyBinding Key="Delete" -->
-                        <!--                 Command="{Binding DeleteSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" /> -->
-                        <!--     <KeyBinding Key="D" Modifiers="Control" -->
-                        <!--                 Command="{Binding DuplicateSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" /> -->
-                        <!-- </DataGrid.InputBindings> -->
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="New"
-                                          Command="{Binding NewRecord, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <MenuItem Header="Edit"
-                                          Command="{Binding EditSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <MenuItem Header="Duplicate"
-                                          Command="{Binding DuplicateSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <MenuItem Header="Delete"
-                                          Command="{Binding DeleteSelectedRecord, RelativeSource={RelativeSource TemplatedParent}}" />
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="EditorID" Binding="{Binding Record.EditorID, Mode=OneWay}"
-                                                Width="200"
-                                                CanUserSort="True" />
-                            <DataGridTextColumn Header="FormKey" Binding="{Binding Record.FormKey, Mode=OneWay}"
-                                                Width="100"
-                                                CanUserSort="True" />
-                            <DataGridTextColumn Header="Use Info" Binding="{Binding References.Count, Mode=OneWay}"
-                                                Width="75"
-                                                CanUserSort="True" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <!-- <mah:ProgressRing -->
-                    <!--     IsActive="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}}" -->
-                    <!--     HorizontalAlignment="Left" VerticalAlignment="Top" -->
-                    <!--     HorizontalContentAlignment="Center" VerticalContentAlignment="Center" -->
-                    <!--     Width="100" Height="100" -->
-                    <!--     Margin="50" /> -->
-                </Grid>
-            </ControlTemplate>
-        </Setter>
-    </Style>
-
-    <!-- <Style Selector="controls|RecordList"> -->
-    <!--     ~1~ Set Defaults @1@ -->
-    <!--     <Setter Property="Template"> -->
-    <!--         <ControlTemplate> -->
-    <!--             <TextBlock Text="Templated Control" /> -->
-    <!--         </ControlTemplate> -->
-    <!--     </Setter> -->
-    <!-- </Style> -->
-
-    <!-- <Style x:Key="{x:Static vm:RecordListVM.RecordReadOnlyListStyle}" TargetType="{x:Type vm:RecordListVM}"> -->
-    <!--     <Setter Property="Template"> -->
-    <!--         <Setter.Value> -->
-    <!--             <ControlTemplate TargetType="{x:Type vm:RecordListVM}"> -->
-    <!--                 <Grid> -->
-    <!--                     <DataGrid x:Name="PART_RecordGrid" -->
-    <!--                               Items="{Binding Records, RelativeSource={RelativeSource TemplatedParent}}" -->
-    <!--                               CanUserSortColumns="True" -->
-    <!--                               CanUserReorderColumns="True" CanUserResizeColumns="True" -->
-    <!--                               AutoGenerateColumns="False" -->
-    <!--                               IsReadOnly="True"> -->
-    <!--                         <DataGrid.Columns> -->
-    <!--                             <DataGridTextColumn Header="EditorID" Binding="{Binding Record.EditorID, Mode=OneWay}" -->
-    <!--                                                 Width="200" -->
-    <!--                                                 CanUserSort="True" /> -->
-    <!--                             <DataGridTextColumn Header="FormKey" Binding="{Binding Record.FormKey, Mode=OneWay}" -->
-    <!--                                                 Width="100" -->
-    <!--                                                 CanUserSort="True" /> -->
-    <!--                             <DataGridTextColumn Header="Use Info" Binding="{Binding References.Count, Mode=OneWay}" -->
-    <!--                                                 Width="75" -->
-    <!--                                                 CanUserSort="True" /> -->
-    <!--                         </DataGrid.Columns> -->
-    <!--                     </DataGrid> -->
-    <!-- -->
-    <!--                     ~1~ <mah:ProgressRing @1@ -->
-    <!--                     ~1~     IsActive="{Binding IsBusy, RelativeSource={RelativeSource TemplatedParent}}" @1@ -->
-    <!--                     ~1~     HorizontalAlignment="Left" VerticalAlignment="Top" @1@ -->
-    <!--                     ~1~     HorizontalContentAlignment="Center" VerticalContentAlignment="Center" @1@ -->
-    <!--                     ~1~     Width="100" Height="100" @1@ -->
-    <!--                     ~1~     Margin="50" /> @1@ -->
-    <!--                 </Grid> -->
-    <!--             </ControlTemplate> -->
-    <!--         </Setter.Value> -->
-    <!--     </Setter> -->
-    <!-- </Style> -->
-</Styles>
+        <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy}"
+                                           HorizontalAlignment="Left" VerticalAlignment="Top"
+                                           Width="100" Height="100"
+                                           Margin="50" />
+    </Grid>
+</UserControl>

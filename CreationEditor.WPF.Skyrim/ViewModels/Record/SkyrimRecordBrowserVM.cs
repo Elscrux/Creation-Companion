@@ -2,20 +2,22 @@
 using System.Reactive;
 using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services.Record;
+using CreationEditor.WPF.ViewModels;
 using CreationEditor.WPF.ViewModels.Record;
+using CreationEditor.WPF.Views.Record;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.WPF.Skyrim.ViewModels.Record;
 
-public class SkyrimRecordBrowserVM : ReactiveObject, IRecordBrowserVM {
+public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
 
-    [Reactive] public IRecordListVM? RecordList { get; set; }
+    [Reactive] public RecordList? RecordList { get; set; }
     
 
     public SkyrimRecordBrowserVM(
@@ -24,9 +26,9 @@ public class SkyrimRecordBrowserVM : ReactiveObject, IRecordBrowserVM {
         _recordListFactory = recordListFactory;
         RecordBrowserSettings = recordBrowserSettings;
 
-        SelectRecordType = ReactiveCommand.Create((RecordTypeListing recordTypeListing) => {
+        SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;
-            if (RecordList != null && RecordList.Type == recordType) return;
+            if (RecordList?.ViewModel?.Type == recordType) return;
 
             RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettings);
         });

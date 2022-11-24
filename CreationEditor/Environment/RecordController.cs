@@ -1,6 +1,7 @@
 ﻿using Elscrux.Logging;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Plugins.Utility;
 using Serilog;
 namespace CreationEditor.Environment;
 
@@ -44,20 +45,19 @@ public class RecordController<TMod, TModGetter> : IRecordController
         _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
             record, typeof(TMajorRecord), _editorEnvironment.ActiveMod);
 
-        return record as TMajorRecord;
+        return (record as TMajorRecord)!;
     }
     
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        var duplicate = record.Duplicate(_editorEnvironment.ActiveMod.GetNextFormKey());
-        var group = _editorEnvironment.ActiveMod.GetTopLevelGroup<TMajorRecord>();
-        group.AddUntyped(duplicate);
+        var resolveContext = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
+        var duplicate = resolveContext.DuplicateIntoAsNewRecord(_editorEnvironment.ActiveMod);
         
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
             duplicate, record, _editorEnvironment.ActiveMod);
 
-        return duplicate as TMajorRecord;
+        return duplicate;
     }
     
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)

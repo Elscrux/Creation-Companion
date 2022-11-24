@@ -3,6 +3,7 @@ using Autofac;
 using CreationEditor.WPF.Models.Record.Browser;
 using CreationEditor.WPF.Services.Record;
 using CreationEditor.WPF.ViewModels.Record;
+using CreationEditor.WPF.Views.Record;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
 namespace CreationEditor.WPF.Skyrim.Services.Record;
@@ -21,11 +22,16 @@ public class SkyrimRecordListFactory : IRecordListFactory {
         _extraColumnProvider = extraColumnProvider;
     }
     
-    public IRecordListVM FromType(Type type, IRecordBrowserSettings? browserSettings = null) {
+    public RecordList FromType(Type type, IRecordBrowserSettings? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettings;
         var browserSettingsParam = TypedParameter.From(browserSettings);
+
+        var recordList = new RecordList();
         
-        RecordListVM recordList = type.Name switch {
+        _extraColumnProvider.GetColumns(type)
+            .ForEach(recordList.AddColumn);
+        
+        recordList.DataContext = type.Name switch {
             nameof(INpcGetter) => _lifetimeScope.Resolve<RecordListVM<Npc, INpcGetter>>(browserSettingsParam),
             nameof(IActionRecordGetter) => _lifetimeScope.Resolve<RecordListVM<ActionRecord, IActionRecordGetter>>(browserSettingsParam),
             nameof(IBodyPartDataGetter) => _lifetimeScope.Resolve<RecordListVM<BodyPartData, IBodyPartDataGetter>>(browserSettingsParam),
@@ -127,11 +133,8 @@ public class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IStaticGetter) => _lifetimeScope.Resolve<RecordListVM<Static, IStaticGetter>>(browserSettingsParam),
             nameof(ITreeGetter) => _lifetimeScope.Resolve<RecordListVM<Tree, ITreeGetter>>(browserSettingsParam),
             
-            _ => _lifetimeScope.Resolve<RecordListVMReadOnly>(TypedParameter.From(type),browserSettingsParam)
+            _ => _lifetimeScope.Resolve<RecordListVMReadOnly>(TypedParameter.From(type), browserSettingsParam)
         };
-        
-        _extraColumnProvider.GetColumns(type)
-            .ForEach(recordList.AddColumn);
         
         return recordList;
     }
