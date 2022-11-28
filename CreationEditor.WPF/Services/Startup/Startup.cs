@@ -5,10 +5,6 @@ using Elscrux.Notification;
 using Serilog;
 namespace CreationEditor.WPF.Services.Startup;
 
-public interface IStartup {
-    void Start();
-}
-
 public class Startup : IStartup {
     private readonly INotifier _notifier;
     private readonly ILogger _logger;

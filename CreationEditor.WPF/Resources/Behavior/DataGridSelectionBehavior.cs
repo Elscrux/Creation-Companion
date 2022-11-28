@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -8,14 +9,14 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
+using DynamicData;
 using Noggog;
 using ReactiveUI;
-using ISelectable = Noggog.ISelectable;
-namespace CreationEditor.WPF;
+namespace CreationEditor.WPF.Behavior;
 
 public class DataGridSelectionBehavior : Behavior<DataGrid> {
     public static readonly StyledProperty<bool?> AllCheckedProperty = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
-    public static readonly StyledProperty<Func<ISelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<ISelectable, bool>>(nameof(SelectionGuard), (_ => true));
+    public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
 
     private bool _isProcessing;
 
@@ -32,7 +33,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         set => SetValue(AllCheckedProperty, value);
     }
 
-    public Func<ISelectable, bool> SelectionGuard {
+    public Func<IReactiveSelectable, bool> SelectionGuard {
         get => GetValue(SelectionGuardProperty);
         set => SetValue(SelectionGuardProperty, value);
     }
@@ -44,11 +45,25 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         if (AddContextFlyout) AddSelectionMenu();
         if (AddKeyBind) AddKeyBindings();
     }
-    
+
+    protected override void OnAttachedToVisualTree() {
+        base.OnAttachedToVisualTree();
+
+        if (AssociatedObject?.Items is IEnumerable<IReactiveSelectable> selectables) {
+            var observableSelectables = selectables
+                .ToObservable()
+                .ToObservableChangeSet();
+
+            observableSelectables
+                .AutoRefresh(selectable => selectable.IsSelected)
+                .Subscribe(UpdateAllChecked);
+        }
+    }
+
     private void AddSelectionColumn() {
         const double columnWidth = 25;
         AssociatedObject?.Columns.Insert(0, new DataGridTemplateColumn {
-            HeaderTemplate = new FuncDataTemplate<ISelectable>((_, _) => {
+            HeaderTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
                 var checkBox = new CheckBox {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
                     MinWidth = columnWidth,
@@ -61,9 +76,9 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
                 
                 return checkBox;
             }),
-            CellTemplate = new FuncDataTemplate<ISelectable>(((_, _) => {
+            CellTemplate = new FuncDataTemplate<IReactiveSelectable>(((_, _) => {
                 var checkBox = new CheckBox {
-                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ISelectable.IsSelected)),
+                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     MinWidth = columnWidth,
                     Classes = new Classes("CenteredBorder"),
@@ -72,8 +87,8 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
                     } }
                 };
                 
-                checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => UpdateAllChecked(true));
-                checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => UpdateAllChecked(false));
+                // checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => UpdateAllChecked(true));
+                // checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => UpdateAllChecked(false));
                 
                 if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
                 
@@ -121,25 +136,16 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         _isProcessing = false;
     }
 
-    private void UpdateAllChecked(bool? lastWasChecked = null) {
+    private void UpdateAllChecked() {
         if (AssociatedObject == null) return;
         
         TryProcess(() => {
             var totalCount = 0;
             var selectedCount = 0;
-            foreach (var selectable in AssociatedObject.Items.Cast<ISelectable>()) {
+            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
                 totalCount++;
                 if (selectable.IsSelected) selectedCount++;
             }
-
-            // The checked/unchecked event comes before the IsSelected binding is updated, so we need to cheat
-            // When we know that something was set to checked, we add one selected count and the other way around for unchecked
-            // We don't do anything when the bindings aren't affected
-            selectedCount += lastWasChecked switch {
-                true => 1,
-                false => -1,
-                null => 0
-            };
 
             if (selectedCount == totalCount) {
                 AllChecked = true;
@@ -156,7 +162,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         
         TryProcess(() => {
             _isProcessing = true;
-            foreach (var selectable in AssociatedObject.SelectedItems.Cast<ISelectable>()) {
+            foreach (var selectable in AssociatedObject.SelectedItems.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
             }
         });
@@ -168,7 +174,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         if (AssociatedObject == null) return;
         
         TryProcess(() => {
-            foreach (var selectable in AssociatedObject.Items.Cast<ISelectable>()) {
+            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
                 AllChecked = newState;
             }
@@ -193,11 +199,11 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         TryProcess(() => {
             _isProcessing = true;
             var newStatus = !AssociatedObject.SelectedItems
-                .Cast<ISelectable>()
+                .Cast<IReactiveSelectable>()
                 .All(selectable => selectable.IsSelected);
 
             AssociatedObject.SelectedItems
-                .Cast<ISelectable>()
+                .Cast<IReactiveSelectable>()
                 .ForEach(selectable => selectable.IsSelected = newStatus && SelectionGuard.Invoke(selectable));
         });
 
@@ -208,7 +214,7 @@ public class DataGridSelectionBehavior : Behavior<DataGrid> {
         if (AssociatedObject == null) return;
         
         TryProcess(() => {
-            foreach (var selectable in AssociatedObject.Items.Cast<ISelectable>()) {
+            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = !selectable.IsSelected && SelectionGuard.Invoke(selectable);
             }
         });

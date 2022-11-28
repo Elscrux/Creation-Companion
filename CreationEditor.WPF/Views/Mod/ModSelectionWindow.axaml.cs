@@ -1,10 +1,10 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using CreationEditor.WPF.ViewModels.Mod;
+using FluentAvalonia.UI.Windowing;
 namespace CreationEditor.WPF.Views.Mod;
 
-public partial class ModSelectionWindow : Window {
+public partial class ModSelectionWindow : AppWindow {
     public ModSelectionWindow() {
         InitializeComponent();
     }

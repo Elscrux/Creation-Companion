@@ -8,6 +8,7 @@ namespace CreationEditor.WPF;
 
 public static class ObservableExtension {
     public static IObservable<T> ObserveOnGui<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.MainThreadScheduler);
+    public static IObservable<T> ObserveOnTaskpool<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.TaskpoolScheduler);
 
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<IChangeSet<TObj, TKey>> changeSet,

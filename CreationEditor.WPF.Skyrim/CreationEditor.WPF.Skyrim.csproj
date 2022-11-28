@@ -24,4 +24,8 @@
       <Folder Include="Views\Record\Editor\Subrecord" />
     </ItemGroup>
 
+    <ItemGroup>
+      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
+    </ItemGroup>
+
 </Project>

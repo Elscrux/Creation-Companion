@@ -19,11 +19,10 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
-            <StackPanel Grid.Row="0" Margin="5">
-                <TextBlock Text="Filter"/>
-                <TextBox Padding="1"
-                         Text="{Binding RecordBrowserSettings.SearchTerm}" />
-            </StackPanel>
+            <TextBox Grid.Row="0"
+                     Margin="5"
+                     Text="{Binding RecordBrowserSettings.SearchTerm}"
+                     Watermark="Search..." />
             <CheckBox
                 Grid.Row="1"
                 Margin="5"

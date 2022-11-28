@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-namespace CreationEditor.WPF.Utility.Converters;
+namespace CreationEditor.WPF.Converter;
 
 public class BooleanToColorConverter : IValueConverter {
     private static readonly ISolidColorBrush ValidBrush = Brushes.ForestGreen;

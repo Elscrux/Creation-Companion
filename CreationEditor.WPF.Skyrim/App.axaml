@@ -2,8 +2,7 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:skyrim="clr-namespace:CreationEditor.WPF.Skyrim"
-             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
-             xmlns:converters="clr-namespace:CreationEditor.WPF.Utility.Converters;assembly=CreationEditor.WPF">
+             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia">
     <Application.DataTemplates>
         <skyrim:ViewLocator />
     </Application.DataTemplates>
@@ -11,15 +10,15 @@
     <Application.Styles>
         <!-- Base Avalonia Style -->
         <styling:FluentAvaloniaTheme PreferSystemTheme="True" />
-        
-        <!-- Avalonia Addons Style -->
-        <DockFluentTheme/>
-        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
-    </Application.Styles>
+        <StyleInclude Source="avares://FluentAvalonia.UI.Windowing/Styles/FAWindowingStyles.axaml" />
 
-    <Application.Resources>
-        <ResourceDictionary>
-            <converters:BooleanToBlurConverter x:Key="BooleanToBlurConverter" />
-        </ResourceDictionary>
-    </Application.Resources>
+        <!-- Avalonia Addons Style -->
+        <DockFluentTheme />
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml" />
+
+        <!-- Custom Style -->
+        <StyleInclude Source="avares://CreationEditor.WPF/Resources/Style/Styles.axaml" />
+        <StyleInclude Source="avares://CreationEditor.WPF/FormKeyPicker/FormKeyPicker.axaml" />
+        <StyleInclude Source="avares://CreationEditor.WPF/FormKeyPicker/FormKeyBox.axaml" />
+    </Application.Styles>
 </Application>

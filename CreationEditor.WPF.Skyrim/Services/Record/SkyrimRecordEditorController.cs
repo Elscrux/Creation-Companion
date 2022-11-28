@@ -7,7 +7,6 @@ using Avalonia.Controls;
 using CreationEditor.WPF.Services.Docking;
 using CreationEditor.WPF.Services.Record;
 using CreationEditor.WPF.ViewModels.Record;
-using Dock.Model.Core;
 using Elscrux.Logging;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -47,7 +46,7 @@ public class SkyrimRecordEditorController : IRecordEditorController {
             if (_lifetimeScope.TryResolve<IRecordEditorVM<TMajorRecord, TMajorRecordGetter>>(out var recordEditorVM)) {
                 var editorControl = recordEditorVM.CreateUserControl(record);
 
-                _dockingManagerService.AddControl(editorControl, record.EditorID ?? record.FormKey.ToString(), Avalonia.Controls.Dock.Left);
+                _dockingManagerService.AddControl(editorControl, record.EditorID ?? record.FormKey.ToString());
                 _recordEditors.Add(record.FormKey, editorControl);
             } else {
                 _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", typeof(TMajorRecord));

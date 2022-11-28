@@ -1,37 +1,47 @@
-﻿<Window x:Class="CreationEditor.WPF.Views.Mod.ModSelectionWindow"
-        x:Name="Window"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mod="clr-namespace:CreationEditor.WPF.Views.Mod"
-        xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
-        xmlns:mod1="clr-namespace:CreationEditor.WPF.Models.Mod"
-        xmlns:wpf="clr-namespace:CreationEditor.WPF"
-        mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:ModSelectionVM}"
-        d:DesignHeight="500" d:DesignWidth="750"
-        MinHeight="480" MinWidth="720" Height="480" Width="720"
-        Title="Select Mods">
-    <Window.KeyBindings>
-        <KeyBinding Gesture="A" Command="{Binding ToggleActive}" />
-    </Window.KeyBindings>
+﻿<windowing:AppWindow
+    x:Class="CreationEditor.WPF.Views.Mod.ModSelectionWindow"
+    x:Name="Window"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mod="clr-namespace:CreationEditor.WPF.Views.Mod"
+    xmlns:modVm="clr-namespace:CreationEditor.WPF.ViewModels.Mod"
+    xmlns:mod1="clr-namespace:CreationEditor.WPF.Models.Mod"
+    xmlns:behavior="clr-namespace:CreationEditor.WPF.Behavior"
+    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
+    mc:Ignorable="d" d:DataContext="{d:DesignInstance modVm:ModSelectionVM}"
+    d:DesignHeight="500" d:DesignWidth="750"
+    MinHeight="480" MinWidth="720" Height="480" Width="720"
+    Title="Select Mods">
     <Grid ColumnDefinitions="2*,1*">
-        <Grid RowDefinitions="*,Auto">
-            <DataGrid Grid.Row="0"
-                      Items="{Binding Mods}"
+        <Grid RowDefinitions="Auto,*,Auto">
+            <TextBox Grid.Row="0"
+                     Margin="5"
+                     Watermark="Search..."
+                     Text="{Binding ModSearchText}"/>
+            
+            <DataGrid Grid.Row="1"
+                      Margin="5"
+                      Items="{Binding DisplayedMods}"
                       SelectedItem="{Binding SelectedMod}"
+                      AutoGenerateColumns="False"
                       CanUserReorderColumns="False" CanUserResizeColumns="True"
                       CanUserSortColumns="False"
                       IsReadOnly="True"
-                      SelectionMode="Single"
-                      GridLinesVisibility="None" AutoGenerateColumns="False">
+                      SelectionMode="Extended"
+                      GridLinesVisibility="None"
+                      behavior:DoubleTappedBehavior.Command="{Binding ToggleActive}">
+                <DataGrid.KeyBindings>
+                    <KeyBinding Gesture="A" Command="{Binding ToggleActive}" />
+                </DataGrid.KeyBindings>
                 <DataGrid.ContextFlyout>
                     <MenuFlyout>
                         <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}" />
                     </MenuFlyout>
                 </DataGrid.ContextFlyout>
                 <Interaction.Behaviors>
-                    <wpf:DataGridSelectionBehavior EnabledMapping="MastersValid"
+                    <behavior:DataGridSelectionBehavior EnabledMapping="MastersValid"
                                                    SelectionGuard="{Binding CanSelect}" />
                     <EventTriggerBehavior />
                 </Interaction.Behaviors>
@@ -54,23 +64,23 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <Border Grid.Row="1"
-                    BorderThickness="1">
-                <StackPanel Margin="5" Orientation="Horizontal">
-                    <Button Padding="5" VerticalAlignment="Center"
-                            IsEnabled="{Binding AnyModsLoaded}"
-                            Content="Load"
-                            Command="{Binding Confirm}"
-                            CommandParameter="{Binding ElementName=Window}" />
+            <StackPanel Grid.Row="2"
+                        Margin="5" Orientation="Horizontal">
+                <Button Padding="5" VerticalAlignment="Center"
+                        IsEnabled="{Binding AnyModsLoaded}"
+                        Content="Load"
+                        Command="{Binding CloseAndLoadMods}"
+                        CommandParameter="{Binding ElementName=Window}" />
 
-                    <TextBlock Padding="5" VerticalAlignment="Center"
-                               IsVisible="{Binding !AnyModsActive}"
-                               Foreground="IndianRed"
-                               Text="No Active Mod Selected" />
-                </StackPanel>
-            </Border>
+                <TextBlock Padding="5" VerticalAlignment="Center"
+                           IsVisible="{Binding !AnyModsActive}"
+                           Foreground="IndianRed"
+                           Text="No Active Mod Selected" />
+            </StackPanel>
         </Grid>
 
-        <mod:ModDetails Grid.Column="1" DataContext="{Binding SelectedModDetails}" />
+        <mod:ModDetails Grid.Column="1" 
+                        BorderBrush="{StaticResource ButtonBackground}" BorderThickness="5,0,0,0"
+                        DataContext="{Binding SelectedModDetails}" />
     </Grid>
-</Window>
+</windowing:AppWindow>

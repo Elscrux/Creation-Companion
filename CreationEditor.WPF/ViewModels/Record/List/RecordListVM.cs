@@ -48,7 +48,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
 
     protected static readonly SourceCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> UpdateCache = new(x => x.Record.FormKey);
 
-    public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; set; }
+    public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; }
 
     public RecordListVM(
         IReferenceQuery referenceQuery,
@@ -92,7 +92,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .Where(x => x.Item1.ListedOrder.Count > 0)
             .Do(_ => IsBusy = true)
-            .ObserveOn(RxApp.TaskpoolScheduler)
+            .ObserveOnTaskpool()
             .Select(x => {
                 return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
                     foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
@@ -108,13 +108,12 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
                     }
                     obs.OnCompleted();
                     return Task.CompletedTask;
-                });
+                }).ToObservableChangeSet(refRecord => refRecord.Record.FormKey);
             })
-            .Select(x => x.ToObservableChangeSet(refRecord => refRecord.Record.FormKey))
             .Switch()
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOnGui()
             .Do(_ => IsBusy = false)
-            .ObserveOn(RxApp.TaskpoolScheduler)
+            .ObserveOnTaskpool()
             .AsObservableCache();
 
         var finalCache = Observable.Merge(

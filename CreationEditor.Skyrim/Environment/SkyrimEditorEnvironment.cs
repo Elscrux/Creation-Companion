@@ -1,12 +1,14 @@
 ﻿using System.Reactive.Subjects;
 using CreationEditor.Environment;
 using CreationEditor.Notification;
+using Elscrux.Logging;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
+using Serilog;
 namespace CreationEditor.Skyrim.Environment;
 
 public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
@@ -16,6 +18,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IBackgroundTaskManager _backgroundTaskManager;
     private readonly INotifier _notifier;
+    private readonly ILogger _logger;
 
     private IGameEnvironment<ISkyrimMod, ISkyrimModGetter> _gameEnvironment;
     IGameEnvironment IEditorEnvironment.Environment => _gameEnvironment;
@@ -48,11 +51,13 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         IReferenceQuery referenceQuery,
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IBackgroundTaskManager backgroundTaskManager,
-        INotifier notifier) {
+        INotifier notifier,
+        ILogger logger) {
         _referenceQuery = referenceQuery;
         _simpleEnvironmentContext = simpleEnvironmentContext;
         _backgroundTaskManager = backgroundTaskManager;
         _notifier = notifier;
+        _logger = logger;
 
         _activeMod = new SkyrimMod(NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
@@ -64,6 +69,15 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     }
 
     public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null) {
+        var modKeysArray = modKeys.ToArray();
+
+        var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
+        if (activeMod == null) {
+            _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
+        } else {
+            _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.Value.FileName);
+        }
+        
         _backgroundTaskManager.ReferencesLoaded = false;
         
         _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
@@ -83,7 +97,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         linearNotifier.Next("Building Environment");
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_simpleEnvironmentContext.GameReleaseContext.Release)
-            .WithLoadOrder(modKeys.ToArray())
+            .WithLoadOrder(modKeysArray)
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();
         linearNotifier.Stop();

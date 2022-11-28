@@ -2,9 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:comparer="clr-namespace:CreationEditor.WPF.Utility.Comparer"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:model="clr-namespace:CreationEditor.WPF.Models.Record"
+             xmlns:comparer="clr-namespace:CreationEditor.WPF.Comparer"
+             xmlns:behavior="clr-namespace:CreationEditor.WPF.Behavior"
              mc:Ignorable="d"
              x:Class="CreationEditor.WPF.Views.Record.RecordList">
     <UserControl.Resources>
@@ -18,6 +19,7 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
+                  behavior:DoubleTappedBehavior.Command="{ReflectionBinding EditSelectedRecord}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
                 <KeyBinding Gesture="Delete"

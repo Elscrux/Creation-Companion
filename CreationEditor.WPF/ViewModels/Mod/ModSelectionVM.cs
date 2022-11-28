@@ -1,14 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Input;
 using Avalonia.Controls;
 using CreationEditor.Environment;
 using CreationEditor.WPF.Models.Mod;
 using CreationEditor.WPF.Services;
 using DynamicData;
 using DynamicData.Binding;
-using Elscrux.Notification;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -18,24 +16,24 @@ using MutagenLibrary.Core.Plugins;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ISelectable = Noggog.ISelectable;
 namespace CreationEditor.WPF.ViewModels.Mod;
 
 public class ModSelectionVM : ViewModel {
-    private readonly INotifier _notifier;
-    private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IEditorEnvironment _editorEnvironment;
-    public IBusyService BusyService { get; }
+    private readonly IBusyService _busyService;
     private readonly IGameEnvironment _environment;
 
-    [Reactive] public ObservableCollection<ActivatableModItem> Mods { get; set; }
+    private readonly List<ActivatableModItem> _mods;
+    public IObservableCollection<ActivatableModItem> DisplayedMods { get; }
     private readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> _masterInfos = new();
 
-    [Reactive] public ActivatableModItem? SelectedMod { get; set; }
-    [Reactive] public IModGetterVM SelectedModDetails { get; init; }
+    [Reactive] public string ModSearchText { get; set; } = string.Empty;
 
-    public ModKey? ActiveMod => Mods.FirstOrDefault(x => x.IsActive)?.ModKey;
-    public IEnumerable<ModKey> SelectedMods => Mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
+    [Reactive] public ActivatableModItem? SelectedMod { get; set; }
+    public IModGetterVM SelectedModDetails { get; init; }
+
+    public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModKey;
+    public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
     private readonly ObservableAsPropertyHelper<bool> _anyModsLoaded;
     public bool AnyModsLoaded => _anyModsLoaded.Value;
@@ -43,34 +41,53 @@ public class ModSelectionVM : ViewModel {
     private readonly ObservableAsPropertyHelper<bool> _anyModsActive;
     public bool AnyModsActive => _anyModsActive.Value;
 
-    public ICommand Confirm { get; }
-    public ICommand ToggleActive { get; }
-    public Func<ISelectable, bool> CanSelect { get; } = selectable => selectable is ActivatableModItem { MastersValid: true };
+    public ReactiveCommand<Window, Unit> CloseAndLoadMods { get; }
+    public ReactiveCommand<Unit, Unit> ToggleActive { get; }
+    public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is ActivatableModItem { MastersValid: true };
 
     public ModSelectionVM(
-        INotifier notifier,
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
         IPluginListingsPathProvider pluginListingsProvider,
         IBusyService busyService) {
-        _notifier = notifier;
-        _simpleEnvironmentContext = simpleEnvironmentContext;
         _editorEnvironment = editorEnvironment;
+        _busyService = busyService;
         SelectedModDetails = modGetterVM;
-        BusyService = busyService;
 
-        _environment = GameEnvironment.Typical.Construct(_simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
-
+        _environment = GameEnvironment.Typical.Construct(simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
         var filePath = pluginListingsProvider.Get(simpleEnvironmentContext.GameReleaseContext.Release, GameInstallMode.Steam);
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
-        Mods = new ObservableCollection<ActivatableModItem>(_environment.LoadOrder.Keys.Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid)));
+        _mods = _environment.LoadOrder.Keys
+            .Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid))
+            .ToList();
 
-        var observableMods = Mods.ToObservableChangeSet();
+        DisplayedMods = this.WhenAnyValue(x => x.ModSearchText)
+            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .ObserveOnTaskpool()
+            .Select(searchText => {
+                return Observable.Create<ActivatableModItem>((obs, cancel) => {
+                    foreach (var mod in _mods) {
+                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                        if (!mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase)) continue;
+
+                        obs.OnNext(mod);
+                    }
+                    obs.OnCompleted();
+                    return Task.CompletedTask;
+                }).ToObservableChangeSet(x => x.ModKey.FileName.String);
+            })
+            .Switch()
+            .ObserveOnGui()
+            .ToObservableCollection(this);
+
+        var observableMods = _mods
+            .ToObservable()
+            .ToObservableChangeSet();
 
         var modSelected = observableMods
             .AutoRefresh(modItem => modItem.IsSelected);
@@ -92,45 +109,27 @@ public class ModSelectionVM : ViewModel {
             foreach (var change in changedMods) {
                 var changedMod = change.Item.Current;
                 if (changedMod is { IsActive: true }) {
-                    Mods?.Where(mod => mod != changedMod)
+                    _mods?.Where(mod => mod != changedMod)
                         .ForEach(modItem => modItem.IsActive = false);
                 }
             }
         });
 
+        var selectedModValid = this
+            .WhenAnyValue(x => x.SelectedMod)
+            .NotNull()
+            .Select(CanSelect);
+        
         ToggleActive = ReactiveCommand.Create(
-            canExecute: this
-                .WhenAnyValue(x => x.SelectedMod)
-                .NotNull()
-                .Select(mod => mod.MastersValid),
+            canExecute: selectedModValid,
             execute: () => {
                 if (SelectedMod == null) return;
                 SelectedMod.IsActive = !SelectedMod.IsActive;
             });
 
-        Confirm = ReactiveCommand.Create<Window>(async window => {
+        CloseAndLoadMods = ReactiveCommand.Create<Window>(window => {
             window.Close();
-
-            BusyService.IsBusy = true;
-            await Task.Run(() => {
-                //Load all mods that are selected, or masters of selected mods
-                var loadedMods = new HashSet<ModKey>();
-                var missingMods = new Queue<ModKey>(SelectedMods);
-                var modKeys = _environment.LoadOrder.Keys.ToHashSet();
-                
-                while (missingMods.Any()) {
-                    var modKey = missingMods.Dequeue();
-                    loadedMods.Add(modKey);
-
-                    foreach (var master in _masterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
-                        missingMods.Enqueue(master);
-                    }
-                }
-
-                var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-                _editorEnvironment.Build(orderedMods, ActiveMod);
-            });
-            BusyService.IsBusy = false;
+            LoadMods();
         });
 
         this.WhenAnyValue(x => x.SelectedMod)
@@ -176,5 +175,28 @@ public class ModSelectionVM : ViewModel {
                 _masterInfos.Add(listing.ModKey, (masters, valid));
             }
         }
+    }
+
+    private async void LoadMods() {
+        _busyService.IsBusy = true;
+        await Task.Run(() => {
+            //Load all mods that are selected, or masters of selected mods
+            var loadedMods = new HashSet<ModKey>();
+            var missingMods = new Queue<ModKey>(SelectedMods);
+            var modKeys = _environment.LoadOrder.Keys.ToHashSet();
+
+            while (missingMods.Any()) {
+                var modKey = missingMods.Dequeue();
+                loadedMods.Add(modKey);
+
+                foreach (var master in _masterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
+                    missingMods.Enqueue(master);
+                }
+            }
+
+            var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
+            _editorEnvironment.Build(orderedMods, ActiveMod);
+        });
+        _busyService.IsBusy = false;
     }
 }

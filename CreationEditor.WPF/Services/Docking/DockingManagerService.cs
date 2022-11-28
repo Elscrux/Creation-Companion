@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Subjects;
 using Avalonia.Controls;
-using CreationEditor.WPF.ViewModels;
+using Avalonia.Layout;
 using CreationEditor.WPF.ViewModels.Docking;
 using Dock.Model.Controls;
 using Dock.Model.Core;
@@ -9,27 +9,8 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.WPF.Services.Docking;
 
-public interface IDockingManagerService {
-    public IRootDock DockingManager { get; }
-
-    public IDock? ActiveDocument { get; }
-
-    public void AddControl<TControl>(TControl control,
-        string title,
-        Avalonia.Controls.Dock? dock = null)
-        where TControl : UserControl;
-
-    public void RemoveControl(UserControl control);
-
-    public void SetActiveControl(UserControl control);
-
-    public IObservable<UserControl> Closed { get; }
-
-    public void SaveLayout();
-    public void LoadLayout();
-}
 public class DockingManagerService : ReactiveObject, IDockingManagerService {
-    public IRootDock DockingManager { get; }
+    public DockPanel DockingManager { get; }
     private DefaultDockFactory Factory { get; }
 
     private readonly Subject<UserControl> _closed = new();
@@ -37,33 +18,23 @@ public class DockingManagerService : ReactiveObject, IDockingManagerService {
 
     public IDock? ActiveDocument { get; private set; }
 
-    public DockingManagerService() {
+    public DockingManagerService(DockPanel dockPanel) {
+        DockingManager = dockPanel;
         Factory = new DefaultDockFactory(this);
-        DockingManager = Factory.CreateLayout();
-        Factory.InitLayout(DockingManager);
     }
 
     public void AddControl<TControl>(TControl control,
         string title,
         Avalonia.Controls.Dock? dock = null)
         where TControl : UserControl {
-        // Factory.Main.VisibleDockables?.Add(new ProportionalDockSplitter());
-        Factory.Main.VisibleDockables?.Add(new ToolDock {
-            Proportion = 1,
-            VisibleDockables = Factory.CreateList<IDockable>(
-                new ToolDockVM {
-                    Title = title,
-                    Id = Guid.NewGuid().ToString(),
-                    Control = control
-                }
-            )
-        });
-
-        Factory.InitLayout(DockingManager);
+        if (dock != null) control.SetValue(DockPanel.DockProperty, dock);
+        control.VerticalAlignment = VerticalAlignment.Stretch;
+        control.HorizontalAlignment = HorizontalAlignment.Stretch;
+        DockingManager.Children.Add(control);
     }
 
     public void RemoveControl(UserControl control) {
-        DockingManager.VisibleDockables.RemoveWhere(l => ReferenceEquals(l.Context, control));
+        DockingManager.Children.RemoveWhere(c => ReferenceEquals(c, control));
     }
 
     public void SetActiveControl(UserControl control) {
@@ -85,17 +56,95 @@ public class DockingManagerService : ReactiveObject, IDockingManagerService {
 
     public void LoadLayout() {}
 }
-public static class ConvertDock {
-    public static DockMode ToDockMode(this Avalonia.Controls.Dock? dock) {
-        return dock switch {
-            Avalonia.Controls.Dock.Left => DockMode.Left,
-            Avalonia.Controls.Dock.Bottom => DockMode.Bottom,
-            Avalonia.Controls.Dock.Right => DockMode.Right,
-            Avalonia.Controls.Dock.Top => DockMode.Top,
-            _ => DockMode.Center
-        };
-    }
-}
+
+// public interface IDockingManagerService {
+//     public IRootDock DockingManager { get; }
+//
+//     public IDock? ActiveDocument { get; }
+//
+//     public void AddControl<TControl>(TControl control,
+//         string title,
+//         Avalonia.Controls.Dock? dock = null)
+//         where TControl : UserControl;
+//
+//     public void RemoveControl(UserControl control);
+//
+//     public void SetActiveControl(UserControl control);
+//
+//     public IObservable<UserControl> Closed { get; }
+//
+//     public void SaveLayout();
+//     public void LoadLayout();
+// }
+// public class DockingManagerService : ReactiveObject, IDockingManagerService {
+//     public IRootDock DockingManager { get; }
+//     private DefaultDockFactory Factory { get; }
+//
+//     private readonly Subject<UserControl> _closed = new();
+//     public IObservable<UserControl> Closed => _closed;
+//
+//     public IDock? ActiveDocument { get; private set; }
+//
+//     public DockingManagerService() {
+//         Factory = new DefaultDockFactory(this);
+//         DockingManager = Factory.CreateLayout();
+//         Factory.InitLayout(DockingManager);
+//     }
+//
+//     public void AddControl<TControl>(TControl control,
+//         string title,
+//         Avalonia.Controls.Dock? dock = null)
+//         where TControl : UserControl {
+//         // Factory.Main.VisibleDockables?.Add(new ProportionalDockSplitter());
+//         var toolDock = new ToolDock {
+//             Proportion = 0.5,
+//             VisibleDockables = Factory.CreateList<IDockable>(
+//                 new ToolDockVM {
+//                     Title = title,
+//                     Id = Guid.NewGuid().ToString(),
+//                     Control = control
+//                 }
+//             )
+//         };
+//         Factory.Main.VisibleDockables?.Add(toolDock);
+//
+//         Factory.UpdateDockable(toolDock, Factory.Main);
+//     }
+//
+//     public void RemoveControl(UserControl control) {
+//         DockingManager.VisibleDockables.RemoveWhere(l => ReferenceEquals(l.Context, control));
+//     }
+//
+//     public void SetActiveControl(UserControl control) {
+//         var dock = GetDock(control);
+//         if (dock == null) return;
+//
+//         if (ActiveDocument != null) ActiveDocument.IsActive = false;
+//
+//         dock.IsActive = true;
+//         ActiveDocument = dock;
+//     }
+//
+//     private IDock? GetDock(UserControl control) {
+//         return null;
+//         // return DockingManager.VisibleDockables?.FirstOrDefault(l => ReferenceEquals(l.Context, control));
+//     }
+//
+//     public void SaveLayout() {}
+//
+//     public void LoadLayout() {}
+// }
+// public static class ConvertDock {
+//     public static DockMode ToDockMode(this Avalonia.Controls.Dock? dock) {
+//         return dock switch {
+//             Avalonia.Controls.Dock.Left => DockMode.Left,
+//             Avalonia.Controls.Dock.Bottom => DockMode.Bottom,
+//             Avalonia.Controls.Dock.Right => DockMode.Right,
+//             Avalonia.Controls.Dock.Top => DockMode.Top,
+//             _ => DockMode.Center
+//         };
+//     }
+// }
 
 //
 // public interface IDockingManagerService {

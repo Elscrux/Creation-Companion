@@ -50,7 +50,7 @@ public partial class App : Application {
             var window = new MainWindow();
             builder.RegisterInstance(window).As<IMainWindow>();
 
-            var dockingManagerService = new DockingManagerService();
+            var dockingManagerService = new DockingManagerService(window.DockPanel);
             builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
         
             var container = builder.Build();

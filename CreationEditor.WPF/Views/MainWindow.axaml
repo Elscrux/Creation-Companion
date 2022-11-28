@@ -1,17 +1,22 @@
-﻿<Window x:Class="CreationEditor.WPF.Views.MainWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:views="clr-namespace:CreationEditor.WPF.Views"
-        xmlns:viewModels="clr-namespace:CreationEditor.WPF.ViewModels"
-        xmlns:notification="clr-namespace:CreationEditor.Notification;assembly=CreationEditor"
-        mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
-        x:Name="Window"
-        Title="{Binding WindowTitle}" MinHeight="480" MinWidth="720">
+﻿<windowing:AppWindow
+    x:Class="CreationEditor.WPF.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:views="clr-namespace:CreationEditor.WPF.Views"
+    xmlns:viewModels="clr-namespace:CreationEditor.WPF.ViewModels"
+    xmlns:notification="clr-namespace:CreationEditor.Notification;assembly=CreationEditor"
+    xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
+    mc:Ignorable="d" d:DataContext="{d:DesignInstance viewModels:MainVM}"
+    x:Name="Window"
+    Title="{Binding WindowTitle}"
+    MinHeight="480" MinWidth="720">
     <Grid>
-        <DockPanel IsHitTestVisible="{Binding !BusyService.IsBusy}"
-                   VerticalAlignment="Top">
+        <DockPanel x:Name="DockPanel"
+                   IsHitTestVisible="{Binding !BusyService.IsBusy}"
+                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Menu DockPanel.Dock="Top">
                 <Menu.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -61,14 +66,12 @@
             <!--     </uniDock:StackDockGroup> -->
             <!-- </uniDock:RootDockGroup> -->
             
-            <DockControl Layout="{Binding DockingManagerService.DockingManager}">
-                
-            </DockControl>
+            <DockControl Layout="{Binding DockingManagerService.DockingManager}"/>
         </DockPanel>
 
-        <!-- <mah:ProgressRing IsActive="{Binding BusyService.IsBusy}" -->
-        <!--                   HorizontalAlignment="Center" VerticalAlignment="Center" -->
-        <!--                   Width="500" Height="500" /> -->
+        <avaloniaProgressRing:ProgressRing IsActive="{Binding BusyService.IsBusy}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Width="500" Height="500" />
 
         <ItemsControl Items="{Binding LoadingItems}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -83,4 +86,4 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
     </Grid>
-</Window>
+</windowing:AppWindow>

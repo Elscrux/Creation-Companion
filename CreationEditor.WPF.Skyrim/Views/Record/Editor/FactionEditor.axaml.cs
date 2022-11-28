@@ -1,9 +1,10 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
 using CreationEditor.WPF.Skyrim.ViewModels.Record;
 namespace CreationEditor.WPF.Skyrim.Views.Record;
 
-public partial class FactionEditor : UserControl {
+public partial class FactionEditor : ReactiveUserControl<FactionEditorVM> {
     public FactionEditor() {
         InitializeComponent();
     }

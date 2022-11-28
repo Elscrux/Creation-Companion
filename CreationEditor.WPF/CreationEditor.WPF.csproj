@@ -18,6 +18,8 @@
         <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0-preview20221106001" />
         <PackageReference Include="Dock.Avalonia" Version="11.0.0-preview4" />
         <PackageReference Include="Dock.Model.ReactiveUI" Version="11.0.0-preview4" />
+        <PackageReference Include="FluentAvalonia.FluentIcons" Version="2.0.0-alpha.5" />
+        <PackageReference Include="FluentAvalonia.UI.Windowing" Version="2.0.0-preview4" />
         <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview4" />
         <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2" />
         <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr005" />
@@ -44,6 +46,14 @@
         <DependentUpon>DocumentDockView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
+      <UpToDateCheckInput Remove="FormKeyPicker\test.axaml" />
+      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
+      <UpToDateCheckInput Remove="FormKeyPicker\test.axaml" />
+      <UpToDateCheckInput Remove="Style\Styles.axaml" />
     </ItemGroup>
 
 </Project>

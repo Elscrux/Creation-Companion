@@ -1,10 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using FluentAvalonia.UI.Windowing;
 namespace CreationEditor.WPF.Views;
 
-public partial class MainWindow : Window, IMainWindow {
-    // public IUniDockService DockingManager => this.FindControl<RootDockGroup>("DockingManager").TheDockManager;
+public partial class MainWindow : AppWindow, IMainWindow {
+    public DockPanel? DockPanel => this.FindControl<DockPanel>("DockPanel");
 
     public MainWindow() {
         InitializeComponent();

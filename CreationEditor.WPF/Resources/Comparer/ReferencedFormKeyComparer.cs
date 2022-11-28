@@ -1,5 +1,5 @@
 ﻿using CreationEditor.WPF.Models.Record;
-namespace CreationEditor.WPF.Utility.Comparer;
+namespace CreationEditor.WPF.Comparer;
 
 public class ReferencedFormKeyComparer : ReferencedComparer {
     public override int Compare(IReferencedRecord? x, IReferencedRecord? y) {

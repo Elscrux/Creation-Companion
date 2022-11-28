@@ -1,7 +1,6 @@
 ﻿using Elscrux.Logging;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Plugins.Utility;
 using Serilog;
 namespace CreationEditor.Environment;
 
@@ -43,7 +42,7 @@ public class RecordController<TMod, TModGetter> : IRecordController
         var record = group.AddNew(_editorEnvironment.ActiveMod.GetNextFormKey());
         
         _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
-            record, typeof(TMajorRecord), _editorEnvironment.ActiveMod);
+            record, typeof(TMajorRecord), _editorEnvironment.ActiveMod.ModKey);
 
         return (record as TMajorRecord)!;
     }
@@ -55,7 +54,7 @@ public class RecordController<TMod, TModGetter> : IRecordController
         var duplicate = resolveContext.DuplicateIntoAsNewRecord(_editorEnvironment.ActiveMod);
         
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
-            duplicate, record, _editorEnvironment.ActiveMod);
+            duplicate, record, _editorEnvironment.ActiveMod.ModKey);
 
         return duplicate;
     }
@@ -79,8 +78,8 @@ public class RecordController<TMod, TModGetter> : IRecordController
 
         var newOverride = context.GetOrAddAsOverride(_editorEnvironment.ActiveMod);
         if (context.ModKey != _editorEnvironment.ActiveMod.ModKey) {
-            _logger.Here().Verbose("Creating overwrite {Override} of record {Record} in {Mod}",
-                newOverride, record, _editorEnvironment.ActiveMod);
+            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
+                record, _editorEnvironment.ActiveMod.ModKey);
         }
 
         return newOverride;
