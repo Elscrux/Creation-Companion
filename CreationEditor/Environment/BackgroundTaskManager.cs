@@ -1,9 +1,10 @@
-﻿namespace CreationEditor.Environment;
+﻿using ReactiveUI.Fody.Helpers;
+namespace CreationEditor.Environment;
 
 public interface IBackgroundTaskManager {
-    public bool ReferencesLoaded { get; set; } 
+    [Reactive] public bool ReferencesLoaded { get; set; } 
 }
 
 public class BackgroundTaskManager : IBackgroundTaskManager {
-    public bool ReferencesLoaded { get; set; }
+    [Reactive] public bool ReferencesLoaded { get; set; }
 }

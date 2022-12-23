@@ -1,0 +1,66 @@
+﻿<UserControl
+    x:Class="CreationEditor.Avalonia.Views.Record.RecordBrowser"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:browser="clr-namespace:CreationEditor.Avalonia.Models.Record.Browser"
+    xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record"
+    d:DesignHeight="720" d:DesignWidth="480">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" MinWidth="150"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="4*" MinWidth="150"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- <Border Grid.Column="0" -->
+        <!--         BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--         BorderThickness="2" -->
+        <!--         CornerRadius="3"> -->
+            <Grid RowDefinitions="Auto,Auto,*">
+                <TextBox Grid.Row="0"
+                         Margin="5"
+                         Text="{Binding RecordBrowserSettings.SearchTerm}"
+                         Watermark="Search..."/>
+                <CheckBox
+                    Grid.Row="1"
+                    Margin="5"
+                    Content="Show Only Active"
+                    IsChecked="{Binding RecordBrowserSettings.OnlyActive}"/>
+                <TreeView Grid.Row="2"
+                          Items="{Binding RecordTypeGroups}">
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="browser:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
+                            <TextBlock Text="{Binding GroupName}"/>
+                        </TreeDataTemplate>
+                        <DataTemplate DataType="browser:RecordTypeListing">
+                            <Button
+                                Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=record:RecordBrowser}}"
+                                CommandParameter="{Binding}"
+                                FontSize="12"
+                                HorizontalContentAlignment="Left">
+                                <TextBlock Text="{Binding RecordTypeName}"/>
+                            </Button>
+                        </DataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+            </Grid>
+        <!-- </Border> -->
+
+        <GridSplitter Grid.Column="1"/>
+        <!-- <GridSplitter Background="Transparent" -->
+        <!--               MinWidth="10" -->
+        <!--               CornerRadius="4" -->
+        <!--               BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--               BorderThickness="2" Grid.Column="1"/> -->
+        <!-- <GridSplitter Background="Transparent" Grid.Column="1"/> -->
+
+        <ContentControl Grid.Column="2"
+                        Content="{Binding RecordList}"/>
+        <!-- <ContentControl Grid.Column="2" -->
+        <!--                 BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--                 BorderThickness="2" -->
+        <!--                 CornerRadius="3" -->
+        <!--                 Content="{Binding RecordList}"/> -->
+    </Grid>
+</UserControl>

@@ -1,0 +1,70 @@
+﻿<windowing:AppWindow
+    x:Class="CreationEditor.Avalonia.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:notification="clr-namespace:CreationEditor.Notification;assembly=CreationEditor"
+    xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
+    xmlns:notificationView="clr-namespace:CreationEditor.Avalonia.Views.Notification"
+    xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+    x:Name="Window"
+    Title="{Binding WindowTitle}"
+    MinHeight="480" MinWidth="720">
+    <Grid>
+        <DockPanel IsHitTestVisible="{Binding !BusyService.IsBusy}"
+                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Menu DockPanel.Dock="Top" VerticalAlignment="Top">
+                <Menu.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <DockPanel HorizontalAlignment="Stretch"/>
+                    </ItemsPanelTemplate>
+                </Menu.ItemsPanel>
+                <MenuItem Header="File">
+                    <MenuItem Header="Mods"
+                              Command="{Binding OpenSelectMods}"
+                              CommandParameter="{Binding ElementName=Window}"/>
+                    <MenuItem Header="Save"
+                              Command="{Binding Save}"/>
+                </MenuItem>
+                <MenuItem Header="View">
+                    <MenuItem Header="Log"
+                              Command="{Binding OpenLog}"/>
+                    <MenuItem Header="Record Browser"
+                              Command="{Binding OpenRecordBrowser}"/>
+                </MenuItem>
+                <MenuItem IsVisible="{Binding !!LoadingItems.Count}"
+                          HorizontalAlignment="Right"
+                          Items="{Binding LoadingItems}">
+                    <MenuItem.Header>
+                        <notificationView:NotificationView DataContext="{Binding LatestNotification}"/>
+                    </MenuItem.Header>
+                    <MenuItem.DataTemplates>
+                        <DataTemplate DataType="notification:NotificationItem">
+                            <notificationView:NotificationView DataContext="{Binding}"/>
+                        </DataTemplate>
+                    </MenuItem.DataTemplates>
+                </MenuItem>
+            </Menu>
+
+            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+        </DockPanel>
+
+        <avaloniaProgressRing:ProgressRing IsActive="{Binding BusyService.IsBusy}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Width="500" Height="500"/>
+
+        <ItemsControl Items="{Binding LoadingItems}"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      IsVisible="{Binding BusyService.IsBusy}"
+                      Margin="0, 256, 0, 0">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="notification:NotificationItem">
+                    <StackPanel>
+                        <notificationView:NotificationView DataContext="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+    </Grid>
+</windowing:AppWindow>

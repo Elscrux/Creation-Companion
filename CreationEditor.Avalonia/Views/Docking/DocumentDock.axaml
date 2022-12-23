@@ -1,0 +1,45 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:fluent="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
+             xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Docking.DocumentDock"
+             Classes="AccentSelected BorderedDock">
+    <Design.DataContext>
+        <vm:DocumentDockVM/>
+    </Design.DataContext>
+    <fluent:TabView TabItems="{Binding Tabs}"
+                    SelectedItem="{Binding ActiveTab}"
+                    IsAddTabButtonVisible="False"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    CanDragTabs="True"
+                    AllowDropTabs="True"
+                    TabWidthMode="SizeToContent">
+        <fluent:TabView.TabItemTemplate>
+            <DataTemplate DataType="model:IDockedItem">
+                <fluent:TabViewItem x:Name="TabViewItem"
+                                    Header="{Binding Header}"
+                                    IconSource="{Binding IconSource}"
+                                    IsSelected="{Binding IsSelected}"
+                                    IsClosable="{Binding CanClose}"
+                                    Content="{Binding}">
+                    <Interaction.Behaviors>
+                        <EventTriggerBehavior EventName="CloseRequested"
+                                              SourceObject="{Binding #TabViewItem}">
+                            <InvokeCommandAction Command="{Binding Close}"/>
+                        </EventTriggerBehavior>
+                    </Interaction.Behaviors>
+                    <fluent:TabViewItem.ContentTemplate>
+                        <DataTemplate DataType="model:IDockedItem">
+                            <ContentControl Content="{Binding Control}"/>
+                        </DataTemplate>
+                    </fluent:TabViewItem.ContentTemplate>
+                </fluent:TabViewItem>
+            </DataTemplate>
+        </fluent:TabView.TabItemTemplate>
+    </fluent:TabView>
+</UserControl>

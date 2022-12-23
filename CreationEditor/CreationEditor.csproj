@@ -14,8 +14,8 @@
       <PackageReference Include="Noggog.CSharpExt" Version="2.52.0" />
       <PackageReference Include="MutagenLibrary.Core" Version="1.1.0" />
       <PackageReference Include="MutagenLibrary.References" Version="1.1.0" />
-      <PackageReference Include="ReactiveUI" Version="18.3.1" />
-      <PackageReference Include="ReactiveUI.Fody" Version="18.3.1" />
+      <PackageReference Include="ReactiveUI" Version="18.4.1" />
+      <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
     </ItemGroup>
 
     <ItemGroup>

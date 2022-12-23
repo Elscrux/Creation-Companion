@@ -1,0 +1,26 @@
+﻿<Application x:Class="CreationEditor.Skyrim.Avalonia.App"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
+             xmlns:avalonia="clr-namespace:CreationEditor.Skyrim.Avalonia">
+    <Application.DataTemplates>
+        <avalonia:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <!-- Base Avalonia Style -->
+        <styling:FluentAvaloniaTheme PreferSystemTheme="True" />
+        <StyleInclude Source="avares://FluentAvalonia.UI.Windowing/Styles/FAWindowingStyles.axaml" />
+
+        <!-- Avalonia Addons Style -->
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml" />
+        <!-- <DockFluentTheme /> -->
+
+        <!-- Custom Style -->
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml" />
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml" />
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml" />
+        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyPicker.axaml" />
+        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyBox.axaml" />
+    </Application.Styles>
+</Application>

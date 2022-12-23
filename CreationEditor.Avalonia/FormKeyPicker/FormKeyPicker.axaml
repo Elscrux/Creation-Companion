@@ -1,0 +1,142 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
+        xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <formKeyPicker:FormKeyPicker/>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="formKeyPicker|FormKeyPicker">
+        <Style.Resources>
+            <formKeyPicker:RecordTypeGameConverter x:Key="RecordTypeGameConverter" />
+            <formKeyPicker:RecordTypeNameConverter x:Key="RecordTypeNameConverter" />
+        </Style.Resources>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid MinHeight="18" ColumnDefinitions="*,5,*" RowDefinitions="Auto,Auto,*">
+                            <TextBox Grid.Row="0" Grid.Column="0"
+                                     x:Name="PART_EditorIDBox"
+                                     Margin="-1"
+                                     Watermark="EditorID"
+                                     Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <TextBox Grid.Row="0" Grid.Column="2"
+                                     x:Name="PART_FormKeyBox"
+                                     Margin="-1"
+                                     Watermark="FormKey"
+                                     Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                            <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
+                            <!-- PassiveBrush="{TemplateBinding PassiveBrush}" -->
+                            <!-- SuccessBrush="{TemplateBinding SuccessBrush}" -->
+                            <!-- ProcessingSpinnerForeground="{TemplateBinding ProcessingSpinnerForeground}" -->
+                            <!-- ProcessingSpinnerGlow="{TemplateBinding ProcessingSpinnerGlow}" -->
+                            <!-- Status="{TemplateBinding Status}" -->
+                            <!-- <avaloniaProgressRing:ProgressRing Grid.Row="0" Grid.Column="2" -->
+                            <!--                                    x:Name="PART_ErrorStateCircle" -->
+                            <!--                                    Margin="0,0,5,0" -->
+                            <!--                                    HorizontalAlignment="Right" -->
+                            <!--                                    VerticalAlignment="Center" -->
+                            <!--                                    IsActive="{TemplateBinding Processing}" -->
+                            <!--                                    ToolTip.Tip="{TemplateBinding StatusString}" /> -->
+
+                            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                    Height="{Binding SearchBoxHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                    MaxHeight="{Binding MaxSearchBoxHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                    Margin="0,-1,0,0"
+                                    Padding="1"
+                                    CornerRadius="3"
+                                    IsVisible="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}">
+                                <Grid>
+                                    <ListBox
+                                        Items="{Binding ApplicableEditorIDs, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate DataType="records:IMajorRecordIdentifier">
+                                                <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                                        Command="{Binding PickerClickCommand, RelativeSource={RelativeSource AncestorType=formKeyPicker:AFormKeyPicker}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{CompiledBinding EditorID}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   FontSize="10" />
+
+                                                        <TextBlock Grid.Column="1"
+                                                                   IsVisible="{Binding IsPointerOver, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                                   Margin="6,0"
+                                                                   Foreground="#AAAAAA"
+                                                                   Text="{CompiledBinding FormKey}"
+                                                                   FontSize="10" />
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <ListBox
+                                        Items="{Binding ScopedTypes, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate DataType="system:Type">
+                                                <Grid Margin="6,0,0,0">
+                                                    <TextBlock Margin="0,4">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0} ( {1} )">
+                                                                <Binding Converter="{StaticResource RecordTypeNameConverter}"
+                                                                         Mode="OneWay"/>
+                                                                <Binding Converter="{StaticResource RecordTypeGameConverter}"
+                                                                         Mode="OneWay"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                    Margin="0,3,0,0"
+                                    Background="{StaticResource ButtonBackground}"
+                                    BorderBrush="{StaticResource ButtonBorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    IsVisible="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0"
+                                               Text="Search"
+                                               Margin="6,2" />
+
+                                    <Button Grid.Column="1"
+                                            Command="{Binding ToggleViewAllowedTypesCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <Grid>
+                                            <fluentIcons:FluentIcon Icon="Search48Regular"
+                                                                    IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                    ToolTip.Tip="See type scoping" />
+                                            <fluentIcons:FluentIcon Icon="Question48Regular"
+                                                                    IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                    ToolTip.Tip="Search records" />
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</Styles>

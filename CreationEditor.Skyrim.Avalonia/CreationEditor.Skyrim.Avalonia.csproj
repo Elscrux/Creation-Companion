@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
+        <AssemblyName>CreationEditor.Skyrim.Avalonia</AssemblyName>
+        <RootNamespace>CreationEditor.Skyrim.Avalonia</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.40.0-pr005" />
+        <PackageReference Include="ReactiveUI" Version="18.4.1" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
+        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Models\Records\List" />
+      <Folder Include="Views\Record\Editor\Subrecord" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
+    </ItemGroup>
+
+</Project>

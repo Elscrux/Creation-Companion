@@ -1,0 +1,30 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+        xmlns:fluent="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+    
+    <Style Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Path#SelectedBackgroundPath">
+        <Setter Property="Fill" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+    <Style Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Border#TabContainerBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}"/>
+        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+    
+    <Style Selector="docking|DockedControl.AccentSelected:not(:focus-within) Border#DockTitleBar">
+        <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
+    </Style>
+    <Style Selector="docking|DockedControl.AccentSelected:focus-within Border#DockTitleBar">
+        <Setter Property="Background" Value="{StaticResource SystemAccentColor}"/>
+    </Style>
+    <Style Selector="docking|DockedControl.BorderedDock, docking|DocumentDock.BorderedDock">
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonBackground}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+</Styles>

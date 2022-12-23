@@ -1,0 +1,72 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:comparer="clr-namespace:CreationEditor.Avalonia.Comparer"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:record="clr-namespace:CreationEditor.Avalonia.Models.Record"
+             mc:Ignorable="d"
+             x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
+    <UserControl.Resources>
+        <comparer:ReferencedFormKeyComparer x:Key="FormKeySorter"/>
+        <comparer:ReferencedEditorIDComparer x:Key="EditorIDSorter"/>
+    </UserControl.Resources>
+    <Grid>
+        <!-- Background needs to be transparent to make the context menu work in empty area -->
+        <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
+        <DataGrid x:Name="PART_RecordGrid"
+                  Background="Transparent"
+                  Items="{Binding Records}"
+                  SelectedItem="{ReflectionBinding SelectedRecord}"
+                  CanUserSortColumns="True"
+                  CanUserReorderColumns="True" CanUserResizeColumns="True"
+                  AutoGenerateColumns="False"
+                  behavior:DoubleTappedBehavior.Command="{ReflectionBinding EditSelectedRecord}"
+                  IsReadOnly="True">
+            <DataGrid.KeyBindings>
+                <KeyBinding Gesture="Delete"
+                            Command="{ReflectionBinding DeleteSelectedRecord}"/>
+                <KeyBinding Gesture="Ctrl+D"
+                            Command="{ReflectionBinding DuplicateSelectedRecord}"/>
+            </DataGrid.KeyBindings>
+            <DataGrid.ContextFlyout>
+                <MenuFlyout>
+                    <MenuItem Header="New"
+                              Command="{ReflectionBinding NewRecord}"/>
+                    <MenuItem Header="Edit"
+                              Command="{ReflectionBinding EditSelectedRecord}"/>
+                    <MenuItem Header="Duplicate"
+                              Command="{ReflectionBinding DuplicateSelectedRecord}"/>
+                    <MenuItem Header="Delete"
+                              Command="{ReflectionBinding DeleteSelectedRecord}"/>
+                </MenuFlyout>
+            </DataGrid.ContextFlyout>
+            <DataGrid.Columns>
+                <DataGridTextColumn x:DataType="record:IReferencedRecord"
+                                    Header="EditorID"
+                                    Binding="{Binding Record.EditorID, Mode=OneWay}"
+                                    Width="200"
+                                    CanUserSort="True"
+                                    CustomSortComparer="{StaticResource EditorIDSorter}"/>
+                <DataGridTextColumn x:DataType="record:IReferencedRecord"
+                                    Header="FormKey"
+                                    Binding="{Binding Record.FormKey, Mode=OneWay}"
+                                    Width="100"
+                                    CanUserSort="True"
+                                    CustomSortComparer="{StaticResource FormKeySorter}"/>
+                <DataGridTextColumn x:DataType="record:IReferencedRecord"
+                                    Header="Use Info"
+                                    Binding="{Binding References.Count, Mode=OneWay}"
+                                    Width="90"
+                                    CanUserSort="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+
+        <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy}"
+                                           HorizontalAlignment="Left" VerticalAlignment="Top"
+                                           Width="100" Height="100"
+                                           Margin="50"/>
+    </Grid>
+</UserControl>

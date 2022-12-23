@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
+             xmlns:tab="clr-namespace:CreationEditor.Avalonia.Views.Tab"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Docking.DockingManager">
+    <Design.DataContext>
+        <docking:DockingManagerVM/>
+    </Design.DataContext>
+    <!-- <DockPanel> -->
+    <!-- <tab:TabStack DockPanel.Dock="Top" -->
+    <!--               Orientation="Horizontal" -->
+    <!--               DataContext="{Binding Tabs}"/> -->
+    <!--      -->
+    <!--     <LayoutTransformControl DockPanel.Dock="Left" Height="500" Width="500" VerticalAlignment="Top"> -->
+    <!--         <LayoutTransformControl.LayoutTransform> -->
+    <!--             ~1~ todo change to 90 when this is resolved https://github.com/AvaloniaUI/Avalonia/issues/9748 @1@ -->
+    <!--             <RotateTransform Angle="-89.9"></RotateTransform> -->
+    <!--         </LayoutTransformControl.LayoutTransform> -->
+    <!--          -->
+    <!--         <tab:TabStack Orientation="Horizontal" VerticalAlignment="Top" FlowDirection="RightToLeft" -->
+    <!--                       DataContext="{Binding Tabs2}"/> -->
+    <!--     </LayoutTransformControl> -->
+    <!--      -->
+    <!--     <LayoutTransformControl DockPanel.Dock="Right" Height="180" Width="100" VerticalAlignment="Top"> -->
+    <!--         <LayoutTransformControl.LayoutTransform> -->
+    <!--             ~1~ todo change to 90 when this is resolved https://github.com/AvaloniaUI/Avalonia/issues/9748 @1@ -->
+    <!--             <RotateTransform Angle="89.9"></RotateTransform> -->
+    <!--         </LayoutTransformControl.LayoutTransform> -->
+    <!--          -->
+    <!--         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" FlowDirection="RightToLeft"> -->
+    <!--             <TextBlock Text="123"/> -->
+    <!--             <TextBlock Text="456"/> -->
+    <!--             <TextBlock Text="789"/> -->
+    <!--         </StackPanel> -->
+    <!--     </LayoutTransformControl> -->
+    <!--      -->
+    <!--     <ContentControl MinHeight="50" MinWidth="50" -->
+    <!--                     Background="Blue" -->
+    <!--                     Content="{Binding LayoutGrid}"/> -->
+    <!-- </DockPanel> -->
+
+    <!-- <Grid> -->
+    <!--     <Grid.RowDefinitions> -->
+    <!--         <RowDefinition Height="{Binding Height, ElementName=Top}"/> -->
+    <!--         <RowDefinition Height="5"/> -->
+    <!--         <RowDefinition /> -->
+    <!--         <RowDefinition Height="5"/> -->
+    <!--         <RowDefinition /> -->
+    <!--     </Grid.RowDefinitions> -->
+    <!--      -->
+    <!--     <Grid.ColumnDefinitions> -->
+    <!--         <ColumnDefinition MinWidth="20"/> -->
+    <!--         <ColumnDefinition Width="5"/> -->
+    <!--         <ColumnDefinition/> -->
+    <!--         <ColumnDefinition Width="5"/> -->
+    <!--         <ColumnDefinition MinWidth="20"/> -->
+    <!--     </Grid.ColumnDefinitions> -->
+    <!--      -->
+    <!--     <tab:TabStack Grid.Row="0" Grid.Column="0" -->
+    <!--                   x:Name="Top" -->
+    <!--                   Grid.ColumnSpan="5" -->
+    <!--                   VerticalAlignment="Top" -->
+    <!--                   DataContext="{Binding Tabs}"> -->
+    <!--     </tab:TabStack> -->
+    <!--     ~1~ <Grid Grid.Row="0" Grid.Column="0" @1@ -->
+    <!--     ~1~       Grid.ColumnSpan="5" @1@ -->
+    <!--     ~1~       RowDefinitions="20,*"> @1@ -->
+    <!--     ~1~     <StackPanel Grid.Row="0" @1@ -->
+    <!--     ~1~                 Background="Green" @1@ -->
+    <!--     ~1~                 Orientation="Horizontal"> @1@ -->
+    <!--     ~1~         <TextBlock Text="Test1"/> @1@ -->
+    <!--     ~1~         <TextBlock Text="Test2"/> @1@ -->
+    <!--     ~1~     </StackPanel> @1@ -->
+    <!--     ~1~ @1@ -->
+    <!--     ~1~     <ContentControl Grid.Row="1"> @1@ -->
+    <!--     ~1~         <Rectangle Fill="Blue"/> @1@ -->
+    <!--     ~1~     </ContentControl> @1@ -->
+    <!--     ~1~ </Grid> @1@ -->
+    <!--      -->
+    <!--     ~1~ <ContentControl Grid.Row="0" Grid.Column="0" @1@ -->
+    <!--     ~1~                 Grid.ColumnSpan="5" @1@ -->
+    <!--     ~1~                 Content="{Binding Top}"/> @1@ -->
+    <!--      -->
+    <!--     <GridSplitter Grid.Row="1" Grid.Column="0" -->
+    <!--                   Grid.ColumnSpan="5" -->
+    <!--                   Background="Transparent"/> -->
+    <!-- -->
+    <!--     <ContentControl Grid.Row="2" Grid.Column="0" -->
+    <!--                     Content="{Binding Left}"/> -->
+    <!-- -->
+    <!--     <GridSplitter Grid.Row="2" Grid.Column="1" -->
+    <!--                   Background="Transparent"/> -->
+    <!-- -->
+    <!--     <ContentControl Grid.Row="2" Grid.Column="2" -->
+    <!--                     MinHeight="50" MinWidth="50" -->
+    <!--                     Content="{Binding LayoutGrid}"/> -->
+    <!-- -->
+    <!--     <GridSplitter Grid.Row="2" Grid.Column="3" -->
+    <!--                   Background="Transparent"/> -->
+    <!-- -->
+    <!--     <ContentControl Grid.Row="2" Grid.Column="4" -->
+    <!--                     Content="{Binding Right}"/> -->
+    <!-- -->
+    <!--     <GridSplitter Grid.Row="3" Grid.Column="0" -->
+    <!--                   Grid.ColumnSpan="5" -->
+    <!--                   Background="Transparent"/> -->
+    <!-- -->
+    <!--     <ContentControl Grid.Row="4" Grid.Column="0" -->
+    <!--                     Grid.ColumnSpan="5" -->
+    <!--                     Content="{Binding Bottom}"/> -->
+    <!-- </Grid> -->
+    
+    <ContentControl MinHeight="50" MinWidth="50"
+                    Content="{Binding LayoutGrid}"/>
+</UserControl>

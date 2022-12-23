@@ -1,5 +1,4 @@
-﻿using DynamicData;
-using Elscrux.Notification;
+﻿using Elscrux.Notification;
 namespace CreationEditor.Notification;
 
 // public class Notifier : INotifier {

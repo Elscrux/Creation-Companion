@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Docking.DockedControl"
+             Classes="AccentSelected BorderedDock">
+    <DockPanel>
+        <Border x:Name="DockTitleBar"
+                DockPanel.Dock="Top"
+                CornerRadius="4"
+                Padding="2,0,2,0"
+                MaxHeight="25">
+            <Grid>
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                    <TextBlock
+                        Text="{Binding Header, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right">
+
+                    <!-- Pin -->
+                    <Button
+                        Command="{Binding TogglePin, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}">
+                        <Grid>
+                            <fluentIcons:FluentIcon Icon="PinOff48Regular"
+                                                    IsVisible="{Binding IsPinned, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}"
+                                                    ToolTip.Tip="Unpin"/>
+                            <fluentIcons:FluentIcon Icon="Pin48Regular"
+                                                    IsVisible="{Binding !IsPinned, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}"
+                                                    ToolTip.Tip="Pin"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- Close -->
+                    <Button
+                        Command="{Binding Close, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}">
+                        <fluentIcons:FluentIcon Icon="Dismiss48Regular"
+                                                IsVisible="{Binding CanClose, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}"
+                                                ToolTip.Tip="Close"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <ContentControl Content="{Binding Control, RelativeSource={RelativeSource AncestorType=docking:DockedControl}}"/>
+    </DockPanel>
+</UserControl>
