@@ -7,28 +7,25 @@ namespace CreationEditor.Avalonia.Services.Docking;
 public class DockingManagerService : ReactiveObject, IDockingManagerService {
     public DockingManagerVM Root { get; } = new();
 
-    public IObservable<Control> Closed => Root.Closed;
+    public IObservable<IDockedItem> Closed => Root.Closed;
 
     public void AddControl(Control control, DockConfig config) {
         var dockedItem = new DockedItem(control, Root, config);
         
-        switch (config.DockType) {
-            case DockType.Layout:
-                Root.AddDockedControl(LayoutDockVM.Create(dockedItem), config);
-                break;
-            case DockType.Document:
-                Root.AddToChildDocument(dockedItem, config);
-                break;
-        }
+        Root.Add(dockedItem, config);
     }
 
     public void RemoveControl(Control control) {
-        Root.RemoveDockedControl(control);
+        if (Root.TryGetDock(control, out var dockedItem)) {
+            Root.Remove(dockedItem);
+        }
     }
 
-    public void SetActiveControl(Control control) {
-        Root.Focus(control);
-        control.Focus();
+    public void Focus(Control control) {
+        if (Root.TryGetDock(control, out var dockedItem)) {
+            Root.Focus(dockedItem);
+            control.Focus();
+        }
     }
 
     public void SaveLayout() {}

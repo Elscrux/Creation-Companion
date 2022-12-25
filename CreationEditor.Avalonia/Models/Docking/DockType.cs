@@ -3,4 +3,5 @@
 public enum DockType {
     Layout,
     Document,
+    Side,
 }

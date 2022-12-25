@@ -1,19 +1,47 @@
 ﻿using System.Reactive.Subjects;
 using Avalonia.Controls;
 using Avalonia.Media;
-using CreationEditor.Avalonia.Views.Tab;
+using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 /// <summary>
 /// this is a dock where you also have side bars/trays and you can add any docks to it
 /// </summary>
 public class DockingManagerVM : LayoutDockVM {
-    public void OnControlRemoved(Control control) {
-        _closed.OnNext(control);
+    public void OnRemoved(IDockedItem dockedItem) {
+        _closed.OnNext(dockedItem);
     }
     
-    private readonly Subject<Control> _closed = new();
-    public IObservable<Control> Closed => _closed;
+    private readonly Subject<IDockedItem> _closed = new();
+    public IObservable<IDockedItem> Closed => _closed;
+    
+    public new void Add(IDockedItem dockedItem, DockConfig config) {
+        switch (config.DockType) {
+            case DockType.Layout:
+                AddDockedControl(CreateControl(dockedItem), config);
+                break;
+            case DockType.Document:
+                AddDocumentControl(dockedItem, config);
+                break;
+            case DockType.Side:
+                AddSideControl(dockedItem, config);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public void AddSideControl(IDockedItem dockedItem, DockConfig config) {
+        var tabGroup = config.Dock switch {
+            Dock.Top => TopSide,
+            Dock.Bottom => BottomSide,
+            Dock.Left => LeftSide,
+            Dock.Right => RightSide,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        tabGroup.Add(dockedItem, config);
+    }
 
     public Grid Top { get; } = new() {
         Background = Brushes.Purple,
@@ -36,58 +64,50 @@ public class DockingManagerVM : LayoutDockVM {
         ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
     };
     public Grid Right { get; } = new() {
-        Background = Brushes.Blue,
+        Background = Brushes.Orange,
         RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
         ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
     };
 
-    public TabStackVM Tabs { get; } = new();
-    public TabStackVM Tabs2 { get; } = new();
-    public TabStackVM Tabs3 { get; } = new();
-    public TabStackVM Tabs4 { get; } = new();
+    public SidePanelVM TopSide { get; } = new();
+    public SidePanelVM LeftSide { get; } = new();
+    public SidePanelVM RightSide { get; } = new();
+    public SidePanelVM BottomSide { get; } = new();
 
     public DockingManagerVM() {
-        Tabs.Tabs.Add(new TabStackTab {
+        TopSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
                 Header = "test1",
-                Control = Top
             });
         
-        Tabs.Tabs.Add(new TabStackTab {
+        TopSide.Tabs.Add(new DockedItem(Bottom, this, new DockConfig()) {
                 Header = "test2",
-                Control = Top2
             });
         
         
-        Tabs2.Tabs.Add(new TabStackTab {
+        LeftSide.Tabs.Add(new DockedItem(Left, this, new DockConfig()) {
                 Header = "AAAAAA",
-                Control = Right
             });
         
-        Tabs2.Tabs.Add(new TabStackTab {
+        LeftSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
                 Header = "BBBBBB",
-                Control = Bottom
             });
         
         
-        Tabs3.Tabs.Add(new TabStackTab {
+        RightSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
                 Header = "CCCCCC",
-                Control = Right
             });
         
-        Tabs3.Tabs.Add(new TabStackTab {
+        RightSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
                 Header = "DDDD",
-                Control = Bottom
             });
         
         
-        Tabs4.Tabs.Add(new TabStackTab {
+        BottomSide.Tabs.Add(new DockedItem(Bottom, this, new DockConfig()) {
                 Header = "EEEEEEE",
-                Control = Right
             });
         
-        Tabs4.Tabs.Add(new TabStackTab {
+        BottomSide.Tabs.Add(new DockedItem(Left, this, new DockConfig()) {
                 Header = "FFFF",
-                Control = Bottom
             });
     }
 }

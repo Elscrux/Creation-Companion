@@ -41,7 +41,7 @@ public class RecordEditorController : IRecordEditorController {
         
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editor)) {
             // Select editor as active
-            _dockingManagerService.SetActiveControl(editor);
+            _dockingManagerService.Focus(editor);
         } else {
             // Open new editor
             if (_lifetimeScope.TryResolve<IRecordEditorVM<TMajorRecord, TMajorRecordGetter>>(out var recordEditorVM)) {
@@ -52,7 +52,7 @@ public class RecordEditorController : IRecordEditorController {
                     new DockConfig {
                         Header = record.EditorID ?? record.FormKey.ToString(),
                         Dock = Dock.Top,
-                        DockType = DockType.Document,
+                        DockType = DockType.Side,
                         Size = new GridLength(2, GridUnitType.Star),
                     });
                 _openRecordEditors.Add(record.FormKey, editorControl);
@@ -72,9 +72,9 @@ public class RecordEditorController : IRecordEditorController {
         }
     }
 
-    private void OnClosed(Control control) {
-        RemoveEditorCache(control);
-        if (control.DataContext is IRecordEditorVM recordEditorVM) {
+    private void OnClosed(IDockedItem dockedItem) {
+        RemoveEditorCache(dockedItem.Control);
+        if (dockedItem.Control.DataContext is IRecordEditorVM recordEditorVM) {
             _recordChanged.OnNext(recordEditorVM.Record);
         }
     }

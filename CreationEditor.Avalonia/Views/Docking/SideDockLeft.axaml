@@ -1,0 +1,70 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
+             xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:CompileBindings="True" x:DataType="vm:SidePanelVM"
+             x:Class="CreationEditor.Avalonia.Views.Docking.SideDockLeft">
+    <Design.DataContext>
+        <vm:SidePanelVM/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="20,*" Classes="AccentSelected">
+        <LayoutTransformControl Grid.Column="0"
+                                VerticalAlignment="Top">
+            <!-- todo https://github.com/AvaloniaUI/Avalonia/issues/9748 -->
+            <LayoutTransformControl.LayoutTransform>
+                <RotateTransform Angle="-89.9"/>
+            </LayoutTransformControl.LayoutTransform>
+            
+            <ItemsRepeater Items="{Binding Tabs}"
+                           FlowDirection="RightToLeft">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal"/>
+                </ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate DataType="model:IDockedItem">
+                        <Border Classes.AccentSelected="{Binding IsSelected}"
+                                x:Name="TabBorder">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- Close -->
+                                <Button
+                                    Margin="4"
+                                    Padding="4"
+                                    CornerRadius="8"
+                                    Command="{ReflectionBinding DataContext.Close, RelativeSource={RelativeSource AncestorType=docking:SideDockLeft}}"
+                                    CommandParameter="{Binding}">
+                                    <fluentIcons:FluentIcon Icon="Dismiss48Regular"
+                                                            IsVisible="{Binding CanClose}"
+                                                            ToolTip.Tip="Close"/>
+                                </Button>
+                                
+                                <TextBlock Text="{Binding Header}"
+                                           FontSize="12"
+                                           Padding="4,2"
+                                           x:Name="TabHeader">
+                                    <Interaction.Behaviors>
+                                        <EventTriggerBehavior EventName="PointerPressed"
+                                                              SourceObject="{Binding #TabHeader}">
+                                            <InvokeCommandAction
+                                                Command="{ReflectionBinding DataContext.Activate, RelativeSource={RelativeSource AncestorType=docking:SideDockLeft}}"
+                                                CommandParameter="{Binding Path=#TabHeader.DataContext}"/>
+                                        </EventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </LayoutTransformControl>
+
+        <ContentControl Grid.Column="1"
+                        VerticalAlignment="Stretch"
+                        Content="{Binding ActiveTab.Control}"/>
+    </Grid>
+</UserControl>

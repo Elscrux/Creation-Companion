@@ -22,7 +22,7 @@
                 <MenuItem Header="File">
                     <MenuItem Header="Mods"
                               Command="{Binding OpenSelectMods}"
-                              CommandParameter="{Binding ElementName=Window}"/>
+                              CommandParameter="{Binding #Window}"/>
                     <MenuItem Header="Save"
                               Command="{Binding Save}"/>
                 </MenuItem>

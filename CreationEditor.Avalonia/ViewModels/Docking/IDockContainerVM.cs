@@ -3,13 +3,13 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
-public interface IDockableVM {
-    public static abstract Control Create(IDockedItem dockedItem);
-
+public interface IDockContainerVM {
     public int ChildrenCount { get; }
 
     public bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock);
     
-    public void Focus(Control control);
-    public bool RemoveDockedControl(Control control);
+    public void Focus(IDockedItem dockedItem);
+
+    public void Add(IDockedItem dockedItem, DockConfig config);
+    public bool Remove(IDockedItem dockedItem);
 }

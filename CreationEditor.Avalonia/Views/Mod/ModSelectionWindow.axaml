@@ -71,7 +71,7 @@
                         IsEnabled="{Binding AnyModsLoaded}"
                         Content="Load"
                         Command="{Binding CloseAndLoadMods}"
-                        CommandParameter="{Binding ElementName=Window}"/>
+                        CommandParameter="{Binding #Window}"/>
 
                 <TextBlock Padding="5" VerticalAlignment="Center"
                            IsVisible="{Binding !AnyModsActive}"

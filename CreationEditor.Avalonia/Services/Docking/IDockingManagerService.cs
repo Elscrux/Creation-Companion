@@ -10,9 +10,9 @@ public interface IDockingManagerService {
 
     public void RemoveControl(Control control);
 
-    public void SetActiveControl(Control control);
+    public void Focus(Control control);
 
-    public IObservable<Control> Closed { get; }
+    public IObservable<IDockedItem> Closed { get; }
 
     public void SaveLayout();
     public void LoadLayout();

@@ -30,7 +30,7 @@ public partial class DockedControl : UserControl, IDockedItem {
         Close = ReactiveCommand.Create(
             canExecute: this.WhenAnyValue(x => x.CanClose),
             execute: () => {
-                Root?.RemoveDockedControl(Control);
+                Root?.Remove(this);
             });
 
         TogglePin = ReactiveCommand.Create(

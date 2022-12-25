@@ -5,7 +5,7 @@ using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Views.Docking;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
-public class LayoutDockVM : ViewModel, IDockableVM {
+public class LayoutDockVM : ViewModel, IDockContainerVM {
     protected const int MinLayoutSize = 150;
 
     private static readonly DockConfig DefaultDockConfig = new();
@@ -20,21 +20,7 @@ public class LayoutDockVM : ViewModel, IDockableVM {
         LayoutGrid.Children.Add(new DockedControl(dockedControlVM));
     }
 
-    public static Control Create(IDockedItem dockedItem) => new LayoutDock(new LayoutDockVM(dockedItem));
-
-    public void AddToChildDocument(IDockedItem dockedItem, DockConfig config) {
-        var documentDockVM = LayoutGrid.Children
-            .Select(x => x.DataContext)
-            .OfType<DocumentDockVM>()
-            .FirstOrDefault();
-        
-        //Try to add to existing document dock, otherwise add new document dock
-        if (documentDockVM != null) {
-            documentDockVM.AddDockedControl(dockedItem);
-        } else {
-            AddDockedControl(DocumentDockVM.Create(dockedItem), config);
-        }
-    }
+    public static Control CreateControl(IDockedItem dockedItem) => new LayoutDock(new LayoutDockVM(dockedItem));
 
     public int ChildrenCount => LayoutGrid.Children.Count;
     
@@ -51,7 +37,7 @@ public class LayoutDockVM : ViewModel, IDockableVM {
         
         if (ChildrenCount > 1) {
             foreach (var layoutChild in LayoutGrid.Children) {
-                if (layoutChild.DataContext is IDockableVM dockableVM && dockableVM.TryGetDock(control, out var dock)) {
+                if (layoutChild.DataContext is IDockContainerVM dockContainerVM && dockContainerVM.TryGetDock(control, out var dock)) {
                     outDock = dock;
                     return true;
                 }
@@ -64,23 +50,50 @@ public class LayoutDockVM : ViewModel, IDockableVM {
         return false;
     }
     
-    public void Focus(Control control) {
+    public void Focus(IDockedItem dockedItem) {
         foreach (var child in LayoutGrid.Children.OfType<Control>()) {
-            if (child is GridSplitter || child.DataContext is not IDockableVM dockableVM) continue;
+            if (child is GridSplitter || child.DataContext is not IDockContainerVM dockableVM) continue;
             
-            if (ReferenceEquals(control, child) && child is DockedControl dockedControl) {
+            if (ReferenceEquals(dockedItem, child) && child is DockedControl dockedControl) {
                 dockedControl.Focus();
             } else {
-                dockableVM.Focus(control);
+                dockableVM.Focus(dockedItem);
             }
         }
     }
-    
-    public void AddDockedControl(Control control) {
-        AddDockedControl(control, DefaultDockConfig);
+
+    public void Add(IDockedItem dockedItem, DockConfig config) {
+        switch (config.DockType) {
+            case DockType.Layout:
+                AddDockedControl(CreateControl(dockedItem), config);
+                break;
+            case DockType.Document:
+                AddDocumentControl(dockedItem, config);
+                break;
+            case DockType.Side:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public void AddDocumentControl(IDockedItem dockedItem, DockConfig config) {
+        var documentDockVM = LayoutGrid.Children
+            .Select(x => x.DataContext)
+            .OfType<DocumentDockVM>()
+            .FirstOrDefault();
+        
+        //Try to add to existing document dock, otherwise add new document dock
+        if (documentDockVM != null) {
+            documentDockVM.AddDocumentControl(dockedItem);
+        } else {
+            AddDockedControl(DocumentDockVM.CreateControl(dockedItem), config);
+        }
     }
     
-    public void AddDockedControl(Control control, DockConfig config) {
+    public void AddDockedControl(Control control, DockConfig? config = null) {
+        config ??= DefaultDockConfig;
+        
         if (LayoutGrid.Children.Count == 0) {
             LayoutGrid.ColumnDefinitions[0].Width = config.Size;
             LayoutGrid.RowDefinitions[0].Height = config.Size;
@@ -173,28 +186,26 @@ public class LayoutDockVM : ViewModel, IDockableVM {
         }
     }
     
-    public bool RemoveDockedControl(Control control) {
+    public bool Remove(IDockedItem dockedItem) {
         var root = GetRoot();
         
         var controlIndex = -1;
         foreach (var layoutControl in LayoutGrid.Children.OfType<Control>()) {
             controlIndex++;
-            if (layoutControl is GridSplitter || layoutControl.DataContext is not IDockableVM dockableVM) continue;
+            if (layoutControl is GridSplitter || layoutControl.DataContext is not IDockContainerVM dockContainer) continue;
             
-            // Break if control could be removed from child
-            var removedControl = dockableVM.RemoveDockedControl(control);
-
-            if (dockableVM.ChildrenCount > 1) {
+            if (dockContainer.ChildrenCount > 1) {
                 // Multi dock can resolve dock itself
-                dockableVM.RemoveDockedControl(control);
+                dockContainer.Remove(dockedItem);
             } else {
-                if (!dockableVM.TryGetDock(control, out var dock) && (!removedControl || dockableVM.ChildrenCount != 0)) continue;
+                // If single dock contains the control
+                if (!dockContainer.TryGetDock(dockedItem.Control, out _)) continue;
                 
                 // We need to remove the dock from the layout
                 // If this was the only entry, we're done
                 if (LayoutGrid.Children.Count == 1) {
                     LayoutGrid.Children.RemoveAt(0);
-                    root.OnControlRemoved(control);
+                    root.OnRemoved(dockedItem);
                     return true;
                 }
                 
@@ -230,7 +241,7 @@ public class LayoutDockVM : ViewModel, IDockableVM {
                     // The grid splitter will always be here for other controls
                     LayoutGrid.Children.RemoveAt(controlIndex - 1);
                 }
-                root.OnControlRemoved(control);
+                root.OnRemoved(dockedItem);
                 
                 switch (originalDock) {
                     case Dock.Top:

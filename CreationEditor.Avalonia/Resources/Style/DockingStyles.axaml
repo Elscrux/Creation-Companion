@@ -8,6 +8,7 @@
         </Border>
     </Design.PreviewWith>
     
+    <!-- Document -->
     <Style Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Path#SelectedBackgroundPath">
         <Setter Property="Fill" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
@@ -16,6 +17,18 @@
         <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
     
+    <!-- Side -->
+    <Style Selector="Border#TabBorder">
+        <Setter Property="CornerRadius" Value="2"/>
+    </Style>
+    <Style Selector="Border.AccentSelected">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+    </Style>
+    <Style Selector="Grid#TabGrid:focus-within Border.AccentSelected">
+        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+    
+    <!-- Control -->
     <Style Selector="docking|DockedControl.AccentSelected:not(:focus-within) Border#DockTitleBar">
         <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
     </Style>

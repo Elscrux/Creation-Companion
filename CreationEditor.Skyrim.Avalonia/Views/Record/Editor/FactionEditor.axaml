@@ -67,6 +67,7 @@
                             <!-- dd:DragDrop.ShowAlwaysDropTargetAdorner="True" -->
                             <!-- dd:DragDrop.UseDefaultEffectDataTemplate="True" -->
                             <DataGrid Items="{Binding EditableRecord.Relations}"
+                                      Background="Transparent"
                                       CanUserReorderColumns="False"
                                       CanUserResizeColumns="True"
                                       CanUserSortColumns="True"
@@ -135,6 +136,7 @@
                                             Header="Ranks"
                                             FontSize="12">
                         <DataGrid Items="{Binding EditableRecord.Ranks}"
+                                  Background="Transparent"
                                   CanUserReorderColumns="False"
                                   CanUserResizeColumns="True"
                                   CanUserSortColumns="False"
@@ -156,20 +158,30 @@
                                 </MenuFlyout>
                             </DataGrid.ContextFlyout>
                             <DataGrid.Columns>
-                                <DataGridTextColumn x:DataType="skyrim:Rank"
-                                                    Binding="{Binding Title.Male.String}">
-                                    <DataGridTextColumn.Header>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.Header>
                                         <TextBlock Text="Male Title"
                                                    ToolTip.Tip="Male Title name, not visible in game"/>
-                                    </DataGridTextColumn.Header>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn x:DataType="skyrim:Rank"
-                                                    Binding="{Binding Title.Female.String}">
-                                    <DataGridTextColumn.Header>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="skyrim:Rank">
+                                            <TextBox Text="{Binding Title.Male.String}"
+                                                     Watermark="Male"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.Header>
                                         <TextBlock Text="Female Title"
                                                    ToolTip.Tip="Female Title name, not visible in game"/>
-                                    </DataGridTextColumn.Header>
-                                </DataGridTextColumn>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="skyrim:Rank">
+                                            <TextBox Text="{Binding Title.Male.String}"
+                                                     Watermark="Female"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </HeaderedContentControl>

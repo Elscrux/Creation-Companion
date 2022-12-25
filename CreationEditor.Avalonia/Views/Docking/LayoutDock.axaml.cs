@@ -7,7 +7,7 @@ public partial class LayoutDock : ReactiveUserControl<LayoutDockVM> {
         InitializeComponent();
     }
 
-    public LayoutDock(IDockableVM vm) : this() {
+    public LayoutDock(IDockContainerVM vm) : this() {
         DataContext = vm;
     }
 }

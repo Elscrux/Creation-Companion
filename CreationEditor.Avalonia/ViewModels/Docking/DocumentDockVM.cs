@@ -7,7 +7,7 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// <summary>
 /// Documents that are organized in a tab view
 /// </summary>
-public class DocumentDockVM : ViewModel, IDockableVM {//todo this is more like a document dock (with tabs)
+public class DocumentDockVM : ViewModel, IDockContainerVM {
     public ObservableCollection<IDockedItem> Tabs { get; } = new();
 
     public IDockedItem? ActiveTab { get; set; }
@@ -17,7 +17,7 @@ public class DocumentDockVM : ViewModel, IDockableVM {//todo this is more like a
         ActiveTab = dockedItem;
     }
     
-    public static Control Create(IDockedItem dockedItem) => new DocumentDock(new DocumentDockVM(dockedItem));
+    public static Control CreateControl(IDockedItem dockedItem) => new DocumentDock(new DocumentDockVM(dockedItem));
 
     public int ChildrenCount => Tabs.Count;
 
@@ -33,36 +33,44 @@ public class DocumentDockVM : ViewModel, IDockableVM {//todo this is more like a
 
         return false;
     }
-    
-    public void AddDockedControl(IDockedItem dockedItem) {
-        Tabs.Add(dockedItem);
-        Focus(dockedItem.Control);
+
+    public void Add(IDockedItem dockedItem, DockConfig config) {
+        switch (config.DockType) {
+            case DockType.Layout:
+                break;
+            case DockType.Document:
+                AddDocumentControl(dockedItem);
+                break;
+            case DockType.Side:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
     
-    public bool RemoveDockedControl(Control control) {
+    public void AddDocumentControl(IDockedItem dockedItem) {
+        Tabs.Add(dockedItem);
+        Focus(dockedItem);
+    }
+    
+    public bool Remove(IDockedItem dockedItem) {
         var oldCount = Tabs.Count;
-        
-        // Remove control
-        for (var i = Tabs.Count - 1; i >= 0; i--) {
-            var dockedItem = Tabs[i];
-            if (ReferenceEquals(dockedItem.Control, control)) {
-                dockedItem.Root.OnControlRemoved(control);
-                Tabs.RemoveAt(i);
-            }
-        }
+
+        // Remove tab
+        Tabs.Remove(dockedItem);
         
         // Change active tab if necessary
-        if (Tabs.Count > 0 && ReferenceEquals(ActiveTab?.Control, control)) ActiveTab = Tabs[0];
-        
-        return oldCount != Tabs.Count;
+        if (Tabs.Count > 0 && ReferenceEquals(ActiveTab?.Control, dockedItem)) ActiveTab = Tabs[0];
+
+        if (oldCount == Tabs.Count) return false;
+
+        dockedItem.Root.OnRemoved(dockedItem);
+        return true;
     }
 
-    public void Focus(Control control) {
-        if (TryGetDock(control, out var dock)) {
-            foreach (var tab in Tabs) {
-                tab.IsSelected = false;
-            }
-            dock.IsSelected = true;
-        }
+    public void Focus(IDockedItem dockedItem) {
+        foreach (var tab in Tabs) tab.IsSelected = false;
+        
+        dockedItem.IsSelected = true;
     }
 }
