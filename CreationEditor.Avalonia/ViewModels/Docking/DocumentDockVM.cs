@@ -7,21 +7,23 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// <summary>
 /// Documents that are organized in a tab view
 /// </summary>
-public class DocumentDockVM : ViewModel, IDockContainerVM {
+public sealed class DocumentDockVM : DockContainerVM {
     public ObservableCollection<IDockedItem> Tabs { get; } = new();
-
+    
+    public override IEnumerable<IDockObject> Children => Tabs;
+    public override int ChildrenCount => Tabs.Count;
+    
     public IDockedItem? ActiveTab { get; set; }
 
-    protected DocumentDockVM(IDockedItem dockedItem) {
-        Tabs.Add(dockedItem);
-        ActiveTab = dockedItem;
+    private DocumentDockVM(IDockedItem dockedItem, DockContainerVM? dockParent) {
+        DockParent = dockParent;
+        Add(dockedItem, DockConfig.Default);
     }
     
-    public static Control CreateControl(IDockedItem dockedItem) => new DocumentDock(new DocumentDockVM(dockedItem));
+    public static Control CreateControl(IDockedItem dockedItem, DockContainerVM? parent) => new DocumentDock(new DocumentDockVM(dockedItem, parent));
 
-    public int ChildrenCount => Tabs.Count;
 
-    public bool TryGetDock(Control control, out IDockedItem outDock) {
+    public override bool TryGetDock(Control control, out IDockedItem outDock) {
         outDock = null!;
         
         foreach (var dockedItem in Tabs) {
@@ -34,43 +36,44 @@ public class DocumentDockVM : ViewModel, IDockContainerVM {
         return false;
     }
 
-    public void Add(IDockedItem dockedItem, DockConfig config) {
-        switch (config.DockType) {
-            case DockType.Layout:
-                break;
-            case DockType.Document:
-                AddDocumentControl(dockedItem);
-                break;
-            case DockType.Side:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-    
-    public void AddDocumentControl(IDockedItem dockedItem) {
+    public override void Add(IDockedItem dockedItem, DockConfig config) {
+        if (config.DockMode is not DockMode.Default or DockMode.Document) return;
+        
+        dockedItem.DockParent = this;
         Tabs.Add(dockedItem);
         Focus(dockedItem);
+        
+        (this as IDockObject).DockRoot.OnDockAdded(dockedItem);
     }
     
-    public bool Remove(IDockedItem dockedItem) {
-        var oldCount = Tabs.Count;
-
-        // Remove tab
-        Tabs.Remove(dockedItem);
+    public override bool Remove(IDockedItem dockedItem) {
+        if (!Tabs.Contains(dockedItem)) return false;
         
-        // Change active tab if necessary
-        if (Tabs.Count > 0 && ReferenceEquals(ActiveTab?.Control, dockedItem)) ActiveTab = Tabs[0];
+        using ((this as IDockObject).DockRoot.ModificationLock.Lock()) {
+            using (dockedItem.RemovalLock.Lock()) {
+                var oldCount = Tabs.Count;
+        
+                // Change active tab if necessary
+                if (dockedItem.Equals(ActiveTab)) ActiveTab = Tabs.FirstOrDefault(tab => !tab.Equals(dockedItem));
 
-        if (oldCount == Tabs.Count) return false;
+                // Remove tab
+                Tabs.Remove(dockedItem);
 
-        dockedItem.Root.OnRemoved(dockedItem);
-        return true;
+                return oldCount != Tabs.Count;
+            }
+        }
     }
 
-    public void Focus(IDockedItem dockedItem) {
-        foreach (var tab in Tabs) tab.IsSelected = false;
+    public override bool CleanUp() => false;
+
+    public override bool Focus(IDockedItem dockedItem) {
+        if (!Tabs.Contains(dockedItem)) return false;
         
+        foreach (var tab in Tabs) tab.IsSelected = false;
+
         dockedItem.IsSelected = true;
+        ActiveTab = dockedItem;
+
+        return true;
     }
 }

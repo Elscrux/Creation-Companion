@@ -4,74 +4,112 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:CompileBindings="True" x:DataType="docking:DockingManagerVM"
-             x:Class="CreationEditor.Avalonia.Views.Docking.DockingManager">
+             x:Class="CreationEditor.Avalonia.Views.Docking.DockingManager"
+             Background="Transparent">
     <Design.DataContext>
         <docking:DockingManagerVM/>
     </Design.DataContext>
+
     <Grid>
-        <Grid.Resources>
-            <view:GridLengthPixelConverter x:Key="ToGridLengthPixel"/>
-        </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition MinHeight="{ReflectionBinding DataContext.TabMinSize, ElementName=Top}"
-                           Height="{ReflectionBinding DataContext.TabSize, ElementName=Top, Converter={StaticResource ToGridLengthPixel}}"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition MinHeight="100"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition MinHeight="{ReflectionBinding DataContext.TabMinSize, ElementName=Bottom}"
-                           Height="{ReflectionBinding DataContext.TabSize, ElementName=Bottom, Converter={StaticResource ToGridLengthPixel}}"/>
+            <RowDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding TopSide}"/>
+                </Interaction.Behaviors>
+            </RowDefinition>
+            <RowDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding TopSide}"
+                                                     ActiveTabSize="5" 
+                                                     ActiveTabMinSize="5"
+                                                     NoActiveTabSize="5"/>
+                </Interaction.Behaviors>
+            </RowDefinition>
+            <RowDefinition MinHeight="{Binding LayoutMinHeight}"
+                           Height="{Binding LayoutHeight}"/>
+            <RowDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding BottomSide}"
+                                                     ActiveTabSize="5" 
+                                                     ActiveTabMinSize="5"
+                                                     NoActiveTabSize="5"/>
+                </Interaction.Behaviors>
+            </RowDefinition>
+            <RowDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding BottomSide}"/>
+                </Interaction.Behaviors>
+            </RowDefinition>
         </Grid.RowDefinitions>
-        
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="{ReflectionBinding DataContext.TabMinSize, ElementName=Left}"
-                              Width="{ReflectionBinding DataContext.TabSize, ElementName=Left, Converter={StaticResource ToGridLengthPixel}}"/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition MinWidth="100"/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition MinWidth="{ReflectionBinding DataContext.TabMinSize, ElementName=Right}"
-                              Width="{ReflectionBinding DataContext.TabSize, ElementName=Right, Converter={StaticResource ToGridLengthPixel}}"/>
+            <ColumnDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding LeftSide}"/>
+                </Interaction.Behaviors>
+            </ColumnDefinition>
+            <ColumnDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding LeftSide}"
+                                                     ActiveTabSize="5" 
+                                                     ActiveTabMinSize="5"
+                                                     NoActiveTabSize="5"/>
+                </Interaction.Behaviors>
+            </ColumnDefinition>
+            <ColumnDefinition MinWidth="{Binding LayoutMinWidth}"
+                              Width="{Binding LayoutWidth}"/>
+            <ColumnDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding RightSide}"
+                                                     ActiveTabSize="5" 
+                                                     ActiveTabMinSize="5"
+                                                     NoActiveTabSize="5"/>
+                </Interaction.Behaviors>
+            </ColumnDefinition>
+            <ColumnDefinition>
+                <Interaction.Behaviors>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding RightSide}"/>
+                </Interaction.Behaviors>
+            </ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <view:SideDock Grid.Row="0" Grid.Column="0"
-                      Grid.ColumnSpan="5"
-                      x:Name="Top"
-                      DataContext="{Binding TopSide}"/>
+                       Grid.ColumnSpan="5"
+                       DataContext="{Binding TopSide}"/>
 
         <GridSplitter Grid.Row="1" Grid.Column="0"
                       Grid.ColumnSpan="5"
-                      IsEnabled="{ReflectionBinding DataContext.ActiveTab, ElementName=Top, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      IsEnabled="{Binding TopSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
                       Background="Transparent"/>
 
         <view:SideDockLeft Grid.Row="2" Grid.Column="0"
-                                x:Name="Left"
-                                DataContext="{Binding LeftSide}"/>
+                           DataContext="{Binding LeftSide}"/>
 
         <GridSplitter Grid.Row="2" Grid.Column="1"
-                      IsEnabled="{ReflectionBinding DataContext.ActiveTab, ElementName=Left, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      IsEnabled="{Binding LeftSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
                       Background="Transparent"/>
 
-        <ContentControl Grid.Row="2" Grid.Column="2"
-                        MinHeight="50" MinWidth="50"
-                        Content="{Binding LayoutGrid}"/>
+        <view:LayoutDock Grid.Row="2" Grid.Column="2"
+                         DataContext="{Binding Layout}"/>
 
         <GridSplitter Grid.Row="2" Grid.Column="3"
-                      IsEnabled="{ReflectionBinding DataContext.ActiveTab, ElementName=Right, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      IsEnabled="{Binding RightSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
                       Background="Transparent"/>
 
         <view:SideDockRight Grid.Row="2" Grid.Column="4"
-                      x:Name="Right"
-                      DataContext="{Binding RightSide}"/>
+                            DataContext="{Binding RightSide}"/>
 
         <GridSplitter Grid.Row="3" Grid.Column="0"
                       Grid.ColumnSpan="5"
-                      IsEnabled="{ReflectionBinding DataContext.ActiveTab, ElementName=Bottom, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="Transparent"/>
+                      IsEnabled="{Binding BottomSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      Background="Transparent">
+        </GridSplitter>
 
         <view:SideDock Grid.Row="4" Grid.Column="0"
-                      Grid.ColumnSpan="5"
-                      x:Name="Bottom"
-                      DataContext="{Binding BottomSide}"/>
+                       Grid.ColumnSpan="5"
+                       DataContext="{Binding BottomSide}"/>
     </Grid>
 </UserControl>

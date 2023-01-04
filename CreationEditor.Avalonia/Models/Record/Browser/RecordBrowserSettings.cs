@@ -37,7 +37,7 @@ public class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettings {
         LinkCache = Scope switch {
             BrowserScope.Environment => _editorEnvironment.LinkCache,
             BrowserScope.ActiveMod => _editorEnvironment.ActiveModLinkCache,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(Scope))
         };
     }
 

@@ -10,8 +10,8 @@
     <ItemGroup>
       <PackageReference Include="Autofac" Version="6.5.0" />
       <PackageReference Include="Elscrux" Version="1.1.0" />
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0-pr005" />
-      <PackageReference Include="Noggog.CSharpExt" Version="2.52.0" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0" />
+      <PackageReference Include="Noggog.CSharpExt" Version="2.54.0" />
       <PackageReference Include="MutagenLibrary.Core" Version="1.1.0" />
       <PackageReference Include="MutagenLibrary.References" Version="1.1.0" />
       <PackageReference Include="ReactiveUI" Version="18.4.1" />

@@ -44,7 +44,6 @@ public partial class App : Application {
         
             // ToDo
             // Remove
-            builder.RegisterType<GameInstallModeContext>().AsImplementedInterfaces();
             builder.RegisterType<GameLocator>().As<IGameDirectoryLookup>();
         
             var window = new MainWindow();

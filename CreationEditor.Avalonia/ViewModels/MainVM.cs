@@ -39,6 +39,8 @@ public class MainVM : NotifiedVM {
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
         
+        // todo add default docking manager views (record browser on the left in side panel, log at the bottom in side panel)
+        
         OpenSelectMods = ReactiveCommand.Create<Window>(window => {
             var modSelectionWindow = new ModSelectionWindow(modSelectionVM);
             modSelectionWindow.ShowDialog(window);
@@ -49,22 +51,26 @@ public class MainVM : NotifiedVM {
         OpenLog = ReactiveCommand.Create(() => {
             // DockingManagerService.AddControl(
             //     new LogView(componentContext.Resolve<ILogVM>()),
-            //     "Log",
-            //     DockPosition.Bottom);
-            //     // new DockingStatus { AnchorSide = AnchorSide.Bottom, Height = 200 });
+            //     new DockConfig {
+            //         DockInfo = new DockInfo {
+            //             Header = "Log", 
+            //         },
+            //         Dock = Dock.Bottom,
+            //         DockMode = DockMode.Side,
+            //     });
         });
         
         OpenRecordBrowser = ReactiveCommand.Create(() => {
             DockingManagerService.AddControl(
                 new RecordBrowser(componentContext.Resolve<IRecordBrowserVM>()),
                 new DockConfig {
-                    Header = "Record Browser",
+                    DockInfo = new DockInfo {
+                        Header = "Record Browser", 
+                    },
                     Dock = Dock.Left,
-                    DockType = DockType.Layout,
+                    DockMode = DockMode.Layout,
                     Size = new GridLength(3, GridUnitType.Star),
                 });
-            // DockKind.Left);
-            // new DockingStatus { Width = 600 });
         });
         
         editorEnvironment.ActiveModChanged
@@ -73,12 +79,5 @@ public class MainVM : NotifiedVM {
             });
 
         notifier.Subscribe(this);
-
-        // ThemeManager.Current.ThemeSyncMode = ThemeSyncMode.SyncAll;
-        // ThemeManager.Current.SyncTheme();
-        // Theme = ThemeManager.Current.DetectTheme()?.BaseColorScheme switch {
-        //     "Dark" => new Vs2013DarkTheme(),
-        //     _ => new Vs2013LightTheme(),
-        // };
     }
 }

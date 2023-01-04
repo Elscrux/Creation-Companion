@@ -436,7 +436,7 @@
                                         <!--                   HigherValue="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}" -->
                                         <!--                   AutoToolTipPlacement="TopLeft" -->
                                         <!--                   IsSnapToTickEnabled="True" -->
-                                        <!--                   RangeBackground="{StaticResource SystemAccentColor}" -->
+                                        <!--                   RangeBackground="{DynamicResource SystemAccentColor}" -->
                                         <!--                   TickFrequency="1" TickPlacement="TopLeft" /> -->
                                     </HeaderedContentControl>
 

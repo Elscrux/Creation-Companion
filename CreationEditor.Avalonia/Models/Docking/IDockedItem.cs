@@ -4,21 +4,24 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Avalonia.Models.Docking; 
+namespace CreationEditor.Avalonia.Models.Docking;
 
-public interface IDockedItem {
-    public Control Control { get; set; }
-    public DockingManagerVM Root { get; set; }
+public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
+    public Guid Id { get; }
+
+    public Control Control { get; }
+    
+    public new DockContainerVM DockParent { get; set; }
+    
+    [Reactive] public bool IsSelected { get; set; }
     
     [Reactive] public string? Header { get; set; }
     [Reactive] public IconSource? IconSource { get; set; }
     
     [Reactive] public bool CanClose { get; set; }
-    [Reactive] public bool CanPin { get; set; }
-    
-    [Reactive] public bool IsPinned { get; set; }
-    [Reactive] public bool IsSelected { get; set; }
+    public ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
 
-    public ReactiveCommand<Unit, Unit> Close { get; }
-    public ReactiveCommand<Unit, Unit> TogglePin { get; }
+    public DisposableCounterLock RemovalLock { get; }
+    
+    public IObservable<IDockedItem> Closed { get; }
 }

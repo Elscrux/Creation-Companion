@@ -1,51 +1,114 @@
+using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Avalonia.Views.Docking; 
+namespace CreationEditor.Avalonia.Views.Docking;
 
-public partial class DockedControl : UserControl, IDockedItem {
-    public Control Control { get; set; } = null!;
-    public DockingManagerVM Root { get; set; } = null!;
+[DebuggerDisplay("Header = {Header}")]
+public partial class DockedControl : UserControl, IDockedItem, IDockPreview {
+    public IDockedItem DockedItem { get; } = null!;
+
+    public Guid Id => DockedItem.Id;
     
-    [Reactive] public string? Header { get; set; }
-    [Reactive] public IconSource? IconSource { get; set; }
+    public Control Control => DockedItem.Control;
+    public DockContainerVM DockParent {
+        get => DockedItem.DockParent;
+        set => DockedItem.DockParent = value;
+    }
+    
+    public bool IsSelected {
+        get => DockedItem.IsSelected;
+        set => DockedItem.IsSelected = value;
+    }
+    
+    public string? Header {
+        get => DockedItem.Header;
+        set => DockedItem.Header = value;
+    }
 
-    [Reactive] public bool CanPin { get; set; } = true;
-    [Reactive] public bool CanClose { get; set; } = true;
+    public IconSource? IconSource {
+        get => DockedItem.IconSource;
+        set => DockedItem.IconSource = value;
+    }
+    
+    public bool CanClose {
+        get => DockedItem.CanClose;
+        set => DockedItem.CanClose = value;
+    }
+    
+    public ReactiveCommand<Unit, IObservable<IDockedItem>> Close => DockedItem.Close;
 
-    [Reactive] public bool IsPinned { get; set; } = true;
-    [Reactive] public bool IsSelected { get; set; }
-
-    public ReactiveCommand<Unit, Unit> Close { get; }
-    public ReactiveCommand<Unit, Unit> TogglePin { get; }
+    public DisposableCounterLock RemovalLock => DockedItem.RemovalLock;
+    
+    public IObservable<IDockedItem> Closed => DockedItem.Closed;
 
     public DockedControl() {
         InitializeComponent();
-        
-        Close = ReactiveCommand.Create(
-            canExecute: this.WhenAnyValue(x => x.CanClose),
-            execute: () => {
-                Root?.Remove(this);
-            });
-
-        TogglePin = ReactiveCommand.Create(
-            canExecute: this.WhenAnyValue(x => x.CanPin),
-            execute: () => {
-                IsPinned = !IsPinned;
-            });
     }
-    
+
     public DockedControl(IDockedItem vm) : this() {
+        DataContext = DockedItem = vm;
+        Name = Header = vm.Header;
+        
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
+        
+        DetachedFromLogicalTree += (_, _) => CheckRemoved();
+        Control.DetachedFromLogicalTree += (_, _) => CheckRemoved();
+    }
 
-        Control = vm.Control;
-        Root = vm.Root;
-        DataContext = vm;
+    private void CheckRemoved() {
+        if (RemovalLock.IsLocked()
+         || GetValue(VisualParentProperty) != null
+         || Control.GetValue(VisualParentProperty) != null
+         || DockParent.TryGetDock(Control, out _)) return;
+
+        (this as IDockObject).DockRoot.OnDockRemoved(this);
+    }
+    
+    public void ShowPreview(Dock dock) {
+        var grid = new Grid {
+            Children = {
+                new Rectangle {
+                    IsHitTestVisible = false,
+                    Opacity = 0.5,
+                    Fill = (this as IDockPreview).Brush,
+                    [Grid.RowProperty] = 1,
+                }
+            }
+        };
+        switch (dock) {
+            case Dock.Top:
+                grid.RowDefinitions = new RowDefinitions { new(), new() };
+                grid.Children[0].SetValue(Grid.RowProperty, 0);
+                break;
+            case Dock.Bottom:
+                grid.RowDefinitions = new RowDefinitions { new(), new() };
+                grid.Children[0].SetValue(Grid.RowProperty, 1);
+                break;
+            case Dock.Left:
+                grid.ColumnDefinitions = new ColumnDefinitions { new(), new() };
+                grid.Children[0].SetValue(Grid.ColumnProperty, 0);
+                break;
+            case Dock.Right:
+                grid.ColumnDefinitions = new ColumnDefinitions { new(), new() };
+                grid.Children[0].SetValue(Grid.ColumnProperty, 1);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(dock), dock, null);
+        }
+
+        AdornerLayer.SetAdorner(this, grid);
+    }
+
+    public bool Equals(IDockedItem? other) {
+        return Id == other?.Id;
     }
 }
+

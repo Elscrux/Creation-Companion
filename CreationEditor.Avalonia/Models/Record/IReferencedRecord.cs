@@ -5,5 +5,5 @@ namespace CreationEditor.Avalonia.Models.Record;
 
 public interface IReferencedRecord {
     [Reactive] public IMajorRecordGetter Record { get; set; }
-    [Reactive] public HashSet<IFormLinkIdentifier> References { get; set; }
+    public HashSet<IFormLinkIdentifier> References { get; set; }
 }

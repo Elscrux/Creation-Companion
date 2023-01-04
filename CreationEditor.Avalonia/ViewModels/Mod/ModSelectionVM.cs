@@ -57,7 +57,7 @@ public class ModSelectionVM : ViewModel {
         SelectedModDetails = modGetterVM;
         _environment = GameEnvironment.Typical.Construct(simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
-        var filePath = pluginListingsProvider.Get(simpleEnvironmentContext.GameReleaseContext.Release, GameInstallMode.Steam);
+        var filePath = pluginListingsProvider.Get(simpleEnvironmentContext.GameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();

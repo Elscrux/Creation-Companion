@@ -12,6 +12,7 @@ public interface IDockingManagerService {
 
     public void Focus(Control control);
 
+    public IObservable<IDockedItem> Opened { get; }
     public IObservable<IDockedItem> Closed { get; }
 
     public void SaveLayout();

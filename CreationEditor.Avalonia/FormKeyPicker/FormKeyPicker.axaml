@@ -111,8 +111,8 @@
 
                             <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                     Margin="0,3,0,0"
-                                    Background="{StaticResource ButtonBackground}"
-                                    BorderBrush="{StaticResource ButtonBorderBrush}"
+                                    Background="{DynamicResource ButtonBackground}"
+                                    BorderBrush="{DynamicResource ButtonBorderBrush}"
                                     BorderThickness="0,0,0,1"
                                     IsVisible="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}">
                                 <Grid ColumnDefinitions="*,Auto">

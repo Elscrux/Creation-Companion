@@ -5,17 +5,25 @@
              xmlns:fluent="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Docking.DocumentDock"
-             Classes="AccentSelected BorderedDock">
+             Classes="AccentSelected BorderedDock"
+             Background="Transparent">
     <Design.DataContext>
         <vm:DocumentDockVM/>
     </Design.DataContext>
+    
+    <Interaction.Behaviors>
+        <behavior:DockDropBehavior DockContainer="{Binding}"/>
+    </Interaction.Behaviors>
+    
     <fluent:TabView TabItems="{Binding Tabs}"
                     SelectedItem="{Binding ActiveTab}"
                     IsAddTabButtonVisible="False"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    TabDragStarting="TabView_OnTabDragStarting"
                     CanDragTabs="True"
                     AllowDropTabs="True"
                     TabWidthMode="SizeToContent">

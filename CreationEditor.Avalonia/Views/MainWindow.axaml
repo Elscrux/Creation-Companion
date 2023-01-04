@@ -46,7 +46,29 @@
                 </MenuItem>
             </Menu>
 
-            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+            <!-- <Grid ColumnDefinitions="*,5,*"> -->
+                
+                <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+        
+        
+
+                <!-- <GridSplitter Grid.Column="1" Background="Transparent"/> -->
+                <!-- -->
+                <!-- <TreeView Grid.Column="2" -->
+                <!--           Items="{Binding DockingManagerService.Root.Children}"> -->
+                <!--     <TreeView.DataTemplates> -->
+                <!--         <TreeDataTemplate DataType="docking1:LayoutDockVM" ItemsSource="{Binding ChildrenX}"> -->
+                <!--             <TextBlock Text="Layout Dock"/> -->
+                <!--         </TreeDataTemplate> -->
+                <!--         <DataTemplate DataType="docking:DockedControl"> -->
+                <!--             <TextBlock Text="{Binding DataContext.Header, FallbackValue=NoName}"/> -->
+                <!--         </DataTemplate> -->
+                <!--         <DataTemplate DataType="Control"> -->
+                <!--             <TextBlock Text="sadfsdf"/> -->
+                <!--         </DataTemplate> -->
+                <!--     </TreeView.DataTemplates> -->
+                <!-- </TreeView> -->
+            <!-- </Grid> -->
         </DockPanel>
 
         <avaloniaProgressRing:ProgressRing IsActive="{Binding BusyService.IsBusy}"

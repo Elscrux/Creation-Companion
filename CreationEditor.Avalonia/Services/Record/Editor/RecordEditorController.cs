@@ -31,9 +31,7 @@ public class RecordEditorController : IRecordEditorController {
         _dockingManagerService.Closed.Subscribe(OnClosed);
     }
     
-    public bool AnyEditorsOpen() {
-        return _openRecordEditors.Count > 0;
-    }
+    public bool AnyEditorsOpen() => _openRecordEditors.Count > 0;
 
     public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
@@ -50,9 +48,11 @@ public class RecordEditorController : IRecordEditorController {
                 _dockingManagerService.AddControl(
                     editorControl, 
                     new DockConfig {
-                        Header = record.EditorID ?? record.FormKey.ToString(),
-                        Dock = Dock.Top,
-                        DockType = DockType.Side,
+                        DockInfo = new DockInfo {
+                            Header = record.EditorID ?? record.FormKey.ToString(),
+                        },
+                        Dock = Dock.Right,
+                        DockMode = DockMode.Document,
                         Size = new GridLength(2, GridUnitType.Star),
                     });
                 _openRecordEditors.Add(record.FormKey, editorControl);

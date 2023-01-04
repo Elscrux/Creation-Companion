@@ -6,65 +6,75 @@
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:CompileBindings="True" x:DataType="vm:SidePanelVM"
-             x:Class="CreationEditor.Avalonia.Views.Docking.SideDockLeft">
+             x:CompileBindings="True" x:DataType="vm:SideDockVM"
+             x:Class="CreationEditor.Avalonia.Views.Docking.SideDockLeft"
+             Background="Transparent">
     <Design.DataContext>
-        <vm:SidePanelVM/>
+        <vm:SideDockVM/>
     </Design.DataContext>
+    
+    <Interaction.Behaviors>
+        <behavior:DockDropBehavior DockContainer="{Binding}"/>
+    </Interaction.Behaviors>
 
-    <Grid ColumnDefinitions="20,*" Classes="AccentSelected">
+    <Grid ColumnDefinitions="20,*"
+          Classes="AccentSelected TabGrid">
         <LayoutTransformControl Grid.Column="0"
-                                VerticalAlignment="Top">
+                                VerticalAlignment="Stretch">
             <!-- todo https://github.com/AvaloniaUI/Avalonia/issues/9748 -->
             <LayoutTransformControl.LayoutTransform>
                 <RotateTransform Angle="-89.9"/>
             </LayoutTransformControl.LayoutTransform>
-            
-            <ItemsRepeater Items="{Binding Tabs}"
-                           FlowDirection="RightToLeft">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal"/>
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate DataType="model:IDockedItem">
-                        <Border Classes.AccentSelected="{Binding IsSelected}"
-                                x:Name="TabBorder">
-                            <StackPanel Orientation="Horizontal">
-                                <!-- Close -->
-                                <Button
-                                    Margin="4"
-                                    Padding="4"
-                                    CornerRadius="8"
-                                    Command="{ReflectionBinding DataContext.Close, RelativeSource={RelativeSource AncestorType=docking:SideDockLeft}}"
-                                    CommandParameter="{Binding}">
-                                    <fluentIcons:FluentIcon Icon="Dismiss48Regular"
-                                                            IsVisible="{Binding CanClose}"
-                                                            ToolTip.Tip="Close"/>
-                                </Button>
-                                
-                                <TextBlock Text="{Binding Header}"
-                                           FontSize="12"
-                                           Padding="4,2"
-                                           x:Name="TabHeader">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="PointerPressed"
-                                                              SourceObject="{Binding #TabHeader}">
-                                            <InvokeCommandAction
-                                                Command="{ReflectionBinding DataContext.Activate, RelativeSource={RelativeSource AncestorType=docking:SideDockLeft}}"
-                                                CommandParameter="{Binding Path=#TabHeader.DataContext}"/>
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+
+            <Border Classes="TabBar">
+                <ItemsRepeater Items="{Binding Tabs}"
+                               FlowDirection="RightToLeft">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate DataType="model:IDockedItem">
+                            <Border Classes="Tab"
+                                    Classes.AccentSelected="{Binding IsSelected}">
+                                <Interaction.Behaviors>
+                                    <behavior:DockDragBehavior/>
+                                </Interaction.Behaviors>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Close -->
+                                    <Button Classes="DockClose"
+                                            Command="{Binding Close}">
+                                        <fluentIcons:FluentIcon Icon="Dismiss48Regular"
+                                                                IsVisible="{Binding CanClose}"
+                                                                ToolTip.Tip="Close"/>
+                                    </Button>
+
+                                    <TextBlock Text="{Binding Header}"
+                                               FontSize="12"
+                                               Padding="4,2"
+                                               x:Name="TabHeader">
+                                        <Interaction.Behaviors>
+                                            <EventTriggerBehavior EventName="PointerReleased"
+                                                                  SourceObject="{Binding #TabHeader}">
+                                                <InvokeCommandAction
+                                                    Command="{ReflectionBinding DataContext.Activate, RelativeSource={RelativeSource AncestorType=docking:SideDockLeft}}"
+                                                    CommandParameter="{Binding Path=#TabHeader.DataContext}"/>
+                                            </EventTriggerBehavior>
+                                        </Interaction.Behaviors>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </Border>
         </LayoutTransformControl>
 
         <ContentControl Grid.Column="1"
                         VerticalAlignment="Stretch"
-                        Content="{Binding ActiveTab.Control}"/>
+                        Content="{Binding ActiveTab.Control}"
+                        Classes="BorderedDock AccentSelected"/>
     </Grid>
 </UserControl>

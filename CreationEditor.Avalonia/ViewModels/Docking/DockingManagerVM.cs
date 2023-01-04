@@ -1,113 +1,146 @@
-﻿using System.Reactive.Subjects;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Subjects;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using CreationEditor.Avalonia.Models.Docking;
+using Noggog;
+using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 /// <summary>
-/// this is a dock where you also have side bars/trays and you can add any docks to it
+/// Root for a docking system. Contains four side docks in every direction and a layout to customize the view.
 /// </summary>
-public class DockingManagerVM : LayoutDockVM {
-    public void OnRemoved(IDockedItem dockedItem) {
-        _closed.OnNext(dockedItem);
-    }
+public sealed class DockingManagerVM : DockContainerVM {
+    public DisposableCounterLock ModificationLock { get; }
+    
+    
+    private readonly Subject<IDockedItem> _opened = new();
+    public IObservable<IDockedItem> Opened => _opened;
+    
     
     private readonly Subject<IDockedItem> _closed = new();
     public IObservable<IDockedItem> Closed => _closed;
-    
-    public new void Add(IDockedItem dockedItem, DockConfig config) {
-        switch (config.DockType) {
-            case DockType.Layout:
-                AddDockedControl(CreateControl(dockedItem), config);
-                break;
-            case DockType.Document:
-                AddDocumentControl(dockedItem, config);
-                break;
-            case DockType.Side:
-                AddSideControl(dockedItem, config);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+
+
+    public LayoutDockVM Layout { get; }
+    [Reactive] public Size LayoutSize { get; set; }
+    [Reactive] public double LayoutHeight { get; set; }
+    [Reactive] public double LayoutWidth { get; set; }
+    [Reactive] public double LayoutMinHeight { get; set; }
+    [Reactive] public double LayoutMinWidth { get; set; }
+
+    public SideDockVM TopSide { get; }
+    public SideDockVM BottomSide { get; }
+    public SideDockVM LeftSide { get; }
+    public SideDockVM RightSide { get; }
+
+    public override IEnumerable<IDockObject> Children { get; }
+
+    public DockingManagerVM() {
+        ModificationLock = new DisposableCounterLock(() => CleanUp());
+        
+        Layout = new LayoutDockVM(this);
+        TopSide = new SideDockVM(this);
+        BottomSide = new SideDockVM(this);
+        LeftSide = new SideDockVM(this);
+        RightSide = new SideDockVM(this);
+        
+        Children = new List<IDockObject> { Layout, TopSide, BottomSide, LeftSide, RightSide };
+
+        DockedItem Get(IBrush brush, string header, DockContainerVM parent) {
+            return new DockedItem(new Rectangle { MinWidth = 150, MinHeight = 150, Fill = brush }, new DockInfo()) {
+                DockParent = parent,
+                Header = header };
+        }
+        
+        TopSide.Tabs.Add(Get(Brushes.Yellow, "test1", TopSide));
+        TopSide.Tabs.Add(Get(Brushes.Orange, "test2", TopSide));
+        LeftSide.Tabs.Add(Get(Brushes.Red, "AAAAAA", LeftSide));
+        LeftSide.Tabs.Add(Get(Brushes.Blue, "BBBBBB", LeftSide));
+        RightSide.Tabs.Add(Get(Brushes.Green, "CCCCCC", RightSide));
+        RightSide.Tabs.Add(Get(Brushes.Pink, "DDDD", RightSide));
+        BottomSide.Tabs.Add(Get(Brushes.Violet, "EEEEEEE", BottomSide));
+        BottomSide.Tabs.Add(Get(Brushes.Azure, "FFFF", BottomSide));
+    }
+
+    public void OnDockAdded(IDockedItem dockedItem) {
+        if (!ModificationLock.IsLocked()) {
+            _opened.OnNext(dockedItem);
         }
     }
 
-    public void AddSideControl(IDockedItem dockedItem, DockConfig config) {
-        var tabGroup = config.Dock switch {
+    public void OnDockRemoved(IDockedItem dockedItem) {
+        if (!ModificationLock.IsLocked()) {
+            _closed.OnNext(dockedItem);
+        }
+    }
+
+    public override bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock) {
+        outDock = ContainerChildren
+            .Select(vm => vm.TryGetDock(control, out var layoutDock) ? layoutDock : null)
+            .NotNull()
+            .FirstOrDefault();
+
+        return outDock != null;
+    }
+    
+    public override bool Focus(IDockedItem dockedItem) => ContainerChildren.Any(dockVM => dockVM.Focus(dockedItem));
+    
+    public override void Add(IDockedItem dockedItem, DockConfig config) {
+        switch (config.DockMode) {
+            case DockMode.Default:
+            case DockMode.Layout:
+            case DockMode.Document:
+                Layout.Add(dockedItem, config);
+                break;
+            case DockMode.Side:
+                AddSideControl(dockedItem, config);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(config));
+        }
+    }
+
+    private void AddSideControl(IDockedItem dockedItem, DockConfig config) {
+        GetSideDock(config).Add(dockedItem, config);
+    }
+
+    public override bool Remove(IDockedItem dockedItem) {
+        using (dockedItem.RemovalLock.Lock()) {
+            return Layout.Remove(dockedItem)
+             || TopSide.Remove(dockedItem)
+             || BottomSide.Remove(dockedItem)
+             || LeftSide.Remove(dockedItem)
+             || RightSide.Remove(dockedItem);
+        }
+    }
+    
+    public override bool CleanUp() {
+        var anyChanges = Layout.CleanUp();
+        
+        LayoutSize = Layout.LayoutGrid.AdjustSize();
+        UpdateSize();
+
+        return anyChanges;
+    }
+
+    public void UpdateSize() {
+        LayoutWidth = Math.Clamp(Math.Max(Layout.LayoutGrid.Bounds.Width, LayoutSize.Width), 0, Layout.LayoutGrid.Bounds.Width);
+        LayoutMinWidth = Math.Clamp(LayoutSize.Width, 0, Layout.LayoutGrid.Bounds.Width);
+        
+        LayoutHeight = Math.Clamp(Math.Max(Layout.LayoutGrid.Bounds.Height, LayoutSize.Height), 0, Layout.LayoutGrid.Bounds.Height);
+        LayoutMinHeight = Math.Clamp(LayoutSize.Height, 0, Layout.LayoutGrid.Bounds.Height);
+    }
+
+    private SideDockVM GetSideDock(DockConfig config) {
+        return config.Dock switch {
             Dock.Top => TopSide,
             Dock.Bottom => BottomSide,
             Dock.Left => LeftSide,
             Dock.Right => RightSide,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(config))
         };
-        
-        tabGroup.Add(dockedItem, config);
-    }
-
-    public Grid Top { get; } = new() {
-        Background = Brushes.Purple,
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
-    };
-    public Grid Top2 { get; } = new() {
-        Background = Brushes.Red,
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
-    };
-    public Grid Bottom { get; } = new() {
-        Background = Brushes.Green,
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
-    };
-    public Grid Left { get; } = new() {
-        Background = Brushes.Yellow,
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
-    };
-    public Grid Right { get; } = new() {
-        Background = Brushes.Orange,
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } },
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } },
-    };
-
-    public SidePanelVM TopSide { get; } = new();
-    public SidePanelVM LeftSide { get; } = new();
-    public SidePanelVM RightSide { get; } = new();
-    public SidePanelVM BottomSide { get; } = new();
-
-    public DockingManagerVM() {
-        TopSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
-                Header = "test1",
-            });
-        
-        TopSide.Tabs.Add(new DockedItem(Bottom, this, new DockConfig()) {
-                Header = "test2",
-            });
-        
-        
-        LeftSide.Tabs.Add(new DockedItem(Left, this, new DockConfig()) {
-                Header = "AAAAAA",
-            });
-        
-        LeftSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
-                Header = "BBBBBB",
-            });
-        
-        
-        RightSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
-                Header = "CCCCCC",
-            });
-        
-        RightSide.Tabs.Add(new DockedItem(Top, this, new DockConfig()) {
-                Header = "DDDD",
-            });
-        
-        
-        BottomSide.Tabs.Add(new DockedItem(Bottom, this, new DockConfig()) {
-                Header = "EEEEEEE",
-            });
-        
-        BottomSide.Tabs.Add(new DockedItem(Left, this, new DockConfig()) {
-                Header = "FFFF",
-            });
     }
 }

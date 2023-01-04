@@ -52,12 +52,15 @@ public class NotifiedVM : ViewModel, INotificationReceiver {
     }
 
     public void ReceiveNotify(Guid id, string message) {
-        var item = LoadingItems.FirstOrDefault(item => item.ID == id);
-        if (item != null) {
-            item.LoadText = message;
-        } else {
-            Dispatcher.UIThread.Post(() => LoadingItems.Add(new NotificationItem(id, message, 0)));
-        }
+        Dispatcher.UIThread.Post(() => {
+            var item = LoadingItems.FirstOrDefault(item => item.ID == id);
+            
+            if (item != null) {
+                item.LoadText = message;
+            } else {
+                Dispatcher.UIThread.Post(() => LoadingItems.Add(new NotificationItem(id, message, 0)));
+            }
+        });
     }
 
     public void ReceiveProgress(Guid id, float progress) {

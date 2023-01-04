@@ -9,12 +9,14 @@
     xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Mod"
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
+    xmlns:attached="clr-namespace:CreationEditor.Avalonia.Behavior.Attached"
     d:DesignHeight="500" d:DesignWidth="750"
     MinHeight="480" MinWidth="720" Height="480" Width="720"
     Title="Select Mods">
     <Design.DataContext>
         <mod:ModSelectionVM/>
     </Design.DataContext>
+    
     <Grid ColumnDefinitions="2*,Auto,1*">
         <Grid RowDefinitions="Auto,*,Auto">
             <TextBox Grid.Row="0"
@@ -32,7 +34,7 @@
                       IsReadOnly="True"
                       SelectionMode="Extended"
                       GridLinesVisibility="None"
-                      behavior:DoubleTappedBehavior.Command="{Binding ToggleActive}">
+                      attached:DoubleTappedBehavior.Command="{Binding ToggleActive}">
                 <DataGrid.KeyBindings>
                     <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>
                 </DataGrid.KeyBindings>

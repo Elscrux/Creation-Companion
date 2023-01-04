@@ -8,13 +8,14 @@
     d:DesignHeight="720" d:DesignWidth="480">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" MinWidth="150"/>
+            <ColumnDefinition MinWidth="150"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="4*" MinWidth="150"/>
+            <ColumnDefinition MinWidth="150"
+                              Width="4*"/>
         </Grid.ColumnDefinitions>
 
         <!-- <Border Grid.Column="0" -->
-        <!--         BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--         BorderBrush="{DynamicResource ButtonBackground}" -->
         <!--         BorderThickness="2" -->
         <!--         CornerRadius="3"> -->
             <Grid RowDefinitions="Auto,Auto,*">
@@ -51,14 +52,14 @@
         <!-- <GridSplitter Background="Transparent" -->
         <!--               MinWidth="10" -->
         <!--               CornerRadius="4" -->
-        <!--               BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--               BorderBrush="{DynamicResource ButtonBackground}" -->
         <!--               BorderThickness="2" Grid.Column="1"/> -->
         <!-- <GridSplitter Background="Transparent" Grid.Column="1"/> -->
 
         <ContentControl Grid.Column="2"
                         Content="{Binding RecordList}"/>
         <!-- <ContentControl Grid.Column="2" -->
-        <!--                 BorderBrush="{StaticResource ButtonBackground}" -->
+        <!--                 BorderBrush="{DynamicResource ButtonBackground}" -->
         <!--                 BorderThickness="2" -->
         <!--                 CornerRadius="3" -->
         <!--                 Content="{Binding RecordList}"/> -->

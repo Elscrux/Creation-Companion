@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-namespace CreationEditor.Avalonia.Behavior;
+namespace CreationEditor.Avalonia.Behavior.Attached;
 
 /// <summary>
 /// Container class for attached properties. Must inherit from <see cref="AvaloniaObject"/>.

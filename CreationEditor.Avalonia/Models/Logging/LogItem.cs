@@ -15,6 +15,6 @@ public record LogItem(string Text, LogEventLevel Level) : ILogItem {
         LogEventLevel.Warning => ILogVM.WarningBrush,
         LogEventLevel.Error => ILogVM.ErrorBrush,
         LogEventLevel.Fatal => ILogVM.FatalBrush,
-        _ => throw new ArgumentOutOfRangeException()
+        _ => throw new ArgumentOutOfRangeException(nameof(Level))
     };
 }

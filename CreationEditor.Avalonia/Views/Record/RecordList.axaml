@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:comparer="clr-namespace:CreationEditor.Avalonia.Comparer"
-             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:record="clr-namespace:CreationEditor.Avalonia.Models.Record"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Behavior.Attached"
              mc:Ignorable="d"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
     <UserControl.Resources>
@@ -22,7 +22,7 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
-                  behavior:DoubleTappedBehavior.Command="{ReflectionBinding EditSelectedRecord}"
+                  attached:DoubleTappedBehavior.Command="{ReflectionBinding EditSelectedRecord}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
                 <KeyBinding Gesture="Delete"

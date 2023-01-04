@@ -3,10 +3,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="CreationEditor.Avalonia.Views.Docking.LayoutDock">
+             x:Class="CreationEditor.Avalonia.Views.Docking.LayoutDock"
+             Background="Transparent">
     <Design.DataContext>
         <docking:LayoutDockVM/>
     </Design.DataContext>
-    <ContentControl Content="{Binding LayoutGrid}"/>
+
+    <Interaction.Behaviors>
+        <behavior:DockDropBehavior DockContainer="{Binding}"/>
+    </Interaction.Behaviors>
+    
+    <ContentControl Content="{Binding LayoutGrid}">
+        <ContentControl.Resources>
+            <converter:ReturnParameterIfTrueConverter
+                x:Key="ReturnDoubleIfTrue"
+                x:TypeArguments="system:Double"
+                Converter="{x:Static converter:DoubleConverters.ToThickness}"
+                DefaultValue="0"/>
+        </ContentControl.Resources>
+        
+        <ContentControl.Padding>
+            <Binding Path="InEditMode"
+                     Converter="{StaticResource ReturnDoubleIfTrue}"
+                     ConverterParameter="10"/>
+        </ContentControl.Padding>
+    </ContentControl>
 </UserControl>
