@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -71,17 +70,13 @@ public sealed class DockDropBehavior : Behavior<Control> {
         dragData.Preview?.HidePreview();
 
         // Handle layout change
-        using (dragData.Item.DockRoot.ModificationLock.Lock()) {
-            using (dragData.Item.RemovalLock.Lock()) {
-                dragData.Item.Close
-                    .Execute()
-                    .Switch()
-                    .Subscribe(x => {
-                        var dock = GetDockType(e, control);
-                        DockContainer.Add(dragData.Item, new DockConfig { Dock = dock });
-                    });
-            }
-        }
+        (DockContainer as IDockObject).DockRoot
+            .StartEdit()
+            .StopReporting()
+            .Remove(dragData.Item.DockParent, dragData.Item)
+            .Add(DockContainer, dragData.Item, new DockConfig { Dock = GetDockType(e, control) })
+            .StartReporting()
+            .FinishEdit();
     }
     
     [MemberNotNullWhen(true, nameof(DockContainer))]

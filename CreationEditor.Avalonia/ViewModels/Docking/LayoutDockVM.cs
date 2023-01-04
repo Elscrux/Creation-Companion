@@ -108,7 +108,7 @@ public sealed class LayoutDockVM : DockContainerVM {
     }
     
     private void AddDockedControl(IDockedItem dockedItem, DockConfig config) {
-        using ((this as IDockObject).DockRoot.ModificationLock.Lock()) {
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             switch (LayoutGrid.Children) {
                 // If the layout grid is empty, add the element directly and return early
                 case []: {
@@ -137,7 +137,7 @@ public sealed class LayoutDockVM : DockContainerVM {
     }
 
     public override bool Remove(IDockedItem dockedItem) {
-        using ((this as IDockObject).DockRoot.ModificationLock.Lock()) {
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             using (dockedItem.RemovalLock.Lock()) {
                 foreach (var control in LayoutGrid.Children.OfType<Control>()) {
                     switch (control) {

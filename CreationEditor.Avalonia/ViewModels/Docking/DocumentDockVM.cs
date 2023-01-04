@@ -49,7 +49,7 @@ public sealed class DocumentDockVM : DockContainerVM {
     public override bool Remove(IDockedItem dockedItem) {
         if (!Tabs.Contains(dockedItem)) return false;
         
-        using ((this as IDockObject).DockRoot.ModificationLock.Lock()) {
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             using (dockedItem.RemovalLock.Lock()) {
                 var oldCount = Tabs.Count;
         

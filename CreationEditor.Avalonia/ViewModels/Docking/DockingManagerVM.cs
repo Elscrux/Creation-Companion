@@ -13,7 +13,8 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// Root for a docking system. Contains four side docks in every direction and a layout to customize the view.
 /// </summary>
 public sealed class DockingManagerVM : DockContainerVM {
-    public DisposableCounterLock ModificationLock { get; }
+    public object EditLock { get; } = new();
+    public DisposableCounterLock CleanUpLock { get; }
     
     
     private readonly Subject<IDockedItem> _opened = new();
@@ -37,9 +38,11 @@ public sealed class DockingManagerVM : DockContainerVM {
     public SideDockVM RightSide { get; }
 
     public override IEnumerable<IDockObject> Children { get; }
+    
+    public bool IsReporting { get; set; }
 
     public DockingManagerVM() {
-        ModificationLock = new DisposableCounterLock(() => CleanUp());
+        CleanUpLock = new DisposableCounterLock(() => CleanUp());
         
         Layout = new LayoutDockVM(this);
         TopSide = new SideDockVM(this);
@@ -66,13 +69,13 @@ public sealed class DockingManagerVM : DockContainerVM {
     }
 
     public void OnDockAdded(IDockedItem dockedItem) {
-        if (!ModificationLock.IsLocked()) {
+        if (IsReporting) {
             _opened.OnNext(dockedItem);
         }
     }
 
     public void OnDockRemoved(IDockedItem dockedItem) {
-        if (!ModificationLock.IsLocked()) {
+        if (IsReporting) {
             _closed.OnNext(dockedItem);
         }
     }
