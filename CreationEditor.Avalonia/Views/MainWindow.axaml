@@ -7,9 +7,11 @@
     xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
     xmlns:notificationView="clr-namespace:CreationEditor.Avalonia.Views.Notification"
     xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
-    x:Name="Window"
+    xmlns:viewModels="clr-namespace:CreationEditor.Avalonia.ViewModels"
     Title="{Binding WindowTitle}"
-    MinHeight="480" MinWidth="720">
+    MinHeight="480" MinWidth="720"
+    x:CompileBindings="True" x:DataType="viewModels:MainVM"
+    x:Name="Window">
     <Grid>
         <DockPanel IsHitTestVisible="{Binding !BusyService.IsBusy}"
                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -45,30 +47,8 @@
                     </MenuItem.DataTemplates>
                 </MenuItem>
             </Menu>
-
-            <!-- <Grid ColumnDefinitions="*,5,*"> -->
-                
-                <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
-        
-        
-
-                <!-- <GridSplitter Grid.Column="1" Background="Transparent"/> -->
-                <!-- -->
-                <!-- <TreeView Grid.Column="2" -->
-                <!--           Items="{Binding DockingManagerService.Root.Children}"> -->
-                <!--     <TreeView.DataTemplates> -->
-                <!--         <TreeDataTemplate DataType="docking1:LayoutDockVM" ItemsSource="{Binding ChildrenX}"> -->
-                <!--             <TextBlock Text="Layout Dock"/> -->
-                <!--         </TreeDataTemplate> -->
-                <!--         <DataTemplate DataType="docking:DockedControl"> -->
-                <!--             <TextBlock Text="{Binding DataContext.Header, FallbackValue=NoName}"/> -->
-                <!--         </DataTemplate> -->
-                <!--         <DataTemplate DataType="Control"> -->
-                <!--             <TextBlock Text="sadfsdf"/> -->
-                <!--         </DataTemplate> -->
-                <!--     </TreeView.DataTemplates> -->
-                <!-- </TreeView> -->
-            <!-- </Grid> -->
+            
+            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
         </DockPanel>
 
         <avaloniaProgressRing:ProgressRing IsActive="{Binding BusyService.IsBusy}"
