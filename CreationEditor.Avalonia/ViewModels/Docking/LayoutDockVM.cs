@@ -123,9 +123,7 @@ public sealed class LayoutDockVM : DockContainerVM {
                     if (LayoutGrid.Remove(dockedControl)) {
                         // Add layout grid instead
                         var convertedLayoutDock = new LayoutDockVM(dockedControl, this);
-                        LayoutGrid.Add(convertedLayoutDock.LayoutGrid, new DockConfig {
-                            Dock = config.Dock.Opposite()
-                        });
+                        LayoutGrid.Add(convertedLayoutDock.LayoutGrid, DockConfig.Default);
                     }
                     break;
                 }

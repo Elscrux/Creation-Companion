@@ -121,7 +121,7 @@ public sealed class DockingManagerVM : DockContainerVM {
     }
     
     public override bool CleanUp() {
-        var anyChanges = Layout.CleanUp();
+        var anyChanges = ContainerChildren.Any(child => child.CleanUp());
         
         LayoutSize = Layout.LayoutGrid.AdjustSize();
         UpdateSize();

@@ -51,6 +51,7 @@
             </Grid>
         </Border>
         
-        <ContentControl Content="{Binding Control}"/>
+		<!-- Must be set up like this with ReflectionBinding on DockedControl directly and not IDockedItem DataContext  -->
+        <ContentControl Content="{ReflectionBinding Control, RelativeSource={RelativeSource AncestorType=view:DockedControl}}"/>
     </DockPanel>
 </UserControl>

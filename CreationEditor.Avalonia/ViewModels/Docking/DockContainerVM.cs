@@ -43,19 +43,3 @@ public abstract class DockContainerVM : ViewModel, IDockObject {
     public abstract bool Remove(IDockedItem dockedItem);
     public abstract bool CleanUp();
 }
-// public interface IDockContainerVM : IDockObject {
-//     public IEnumerable<IDockObject> Children { get; }
-//     public int ChildrenCount { get; }
-//
-//     public new IDockContainerVM? DockParent { get; set; }
-//
-//     public bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock);
-//     
-//     public bool Focus(IDockedItem dockedItem);
-//
-//     public void Add(IDockedItem dockedItem, DockConfig config);
-//     public bool Remove(IDockedItem dockedItem);
-//     public bool CleanUp();
-//
-//     public bool InEditMode { get; set; }
-// }

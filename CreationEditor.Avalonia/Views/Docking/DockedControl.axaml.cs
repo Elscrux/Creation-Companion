@@ -53,7 +53,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         InitializeComponent();
     }
 
-    public DockedControl(IDockedItem vm) : this() {
+    public DockedControl(IDockedItem vm) {
         DataContext = DockedItem = vm;
         Name = Header = vm.Header;
         
@@ -62,6 +62,8 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         
         DetachedFromLogicalTree += (_, _) => CheckRemoved();
         Control.DetachedFromLogicalTree += (_, _) => CheckRemoved();
+        
+        InitializeComponent();
     }
 
     private void CheckRemoved() {
