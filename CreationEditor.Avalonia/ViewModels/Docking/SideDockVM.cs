@@ -51,7 +51,7 @@ public sealed class SideDockVM : DockContainerVM {
     }
     
     public override void Add(IDockedItem dockedItem, DockConfig config) {
-        if (config.DockMode is not DockMode.Default or DockMode.Side) return;
+        if (config.DockMode is not DockMode.Default and not DockMode.Side) return;
         
         dockedItem.DockParent = this;
         Tabs.Add(dockedItem);
