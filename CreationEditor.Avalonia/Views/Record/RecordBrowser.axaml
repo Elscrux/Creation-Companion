@@ -3,9 +3,11 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:browser="clr-namespace:CreationEditor.Avalonia.Models.Record.Browser"
-    xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record"
-    d:DesignHeight="720" d:DesignWidth="480">
+    xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Record.Browser"
+    xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.Browser"
+    x:CompileBindings="True" x:DataType="vm:IRecordBrowserVM"
+    d:DesignHeight="720" d:DesignWidth="480"
+    x:Name="Browser">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="150"/>
@@ -31,12 +33,12 @@
                 <TreeView Grid.Row="2"
                           Items="{Binding RecordTypeGroups}">
                     <TreeView.DataTemplates>
-                        <TreeDataTemplate DataType="browser:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
+                        <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
                             <TextBlock Text="{Binding GroupName}"/>
                         </TreeDataTemplate>
-                        <DataTemplate DataType="browser:RecordTypeListing">
+                        <DataTemplate DataType="model:RecordTypeListing">
                             <Button
-                                Command="{Binding DataContext.SelectRecordType, RelativeSource={RelativeSource AncestorType=record:RecordBrowser}}"
+                                Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
                                 CommandParameter="{Binding}"
                                 FontSize="12"
                                 HorizontalContentAlignment="Left">

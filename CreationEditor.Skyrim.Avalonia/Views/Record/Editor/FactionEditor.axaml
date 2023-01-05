@@ -3,17 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:skyrim="clr-namespace:Mutagen.Bethesda.Skyrim;assembly=Mutagen.Bethesda.Skyrim"
-             xmlns:vm="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record"
-             xmlns:view="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record"
              xmlns:plugins="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:editor="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor"
-             xmlns:tooltips="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter.Tooltips"
-             xmlns:editor1="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor"
+             xmlns:tooltips="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter"
              x:CompileBindings="True" x:DataType="editor:FactionEditorVM"
-             d:DesignHeight="900" d:DesignWidth="900">
-    <UserControl.Resources>
-        <tooltips:CombatReactionTooltip x:Key="CombatReactionTooltip"/>
-    </UserControl.Resources>
+             d:DesignHeight="900" d:DesignWidth="900"
+             x:Name="Editor">
     <ScrollViewer>
         <StackPanel>
             <Menu>
@@ -104,7 +99,7 @@
                                                     <ComboBox.ItemTemplate>
                                                         <DataTemplate DataType="skyrim:CombatReaction">
                                                             <TextBlock Text="{Binding}"
-                                                                       ToolTip.Tip="{Binding Converter={StaticResource CombatReactionTooltip}}"/>
+                                                                       ToolTip.Tip="{Binding Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"/>
                                                         </DataTemplate>
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
@@ -119,8 +114,8 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate DataType="skyrim:Relation">
                                                 <plugins:FormKeyPicker FormKey="{Binding Target.FormKey}"
-                                                                       ScopedTypes="{ReflectionBinding DataContext.RelationTypes, RelativeSource={RelativeSource AncestorType=editor1:FactionEditor}}"
-                                                                       LinkCache="{ReflectionBinding DataContext.LinkCache, RelativeSource={RelativeSource AncestorType=editor1:FactionEditor}}"/>
+                                                                       ScopedTypes="{x:Static editor:FactionEditorVM.RelationTypes}"
+                                                                       LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCache}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -255,8 +250,7 @@
                             <HeaderedContentControl.Header>
                                 <CheckBox Content="Track Crime"
                                           ToolTip.Tip="If a faction is flagged to track crime, its members will remember crimes against it."
-                                          DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=HeaderedContentControl}}"
-                                          IsChecked="{ReflectionBinding EditableRecord.TrackCrime}"
+                                          IsChecked="{Binding EditableRecord.TrackCrime}"
                                           Margin="5"/>
                             </HeaderedContentControl.Header>
 
@@ -327,8 +321,7 @@
                                                             Margin="5">
                                         <HeaderedContentControl.Header>
                                             <CheckBox Content="Use Defaults"
-                                                      DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=HeaderedContentControl}}"
-                                                      IsChecked="{ReflectionBinding EditableRecord.CrimeGoldUseDefaults}"
+                                                      IsChecked="{Binding EditableRecord.CrimeGoldUseDefaults}"
                                                       Margin="5"/>
                                         </HeaderedContentControl.Header>
 
@@ -418,8 +411,7 @@
                         <HeaderedContentControl.Header>
                             <CheckBox Content="Vendor"
                                       ToolTip.Tip="Allows you to specify bounty amounts allocated for specific crimes. "
-                                      DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=HeaderedContentControl}}"
-                                      IsChecked="{ReflectionBinding EditableRecord.Vendor}"
+                                      IsChecked="{Binding EditableRecord.Vendor}"
                                       Margin="5"/>
                         </HeaderedContentControl.Header>
 
@@ -478,7 +470,7 @@
                                 <StackPanel>
                                     <CheckBox Content="Not Buy/Sell"
                                               ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list."
-                                              IsChecked="{ReflectionBinding EditableRecord.VendorValues.NotSellBuy}"
+                                              IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                               Margin="5"/>
 
                                     <HeaderedContentControl Classes="Default"
@@ -502,7 +494,7 @@
 
                             <CheckBox Content="Only Buy Stolen Items"
                                       ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
-                                      IsChecked="{ReflectionBinding EditableRecord.VendorValues.NotSellBuy}"
+                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                       Margin="5"/>
                         </StackPanel>
                     </HeaderedContentControl>

@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
+using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
@@ -11,7 +12,7 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 [DebuggerDisplay("Header = {Header}")]
-public partial class DockedControl : UserControl, IDockedItem, IDockPreview {
+public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedItem, IDockPreview {
     public IDockedItem DockedItem { get; } = null!;
 
     public Guid Id => DockedItem.Id;

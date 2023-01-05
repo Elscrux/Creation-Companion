@@ -1,8 +1,8 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 namespace CreationEditor.Avalonia.Views.Record; 
 
-public partial class RecordBrowser : UserControl {
+public partial class RecordBrowser : ReactiveUserControl<IRecordBrowserVM> {
     public RecordBrowser() {
         InitializeComponent();
     }
