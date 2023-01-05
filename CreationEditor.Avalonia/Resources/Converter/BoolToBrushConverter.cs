@@ -3,9 +3,9 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 namespace CreationEditor.Avalonia.Converter;
 
-public class BoolToColorConverter : IValueConverter {
-    private ISolidColorBrush ValidBrush { get; } = Brushes.ForestGreen;
-    private ISolidColorBrush ErrorBrush { get; } = Brushes.IndianRed;
+public class BoolToBrushConverter : IValueConverter {
+    public IBrush ValidBrush { get; set; } = Brushes.ForestGreen;
+    public IBrush ErrorBrush { get; set; } = Brushes.IndianRed;
     
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is true ? ValidBrush : ErrorBrush;
     

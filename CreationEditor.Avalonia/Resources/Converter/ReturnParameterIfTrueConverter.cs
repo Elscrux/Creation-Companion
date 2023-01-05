@@ -15,7 +15,7 @@ public class ReturnParameterIfTrueConverter<TIn> : IValueConverter
         return Converter?.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture);
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
         throw new NotImplementedException();
     }
 }
