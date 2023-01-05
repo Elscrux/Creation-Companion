@@ -4,8 +4,10 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
+using CreationEditor.Avalonia.ViewModels.Logging;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Environment;
@@ -49,15 +51,15 @@ public class MainVM : NotifiedVM {
         Save = ReactiveCommand.Create(() => {});
         
         OpenLog = ReactiveCommand.Create(() => {
-            // DockingManagerService.AddControl(
-            //     new LogView(componentContext.Resolve<ILogVM>()),
-            //     new DockConfig {
-            //         DockInfo = new DockInfo {
-            //             Header = "Log", 
-            //         },
-            //         Dock = Dock.Bottom,
-            //         DockMode = DockMode.Side,
-            //     });
+            DockingManagerService.AddControl(
+                new LogView(componentContext.Resolve<ILogVM>()),
+                new DockConfig {
+                    DockInfo = new DockInfo {
+                        Header = "Log", 
+                    },
+                    Dock = Dock.Bottom,
+                    DockMode = DockMode.Side,
+                });
         });
         
         OpenRecordBrowser = ReactiveCommand.Create(() => {

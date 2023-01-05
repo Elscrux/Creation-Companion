@@ -1,0 +1,65 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Logging"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:events="clr-namespace:Serilog.Events;assembly=Serilog"
+             xmlns:logging="clr-namespace:CreationEditor.Avalonia.Models.Logging"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:CompileBindings="True" x:DataType="vm:ILogVM"
+             x:Class="CreationEditor.Avalonia.Views.Logging.LogView"
+             x:Name="Log">
+    <Design.DataContext>
+        <vm:LogVM/>
+    </Design.DataContext>
+
+    <UserControl.Resources>
+        <converter:LogLevelToToBrushConverter
+            x:Key="LogLevelToToBrushConverter"
+            VerboseBrush="CornflowerBlue"
+            DebugBrush="ForestGreen"
+            MessageBrush="White"
+            WarningBrush="Yellow"
+            ErrorBrush="Orange"
+            FatalBrush="Red"/>
+        <converter:LevelVisibilityConverter
+            x:Key="LevelVisibilityConverter"
+            LevelsVisibility="{Binding LevelsVisibility}"/>
+    </UserControl.Resources>
+
+    <ListBox Items="{Binding VisibleLogItems}"
+             Classes="Compact">
+        <ListBox.ContextFlyout>
+            <MenuFlyout>
+                <MenuItem Header="Clear" Command="{Binding Clear}"/>
+                <MenuItem Header="Display" Items="{x:Static vm:LogVM.LogLevels}">
+                    <MenuItem.DataTemplates>
+                        <DataTemplate DataType="events:LogEventLevel">
+                            <CheckBox Classes="LogLevelColor"
+                                      IsChecked="{Binding Converter={StaticResource LevelVisibilityConverter}}"
+                                      Content="{Binding Converter={x:Static converter:EnumConverters.ToString}}"
+                                      Command="{ReflectionBinding #Log.ViewModel.ToggleEvent}"
+                                      CommandParameter="{Binding}">
+                                <CheckBox.Styles>
+                                    <Style
+                                        Selector="CheckBox.LogLevelColor /template/ ContentPresenter#ContentPresenter">
+                                        <Setter Property="Foreground"
+                                                Value="{Binding Converter={StaticResource LogLevelToToBrushConverter}}"/>
+                                    </Style>
+                                </CheckBox.Styles>
+                            </CheckBox>
+                        </DataTemplate>
+                    </MenuItem.DataTemplates>
+                </MenuItem>
+            </MenuFlyout>
+        </ListBox.ContextFlyout>
+        
+        <ListBox.ItemTemplate>
+            <DataTemplate DataType="logging:ILogItem">
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding Level, Converter={StaticResource LogLevelToToBrushConverter}}"/>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+</UserControl>

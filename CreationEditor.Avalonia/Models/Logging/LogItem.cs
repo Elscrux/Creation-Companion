@@ -1,20 +1,8 @@
-﻿using Avalonia.Media;
-using CreationEditor.Avalonia.ViewModels.Logging;
-using Elscrux.Logging.Sinks;
-using Serilog.Events;
+﻿using Serilog.Events;
 namespace CreationEditor.Avalonia.Models.Logging;
 
-public record LogItem(string Text, LogEventLevel Level) : ILogItem {
+public sealed record LogItem(string Text, LogEventLevel Level) : ILogItem {
+    public Guid Id { get; set; } = Guid.NewGuid();
     public LogEventLevel Level { get; set; } = Level;
     public string Text { get; set; } = Text;
-    
-    public ISolidColorBrush Color => Level switch {
-        LogEventLevel.Verbose => ILogVM.VerboseBrush,
-        LogEventLevel.Debug => ILogVM.DebugBrush,
-        LogEventLevel.Information => ILogVM.MessageBrush,
-        LogEventLevel.Warning => ILogVM.WarningBrush,
-        LogEventLevel.Error => ILogVM.ErrorBrush,
-        LogEventLevel.Fatal => ILogVM.FatalBrush,
-        _ => throw new ArgumentOutOfRangeException(nameof(Level))
-    };
 }
