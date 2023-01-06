@@ -11,7 +11,7 @@
     <Grid>
         <!-- Background needs to be transparent to make the context menu work in empty area -->
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
-        <DataGrid x:Name="PART_RecordGrid"
+        <DataGrid x:Name="RecordGrid"
                   Background="Transparent"
                   Items="{Binding Records}"
                   SelectedItem="{ReflectionBinding SelectedRecord}"
