@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Services.Docking;
 
-public class DockingManagerService : ReactiveObject, IDockingManagerService {
+public sealed class DockingManagerService : ReactiveObject, IDockingManagerService {
     public DockingManagerVM Root { get; } = new();
 
     public IObservable<IDockedItem> Opened => Root.Opened;

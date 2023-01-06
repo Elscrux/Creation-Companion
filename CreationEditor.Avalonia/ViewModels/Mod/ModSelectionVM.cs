@@ -2,12 +2,13 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
+using CreationEditor.Avalonia.Extension;
+using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Environment;
 using DynamicData;
 using DynamicData.Binding;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -18,7 +19,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public class ModSelectionVM : ViewModel {
+public sealed class ModSelectionVM : ViewModel {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IBusyService _busyService;
     private readonly IGameEnvironment _environment;

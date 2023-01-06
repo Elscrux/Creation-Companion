@@ -2,8 +2,8 @@
 using System.Reactive;
 using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Models.Record.Browser;
-using CreationEditor.Avalonia.Services.Record;
 using CreationEditor.Avalonia.Services.Record.List;
+using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Skyrim;
@@ -11,7 +11,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
-public class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
+public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 

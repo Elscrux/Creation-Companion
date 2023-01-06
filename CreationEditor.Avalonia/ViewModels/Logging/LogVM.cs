@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models.Logging;
 using DynamicData;
 using DynamicData.Binding;

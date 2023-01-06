@@ -8,7 +8,7 @@ using Serilog;
 using INotifier = CreationEditor.Notification.INotifier;
 namespace CreationEditor.Environment; 
 
-public class BackgroundReferenceQuery : IReferenceQuery {
+public sealed class BackgroundReferenceQuery : IReferenceQuery {
     private readonly IBackgroundTaskManager _backgroundTaskManager;
     private readonly ReferenceQuery _referenceQuery;
 

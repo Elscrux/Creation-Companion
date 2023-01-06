@@ -6,7 +6,7 @@ using DynamicData.Binding;
 using Elscrux.Notification;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Avalonia;
+namespace CreationEditor.Avalonia.ViewModels;
 
 // public class NotifiedVM : ViewModel {
 //     public IObservableCollection<NotificationItem>? LoadingItems { get; }

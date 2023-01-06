@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Notification;
 
-public class ChainedNotifier : ANotificationContext {
+public sealed class ChainedNotifier : ANotificationContext {
     private readonly IEnumerator<string> _stepEnumerator;
     private readonly float _countFloat;
     private int _currentStep;

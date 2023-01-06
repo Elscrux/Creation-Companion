@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Threading;
+using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -36,7 +37,7 @@ public abstract class RecordListVM : ViewModel, IRecordListVM {
     }
 }
 
-public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
+public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
 
@@ -46,7 +47,7 @@ public class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
-    protected static readonly SourceCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> UpdateCache = new(x => x.Record.FormKey);
+    private static readonly SourceCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> UpdateCache = new(x => x.Record.FormKey);
 
     public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; }
 

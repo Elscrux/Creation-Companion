@@ -16,54 +16,38 @@
                               Width="4*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- <Border Grid.Column="0" -->
-        <!--         BorderBrush="{DynamicResource ButtonBackground}" -->
-        <!--         BorderThickness="2" -->
-        <!--         CornerRadius="3"> -->
-            <Grid RowDefinitions="Auto,Auto,*">
-                <TextBox Grid.Row="0"
-                         Margin="5"
-                         Text="{Binding RecordBrowserSettings.SearchTerm}"
-                         Watermark="Search..."/>
-                <CheckBox
-                    Grid.Row="1"
-                    Margin="5"
-                    Content="Show Only Active"
-                    IsChecked="{Binding RecordBrowserSettings.OnlyActive}"/>
-                <TreeView Grid.Row="2"
-                          Items="{Binding RecordTypeGroups}">
-                    <TreeView.DataTemplates>
-                        <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
-                            <TextBlock Text="{Binding GroupName}"/>
-                        </TreeDataTemplate>
-                        <DataTemplate DataType="model:RecordTypeListing">
-                            <Button
-                                Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
-                                CommandParameter="{Binding}"
-                                FontSize="12"
-                                HorizontalContentAlignment="Left">
-                                <TextBlock Text="{Binding RecordTypeName}"/>
-                            </Button>
-                        </DataTemplate>
-                    </TreeView.DataTemplates>
-                </TreeView>
-            </Grid>
-        <!-- </Border> -->
+        <Grid RowDefinitions="Auto,Auto,*">
+            <TextBox Grid.Row="0"
+                     Margin="5"
+                     Text="{Binding RecordBrowserSettings.SearchTerm}"
+                     Watermark="Search..."/>
+            <CheckBox
+                Grid.Row="1"
+                Margin="5"
+                Content="Show Only Active"
+                IsChecked="{Binding RecordBrowserSettings.OnlyActive}"/>
+            <TreeView Grid.Row="2"
+                      Items="{Binding RecordTypeGroups}">
+                <TreeView.DataTemplates>
+                    <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
+                        <TextBlock Text="{Binding GroupName}"/>
+                    </TreeDataTemplate>
+                    <DataTemplate DataType="model:RecordTypeListing">
+                        <Button
+                            Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
+                            CommandParameter="{Binding}"
+                            FontSize="12"
+                            HorizontalContentAlignment="Left">
+                            <TextBlock Text="{Binding RecordTypeName}"/>
+                        </Button>
+                    </DataTemplate>
+                </TreeView.DataTemplates>
+            </TreeView>
+        </Grid>
 
         <GridSplitter Grid.Column="1"/>
-        <!-- <GridSplitter Background="Transparent" -->
-        <!--               MinWidth="10" -->
-        <!--               CornerRadius="4" -->
-        <!--               BorderBrush="{DynamicResource ButtonBackground}" -->
-        <!--               BorderThickness="2" Grid.Column="1"/> -->
-        <!-- <GridSplitter Background="Transparent" Grid.Column="1"/> -->
 
         <ContentControl Grid.Column="2"
                         Content="{Binding RecordList}"/>
-        <!-- <ContentControl Grid.Column="2" -->
-        <!--                 BorderBrush="{DynamicResource ButtonBackground}" -->
-        <!--                 BorderThickness="2" -->
-        <!--                 CornerRadius="3" -->
-        <!--                 Content="{Binding RecordList}"/> -->
     </Grid>
 </UserControl>

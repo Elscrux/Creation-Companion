@@ -1,7 +1,7 @@
 ﻿using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Models.Docking;
 
-public class DockInfo {
+public sealed class DockInfo {
     public string Header { get; init; } = string.Empty;
     public IconSource? IconSource { get; init; } = null;
     

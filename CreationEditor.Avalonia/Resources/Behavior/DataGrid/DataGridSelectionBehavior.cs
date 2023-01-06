@@ -9,12 +9,13 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
+using CreationEditor.Avalonia.Models;
 using DynamicData;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
-public class DataGridSelectionBehavior : Behavior<DataGrid> {
+public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     public static readonly StyledProperty<bool?> AllCheckedProperty = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
 

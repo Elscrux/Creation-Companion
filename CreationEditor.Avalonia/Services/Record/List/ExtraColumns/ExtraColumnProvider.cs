@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
-public class ExtraColumnProvider : IExtraColumnProvider {
+public sealed class ExtraColumnProvider : IExtraColumnProvider {
     private readonly Dictionary<Type, IExtraColumns> _extraColumnsCache = new();
 
     public ExtraColumnProvider() {

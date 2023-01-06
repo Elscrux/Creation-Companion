@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using CreationEditor.Avalonia;
+using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -9,7 +10,7 @@ using Mutagen.Bethesda.Skyrim;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Mod; 
 
-public class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
+public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
     [Reactive] public bool IsReadOnly { get; set; } = true;
 
     [Reactive] public string Name { get; set; } = string.Empty;

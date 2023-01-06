@@ -29,7 +29,7 @@ public interface IReferenceQuery {
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
-public class ReferenceQuery : IReferenceQuery {
+public sealed class ReferenceQuery : IReferenceQuery {
     private const string CacheDirectory = "MutagenCache";
     private const string CacheSubdirectory = "References";
     private const string CacheExtension = "cache";
@@ -190,7 +190,7 @@ public class ReferenceQuery : IReferenceQuery {
             var lastWriteTime = _fileSystem.File.GetLastWriteTime(modFilePath);
             return dateTime.CompareTo(lastWriteTime) >= 0;
         } else {
-            _logger.Here().Warning("Couldn't parse {DateTimeStr} as DateTime in reference cache of {mod.ModKey} -> build references instead", dateTimeStr, mod.ModKey);
+            _logger.Here().Warning("Couldn't parse {DateTimeStr} as DateTime in reference cache of {ModKey} -> build references instead", dateTimeStr, mod.ModKey);
             return false;
         }
     }

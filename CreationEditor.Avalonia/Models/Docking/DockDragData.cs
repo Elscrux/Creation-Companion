@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
-using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Views.Docking;
-namespace CreationEditor.Avalonia.Behavior;
+namespace CreationEditor.Avalonia.Models.Docking;
 
 public sealed record DockDragData {
     public required IDockedItem Item { get; set; }

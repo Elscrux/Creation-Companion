@@ -16,7 +16,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;
 
-public class MainVM : NotifiedVM {
+public sealed class MainVM : NotifiedVM {
     private const string BaseWindowTitle = "Creation Editor";
 
     public IBusyService BusyService { get; }

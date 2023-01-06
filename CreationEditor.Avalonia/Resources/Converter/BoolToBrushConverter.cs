@@ -3,7 +3,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 namespace CreationEditor.Avalonia.Converter;
 
-public class BoolToBrushConverter : IValueConverter {
+public sealed class BoolToBrushConverter : IValueConverter {
     public IBrush ValidBrush { get; set; } = Brushes.ForestGreen;
     public IBrush ErrorBrush { get; set; } = Brushes.IndianRed;
     

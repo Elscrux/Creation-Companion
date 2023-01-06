@@ -1,4 +1,5 @@
-﻿using CreationEditor.Environment;
+﻿using CreationEditor.Avalonia.Extension;
+using CreationEditor.Environment;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -6,7 +7,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Record.Browser;
 
-public class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettings {
+public sealed class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettings {
     private const char SplitChar = '*';
     
     private readonly IEditorEnvironment _editorEnvironment;

@@ -4,7 +4,7 @@ using Serilog;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.Modules;
 
-public class LoggingModule : Module {
+public sealed class LoggingModule : Module {
     protected override void Load(ContainerBuilder builder) {
         const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
 

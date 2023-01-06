@@ -7,7 +7,7 @@ namespace CreationEditor.Avalonia.Behavior.Attached;
 /// <summary>
 /// Container class for attached properties. Must inherit from <see cref="AvaloniaObject"/>.
 /// </summary>
-public class DoubleTappedBehavior : AvaloniaObject {
+public sealed class DoubleTappedBehavior : AvaloniaObject {
     /// <summary>
     /// Identifies the <seealso cref="CommandProperty"/> avalonia attached property.
     /// </summary>

@@ -1,7 +1,6 @@
 ﻿namespace CreationEditor.Avalonia.FormKeyPicker;
 
-public enum StatusIndicatorState
-{
+public enum StatusIndicatorState {
     Passive,
     Success,
     Failure,

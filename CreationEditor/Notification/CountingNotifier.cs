@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Notification;
 
-public class CountingNotifier : ANotificationContext {
+public sealed class CountingNotifier : ANotificationContext {
     private readonly float _countFloat;
     private readonly int _count;
     private int _currentStep;

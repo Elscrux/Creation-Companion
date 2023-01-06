@@ -4,8 +4,9 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Avalonia;
+namespace CreationEditor.Avalonia.Extension;
 
+// Mostly copied from Noggog.CSharpExt
 public static class ObservableExtension {
     public static IObservable<T> ObserveOnGui<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.MainThreadScheduler);
     public static IObservable<T> ObserveOnTaskpool<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.TaskpoolScheduler);

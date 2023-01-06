@@ -2,7 +2,7 @@
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Notification;
 
-public class NotificationItem : ReactiveObject {
+public sealed class NotificationItem : ReactiveObject {
     public Guid ID { get; }
     // todo enable when this is fixed https://github.com/AvaloniaUI/Avalonia/issues/8810
     // [Reactive]

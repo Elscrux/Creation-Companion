@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Notification;
 
-public class LinearNotifier : ANotificationContext {
+public sealed class LinearNotifier : ANotificationContext {
     private readonly float? _countFloat;
     private int _currentStep;
 

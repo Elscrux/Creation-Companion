@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
-public class RecordEditorController : IRecordEditorController {
+public sealed class RecordEditorController : IRecordEditorController {
     private readonly ILogger _logger;
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IDockingManagerService _dockingManagerService;

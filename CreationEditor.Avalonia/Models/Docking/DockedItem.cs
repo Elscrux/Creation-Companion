@@ -2,6 +2,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
+using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
@@ -9,7 +10,7 @@ using ReactiveUI.Fody.Helpers;
 using Visual = Avalonia.Visual;
 namespace CreationEditor.Avalonia.Models.Docking;
 
-public class DockedItem : ViewModel, IDockedItem {
+public sealed class DockedItem : ViewModel, IDockedItem {
     public Guid Id { get; }
 
     public Control Control { get; }

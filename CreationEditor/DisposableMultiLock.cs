@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Avalonia;
+﻿namespace CreationEditor;
 
 public sealed class DisposableCounterLock {
     private readonly Action _freeAction;

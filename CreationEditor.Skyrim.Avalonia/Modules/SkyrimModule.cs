@@ -19,7 +19,7 @@ using Mutagen.Bethesda.Skyrim;
 using MutagenLibrary.Core.Plugins;
 namespace CreationEditor.Skyrim.Avalonia.Modules; 
 
-public class SkyrimModule : Module {
+public sealed class SkyrimModule : Module {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterType<SkyrimEditorEnvironment>()
             .As<IEditorEnvironment>()

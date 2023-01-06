@@ -28,7 +28,7 @@ namespace CreationEditor.Notification;
 //     }
 // }
 
-public class Notifier : INotifier {
+public sealed class Notifier : INotifier {
     #region Observer
     private readonly List<INotificationReceiver> _observers = new();
 

@@ -13,7 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Environment;
 namespace CreationEditor.Avalonia.Modules; 
 
-public class MainModule : Module {
+public sealed class MainModule : Module {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterType<Startup>()
             .As<IStartup>();

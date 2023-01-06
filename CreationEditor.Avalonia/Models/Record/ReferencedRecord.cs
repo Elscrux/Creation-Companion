@@ -4,7 +4,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Record;
 
-public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject, IReferencedRecord
+public sealed class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject, IReferencedRecord
     where TMajorRecord : IMajorRecordIdentifier
     where TMajorRecordGetter : IMajorRecordIdentifier {
 

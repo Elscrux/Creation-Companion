@@ -5,7 +5,7 @@ using Elscrux.Notification;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Startup;
 
-public class Startup : IStartup {
+public sealed class Startup : IStartup {
     private readonly INotifier _notifier;
     private readonly ILogger _logger;
     private readonly IMainWindow _mainWindow;

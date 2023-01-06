@@ -1,9 +1,10 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using CreationEditor.Avalonia.Extension;
+using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public class ActivatableModItem : ModItem {
+public sealed class ActivatableModItem : ModItem {
     [Reactive] public bool IsActive { get; set; }
     [Reactive] public bool MastersValid { get; set; }
 

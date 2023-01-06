@@ -2,7 +2,7 @@
 using Avalonia.Data.Converters;
 namespace CreationEditor.Avalonia.Converter;
 
-public class ReturnParameterIfTrueConverter<TIn> : IValueConverter
+public sealed class ReturnParameterIfTrueConverter<TIn> : IValueConverter
     where TIn : IParsable<TIn> {
     public TIn? DefaultValue { get; set; }
     public IFormatProvider? ParseFormatProvider { get; set; } = null;

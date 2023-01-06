@@ -1,5 +1,5 @@
 ﻿using Avalonia;
-namespace CreationEditor.Avalonia;
+namespace CreationEditor.Avalonia.Extension;
 
 public static class PointExtension {
     public static double Distance(this Point p1, Point p2) {

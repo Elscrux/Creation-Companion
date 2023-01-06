@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 namespace CreationEditor.Avalonia.Models.Record.Browser; 
 
-public class RecordTypeGroup {
+public sealed class RecordTypeGroup {
     public string GroupName { get; }
     public ObservableCollection<RecordTypeListing> RecordTypes { get; set; }
 

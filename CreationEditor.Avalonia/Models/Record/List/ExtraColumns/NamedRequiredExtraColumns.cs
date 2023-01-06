@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Comparer;
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
-public class NamedRequiredExtraColumns : ExtraColumns<INamedRequired, INamedRequiredGetter> {
+public sealed class NamedRequiredExtraColumns : ExtraColumns<INamedRequired, INamedRequiredGetter> {
     public override IEnumerable<ExtraColumn> Columns {
         get {
             yield return new ExtraColumn(

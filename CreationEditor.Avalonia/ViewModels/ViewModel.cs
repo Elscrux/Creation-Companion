@@ -3,7 +3,7 @@ using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Avalonia;
+namespace CreationEditor.Avalonia.ViewModels;
 
 public class ViewModel : ReactiveObject, IDisposableDropoff {
     private readonly Lazy<CompositeDisposable> _compositeDisposable = new();

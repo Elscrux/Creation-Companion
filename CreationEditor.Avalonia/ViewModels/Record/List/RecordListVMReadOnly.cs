@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Environment;
@@ -7,7 +8,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public class RecordListVMReadOnly : RecordListVM {
+public sealed class RecordListVMReadOnly : RecordListVM {
     public RecordListVMReadOnly(
         Type type,
         IRecordBrowserSettings recordBrowserSettings,

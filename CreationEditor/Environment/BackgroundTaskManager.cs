@@ -5,6 +5,6 @@ public interface IBackgroundTaskManager {
     [Reactive] public bool ReferencesLoaded { get; set; } 
 }
 
-public class BackgroundTaskManager : IBackgroundTaskManager {
+public sealed class BackgroundTaskManager : IBackgroundTaskManager {
     [Reactive] public bool ReferencesLoaded { get; set; }
 }

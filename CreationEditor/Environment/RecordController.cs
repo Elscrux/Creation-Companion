@@ -22,7 +22,7 @@ public interface IRecordController {
         where TMajorRecordGetter : class, IMajorRecordGetter;
 }
 
-public class RecordController<TMod, TModGetter> : IRecordController
+public sealed class RecordController<TMod, TModGetter> : IRecordController
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     private readonly ILogger _logger;
