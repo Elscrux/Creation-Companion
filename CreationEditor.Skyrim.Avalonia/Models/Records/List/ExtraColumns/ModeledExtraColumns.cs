@@ -14,7 +14,7 @@ public class ModeledExtraColumns : ExtraColumns<IModeled, IModeledGetter> {
                 Binding = new Binding("Record.Model.File.DataRelativePath", BindingMode.OneWay),
                 CanUserSort = true,
                 Width = new DataGridLength(200),
-                CustomSortComparer = ReferencedModeledComparer.Instance
+                CustomSortComparer = SkyrimRecordComparers.ModeledComparer
             }, 25);
         }
     }

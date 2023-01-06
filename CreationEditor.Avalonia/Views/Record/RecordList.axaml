@@ -8,10 +8,6 @@
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Behavior.Attached"
              mc:Ignorable="d"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
-    <UserControl.Resources>
-        <comparer:ReferencedFormKeyComparer x:Key="FormKeySorter"/>
-        <comparer:ReferencedEditorIDComparer x:Key="EditorIDSorter"/>
-    </UserControl.Resources>
     <Grid>
         <!-- Background needs to be transparent to make the context menu work in empty area -->
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
@@ -48,13 +44,13 @@
                                     Binding="{Binding Record.EditorID, Mode=OneWay}"
                                     Width="200"
                                     CanUserSort="True"
-                                    CustomSortComparer="{StaticResource EditorIDSorter}"/>
+                                    CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"/>
                 <DataGridTextColumn x:DataType="record:IReferencedRecord"
                                     Header="FormKey"
                                     Binding="{Binding Record.FormKey, Mode=OneWay}"
                                     Width="100"
                                     CanUserSort="True"
-                                    CustomSortComparer="{StaticResource FormKeySorter}"/>
+                                    CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"/>
                 <DataGridTextColumn x:DataType="record:IReferencedRecord"
                                     Header="Use Info"
                                     Binding="{Binding References.Count, Mode=OneWay}"
