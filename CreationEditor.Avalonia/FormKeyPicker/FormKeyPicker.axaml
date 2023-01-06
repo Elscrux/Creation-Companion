@@ -3,7 +3,8 @@
         xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
         xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
-        xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker">
+        xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker"
+        xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter">
     <Design.PreviewWith>
         <Border Padding="20">
             <formKeyPicker:FormKeyPicker/>
@@ -11,10 +12,6 @@
     </Design.PreviewWith>
 
     <Style Selector="formKeyPicker|FormKeyPicker">
-        <Style.Resources>
-            <formKeyPicker:RecordTypeGameConverter x:Key="RecordTypeGameConverter" />
-            <formKeyPicker:RecordTypeNameConverter x:Key="RecordTypeNameConverter" />
-        </Style.Resources>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
@@ -95,9 +92,9 @@
                                                     <TextBlock Margin="0,4">
                                                         <TextBlock.Text>
                                                             <MultiBinding StringFormat="{}{0} ( {1} )">
-                                                                <Binding Converter="{StaticResource RecordTypeNameConverter}"
+                                                                <Binding Converter="{x:Static converter:RecordTypeConverters.ToName}"
                                                                          Mode="OneWay"/>
-                                                                <Binding Converter="{StaticResource RecordTypeGameConverter}"
+                                                                <Binding Converter="{x:Static converter:RecordTypeConverters.ToGame}"
                                                                          Mode="OneWay"/>
                                                             </MultiBinding>
                                                         </TextBlock.Text>
