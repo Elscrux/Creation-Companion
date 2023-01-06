@@ -55,9 +55,11 @@ public partial class App : Application {
             builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
         
             var container = builder.Build();
-        
-            container.Resolve<IStartup>()
-                .Start();
+
+            var lifecycle = container.Resolve<ILifecycle>();
+            lifecycle.Start();
+
+            desktop.Exit += (_, _) => lifecycle.Exit();
             
             desktop.MainWindow = window;
         }
