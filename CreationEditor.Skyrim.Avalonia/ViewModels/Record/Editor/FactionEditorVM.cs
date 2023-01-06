@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
+﻿using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -11,14 +9,12 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using FactionEditor = CreationEditor.Skyrim.Avalonia.Views.Record.Editor.FactionEditor;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
 
-public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
-    private readonly IRecordEditorController _recordEditorController;
+public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
     
     IMajorRecordGetter IRecordEditorVM.Record => Record;
@@ -36,21 +32,15 @@ public class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGette
     public int SelectedRelationIndex { get; set; }
     public int SelectedRankIndex { get; set; }
     
-    public IEnumerable<Type> OutfitTypes { get; } = typeof(IOutfitGetter).AsEnumerable();
-    public IEnumerable<Type> FormListTypes { get; } = typeof(IFormListGetter).AsEnumerable();
-    
-    public static IEnumerable<Type> RelationTypes { get; } = new[] { typeof(IFactionGetter), typeof(IRaceGetter) };
-    public static IEnumerable<CombatReaction> CombatReactions { get; } = Enum.GetValues<CombatReaction>();
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
         IEditorEnvironment editorEnvironment) {
-        _recordEditorController = recordEditorController;
         _editorEnvironment = editorEnvironment;
         
         Save = ReactiveCommand.Create(() => {
             EditableRecord.SetFaction(Record);
             
-            _recordEditorController.CloseEditor(Record);
+            recordEditorController.CloseEditor(Record);
         });
         
         AddRelation = ReactiveCommand.Create(() => {

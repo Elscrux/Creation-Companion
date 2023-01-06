@@ -6,6 +6,7 @@
              xmlns:plugins="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:editor="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor"
              xmlns:tooltips="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
              x:CompileBindings="True" x:DataType="editor:FactionEditorVM"
              d:DesignHeight="900" d:DesignWidth="900"
              x:Name="Editor">
@@ -93,7 +94,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate DataType="skyrim:Relation">
                                                 <ComboBox
-                                                    Items="{x:Static editor:FactionEditorVM.CombatReactions}"
+                                                    Items="{x:Static constants:EnumConstants.CombatReactions}"
                                                     ToolTip.Tip="{Binding Reaction, Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"
                                                     SelectedItem="{Binding Reaction}">
                                                     <ComboBox.ItemTemplate>
@@ -114,7 +115,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate DataType="skyrim:Relation">
                                                 <plugins:FormKeyPicker FormKey="{Binding Target.FormKey}"
-                                                                       ScopedTypes="{x:Static editor:FactionEditorVM.RelationTypes}"
+                                                                       ScopedTypes="{x:Static constants:FormTypeConstants.RelationTypes}"
                                                                        LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCache}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -288,7 +289,7 @@
                                                         Header="Jail Outfit"
                                                         ToolTip.Tip="The clothes given to the player in prison. Usually BeggarOutfit.">
                                     <plugins:FormKeyPicker FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
-                                                           ScopedTypes="{Binding OutfitTypes}"
+                                                           ScopedTypes="{x:Static constants:FormTypeConstants.OutfitTypes}"
                                                            LinkCache="{Binding LinkCache}"/>
                                 </HeaderedContentControl>
 
@@ -298,7 +299,7 @@
                                                         ToolTip.Tip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown.">
                                     <plugins:FormKeyPicker
                                         FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
-                                        ScopedTypes="{Binding FormListTypes}"
+                                        ScopedTypes="{x:Static constants:FormTypeConstants.FormListTypes}"
                                         LinkCache="{Binding LinkCache}"/>
                                 </HeaderedContentControl>
 
@@ -479,7 +480,7 @@
                                                             ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
                                         <plugins:FormKeyPicker
                                             FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
-                                            ScopedTypes="{Binding FormListTypes}"
+                                            ScopedTypes="{x:Static constants:FormTypeConstants.FormListTypes}"
                                             LinkCache="{Binding LinkCache}"/>
                                     </HeaderedContentControl>
                                 </StackPanel>
