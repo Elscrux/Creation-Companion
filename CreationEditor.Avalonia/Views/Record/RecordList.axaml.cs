@@ -8,6 +8,12 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         InitializeComponent();
     }
     
+    public RecordList(IEnumerable<DataGridColumn> columns) : this() {
+        foreach (var column in columns) {
+            AddColumn(column);
+        }
+    }
+    
     public void AddColumn(DataGridColumn column) {
         RecordGrid?.Columns.Add(column);
     }

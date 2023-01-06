@@ -27,11 +27,8 @@ public class SkyrimRecordListFactory : IRecordListFactory {
         browserSettings ??= _defaultRecordBrowserSettings;
         var browserSettingsParam = TypedParameter.From(browserSettings);
 
-        var recordList = new RecordList();
-        
-        _extraColumnProvider.GetColumns(type)
-            .ForEach(recordList.AddColumn);
-        
+        var recordList = new RecordList(_extraColumnProvider.GetColumns(type));
+
         recordList.DataContext = type.Name switch {
             nameof(INpcGetter) => _lifetimeScope.Resolve<RecordListVM<Npc, INpcGetter>>(browserSettingsParam),
             nameof(IActionRecordGetter) => _lifetimeScope.Resolve<RecordListVM<ActionRecord, IActionRecordGetter>>(browserSettingsParam),
