@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
@@ -25,7 +26,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public List<ISetting> Children { get; } = new();
 
     public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
-    public ReactiveCommand<List<StartupDock>, Unit> RemoveStartupDock { get; }
+    public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }
     
     [JsonProperty]
     public ObservableCollection<StartupDock> Docks { get; } = new();
@@ -37,8 +38,8 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
 
         AddStartupDock = ReactiveCommand.Create(() => Docks.Add(new StartupDock()));
         
-        RemoveStartupDock = ReactiveCommand.Create<List<StartupDock>>(removeDocks => {
-            foreach (var removeDock in removeDocks) {
+        RemoveStartupDock = ReactiveCommand.Create<IList>(removeDocks => {
+            foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
                 Docks.Remove(removeDock);
             }
         });
