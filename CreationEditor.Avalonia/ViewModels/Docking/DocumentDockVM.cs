@@ -37,7 +37,7 @@ public sealed class DocumentDockVM : DockContainerVM {
     }
 
     public override void Add(IDockedItem dockedItem, DockConfig config) {
-        if (config.DockMode is not DockMode.Default and not DockMode.Document) return;
+        if (config.DockMode is not null and not DockMode.Document) return;
         
         dockedItem.DockParent = this;
         Tabs.Add(dockedItem);

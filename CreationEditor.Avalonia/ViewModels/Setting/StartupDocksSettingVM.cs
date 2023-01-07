@@ -15,7 +15,7 @@ public sealed record StartupDocksSetting(List<StartupDock> Docks);
 
 public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<DockElement> StartupDockTypes = Enum.GetValues<DockElement>();
-    public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>().Skip(1);
+    public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>();
     public static readonly IEnumerable<Dock> DockTypes = Enum.GetValues<Dock>();
 
     private readonly IDockFactory _dockFactory;

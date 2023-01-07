@@ -76,13 +76,13 @@ public sealed class DockingManagerVM : DockContainerVM {
     
     public override void Add(IDockedItem dockedItem, DockConfig config) {
         switch (config.DockMode) {
-            case DockMode.Default:
-            case DockMode.Layout:
-            case DockMode.Document:
-                Layout.Add(dockedItem, config);
-                break;
             case DockMode.Side:
                 AddSideControl(dockedItem, config);
+                break;
+            case null:
+            case DockMode.Document:
+            case DockMode.Layout:
+                Layout.Add(dockedItem, config);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(config));
