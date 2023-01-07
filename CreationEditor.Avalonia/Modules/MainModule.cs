@@ -47,7 +47,12 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<ExtraColumnProvider>()
-            .As<IExtraColumnProvider>();
+            .As<IExtraColumnProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<DockFactory>()
+            .As<IDockFactory>()
+            .SingleInstance();
         
         //VMs
         builder.RegisterType<ModSelectionVM>();

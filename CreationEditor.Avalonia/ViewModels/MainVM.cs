@@ -1,15 +1,14 @@
 ﻿using System.Reactive;
 using Autofac;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Models.Docking;
+using CreationEditor.Avalonia.Models;
+using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
-using CreationEditor.Avalonia.ViewModels.Logging;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Avalonia.Views.Logging;
+using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views.Mod;
-using CreationEditor.Avalonia.Views.Record;
+using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Environment;
 using CreationEditor.Notification;
 using ReactiveUI;
@@ -17,6 +16,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : NotifiedVM {
+    private readonly IDockFactory _dockFactory;
     private const string BaseWindowTitle = "Creation Editor";
 
     public IBusyService BusyService { get; }
@@ -37,7 +37,9 @@ public sealed class MainVM : NotifiedVM {
         IBusyService busyService,
         IEditorEnvironment editorEnvironment,
         ModSelectionVM modSelectionVM,
-        IDockingManagerService dockingManagerService) {
+        IDockingManagerService dockingManagerService,
+        IDockFactory dockFactory) {
+        _dockFactory = dockFactory;
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
         
@@ -50,30 +52,9 @@ public sealed class MainVM : NotifiedVM {
 
         Save = ReactiveCommand.Create(() => {});
         
-        OpenLog = ReactiveCommand.Create(() => {
-            DockingManagerService.AddControl(
-                new LogView(componentContext.Resolve<ILogVM>()),
-                new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Log", 
-                    },
-                    Dock = Dock.Bottom,
-                    DockMode = DockMode.Side,
-                });
-        });
+        OpenLog = ReactiveCommand.Create(() => _dockFactory.Open(DockElement.Log));
         
-        OpenRecordBrowser = ReactiveCommand.Create(() => {
-            DockingManagerService.AddControl(
-                new RecordBrowser(componentContext.Resolve<IRecordBrowserVM>()),
-                new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Record Browser", 
-                    },
-                    Dock = Dock.Left,
-                    DockMode = DockMode.Layout,
-                    Size = new GridLength(3, GridUnitType.Star),
-                });
-        });
+        OpenRecordBrowser = ReactiveCommand.Create(() => _dockFactory.Open(DockElement.RecordBrowser));
         
         editorEnvironment.ActiveModChanged
             .Subscribe(activeMod => {

@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
 
-public class SkyrimRecordListFactory : IRecordListFactory {
+public sealed class SkyrimRecordListFactory : IRecordListFactory {
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IRecordBrowserSettings _defaultRecordBrowserSettings;
     private readonly IExtraColumnProvider _extraColumnProvider;
