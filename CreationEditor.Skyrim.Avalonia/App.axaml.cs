@@ -39,10 +39,10 @@ public partial class App : Application {
             builder.RegisterModule<NotificationModule>();
             builder.RegisterModule<Notification.NotificationModule>();
             builder.RegisterModule<LoggingModule>();
+            builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<MutagenModule>();
             builder.RegisterModule<SkyrimModule>();
         
-            // ToDo
             // Remove
             builder.RegisterType<GameLocator>().As<IGameDirectoryLookup>();
         

@@ -1,0 +1,44 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:settings="clr-namespace:CreationEditor.Settings;assembly=CreationEditor"
+             xmlns:setting="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:CompileBindings="True" x:DataType="setting:ISettingsVM"
+             x:Class="CreationEditor.Avalonia.Views.Setting.SettingsView">
+    <Design.DataContext>
+        <setting:SettingsVM/>
+    </Design.DataContext>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="200" Width="200"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <TreeView Grid.Column="0"
+                  Items="{Binding RootSettings}"
+                  SelectedItem="{Binding SelectedSetting}">
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="settings:ISetting" ItemsSource="{Binding Children}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}"/>
+                    </StackPanel>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+        
+        <GridSplitter Grid.Column="1"/>
+        
+        <!-- We'll get the view for a setting via ViewLocator -->
+        <ContentControl Grid.Column="2"
+                        Content="{ReflectionBinding SelectedSetting}"/>
+        
+        <Button Grid.Column="0"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Content="Save"
+                Command="{Binding Save}"/>
+    </Grid>
+</UserControl>

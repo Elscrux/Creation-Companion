@@ -3,9 +3,10 @@ using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.ViewModels;
+using CreationEditor.Settings;
 namespace CreationEditor.Skyrim.Avalonia;
 
-public class ViewLocator : IDataTemplate {
+public sealed class ViewLocator : IDataTemplate {
     public IControl Build(object? data) {
         var name = data?.GetType().FullName?
             .Replace("ViewModel", "View")
@@ -16,6 +17,6 @@ public class ViewLocator : IDataTemplate {
     }
 
     public bool Match(object? data) {
-        return data is MainVM;
+        return data is MainVM or ISetting;
     }
 }

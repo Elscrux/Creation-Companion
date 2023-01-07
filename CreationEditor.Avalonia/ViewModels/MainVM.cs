@@ -26,6 +26,7 @@ public sealed class MainVM : NotifiedVM {
     public IDockingManagerService DockingManagerService { get; }
 
     public ReactiveCommand<Window, Unit> OpenSelectMods { get; }
+    public ReactiveCommand<Window, Unit> OpenSettings { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
     
     public ReactiveCommand<Unit, Unit> OpenLog { get; }
@@ -43,11 +44,14 @@ public sealed class MainVM : NotifiedVM {
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
         
-        // todo add default docking manager views (record browser on the left in side panel, log at the bottom in side panel)
-        
         OpenSelectMods = ReactiveCommand.Create<Window>(window => {
             var modSelectionWindow = new ModSelectionWindow(modSelectionVM);
             modSelectionWindow.ShowDialog(window);
+        });
+        
+        OpenSettings = ReactiveCommand.Create<Window>(window => {
+            var settingsWindow = new SettingsWindow(componentContext.Resolve<ISettingsVM>());
+            settingsWindow.ShowDialog(window);
         });
 
         Save = ReactiveCommand.Create(() => {});

@@ -30,6 +30,13 @@
                             <fluentIcons:FluentIcon Icon="AppsAddIn24Regular"/>
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Settings"
+                              Command="{Binding OpenSettings}"
+                              CommandParameter="{Binding #Window}">
+                        <MenuItem.Icon>
+                            <fluentIcons:FluentIcon Icon="Settings24Regular"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Save"
                               Command="{Binding Save}">
                         <MenuItem.Icon>

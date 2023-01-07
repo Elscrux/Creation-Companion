@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 namespace CreationEditor.Avalonia.Models.Docking;
 
-public sealed class DockConfig {
+public sealed record DockConfig {
     public static readonly DockConfig Default = new();
 
     public DockInfo DockInfo { get; init; } = new();
