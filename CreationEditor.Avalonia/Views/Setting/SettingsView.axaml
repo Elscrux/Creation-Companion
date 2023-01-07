@@ -15,7 +15,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="200" Width="200"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition/>
+            <ColumnDefinition MinWidth="200" />
         </Grid.ColumnDefinitions>
         
         <TreeView Grid.Column="0"

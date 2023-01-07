@@ -1,9 +1,9 @@
-﻿using Avalonia.Controls;
-using CreationEditor.Avalonia.ViewModels.Setting;
+﻿using CreationEditor.Avalonia.ViewModels.Setting;
+using FluentAvalonia.UI.Windowing;
 
 namespace CreationEditor.Avalonia.Views.Setting; 
 
-public partial class SettingsWindow : Window {
+public partial class SettingsWindow : AppWindow {
     public SettingsWindow() {
         InitializeComponent();
     }
