@@ -2,8 +2,6 @@
 using System.Reactive.Subjects;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
-using Avalonia.Media;
 using CreationEditor.Avalonia.Models.Docking;
 using Noggog;
 using ReactiveUI.Fody.Helpers;
@@ -51,21 +49,6 @@ public sealed class DockingManagerVM : DockContainerVM {
         RightSide = new SideDockVM(this);
         
         Children = new List<IDockObject> { Layout, TopSide, BottomSide, LeftSide, RightSide };
-
-        DockedItem Get(IBrush brush, string header, DockContainerVM parent) {
-            return new DockedItem(new Rectangle { MinWidth = 150, MinHeight = 150, Fill = brush }, new DockInfo()) {
-                DockParent = parent,
-                Header = header };
-        }
-        
-        TopSide.Tabs.Add(Get(Brushes.Yellow, "test1", TopSide));
-        TopSide.Tabs.Add(Get(Brushes.Orange, "test2", TopSide));
-        LeftSide.Tabs.Add(Get(Brushes.Red, "AAAAAA", LeftSide));
-        LeftSide.Tabs.Add(Get(Brushes.Blue, "BBBBBB", LeftSide));
-        RightSide.Tabs.Add(Get(Brushes.Green, "CCCCCC", RightSide));
-        RightSide.Tabs.Add(Get(Brushes.Pink, "DDDD", RightSide));
-        BottomSide.Tabs.Add(Get(Brushes.Violet, "EEEEEEE", BottomSide));
-        BottomSide.Tabs.Add(Get(Brushes.Azure, "FFFF", BottomSide));
     }
 
     public void OnDockAdded(IDockedItem dockedItem) {
