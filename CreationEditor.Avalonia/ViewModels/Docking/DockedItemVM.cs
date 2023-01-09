@@ -2,15 +2,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Docking;
+using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Visual = Avalonia.Visual;
-namespace CreationEditor.Avalonia.Models.Docking;
+namespace CreationEditor.Avalonia.ViewModels.Docking;
 
-public sealed class DockedItem : ViewModel, IDockedItem {
+public sealed class DockedItemVM : ViewModel, IDockedItem {
     public Guid Id { get; }
 
     public Control Control { get; }
@@ -31,7 +30,7 @@ public sealed class DockedItem : ViewModel, IDockedItem {
     private readonly Subject<IDockedItem> _closed = new();
     public IObservable<IDockedItem> Closed => _closed;
 
-    public DockedItem(Control control, DockInfo info) {
+    public DockedItemVM(Control control, DockInfo info) {
         Id = Guid.NewGuid();
         Control = control;
         Header = info.Header;

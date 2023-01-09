@@ -11,7 +11,7 @@ public sealed class DockingManagerService : ReactiveObject, IDockingManagerServi
     public IObservable<IDockedItem> Closed => Root.Closed;
 
     public void AddControl(Control control, DockConfig config) {
-        var dockedItem = new DockedItem(control, config.DockInfo);
+        var dockedItem = new DockedItemVM(control, config.DockInfo);
         
         Root.Add(dockedItem, config);
     }
