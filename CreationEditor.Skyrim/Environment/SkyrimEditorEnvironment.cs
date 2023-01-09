@@ -17,7 +17,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     private readonly IReferenceQuery _referenceQuery;
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IBackgroundTaskManager _backgroundTaskManager;
-    private readonly INotifier _notifier;
+    private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
 
     private IGameEnvironment<ISkyrimMod, ISkyrimModGetter> _gameEnvironment;
@@ -51,12 +51,12 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         IReferenceQuery referenceQuery,
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IBackgroundTaskManager backgroundTaskManager,
-        INotifier notifier,
+        INotificationService notificationService,
         ILogger logger) {
         _referenceQuery = referenceQuery;
         _simpleEnvironmentContext = simpleEnvironmentContext;
         _backgroundTaskManager = backgroundTaskManager;
-        _notifier = notifier;
+        _notificationService = notificationService;
         _logger = logger;
 
         _activeMod = new SkyrimMod(NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
@@ -83,7 +83,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
         _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
-        var linearNotifier = new LinearNotifier(_notifier, activeMod == null ? 1 : 2);
+        var linearNotifier = new LinearNotifier(_notificationService, activeMod == null ? 1 : 2);
         
         if (activeMod != null) {
             linearNotifier.Next($"Preparing {activeMod.Value.FileName}");
@@ -109,7 +109,7 @@ public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimMod
     }
 
     private async void Prepare() {
-        var linearNotifier = new LinearNotifier(_notifier, 1);
+        var linearNotifier = new LinearNotifier(_notificationService, 1);
 
         linearNotifier.Next("Loading References");
         await Task.Run(() => _referenceQuery.LoadModReferences(_gameEnvironment));

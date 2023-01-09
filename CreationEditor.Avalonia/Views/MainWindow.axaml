@@ -58,11 +58,11 @@
                         </MenuItem.Icon>
                     </MenuItem>
                 </MenuItem>
-                <MenuItem IsVisible="{Binding !!LoadingItems.Count}"
+                <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
                           HorizontalAlignment="Right"
-                          Items="{Binding LoadingItems}">
+                          Items="{Binding NotificationVM.LoadingItems}">
                     <MenuItem.Header>
-                        <notificationView:NotificationView DataContext="{Binding LatestNotification}"/>
+                        <notificationView:NotificationView DataContext="{Binding NotificationVM.LatestNotification^}"/>
                     </MenuItem.Header>
                     <MenuItem.DataTemplates>
                         <DataTemplate DataType="notification:NotificationItem">
@@ -79,18 +79,18 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Width="500" Height="500"/>
 
-        <ItemsControl Items="{Binding LoadingItems}"
+        <ItemsRepeater Items="{Binding NotificationVM.LoadingItems}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"
                       IsVisible="{Binding BusyService.IsBusy}"
                       Margin="0, 256, 0, 0">
-            <ItemsControl.ItemTemplate>
+            <ItemsRepeater.DataTemplates>
                 <DataTemplate DataType="notification:NotificationItem">
                     <StackPanel>
                         <notificationView:NotificationView DataContext="{Binding}"/>
                     </StackPanel>
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            </ItemsRepeater.DataTemplates>
+        </ItemsRepeater>
 
     </Grid>
 </windowing:AppWindow>

@@ -21,16 +21,16 @@
 
     <ItemGroup>
       <Compile Update="Notification\ChainedNotifier.cs">
-        <DependentUpon>ANotificationContext.cs</DependentUpon>
+        <DependentUpon>ANotifier.cs</DependentUpon>
       </Compile>
       <Compile Update="Notification\CountingNotifier.cs">
-        <DependentUpon>ANotificationContext.cs</DependentUpon>
+        <DependentUpon>ANotifier.cs</DependentUpon>
       </Compile>
       <Compile Update="Notification\LinearNotifier.cs">
-        <DependentUpon>ANotificationContext.cs</DependentUpon>
+        <DependentUpon>ANotifier.cs</DependentUpon>
       </Compile>
-      <Compile Update="Notification\Notifier.cs">
-        <DependentUpon>INotifier.cs</DependentUpon>
+      <Compile Update="Notification\NotificationService.cs">
+        <DependentUpon>INotificationService.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

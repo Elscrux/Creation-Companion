@@ -9,10 +9,10 @@ using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Startup;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.Modules;
-using Elscrux.Notification;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Installs.DI;
+using NotificationModule = CreationEditor.Avalonia.Modules.NotificationModule;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public partial class App : Application {
@@ -37,7 +37,7 @@ public partial class App : Application {
         
             builder.RegisterModule<MainModule>();
             builder.RegisterModule<NotificationModule>();
-            builder.RegisterModule<Notification.NotificationModule>();
+            builder.RegisterModule<NotificationModule>();
             builder.RegisterModule<LoggingModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<MutagenModule>();

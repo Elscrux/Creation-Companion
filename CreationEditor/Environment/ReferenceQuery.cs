@@ -1,11 +1,11 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using MutagenLibrary.Core.Plugins;
 using Serilog;
-using INotifier = CreationEditor.Notification.INotifier;
 namespace CreationEditor.Environment; 
 
 public sealed class BackgroundReferenceQuery : IReferenceQuery {
@@ -15,12 +15,12 @@ public sealed class BackgroundReferenceQuery : IReferenceQuery {
     public BackgroundReferenceQuery(
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IFileSystem fileSystem,
-        INotifier notifier,
+        INotificationService notificationService,
         ILogger logger,
         IBackgroundTaskManager backgroundTaskManager) {
         _backgroundTaskManager = backgroundTaskManager;
 
-        _referenceQuery = new ReferenceQuery(simpleEnvironmentContext, fileSystem, notifier, logger);
+        _referenceQuery = new ReferenceQuery(simpleEnvironmentContext, fileSystem, notificationService, logger);
     }
     
     public void LoadModReferences(IModGetter mod) => _referenceQuery.LoadModReferences(mod);

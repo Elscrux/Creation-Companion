@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Notification;
 
-public sealed class LinearNotifier : ANotificationContext {
+public sealed class LinearNotifier : ANotifier {
     private readonly float? _countFloat;
     private int _currentStep;
 
@@ -9,40 +9,41 @@ public sealed class LinearNotifier : ANotificationContext {
     /// It can also provide progress information if predetermined
     /// count is set int the constructor.
     /// </summary>
-    /// <param name="notifier">Notifier to notify</param>
-    /// <param name="count">Amount of steps the notifier will go through</param>
+    /// <param name="notificationService">NotificationService to notify</param>
+    /// <param name="count">Amount of steps the notificationService will go through</param>
     /// <example>
     /// Doing tasks in a row.
     /// <code>
-    /// var linearNotifier = new LinearNotifier(notifier, 3);
     ///
+    /// var linearNotifier = new LinearNotifier(notificationService, 3);
+    /// 
     /// linearNotifier.Next("Prepare files");
     /// PrepareFiles();
-    ///
+    /// 
     /// linearNotifier.Next("Generate cache");
     /// GenerateCache();
-    ///
+    /// 
     /// linearNotifier.Next("Finalize");
     /// Finalize(); 
     /// 
     /// linearNotifier.Stop();
     /// </code>
     /// </example>
-    public LinearNotifier(INotifier notifier, int count = 1)
-        : base(notifier) {
+    public LinearNotifier(INotificationService notificationService, int count = 1)
+        : base(notificationService) {
         _countFloat = count;
     }
 
     public void Next(string message) {
         if (_countFloat is > 1) {
-            Notifier.NotifyProgress(ID, message, _currentStep / _countFloat.Value);
+            NotificationService.Notify(ID, message, _currentStep / _countFloat.Value);
             _currentStep++;
         } else {
-            Notifier.Notify(ID, message);
+            NotificationService.Notify(ID, message);
         }
     }
 
     public void Stop() {
-        Notifier.Stop(ID);
+        NotificationService.Stop(ID);
     }
 }

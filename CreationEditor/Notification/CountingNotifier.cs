@@ -1,9 +1,11 @@
 ﻿namespace CreationEditor.Notification;
 
-public sealed class CountingNotifier : ANotificationContext {
+public sealed class CountingNotifier : ANotifier {
     private readonly float _countFloat;
     private readonly int _count;
     private int _currentStep;
+
+    private readonly string _message;
 
     /// <summary>
     /// CountingNotifier helps with many notifications in a row of the same type.
@@ -11,13 +13,13 @@ public sealed class CountingNotifier : ANotificationContext {
     /// call to Start() where you can pass a message that will be displayed for
     /// all following steps using NextStep().
     /// </summary>
-    /// <param name="notifier">Notifier to notify</param>
+    /// <param name="notificationService">NotificationService to notify</param>
+    /// <param name="message">Message displayed per notification step</param>
     /// <param name="count">Amount of steps to go through</param>
     /// <example>
     /// Iterating a list and doing something for every item in the list.
     /// <code>
-    /// var counter = new CountingNotifier(notifier, list.Count);
-    /// counter.Start("Doing job");
+    /// var counter = new CountingNotifier(notificationService, "Doing job", list.Count);
     /// foreach (var item in list) {
     ///     counter.NextStep();
     ///     // do something
@@ -25,25 +27,22 @@ public sealed class CountingNotifier : ANotificationContext {
     /// counter.Stop()
     /// </code>
     /// </example>
-    public CountingNotifier(INotifier notifier, int count)
-        : base(notifier) {
+    public CountingNotifier(INotificationService notificationService, string message, int count)
+        : base(notificationService) {
+        _message = message;
         _countFloat = _count = count;
-    }
-
-    public void Start(string message) {
-        _currentStep = 0;
-        Notifier.Notify(ID, message);
     }
 
     public void NextStep() {
         _currentStep++;
-        Notifier.Progress(ID, _currentStep / _countFloat);
+        NotificationService.Notify(ID, _message, _currentStep / _countFloat);
+        
         if (_currentStep == _count) {
-            Notifier.Stop(ID);
+            Stop();
         }
     }
 
     public void Stop() {
-        Notifier.Stop(ID);
+        NotificationService.Stop(ID);
     }
 }

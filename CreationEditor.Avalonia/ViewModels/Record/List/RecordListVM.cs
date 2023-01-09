@@ -92,6 +92,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListV
         
         var recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .StartWith()
             .Where(x => x.Item1.ListedOrder.Count > 0)
             .Do(_ => IsBusy = true)
             .ObserveOnTaskpool()

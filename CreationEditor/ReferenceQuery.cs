@@ -38,7 +38,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
 
     private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
     private readonly IFileSystem _fileSystem;
-    private readonly INotifier _notifier;
+    private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
 
     private string CacheDirPath => _fileSystem.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), CacheDirectory, CacheSubdirectory);
@@ -51,11 +51,11 @@ public sealed class ReferenceQuery : IReferenceQuery {
     public ReferenceQuery(
         ISimpleEnvironmentContext simpleEnvironmentContext,
         IFileSystem fileSystem,
-        INotifier notifier,
+        INotificationService notificationService,
         ILogger logger) {
         _simpleEnvironmentContext = simpleEnvironmentContext;
         _fileSystem = fileSystem;
-        _notifier = notifier;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -78,7 +78,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
     public void LoadModReferences(IReadOnlyList<IModGetter> mods) {
         if (mods.All(mod => _modCaches.ContainsKey(mod.ModKey))) return;
 
-        var notify = new LinearNotifier(_notifier, mods.Count);
+        var notify = new LinearNotifier(_notificationService, mods.Count);
         foreach (var mod in mods) {
             notify.Next($"Loading References in {mod.ModKey}");
             LoadModReferences(mod);
@@ -204,8 +204,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
         //Fill modCache
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
 
-        var counter = new CountingNotifier(_notifier, (int) mod.GetRecordCount());
-        counter.Start("Parsing Records");
+        var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) mod.GetRecordCount());
         foreach (var recordGetter in mod.EnumerateMajorRecords()) {
             counter.NextStep();
 
@@ -231,8 +230,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
         writer.Write(DateTime.Now.ToString(CultureInfo.InvariantCulture));
         writer.Write(modCache.Count);
 
-        counter = new CountingNotifier(_notifier, modCache.Count);
-        counter.Start("Saving Cache");
+        counter = new CountingNotifier(_notificationService, "Saving Cache", modCache.Count);
         foreach (var (key, value) in modCache) {
             counter.NextStep();
 
@@ -258,7 +256,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
             var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
 
             //Decompress cache and copy to temporary uncompressed cache 
-            var linearNotifier = new LinearNotifier(_notifier);
+            var linearNotifier = new LinearNotifier(_notificationService);
             linearNotifier.Next("Decompressing Cache");
             
             using (var fileStream = _fileSystem.File.OpenRead(CacheFile(modKey))) {
@@ -278,8 +276,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
 
                 //Build ref cache
                 var formCount = reader.ReadInt32();
-                var counter = new CountingNotifier(_notifier, formCount);
-                counter.Start("Reading Cache");
+                var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount);
                 for (var i = 0; i < formCount; i++) {
                     counter.NextStep();
 
