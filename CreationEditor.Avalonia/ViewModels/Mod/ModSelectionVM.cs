@@ -2,11 +2,11 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Environment;
+using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Environments;

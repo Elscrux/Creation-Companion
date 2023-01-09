@@ -1,15 +1,11 @@
 ﻿using Autofac;
-using CreationEditor.Avalonia.Services.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Environment;
-using CreationEditor.Skyrim.Avalonia.Services.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
-using CreationEditor.Skyrim.Avalonia.ViewModels.Record;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Skyrim.Environment;

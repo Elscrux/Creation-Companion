@@ -7,7 +7,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
-using CreationEditor.Avalonia.Extension;
+using CreationEditor.Extension;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -23,7 +23,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     private enum UpdatingEnum { None, FormKey, EditorID, FormStr }
     private UpdatingEnum _updating;
 
-    public IDisposableDropoff LoadedDisposable = new DisposableBucket();
+    public readonly IDisposableDropoff LoadedDisposable = new DisposableBucket();
 
     public ILinkCache? LinkCache {
         get => GetValue(LinkCacheProperty);
@@ -176,7 +176,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     public static readonly StyledProperty<ICommand> ViewAllowedTypesCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(ToggleViewAllowedTypesCommand));
     #endregion
 
-    record State(StatusIndicatorState Status, string Text, FormKey FormKey, string Edid);
+    private sealed record State(StatusIndicatorState Status, string Text, FormKey FormKey, string EditorID);
 
     static AFormKeyPicker() {
         // DefaultStyleKeyProperty.OverrideMetadata(typeof(AFormKeyPicker typeof(AFormKeyPicker))); todo
@@ -213,11 +213,9 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         return new State(StatusIndicatorState.Passive, "FormKey is null.  No lookup required", FormKey.Null, string.Empty);
                     }
                     var scopedTypes = ScopedTypesInternal(x.Types);
-                    if (x.LinkCache.TryResolveIdentifier(x.FormKey, scopedTypes, out var edid)) {
-                        return new State(StatusIndicatorState.Success, "Located record", x.FormKey, edid ?? string.Empty);
-                    } else {
-                        return new State(StatusIndicatorState.Failure, "Could not resolve record", x.FormKey, string.Empty);
-                    }
+                    return x.LinkCache.TryResolveIdentifier(x.FormKey, scopedTypes, out var editorId)
+                        ? new State(StatusIndicatorState.Success, "Located record", x.FormKey, editorId ?? string.Empty)
+                        : new State(StatusIndicatorState.Failure, "Could not resolve record", x.FormKey, string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
@@ -230,8 +228,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                 if (Status != rec.Status) Status = rec.Status;
 
                 if (rec.Status == StatusIndicatorState.Success) {
-                    if (EditorID != rec.Edid) {
-                        EditorID = rec.Edid;
+                    if (EditorID != rec.EditorID) {
+                        EditorID = rec.EditorID;
                     }
 
                     var formKeyStr = rec.FormKey.ToString();
@@ -257,7 +255,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     }
                 }
             })
-            .Do(x => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
             .DisposeWith(UnloadDisposable);
 
@@ -268,8 +266,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                 this.WhenAnyValue(
                     x => x.LinkCache,
                     x => x.ScopedTypes),
-                (edid, sources) => (EditorID: edid, LinkCache: sources.Item1, Types: sources.Item2))
-            .Where(x => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
+                (editorId, sources) => (EditorID: editorId, LinkCache: sources.Item1, Types: sources.Item2))
+            .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
             .Do(_ => {
                 _updating = UpdatingEnum.EditorID;
                 if (!Processing) {
@@ -328,7 +326,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     }
                 }
             })
-            .Do(x => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
             .DisposeWith(UnloadDisposable);
 
@@ -343,7 +341,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     x => x.MissingMeansError,
                     x => x.MissingMeansNull),
                 (str, sources) => (Raw: str, LinkCache: sources.Item1, Types: sources.Item2, MissingMeansError: sources.Item3, MissingMeansNull: sources.Item4))
-            .Where(x => _updating is UpdatingEnum.None or UpdatingEnum.FormStr)
+            .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormStr)
             .Do(_ => {
                 _updating = UpdatingEnum.FormStr;
                 if (!Processing) {
@@ -363,17 +361,16 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     if (FormKey.TryFactory(x.Raw, out var formKey)) {
                         if (x.LinkCache == null) return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
 
-                        if (x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var edid)) {
-                            return new State(StatusIndicatorState.Success, "Located record", formKey, edid ?? string.Empty);
-                        } else {
-                            FormKey formKeyToUse;
-                            formKeyToUse = x.MissingMeansNull ? FormKey.Null : formKey;
-                            return new State(
-                                x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
-                                "Could not resolve record",
-                                formKeyToUse,
-                                string.Empty);
+                        if (x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var editorId)) {
+                            return new State(StatusIndicatorState.Success, "Located record", formKey, editorId ?? string.Empty);
                         }
+                        
+                        var formKeyToUse = x.MissingMeansNull ? FormKey.Null : formKey;
+                        return new State(
+                            x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
+                            "Could not resolve record",
+                            formKeyToUse,
+                            string.Empty);
                     }
 
                     if (x.LinkCache == null) {
@@ -384,8 +381,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         if (x.LinkCache.ListedOrder.Count >= formID.ModIndex.ID) {
                             var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
                             formKey = new FormKey(targetMod.ModKey, formID.ID);
-                            return x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var edid)
-                                ? new State(StatusIndicatorState.Success, "Located record", formKey, edid ?? string.Empty)
+                            return x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var editorId)
+                                ? new State(StatusIndicatorState.Success, "Located record", formKey, editorId ?? string.Empty)
                                 : new State(StatusIndicatorState.Failure, "Could not resolve record", FormKey.Null, string.Empty);
                         }
                     }
@@ -411,8 +408,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         FormKeyStr = formKeyStr;
                     }
 
-                    if (EditorID != rec.Edid) {
-                        EditorID = rec.Edid;
+                    if (EditorID != rec.EditorID) {
+                        EditorID = rec.EditorID;
                     }
 
                     if (!Found) {
@@ -432,7 +429,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     }
                 }
             })
-            .Do(x => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
             .DisposeWith(UnloadDisposable);
 
@@ -468,18 +465,18 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     this.WhenAnyValue(x => x.SearchMode)
                         .DistinctUntilChanged(),
                     this.WhenAnyValue(x => x.LinkCache),
-                    (SearchMode, Cache) => (SearchMode, Cache))
+                    (searchMode, cache) => (SearchMode: searchMode, Cache: cache))
                 .Select(x => {
                     switch (x.SearchMode) {
                         case FormKeyPickerSearchMode.None:
-                            return Observable.Return<Func<IMajorRecordIdentifier, bool>>(x => false);
+                            return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
                         case FormKeyPickerSearchMode.EditorID:
                             return this.WhenAnyValue(x => x.EditorID)
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 // .ObserveOn(RxApp.TaskpoolScheduler)
                                 .Select<string, Func<IMajorRecordIdentifier, bool>>(term => ident => {
-                                    var edid = ident.EditorID;
-                                    return edid.IsNullOrWhitespace() || term.IsNullOrWhitespace() || edid.ContainsInsensitive(term);
+                                    var editorID = ident.EditorID;
+                                    return editorID.IsNullOrWhitespace() || term.IsNullOrWhitespace() || editorID.ContainsInsensitive(term);
                                 });
                         case FormKeyPickerSearchMode.FormKey:
 
@@ -493,19 +490,16 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
                                 .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, strictLength: false)))
-                                .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => (ident) => {
+                                .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
                                     var fk = ident.FormKey;
                                     if (fk == term.FormKey) return true;
+                                    if (term.ID == null) return false;
+                                    
+                                    if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
+                                    if (modKeyToId == null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
 
-                                    if (term.ID != null) {
-                                        if (term.RawStr.Length <= 6) {
-                                            return fk.ID == term.ID.Value.Raw;
-                                        } else if (modKeyToId != null && modKeyToId.TryGetValue(fk.ModKey, out var index)) {
-                                            var formID = new FormID(new ModIndex(index), fk.ID);
-                                            return formID.Raw == term.ID.Value.Raw;
-                                        }
-                                    }
-                                    return false;
+                                    var formID = new FormID(new ModIndex(index), fk.ID);
+                                    return formID.Raw == term.ID.Value.Raw;
                                 });
                         default:
                             throw new NotImplementedException();

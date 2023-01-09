@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using CreationEditor.Avalonia.Extension;
+using CreationEditor.Extension;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.Converter;
 

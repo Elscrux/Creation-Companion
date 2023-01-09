@@ -3,6 +3,6 @@ using System.Collections.Generic;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Resources.Constants; 
 
-public class EnumConstants {
+public static class EnumConstants {
     public static readonly IEnumerable<CombatReaction> CombatReactions = Enum.GetValues<CombatReaction>();
 }

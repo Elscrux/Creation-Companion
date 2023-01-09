@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Win32.Interop.Automation;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;
@@ -141,13 +140,13 @@ public sealed class DockGrid : Grid {
             Children.RemoveAt(controlIndex - 1);
         }
         
-        RowOrColumnMajor removeType;
+        bool changeRow;
         if (controlRowSpan > 1) {
             // If we span over multiple rows, remove the column we're in 
-            removeType = RowOrColumnMajor.ColumnMajor;
+            changeRow = false;
         } else if (controlColumnSpan > 1) {
             // If we span over multiple columns, remove the row we're in 
-            removeType = RowOrColumnMajor.RowMajor;
+            changeRow = true;
         } else {
             // If our size is 1x1, check if there are any other children in the grid that are fully
             // subsumed by our control by row or column - don't delete the row or column in that case
@@ -175,75 +174,72 @@ public sealed class DockGrid : Grid {
             if (removeRow && removeColumn) {
                 throw new Exception("Both row, and column can be deleted. This state isn't allowed by definition");
             } else if (removeRow) {
-                removeType = RowOrColumnMajor.RowMajor;
+                changeRow = true;
             } else if (removeColumn) {
-                removeType = RowOrColumnMajor.ColumnMajor;
+                changeRow = false;
             } else {
                 throw new Exception("Both row, and column can't be deleted. This state isn't allowed by definition");
             }
         }
 
-        switch (removeType) {
-            case RowOrColumnMajor.RowMajor:
-                // Adjust remaining control positions
-                foreach (var c in Children) {
-                    if (c is not Control child) continue;
+        if (changeRow) {
+            // Adjust remaining control positions
+            foreach (var c in Children) {
+                if (c is not Control child) continue;
 
-                    var currentRow = GetRow(child);
-                    var currentRowSpan = GetRowSpan(child);
+                var currentRow = GetRow(child);
+                var currentRowSpan = GetRowSpan(child);
 
-                    if (currentRow + currentRowSpan - 1 < controlRow) continue;
+                if (currentRow + currentRowSpan - 1 < controlRow) continue;
 
-                    // We'll be affected by the row changes
-                    if (currentRow <= controlRow) {
-                        // We're inside the row that is removed - decrease size
-                        if (currentRowSpan > 2) {
-                            SetRowSpan(child, currentRowSpan - 2);
-                        } else {
-                            throw new Exception($"To small to decrease span {child.GetType().Name}");
-                        }
+                // We'll be affected by the row changes
+                if (currentRow <= controlRow) {
+                    // We're inside the row that is removed - decrease size
+                    if (currentRowSpan > 2) {
+                        SetRowSpan(child, currentRowSpan - 2);
                     } else {
-                        // We're outside the row, but the row removal will affect us - change row
-                        SetRow(child, currentRow - 2);
+                        throw new Exception($"To small to decrease span {child.GetType().Name}");
                     }
+                } else {
+                    // We're outside the row, but the row removal will affect us - change row
+                    SetRow(child, currentRow - 2);
                 }
+            }
 
-                // Remove rows
-                if (RowDefinitions.Count > 1) {
-                    RowDefinitions.RemoveAt(controlRow);
-                    RowDefinitions.RemoveAt(RowDefinitions.Count > controlRow ? controlRow : RowDefinitions.Count - 1);
-                }
-                break;
-            case RowOrColumnMajor.ColumnMajor:
-                // Adjust remaining control positions
-                foreach (var c in Children) {
-                    if (c is not Control child) continue;
+            // Remove rows
+            if (RowDefinitions.Count > 1) {
+                RowDefinitions.RemoveAt(controlRow);
+                RowDefinitions.RemoveAt(RowDefinitions.Count > controlRow ? controlRow : RowDefinitions.Count - 1);
+            }
+        } else {
+            // Adjust remaining control positions
+            foreach (var c in Children) {
+                if (c is not Control child) continue;
 
-                    var currentColumn = GetColumn(child);
-                    var currentColumnSpan = GetColumnSpan(child);
+                var currentColumn = GetColumn(child);
+                var currentColumnSpan = GetColumnSpan(child);
 
-                    if (currentColumn + currentColumnSpan - 1 < controlColumn) continue;
+                if (currentColumn + currentColumnSpan - 1 < controlColumn) continue;
 
-                    // We'll be affected by the column changes
-                    if (currentColumn <= controlColumn) {
-                        // We're inside the column that is removed - decrease size
-                        if (currentColumnSpan > 2) {
-                            SetColumnSpan(child, currentColumnSpan - 2);
-                        } else {
-                            throw new Exception($"To small to decrease span {child.GetType().Name}");
-                        }
+                // We'll be affected by the column changes
+                if (currentColumn <= controlColumn) {
+                    // We're inside the column that is removed - decrease size
+                    if (currentColumnSpan > 2) {
+                        SetColumnSpan(child, currentColumnSpan - 2);
                     } else {
-                        // We're outside the column, but the column removal will affect us - change column
-                        SetColumn(child, currentColumn - 2);
+                        throw new Exception($"To small to decrease span {child.GetType().Name}");
                     }
+                } else {
+                    // We're outside the column, but the column removal will affect us - change column
+                    SetColumn(child, currentColumn - 2);
                 }
+            }
 
-                // Remove columns
-                if (ColumnDefinitions.Count > 1) {
-                    ColumnDefinitions.RemoveAt(controlColumn);
-                    ColumnDefinitions.RemoveAt(ColumnDefinitions.Count > controlColumn ? controlColumn : ColumnDefinitions.Count - 1);
-                }
-                break;
+            // Remove columns
+            if (ColumnDefinitions.Count > 1) {
+                ColumnDefinitions.RemoveAt(controlColumn);
+                ColumnDefinitions.RemoveAt(ColumnDefinitions.Count > controlColumn ? controlColumn : ColumnDefinitions.Count - 1);
+            }
         }
 
         // Clean up unnecessary rows and columns

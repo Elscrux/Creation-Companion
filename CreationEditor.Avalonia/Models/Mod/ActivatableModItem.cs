@@ -1,4 +1,4 @@
-﻿using CreationEditor.Avalonia.Extension;
+﻿using CreationEditor.Extension;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

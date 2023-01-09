@@ -1,5 +1,4 @@
 ﻿using Avalonia.ReactiveUI;
-using CreationEditor.Avalonia.Behavior;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;

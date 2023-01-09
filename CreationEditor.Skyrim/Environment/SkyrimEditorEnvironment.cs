@@ -11,7 +11,7 @@ using MutagenLibrary.Core.Plugins;
 using Serilog;
 namespace CreationEditor.Skyrim.Environment;
 
-public class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
+public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
     private static readonly ModKey NewModKey = new("NewMod", ModType.Plugin);
     
     private readonly IReferenceQuery _referenceQuery;

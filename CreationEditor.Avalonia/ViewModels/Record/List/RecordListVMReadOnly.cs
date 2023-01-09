@@ -1,8 +1,8 @@
 ﻿using System.Reactive.Linq;
-using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Environment;
+using CreationEditor.Extension;
 using DynamicData;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;

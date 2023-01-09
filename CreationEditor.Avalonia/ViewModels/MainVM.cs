@@ -1,26 +1,21 @@
 ﻿using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Autofac;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Environment;
-using CreationEditor.Notification;
-using DynamicData;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {
-    private readonly IDockFactory _dockFactory;
     private const string BaseWindowTitle = "Creation Editor";
 
     public INotificationVM NotificationVM { get; }
@@ -45,7 +40,6 @@ public sealed class MainVM : ViewModel {
         ModSelectionVM modSelectionVM,
         IDockingManagerService dockingManagerService,
         IDockFactory dockFactory) {
-        _dockFactory = dockFactory;
         NotificationVM = notificationVM;
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
@@ -62,9 +56,9 @@ public sealed class MainVM : ViewModel {
 
         Save = ReactiveCommand.Create(() => {});
 
-        OpenLog = ReactiveCommand.Create(() => _dockFactory.Open(DockElement.Log));
+        OpenLog = ReactiveCommand.Create(() => dockFactory.Open(DockElement.Log));
 
-        OpenRecordBrowser = ReactiveCommand.Create(() => _dockFactory.Open(DockElement.RecordBrowser));
+        OpenRecordBrowser = ReactiveCommand.Create(() => dockFactory.Open(DockElement.RecordBrowser));
 
         editorEnvironment.ActiveModChanged
             .Subscribe(activeMod => {

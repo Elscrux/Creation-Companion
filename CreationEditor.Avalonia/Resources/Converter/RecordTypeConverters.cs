@@ -2,7 +2,7 @@
 using Loqui;
 namespace CreationEditor.Avalonia.Converter; 
 
-public class RecordTypeConverters {
+public abstract class RecordTypeConverters {
     public static readonly FuncValueConverter<Type, string?> ToName
         = new(type => {
             if (type == null) return null;

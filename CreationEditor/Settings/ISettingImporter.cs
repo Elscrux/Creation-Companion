@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Serilog;
 namespace CreationEditor.Settings;
 
-public interface ISettingImporter<TSetting> {
+public interface ISettingImporter<out TSetting> {
     public TSetting? Import(ISetting setting);
 }
 

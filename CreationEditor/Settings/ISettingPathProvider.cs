@@ -8,7 +8,7 @@ public interface ISettingPathProvider {
     public FilePath GetFullPath(ISetting setting);
 }
 
-public class SettingPathProvider : ISettingPathProvider {
+public sealed class SettingPathProvider : ISettingPathProvider {
     private readonly IFileSystem _fileSystem;
     
     public SettingPathProvider(

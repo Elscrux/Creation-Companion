@@ -1,18 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using CreationEditor.Settings;
-using Elscrux.Logging;
-using Newtonsoft.Json;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Serilog;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
 public sealed class SettingsVM : ViewModel, ISettingsVM {
-    private readonly ILogger _logger;
-    private const string SettingsFolder = "Settings";
-    
     public IEnumerable<ISetting> RootSettings => ObservableSettings;
     private ObservableCollection<ISetting> ObservableSettings { get; }
     
@@ -21,10 +14,8 @@ public sealed class SettingsVM : ViewModel, ISettingsVM {
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public SettingsVM(
-        ILogger logger,
         ISettingProvider settingProvider,
         ISettingExporter settingExporter) {
-        _logger = logger;
         ObservableSettings = new ObservableCollection<ISetting>(settingProvider.Settings);
 
         Save = ReactiveCommand.Create(() => {

@@ -15,14 +15,13 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
             .ForEach(extraColumns => _extraColumnsCache.Add(extraColumns.Type, extraColumns));
     }
 
-    public List<DataGridColumn> GetColumns(Type type) {
+    public IEnumerable<DataGridColumn> GetColumns(Type type) {
         return type.GetInterfaces()
             .SelectWhere(@interface => _extraColumnsCache.TryGetValue(@interface, out var extraColumn)
                 ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns) 
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
             .SelectMany(c => c)
             .OrderByDescending(c => c.Priority)
-            .Select(c => c.Column)
-            .ToList();
+            .Select(c => c.Column);
     }
 }

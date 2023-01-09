@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Linq;
-using CreationEditor.Avalonia.Extension;
+using CreationEditor.Extension;
 using CreationEditor.Notification;
 using DynamicData;
 using DynamicData.Binding;
-namespace CreationEditor.Avalonia.ViewModels;
+namespace CreationEditor.Avalonia.ViewModels.Notification;
 
 public interface INotificationVM {
     public IList<NotificationItem> LoadingItems { get; }

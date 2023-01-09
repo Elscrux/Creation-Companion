@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-namespace CreationEditor.Avalonia.Extension; 
+namespace CreationEditor.Extension; 
 
 public static class EnumExtension {
     public static bool TryParse<TEnum>([NotNullWhen(true)] object? value, out TEnum outEnum) 

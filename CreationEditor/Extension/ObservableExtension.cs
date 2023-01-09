@@ -4,7 +4,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.Extension;
+namespace CreationEditor.Extension;
 
 // Mostly copied from Noggog.CSharpExt
 public static class ObservableExtension {

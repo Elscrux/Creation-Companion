@@ -11,5 +11,4 @@ public interface ILogVM : ILogListSink {
 
     public ReactiveCommand<Unit, Unit> Clear { get; }
     public ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }
-
 }

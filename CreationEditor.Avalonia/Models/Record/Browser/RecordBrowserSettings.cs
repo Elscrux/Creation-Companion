@@ -1,5 +1,5 @@
-﻿using CreationEditor.Avalonia.Extension;
-using CreationEditor.Environment;
+﻿using CreationEditor.Environment;
+using CreationEditor.Extension;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;

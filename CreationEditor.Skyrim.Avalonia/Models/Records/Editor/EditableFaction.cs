@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Models.Records.Editor; 
 
-public class EditableFaction : Faction, INotifyPropertyChanged {
+public sealed class EditableFaction : Faction, INotifyPropertyChanged {
     public new ObservableCollection<Relation> Relations { get; set; }
     public new ObservableCollection<Rank> Ranks { get; set; }
     public new CrimeValues CrimeValues { get; set; }

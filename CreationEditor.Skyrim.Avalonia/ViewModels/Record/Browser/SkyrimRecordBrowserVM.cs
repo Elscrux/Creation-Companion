@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels;

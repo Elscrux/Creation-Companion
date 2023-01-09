@@ -23,14 +23,10 @@ public class FormKeyPicker : AFormKeyPicker {
 
     public FormKeyPicker() {
         PickerClickCommand = ReactiveCommand.Create((object o) => {
-            switch (o) {
-                case IMajorRecordIdentifier identifier:
-                    FormKey = identifier.FormKey;
-                    InSearchMode = false;
-                    break;
-                default:
-                    break;
-            }
+            if (o is not IMajorRecordIdentifier identifier) return;
+
+            FormKey = identifier.FormKey;
+            InSearchMode = false;
         });
     }
 }

@@ -45,8 +45,8 @@ public class ViewModel : ReactiveObject, IDisposableDropoff {
         int index,
         string name,
         string hasBeenSetName) {
-        bool hasBeen = hasBeenSet[index];
-        bool flag = EqualityComparer<T>.Default.Equals(item, newItem);
+        var hasBeen = hasBeenSet[index];
+        var flag = EqualityComparer<T>.Default.Equals(item, newItem);
         if (hasBeen != newHasBeenSet)
             hasBeenSet[index] = newHasBeenSet;
         if (!flag) {

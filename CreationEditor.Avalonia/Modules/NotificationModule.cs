@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using CreationEditor.Avalonia.ViewModels;
+using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Notification;
 namespace CreationEditor.Avalonia.Modules; 
 

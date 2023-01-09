@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Models.Records.Editor.Subrecords; 
 
-public class EditableCondition : Condition, INotifyPropertyChanged {
+public sealed class EditableCondition : Condition, INotifyPropertyChanged {
     public override ConditionData Data { get; set; }
     
     public bool Or {

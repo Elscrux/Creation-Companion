@@ -1,7 +1,7 @@
 ﻿using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.ViewModels.Docking; 
 
-public class DockEdit {
+public sealed class DockEdit {
     private readonly DockingManagerVM _dockingManagerVM;
 
     private readonly object _editLock;

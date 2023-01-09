@@ -126,7 +126,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
     public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod) {
         LoadModReferences(mod);
 
-        return _modCaches[mod.ModKey].Cache.ContainsKey(formKey) ? _modCaches[mod.ModKey].Cache[formKey] : new HashSet<IFormLinkIdentifier>();
+        return _modCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references) ? references : new HashSet<IFormLinkIdentifier>();
     }
 
     /// <summary>

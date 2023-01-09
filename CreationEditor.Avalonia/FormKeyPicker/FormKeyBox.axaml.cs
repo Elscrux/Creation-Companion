@@ -7,8 +7,8 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.FormKeyPicker;
 
-public class FormKeyBox : TemplatedControl {
-    private bool _blockSync = false;
+public sealed class FormKeyBox : TemplatedControl {
+    private bool _blockSync;
 
     public FormKey FormKey {
         get => GetValue(FormKeyProperty);
@@ -25,7 +25,7 @@ public class FormKeyBox : TemplatedControl {
     private ErrorResponse _error;
     public ErrorResponse Error {
         get => _error;
-        protected set => SetAndRaise(ErrorProperty, ref _error, value);
+        private set => SetAndRaise(ErrorProperty, ref _error, value);
     }
     public static readonly DirectProperty<FormKeyBox, ErrorResponse> ErrorProperty = AvaloniaProperty.RegisterDirect<FormKeyBox, ErrorResponse>(nameof(Error), box => box.Error, defaultBindingMode: BindingMode.TwoWay);
 
@@ -48,7 +48,7 @@ public class FormKeyBox : TemplatedControl {
 
                 _blockSync = true;
                 if (x.IsNull) {
-                    if (RawString != String.Empty) {
+                    if (RawString != string.Empty) {
                         RawString = string.Empty;
                     }
                 } else {

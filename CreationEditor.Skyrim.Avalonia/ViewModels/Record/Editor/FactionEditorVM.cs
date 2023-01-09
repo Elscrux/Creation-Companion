@@ -1,6 +1,5 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
-using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
