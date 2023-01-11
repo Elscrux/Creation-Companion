@@ -61,6 +61,7 @@ public sealed class LogVM : ViewModel, ILogVM {
             .Connect()
             .Filter(item => VisibilityLevels.Contains(item.Level))
             .LimitSizeTo(MaxLogCount)
+            .SortBy(item => item.Time)
             .ToObservableCollection(this);
     }
 
