@@ -85,7 +85,8 @@
 
         <GridSplitter Grid.Column="1"/>
 
-        <view:ModView Grid.Column="2"
-                      DataContext="{Binding SelectedModDetails}"/>
+        <ScrollViewer Grid.Column="2">
+            <view:ModView DataContext="{Binding SelectedModDetails}"/>
+        </ScrollViewer>
     </Grid>
 </windowing:AppWindow>
