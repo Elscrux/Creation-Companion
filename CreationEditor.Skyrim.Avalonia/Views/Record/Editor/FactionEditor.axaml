@@ -63,7 +63,7 @@
                             <!-- dd:DragDrop.ShowAlwaysDropTargetAdorner="True" -->
                             <!-- dd:DragDrop.UseDefaultEffectDataTemplate="True" -->
                             <DataGrid Items="{Binding EditableRecord.Relations}"
-                                      Background="Transparent"
+                                      Background="{DynamicResource SystemControlTransparentBrush}"
                                       CanUserReorderColumns="False"
                                       CanUserResizeColumns="True"
                                       CanUserSortColumns="True"
@@ -132,7 +132,7 @@
                                             Header="Ranks"
                                             FontSize="12">
                         <DataGrid Items="{Binding EditableRecord.Ranks}"
-                                  Background="Transparent"
+                                  Background="{DynamicResource SystemControlTransparentBrush}"
                                   CanUserReorderColumns="False"
                                   CanUserResizeColumns="True"
                                   CanUserSortColumns="False"

@@ -12,7 +12,7 @@
         <!-- Background needs to be transparent to make the context menu work in empty area -->
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
         <DataGrid x:Name="RecordGrid"
-                  Background="Transparent"
+                  Background="{DynamicResource SystemControlTransparentBrush}"
                   Items="{Binding Records}"
                   SelectedItem="{ReflectionBinding SelectedRecord}"
                   CanUserSortColumns="True"

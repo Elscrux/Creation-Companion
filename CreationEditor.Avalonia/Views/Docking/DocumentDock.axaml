@@ -9,7 +9,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Docking.DocumentDock"
              Classes="AccentSelected BorderedDock"
-             Background="Transparent">
+             Background="{DynamicResource SystemControlTransparentBrush}">
     <Design.DataContext>
         <vm:DocumentDockVM/>
     </Design.DataContext>

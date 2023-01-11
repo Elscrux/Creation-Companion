@@ -10,7 +10,7 @@
              x:CompileBindings="True" x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDockRight"
              x:Name="Dock"
-             Background="Transparent">
+             Background="{DynamicResource SystemControlTransparentBrush}">
     <Design.DataContext>
         <vm:SideDockVM/>
     </Design.DataContext>

@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:CompileBindings="True" x:DataType="docking:DockingManagerVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.DockingManager"
-             Background="Transparent">
+             Background="{DynamicResource SystemControlTransparentBrush}">
     <Design.DataContext>
         <docking:DockingManagerVM/>
     </Design.DataContext>
@@ -83,21 +83,21 @@
         <GridSplitter Grid.Row="1" Grid.Column="0"
                       Grid.ColumnSpan="5"
                       IsEnabled="{Binding TopSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="Transparent"/>
+                      Background="{DynamicResource SystemControlTransparentBrush}"/>
 
         <view:SideDockLeft Grid.Row="2" Grid.Column="0"
                            DataContext="{Binding LeftSide}"/>
 
         <GridSplitter Grid.Row="2" Grid.Column="1"
                       IsEnabled="{Binding LeftSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="Transparent"/>
+                      Background="{DynamicResource SystemControlTransparentBrush}"/>
 
         <view:LayoutDock Grid.Row="2" Grid.Column="2"
                          DataContext="{Binding Layout}"/>
 
         <GridSplitter Grid.Row="2" Grid.Column="3"
                       IsEnabled="{Binding RightSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="Transparent"/>
+                      Background="{DynamicResource SystemControlTransparentBrush}"/>
 
         <view:SideDockRight Grid.Row="2" Grid.Column="4"
                             DataContext="{Binding RightSide}"/>
@@ -105,7 +105,7 @@
         <GridSplitter Grid.Row="3" Grid.Column="0"
                       Grid.ColumnSpan="5"
                       IsEnabled="{Binding BottomSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="Transparent">
+                      Background="{DynamicResource SystemControlTransparentBrush}">
         </GridSplitter>
 
         <view:SideDock Grid.Row="4" Grid.Column="0"

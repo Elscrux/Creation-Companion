@@ -9,7 +9,7 @@
              x:Class="CreationEditor.Avalonia.Views.Setting.StartupDocksSettingView">
     <DataGrid x:Name="ItemsControl"
               Items="{Binding Docks}"
-              Background="Transparent">
+              Background="{DynamicResource SystemControlTransparentBrush}">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">
                 <DataGridTemplateColumn.CellTemplate>
