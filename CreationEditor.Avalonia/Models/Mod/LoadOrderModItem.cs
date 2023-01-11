@@ -4,13 +4,15 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public sealed class ActivatableModItem : ModItem {
+public sealed class LoadOrderModItem : ModItem {
+    public uint LoadOrderIndex { get; }
     [Reactive] public bool IsActive { get; set; }
     [Reactive] public bool MastersValid { get; set; }
 
-    public ActivatableModItem(ModKey modKey, bool mastersValid) : base(modKey) {
+    public LoadOrderModItem(ModKey modKey, bool mastersValid, uint loadOrderIndex) : base(modKey) {
         MastersValid = mastersValid;
-        
+        LoadOrderIndex = loadOrderIndex;
+
         this.WhenAnyValue(x => x.IsSelected)
             .ObserveOnGui()
             .Subscribe(isSelected => {

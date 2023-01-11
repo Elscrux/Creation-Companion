@@ -24,14 +24,38 @@ public static class ObservableExtension {
         where TKey : notnull {
         var destination = new ObservableCollectionExtended<TObj>();
 
-        changeSet.ObserveOnGui().Bind(destination).Subscribe().DisposeWith(disposable);
+        changeSet
+            .ObserveOnGui()
+            .Bind(destination)
+            .Subscribe()
+            .DisposeWith(disposable);
+        
+        return destination;
+    }
+
+    public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
+        this IObservable<ISortedChangeSet<TObj, TKey>> changeSet,
+        IDisposableDropoff disposable)
+        where TKey : notnull {
+        var destination = new ObservableCollectionExtended<TObj>();
+        changeSet
+            .ObserveOnGui()
+            .Bind(destination)
+            .Subscribe()
+            .DisposeWith(disposable);
+        
         return destination;
     }
 
     public static ReadOnlyObservableCollection<TObj> ToObservableCollection<TObj>(
         this IObservable<IChangeSet<TObj>> changeSet,
         IDisposableDropoff disposable) {
-        changeSet.ObserveOnGui().Bind(out var readOnlyObservableCollection).Subscribe().DisposeWith(disposable);
+        changeSet
+            .ObserveOnGui()
+            .Bind(out var readOnlyObservableCollection)
+            .Subscribe()
+            .DisposeWith(disposable);
+        
         return readOnlyObservableCollection;
     }
 }

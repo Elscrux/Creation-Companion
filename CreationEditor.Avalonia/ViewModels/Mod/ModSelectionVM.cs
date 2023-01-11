@@ -24,27 +24,24 @@ public sealed class ModSelectionVM : ViewModel {
     private readonly IBusyService _busyService;
     private readonly IGameEnvironment _environment;
 
-    private readonly List<ActivatableModItem> _mods;
-    public IObservableCollection<ActivatableModItem> DisplayedMods { get; }
+    private readonly SourceCache<LoadOrderModItem, ModKey> _mods = new(x => x.ModKey);
+    public IObservableCollection<LoadOrderModItem> DisplayedMods { get; }
     private readonly Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> _masterInfos = new();
 
     [Reactive] public string ModSearchText { get; set; } = string.Empty;
 
-    [Reactive] public ActivatableModItem? SelectedMod { get; set; }
+    [Reactive] public LoadOrderModItem? SelectedMod { get; set; }
     public IModGetterVM SelectedModDetails { get; init; }
 
-    public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModKey;
-    public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
+    public ModKey? ActiveMod => _mods.Items.FirstOrDefault(x => x.IsActive)?.ModKey;
+    public IEnumerable<ModKey> SelectedMods => _mods.Items.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
-    private readonly ObservableAsPropertyHelper<bool> _anyModsLoaded;
-    public bool AnyModsLoaded => _anyModsLoaded.Value;
-
-    private readonly ObservableAsPropertyHelper<bool> _anyModsActive;
-    public bool AnyModsActive => _anyModsActive.Value;
+    public IObservable<bool> AnyModsLoaded { get; }
+    public IObservable<bool> AnyModsActive { get; }
 
     public ReactiveCommand<Window, Unit> CloseAndLoadMods { get; }
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
-    public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is ActivatableModItem { MastersValid: true };
+    public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
     public ModSelectionVM(
         ISimpleEnvironmentContext simpleEnvironmentContext,
@@ -62,58 +59,51 @@ public sealed class ModSelectionVM : ViewModel {
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
-        _mods = _environment.LoadOrder.Keys
-            .Select(modKey => new ActivatableModItem(modKey, _masterInfos[modKey].Valid))
-            .ToList();
-
-        DisplayedMods = this.WhenAnyValue(x => x.ModSearchText)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .ObserveOnTaskpool()
-            .Select(searchText => {
-                return Observable.Create<ActivatableModItem>((obs, cancel) => {
-                    foreach (var mod in _mods) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
-                        if (!mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase)) continue;
-
-                        obs.OnNext(mod);
-                    }
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
-                }).ToObservableChangeSet(x => x.ModKey.FileName.String);
-            })
-            .Switch()
-            .ObserveOnGui()
-            .ToObservableCollection(this);
-
-        var observableMods = _mods
-            .ToObservable()
-            .ToObservableChangeSet();
-
-        var modSelected = observableMods
-            .AutoRefresh(modItem => modItem.IsSelected);
         
-        _anyModsLoaded = modSelected
-            .ToCollection()
-            .Select(collection => collection.Any(mod => mod.IsSelected))
-            .ToProperty(this, vm => vm.AnyModsLoaded);
-
-        var modActivated = observableMods
-            .AutoRefresh(modItem => modItem.IsActive);
-
-        _anyModsActive = modActivated
-            .ToCollection()
-            .Select(collection => collection.Any(mod => mod.IsActive))
-            .ToProperty(this, vm => vm.AnyModsActive);
-
-        modActivated.Subscribe(changedMods => {
-            foreach (var change in changedMods) {
-                var changedMod = change.Item.Current;
-                if (changedMod is { IsActive: true }) {
-                    _mods?.Where(mod => mod != changedMod)
-                        .ForEach(modItem => modItem.IsActive = false);
-                }
+        // Fill mods with active load order
+        _mods.Edit(updater => {
+            var modKeys = _environment.LoadOrder.Keys.ToList();
+            for (var i = 0; i < modKeys.Count; i++) {
+                var modKey = modKeys[i];
+                updater.AddOrUpdate(new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i));
             }
         });
+        
+        var connectedMods = _mods.Connect();
+
+        DisplayedMods = _mods.Connect()
+            .Filter(this.WhenAnyValue(x => x.ModSearchText)
+                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                    .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>
+                            searchText.IsNullOrEmpty()
+                         || mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
+            .SortBy(mod => mod.LoadOrderIndex)
+            .ToObservableCollection(this);
+
+        var modSelected = connectedMods
+            .AutoRefresh(modItem => modItem.IsSelected)
+            .ToCollection();
+        
+        AnyModsLoaded = modSelected
+            .Select(collection => collection.Any(mod => mod.IsSelected));
+
+        var modActivated = connectedMods
+            .AutoRefresh(modItem => modItem.IsActive)
+            .ToCollection();
+
+        AnyModsActive = modActivated
+            .Select(collection => collection.Any(mod => mod.IsActive));
+
+        modActivated
+            .Subscribe(changedMods => {
+                foreach (var changedMod in changedMods) {
+                    if (changedMod is { IsActive: true }) {
+                        _mods.Items.Where(mod => mod != changedMod)
+                            .ForEach(modItem => modItem.IsActive = false);
+                    }
+                    break;
+                }
+            });
 
         var selectedModValid = this
             .WhenAnyValue(x => x.SelectedMod)

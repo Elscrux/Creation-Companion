@@ -10,7 +10,7 @@ public class ModItem : ReactiveObject, IReactiveSelectable {
     public ModItem(ModKey modKey) => ModKey = modKey;
 
     [Reactive] public bool IsSelected { get; set; }
-    [Reactive] public ModKey ModKey { get; protected set; }
+    public ModKey ModKey { get; }
 
     public override string ToString() => ModKey == NewMod ? NewPluginIdentifier : ModKey.FileName;
 }
