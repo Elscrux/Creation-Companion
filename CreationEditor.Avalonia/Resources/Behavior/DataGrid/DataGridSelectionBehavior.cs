@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
@@ -16,8 +17,11 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
-    public static readonly StyledProperty<bool?> AllCheckedProperty = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
-    public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
+    public static readonly StyledProperty<bool?> AllCheckedProperty
+        = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
+    
+    public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
+        = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
 
     private bool _isProcessing;
 
@@ -64,12 +68,12 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     }
 
     private void AddSelectionColumn() {
-        const double columnWidth = 25;
+        const double columnWidth = 24;
         AssociatedObject?.Columns.Insert(0, new DataGridTemplateColumn {
             HeaderTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
                 var checkBox = new CheckBox {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
-                    MinWidth = columnWidth,
+                    MinWidth = 20,
                     DataContext = this,
                     HorizontalAlignment = HorizontalAlignment.Center,
                 };
@@ -83,15 +87,21 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                 var checkBox = new CheckBox {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    MinWidth = columnWidth,
+                    MinWidth = 20,
                     Classes = new Classes("CenteredBorder"),
-                    Styles = { new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
-                        Setters = { new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center) }
-                    } }
+                    Styles = {
+                        new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
+                            Setters = {
+                                new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center),
+                            }
+                        },
+                        new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Descendant().OfType<ContentPresenter>()) {
+                            Setters = {
+                                new Setter(Visual.IsVisibleProperty, false),
+                            }
+                        },
+                    }
                 };
-                
-                // checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => UpdateAllChecked(true));
-                // checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => UpdateAllChecked(false));
                 
                 if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
                 
