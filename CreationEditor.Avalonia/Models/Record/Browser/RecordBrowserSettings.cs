@@ -42,9 +42,15 @@ public sealed class RecordBrowserSettings : ReactiveObject, IRecordBrowserSettin
         };
     }
 
-    public bool Filter(IMajorRecordIdentifier record) {
+    public bool Filter(IMajorRecordGetter record) {
+        if (SearchTerm.IsNullOrEmpty()) return true;
+        if (record.IsDeleted) return false;
+
         var editorID = record.EditorID;
-    
-        return SearchTerm.IsNullOrWhitespace() || editorID != null && SearchTerm.Split(SplitChar).All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
+
+        return !editorID.IsNullOrEmpty()
+         && SearchTerm
+                .Split(SplitChar)
+                .All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -9,5 +9,5 @@ public interface IRecordBrowserSettings {
     [Reactive] public BrowserScope Scope { get; set; }
     [Reactive] public string SearchTerm { get; set; }
 
-    public bool Filter(IMajorRecordIdentifier record);
+    public bool Filter(IMajorRecordGetter record);
 }

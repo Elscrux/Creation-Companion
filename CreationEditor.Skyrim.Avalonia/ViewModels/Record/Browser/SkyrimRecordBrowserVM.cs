@@ -30,6 +30,7 @@ public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
             var recordType = recordTypeListing.Registration.GetterType;
             if (RecordList?.ViewModel?.Type == recordType) return;
 
+            RecordList?.ViewModel?.Dispose();
             RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettings);
         });
         

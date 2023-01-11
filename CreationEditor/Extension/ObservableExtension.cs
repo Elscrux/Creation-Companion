@@ -11,6 +11,13 @@ public static class ObservableExtension {
     public static IObservable<T> ObserveOnGui<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.MainThreadScheduler);
     public static IObservable<T> ObserveOnTaskpool<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.TaskpoolScheduler);
 
+    public static IObservable<T> DoOnGuiAndSwitchBack<T>(this IObservable<T> obs, Action<T> onNext) {
+        return obs
+            .ObserveOnGui()
+            .Do(onNext)
+            .ObserveOnTaskpool();
+    }
+
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<IChangeSet<TObj, TKey>> changeSet,
         IDisposableDropoff disposable)

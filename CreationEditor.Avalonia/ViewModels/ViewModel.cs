@@ -5,6 +5,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
+// Adapted from Noggog.WPF
 public class ViewModel : ReactiveObject, IDisposableDropoff {
     private readonly Lazy<CompositeDisposable> _compositeDisposable = new();
 

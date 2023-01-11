@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Reactive;
-using System.Reactive.Linq;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
@@ -8,38 +6,17 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Environment;
 using CreationEditor.Extension;
 using DynamicData;
-using DynamicData.Binding;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public abstract class RecordListVM : ViewModel, IRecordListVM {
-    protected readonly IReferenceQuery ReferenceQuery;
-    protected readonly IRecordController RecordController;
-
-    public Type Type { get; set; } = null!;
-    [Reactive] public IEnumerable Records { get; set; } = null!;
-    [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
-
-    [Reactive] public bool IsBusy { get; set; }
-
-    protected RecordListVM(
-        IRecordBrowserSettings recordBrowserSettings,
-        IReferenceQuery referenceQuery, 
-        IRecordController recordController) {
-        ReferenceQuery = referenceQuery;
-        RecordController = recordController;
-        RecordBrowserSettings = recordBrowserSettings;
-    }
-}
-
-public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListVM
+public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordListVM
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
+
+    public override Type Type { get; }
 
     public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
@@ -47,12 +24,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListV
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
-    private static readonly SourceCache<ReferencedRecord<TMajorRecord, TMajorRecordGetter>, FormKey> UpdateCache = new(x => x.Record.FormKey);
-
-    public new IObservableCollection<ReferencedRecord<TMajorRecord, TMajorRecordGetter>> Records { get; }
-
     public RecordListVM(
-        IEditorEnvironment editorEnvironment,
         IReferenceQuery referenceQuery,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordEditorController recordEditorController,
@@ -65,7 +37,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListV
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
             
             var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
-            UpdateCache.AddOrUpdate(referencedRecord);
+            RecordCache.AddOrUpdate(referencedRecord);
         });
         
         EditSelectedRecord = ReactiveCommand.Create(() => {
@@ -80,66 +52,45 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : RecordListV
             var duplicate = RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             
             var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(duplicate);
-            UpdateCache.AddOrUpdate(referencedRecord);
+            RecordCache.AddOrUpdate(referencedRecord);
         });
         
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
             
-            Dispatcher.UIThread.Post(() => RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record));
-            Records!.Remove(SelectedRecord);
+            RecordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
+            RecordCache.Remove(SelectedRecord);
         });
-        
-        var recordCache = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .StartWith()
-            .Where(x => x.Item1.ListedOrder.Count > 0)
-            .Do(_ => IsBusy = true)
-            .ObserveOnTaskpool()
-            .Select(x => {
-                return Observable.Create<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>((obs, cancel) => {
-                    foreach (var record in x.Item1.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
-                        //Skip when browser settings don't match
-                        if (!RecordBrowserSettings.Filter(record)) continue;
-
+        this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache)
+            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
+            .Subscribe(linkCache => {
+                RecordCache.Clear();
+                RecordCache.Refresh();
+                RecordCache.Edit(updater => {
+                    foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
                         var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
                         var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
 
-                        obs.OnNext(referencedRecord);
+                        updater.AddOrUpdate(referencedRecord);
                     }
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
-                }).ToObservableChangeSet(refRecord => refRecord.Record.FormKey);
+                });
+                
+                Dispatcher.UIThread.Post(() => IsBusy = false);
             })
-            .Switch()
-            .ObserveOnGui()
-            .Do(_ => IsBusy = false)
-            .ObserveOnTaskpool()
-            .AsObservableCache();
+            .DisposeWith(this);
 
-        var finalCache = Observable.Merge(
-            recordCache.Connect(),
-            UpdateCache.Connect())
-            .AsObservableCache();
-        
-        Records = finalCache
-            .Connect()
-            .ToObservableCollection(this);
-
-        editorEnvironment.LoadOrderChanged
-            .Subscribe(_ => {
-                UpdateCache.Clear();
-            });
-        
         recordEditorController.RecordChanged
             .Subscribe(majorRecord => {
                 if (majorRecord is not TMajorRecordGetter record) return;
-                if (!finalCache.TryGetValue(record.FormKey, out var listRecord)) return;
+                if (!RecordCache.TryGetValue(record.FormKey, out var listRecord)) return;
                 
+                // Modify value
                 listRecord.Record = record;
-                UpdateCache.AddOrUpdate(listRecord);
-            });
+                
+                // Force update
+                RecordCache.AddOrUpdate(listRecord);
+            })
+            .DisposeWith(this);;
     }
 }

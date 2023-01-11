@@ -1,4 +1,4 @@
-﻿using System.Reactive.Linq;
+﻿using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Environment;
@@ -8,7 +8,9 @@ using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public sealed class RecordListVMReadOnly : RecordListVM {
+public sealed class RecordListVMReadOnly : ARecordListVM {
+    public override Type Type { get; }
+
     public RecordListVMReadOnly(
         Type type,
         IRecordBrowserSettings recordBrowserSettings,
@@ -17,34 +19,20 @@ public sealed class RecordListVMReadOnly : RecordListVM {
         : base(recordBrowserSettings, referenceQuery, recordController) {
         Type = type;
 
-        Records = this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache, x => x.RecordBrowserSettings.SearchTerm, x => x.Type)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .Where(x => x.Item1.ListedOrder.Count > 0)
-            .Do(_ => IsBusy = true)
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(x => {
-                return Observable.Create<ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>>((obs, cancel) => {
-                    foreach (var recordIdentifier in x.Item1.AllIdentifiers(x.Item3)) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
+        this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache)
+            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
+            .Subscribe(linkCache => {
+                RecordCache.Clear();
+                RecordCache.Edit(updater => {
+                    foreach (var record in linkCache.AllIdentifiers(Type)) {
+                        var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
+                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, formLinks);
 
-                        //Skip when browser settings don't match
-                        if (!RecordBrowserSettings.Filter(recordIdentifier)) continue;
-
-                        var formLinks = ReferenceQuery.GetReferences(recordIdentifier.FormKey, RecordBrowserSettings.LinkCache);
-                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(recordIdentifier, formLinks);
-
-                        obs.OnNext(referencedRecord);
+                        updater.AddOrUpdate(referencedRecord);
                     }
-
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
                 });
-            })
-            .Select(x => x.ToObservableChangeSet())
-            .Switch()
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Do(_ => IsBusy = false)
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .ToObservableCollection(this);
+                
+                Dispatcher.UIThread.Post(() => IsBusy = false);
+            });
     }
 }

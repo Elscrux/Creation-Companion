@@ -1,12 +1,12 @@
-﻿using System.Collections;
+﻿using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public interface IRecordListVM {
-    public Type Type { get; set; }
-    [Reactive] public IEnumerable Records { get; set; }
-    [Reactive] public IRecordBrowserSettings RecordBrowserSettings { get; set; }
+public interface IRecordListVM : IDisposable {
+    public Type Type { get; }
+    public IEnumerable<IReferencedRecord> Records { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
     
     [Reactive] public bool IsBusy { get; set; }
 }
