@@ -6,6 +6,8 @@
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              xmlns:events="clr-namespace:Serilog.Events;assembly=Serilog"
              xmlns:logging="clr-namespace:CreationEditor.Avalonia.Models.Logging"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:CompileBindings="True" x:DataType="vm:ILogVM"
              x:Class="CreationEditor.Avalonia.Views.Logging.LogView"
@@ -28,38 +30,74 @@
             LevelsVisibility="{Binding LevelsVisibility}"/>
     </UserControl.Resources>
 
-    <ListBox Items="{Binding VisibleLogItems}"
-             Classes="Compact">
-        <ListBox.ContextFlyout>
-            <MenuFlyout>
-                <MenuItem Header="Clear" Command="{Binding Clear}"/>
-                <MenuItem Header="Display" Items="{x:Static vm:LogVM.LogLevels}">
-                    <MenuItem.DataTemplates>
-                        <DataTemplate DataType="events:LogEventLevel">
-                            <CheckBox Classes="LogLevelColor"
-                                      IsChecked="{Binding Converter={StaticResource LevelVisibilityConverter}}"
-                                      Content="{Binding Converter={x:Static converter:EnumConverters.ToString}}"
-                                      Command="{ReflectionBinding #Log.ViewModel.ToggleEvent}"
-                                      CommandParameter="{Binding}">
-                                <CheckBox.Styles>
-                                    <Style
-                                        Selector="CheckBox.LogLevelColor /template/ ContentPresenter#ContentPresenter">
-                                        <Setter Property="Foreground"
-                                                Value="{Binding Converter={StaticResource LogLevelToToBrushConverter}}"/>
-                                    </Style>
-                                </CheckBox.Styles>
-                            </CheckBox>
-                        </DataTemplate>
-                    </MenuItem.DataTemplates>
-                </MenuItem>
-            </MenuFlyout>
-        </ListBox.ContextFlyout>
+    <Grid ColumnDefinitions="20,*">
+        <StackPanel Grid.Column="0"
+                    Spacing="2"
+                    Background="{DynamicResource ButtonBackground}">
+            <Button Classes="Transparent"
+                    Command="{Binding Clear}"
+                    Width="20" Height="20"
+                    Padding="2">
+                <fluentIcons:FluentIcon Icon="Delete24Filled"/>
+            </Button>
+            
+            <Button Classes="Transparent"
+                    Command="{Binding ToggleAutoScroll}"
+                    Width="20" Height="20"
+                    Padding="2">
+                <Grid>
+                    <fluentIcons:FluentIcon Icon="ArrowSortDownLines24Filled"/>
+                    <fluentIcons:FluentIcon Icon="Line24Filled"
+                                            HasMirrorTransform="True"
+                                            IsVisible="{Binding !AutoScroll}"/>
+                </Grid>
+            </Button>
+            
+            <Button Classes="Transparent"
+                    Padding="2"
+                    HorizontalAlignment="Center"
+                    Width="20" Height="20">
+                <Button.Flyout>
+                    <Flyout>
+                        <ListBox Items="{x:Static vm:LogVM.LogLevels}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="events:LogEventLevel">
+                                    <CheckBox Classes="LogLevelColor"
+                                              IsChecked="{Binding Converter={StaticResource LevelVisibilityConverter}}"
+                                              Content="{Binding Converter={x:Static converter:EnumConverters.ToString}}"
+                                              Command="{ReflectionBinding #Log.ViewModel.ToggleEvent}"
+                                              CommandParameter="{Binding}">
+                                        <CheckBox.Styles>
+                                            <Style
+                                                Selector="CheckBox.LogLevelColor /template/ ContentPresenter#ContentPresenter">
+                                                <Setter Property="Foreground"
+                                                        Value="{Binding Converter={StaticResource LogLevelToToBrushConverter}}"/>
+                                            </Style>
+                                        </CheckBox.Styles>
+                                    </CheckBox>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Flyout>
+                </Button.Flyout>
+                
+                <fluentIcons:FluentIcon Icon="MoreVertical24Filled"/>
+            </Button>
+        </StackPanel>
         
-        <ListBox.ItemTemplate>
-            <DataTemplate DataType="logging:ILogItem">
-                <TextBlock Text="{Binding Text}"
-                           Foreground="{Binding Level, Converter={StaticResource LogLevelToToBrushConverter}}"/>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
+        <ListBox Grid.Column="1"
+                 Items="{Binding LogItems}"
+                 Classes="Compact">
+            <Interaction.Behaviors>
+                <behavior:ListBoxAutoScrollToBottom ScrollingEnabled="{Binding AutoScroll}"/>
+            </Interaction.Behaviors>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="logging:ILogItem">
+                    <TextBlock Text="{Binding Text}"
+                               Foreground="{Binding Level, Converter={StaticResource LogLevelToToBrushConverter}}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
 </UserControl>
