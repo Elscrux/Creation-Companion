@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
-using Avalonia;
 using Avalonia.Controls.Presenters;
-using MutagenLibrary.Core.Plugins;
+using CreationEditor.Avalonia.Services.Viewport;
+using CreationEditor.Services.Environment;
 using Noggog;
-namespace CreationEditor.Render.View;
+namespace CreationEditor.Avalonia.Views.Viewport;
 
 public class RenderView : ContentPresenter {
-    public RenderView(ISimpleEnvironmentContext environmentContext) {
+    public RenderView(IEnvironmentContext environmentContext) {
         Interop.Start(environmentContext);
         
         var process = Process.GetProcessesByName("CreationEditor.Skyrim.Avalonia")

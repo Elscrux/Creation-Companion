@@ -3,7 +3,8 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
-namespace CreationEditor.Render.View;
+using CreationEditor.Avalonia.Services.Viewport;
+namespace CreationEditor.Avalonia.Views.Viewport;
 
 public class RenderViewHost : NativeControlHost {
     private readonly Process _process;
