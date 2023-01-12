@@ -9,7 +9,8 @@ using CreationEditor.Avalonia.Services.Startup;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Environment;
+using CreationEditor.Services.Background;
+using CreationEditor.Services.Mutagen.References;
 namespace CreationEditor.Avalonia.Modules; 
 
 public sealed class MainModule : Module {

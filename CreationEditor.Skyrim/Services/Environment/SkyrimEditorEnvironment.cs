@@ -1,21 +1,22 @@
 ﻿using System.Reactive.Subjects;
-using CreationEditor.Environment;
-using CreationEditor.Notification;
-using Elscrux.Logging;
+using CreationEditor.Extension;
+using CreationEditor.Services.Background;
+using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using MutagenLibrary.Core.Plugins;
 using Serilog;
-namespace CreationEditor.Skyrim.Environment;
+namespace CreationEditor.Skyrim.Services.Environment;
 
 public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
     private static readonly ModKey NewModKey = new("NewMod", ModType.Plugin);
     
     private readonly IReferenceQuery _referenceQuery;
-    private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
+    private readonly IEnvironmentContext _environmentContext;
     private readonly IBackgroundTaskManager _backgroundTaskManager;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
@@ -49,21 +50,21 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
     
     public SkyrimEditorEnvironment(
         IReferenceQuery referenceQuery,
-        ISimpleEnvironmentContext simpleEnvironmentContext,
+        IEnvironmentContext environmentContext,
         IBackgroundTaskManager backgroundTaskManager,
         INotificationService notificationService,
         ILogger logger) {
         _referenceQuery = referenceQuery;
-        _simpleEnvironmentContext = simpleEnvironmentContext;
+        _environmentContext = environmentContext;
         _backgroundTaskManager = backgroundTaskManager;
         _notificationService = notificationService;
         _logger = logger;
 
-        _activeMod = new SkyrimMod(NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
         
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-            .Create(_simpleEnvironmentContext.GameReleaseContext.Release)
+            .Create(_environmentContext.GameReleaseContext.Release)
             .WithLoadOrder(_activeMod.ModKey)
             .Build();
     }
@@ -80,7 +81,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         
         _backgroundTaskManager.ReferencesLoaded = false;
         
-        _activeMod = new SkyrimMod(activeMod ?? NewModKey, _simpleEnvironmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(activeMod ?? NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         var linearNotifier = new LinearNotifier(_notificationService, activeMod == null ? 1 : 2);
@@ -88,7 +89,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         if (activeMod != null) {
             linearNotifier.Next($"Preparing {activeMod.Value.FileName}");
             _activeMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-                .Create(_simpleEnvironmentContext.GameReleaseContext.Release)
+                .Create(_environmentContext.GameReleaseContext.Release)
                 .WithLoadOrder(activeMod.Value)
                 .Build()
                 .LoadOrder[^1].Mod!);
@@ -96,7 +97,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         
         linearNotifier.Next("Building Environment");
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-            .Create(_simpleEnvironmentContext.GameReleaseContext.Release)
+            .Create(_environmentContext.GameReleaseContext.Release)
             .WithLoadOrder(modKeysArray)
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();

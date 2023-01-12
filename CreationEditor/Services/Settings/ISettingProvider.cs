@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using Elscrux.Logging;
+using CreationEditor.Extension;
 using Noggog;
 using Serilog;
-namespace CreationEditor.Settings; 
+namespace CreationEditor.Services.Settings; 
 
 public interface ISettingProvider {
     public IEnumerable<ISetting> Settings { get; }

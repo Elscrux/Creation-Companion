@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Notification; 
+﻿namespace CreationEditor.Services.Notification; 
 
 public interface INotificationService {
     public IObservable<NotificationItem> Notifications { get; }

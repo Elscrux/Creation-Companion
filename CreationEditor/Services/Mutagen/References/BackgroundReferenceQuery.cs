@@ -1,26 +1,29 @@
 ﻿using System.IO.Abstractions;
-using CreationEditor.Notification;
+using CreationEditor.Services.Background;
+using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
-using MutagenLibrary.Core.Plugins;
 using Serilog;
-namespace CreationEditor.Environment; 
+namespace CreationEditor.Services.Mutagen.References; 
 
 public sealed class BackgroundReferenceQuery : IReferenceQuery {
     private readonly IBackgroundTaskManager _backgroundTaskManager;
     private readonly ReferenceQuery _referenceQuery;
 
     public BackgroundReferenceQuery(
-        ISimpleEnvironmentContext simpleEnvironmentContext,
+        IEnvironmentContext environmentContext,
         IFileSystem fileSystem,
         INotificationService notificationService,
+        IModInfoProvider<IModGetter> modInfoProvider,
         ILogger logger,
         IBackgroundTaskManager backgroundTaskManager) {
         _backgroundTaskManager = backgroundTaskManager;
 
-        _referenceQuery = new ReferenceQuery(simpleEnvironmentContext, fileSystem, notificationService, logger);
+        _referenceQuery = new ReferenceQuery(environmentContext, fileSystem, notificationService, modInfoProvider, logger);
     }
     
     public void LoadModReferences(IModGetter mod) => _referenceQuery.LoadModReferences(mod);

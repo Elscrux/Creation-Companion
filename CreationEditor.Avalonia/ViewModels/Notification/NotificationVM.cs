@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Linq;
 using CreationEditor.Extension;
-using CreationEditor.Notification;
+using CreationEditor.Services.Notification;
 using DynamicData;
 using DynamicData.Binding;
 namespace CreationEditor.Avalonia.ViewModels.Notification;

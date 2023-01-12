@@ -1,30 +1,18 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Compression;
-using CreationEditor.Notification;
-using Elscrux.Logging;
+using CreationEditor.Extension;
+using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Notification;
 using Loqui;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
-using MutagenLibrary.Core.Plugins;
 using Serilog;
-namespace CreationEditor;
-
-public interface IReferenceQuery {
-    public void LoadModReferences(IModGetter mod);
-    public void LoadModReferences(IReadOnlyList<IModGetter> mods);
-    public void LoadModReferences(ILinkCache linkCache);
-    public void LoadModReferences(IGameEnvironment environment);
-
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> mods);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, ILinkCache linkCache);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IGameEnvironment environment);
-}
+namespace CreationEditor.Services.Mutagen.References;
 
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
@@ -36,26 +24,29 @@ public sealed class ReferenceQuery : IReferenceQuery {
     private const string TempCacheExtension = "temp";
     private const string BaseNamespace = "Mutagen.Bethesda.";
 
-    private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
+    private readonly IEnvironmentContext _environmentContext;
     private readonly IFileSystem _fileSystem;
     private readonly INotificationService _notificationService;
+    private readonly IModInfoProvider<IModGetter> _modInfoProvider;
     private readonly ILogger _logger;
 
     private string CacheDirPath => _fileSystem.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), CacheDirectory, CacheSubdirectory);
     private string CacheFile(ModKey mod) => _fileSystem.Path.Combine(CacheDirPath, $"{mod.Name}.{CacheExtension}");
     private string TempCacheFile(ModKey mod) => _fileSystem.Path.Combine(CacheDirPath, $"{mod.Name}.{TempCacheExtension}");
-    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_simpleEnvironmentContext.DataDirectoryProvider.Path, mod.FileName);
+    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, mod.FileName);
 
     private readonly Dictionary<ModKey, ReferenceCache> _modCaches = new();
 
     public ReferenceQuery(
-        ISimpleEnvironmentContext simpleEnvironmentContext,
+        IEnvironmentContext environmentContext,
         IFileSystem fileSystem,
         INotificationService notificationService,
+        IModInfoProvider<IModGetter> modInfoProvider,
         ILogger logger) {
-        _simpleEnvironmentContext = simpleEnvironmentContext;
+        _environmentContext = environmentContext;
         _fileSystem = fileSystem;
         _notificationService = notificationService;
+        _modInfoProvider = modInfoProvider;
         _logger = logger;
     }
 
@@ -204,7 +195,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
         //Fill modCache
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
 
-        var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) mod.GetRecordCount());
+        var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) _modInfoProvider.GetRecordCount(mod));
         foreach (var recordGetter in mod.EnumerateMajorRecords()) {
             counter.NextStep();
 

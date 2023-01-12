@@ -5,15 +5,14 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Services.Busy;
-using CreationEditor.Environment;
 using CreationEditor.Extension;
+using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
-using MutagenLibrary.Core.Plugins;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -44,7 +43,7 @@ public sealed class ModSelectionVM : ViewModel {
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
     public ModSelectionVM(
-        ISimpleEnvironmentContext simpleEnvironmentContext,
+        IEnvironmentContext environmentContext,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
@@ -53,9 +52,9 @@ public sealed class ModSelectionVM : ViewModel {
         _editorEnvironment = editorEnvironment;
         _busyService = busyService;
         SelectedModDetails = modGetterVM;
-        _environment = GameEnvironment.Typical.Construct(simpleEnvironmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
+        _environment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
-        var filePath = pluginListingsProvider.Get(simpleEnvironmentContext.GameReleaseContext.Release);
+        var filePath = pluginListingsProvider.Get(environmentContext.GameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();

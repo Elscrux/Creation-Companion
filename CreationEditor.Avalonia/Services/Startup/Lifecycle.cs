@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
-using Elscrux.Logging;
+using CreationEditor.Extension;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Startup;

@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions;
-using Elscrux.Logging;
+using CreationEditor.Extension;
 using Newtonsoft.Json;
 using Serilog;
-namespace CreationEditor.Settings;
+namespace CreationEditor.Services.Settings;
 
 public interface ISettingImporter<out TSetting> {
     public TSetting? Import(ISetting setting);

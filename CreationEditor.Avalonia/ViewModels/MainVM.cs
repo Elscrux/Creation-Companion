@@ -10,7 +10,7 @@ using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Setting;
-using CreationEditor.Environment;
+using CreationEditor.Services.Environment;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;

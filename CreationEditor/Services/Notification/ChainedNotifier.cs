@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Notification;
+﻿namespace CreationEditor.Services.Notification;
 
 public sealed class ChainedNotifier : ANotifier {
     private readonly IEnumerator<string> _stepEnumerator;

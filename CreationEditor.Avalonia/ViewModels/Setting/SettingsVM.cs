@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using CreationEditor.Settings;
+using CreationEditor.Services.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Setting;

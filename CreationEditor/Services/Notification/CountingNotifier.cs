@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Notification;
+﻿namespace CreationEditor.Services.Notification;
 
 public sealed class CountingNotifier : ANotifier {
     private readonly float _countFloat;

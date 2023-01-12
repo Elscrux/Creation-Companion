@@ -3,16 +3,19 @@ using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Environment;
+using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
-using CreationEditor.Skyrim.Environment;
+using CreationEditor.Skyrim.Services.Environment;
+using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using MutagenLibrary.Core.Plugins;
 namespace CreationEditor.Skyrim.Avalonia.Modules; 
 
 public sealed class SkyrimModule : Module {
@@ -22,11 +25,15 @@ public sealed class SkyrimModule : Module {
             .As<IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>>()
             .SingleInstance();
 
-        var environmentProvider = SimpleEnvironmentContext.Build(GameRelease.SkyrimSE);
+        var environmentProvider = EnvironmentContext.Build(GameRelease.SkyrimSE);
         
         builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE)).AsImplementedInterfaces();
         
-        builder.RegisterInstance(environmentProvider).As<ISimpleEnvironmentContext>();
+        builder.RegisterInstance(environmentProvider).As<IEnvironmentContext>();
+
+        builder.RegisterType<SkyrimModInfoProvider>()
+            .As<IModInfoProvider<IModGetter>>()
+            .As<IModInfoProvider<ISkyrimModGetter>>();
         
         builder.RegisterType<SkyrimRecordBrowserVM>().As<IRecordBrowserVM>();
         

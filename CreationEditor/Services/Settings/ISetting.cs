@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Settings;
+﻿namespace CreationEditor.Services.Settings;
 
 public interface ISetting {
     public string Name { get; }

@@ -8,25 +8,22 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Render.View;
-using MutagenLibrary.Core.Plugins;
+using CreationEditor.Avalonia.Views.Viewport;
+using CreationEditor.Services.Environment;
 namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory : IDockFactory {
-    private readonly IMainWindow _mainWindow;
     private readonly IComponentContext _componentContext;
     private readonly IDockingManagerService _dockingManagerService;
-    private readonly ISimpleEnvironmentContext _simpleEnvironmentContext;
+    private readonly IEnvironmentContext _environmentContext;
 
     public DockFactory(
-        IMainWindow mainWindow,
         IComponentContext componentContext,
         IDockingManagerService dockingManagerService,
-        ISimpleEnvironmentContext simpleEnvironmentContext) {
-        _mainWindow = mainWindow;
+        IEnvironmentContext environmentContext) {
         _componentContext = componentContext;
         _dockingManagerService = dockingManagerService;
-        _simpleEnvironmentContext = simpleEnvironmentContext;
+        _environmentContext = environmentContext;
     }
     
     public void Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null) {
@@ -56,7 +53,7 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.Viewport:
-                control = new RenderView(_simpleEnvironmentContext);
+                control = new RenderView(_environmentContext);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Viewport",

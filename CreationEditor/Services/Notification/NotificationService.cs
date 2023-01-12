@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Subjects;
-namespace CreationEditor.Notification;
+namespace CreationEditor.Services.Notification;
 
 public sealed class NotificationService : INotificationService {
     private readonly Subject<NotificationItem> _notifications = new();

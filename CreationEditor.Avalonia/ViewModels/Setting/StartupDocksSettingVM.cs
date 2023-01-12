@@ -7,7 +7,7 @@ using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Models.Settings;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Startup;
-using CreationEditor.Settings;
+using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting;

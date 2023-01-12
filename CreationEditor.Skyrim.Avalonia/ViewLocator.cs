@@ -3,7 +3,7 @@ using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Settings;
+using CreationEditor.Services.Settings;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public sealed class ViewLocator : IDataTemplate {

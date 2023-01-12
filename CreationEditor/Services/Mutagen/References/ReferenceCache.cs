@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins;
-namespace CreationEditor;
+namespace CreationEditor.Services.Mutagen.References;
 
 public sealed record ReferenceCache(Dictionary<FormKey, HashSet<IFormLinkIdentifier>> Cache) {
     public static ReferenceCache operator +(ReferenceCache a, ReferenceCache b) {

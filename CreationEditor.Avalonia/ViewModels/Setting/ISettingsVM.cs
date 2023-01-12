@@ -1,5 +1,5 @@
 ﻿using System.Reactive;
-using CreationEditor.Settings;
+using CreationEditor.Services.Settings;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting; 
 

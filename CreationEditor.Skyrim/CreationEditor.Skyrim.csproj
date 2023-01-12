@@ -11,4 +11,8 @@
       <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.40.0" />
+    </ItemGroup>
+
 </Project>

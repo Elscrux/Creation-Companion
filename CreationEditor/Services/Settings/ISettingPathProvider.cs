@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Noggog;
-namespace CreationEditor.Settings;
+namespace CreationEditor.Services.Settings;
 
 public interface ISettingPathProvider {
     public FilePath Path { get; }

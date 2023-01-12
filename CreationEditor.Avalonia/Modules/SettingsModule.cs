@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels.Setting;
-using CreationEditor.Settings;
+using CreationEditor.Services.Settings;
 namespace CreationEditor.Avalonia.Modules; 
 
 public sealed class SettingsModule : Module {

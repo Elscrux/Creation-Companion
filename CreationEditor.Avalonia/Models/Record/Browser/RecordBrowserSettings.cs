@@ -1,5 +1,5 @@
-﻿using CreationEditor.Environment;
-using CreationEditor.Extension;
+﻿using CreationEditor.Extension;
+using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;

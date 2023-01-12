@@ -1,5 +1,5 @@
 ﻿using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Environment;
+namespace CreationEditor.Services.Background;
 
 public interface IBackgroundTaskManager {
     [Reactive] public bool ReferencesLoaded { get; set; } 
