@@ -557,14 +557,14 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .Subscribe(_ => SearchMode = searchMode)
             .DisposeWith(TemplateDisposable);
 
-        // Observable.Merge(
-        //         this.WhenAnyValue(x => x.IsKeyboardFocusWithin),
-        //         this.WhenAnyValue(x => x.IsVisible))
-        //     .Where(x => !x)
-        //     .Delay(TimeSpan.FromMilliseconds(150), RxApp.MainThreadScheduler)
-        //     .Subscribe(_ => {
-        //         SearchMode = FormKeyPickerSearchMode.None;
-        //     })
-        //     .DisposeWith(TemplateDisposable);
+        Observable.Merge(
+                this.WhenAnyValue(x => x.IsKeyboardFocusWithin),
+                this.WhenAnyValue(x => x.IsVisible))
+            .Where(x => !x)
+            .Delay(TimeSpan.FromMilliseconds(150), RxApp.MainThreadScheduler)
+            .Subscribe(_ => {
+                SearchMode = FormKeyPickerSearchMode.None;
+            })
+            .DisposeWith(TemplateDisposable);
     }
 }
