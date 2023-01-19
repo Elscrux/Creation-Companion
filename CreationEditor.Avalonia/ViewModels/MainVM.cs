@@ -29,9 +29,7 @@ public sealed class MainVM : ViewModel {
     public ReactiveCommand<Window, Unit> OpenSettings { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
     
-    public ReactiveCommand<Unit, Unit> OpenLog { get; }
-    public ReactiveCommand<Unit, Unit> OpenRecordBrowser { get; }
-    public ReactiveCommand<Unit, Unit> OpenViewport { get; }
+    public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
 
     public MainVM(
         IComponentContext componentContext,
@@ -57,11 +55,7 @@ public sealed class MainVM : ViewModel {
 
         Save = ReactiveCommand.Create(() => {});
 
-        OpenLog = ReactiveCommand.Create(() => dockFactory.Open(DockElement.Log));
-
-        OpenRecordBrowser = ReactiveCommand.Create(() => dockFactory.Open(DockElement.RecordBrowser));
-
-        OpenViewport = ReactiveCommand.Create(() => dockFactory.Open(DockElement.Viewport));
+        OpenDockElement = ReactiveCommand.Create<DockElement>(element => dockFactory.Open(element));
 
         editorEnvironment.ActiveModChanged
             .Subscribe(activeMod => {
