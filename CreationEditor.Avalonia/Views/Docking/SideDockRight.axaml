@@ -62,9 +62,9 @@
 
                                     <!-- Close -->
                                     <Button Classes="DockClose"
-                                            Command="{Binding Close}">
+                                            Command="{Binding Close}"
+                                            IsVisible="{Binding CanClose}">
                                         <fluentIcons:FluentIcon Icon="Dismiss48Regular"
-                                                                IsVisible="{Binding CanClose}"
                                                                 ToolTip.Tip="Close"/>
                                     </Button>
                                 </StackPanel>
