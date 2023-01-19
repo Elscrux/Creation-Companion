@@ -48,6 +48,9 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
     private readonly Subject<List<ModKey>> _loadOrderChanged = new();
     public IObservable<List<ModKey>> LoadOrderChanged => _loadOrderChanged;
     
+    private readonly Subject<ILinkCache> _linkCacheChanged = new();
+    public IObservable<ILinkCache> LinkCacheChanged => _linkCacheChanged;
+
     public SkyrimEditorEnvironment(
         IReferenceQuery referenceQuery,
         IEnvironmentContext environmentContext,
@@ -105,6 +108,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         
         _activeModChanged.OnNext(_activeMod.ModKey);
         _loadOrderChanged.OnNext(_gameEnvironment.LoadOrder.Select(x => x.Key).ToList());
+        _linkCacheChanged.OnNext(_gameEnvironment.LinkCache);
 
         Prepare();
     }
