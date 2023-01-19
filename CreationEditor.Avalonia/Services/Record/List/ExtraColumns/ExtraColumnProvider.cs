@@ -16,7 +16,7 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
     }
 
     public IEnumerable<DataGridColumn> GetColumns(Type type) {
-        return type.GetInterfaces()
+        return type.AsEnumerable().Concat(type.GetInterfaces())
             .SelectWhere(@interface => _extraColumnsCache.TryGetValue(@interface, out var extraColumn)
                 ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns) 
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
