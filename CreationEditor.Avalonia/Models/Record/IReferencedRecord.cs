@@ -1,9 +1,6 @@
-﻿using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
-using ReactiveUI.Fody.Helpers;
+﻿using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Models.Record;
 
-public interface IReferencedRecord {
-    [Reactive] public IMajorRecordGetter Record { get; set; }
-    public HashSet<IFormLinkIdentifier> References { get; set; }
+public interface IReferencedRecord : IReferencedRecordIdentifier {
+    public new IMajorRecordGetter Record { get; set; }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using Autofac;
-using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
+using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Skyrim;
@@ -11,20 +11,20 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
 
 public sealed class SkyrimRecordListFactory : IRecordListFactory {
     private readonly ILifetimeScope _lifetimeScope;
-    private readonly IRecordBrowserSettings _defaultRecordBrowserSettings;
+    private readonly IRecordBrowserSettingsVM _defaultRecordBrowserSettingsVM;
     private readonly IExtraColumnProvider _extraColumnProvider;
 
     public SkyrimRecordListFactory(
         ILifetimeScope lifetimeScope,
-        IRecordBrowserSettings defaultRecordBrowserSettings,
+        IRecordBrowserSettingsVM defaultRecordBrowserSettingsVM,
         IExtraColumnProvider extraColumnProvider) {
         _lifetimeScope = lifetimeScope;
-        _defaultRecordBrowserSettings = defaultRecordBrowserSettings;
+        _defaultRecordBrowserSettingsVM = defaultRecordBrowserSettingsVM;
         _extraColumnProvider = extraColumnProvider;
     }
     
-    public RecordList FromType(Type type, IRecordBrowserSettings? browserSettings = null) {
-        browserSettings ??= _defaultRecordBrowserSettings;
+    public RecordList FromType(Type type, IRecordBrowserSettingsVM? browserSettings = null) {
+        browserSettings ??= _defaultRecordBrowserSettingsVM;
         var browserSettingsParam = TypedParameter.From(browserSettings);
 
         var recordList = new RecordList(_extraColumnProvider.GetColumns(type));

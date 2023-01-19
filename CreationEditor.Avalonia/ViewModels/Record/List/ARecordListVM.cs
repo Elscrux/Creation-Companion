@@ -3,7 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Record;
-using CreationEditor.Avalonia.Models.Record.Browser;
+using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -13,7 +13,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public abstract class ARecordListVM : ViewModel, IRecordListVM {
+public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
+    where TReferenced : IReferencedRecordIdentifier {
     protected readonly IReferenceQuery ReferenceQuery;
     protected readonly IRecordController RecordController;
 
@@ -23,25 +24,24 @@ public abstract class ARecordListVM : ViewModel, IRecordListVM {
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
     [Reactive] public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; protected init; }
 
-    public IEnumerable<IReferencedRecord> Records { get; }
-    protected readonly SourceCache<IReferencedRecord, FormKey> RecordCache = new(x => x.Record.FormKey);
+    public IEnumerable Records { get; }
+    protected readonly SourceCache<TReferenced, FormKey> RecordCache = new(x => x.Record.FormKey);
 
     [Reactive] public bool IsBusy { get; set; }
 
     protected ARecordListVM(
-        IRecordBrowserSettings recordBrowserSettings,
+        IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
         IRecordController recordController) {
         ReferenceQuery = referenceQuery;
         RecordController = recordController;
-        RecordBrowserSettings = recordBrowserSettings;
+        RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Records = RecordCache
             .Connect()
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Filter(this.WhenAnyValue(x => x.RecordBrowserSettings.SearchTerm)
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-                .Select(_ => new Func<IReferencedRecord, bool>(record => RecordBrowserSettings.Filter(record.Record))))
+            .Filter(RecordBrowserSettingsVM.SettingsChanged
+                .Select(_ => new Func<TReferenced, bool>(record => RecordBrowserSettingsVM.Filter(record.Record))))
             .DoOnGuiAndSwitchBack(_ => IsBusy = false)
             .ToObservableCollection(this);
     }

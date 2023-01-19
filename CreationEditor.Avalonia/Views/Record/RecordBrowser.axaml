@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Record.Browser"
     xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.Browser"
+    xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record"
     x:CompileBindings="True" x:DataType="vm:IRecordBrowserVM"
     d:DesignHeight="720" d:DesignWidth="480"
     x:Name="Browser">
@@ -16,17 +17,12 @@
                               Width="4*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid RowDefinitions="Auto,Auto,*">
-            <TextBox Grid.Row="0"
-                     Margin="5"
-                     Text="{Binding RecordBrowserSettings.SearchTerm}"
-                     Watermark="Search..."/>
-            <CheckBox
-                Grid.Row="1"
-                Margin="5"
-                Content="Show Only Active"
-                IsChecked="{Binding RecordBrowserSettings.OnlyActive}"/>
-            <TreeView Grid.Row="2"
+        <Grid RowDefinitions="Auto,*">
+            <record:RecordBrowserSettings
+                Grid.Row="0"
+                DataContext="{Binding RecordBrowserSettingsVM}"/>
+            
+            <TreeView Grid.Row="1"
                       Items="{Binding RecordTypeGroups}">
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">

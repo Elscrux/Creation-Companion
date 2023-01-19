@@ -10,5 +10,5 @@ public interface IRecordBrowserVM {
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
     [Reactive] public RecordList? RecordList { get; set; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
-    public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 }

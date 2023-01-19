@@ -12,7 +12,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
 public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;
-    public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
@@ -22,16 +22,16 @@ public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
 
     public SkyrimRecordBrowserVM(
         IRecordListFactory recordListFactory,
-        IRecordBrowserSettings recordBrowserSettings) {
+        IRecordBrowserSettingsVM recordBrowserSettingsVM) {
         _recordListFactory = recordListFactory;
-        RecordBrowserSettings = recordBrowserSettings;
+        RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;
             if (RecordList?.ViewModel?.Type == recordType) return;
 
             RecordList?.ViewModel?.Dispose();
-            RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettings);
+            RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettingsVM);
         });
         
         RecordTypeGroups = new ObservableCollection<RecordTypeGroup> {

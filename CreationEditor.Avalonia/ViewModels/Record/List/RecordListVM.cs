@@ -2,8 +2,8 @@ using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
-using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -15,7 +15,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordListVM
+public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordListVM<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
 
@@ -29,10 +29,10 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
 
     public RecordListVM(
         IReferenceQuery referenceQuery,
-        IRecordBrowserSettings recordBrowserSettings,
+        IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordBrowserSettings, referenceQuery, recordController) {
+        : base(recordBrowserSettingsVM, referenceQuery, recordController) {
         Type = typeof(TMajorRecordGetter);
         
         NewRecord = ReactiveCommand.Create(() => {
@@ -66,14 +66,14 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
             RecordCache.Remove(SelectedRecord);
         });
 
-        this.WhenAnyValue(x => x.RecordBrowserSettings.LinkCache)
+        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(linkCache => {
                 RecordCache.Clear();
                 RecordCache.Refresh();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettings.LinkCache);
+                        var formLinks = ReferenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
                         var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
 
                         updater.AddOrUpdate(referencedRecord);
