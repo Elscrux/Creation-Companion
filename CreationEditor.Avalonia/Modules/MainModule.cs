@@ -6,6 +6,7 @@ using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Startup;
+using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -55,6 +56,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
             .SingleInstance();
+
+        builder.RegisterType<BSEViewportFactory>()
+            .As<IViewportFactory>();
         
         //VMs
         builder.RegisterType<ModSelectionVM>();

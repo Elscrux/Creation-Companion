@@ -6,13 +6,13 @@ using Avalonia.Platform;
 using CreationEditor.Avalonia.Services.Viewport;
 namespace CreationEditor.Avalonia.Views.Viewport;
 
-public class RenderViewHost : NativeControlHost {
+public class ViewportHost : NativeControlHost {
     private readonly Process _process;
     private Window? _rootWindow;
     
     private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-    public RenderViewHost(Process process) {
+    public ViewportHost(Process process) {
         _process = process;
     }
 
@@ -35,7 +35,7 @@ public class RenderViewHost : NativeControlHost {
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent) {
-        switch (System.Environment.OSVersion.Platform) {
+        switch (Environment.OSVersion.Platform) {
             case PlatformID.Win32S:
             case PlatformID.Win32Windows:
             case PlatformID.Win32NT:
@@ -57,7 +57,7 @@ public class RenderViewHost : NativeControlHost {
     }
 
     protected override void DestroyNativeControlCore(IPlatformHandle control) {
-        switch (System.Environment.OSVersion.Platform) {
+        switch (Environment.OSVersion.Platform) {
             case PlatformID.Win32S:
             case PlatformID.Win32Windows:
             case PlatformID.Win32NT:

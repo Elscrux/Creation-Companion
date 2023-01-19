@@ -7,6 +7,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
+using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
@@ -30,6 +31,8 @@ public sealed class SkyrimModule : Module {
         builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE)).AsImplementedInterfaces();
         
         builder.RegisterInstance(environmentProvider).As<IEnvironmentContext>();
+        
+        builder.RegisterType<BSERuntimeService>().As<IViewportRuntimeService>();
 
         builder.RegisterType<SkyrimModInfoProvider>()
             .As<IModInfoProvider<IModGetter>>()

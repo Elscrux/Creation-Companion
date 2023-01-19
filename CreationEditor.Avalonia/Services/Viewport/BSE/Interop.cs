@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using CreationEditor.Services.Environment;
 using Noggog;
-namespace CreationEditor.Avalonia.Services.Viewport;
+namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 
 public static class Interop {
     private const string DllName = "TGInterOp.dll";
@@ -42,13 +41,13 @@ public static class Interop {
     public delegate void LoadCallback(uint count, ReferenceLoad[] load);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void UpdateCallback (uint count, ReferenceUpdate[] load);
+    public delegate void UpdateCallback(uint count, ReferenceUpdate[] load);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void HideCallback (uint count, string[] keys, bool hide);
+    public delegate void HideCallback(uint count, string[] keys, bool hide);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void DeleteCallback (uint count, string[] keys, bool hide);
+    public delegate void DeleteCallback(uint count, string[] keys, bool hide);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addLoadCallback(LoadCallback callback);
@@ -82,24 +81,4 @@ public static class Interop {
     
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void waitFinishedInit();
-
-    public static async void Start(IEnvironmentContext environmentContext) {
-        Task.Run(() => {
-            initTGEditor(new InitConfig {
-                Version = 1,
-                AssetDirectory = @"E:\TES\Skyrim\vanilla-files\"//environmentContext.DataDirectoryProvider.Path
-            });
-        });
-        
-        addLoadCallback((callbackCount, callbackLoads) => {
-            Console.WriteLine($"CALLBACK: {callbackCount}");
-            if (callbackCount == 0) return;
-            
-            foreach (var load in callbackLoads) {
-                Console.WriteLine($"CALLBACK: {load.ToString()}");
-            }
-        });
-
-        waitFinishedInit();
-    }
 }

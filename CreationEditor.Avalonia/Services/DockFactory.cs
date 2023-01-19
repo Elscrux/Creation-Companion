@@ -3,25 +3,29 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
+using CreationEditor.Avalonia.Services.Record.Browser;
+using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.ViewModels.Logging;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Avalonia.Views.Viewport;
-using CreationEditor.Services.Environment;
 namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory : IDockFactory {
+    private bool _viewportCreated;
+    
     private readonly IComponentContext _componentContext;
+    private readonly IViewportFactory _viewportFactory;
     private readonly IDockingManagerService _dockingManagerService;
     private readonly IEnvironmentContext _environmentContext;
 
     public DockFactory(
         IComponentContext componentContext,
+        IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
         IEnvironmentContext environmentContext) {
         _componentContext = componentContext;
+        _viewportFactory = viewportFactory;
         _dockingManagerService = dockingManagerService;
         _environmentContext = environmentContext;
     }
@@ -48,15 +52,20 @@ public sealed class DockFactory : IDockFactory {
                         Header = "Record Browser",
                     },
                     Dock = Dock.Left,
-                    DockMode = DockMode.Layout,
+                    DockMode = DockMode.Side,
                     Size = new GridLength(3, GridUnitType.Star),
                 };
                 break;
             case DockElement.Viewport:
-                control = new RenderView(_environmentContext);
+                if (_viewportCreated && !_viewportFactory.IsMultiInstanceCapable) return;
+                
+                control = _viewportFactory.CreateViewport();
+                _viewportCreated = true;
+
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Viewport",
+                        CanClose = _viewportFactory.IsMultiInstanceCapable
                     },
                     Dock = Dock.Right,
                     DockMode = DockMode.Layout,

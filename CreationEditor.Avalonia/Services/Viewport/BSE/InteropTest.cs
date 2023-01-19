@@ -1,6 +1,6 @@
 ﻿using Noggog;
 using Xunit;
-namespace CreationEditor.Avalonia.Services.Viewport; 
+namespace CreationEditor.Avalonia.Services.Viewport.BSE; 
 
 //Must be run in debug mode to include dll
 public class InteropTest {
@@ -15,7 +15,7 @@ public class InteropTest {
     };
 
     [Fact]
-    public async void TestInit() {
+    public void TestInit() {
         var task = Xunit.Record.ExceptionAsync(() =>  Task.Run(() => {
             Interop.initTGEditor(new Interop.InitConfig {
                 Version = 1,
