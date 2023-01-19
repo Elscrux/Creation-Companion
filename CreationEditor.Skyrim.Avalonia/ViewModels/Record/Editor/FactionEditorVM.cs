@@ -1,10 +1,11 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Services.Environment;
-using CreationEditor.Skyrim.Avalonia.Models.Records.Editor;
+using CreationEditor.Skyrim.Avalonia.Models.Record.Editor;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -15,13 +16,11 @@ using FactionEditor = CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Faction
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
 
 public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
-    private readonly IEditorEnvironment _editorEnvironment;
-    
     IMajorRecordGetter IRecordEditorVM.Record => Record;
     public Faction Record { get; set; } = null!;
     [Reactive] public EditableFaction EditableRecord { get; set; } = null!;
 
-    public ILinkCache LinkCache => _editorEnvironment.LinkCache;
+    [Reactive] public ILinkCache LinkCache { get; set; }
 
     public ReactiveCommand<Unit, Unit> Save { get; }
     public ReactiveCommand<Unit, Unit> AddRelation { get; }
@@ -35,7 +34,10 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFacti
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
         IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+
+        LinkCache = editorEnvironment.LinkCache;
+
+        editorEnvironment.LinkCacheChanged.Subscribe(newLinkCache => LinkCache = newLinkCache);
         
         Save = ReactiveCommand.Create(() => {
             EditableRecord.SetFaction(Record);
