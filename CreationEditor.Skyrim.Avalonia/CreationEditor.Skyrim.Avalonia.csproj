@@ -23,12 +23,37 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Records\List" />
+      <Folder Include="Models\Record\List" />
       <Folder Include="Views\Record\Editor\Subrecord" />
     </ItemGroup>
 
     <ItemGroup>
       <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Record\Browser\CellBrowser.axaml.cs">
+        <DependentUpon>CellBrowser.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Record\List\ExteriorCells.axaml.cs">
+        <DependentUpon>ExteriorCellsBrowser.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Record\List\InteriorCells.axaml.cs">
+        <DependentUpon>InteriorCellsBrowser.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Record\List\PlacedList.axaml.cs">
+        <DependentUpon>PlacedBrowser.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="ViewModels\Record\List\ExteriorCellsVM.cs">
+        <DependentUpon>CellListVM.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ViewModels\Record\List\InteriorCellsVM.cs">
+        <DependentUpon>CellListVM.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
     
     <PropertyGroup>

@@ -60,6 +60,13 @@
                             <fluentIcons:FluentIcon Icon="TextBulletListLtr24Regular"/>
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Cell Browser"
+                              Command="{Binding OpenDockElement}"
+                              CommandParameter="{x:Static models:DockElement.CellBrowser}">
+                        <MenuItem.Icon>
+                            <fluentIcons:FluentIcon Icon="AppFolder24Regular"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Viewport"
                               Command="{Binding OpenDockElement}"
                               CommandParameter="{x:Static models:DockElement.Viewport}">

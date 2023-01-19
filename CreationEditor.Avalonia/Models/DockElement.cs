@@ -3,5 +3,6 @@
 public enum DockElement {
     Log,
     RecordBrowser,
+    CellBrowser,
     Viewport
 }

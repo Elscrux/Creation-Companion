@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -6,11 +7,13 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
+using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using CreationEditor.Skyrim.Services.Environment;
 using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
@@ -43,6 +46,8 @@ public sealed class SkyrimModule : Module {
         builder.RegisterType<SkyrimModGetterVM>().As<IModGetterVM>();
         
         builder.RegisterType<SkyrimRecordListFactory>().As<IRecordListFactory>();
+        
+        builder.RegisterType<SkyrimCellBrowserFactory>().As<ICellBrowserFactory>();
 
         builder.RegisterGeneric(typeof(RecordListVM<,>))
             .As(typeof(RecordListVM<,>));
@@ -55,5 +60,11 @@ public sealed class SkyrimModule : Module {
             .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
+        
+        builder.RegisterType<InteriorCellsVM>().AsSelf();
+        builder.RegisterType<ExteriorCellsVM>().AsSelf();
+        
+        builder.RegisterType<CellBrowserVM>().As<ICellBrowserVM>();
+        builder.RegisterType<PlacedListVM>().As<IPlacedListVM>();
     }
 }

@@ -17,17 +17,17 @@ public sealed class DockFactory : IDockFactory {
     private readonly IComponentContext _componentContext;
     private readonly IViewportFactory _viewportFactory;
     private readonly IDockingManagerService _dockingManagerService;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly ICellBrowserFactory _cellBrowserFactory;
 
     public DockFactory(
         IComponentContext componentContext,
         IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
-        IEnvironmentContext environmentContext) {
+        ICellBrowserFactory cellBrowserFactory) {
         _componentContext = componentContext;
         _viewportFactory = viewportFactory;
         _dockingManagerService = dockingManagerService;
-        _environmentContext = environmentContext;
+        _cellBrowserFactory = cellBrowserFactory;
     }
     
     public void Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null) {
@@ -54,6 +54,16 @@ public sealed class DockFactory : IDockFactory {
                     Dock = Dock.Left,
                     DockMode = DockMode.Side,
                     Size = new GridLength(3, GridUnitType.Star),
+                };
+                break;
+            case DockElement.CellBrowser:
+                control = _cellBrowserFactory.GetBrowser();
+                dockConfig = new DockConfig {
+                    DockInfo = new DockInfo {
+                        Header = "Cell Browser",
+                    },
+                    Dock = Dock.Left,
+                    DockMode = DockMode.Side,
                 };
                 break;
             case DockElement.Viewport:

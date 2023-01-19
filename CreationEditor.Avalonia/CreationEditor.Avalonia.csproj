@@ -47,9 +47,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Views\Record\CellBrowser.axaml.cs">
-        <DependentUpon>CellBrowser.axaml</DependentUpon>
-        <SubType>Code</SubType>
+      <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
+        <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 
