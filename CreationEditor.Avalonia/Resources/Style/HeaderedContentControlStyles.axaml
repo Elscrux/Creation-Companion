@@ -10,10 +10,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <StackPanel>
-                        <ContentPresenter Content="{TemplateBinding Header}" />
-                        <ContentPresenter Content="{TemplateBinding Content}" />
-                    </StackPanel>
+                    <Grid RowDefinitions="Auto,*">
+                        <ContentPresenter Grid.Row="0"
+                                          Content="{TemplateBinding Header}" />
+                        <ContentPresenter Grid.Row="1"
+                                          Content="{TemplateBinding Content}" />
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -25,15 +27,19 @@
                 <ControlTemplate>
                     <Border>
                         <StackPanel>
-                            <ContentPresenter Content="{TemplateBinding Header}" />
-                            <Border BorderBrush="{DynamicResource ButtonBackground}"
-                                    BorderThickness="2"
-                                    Padding="5"
-                                    CornerRadius="5"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Left">
-                                <ContentPresenter Content="{TemplateBinding Content}" />
-                            </Border>
+                            <Grid RowDefinitions="Auto,*">
+                                <ContentPresenter Grid.Row="0"
+                                                  Content="{TemplateBinding Header}" />
+                                <Border Grid.Row="1"
+                                        BorderBrush="{DynamicResource ButtonBackground}"
+                                        BorderThickness="2"
+                                        Padding="5"
+                                        CornerRadius="5"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left">
+                                    <ContentPresenter Content="{TemplateBinding Content}" />
+                                </Border>
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
