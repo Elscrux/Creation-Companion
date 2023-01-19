@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
+using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
@@ -11,6 +12,8 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
     public double ActiveTabSize { get; set; } = 150;
     public double ActiveTabMinSize { get; set; } = 50;
     public double NoActiveTabSize { get; set; } = 20;
+    
+    public IDockedItem? PreviousActiveTab { get; set; }
     
     public SideDockVM? SideDock {
         get => GetValue(SideDockProperty);
@@ -28,11 +31,18 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
 
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(_ => {
-                var size = new GridLength(ReturnIf(SideDock, ActiveTabSize, NoActiveTabSize), GridUnitType.Pixel);
-                AssociatedObject.SetValue(GetSizeProperty(), size);
+                try {
+                    if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
+                    if (PreviousActiveTab != null && SideDock.ActiveTab != null) return;
 
-                var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
-                AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
+                    var size = new GridLength(ReturnIf(SideDock, ActiveTabSize, NoActiveTabSize), GridUnitType.Pixel);
+                    AssociatedObject.SetValue(GetSizeProperty(), size);
+
+                    var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
+                    AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
+                } finally {
+                    PreviousActiveTab = SideDock.ActiveTab;
+                }
             });
     }
     
