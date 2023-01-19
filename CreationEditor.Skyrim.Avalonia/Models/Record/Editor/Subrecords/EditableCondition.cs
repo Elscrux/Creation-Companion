@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.Skyrim.Avalonia.Models.Records.Editor.Subrecords; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecords; 
 
 public sealed class EditableCondition : Condition, INotifyPropertyChanged {
     public override ConditionData Data { get; set; }
