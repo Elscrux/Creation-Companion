@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Startup;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Background;
 using CreationEditor.Services.Mutagen.References;
@@ -37,8 +38,8 @@ public sealed class MainModule : Module {
             .As<IBusyService>()
             .SingleInstance();
 
-        builder.RegisterType<RecordBrowserSettings>()
-            .As<IRecordBrowserSettings>();
+        builder.RegisterType<RecordBrowserSettingsVM>()
+            .As<IRecordBrowserSettingsVM>();
 
         builder.RegisterType<RecordListVMReadOnly>()
             .AsSelf();
