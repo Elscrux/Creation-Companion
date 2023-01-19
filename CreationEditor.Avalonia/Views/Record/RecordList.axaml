@@ -40,25 +40,6 @@
                               Command="{ReflectionBinding DeleteSelectedRecord}"/>
                 </MenuFlyout>
             </DataGrid.ContextFlyout>
-            <DataGrid.Columns>
-                <DataGridTextColumn x:DataType="record:IReferencedRecord"
-                                    Header="EditorID"
-                                    Binding="{Binding Record.EditorID, Mode=OneWay}"
-                                    Width="200"
-                                    CanUserSort="True"
-                                    CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"/>
-                <DataGridTextColumn x:DataType="record:IReferencedRecord"
-                                    Header="FormKey"
-                                    Binding="{Binding Record.FormKey, Mode=OneWay}"
-                                    Width="100"
-                                    CanUserSort="True"
-                                    CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"/>
-                <DataGridTextColumn x:DataType="record:IReferencedRecord"
-                                    Header="Use Info"
-                                    Binding="{Binding References.Count, Mode=OneWay}"
-                                    Width="90"
-                                    CanUserSort="True"/>
-            </DataGrid.Columns>
         </DataGrid>
         
 
