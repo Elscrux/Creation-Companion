@@ -16,4 +16,5 @@ public interface IEditorEnvironment {
     
     public IObservable<ModKey> ActiveModChanged { get; }
     public IObservable<List<ModKey>> LoadOrderChanged { get; }
+    public IObservable<ILinkCache> LinkCacheChanged { get; }
 }
