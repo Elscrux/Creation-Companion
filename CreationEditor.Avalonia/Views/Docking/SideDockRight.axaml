@@ -28,9 +28,8 @@
         
         <LayoutTransformControl Grid.Column="1"
                                 VerticalAlignment="Stretch">
-            <!-- todo https://github.com/AvaloniaUI/Avalonia/issues/9748 -->
             <LayoutTransformControl.LayoutTransform>
-                <RotateTransform Angle="89.9"/>
+                <RotateTransform Angle="90"/>
             </LayoutTransformControl.LayoutTransform>
 
             <Border Classes="TabBar">
