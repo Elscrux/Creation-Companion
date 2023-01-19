@@ -1,4 +1,7 @@
-﻿using System.Reactive.Linq;
+﻿using System.Collections;
+using System.Reactive;
+using System.Reactive.Linq;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Extension;
@@ -15,7 +18,10 @@ public abstract class ARecordListVM : ViewModel, IRecordListVM {
     protected readonly IRecordController RecordController;
 
     public abstract Type Type { get; }
-    public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    
+    public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
+    [Reactive] public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; protected init; }
 
     public IEnumerable<IReferencedRecord> Records { get; }
     protected readonly SourceCache<IReferencedRecord, FormKey> RecordCache = new(x => x.Record.FormKey);

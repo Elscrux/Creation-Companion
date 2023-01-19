@@ -1,4 +1,5 @@
 using System.Reactive;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Record.Browser;
@@ -11,6 +12,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordListVM
@@ -19,7 +21,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
 
     public override Type Type { get; }
 
-    public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
+    [Reactive] public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
@@ -50,6 +52,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
         
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
+            
             var duplicate = RecordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             
             var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(duplicate);
@@ -92,6 +95,13 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
-            .DisposeWith(this);;
+            .DisposeWith(this);
+        
+        ContextMenuItems.Add(new MenuItem { Header = "New", Command = NewRecord });
+        ContextMenuItems.Add(new MenuItem { Header = "Edit", Command = EditSelectedRecord });
+        ContextMenuItems.Add(new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord });
+        ContextMenuItems.Add(new MenuItem { Header = "Delete", Command = DeleteSelectedRecord });
+
+        DoubleTapCommand = EditSelectedRecord;
     }
 }

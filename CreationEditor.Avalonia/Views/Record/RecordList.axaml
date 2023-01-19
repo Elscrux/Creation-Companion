@@ -3,8 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:comparer="clr-namespace:CreationEditor.Avalonia.Comparer"
-             xmlns:record="clr-namespace:CreationEditor.Avalonia.Models.Record"
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              mc:Ignorable="d"
@@ -20,7 +18,7 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
-                  attached:DoubleTappedProperty.Command="{ReflectionBinding EditSelectedRecord}"
+                  attached:DoubleTappedProperty.Command="{Binding DoubleTapCommand}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
                 <KeyBinding Gesture="Delete"
@@ -29,16 +27,7 @@
                             Command="{ReflectionBinding DuplicateSelectedRecord}"/>
             </DataGrid.KeyBindings>
             <DataGrid.ContextFlyout>
-                <MenuFlyout>
-                    <MenuItem Header="New"
-                              Command="{ReflectionBinding NewRecord}"/>
-                    <MenuItem Header="Edit"
-                              Command="{ReflectionBinding EditSelectedRecord}"/>
-                    <MenuItem Header="Duplicate"
-                              Command="{ReflectionBinding DuplicateSelectedRecord}"/>
-                    <MenuItem Header="Delete"
-                              Command="{ReflectionBinding DeleteSelectedRecord}"/>
-                </MenuFlyout>
+                <MenuFlyout Items="{Binding ContextMenuItems}"/>
             </DataGrid.ContextFlyout>
         </DataGrid>
         
