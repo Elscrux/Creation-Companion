@@ -20,7 +20,6 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
 
-    [Reactive] public new ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }

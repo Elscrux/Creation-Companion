@@ -14,7 +14,7 @@
         <DataGrid x:Name="RecordGrid"
                   Background="{DynamicResource SystemControlTransparentBrush}"
                   Items="{Binding Records}"
-                  SelectedItem="{Binding SelectedRecord}"
+                  SelectedItem="{ReflectionBinding SelectedRecord}"
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"

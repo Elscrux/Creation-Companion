@@ -30,7 +30,7 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
 
     [Reactive] public bool IsBusy { get; set; }
     
-    [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
+    [Reactive] public TReferenced? SelectedRecord { get; set; }
 
     public ReactiveCommand<Unit, Unit> OpenUseInfo { get; }
 

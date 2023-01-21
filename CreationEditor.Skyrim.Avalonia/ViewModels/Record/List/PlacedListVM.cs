@@ -30,8 +30,6 @@ public sealed class PlacedListVM : ARecordListVM<ReferencedRecord<IPlaced, IPlac
     [Reactive] public ICellGetter? Cell { get; set; }
     [Reactive] public bool Filled { get; set; }
 
-    [Reactive] public new ReferencedRecord<IPlaced, IPlacedGetter>? SelectedRecord { get; set; }
-    
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
