@@ -9,7 +9,7 @@ namespace CreationEditor.Avalonia.Behavior;
 public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
     public static readonly StyledProperty<SideDockVM?> SideDockProperty = AvaloniaProperty.Register<Control, SideDockVM?>(nameof(SideDock));
 
-    public double ActiveTabSize { get; set; } = 150;
+    public double ActiveTabSize { get; set; } = 300;
     public double ActiveTabMinSize { get; set; } = 50;
     public double NoActiveTabSize { get; set; } = 20;
     
