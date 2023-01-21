@@ -20,7 +20,8 @@
         <Grid RowDefinitions="Auto,*">
             <record:RecordBrowserSettings
                 Grid.Row="0"
-                DataContext="{Binding RecordBrowserSettingsVM}"/>
+                DataContext="{Binding RecordBrowserSettingsVM}"
+                Margin="5"/>
             
             <TreeView Grid.Row="1"
                       Items="{Binding RecordTypeGroups}">

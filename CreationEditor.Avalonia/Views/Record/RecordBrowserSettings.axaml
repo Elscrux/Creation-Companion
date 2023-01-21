@@ -13,8 +13,7 @@
         <browser:RecordBrowserSettingsVM/>
     </Design.DataContext>
     
-    <Grid RowDefinitions="Auto,Auto"
-          Margin="5">
+    <Grid RowDefinitions="Auto,Auto">
         <Grid Row="0" ColumnDefinitions="Auto,*">
             <Button Grid.Column="0"
                     MinWidth="32" MinHeight="32"
