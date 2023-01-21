@@ -31,14 +31,17 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
     private void SideDockChanged() {
         if (SideDock == null || AssociatedObject == null) return;
 
+        AssociatedObject.GetObservable(GetSizeProperty())
+            .Subscribe(size => {
+                if (UpdateSize && PreviousActiveTab != null && SideDock.ActiveTab != null) {
+                    PreviousActiveTab.Size = size.Value;
+                }
+            });
+        
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(x => {
                 var (editMode, activeTab, tabCount) = x;
                 try {
-                    if (UpdateSize && PreviousActiveTab != null && PreviousActiveTab != activeTab) {
-                        PreviousActiveTab.Size = AssociatedObject.GetValue(GetSizeProperty()).Value;
-                    }
-                    
                     if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
 
                     var activeTabSize = UpdateSize && activeTab?.Size != null ? activeTab.Size.Value : ActiveTabSize;

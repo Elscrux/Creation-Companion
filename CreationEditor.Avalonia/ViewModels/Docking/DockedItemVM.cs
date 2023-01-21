@@ -36,6 +36,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
         Control = control;
         Header = info.Header;
         IconSource = info.IconSource;
+        Size = info.Size;
         CanClose = info.CanClose;
 
         RemovalLock = new DisposableCounterLock(CheckRemoved);

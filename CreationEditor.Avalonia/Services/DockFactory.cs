@@ -40,6 +40,7 @@ public sealed class DockFactory : IDockFactory {
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Log",
+                        Size = 150,
                     },
                     Dock = Dock.Bottom,
                     DockMode = DockMode.Side,
