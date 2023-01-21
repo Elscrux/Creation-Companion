@@ -8,5 +8,5 @@ public sealed record DockConfig {
 
     public DockMode? DockMode { get; init; }
     public Dock Dock { get; init; } = Dock.Left;
-    public GridLength Size { get; init; } = new(1, GridUnitType.Star);
+    public GridLength GridSize { get; init; } = new(1, GridUnitType.Star);
 }

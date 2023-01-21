@@ -27,8 +27,8 @@ public sealed class DockGrid : Grid {
     public void Add(Control control, DockConfig config) {
         // If there is no content in the layout grid, add something and return
         if (Children.Count == 0) {
-            ColumnDefinitions[0].Width = config.Size;
-            RowDefinitions[0].Height = config.Size;
+            ColumnDefinitions[0].Width = config.GridSize;
+            RowDefinitions[0].Height = config.GridSize;
             Children.Add(control);
             return;
         }
@@ -36,7 +36,7 @@ public sealed class DockGrid : Grid {
         var rowSpan = RowDefinitions.Count;
         var columnSpan = ColumnDefinitions.Count;
         var gridSplitter = new GridSplitter { Background = Brushes.Transparent };
-        var gridLength = new GridLength(GridSplitterSize);
+        var gridSplitterSize = new GridLength(GridSplitterSize);
 
         switch (config.Dock) {
             case Dock.Top:
@@ -46,13 +46,13 @@ public sealed class DockGrid : Grid {
                 }
 
                 // Add grid splitter
-                RowDefinitions.Insert(0, new RowDefinition(gridLength));
+                RowDefinitions.Insert(0, new RowDefinition(gridSplitterSize));
                 Children.Add(gridSplitter);
                 SetRow(gridSplitter, 1);
                 SetColumnSpan(gridSplitter, columnSpan);
 
                 // Add new docking manager for control
-                RowDefinitions.Insert(0, new RowDefinition(GridLength.Star) { MinHeight = MinLayoutSize, Height = config.Size });
+                RowDefinitions.Insert(0, new RowDefinition(GridLength.Star) { MinHeight = MinLayoutSize, Height = config.GridSize });
                 Children.Add(control);
                 SetRow(control, 0);
                 SetColumnSpan(control, columnSpan);
@@ -60,13 +60,13 @@ public sealed class DockGrid : Grid {
                 break;
             case Dock.Bottom:
                 // Add grid splitter
-                RowDefinitions.Add(new RowDefinition(gridLength));
+                RowDefinitions.Add(new RowDefinition(gridSplitterSize));
                 Children.Add(gridSplitter);
                 SetRow(gridSplitter, RowDefinitions.Count - 1);
                 SetColumnSpan(gridSplitter, columnSpan);
 
                 // Add new docking manager for control
-                RowDefinitions.Add(new RowDefinition(GridLength.Star) { MinHeight = MinLayoutSize, Height = config.Size });
+                RowDefinitions.Add(new RowDefinition(GridLength.Star) { MinHeight = MinLayoutSize, Height = config.GridSize });
                 Children.Add(control);
                 SetRow(control, RowDefinitions.Count - 1);
                 SetColumnSpan(control, columnSpan);
@@ -79,13 +79,13 @@ public sealed class DockGrid : Grid {
                 }
 
                 // Add grid splitter
-                ColumnDefinitions.Insert(0, new ColumnDefinition(gridLength));
+                ColumnDefinitions.Insert(0, new ColumnDefinition(gridSplitterSize));
                 Children.Add(gridSplitter);
                 SetColumn(gridSplitter, 1);
                 SetRowSpan(gridSplitter, rowSpan);
 
                 // Add new docking manager for control
-                ColumnDefinitions.Insert(0, new ColumnDefinition(GridLength.Star) { MinWidth = MinLayoutSize, Width = config.Size });
+                ColumnDefinitions.Insert(0, new ColumnDefinition(GridLength.Star) { MinWidth = MinLayoutSize, Width = config.GridSize });
                 Children.Add(control);
                 SetColumn(control, 0);
                 SetRowSpan(control, rowSpan);
@@ -93,13 +93,13 @@ public sealed class DockGrid : Grid {
                 break;
             case Dock.Right:
                 // Add grid splitter
-                ColumnDefinitions.Add(new ColumnDefinition(gridLength));
+                ColumnDefinitions.Add(new ColumnDefinition(gridSplitterSize));
                 Children.Add(gridSplitter);
                 SetColumn(gridSplitter, ColumnDefinitions.Count - 1);
                 SetRowSpan(gridSplitter, rowSpan);
 
                 // Add new docking manager for control
-                ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star) { MinWidth = MinLayoutSize, Width = config.Size });
+                ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star) { MinWidth = MinLayoutSize, Width = config.GridSize });
                 Children.Add(control);
                 SetColumn(control, ColumnDefinitions.Count - 1);
                 SetRowSpan(control, rowSpan);

@@ -53,7 +53,7 @@ public sealed class RecordEditorController : IRecordEditorController {
                         },
                         Dock = Dock.Right,
                         DockMode = DockMode.Document,
-                        Size = new GridLength(2, GridUnitType.Star),
+                        GridSize = new GridLength(2, GridUnitType.Star),
                     });
                 _openRecordEditors.Add(record.FormKey, editorControl);
             } else {

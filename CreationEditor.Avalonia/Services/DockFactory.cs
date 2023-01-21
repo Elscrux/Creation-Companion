@@ -54,7 +54,7 @@ public sealed class DockFactory : IDockFactory {
                     },
                     Dock = Dock.Left,
                     DockMode = DockMode.Side,
-                    Size = new GridLength(3, GridUnitType.Star),
+                    GridSize = new GridLength(3, GridUnitType.Star),
                 };
                 break;
             case DockElement.CellBrowser:
@@ -80,7 +80,7 @@ public sealed class DockFactory : IDockFactory {
                     },
                     Dock = Dock.Right,
                     DockMode = DockMode.Layout,
-                    Size = new GridLength(3, GridUnitType.Star),
+                    GridSize = new GridLength(3, GridUnitType.Star),
                 };
                 break;
             default:
