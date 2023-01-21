@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
@@ -9,25 +10,100 @@ using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 
 public interface IViewportRuntimeService {
-    public void Load(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint);
-    public void Load(IEnumerable<IPlacedGetter> placedRecords, P3Float origin);
+    public void LoadInteriorCell(ICellGetter cell);
+    public void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell);
 }
 
 public class BSERuntimeService : IViewportRuntimeService {
+    private record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
+    
     private readonly IEditorEnvironment _editorEnvironment;
 
-    public Dictionary<FormKey, Interop.ReferenceLoad> Loaded { get; } = new();
+    private const double UnloadCellGridDistance = 10;
+
+    private FormKey _interiorCell = FormKey.Null;
+    private List<Interop.ReferenceLoad>? _interiorCellReferences;
+    
+    private WorldspaceRuntimeSettings? _worldspaceRuntimeSettings;
 
     public BSERuntimeService(
         IEditorEnvironment editorEnvironment) {
         _editorEnvironment = editorEnvironment;
     }
     
-    public void Load(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
-        Load(placedRecords, new P3Float(gridPoint.X, gridPoint.Y, 0));
+    public void LoadInteriorCell(ICellGetter cell) {
+        if (_interiorCell != cell.FormKey) UnloadEverything();
+        
+        _interiorCellReferences = Load(cell.Temporary.Concat(cell.Persistent), P2Int.Origin);
+        
+        _worldspaceRuntimeSettings = null;
     }
     
-    public void Load(IEnumerable<IPlacedGetter> placedRecords, P3Float origin) {
+    public void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell) {
+        var origin = cell.Grid?.Point ?? P2Int.Origin;
+        var originToLoad = origin;
+        
+        if (_worldspaceRuntimeSettings == null
+         || _worldspaceRuntimeSettings.Worldspace != worldspaceFormKey) {
+            // Worldspace not loaded - unload everything
+            UnloadEverything();
+
+            _worldspaceRuntimeSettings = new WorldspaceRuntimeSettings(worldspaceFormKey, origin, new Dictionary<P2Int, List<Interop.ReferenceLoad>>());
+        } else {
+            // Worldspace loaded
+            
+            // Return if our cell is already loaded
+            if (_worldspaceRuntimeSettings.LoadedCells.ContainsKey(origin)) return;
+
+            // Unload cells outside range
+            foreach (var (grid, references) in _worldspaceRuntimeSettings.LoadedCells) {
+                if (UnloadCellGridDistance < grid.Distance(origin)) continue;
+
+                Unload(references);
+                _worldspaceRuntimeSettings.LoadedCells.Remove(grid);
+            }
+
+            // Transform origin
+            originToLoad -= _worldspaceRuntimeSettings.Origin;
+        }
+
+        var loadedReferences = Load(cell.Temporary.Concat(cell.Persistent), originToLoad);
+        _worldspaceRuntimeSettings.LoadedCells.Add(origin, loadedReferences);
+
+        _interiorCell = FormKey.Null;
+    }
+
+    private void UnloadEverything() {
+        if (_worldspaceRuntimeSettings != null) {
+            var referenceLists = new List<List<Interop.ReferenceLoad>>();
+            
+            foreach (var (_, references) in _worldspaceRuntimeSettings.LoadedCells) {
+                referenceLists.Add(references);
+            }
+
+            if (referenceLists.Count > 0) {
+                var unloadReferences = referenceLists
+                    .SelectMany(x => x)
+                    .Select(x => x.FormKey)
+                    .ToArray();
+                
+                Interop.deleteReferences(Convert.ToUInt32(unloadReferences.Length), unloadReferences);
+            }
+
+            _worldspaceRuntimeSettings = null;
+        } else if (_interiorCellReferences != null) {
+            Unload(_interiorCellReferences);
+            
+            _interiorCellReferences = null;
+        }
+    }
+
+    private void Unload(List<Interop.ReferenceLoad> references) {
+        Interop.deleteReferences(Convert.ToUInt32(references.Count), references.Select(x => x.FormKey).ToArray());
+    }
+    
+    private List<Interop.ReferenceLoad> Load(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
+        var origin = new P3Float(gridPoint.X, gridPoint.Y, 0);
         var refs = new List<Interop.ReferenceLoad>();
         
         foreach (var placed in placedRecords) {
@@ -45,7 +121,7 @@ public class BSERuntimeService : IViewportRuntimeService {
                     break;
                 case IPlacedObjectGetter placedObject:
                     var placement = placedObject.Placement;
-                    if (placement == null) return;
+                    if (placement == null) continue;
         
                     var relativePosition = placement.Position - origin;
         
@@ -81,5 +157,7 @@ public class BSERuntimeService : IViewportRuntimeService {
         }
         
         Interop.loadReferences(Convert.ToUInt32(refs.Count), refs.ToArray());
+
+        return refs;
     }
 }

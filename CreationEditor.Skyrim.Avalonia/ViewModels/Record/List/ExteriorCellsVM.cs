@@ -26,6 +26,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public class ExteriorCellsVM : CellListVM {
+    private readonly IViewportRuntimeService _viewportRuntimeService;
     [Reactive] public FormKey WorldspaceFormKey { get; set; }
 
     [Reactive] public int GridXValue { get; set; }
@@ -47,8 +48,9 @@ public class ExteriorCellsVM : CellListVM {
         IDockFactory dockFactory,
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, viewportRuntimeService, recordEditorController) {
-        
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, recordEditorController) {
+        _viewportRuntimeService = viewportRuntimeService;
+
         CustomFilter = record => ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty();
         
         ExteriorList = new RecordList(extraColumnProvider.GetColumns(typeof(ICellGetter))) { DataContext = this };
@@ -97,4 +99,7 @@ public class ExteriorCellsVM : CellListVM {
         ToggleWildernessCells = ReactiveCommand.Create(RecordBrowserSettingsVM.RequestUpdate);
     }
 
+    protected override void LoadCell(ICellGetter cell) {
+        _viewportRuntimeService.LoadExteriorCell(WorldspaceFormKey, cell);
+    }
 }

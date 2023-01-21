@@ -19,6 +19,7 @@ using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public class InteriorCellsVM : CellListVM {
+    private readonly IViewportRuntimeService _viewportRuntimeService;
     public RecordList InteriorList { get; }
     
     public InteriorCellsVM(
@@ -30,7 +31,8 @@ public class InteriorCellsVM : CellListVM {
         IDockFactory dockFactory,
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, viewportRuntimeService, recordEditorController) {
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, recordEditorController) {
+        _viewportRuntimeService = viewportRuntimeService;
         
         InteriorList = new RecordList(extraColumnProvider.GetColumns(typeof(ICellGetter))) { DataContext = this };
 
@@ -52,5 +54,9 @@ public class InteriorCellsVM : CellListVM {
                 Dispatcher.UIThread.Post(() => IsBusy = false);
             })
             .DisposeWith(this);
+    }
+
+    protected override void LoadCell(ICellGetter cell) {
+        _viewportRuntimeService.LoadInteriorCell(cell);
     }
 }

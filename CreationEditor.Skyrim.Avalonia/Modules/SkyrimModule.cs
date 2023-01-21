@@ -35,7 +35,9 @@ public sealed class SkyrimModule : Module {
         
         builder.RegisterInstance(environmentProvider).As<IEnvironmentContext>();
         
-        builder.RegisterType<BSERuntimeService>().As<IViewportRuntimeService>();
+        builder.RegisterType<BSERuntimeService>()
+            .As<IViewportRuntimeService>()
+            .SingleInstance();
 
         builder.RegisterType<SkyrimModInfoProvider>()
             .As<IModInfoProvider<IModGetter>>()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive;
 using System.Threading;
 using Avalonia.Controls;
@@ -12,15 +11,13 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List; 
 
-public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
+public abstract class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
     public ReactiveCommand<Unit, Unit> ViewSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> NewCell { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedCell { get; }
@@ -33,7 +30,6 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
         IReferenceQuery referenceQuery,
         IRecordController recordController,
         IDockFactory dockFactory,
-        IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
         : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         
@@ -43,8 +39,8 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
             dockFactory.Open(DockElement.Viewport);
 
             Thread.Sleep(250);
-            
-            viewportRuntimeService.Load(SelectedRecord.Record.Temporary.Concat(SelectedRecord.Record.Persistent), SelectedRecord.Record.Grid?.Point ?? new P2Int(0, 0));
+
+            LoadCell(SelectedRecord.Record);
         });
         
         NewCell = ReactiveCommand.Create(() => {
@@ -99,4 +95,6 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
 
         DoubleTapCommand = ViewSelectedCell;
     }
+
+    protected abstract void LoadCell(ICellGetter cell);
 }
