@@ -42,13 +42,18 @@
             <Button Content="Search"
                     Command="{Binding SelectGridCell}"/>
         </StackPanel>
-    
+
+        <CheckBox Grid.Row="4"
+                  Content="Show Wilderness Cells"
+                  IsChecked="{Binding ShowWildernessCells}"
+                  Command="{Binding ToggleWildernessCells}"/>
+
         <record:RecordBrowserSettings
-            Grid.Row="4"
+            Grid.Row="6"
             DataContext="{ReflectionBinding RecordBrowserSettingsVM}"/>
         
         <ContentControl
-            Grid.Row="6"
+            Grid.Row="8"
             Content="{Binding ExteriorList}"/>
     </Grid>
 </UserControl>

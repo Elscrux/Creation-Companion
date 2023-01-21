@@ -31,9 +31,12 @@ public class ExteriorCellsVM : CellListVM {
     [Reactive] public int GridXValue { get; set; }
     [Reactive] public int GridYValue { get; set; }
 
+    [Reactive] public bool ShowWildernessCells { get; set; } = true;
+
     public RecordList ExteriorList { get; }
 
     public ReactiveCommand<Unit, Unit> SelectGridCell { get; }
+    public ReactiveCommand<Unit, Unit> ToggleWildernessCells { get; }
 
     public ExteriorCellsVM(
         IExtraColumnProvider extraColumnProvider,
@@ -45,6 +48,8 @@ public class ExteriorCellsVM : CellListVM {
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
         : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, viewportRuntimeService, recordEditorController) {
+        
+        CustomFilter = record => ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty();
         
         ExteriorList = new RecordList(extraColumnProvider.GetColumns(typeof(ICellGetter))) { DataContext = this };
 
@@ -88,6 +93,8 @@ public class ExteriorCellsVM : CellListVM {
                 }
             }
         });
+
+        ToggleWildernessCells = ReactiveCommand.Create(RecordBrowserSettingsVM.RequestUpdate);
     }
 
 }

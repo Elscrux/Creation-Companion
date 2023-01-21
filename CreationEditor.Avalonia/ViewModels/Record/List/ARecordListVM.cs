@@ -34,6 +34,8 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
 
     public ReactiveCommand<Unit, Unit> OpenUseInfo { get; }
 
+    protected Func<TReferenced, bool>? CustomFilter;
+
     protected ARecordListVM(
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
@@ -58,7 +60,7 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
             .Connect()
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Filter(RecordBrowserSettingsVM.SettingsChanged
-                .Select(_ => new Func<TReferenced, bool>(record => RecordBrowserSettingsVM.Filter(record.Record))))
+                .Select(_ => new Func<TReferenced, bool>(record => RecordBrowserSettingsVM.Filter(record.Record) && (CustomFilter == null || CustomFilter(record)))))
             .DoOnGuiAndSwitchBack(_ => IsBusy = false)
             .ToObservableCollection(this);
         

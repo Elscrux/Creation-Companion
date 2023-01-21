@@ -56,12 +56,12 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
                     .Select(mod => mod.ModKey)
                     .ToList();
                 
-                _settingsChanged.OnNext(Unit.Default);
+                RequestUpdate();
             });
         
         this.WhenAnyValue(x => x.SearchTerm)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .Subscribe(_ => _settingsChanged.OnNext(Unit.Default));
+            .Subscribe(RequestUpdate);
     }
     
     private void UpdateScope() {
@@ -76,6 +76,8 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
             Mods.Add(modItem);
         }
     }
+
+    public void RequestUpdate() => _settingsChanged.OnNext(Unit.Default);
 
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;
