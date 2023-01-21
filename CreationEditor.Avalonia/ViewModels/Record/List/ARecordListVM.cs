@@ -10,7 +10,6 @@ using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
-using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

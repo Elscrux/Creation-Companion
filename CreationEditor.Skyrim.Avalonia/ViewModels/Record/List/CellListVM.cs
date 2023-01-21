@@ -27,7 +27,7 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
     public ReactiveCommand<Unit, Unit> DuplicateSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedCell { get; }
 
-    [Reactive] public ReferencedRecord<Cell, ICellGetter>? SelectedRecord { get; set; }
+    [Reactive] public new ReferencedRecord<Cell, ICellGetter>? SelectedRecord { get; set; }
 
     public CellListVM(
         IRecordListFactory recordListFactory,
