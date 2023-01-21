@@ -3,11 +3,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Record;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
+using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,7 +21,6 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
     protected readonly IReferenceQuery ReferenceQuery;
     protected readonly IRecordController RecordController;
 
-    public abstract Type Type { get; }
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
@@ -28,14 +30,30 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
     protected readonly SourceCache<TReferenced, FormKey> RecordCache = new(x => x.Record.FormKey);
 
     [Reactive] public bool IsBusy { get; set; }
+    
+    [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
+
+    public ReactiveCommand<Unit, Unit> OpenUseInfo { get; }
 
     protected ARecordListVM(
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
         IRecordController recordController) {
         ReferenceQuery = referenceQuery;
         RecordController = recordController;
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
+
+        OpenUseInfo = ReactiveCommand.Create(() => {
+                if (SelectedRecord == null) return;
+
+                var referenceWindow = new ReferenceWindow(SelectedRecord.Record) {
+                    Content = recordListFactory.FromIdentifiers(SelectedRecord.References)
+                };
+
+                referenceWindow.Show();
+            },
+            this.WhenAnyValue(x => x.SelectedRecord).Select(selected => selected is { References.Count: > 0 }));
 
         Records = RecordCache
             .Connect()
@@ -44,5 +62,7 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
                 .Select(_ => new Func<TReferenced, bool>(record => RecordBrowserSettingsVM.Filter(record.Record))))
             .DoOnGuiAndSwitchBack(_ => IsBusy = false)
             .ToObservableCollection(this);
+        
+        ContextMenuItems.Add(new MenuItem { Header = "Open Use Info", Command = OpenUseInfo });
     }
 }

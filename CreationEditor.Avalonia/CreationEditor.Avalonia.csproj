@@ -50,6 +50,15 @@
       <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
         <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
       </Compile>
+      <Compile Update="ViewModels\Record\List\RecordIdentifiersListVM.cs">
+        <DependentUpon>ARecordListVM.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ViewModels\Record\List\RecordListVM.cs">
+        <DependentUpon>ARecordListVM.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ViewModels\Record\List\RecordTypeListVM.cs">
+        <DependentUpon>ARecordListVM.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

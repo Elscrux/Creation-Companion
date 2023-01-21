@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -9,15 +10,16 @@ using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public sealed class RecordListVMReadOnly : ARecordListVM<IReferencedRecordIdentifier> {
-    public override Type Type { get; }
+public sealed class RecordTypeListVM : ARecordListVM<IReferencedRecordIdentifier> {
+    public Type Type { get; }
 
-    public RecordListVMReadOnly(
+    public RecordTypeListVM(
         Type type,
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
-        : base(recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         Type = type;
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)

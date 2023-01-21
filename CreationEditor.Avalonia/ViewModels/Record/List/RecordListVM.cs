@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -19,9 +20,7 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
 
-    public override Type Type { get; }
-
-    [Reactive] public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
+    [Reactive] public new ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
@@ -29,12 +28,11 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
 
     public RecordListVM(
         IReferenceQuery referenceQuery,
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordBrowserSettingsVM, referenceQuery, recordController) {
-        Type = typeof(TMajorRecordGetter);
-        
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = RecordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
@@ -97,10 +95,10 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
             })
             .DisposeWith(this);
         
-        ContextMenuItems.Add(new MenuItem { Header = "New", Command = NewRecord });
-        ContextMenuItems.Add(new MenuItem { Header = "Edit", Command = EditSelectedRecord });
-        ContextMenuItems.Add(new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord });
-        ContextMenuItems.Add(new MenuItem { Header = "Delete", Command = DeleteSelectedRecord });
+        ContextMenuItems.Insert(0, new MenuItem { Header = "New", Command = NewRecord });
+        ContextMenuItems.Insert(1, new MenuItem { Header = "Edit", Command = EditSelectedRecord });
+        ContextMenuItems.Insert(2, new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord });
+        ContextMenuItems.Insert(3, new MenuItem { Header = "Delete", Command = DeleteSelectedRecord });
 
         DoubleTapCommand = EditSelectedRecord;
     }

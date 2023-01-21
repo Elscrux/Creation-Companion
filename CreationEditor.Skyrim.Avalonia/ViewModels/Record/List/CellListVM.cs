@@ -7,6 +7,7 @@ using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.Record;
@@ -20,8 +21,6 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List; 
 
 public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
-    public override Type Type => typeof(ICellGetter);
-    
     public ReactiveCommand<Unit, Unit> ViewSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> NewCell { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedCell { get; }
@@ -31,13 +30,14 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
     [Reactive] public ReferencedRecord<Cell, ICellGetter>? SelectedRecord { get; set; }
 
     public CellListVM(
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery,
         IRecordController recordController,
         IDockFactory dockFactory,
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
-        : base(recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         
         ViewSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
@@ -93,11 +93,11 @@ public class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGetter>> {
             })
             .DisposeWith(this);
 
-        ContextMenuItems.Add(new MenuItem { Header = "View", Command = ViewSelectedCell });
-        ContextMenuItems.Add(new MenuItem { Header = "New", Command = NewCell });
-        ContextMenuItems.Add(new MenuItem { Header = "Edit", Command = EditSelectedCell });
-        ContextMenuItems.Add(new MenuItem { Header = "Duplicate", Command = DuplicateSelectedCell });
-        ContextMenuItems.Add(new MenuItem { Header = "Delete", Command = DeleteSelectedCell });
+        ContextMenuItems.Insert(0,new MenuItem { Header = "View", Command = ViewSelectedCell });
+        ContextMenuItems.Insert(1,new MenuItem { Header = "New", Command = NewCell });
+        ContextMenuItems.Insert(2,new MenuItem { Header = "Edit", Command = EditSelectedCell });
+        ContextMenuItems.Insert(3,new MenuItem { Header = "Duplicate", Command = DuplicateSelectedCell });
+        ContextMenuItems.Insert(4,new MenuItem { Header = "Delete", Command = DeleteSelectedCell });
 
         DoubleTapCommand = ViewSelectedCell;
     }

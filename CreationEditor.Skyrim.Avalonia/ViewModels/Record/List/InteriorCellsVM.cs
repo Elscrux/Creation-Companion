@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.Views.Record;
@@ -22,13 +23,14 @@ public class InteriorCellsVM : CellListVM {
     
     public InteriorCellsVM(
         IExtraColumnProvider extraColumnProvider,
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery,
         IRecordController recordController,
         IDockFactory dockFactory,
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
-        : base(recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, viewportRuntimeService, recordEditorController) {
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, viewportRuntimeService, recordEditorController) {
         
         InteriorList = new RecordList(extraColumnProvider.GetColumns(typeof(ICellGetter))) { DataContext = this };
 

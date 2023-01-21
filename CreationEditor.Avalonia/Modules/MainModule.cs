@@ -42,7 +42,10 @@ public sealed class MainModule : Module {
         builder.RegisterType<RecordBrowserSettingsVM>()
             .As<IRecordBrowserSettingsVM>();
 
-        builder.RegisterType<RecordListVMReadOnly>()
+        builder.RegisterType<RecordTypeListVM>()
+            .AsSelf();
+
+        builder.RegisterType<RecordIdentifiersListVM>()
             .AsSelf();
 
         builder.RegisterType<RecordEditorController>()

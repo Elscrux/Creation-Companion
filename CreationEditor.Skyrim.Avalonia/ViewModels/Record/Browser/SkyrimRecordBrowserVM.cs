@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Reactive;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
@@ -17,6 +18,7 @@ public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
 
+    private Type? _recordListType;
     [Reactive] public RecordList? RecordList { get; set; }
     
 
@@ -28,10 +30,11 @@ public sealed class SkyrimRecordBrowserVM : ViewModel, IRecordBrowserVM {
 
         SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;
-            if (RecordList?.ViewModel?.Type == recordType) return;
+            if (_recordListType == recordType) return;
 
             RecordList?.ViewModel?.Dispose();
             RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettingsVM);
+            _recordListType = recordType;
         });
         
         RecordTypeGroups = new ObservableCollection<RecordTypeGroup> {

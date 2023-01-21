@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.Views.Record;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
@@ -22,7 +25,17 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
         _defaultRecordBrowserSettingsVM = defaultRecordBrowserSettingsVM;
         _extraColumnProvider = extraColumnProvider;
     }
-    
+
+    public RecordList FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettingsVM? browserSettings = null) {
+        browserSettings ??= _defaultRecordBrowserSettingsVM;
+        var browserSettingsParam = TypedParameter.From(browserSettings);
+        var identifiersParam = TypedParameter.From(identifiers);
+
+        return new RecordList(_extraColumnProvider.GetColumns(typeof(IMajorRecordGetter))) {
+            DataContext = _lifetimeScope.Resolve<RecordIdentifiersListVM>(identifiersParam, browserSettingsParam)
+        };
+    }
+
     public RecordList FromType(Type type, IRecordBrowserSettingsVM? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettingsVM;
         var browserSettingsParam = TypedParameter.From(browserSettings);
@@ -131,7 +144,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IStaticGetter) => _lifetimeScope.Resolve<RecordListVM<Static, IStaticGetter>>(browserSettingsParam),
             nameof(ITreeGetter) => _lifetimeScope.Resolve<RecordListVM<Tree, ITreeGetter>>(browserSettingsParam),
             
-            _ => _lifetimeScope.Resolve<RecordListVMReadOnly>(TypedParameter.From(type), browserSettingsParam)
+            _ => _lifetimeScope.Resolve<RecordTypeListVM>(TypedParameter.From(type), browserSettingsParam)
         };
         
         return recordList;

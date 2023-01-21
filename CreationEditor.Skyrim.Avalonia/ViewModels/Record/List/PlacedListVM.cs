@@ -4,6 +4,7 @@ using System.Reactive;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
@@ -29,7 +30,7 @@ public sealed class PlacedListVM : ARecordListVM<ReferencedRecord<IPlaced, IPlac
     [Reactive] public ICellGetter? Cell { get; set; }
     [Reactive] public bool Filled { get; set; }
 
-    [Reactive] public ReferencedRecord<IPlaced, IPlacedGetter>? SelectedRecord { get; set; }
+    [Reactive] public new ReferencedRecord<IPlaced, IPlacedGetter>? SelectedRecord { get; set; }
     
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
@@ -38,15 +39,14 @@ public sealed class PlacedListVM : ARecordListVM<ReferencedRecord<IPlaced, IPlac
     
     public RecordList? PlacedList { get; }
 
-    public override Type Type => typeof(IPlacedGetter);
-
     public PlacedListVM(
         IExtraColumnProvider extraColumnProvider,
         IReferenceQuery referenceQuery,
+        IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         
         PlacedList = new RecordList(extraColumnProvider.GetColumns(typeof(IPlacedGetter))) { DataContext = this };
 
