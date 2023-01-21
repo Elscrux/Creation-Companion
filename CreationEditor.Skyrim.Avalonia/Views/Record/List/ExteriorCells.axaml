@@ -32,15 +32,15 @@
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridXValue}"
                            ShowButtonSpinner="False"
-                           Increment="1"/>
-    
-            <Grid Width="10"/>
+                           Increment="1"
+                           Margin="0,0,10,0"/>
     
             <TextBlock Text="Y" FontSize="16"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridYValue}"
                            ShowButtonSpinner="False"
-                           Increment="1"/>
+                           Increment="1"
+                           Margin="0,0,5,0"/>
     
             <Button Content="Search"
                     Command="{Binding SelectGridCell}"/>
