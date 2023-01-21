@@ -33,7 +33,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
 
         AssociatedObject.GetObservable(GetSizeProperty())
             .Subscribe(size => {
-                if (UpdateSize && SideDock.ActiveTab != null) {
+                if (UpdateSize && SideDock.ActiveTab != null && size.GridUnitType == GridUnitType.Pixel) {
                     SideDock.ActiveTab.Size = size.Value;
                 }
             });
