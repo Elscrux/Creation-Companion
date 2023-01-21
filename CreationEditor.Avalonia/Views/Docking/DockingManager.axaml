@@ -17,7 +17,8 @@
         <Grid.RowDefinitions>
             <RowDefinition>
                 <Interaction.Behaviors>
-                    <behavior:SideDockDefinitionSize SideDock="{Binding TopSide}"/>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding TopSide}"
+                                                     UpdateSize="True"/>
                 </Interaction.Behaviors>
             </RowDefinition>
             <RowDefinition>
@@ -40,7 +41,8 @@
             </RowDefinition>
             <RowDefinition>
                 <Interaction.Behaviors>
-                    <behavior:SideDockDefinitionSize SideDock="{Binding BottomSide}"/>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding BottomSide}"
+                                                     UpdateSize="True"/>
                 </Interaction.Behaviors>
             </RowDefinition>
         </Grid.RowDefinitions>
@@ -48,7 +50,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition>
                 <Interaction.Behaviors>
-                    <behavior:SideDockDefinitionSize SideDock="{Binding LeftSide}"/>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding LeftSide}"
+                                                     UpdateSize="True"/>
                 </Interaction.Behaviors>
             </ColumnDefinition>
             <ColumnDefinition>
@@ -71,7 +74,8 @@
             </ColumnDefinition>
             <ColumnDefinition>
                 <Interaction.Behaviors>
-                    <behavior:SideDockDefinitionSize SideDock="{Binding RightSide}"/>
+                    <behavior:SideDockDefinitionSize SideDock="{Binding RightSide}"
+                                                     UpdateSize="True"/>
                 </Interaction.Behaviors>
             </ColumnDefinition>
         </Grid.ColumnDefinitions>

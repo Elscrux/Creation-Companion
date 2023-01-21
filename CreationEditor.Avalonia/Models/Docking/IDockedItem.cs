@@ -18,6 +18,8 @@ public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
     [Reactive] public string? Header { get; set; }
     [Reactive] public IconSource? IconSource { get; set; }
     
+    public double? Size { get; set; }
+    
     [Reactive] public bool CanClose { get; set; }
     public ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
 

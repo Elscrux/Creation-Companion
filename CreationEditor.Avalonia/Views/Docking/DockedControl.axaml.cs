@@ -37,7 +37,12 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         get => DockedItem.IconSource;
         set => DockedItem.IconSource = value;
     }
-    
+
+    public double? Size {
+        get => DockedItem.Size;
+        set => DockedItem.Size = value;
+    }
+
     public bool CanClose {
         get => DockedItem.CanClose;
         set => DockedItem.CanClose = value;

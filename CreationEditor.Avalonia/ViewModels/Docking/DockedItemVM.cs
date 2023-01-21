@@ -18,7 +18,8 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
 
     [Reactive] public string? Header { get; set; }
     [Reactive] public IconSource? IconSource { get; set; }
-    
+    public double? Size { get; set; }
+
     [Reactive] public bool IsSelected { get; set; }
 
     [Reactive] public bool CanClose { get; set; }

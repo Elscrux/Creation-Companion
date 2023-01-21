@@ -20,6 +20,8 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
         set => SetValue(SideDockProperty, value);
     }
     
+    public bool UpdateSize { get; set; }
+    
     protected override void OnAttached() {
         this.WhenAnyValue(x => x.SideDock,
                 x => x.AssociatedObject)
@@ -30,12 +32,17 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
         if (SideDock == null || AssociatedObject == null) return;
 
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
-            .Subscribe(_ => {
+            .Subscribe(x => {
+                var (editMode, activeTab, tabCount) = x;
                 try {
+                    if (UpdateSize && PreviousActiveTab != null && PreviousActiveTab != activeTab) {
+                        PreviousActiveTab.Size = AssociatedObject.GetValue(GetSizeProperty()).Value;
+                    }
+                    
                     if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
-                    if (PreviousActiveTab != null && SideDock.ActiveTab != null) return;
 
-                    var size = new GridLength(ReturnIf(SideDock, ActiveTabSize, NoActiveTabSize), GridUnitType.Pixel);
+                    var activeTabSize = UpdateSize && activeTab?.Size != null ? activeTab.Size.Value : ActiveTabSize;
+                    var size = new GridLength(ReturnIf(SideDock, activeTabSize, NoActiveTabSize), GridUnitType.Pixel);
                     AssociatedObject.SetValue(GetSizeProperty(), size);
 
                     var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
