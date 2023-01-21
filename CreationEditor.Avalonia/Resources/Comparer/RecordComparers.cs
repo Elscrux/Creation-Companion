@@ -4,7 +4,22 @@ namespace CreationEditor.Avalonia.Comparer;
 
 public static class RecordComparers {
     public static readonly FuncComparer<IReferencedRecord> EditorIDComparer
-        = new((x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Record.EditorID, y.Record.EditorID));
+        = new((x, y) => {
+            var xEditorID = x.Record.EditorID;
+            var yEditorID = y.Record.EditorID;
+
+            var xIsNullOrEmpty = string.IsNullOrEmpty(xEditorID);
+            var yIsNullOrEmpty = string.IsNullOrEmpty(yEditorID);
+            if (xIsNullOrEmpty) {
+                if (yIsNullOrEmpty) return 0;
+                
+                return 1;
+            }
+            if (yIsNullOrEmpty) return -1;
+
+            return StringComparer.OrdinalIgnoreCase.Compare(xEditorID, yEditorID);
+        });
+    
     public static readonly FuncComparer<IReferencedRecord> FormKeyComparer
         = new((x, y) => {
             var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ModKey.Name, y.Record.FormKey.ModKey.Name);
