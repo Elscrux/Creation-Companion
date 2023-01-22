@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -38,13 +39,14 @@ public sealed class PlacedListVM : ARecordListVM<ReferencedRecord<IPlaced, IPlac
     public RecordList? PlacedList { get; }
 
     public PlacedListVM(
+        MainWindow mainWindow,
         IExtraColumnProvider extraColumnProvider,
         IReferenceQuery referenceQuery,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         
         PlacedList = new RecordList(extraColumnProvider.GetColumns(typeof(IPlacedGetter))) { DataContext = this };
 

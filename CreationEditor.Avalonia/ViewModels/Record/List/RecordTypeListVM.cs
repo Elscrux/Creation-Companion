@@ -2,6 +2,7 @@
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -15,11 +16,12 @@ public sealed class RecordTypeListVM : ARecordListVM<IReferencedRecordIdentifier
 
     public RecordTypeListVM(
         Type type,
+        MainWindow mainWindow,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         Type = type;
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)

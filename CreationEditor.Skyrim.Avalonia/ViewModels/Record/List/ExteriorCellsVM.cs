@@ -10,6 +10,7 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -40,6 +41,7 @@ public class ExteriorCellsVM : CellListVM {
     public ReactiveCommand<Unit, Unit> ToggleWildernessCells { get; }
 
     public ExteriorCellsVM(
+        MainWindow mainWindow,
         IExtraColumnProvider extraColumnProvider,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
@@ -48,7 +50,7 @@ public class ExteriorCellsVM : CellListVM {
         IDockFactory dockFactory,
         IViewportRuntimeService viewportRuntimeService,
         IRecordEditorController recordEditorController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, recordEditorController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController, dockFactory, recordEditorController) {
         _viewportRuntimeService = viewportRuntimeService;
 
         CustomFilter = record => ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty();

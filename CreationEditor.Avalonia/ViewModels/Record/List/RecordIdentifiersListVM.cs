@@ -1,6 +1,7 @@
 ﻿using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
@@ -10,12 +11,13 @@ namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed class RecordIdentifiersListVM : ARecordListVM<IReferencedRecordIdentifier> {
     public RecordIdentifiersListVM(
+        MainWindow mainWindow,
         IEnumerable<IFormLinkIdentifier> identifiers,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
         IRecordController recordController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
 
         RecordCache.Clear();
         RecordCache.Edit(updater => {

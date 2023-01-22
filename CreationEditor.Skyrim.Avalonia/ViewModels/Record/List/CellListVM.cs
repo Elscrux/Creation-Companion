@@ -9,6 +9,7 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
@@ -25,13 +26,14 @@ public abstract class CellListVM : ARecordListVM<ReferencedRecord<Cell, ICellGet
     public ReactiveCommand<Unit, Unit> DeleteSelectedCell { get; }
 
     public CellListVM(
+        MainWindow mainWindow,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery,
         IRecordController recordController,
         IDockFactory dockFactory,
         IRecordEditorController recordEditorController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         
         ViewSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;

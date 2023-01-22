@@ -5,6 +5,7 @@ using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -13,7 +14,6 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordListVM<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>
@@ -26,12 +26,13 @@ public sealed class RecordListVM<TMajorRecord, TMajorRecordGetter> : ARecordList
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
     public RecordListVM(
+        MainWindow mainWindow,
         IReferenceQuery referenceQuery,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordEditorController recordEditorController,
         IRecordController recordController)
-        : base(recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
+        : base(mainWindow, recordListFactory, recordBrowserSettingsVM, referenceQuery, recordController) {
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = RecordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);

@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -37,6 +38,7 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
     protected Func<TReferenced, bool>? CustomFilter;
 
     protected ARecordListVM(
+        MainWindow mainWindow,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery, 
@@ -52,7 +54,7 @@ public abstract class ARecordListVM<TReferenced> : ViewModel, IRecordListVM
                     Content = recordListFactory.FromIdentifiers(SelectedRecord.References)
                 };
 
-                referenceWindow.Show();
+                referenceWindow.Show(mainWindow);
             },
             this.WhenAnyValue(x => x.SelectedRecord).Select(selected => selected is { References.Count: > 0 }));
 
