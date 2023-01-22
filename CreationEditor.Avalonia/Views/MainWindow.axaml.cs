@@ -1,11 +1,12 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels;
 using FluentAvalonia.UI.Windowing;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views;
 
-public partial class MainWindow : AppWindow, IMainWindow, IViewFor<MainVM> {
+public partial class MainWindow : AppWindow, IViewFor<MainVM> {
     public static readonly StyledProperty<MainVM?> ViewModelProperty
         = AvaloniaProperty.Register<ReactiveWindow<MainVM>, MainVM?>(nameof(ViewModel));
     
@@ -18,6 +19,7 @@ public partial class MainWindow : AppWindow, IMainWindow, IViewFor<MainVM> {
         get => ViewModel;
         set => ViewModel = (MainVM?) value;
     }
+    public Window XWindow => this;
 
     public MainWindow() {
         InitializeComponent();

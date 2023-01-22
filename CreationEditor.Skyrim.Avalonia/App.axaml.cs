@@ -47,11 +47,9 @@ public partial class App : Application {
             builder.RegisterType<GameLocator>().As<IGameDirectoryLookup>();
         
             var window = new MainWindow();
-            builder.RegisterInstance(window).As<IMainWindow>();
+            builder.RegisterInstance(window).As<MainWindow>();
 
             var dockingManagerService = new DockingManagerService();
-            // var dockingManagerService = new DockingManagerService();
-            // var dockingManagerService = new DockingManagerService(window.DockingManager);
             builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
         
             var container = builder.Build();

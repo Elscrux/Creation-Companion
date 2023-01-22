@@ -8,7 +8,7 @@ namespace CreationEditor.Avalonia.Services.Startup;
 
 public sealed class Lifecycle : ILifecycle {
     private readonly ILogger _logger;
-    private readonly IMainWindow _mainWindow;
+    private readonly MainWindow _mainWindow;
     private readonly Lazy<MainVM> _mainVm;
 
     private readonly List<ILifecycleTask> _lifecycleTasks;
@@ -16,7 +16,7 @@ public sealed class Lifecycle : ILifecycle {
     public Lifecycle(
         IComponentContext componentContext,
         ILogger logger,
-        IMainWindow mainWindow,
+        MainWindow mainWindow,
         Lazy<MainVM> mainVm) {
         _logger = logger;
         _mainWindow = mainWindow;
