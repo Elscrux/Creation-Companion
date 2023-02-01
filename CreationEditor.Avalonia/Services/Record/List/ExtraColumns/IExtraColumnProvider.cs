@@ -1,6 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public interface IExtraColumnProvider {
-    public IEnumerable<DataGridColumn> GetColumns(Type type);
+    public Dictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
 }

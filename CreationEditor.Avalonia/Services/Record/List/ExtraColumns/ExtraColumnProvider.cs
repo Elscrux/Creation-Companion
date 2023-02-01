@@ -1,10 +1,9 @@
-﻿using Avalonia.Controls;
-using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
+﻿using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnProvider : IExtraColumnProvider {
-    private readonly Dictionary<Type, IExtraColumns> _extraColumnsCache = new();
+    public Dictionary<Type, IExtraColumns> ExtraColumnsCache { get; } = new();
 
     public ExtraColumnProvider() {
         typeof(IExtraColumns)
@@ -12,16 +11,6 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
             .NotNull()
             .Select(type => Activator.CreateInstance(type) as IExtraColumns)
             .NotNull()
-            .ForEach(extraColumns => _extraColumnsCache.Add(extraColumns.Type, extraColumns));
-    }
-
-    public IEnumerable<DataGridColumn> GetColumns(Type type) {
-        return type.AsEnumerable().Concat(type.GetInterfaces())
-            .SelectWhere(@interface => _extraColumnsCache.TryGetValue(@interface, out var extraColumn)
-                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns) 
-                : TryGet<IEnumerable<ExtraColumn>>.Failure)
-            .SelectMany(c => c)
-            .OrderByDescending(c => c.Priority)
-            .Select(c => c.Column);
+            .ForEach(extraColumns => ExtraColumnsCache.Add(extraColumns.Type, extraColumns));
     }
 }

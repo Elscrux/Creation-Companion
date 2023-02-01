@@ -1,6 +1,9 @@
 ﻿namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
-public interface IExtraColumns {
-    public Type Type { get; }
+public interface IUntypedExtraColumns {
     public IEnumerable<ExtraColumn> Columns { get; }
+}
+
+public interface IExtraColumns : IUntypedExtraColumns {
+    public Type Type { get; }
 }
