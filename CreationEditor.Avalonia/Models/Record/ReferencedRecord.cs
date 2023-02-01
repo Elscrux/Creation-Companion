@@ -22,6 +22,8 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
         }
     }
 
+    public string RecordTypeName => (this as IReferencedRecord).Record.Registration.Name;
+
     public override bool Equals(object? obj) {
         return obj switch {
             ReferencedRecord<TMajorRecord, TMajorRecordGetter> referencedRecord => referencedRecord.Equals(this),

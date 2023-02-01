@@ -34,6 +34,14 @@ public static class RecordComparers {
     public static readonly FuncComparer<IReferencedRecord> ReferenceCountComparer
         = new((x, y) => x.References.Count.CompareTo(y.References.Count));
     
+    public static readonly FuncComparer<IReferencedRecord> TypeComparer
+        = new((x, y) => {
+            var typeCompare = StringComparer.OrdinalIgnoreCase.Compare(x.RecordTypeName, y.RecordTypeName);
+            if (typeCompare != 0) return typeCompare;
+
+            return EditorIDComparer.Compare(x, y);
+        });
+    
     public static readonly FuncSelectorComparer<IReferencedRecord, INamedRequiredGetter> NamedRequiredComparer
         = new(referencedRecord => referencedRecord.Record as INamedRequiredGetter, 
             (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name));
