@@ -35,10 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Record\List" />
-    </ItemGroup>
-
-    <ItemGroup>
       <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
       <UpToDateCheckInput Remove="FormKeyPicker\test.axaml" />
       <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
@@ -50,14 +46,29 @@
       <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
         <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
       </Compile>
-      <Compile Update="ViewModels\Record\List\RecordIdentifiersListVM.cs">
-        <DependentUpon>ARecordListVM.cs</DependentUpon>
-      </Compile>
       <Compile Update="ViewModels\Record\List\RecordListVM.cs">
-        <DependentUpon>ARecordListVM.cs</DependentUpon>
+        <DependentUpon>IRecordListVM.cs</DependentUpon>
       </Compile>
-      <Compile Update="ViewModels\Record\List\RecordTypeListVM.cs">
-        <DependentUpon>ARecordListVM.cs</DependentUpon>
+      <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnProvider.cs">
+        <DependentUpon>IExtraColumnProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnsBuilder.cs">
+        <DependentUpon>IExtraColumnsBuilder.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Record\List\ExtraColumns\MajorRecordExtraColumns.cs">
+        <DependentUpon>ExtraColumns.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Record\List\ExtraColumns\NamedRequiredExtraColumns.cs">
+        <DependentUpon>ExtraColumns.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Record\List\ExtraColumns\TypeExtraColumns.cs">
+        <DependentUpon>ExtraColumns.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Record\List\ExtraColumns\WeightValueExtraColumns.cs">
+        <DependentUpon>ExtraColumns.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Record\List\ExtraColumns\ExtraColumns.cs">
+        <DependentUpon>IExtraColumns.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 
