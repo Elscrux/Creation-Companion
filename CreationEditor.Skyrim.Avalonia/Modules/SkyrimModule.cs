@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser;
+using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -8,6 +9,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
@@ -48,6 +50,8 @@ public sealed class SkyrimModule : Module {
         builder.RegisterType<SkyrimModGetterVM>().As<IModGetterVM>();
         
         builder.RegisterType<SkyrimRecordListFactory>().As<IRecordListFactory>();
+        
+        builder.RegisterType<SkyrimRecordEditorFactory>().As<IRecordEditorFactory>();
         
         builder.RegisterType<SkyrimCellBrowserFactory>().As<ICellBrowserFactory>();
 

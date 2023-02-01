@@ -1,5 +1,4 @@
-﻿using System.Reactive.Subjects;
-using Autofac;
+﻿using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
@@ -14,16 +13,19 @@ public sealed class RecordEditorController : IRecordEditorController {
     private readonly ILogger _logger;
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IDockingManagerService _dockingManagerService;
+    private readonly IRecordEditorFactory _recordEditorFactory;
 
     private readonly Dictionary<FormKey, Control> _openRecordEditors = new();
 
     public RecordEditorController(
         ILogger logger,
         ILifetimeScope lifetimeScope,
-        IDockingManagerService dockingManagerService) {
+        IDockingManagerService dockingManagerService,
+        IRecordEditorFactory recordEditorFactory) {
         _logger = logger;
         _lifetimeScope = lifetimeScope;
         _dockingManagerService = dockingManagerService;
+        _recordEditorFactory = recordEditorFactory;
 
         _dockingManagerService.Closed.Subscribe(OnClosed);
     }
@@ -56,6 +58,33 @@ public sealed class RecordEditorController : IRecordEditorController {
             } else {
                 _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", typeof(TMajorRecord));
             }
+        }
+    }
+    
+    public void OpenEditor(IMajorRecord record) {
+        if (_openRecordEditors.TryGetValue(record.FormKey, out var editor)) {
+            // Select editor as active
+            _dockingManagerService.Focus(editor);
+        } else {
+            // Open new editor
+            // todo make factory by class name like record list factory
+            var editorControl = _recordEditorFactory.FromType(record);
+            if (editorControl == null) {
+                _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", record.GetType());
+                return;
+            }
+
+            _dockingManagerService.AddControl(
+                editorControl, 
+                new DockConfig {
+                    DockInfo = new DockInfo {
+                        Header = record.EditorID ?? record.FormKey.ToString(),
+                    },
+                    Dock = Dock.Right,
+                    DockMode = DockMode.Document,
+                    GridSize = new GridLength(2, GridUnitType.Star),
+                });
+            _openRecordEditors.Add(record.FormKey, editorControl);
         }
     }
     
