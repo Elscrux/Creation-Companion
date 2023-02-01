@@ -17,7 +17,10 @@ public static class RecordComparers {
             }
             if (yIsNullOrEmpty) return -1;
 
-            return StringComparer.OrdinalIgnoreCase.Compare(xEditorID, yEditorID);
+            var editorIDCompare = StringComparer.OrdinalIgnoreCase.Compare(xEditorID, yEditorID);
+            if (editorIDCompare != 0) return editorIDCompare;
+
+            return FormKeyComparer.Compare(x, y);
         });
     
     public static readonly FuncComparer<IReferencedRecord> FormKeyComparer
