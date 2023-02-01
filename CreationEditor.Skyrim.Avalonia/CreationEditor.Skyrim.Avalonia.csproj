@@ -48,12 +48,6 @@
         <DependentUpon>PlacedBrowser.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="ViewModels\Record\List\ExteriorCellsVM.cs">
-        <DependentUpon>CellListVM.cs</DependentUpon>
-      </Compile>
-      <Compile Update="ViewModels\Record\List\InteriorCellsVM.cs">
-        <DependentUpon>CellListVM.cs</DependentUpon>
-      </Compile>
     </ItemGroup>
     
     <PropertyGroup>

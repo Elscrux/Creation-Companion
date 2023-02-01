@@ -6,7 +6,7 @@
              xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.PlacedList"
-             x:CompileBindings="True" x:DataType="list:IPlacedListVM">
+             x:CompileBindings="True" x:DataType="list:PlacedListVM">
     <Design.DataContext>
         <list:PlacedListVM/>
     </Design.DataContext>
@@ -14,7 +14,7 @@
     <Grid RowDefinitions="Auto,*">
         <record:RecordBrowserSettings
             Grid.Row="0"
-            DataContext="{ReflectionBinding RecordBrowserSettingsVM}"/>
+            DataContext="{ReflectionBinding PlacedProvider.RecordBrowserSettingsVM}"/>
         
         <ContentControl
             Grid.Row="1"

@@ -48,7 +48,7 @@
         </TabControl>
         
         <GridSplitter Grid.Row="1"
-                      IsVisible="{ReflectionBinding PlacedList.ViewModel.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
                       IsEnabled="{Binding ShowReferences}"/>
         
         <Button Grid.Row="1"
@@ -58,7 +58,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Command="{Binding ToggleReferences}"
-                IsVisible="{ReflectionBinding PlacedList.ViewModel.Cell, Converter={x:Static ObjectConverters.IsNotNull}}">
+                IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}">
             <Grid>
                 <fluentIcons:FluentIcon Icon="ChevronDown12Filled"
                                         IsVisible="{Binding ShowReferences}"/>
@@ -71,7 +71,7 @@
             Grid.Row="2"
             Classes="Default"
             Header="References"
-            IsVisible="{ReflectionBinding PlacedList.ViewModel.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
+            IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
             Content="{Binding PlacedList}"/>
     </Grid>
 </UserControl>

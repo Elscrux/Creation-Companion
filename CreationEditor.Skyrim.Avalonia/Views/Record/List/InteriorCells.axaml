@@ -14,7 +14,7 @@
     <Grid RowDefinitions="Auto,*">
         <record:RecordBrowserSettings
             Grid.Row="0"
-            DataContext="{ReflectionBinding RecordBrowserSettingsVM}"/>
+            DataContext="{ReflectionBinding InteriorCellsProvider.RecordBrowserSettingsVM}"/>
     
         <ContentControl
             Grid.Row="1"

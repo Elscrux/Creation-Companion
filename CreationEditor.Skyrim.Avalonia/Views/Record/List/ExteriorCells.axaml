@@ -20,9 +20,9 @@
                                 Header="Worldspace"
                                 Classes="Default">
             <formKeyPicker:FormKeyPicker
-                FormKey="{Binding WorldspaceFormKey}"
+                FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
                 ScopedTypes="{x:Static constants:FormTypeConstants.WorldspaceTypes}"
-                LinkCache="{ReflectionBinding RecordBrowserSettingsVM.LinkCache}"
+                LinkCache="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM.LinkCache}"
                 MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
         </HeaderedContentControl>
     
@@ -48,12 +48,12 @@
 
         <CheckBox Grid.Row="4"
                   Content="Show Wilderness Cells"
-                  IsChecked="{Binding ShowWildernessCells}"
+                  IsChecked="{Binding ExteriorCellsProvider.ShowWildernessCells}"
                   Command="{Binding ToggleWildernessCells}"/>
 
         <record:RecordBrowserSettings
             Grid.Row="6"
-            DataContext="{ReflectionBinding RecordBrowserSettingsVM}"/>
+            DataContext="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM}"/>
         
         <ContentControl
             Grid.Row="8"
