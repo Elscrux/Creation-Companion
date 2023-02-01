@@ -35,6 +35,7 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
     }
     
     public override int GetHashCode() {
+        // While the record can change, its form key will always stay the same
         return HashCode.Combine(Record.FormKey);
     }
 
