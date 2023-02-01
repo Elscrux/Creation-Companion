@@ -39,9 +39,19 @@ public sealed class LayoutDockVM : DockContainerVM {
             case 0:
                 return false;
             case 1:
-                if (LayoutGrid.Children[0] is DockedControl dockedControl && ReferenceEquals(dockedControl.Control, control)) {
-                    outDock = dockedControl;
-                    return true;
+                switch (LayoutGrid.Children[0]) {
+                    // Found matching docked item
+                    case DockedControl dockedControl when ReferenceEquals(dockedControl.Control, control):
+                        dockedControl.Focus();
+                        outDock = dockedControl;
+                        return true;
+                    // Found dock container
+                    case { DataContext: DockContainerVM dockableVM }:
+                        if (dockableVM.TryGetDock(control, out var output)) {
+                            outDock = output;
+                            return true;
+                        }
+                        return false;
                 }
                 break;
             case > 1:
