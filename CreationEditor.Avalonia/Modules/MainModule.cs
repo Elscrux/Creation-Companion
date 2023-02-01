@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -11,6 +10,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Background;
 using CreationEditor.Services.Mutagen.References;
 namespace CreationEditor.Avalonia.Modules; 
@@ -42,10 +42,13 @@ public sealed class MainModule : Module {
         builder.RegisterType<RecordBrowserSettingsVM>()
             .As<IRecordBrowserSettingsVM>();
 
-        builder.RegisterType<RecordTypeListVM>()
+        builder.RegisterType<RecordTypeProvider>()
             .AsSelf();
 
-        builder.RegisterType<RecordIdentifiersListVM>()
+        builder.RegisterType<RecordListVM>()
+            .As<IRecordListVM>();
+
+        builder.RegisterType<RecordIdentifiersProvider>()
             .AsSelf();
 
         builder.RegisterType<RecordEditorController>()
@@ -55,6 +58,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
             .SingleInstance();
+
+        builder.RegisterType<ExtraColumnsBuilder>()
+            .As<IExtraColumnsBuilder>();
 
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
