@@ -28,6 +28,9 @@ public static class RecordComparers {
             return StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ID, y.Record.FormKey.ID);
         });
     
+    public static readonly FuncComparer<IReferencedRecord> ReferenceCountComparer
+        = new((x, y) => x.References.Count.CompareTo(y.References.Count));
+    
     public static readonly FuncSelectorComparer<IReferencedRecord, INamedRequiredGetter> NamedRequiredComparer
         = new(referencedRecord => referencedRecord.Record as INamedRequiredGetter, 
             (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name));
