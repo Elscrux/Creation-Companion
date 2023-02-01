@@ -82,7 +82,7 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;
 
-        return Filter(record);
+        return Filter(record as IMajorRecordIdentifier);
     }
     
     public bool Filter(IMajorRecordIdentifier record) {
@@ -97,3 +97,4 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
                 .All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 }
+ 
