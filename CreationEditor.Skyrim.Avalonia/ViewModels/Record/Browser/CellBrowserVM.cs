@@ -48,6 +48,12 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
         
         ToggleReferences = ReactiveCommand.Create(() => { ShowReferences = !ShowReferences; });
 
+        this.WhenAnyValue(x => x.PlacedListVM.PlacedProvider.Cell)
+            .NotNull()
+            .Take(1)
+            .Subscribe(_ => ShowReferences = true)
+            .DisposeWith(this);
+
         this.WhenAnyValue(
                 x => x.InteriorCellsVM.InteriorCellsProvider.SelectedRecord,
                 x => x.ExteriorCellsVM.ExteriorCellsProvider.SelectedRecord,
