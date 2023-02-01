@@ -40,14 +40,16 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
             .Subscribe(linkCache => {
                 RecordCache.Clear();
                 RecordCache.Refresh();
-                foreach (var identifier in identifiers) {
-                    if (linkCache.TryResolve(identifier.FormKey, identifier.Type, out var record)) {
-                        var formLinks = referenceQuery.GetReferences(record.FormKey, recordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedRecord<IMajorRecord, IMajorRecordGetter>(record, formLinks);
+                RecordCache.Edit(updater => {
+                    foreach (var identifier in identifiers) {
+                        if (linkCache.TryResolve(identifier.FormKey, identifier.Type, out var record)) {
+                            var formLinks = referenceQuery.GetReferences(record.FormKey, recordBrowserSettingsVM.LinkCache);
+                            var referencedRecord = new ReferencedRecord<IMajorRecord, IMajorRecordGetter>(record, formLinks);
 
-                        RecordCache.AddOrUpdate(referencedRecord);
+                            updater.AddOrUpdate(referencedRecord);
+                        }
                     }
-                }
+                });
                 
                 Dispatcher.UIThread.Post(() => IsBusy = false);
             })
