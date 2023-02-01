@@ -29,7 +29,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
 
             yield return new ExtraColumn(
                 new DataGridTextColumn {
-                    Header = "Use Info",
+                    Header = "References",
                     Binding = new Binding("References.Count", BindingMode.OneWay),
                     CanUserSort = true,
                     CustomSortComparer = RecordComparers.ReferenceCountComparer,
