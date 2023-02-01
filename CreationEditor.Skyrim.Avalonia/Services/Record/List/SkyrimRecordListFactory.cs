@@ -9,6 +9,7 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
 using Location = Mutagen.Bethesda.Skyrim.Location;
@@ -32,7 +33,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
 
         var extraColumnsBuilder = _componentContext.Resolve<IExtraColumnsBuilder>();
         var columns = extraColumnsBuilder
-            .AddRecordType<ICellGetter>()
+            .AddRecordType<IMajorRecordGetter>()
             .AddColumnType<TypeExtraColumns>()
             .Build();
 
