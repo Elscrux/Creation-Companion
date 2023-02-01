@@ -17,4 +17,6 @@ public interface IRecordController {
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter;
+
+    public IObservable<IMajorRecordGetter> RecordChanged { get; }
 }

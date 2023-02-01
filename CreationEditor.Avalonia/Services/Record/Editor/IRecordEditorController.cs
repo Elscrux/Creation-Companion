@@ -9,6 +9,4 @@ public interface IRecordEditorController {
     public void CloseEditor(IMajorRecord record);
 
     public bool AnyEditorsOpen();
-
-    public IObservable<IMajorRecordGetter> RecordChanged { get; }
 }

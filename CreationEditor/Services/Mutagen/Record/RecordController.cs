@@ -1,4 +1,5 @@
-﻿using CreationEditor.Extension;
+﻿using System.Reactive.Subjects;
+using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
@@ -10,6 +11,9 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     private readonly ILogger _logger;
     private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
+
+    private readonly Subject<IMajorRecordGetter> _recordChanged = new();
+    public IObservable<IMajorRecordGetter> RecordChanged => _recordChanged;
     
     public RecordController(
         ILogger logger,
@@ -26,6 +30,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         
         _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
             record, typeof(TMajorRecord), _editorEnvironment.ActiveMod.ModKey);
+        
+        _recordChanged.OnNext(record);
 
         return (record as TMajorRecord)!;
     }
@@ -38,6 +44,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
             duplicate, record, _editorEnvironment.ActiveMod.ModKey);
+        
+        _recordChanged.OnNext(duplicate);
 
         return duplicate;
     }
@@ -50,6 +58,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         
         _logger.Here().Verbose("Deleting record {Record} from {Mod}",
             record, _editorEnvironment.ActiveMod);
+        
+        _recordChanged.OnNext(newOverride);
     }
     
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
@@ -64,6 +74,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
             _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
                 record, _editorEnvironment.ActiveMod.ModKey);
         }
+        
+        _recordChanged.OnNext(newOverride);
 
         return newOverride;
     }

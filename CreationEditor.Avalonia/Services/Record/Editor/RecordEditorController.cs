@@ -17,9 +17,6 @@ public sealed class RecordEditorController : IRecordEditorController {
 
     private readonly Dictionary<FormKey, Control> _openRecordEditors = new();
 
-    private readonly Subject<IMajorRecordGetter> _recordChanged = new();
-    public IObservable<IMajorRecordGetter> RecordChanged => _recordChanged;
-
     public RecordEditorController(
         ILogger logger,
         ILifetimeScope lifetimeScope,
@@ -65,8 +62,6 @@ public sealed class RecordEditorController : IRecordEditorController {
     public void CloseEditor(IMajorRecord record) {
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editor)) {
             _dockingManagerService.RemoveControl(editor);
-
-            _recordChanged.OnNext(record);
             
             RemoveEditorCache(editor);
         }
@@ -74,9 +69,6 @@ public sealed class RecordEditorController : IRecordEditorController {
 
     private void OnClosed(IDockedItem dockedItem) {
         RemoveEditorCache(dockedItem.Control);
-        if (dockedItem.Control.DataContext is IRecordEditorVM recordEditorVM) {
-            _recordChanged.OnNext(recordEditorVM.Record);
-        }
     }
     
     private void RemoveEditorCache(Control editor) {
