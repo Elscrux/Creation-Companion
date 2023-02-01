@@ -101,12 +101,13 @@ public sealed class RecordEditorController : IRecordEditorController {
     
     private void RemoveEditorCache(Control editor) {
         var editorsToRemove = _openRecordEditors
-            .Where(x => ReferenceEquals(x.Value, editor))
-            .Select(x => x.Key)
+            .Where(x => ReferenceEquals(x.Value.Control, editor))
             .ToList();
 
-        foreach (var key in editorsToRemove) {
-            _openRecordEditors.Remove(key);
+        foreach (var (formKey, editorControl) in editorsToRemove) {
+            editorControl.EditorVM.Save.Execute();
+            
+            _openRecordEditors.Remove(formKey);
         }
     }
 }
