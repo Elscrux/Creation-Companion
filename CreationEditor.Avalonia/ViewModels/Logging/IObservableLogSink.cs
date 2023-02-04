@@ -2,6 +2,6 @@
 using Serilog.Core;
 namespace CreationEditor.Avalonia.ViewModels.Logging; 
 
-public interface ILogListSink : ILogEventSink {
+public interface IObservableLogSink : ILogEventSink {
     public IObservable<ILogItem> LogAdded { get; }
 }

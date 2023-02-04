@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Subjects;
-using CreationEditor.Avalonia.Models.Logging;
 using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
@@ -34,8 +33,12 @@ public sealed class LogVM : ViewModel, ILogVM {
     private readonly Subject<ILogItem> _logAdded = new();
     public IObservable<ILogItem> LogAdded => _logAdded;
 
-   
-    public LogVM() {
+    public LogVM(
+        IObservableLogSink observableLogSink) {
+        
+        observableLogSink.LogAdded
+            .Subscribe(log => _logAddedCache.AddOrUpdate(log));
+        
         Clear = ReactiveCommand.Create<Unit>(_ => _logAddedCache.Clear());
 
         ToggleEvent = ReactiveCommand.Create<LogEventLevel>(level => {
@@ -63,17 +66,5 @@ public sealed class LogVM : ViewModel, ILogVM {
             .LimitSizeTo(MaxLogCount)
             .SortBy(item => item.Time)
             .ToObservableCollection(this);
-    }
-
-    public void Emit(LogEvent logEvent) {
-        var logMessage = logEvent.RenderMessage();
-        AddText(logMessage, logEvent.Level);
-    }
-
-    private void AddText(string text, LogEventLevel level) {
-        var logItem = new LogItem(text, level);
-        
-        _logAdded.OnNext(logItem);
-        _logAddedCache.AddOrUpdate(logItem);
     }
 }

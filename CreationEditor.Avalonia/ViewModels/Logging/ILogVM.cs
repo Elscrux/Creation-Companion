@@ -5,7 +5,7 @@ using ReactiveUI;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
-public interface ILogVM : ILogListSink {
+public interface ILogVM {
     public IObservableCollection<ILogItem> LogItems { get; }
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; }
 
