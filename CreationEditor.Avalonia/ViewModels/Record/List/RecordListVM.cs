@@ -34,9 +34,12 @@ public class RecordListVM : ViewModel, IRecordListVM {
         RecordProvider = recordProvider;
         DoubleTapCommand = recordProvider.DoubleTapCommand;
 
-        this.WhenAnyValue(x => x.RecordProvider.IsBusy, x => x.IsBusyInternal)
+        this.WhenAnyValue(
+                x => x.RecordProvider.IsBusy,
+                x => x.IsBusyInternal,
+                (isBusy, isBusyInternal) => (IsBusy: isBusy, IsBusyInternal: isBusyInternal))
             .ObserveOnGui()
-            .Subscribe(busyStates => IsBusy = busyStates.Item1 || busyStates.Item2);
+            .Subscribe(busyStates => IsBusy = busyStates.IsBusy || busyStates.IsBusyInternal);
         
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;
