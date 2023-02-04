@@ -89,7 +89,6 @@ public sealed class LayoutDockVM : DockContainerVM {
         switch (config.DockMode) {
             case DockMode.Document:
                 AddDocumentControl(dockedItem, config);
-                (this as IDockObject).DockRoot.OnDockAdded(dockedItem);
                 break;
             case DockMode.Side:
                 break;
