@@ -85,6 +85,7 @@ public sealed class DragDropExtended : AvaloniaObject {
     
     private static void DragStart(object? sender, PointerPressedEventArgs e) {
         if (sender is not DataGridRow row) return;
+        if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
         
         // Only allow starting to drag when the source is directly under the data grid cell
         if (e.Source is not StyledElement styledElement) return;
