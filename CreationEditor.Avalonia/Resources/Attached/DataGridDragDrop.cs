@@ -152,7 +152,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (newIndex > newList.Count) return;
         
         var sameGrid = ReferenceEquals(oldDataGrid, newDataGrid);
-        if (sameGrid && ReferenceEquals(dragItem, hoverItem)) return;
+        if (sameGrid && oldIndex == newIndex) return;
         
         // Remove old item
         oldList.Remove(dragItem);
