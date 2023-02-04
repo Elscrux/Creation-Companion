@@ -36,8 +36,8 @@ public sealed class DockingManagerVM : DockContainerVM {
     public SideDockVM RightSide { get; }
 
     public override IEnumerable<IDockObject> Children { get; }
-    
-    public bool IsReporting { get; set; }
+
+    public bool IsReporting { get; set; } = true;
 
     public DockingManagerVM() {
         CleanUpLock = new DisposableCounterLock(() => CleanUp());
