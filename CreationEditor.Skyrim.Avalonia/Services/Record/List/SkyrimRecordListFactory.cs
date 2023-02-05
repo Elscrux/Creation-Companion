@@ -11,6 +11,7 @@ using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
 using Location = Mutagen.Bethesda.Skyrim.Location;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
@@ -154,7 +155,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IStaticGetter) => _componentContext.Resolve<RecordProvider<Static, IStaticGetter>>(browserSettingsParam),
             nameof(ITreeGetter) => _componentContext.Resolve<RecordProvider<Tree, ITreeGetter>>(browserSettingsParam),
             
-            _ => _componentContext.Resolve<RecordTypeProvider>(TypedParameter.From(type), browserSettingsParam)
+            _ => _componentContext.Resolve<RecordTypeProvider>(TypedParameter.From(type.AsEnumerable()), browserSettingsParam)
         };
 
         var recordListVM = _componentContext.Resolve<IRecordListVM>(TypedParameter.From(recordProvider));

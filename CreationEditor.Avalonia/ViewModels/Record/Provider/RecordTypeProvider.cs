@@ -15,7 +15,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedRecord> {
-    public Type Type { get; }
+    public IList<Type> Types { get; }
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
@@ -29,11 +29,11 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
     
 
     public RecordTypeProvider(
-        Type type,
+        IEnumerable<Type> types,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IReferenceQuery referenceQuery,
         IRecordController recordController) {
-        Type = type;
+        Types = types.ToList();
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
@@ -43,7 +43,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
             .Subscribe(linkCache => {
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
-                    foreach (var record in linkCache.AllIdentifiers(Type)) {
+                    foreach (var record in linkCache.AllIdentifiers(Types)) {
                         var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
                         var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, formLinks);
 
@@ -56,7 +56,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
         recordController.RecordChanged
             .Subscribe(record => {
-                if (record.GetType() != Type) return;
+                if (!Types.Contains(record.GetType())) return;
                 
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
