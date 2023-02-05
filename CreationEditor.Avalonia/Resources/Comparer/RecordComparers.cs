@@ -3,6 +3,15 @@ using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Comparer;
 
 public static class RecordComparers {
+    public static readonly FuncComparer<IReferencedRecord> FormKeyComparer
+        = new((x, y) => {
+            var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ModKey.Name, y.Record.FormKey.ModKey.Name);
+            if (modKeyCompare != 0) return modKeyCompare;
+        
+            return StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ID, y.Record.FormKey.ID);
+        });
+    
+    
     public static readonly FuncComparer<IReferencedRecord> EditorIDComparer
         = new((x, y) => {
             var xEditorID = x.Record.EditorID;
@@ -21,14 +30,6 @@ public static class RecordComparers {
             if (editorIDCompare != 0) return editorIDCompare;
 
             return FormKeyComparer.Compare(x, y);
-        });
-    
-    public static readonly FuncComparer<IReferencedRecord> FormKeyComparer
-        = new((x, y) => {
-            var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ModKey.Name, y.Record.FormKey.ModKey.Name);
-            if (modKeyCompare != 0) return modKeyCompare;
-        
-            return StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ID, y.Record.FormKey.ID);
         });
     
     public static readonly FuncComparer<IReferencedRecord> ReferenceCountComparer
