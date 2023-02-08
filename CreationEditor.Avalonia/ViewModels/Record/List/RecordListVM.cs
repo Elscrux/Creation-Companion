@@ -23,7 +23,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
     public IEnumerable Records { get; }
 
     [Reactive] public bool IsBusy { get; set; }
-    [Reactive] private bool IsBusyInternal { get; set; }
+    [Reactive] private bool IsFiltering { get; set; }
     
     public ReactiveCommand<Unit, Unit> OpenReferences { get; }
 
@@ -36,10 +36,10 @@ public class RecordListVM : ViewModel, IRecordListVM {
 
         this.WhenAnyValue(
                 x => x.RecordProvider.IsBusy,
-                x => x.IsBusyInternal,
-                (isBusy, isBusyInternal) => (IsBusy: isBusy, IsBusyInternal: isBusyInternal))
+                x => x.IsFiltering,
+                (isBusy, isFiltering) => (IsBusy: isBusy, IsFiltering: isFiltering))
             .ObserveOnGui()
-            .Subscribe(busyStates => IsBusy = busyStates.IsBusy || busyStates.IsBusyInternal);
+            .Subscribe(busyStates => IsBusy = busyStates.IsBusy || busyStates.IsFiltering);
         
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;
@@ -55,9 +55,9 @@ public class RecordListVM : ViewModel, IRecordListVM {
 
         Records = RecordProvider.RecordCache
             .Connect()
-            .DoOnGuiAndSwitchBack(_ => IsBusyInternal = true)
+            .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
             .Filter(RecordProvider.Filter)
-            .DoOnGuiAndSwitchBack(_ => IsBusyInternal = false)
+            .DoOnGuiAndSwitchBack(_ => IsFiltering = false)
             .ToObservableCollection(this);
         
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);
