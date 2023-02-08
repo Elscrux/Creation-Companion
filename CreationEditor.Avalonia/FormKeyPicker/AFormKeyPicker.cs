@@ -473,10 +473,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         case FormKeyPickerSearchMode.EditorID:
                             return this.WhenAnyValue(x => x.EditorID)
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-                                // .ObserveOn(RxApp.TaskpoolScheduler)
+                                .ObserveOn(RxApp.TaskpoolScheduler)
                                 .Select<string, Func<IMajorRecordIdentifier, bool>>(term => ident => {
+                                    if (term.IsNullOrWhitespace()) return true;
+
                                     var editorID = ident.EditorID;
-                                    return editorID.IsNullOrWhitespace() || term.IsNullOrWhitespace() || editorID.ContainsInsensitive(term);
+                                    return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(term);
+
                                 });
                         case FormKeyPickerSearchMode.FormKey:
 
