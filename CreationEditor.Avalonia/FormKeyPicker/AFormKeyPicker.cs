@@ -178,10 +178,6 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
     private sealed record State(StatusIndicatorState Status, string Text, FormKey FormKey, string EditorID);
 
-    static AFormKeyPicker() {
-        // DefaultStyleKeyProperty.OverrideMetadata(typeof(AFormKeyPicker typeof(AFormKeyPicker))); todo
-    }
-
     public AFormKeyPicker() {
         ToggleViewAllowedTypesCommand = ReactiveCommand.Create(() => ViewingAllowedTypes = !ViewingAllowedTypes);
     }

@@ -35,10 +35,6 @@ public sealed class FormKeyBox : TemplatedControl {
     }
     public static readonly StyledProperty<string> WatermarkProperty = AvaloniaProperty.Register<FormKeyBox, string>(nameof(Watermark), "FormKey");
 
-    static FormKeyBox() {
-        // DefaultStyleKeyProperty.OverrideMetadata(typeof(FormKeyBox), new FrameworkPropertyMetadata(typeof(FormKeyBox))); todo
-    }
-
     protected override void OnLoaded() {
         base.OnLoaded();
         this.WhenAnyValue(x => x.FormKey)
