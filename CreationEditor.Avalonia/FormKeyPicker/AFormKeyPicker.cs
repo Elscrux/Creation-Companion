@@ -14,7 +14,6 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.FormKeyPicker;
 
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
@@ -99,12 +98,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<ICommand> PickerClickCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(PickerClickCommand), defaultBindingMode: BindingMode.TwoWay);
 
-    private bool _inSearchMode;
-    [Reactive] public bool InSearchMode {
-        get => _inSearchMode;
-        protected set => SetAndRaise(InSearchModeProperty, ref _inSearchMode, value);
+    public bool InSearchMode {
+        get => GetValue(InSearchModeProperty);
+        set => SetValue(InSearchModeProperty, value);
     }
-    public static readonly DirectProperty<AFormKeyPicker, bool> InSearchModeProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, bool>(nameof(InSearchMode), picker => picker.InSearchMode);
+    public static readonly StyledProperty<bool> InSearchModeProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(InSearchMode));
 
     private FormKeyPickerSearchMode _searchMode = FormKeyPickerSearchMode.None;
     public FormKeyPickerSearchMode SearchMode {
@@ -554,16 +552,6 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                 (_, found) => found)
             .Where(found => !found)
             .Subscribe(_ => SearchMode = searchMode)
-            .DisposeWith(TemplateDisposable);
-
-        Observable.Merge(
-                this.WhenAnyValue(x => x.IsKeyboardFocusWithin),
-                this.WhenAnyValue(x => x.IsVisible))
-            .Where(x => !x)
-            .Delay(TimeSpan.FromMilliseconds(150), RxApp.MainThreadScheduler)
-            .Subscribe(_ => {
-                SearchMode = FormKeyPickerSearchMode.None;
-            })
             .DisposeWith(TemplateDisposable);
     }
 }

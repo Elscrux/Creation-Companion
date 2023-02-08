@@ -1,16 +1,20 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
         xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker"
-        xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter">
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons">
     <Design.PreviewWith>
         <Border Padding="20">
             <formKeyPicker:FormKeyPicker/>
         </Border>
     </Design.PreviewWith>
 
+    <Style Selector="Border.ButtonHover:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
+    </Style>
+    
     <Style Selector="formKeyPicker|FormKeyPicker">
         <Setter Property="Template">
             <Setter.Value>
@@ -19,7 +23,16 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid MinHeight="18" ColumnDefinitions="*,5,*" RowDefinitions="Auto,Auto,*">
+                        <Grid MinHeight="30" Margin="2" ColumnDefinitions="*,5,*">
+                            <Border x:Name="Background"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    MinWidth="{DynamicResource ComboBoxThemeMinWidth}"
+                                    CornerRadius="{TemplateBinding CornerRadius}"/>
+                            
                             <TextBox Grid.Row="0" Grid.Column="0"
                                      x:Name="PART_EditorIDBox"
                                      Margin="-1"
@@ -45,91 +58,106 @@
                             <!--                                    IsActive="{TemplateBinding Processing}" -->
                             <!--                                    ToolTip.Tip="{TemplateBinding StatusString}" /> -->
 
-                            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
-                                    Height="{Binding SearchBoxHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                    MaxHeight="{Binding MaxSearchBoxHeight, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                    Margin="0,-1,0,0"
-                                    Padding="1"
-                                    CornerRadius="3"
-                                    IsVisible="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}">
-                                <Grid>
-                                    <ListBox
-                                        Items="{Binding ApplicableEditorIDs, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                        IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate DataType="records:IMajorRecordIdentifier">
-                                                <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                                        Command="{Binding PickerClickCommand, RelativeSource={RelativeSource AncestorType=formKeyPicker:AFormKeyPicker}}"
-                                                        CommandParameter="{Binding}">
-                                                    <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
-                                                        <TextBlock Grid.Column="0"
-                                                                   Text="{CompiledBinding EditorID}"
-                                                                   TextTrimming="CharacterEllipsis"
-                                                                   FontSize="10" />
-
-                                                        <TextBlock Grid.Column="1"
-                                                                   IsVisible="{Binding IsPointerOver, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                                   Margin="6,0"
-                                                                   Foreground="#AAAAAA"
-                                                                   Text="{CompiledBinding FormKey}"
-                                                                   FontSize="10" />
-                                                    </Grid>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                    <ListBox
-                                        Items="{Binding ScopedTypes, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                        IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate DataType="system:Type">
-                                                <Grid Margin="6,0,0,0">
-                                                    <TextBlock Margin="0,4">
-                                                        <TextBlock.Text>
-                                                            <MultiBinding StringFormat="{}{0} ( {1} )">
-                                                                <Binding Converter="{x:Static converter:RecordTypeConverters.ToName}"
-                                                                         Mode="OneWay"/>
-                                                                <Binding Converter="{x:Static converter:RecordTypeConverters.ToGame}"
-                                                                         Mode="OneWay"/>
-                                                            </MultiBinding>
-                                                        </TextBlock.Text>
-                                                    </TextBlock>
+                            <Popup x:Name="PART_Popup"
+                                   WindowManagerAddShadowHint="False"
+                                   IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                   Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                                   MaxHeight="{TemplateBinding MaxSearchBoxHeight}"
+                                   Height="{TemplateBinding SearchBoxHeight}"
+                                   HorizontalAlignment="Stretch"
+                                   PlacementTarget="Background"
+                                   IsLightDismissEnabled="True">
+                                <Border Background="{DynamicResource ComboBoxDropDownBackground}"
+                                        BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
+                                        BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
+                                        Margin="0,-1,0,-1"
+                                        Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
+                                        HorizontalAlignment="Stretch"
+                                        CornerRadius="{DynamicResource OverlayCornerRadius}">
+                                    <Grid RowDefinitions="Auto,*">
+                                        <Grid Grid.Row="0"
+                                              ColumnDefinitions="*,Auto"
+                                              Background="{DynamicResource ButtonBackground}">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="Search"
+                                                       Margin="6,2" />
+                            
+                                            <Button Grid.Column="1"
+                                                    x:Name="TheButton"
+                                                    Command="{Binding ToggleViewAllowedTypesCommand, RelativeSource={RelativeSource TemplatedParent}}">
+                                                <Grid>
+                                                    <fluentIcons:FluentIcon Icon="Search48Regular"
+                                                                            IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                            ToolTip.Tip="See type scoping" />
+                                                    <fluentIcons:FluentIcon Icon="Question48Regular"
+                                                                            IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                            ToolTip.Tip="Search records" />
                                                 </Grid>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                </Grid>
-                            </Border>
-
-                            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                    Margin="0,3,0,0"
-                                    Background="{DynamicResource ButtonBackground}"
-                                    BorderBrush="{DynamicResource ButtonBorderBrush}"
-                                    BorderThickness="0,0,0,1"
-                                    IsVisible="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Grid.Column="0"
-                                               Text="Search"
-                                               Margin="6,2" />
-
-                                    <Button Grid.Column="1"
-                                            Command="{Binding ToggleViewAllowedTypesCommand, RelativeSource={RelativeSource TemplatedParent}}">
-                                        <Grid>
-                                            <fluentIcons:FluentIcon Icon="Search48Regular"
-                                                                    IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                    ToolTip.Tip="See type scoping" />
-                                            <fluentIcons:FluentIcon Icon="Question48Regular"
-                                                                    IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                    ToolTip.Tip="Search records" />
+                                            </Button>
                                         </Grid>
-                                    </Button>
-                                </Grid>
-                            </Border>
+
+                                        <ScrollViewer Grid.Row="1"
+                                                      IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                            <ItemsRepeater
+                                                Items="{TemplateBinding ApplicableEditorIDs}">
+                                                <ItemsRepeater.ItemTemplate>
+                                                    <DataTemplate DataType="records:IMajorRecordIdentifier">
+                                                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                Classes="ButtonHover"
+                                                                Padding="2"
+                                                                Background="{DynamicResource SystemControlTransparentBrush}"
+                                                                x:Name="Border">
+                                                            <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
+                                                                <TextBlock Grid.Column="0"
+                                                                           Text="{CompiledBinding EditorID}"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           FontSize="15"/>
+
+                                                                <TextBlock Grid.Column="1"
+                                                                           IsVisible="{Binding #Border.IsPointerOver}"
+                                                                           Margin="6,0"
+                                                                           Foreground="#AAAAAA"
+                                                                           Text="{CompiledBinding FormKey}"
+                                                                           FontSize="15"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsRepeater.ItemTemplate>
+                                            </ItemsRepeater>
+                                        </ScrollViewer>
+
+
+                                        <ScrollViewer Grid.Row="1"
+                                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                                      IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
+                                            <ItemsRepeater
+                                                Items="{TemplateBinding ScopedTypes}">
+                                                <ItemsRepeater.ItemTemplate>
+                                                    <DataTemplate DataType="system:Type">
+                                                        <Grid Margin="6,0,0,0">
+                                                            <TextBlock Margin="0,4">
+                                                                <TextBlock.Text>
+                                                                    <MultiBinding StringFormat="{}{0} ( {1} )">
+                                                                        <Binding
+                                                                            Converter="{x:Static converter:RecordTypeConverters.ToName}"
+                                                                            Mode="OneWay"/>
+                                                                        <Binding
+                                                                            Converter="{x:Static converter:RecordTypeConverters.ToGame}"
+                                                                            Mode="OneWay"/>
+                                                                    </MultiBinding>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsRepeater.ItemTemplate>
+                                            </ItemsRepeater>
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Border>
+                            </Popup>
                         </Grid>
                     </Border>
                 </ControlTemplate>
