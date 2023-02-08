@@ -7,30 +7,31 @@
              x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM"
              d:DesignHeight="900" d:DesignWidth="900"
              x:Name="Editor">
-    <Grid RowDefinitions="40,65,65,*">
+    <Grid RowDefinitions="40,65,*">
         <Menu Grid.Row="0">
             <MenuItem Header="Save" Command="{Binding Save}"/>
         </Menu>
 
-        <HeaderedContentControl Grid.Row="1"
-                                Classes="Default"
-                                Margin="5"
-                                Header="EditorID">
-            <TextBox Text="{Binding EditableRecord.EditorID}"
-                     Width="400"
-                     HorizontalAlignment="Left"/>
-        </HeaderedContentControl>
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal">
+            <HeaderedContentControl Classes="Default"
+                                    Margin="5"
+                                    Header="EditorID">
+                <TextBox Text="{Binding EditableRecord.EditorID}"
+                         Width="400"
+                         HorizontalAlignment="Left"/>
+            </HeaderedContentControl>
 
-        <HeaderedContentControl Grid.Row="2"
-                                Classes="Default"
-                                Margin="5"
-                                Header="Name">
-            <TextBox Text="{Binding EditableRecord.NameStr}"
-                     Width="400"
-                     HorizontalAlignment="Left"/>
-        </HeaderedContentControl>
+            <HeaderedContentControl Classes="Default"
+                                    Margin="5"
+                                    Header="Name">
+                <TextBox Text="{Binding EditableRecord.NameStr}"
+                         Width="400"
+                         HorizontalAlignment="Left"/>
+            </HeaderedContentControl>
+        </StackPanel>
 
-        <TabControl Grid.Row="3">
+        <TabControl Grid.Row="2">
             <TabItem Header="General">
                 <Grid RowDefinitions="40,*">
                     <StackPanel Grid.Row="0"
@@ -64,7 +65,7 @@
             </TabItem>
 
             <TabItem Header="Vendor">
-               <faction:VendorEditor/>
+                <faction:VendorEditor/>
             </TabItem>
         </TabControl>
     </Grid>
