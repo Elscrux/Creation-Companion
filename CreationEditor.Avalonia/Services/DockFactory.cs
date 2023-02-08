@@ -51,6 +51,7 @@ public sealed class DockFactory : IDockFactory {
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Record Browser",
+                        Size = 500,
                     },
                     Dock = Dock.Left,
                     DockMode = DockMode.Side,
@@ -62,6 +63,7 @@ public sealed class DockFactory : IDockFactory {
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Cell Browser",
+                        Size = 400,
                     },
                     Dock = Dock.Left,
                     DockMode = DockMode.Side,
