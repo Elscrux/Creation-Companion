@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
+             xmlns:majorRecord="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.VendorEditor"
+             x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM">
+    <HeaderedContentControl Classes="GroupBox"
+                            Margin="5"
+                            FontSize="12">
+        <HeaderedContentControl.Header>
+            <CheckBox Content="Vendor"
+                      ToolTip.Tip="Allows you to specify bounty amounts allocated for specific crimes. "
+                      IsChecked="{Binding EditableRecord.Vendor}"/>
+        </HeaderedContentControl.Header>
+
+        <StackPanel IsEnabled="{Binding EditableRecord.Vendor}">
+            <HeaderedContentControl Classes="GroupBox"
+                                    Margin="5"
+                                    Header="Limitations" FontSize="12">
+                <StackPanel>
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Vendor Time Window">
+                        <!-- <xctk:RangeSlider Minimum="0" Maximum="24" -->
+                        <!--                   LowerValue="{Binding EditableRecord.VendorValues.StartHour, Mode=TwoWay}" -->
+                        <!--                   HigherValue="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}" -->
+                        <!--                   AutoToolTipPlacement="TopLeft" -->
+                        <!--                   IsSnapToTickEnabled="True" -->
+                        <!--                   RangeBackground="{DynamicResource SystemAccentColor}" -->
+                        <!--                   TickFrequency="1" TickPlacement="TopLeft" /> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Vendor Conditions"
+                                            ToolTip.Tip="Further limitations when the vendor offers goods.">
+                        <!-- <record:ConditionsEditor/> -->
+                    </HeaderedContentControl>
+                </StackPanel>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Classes="GroupBox"
+                                    Margin="5"
+                                    Header="Vendor Location" FontSize="12">
+                <StackPanel>
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Location"
+                                            ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
+                        <!-- <render:PlacedPicker /> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Radius"
+                                            ToolTip.Tip="How close the merchant needs to be to the set location.">
+                        <NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
+                                       Minimum="0"
+                                       Maximum="65535"
+                                       FormatString="N0"/>
+                    </HeaderedContentControl>
+                </StackPanel>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Classes="GroupBox"
+                                    Margin="5"
+                                    Header="Vendor Buy/Sell List" FontSize="12">
+                <StackPanel>
+                    <CheckBox Content="Not Buy/Sell"
+                              ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list."
+                              IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                              Margin="5"/>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="List"
+                                            ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
+                        <formKeyPicker:FormKeyPicker
+                            FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
+                            ScopedTypes="{x:Static constants:FormTypeConstants.FormListTypes}"
+                            LinkCache="{Binding LinkCache}"/>
+                    </HeaderedContentControl>
+                </StackPanel>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Classes="Default"
+                                    Margin="5"
+                                    Header="Vendor Chest"
+                                    ToolTip.Tip="Sets what container the merchant will sell goods from. Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above.">
+                <!-- <render:PlacedPicker/> -->
+            </HeaderedContentControl>
+
+            <CheckBox Content="Only Buy Stolen Items"
+                      ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
+                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                      Margin="5"/>
+        </StackPanel>
+    </HeaderedContentControl>
+</UserControl>

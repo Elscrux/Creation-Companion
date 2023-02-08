@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.FactionEditor"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:faction="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction"
+             xmlns:majorRecord="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord"
+             x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM"
+             d:DesignHeight="900" d:DesignWidth="900"
+             x:Name="Editor">
+    <Grid RowDefinitions="40,65,65,*">
+        <Menu Grid.Row="0">
+            <MenuItem Header="Save" Command="{Binding Save}"/>
+        </Menu>
+
+        <HeaderedContentControl Grid.Row="1"
+                                Classes="Default"
+                                Margin="5"
+                                Header="EditorID">
+            <TextBox Text="{Binding EditableRecord.EditorID}"
+                     Width="400"
+                     HorizontalAlignment="Left"/>
+        </HeaderedContentControl>
+
+        <HeaderedContentControl Grid.Row="2"
+                                Classes="Default"
+                                Margin="5"
+                                Header="Name">
+            <TextBox Text="{Binding EditableRecord.NameStr}"
+                     Width="400"
+                     HorizontalAlignment="Left"/>
+        </HeaderedContentControl>
+
+        <TabControl Grid.Row="3">
+            <TabItem Header="General">
+                <Grid RowDefinitions="40,*">
+                    <StackPanel Grid.Row="0"
+                                Orientation="Horizontal">
+                        <CheckBox Content="Hidden from PC"
+                                  IsChecked="{Binding EditableRecord.HiddenFromPc}"
+                                  Margin="5"
+                                  ToolTip.Tip="MISSING EXPLANATION"/>
+
+                        <CheckBox Content="Special Combat"
+                                  ToolTip.Tip="MISSING EXPLANATION"
+                                  IsChecked="{Binding EditableRecord.SpecialCombat}"
+                                  Margin="5"/>
+
+                        <CheckBox Content="Can Be Owner"
+                                  ToolTip.Tip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
+                                  IsChecked="{Binding EditableRecord.CanBeOwner}"
+                                  Margin="5"/>
+                    </StackPanel>
+
+                    <faction:RelationsEditor Grid.Row="1"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Ranks">
+                <faction:RanksEditor/>
+            </TabItem>
+
+            <TabItem Header="Crime">
+                <faction:CrimeEditor/>
+            </TabItem>
+
+            <TabItem Header="Vendor">
+               <faction:VendorEditor/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

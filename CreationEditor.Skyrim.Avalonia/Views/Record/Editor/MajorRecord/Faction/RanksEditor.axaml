@@ -1,0 +1,59 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
+             xmlns:skyrim="clr-namespace:Mutagen.Bethesda.Skyrim;assembly=Mutagen.Bethesda.Skyrim"
+             xmlns:majorRecord="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.RanksEditor"
+             x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM">
+    <HeaderedContentControl Classes="Default"
+                            Margin="5"
+                            Header="Ranks"
+                            FontSize="12">
+        <DataGrid Items="{Binding EditableRecord.Ranks}"
+                  Background="{DynamicResource SystemControlTransparentBrush}"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="False"
+                  AutoGenerateColumns="False"
+                  attached:DragDropExtended.AllowDrag="True"
+                  attached:DragDropExtended.AllowDrop="True"
+                  SelectionMode="Single"
+                  SelectedIndex="{Binding SelectedRankIndex}"
+                  MinHeight="250"
+                  attached:ListShortcuts.Add="{Binding AddRank}"
+                  attached:ListShortcuts.Remove="{Binding RemoveSelectedRank}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Male Title"
+                                   ToolTip.Tip="Male Title name, not visible in game"/>
+                    </DataGridTemplateColumn.Header>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="skyrim:Rank">
+                            <TextBox Text="{Binding Title.Male.String}"
+                                     Watermark="Male"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Female Title"
+                                   ToolTip.Tip="Female Title name, not visible in game"/>
+                    </DataGridTemplateColumn.Header>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="skyrim:Rank">
+                            <TextBox Text="{Binding Title.Female.String}"
+                                     Watermark="Female"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </HeaderedContentControl>
+</UserControl>

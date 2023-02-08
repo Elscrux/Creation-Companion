@@ -1,12 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord; 
 
 public sealed class EditableFaction : Faction, INotifyPropertyChanged {
-    public new ObservableCollection<Relation> Relations { get; set; }
+    public new ObservableCollection<EditableRelation> Relations { get; set; }
     public new ObservableCollection<Rank> Ranks { get; set; }
     public new CrimeValues CrimeValues { get; set; }
     public new VendorValues VendorValues { get; set; }
@@ -130,7 +132,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Name = parent.Name;
         FormKey = parent.FormKey;
         Flags = parent.Flags;
-        Relations = new ObservableCollection<Relation>(parent.Relations);
+        Relations = new ObservableCollection<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, Target = r.Target }));
         Ranks = new ObservableCollection<Rank>(parent.Ranks);
         
         CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
@@ -152,7 +154,8 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.EditorID = EditorID;
         faction.Name = Name;
         faction.Flags = Flags;
-        faction.Relations.SetTo(Relations);
+        faction.Relations.Clear();
+        faction.Relations.AddRange(Relations.Select(r => r.ToRelation()));
         
         for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
         faction.Ranks.SetTo(Ranks);

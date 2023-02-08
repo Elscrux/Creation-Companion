@@ -1,0 +1,235 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
+             xmlns:majorRecord="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.CrimeEditor"
+             x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM">
+    <StackPanel>
+        <HeaderedContentControl Classes="GroupBox"
+                                Margin="5"
+                                Header="Ignored Crimes"
+                                FontSize="12">
+            <StackPanel Orientation="Horizontal">
+                <HeaderedContentControl
+                    Classes="GroupBox"
+                    Margin="5"
+                    Header="Against non-members"
+                    FontSize="12">
+                    <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
+                        <CheckBox Grid.Row="0" Grid.Column="0"
+                                  Content="Ignore Murder"
+                                  ToolTip.Tip="Major Crime: Killing a guard or civilian"
+                                  IsChecked="{Binding EditableRecord.IgnoreMurder}"
+                                  Margin="5"/>
+
+                        <CheckBox Grid.Row="0" Grid.Column="1"
+                                  Content="Ignore Assault"
+                                  ToolTip.Tip="Major Crime: Attacking a guard or civilian"
+                                  IsChecked="{Binding EditableRecord.IgnoreAssault}"
+                                  Margin="5"/>
+
+                        <CheckBox Grid.Row="0" Grid.Column="2"
+                                  Content="Ignore Werewolf"
+                                  ToolTip.Tip="Special Crime: Being in or transforming to/from Beast Form in sight of a guard or civilian."
+                                  IsChecked="{Binding EditableRecord.IgnoreWerewolf}"
+                                  Margin="5"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="0"
+                                  Content="Ignore Stealing"
+                                  ToolTip.Tip="Minor Crime: Taking an item marked 'Steal'."
+                                  IsChecked="{Binding EditableRecord.IgnoreStealing}"
+                                  Margin="5"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="1"
+                                  Content="Ignore Trespass"
+                                  ToolTip.Tip="Minor Crime: Entering a cell marked 'Off Limits', or failing to leave an owned cell when instructed to do so by the owner."
+                                  IsChecked="{Binding EditableRecord.IgnoreTrespass}"
+                                  Margin="5"/>
+
+                        <CheckBox Grid.Row="1" Grid.Column="2"
+                                  Content="Ignore Pickpocket"
+                                  ToolTip.Tip="Minor Crime: Trying and failing to pickpocket an item in another actor's inventory"
+                                  IsChecked="{Binding EditableRecord.IgnorePickpocket}"
+                                  Margin="5"/>
+                    </Grid>
+                </HeaderedContentControl>
+
+                <HeaderedContentControl Classes="GroupBox"
+                                        Margin="5"
+                                        Header="Against members"
+                                        FontSize="12">
+                    <CheckBox Content="Ignore all crimes"
+                              ToolTip.Tip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
+                              IsChecked="{Binding EditableRecord.DoNotReportCrimesAgainstMembers}"
+                              Margin="5"/>
+                </HeaderedContentControl>
+            </StackPanel>
+        </HeaderedContentControl>
+
+        <HeaderedContentControl Classes="GroupBox"
+                                Margin="5">
+            <HeaderedContentControl.Header>
+                <CheckBox Content="Track Crime"
+                          ToolTip.Tip="If a faction is flagged to track crime, its members will remember crimes against it."
+                          IsChecked="{Binding EditableRecord.TrackCrime}"/>
+            </HeaderedContentControl.Header>
+
+            <StackPanel Orientation="Horizontal"
+                        IsEnabled="{Binding EditableRecord.TrackCrime}">
+                <StackPanel>
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Exterior Jail Marker"
+                                            ToolTip.Tip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building.">
+                        <!-- <render:PlacedPicker/> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Follow Wait Marker"
+                                            ToolTip.Tip="A marker near which followers will wait if the player gets sent to jail.">
+                        <!-- <render:PlacedPicker/> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Stolen Goods Container"
+                                            ToolTip.Tip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference.">
+                        <!-- <render:PlacedPicker/> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Player Inventory Container"
+                                            ToolTip.Tip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference.">
+                        <!-- <render:PlacedPicker/> -->
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Jail Outfit"
+                                            ToolTip.Tip="The clothes given to the player in prison. Usually BeggarOutfit.">
+                        <formKeyPicker:FormKeyPicker
+                            FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
+                            ScopedTypes="{x:Static constants:FormTypeConstants.OutfitTypes}"
+                            LinkCache="{Binding LinkCache}"/>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Classes="Default"
+                                            Margin="5"
+                                            Header="Shared Crime Faction List"
+                                            ToolTip.Tip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown.">
+                        <formKeyPicker:FormKeyPicker
+                            FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
+                            ScopedTypes="{x:Static constants:FormTypeConstants.FormListTypes}"
+                            LinkCache="{Binding LinkCache}"/>
+                    </HeaderedContentControl>
+
+                    <CheckBox Content="Attack on Sight"
+                              ToolTip.Tip="If checked, guards will attack the player on sight if crime gold is high enough."
+                              IsChecked="{Binding EditableRecord.CrimeValues.AttackOnSight}"
+                              Margin="5"/>
+
+                    <CheckBox Content="Arrest"
+                              ToolTip.Tip="If checked, guards will try to arrest the player."
+                              IsChecked="{Binding EditableRecord.CrimeValues.Arrest}"
+                              Margin="5"/>
+                </StackPanel>
+
+                <StackPanel>
+                    <HeaderedContentControl Classes="GroupBox"
+                                            Margin="5"
+                                            Header="Crime Gold" FontSize="12"
+                                            ToolTip.Tip="Allows you to specify bounty amounts allocated for specific crimes.">
+
+                        <HeaderedContentControl Classes="Default"
+                                                Margin="5"
+                                                Background="{DynamicResource ButtonBackground}">
+                            <HeaderedContentControl.Header>
+                                <CheckBox Content="Use Defaults"
+                                          IsChecked="{Binding EditableRecord.CrimeGoldUseDefaults}"/>
+                            </HeaderedContentControl.Header>
+
+                            <StackPanel IsEnabled="{Binding !EditableRecord.CrimeGoldUseDefaults}">
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Murder">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Murder}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Assault">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Assault}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Pickpocket">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Pickpocket}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Trespass">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Trespass}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="StealMult">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.StealMult}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        Increment="0.1"
+                                        FormatString="N4"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Escape">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Escape}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Werewolf">
+                                    <NumericUpDown
+                                        Value="{Binding EditableRecord.CrimeValues.Werewolf}"
+                                        Minimum="0"
+                                        Maximum="65535"
+                                        FormatString="N0"/>
+                                </HeaderedContentControl>
+                            </StackPanel>
+                        </HeaderedContentControl>
+                    </HeaderedContentControl>
+                </StackPanel>
+            </StackPanel>
+        </HeaderedContentControl>
+    </StackPanel>
+</UserControl>

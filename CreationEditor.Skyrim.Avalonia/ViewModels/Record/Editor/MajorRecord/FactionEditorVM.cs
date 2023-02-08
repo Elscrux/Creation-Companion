@@ -5,15 +5,16 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Services.Environment;
-using CreationEditor.Skyrim.Avalonia.Models.Record.Editor;
+using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
+using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using FactionEditor = CreationEditor.Skyrim.Avalonia.Views.Record.Editor.FactionEditor;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor;
+using FactionEditor = CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.FactionEditor;
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord;
 
 public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFactionGetter> {
     IMajorRecordGetter IRecordEditorVM.Record => Record;
@@ -46,7 +47,9 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Faction, IFacti
         });
         
         AddRelation = ReactiveCommand.Create(() => {
-            EditableRecord.Relations.Add(new Relation());
+            var relation = new EditableRelation { Reaction = CombatReaction.Neutral };
+            EditableRecord.Relations.Add(relation);
+            // todo adding like that makes is that when you fill the relations, they all get the same relation because every new selection overrides the old ones
         });
         
         RemoveSelectedRelations = ReactiveCommand.Create(() => {
