@@ -19,7 +19,6 @@
     </Style>
     <Style Selector="
                 docking|DockedControl.BorderedDock.AccentSelected:focus-within,
-                docking|DocumentDock.BorderedDock.AccentSelected:focus-within,
                 ContentControl.BorderedDock.AccentSelected:focus-within">
         <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
