@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -155,6 +157,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sameGrid && oldIndex == newIndex) return;
         
         // Remove old item
+        oldDataGrid.SelectedItem = null;
         oldList.Remove(dragItem);
         
         // Add new item
