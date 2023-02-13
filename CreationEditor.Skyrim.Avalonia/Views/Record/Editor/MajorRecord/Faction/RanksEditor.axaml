@@ -23,6 +23,7 @@
                   SelectionMode="Single"
                   SelectedIndex="{Binding SelectedRankIndex}"
                   MinHeight="250"
+                  Classes="NoRowSelection"
                   attached:ListShortcuts.Add="{Binding AddRank}"
                   attached:ListShortcuts.Remove="{Binding RemoveSelectedRank}">
             <DataGrid.Columns>
