@@ -18,6 +18,7 @@ public sealed class DragDropExtended : AvaloniaObject {
     public static readonly AttachedProperty<bool> AllowDragProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrag");
     public static readonly AttachedProperty<bool> AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrop");
     public static readonly AttachedProperty<Func<object, bool>> CanDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, bool>>("CanDrop");
+    public static readonly AttachedProperty<Func<object, object?>> DropSelectorProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, object?>>("DropSelector");
     
     public static bool GetAllowDrag(AvaloniaObject obj) => obj.GetValue(AllowDragProperty);
     public static void SetAllowDrag(AvaloniaObject obj, bool value) => obj.SetValue(AllowDragProperty, value);
@@ -27,6 +28,9 @@ public sealed class DragDropExtended : AvaloniaObject {
     
     public static Func<object, bool> GetCanDrop(AvaloniaObject obj) => obj.GetValue(CanDropProperty);
     public static void SetCanDrop(AvaloniaObject obj, Func<object, bool> value) => obj.SetValue(CanDropProperty, value);
+    
+    public static Func<object, object?> GetDropSelector(AvaloniaObject obj) => obj.GetValue(DropSelectorProperty);
+    public static void SetDropSelector(AvaloniaObject obj, Func<object, object?> value) => obj.SetValue(DropSelectorProperty, value);
     
     static DragDropExtended() {
         AllowDragProperty.Changed
@@ -195,7 +199,6 @@ public sealed class DragDropExtended : AvaloniaObject {
 
         var oldRowObject = e.Data?.Get(DataGridRow);
         if (oldRowObject is not DataGridRow { DataContext: {} dragItem } oldRow) return false;
-        if (dragItem.GetType() != hoverItem.GetType()) return false;
 
         if (e.Data?.Contains(DataGrid) is not true) return false;
 
@@ -206,7 +209,21 @@ public sealed class DragDropExtended : AvaloniaObject {
         var newDataGrid = newRow.FindAncestorOfType<DataGrid>();
         if (newDataGrid?.Items is not IList newList) return false;
 
+        var selector = newDataGrid.GetValue(DropSelectorProperty);
+        
+        var hoverType = hoverItem.GetType();
+        
         outDragItem = dragItem;
+        if (dragItem.GetType() != hoverType) {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (selector != null) {
+                var transformedDragItem = selector(dragItem);
+                if (transformedDragItem?.GetType() != hoverType) return false;
+
+                outDragItem = transformedDragItem;
+            }
+        }
+        
         outOldRow = oldRow;
         outOldDataGrid = oldDataGrid;
         outOldList = oldList;
