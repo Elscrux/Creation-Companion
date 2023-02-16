@@ -195,6 +195,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     public AFormKeyPicker() {
         ToggleViewAllowedTypesCommand = ReactiveCommand.Create(() => ViewingAllowedTypes = !ViewingAllowedTypes);
     }
+    
+    private const string LocatedRecord = "Located record";
+    private const string LinkCacheMissing = "No LinkCache is provided for lookup";
+    private const string FormKeyNull = "FormKey is null.  No lookup required";
+    private const string FormKeyNotResolved = "Could not resolve record";
+    private const string FormKeyBlacklisted = "FormKey is blacklisted";
+    private const string FormKeyFiltered = "FormKey filtered out";
 
     protected override void OnLoaded() {
         base.OnLoaded();
@@ -217,20 +224,20 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .Select(x => {
                 try {
                     if (x.LinkCache == null) {
-                        return new State(StatusIndicatorState.Passive, "No LinkCache is provided for lookup", FormKey.Null, string.Empty);
+                        return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
                     if (x.FormKey.IsNull) {
-                        return new State(StatusIndicatorState.Passive, "FormKey is null.  No lookup required", FormKey.Null, string.Empty);
+                        return new State(StatusIndicatorState.Passive, FormKeyNull, FormKey.Null, string.Empty);
                     }
                     var scopedTypes = ScopedTypesInternal(x.Types);
                     return x.LinkCache.TryResolveIdentifier(x.FormKey, scopedTypes, out var editorId)
-                        ? new State(StatusIndicatorState.Success, "Located record", x.FormKey, editorId ?? string.Empty)
-                        : new State(StatusIndicatorState.Failure, "Could not resolve record", x.FormKey, string.Empty);
+                        ? new State(StatusIndicatorState.Success, LocatedRecord, x.FormKey, editorId ?? string.Empty)
+                        : new State(StatusIndicatorState.Failure, FormKeyNotResolved, x.FormKey, string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
             })
-            .StartWith(new State(StatusIndicatorState.Passive, "FormKey is null.  No lookup required", FormKey.Null, string.Empty))
+            .StartWith(new State(StatusIndicatorState.Passive, FormKeyNull, FormKey.Null, string.Empty))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Do(rec => {
                 if (Processing) Processing = false;
@@ -296,9 +303,9 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     var scopedTypes = ScopedTypesInternal(types);
                     return linkCache.TryResolveIdentifier(editorID, scopedTypes, out var formKey)
                         ? blacklistFormKeys != null && blacklistFormKeys.Contains(formKey)
-                            ? new State(StatusIndicatorState.Passive, "FormKey is blacklisted", FormKey.Null, string.Empty)
-                            : new State(StatusIndicatorState.Success, "Located record", formKey, editorID)
-                        : new State(StatusIndicatorState.Failure, "Could not resolve record", FormKey.Null, string.Empty);
+                            ? new State(StatusIndicatorState.Passive, FormKeyBlacklisted, FormKey.Null, string.Empty)
+                            : new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorID)
+                        : new State(StatusIndicatorState.Failure, FormKeyFiltered, FormKey.Null, string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
@@ -374,7 +381,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
                     if (FormKey.TryFactory(x.Raw, out var formKey)) {
                         if (x.BlacklistFormKeys != null && x.BlacklistFormKeys.Contains(formKey)) {
-                            return new State(StatusIndicatorState.Passive, "FormKey is blacklisted", FormKey.Null, string.Empty);
+                            return new State(StatusIndicatorState.Passive, FormKeyBlacklisted, FormKey.Null, string.Empty);
                         }
 
                         if (x.LinkCache == null) {
@@ -382,19 +389,19 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         }
 
                         if (x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var editorId)) {
-                            return new State(StatusIndicatorState.Success, "Located record", formKey, editorId ?? string.Empty);
+                            return new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty);
                         }
                         
                         var formKeyToUse = x.MissingMeansNull ? FormKey.Null : formKey;
                         return new State(
                             x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
-                            "Could not resolve record",
+                            FormKeyNotResolved,
                             formKeyToUse,
                             string.Empty);
                     }
 
                     if (x.LinkCache == null) {
-                        return new State(StatusIndicatorState.Passive, "No LinkCache is provided for lookup", FormKey.Null, string.Empty);
+                        return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
 
                     if (FormID.TryFactory(x.Raw, out var formID, strictLength: true)) {
@@ -402,12 +409,12 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                             var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
                             formKey = new FormKey(targetMod.ModKey, formID.ID);
                             return x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var editorId)
-                                ? new State(StatusIndicatorState.Success, "Located record", formKey, editorId ?? string.Empty)
-                                : new State(StatusIndicatorState.Failure, "Could not resolve record", FormKey.Null, string.Empty);
+                                ? new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty)
+                                : new State(StatusIndicatorState.Failure, FormKeyNotResolved, FormKey.Null, string.Empty);
                         }
                     }
 
-                    return new State(StatusIndicatorState.Failure, "Could not resolve record", FormKey.Null, string.Empty);
+                    return new State(StatusIndicatorState.Failure, FormKeyNotResolved, FormKey.Null, string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
