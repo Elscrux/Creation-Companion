@@ -1,13 +1,17 @@
 ﻿using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using DynamicData;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
@@ -26,6 +30,8 @@ public class RecordListVM : ViewModel, IRecordListVM {
     [Reactive] private bool IsFiltering { get; set; }
     
     public ReactiveCommand<Unit, Unit> OpenReferences { get; }
+    
+    public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }
 
     public RecordListVM(
         IRecordProvider recordProvider,
@@ -59,6 +65,13 @@ public class RecordListVM : ViewModel, IRecordListVM {
             .Filter(RecordProvider.Filter)
             .DoOnGuiAndSwitchBack(_ => IsFiltering = false)
             .ToObservableCollection(this);
+
+        GetFormLink = element => {
+            if (RecordProvider.SelectedRecord == null) return FormLinkInformation.Null;
+            if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;
+
+            return referencedRecord.Record.ToLink();
+        };
         
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);
         ContextMenuItems.Add(new MenuItem { Header = "Open References", Command = OpenReferences });

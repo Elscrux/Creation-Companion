@@ -18,6 +18,8 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
+                  attached:FormLinkDragDrop.AllowDragDataGrid="True"
+                  attached:FormLinkDragDrop.GetFormLink="{Binding GetFormLink}"
                   attached:DoubleTappedProperty.Command="{Binding RecordProvider.DoubleTapCommand}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
