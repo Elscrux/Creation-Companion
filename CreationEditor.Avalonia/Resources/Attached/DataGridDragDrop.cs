@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.ObjectModel;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -38,7 +36,10 @@ public sealed class DragDropExtended : AvaloniaObject {
                 if (allowDrag.Sender is not DataGrid dataGrid) return;
                 
                 var state = allowDrag.NewValue.GetValueOrDefault<bool>();
-                dataGrid.LoadingRow += (_, args) => {
+                
+                dataGrid.LoadingRow -= OnDataGridOnLoadingRow;
+                dataGrid.LoadingRow += OnDataGridOnLoadingRow;
+                void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
                         // Tunnel routing is required because of the way data grid behaves - otherwise the event is not passed 
                         args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
@@ -46,11 +47,13 @@ public sealed class DragDropExtended : AvaloniaObject {
                     } else {
                         args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
                     }
-                };
+                }
                 
-                dataGrid.UnloadingRow += (_, args) => {
+                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
+                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
+                void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
                     args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
-                };
+                }
             });
         
         AllowDropProperty.Changed
@@ -60,7 +63,10 @@ public sealed class DragDropExtended : AvaloniaObject {
                 dataGrid.SetValue(DragDrop.AllowDropProperty, allowDrop.NewValue.Value);
                 
                 var state = allowDrop.NewValue.GetValueOrDefault<bool>();
-                dataGrid.LoadingRow += (_, args) => {
+                
+                dataGrid.LoadingRow -= OnDataGridOnLoadingRow;
+                dataGrid.LoadingRow += OnDataGridOnLoadingRow;
+                void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
                         args.Row.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                         args.Row.AddHandler(DragDrop.DragEnterEvent, DragEnter);
@@ -75,13 +81,15 @@ public sealed class DragDropExtended : AvaloniaObject {
                         args.Row.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                         args.Row.RemoveHandler(DragDrop.DropEvent, Drop);
                     }
-                };
+                }
                 
-                dataGrid.UnloadingRow += (_, args) => {
+                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
+                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
+                void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
                     args.Row.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                     args.Row.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                     args.Row.RemoveHandler(DragDrop.DropEvent, Drop);
-                };
+                }
             });
     }
     
