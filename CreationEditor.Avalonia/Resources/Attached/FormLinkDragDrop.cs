@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
+using CreationEditor.Avalonia.Constants;
 using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Avalonia.Attached;
 
@@ -32,13 +32,6 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
     public static Func<IFormLinkIdentifier, bool> GetCanSetFormLink(AvaloniaObject obj) => obj.GetValue(CanSetFormLinkProperty);
     public static void SetCanSetFormLink(AvaloniaObject obj, Func<IFormLinkIdentifier, bool> value) => obj.SetValue(CanSetFormLinkProperty, value);
-
-    public static IBrush? Brush =>
-        Application.Current != null
-     && Application.Current.TryFindResource("SystemAccentColor", out var obj)
-     && obj is Color color
-            ? new SolidColorBrush(color)
-            : null;
 
     static FormLinkDragDrop() {
         AllowDragDataGridProperty.Changed
@@ -199,9 +192,6 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         var setFormLink = GetSetFormLink(visual);
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (setFormLink == null) return;
-
-        var formLink = GetData(e);
-        if (formLink == null) return;
 
         // Hide adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, null);

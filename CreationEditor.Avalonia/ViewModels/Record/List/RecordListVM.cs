@@ -10,7 +10,6 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
 using DynamicData;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -67,10 +66,9 @@ public class RecordListVM : ViewModel, IRecordListVM {
             .ToObservableCollection(this);
 
         GetFormLink = element => {
-            if (RecordProvider.SelectedRecord == null) return FormLinkInformation.Null;
             if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;
 
-            return referencedRecord.Record.ToLink();
+            return FormLinkInformation.Factory(referencedRecord.Record);
         };
         
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);

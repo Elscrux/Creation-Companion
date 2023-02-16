@@ -5,11 +5,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Attached;
-using FluentAvalonia.Core;
-using Mutagen.Bethesda;
+using CreationEditor.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 namespace CreationEditor.Avalonia.FormKeyPicker;
 
 // Ported from Mutagen.Bethesda.WPF by Noggog
@@ -48,7 +46,7 @@ public class FormKeyPicker : AFormKeyPicker {
         dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty, _ => {
             if (LinkCache == null || !LinkCache.TryResolve(FormKey, ScopedTypesInternal(ScopedTypes), out var record)) return FormLinkInformation.Null;
 
-            return record.ToLinkGetter();
+            return FormLinkInformation.Factory(record);
         });
 
         SetValue(FormLinkDragDrop.SetFormLinkProperty, formLink => FormKey = formLink.FormKey);
@@ -56,7 +54,7 @@ public class FormKeyPicker : AFormKeyPicker {
         SetValue(FormLinkDragDrop.CanSetFormLinkProperty, formLink => {
             // FormLink type needs to be in scoped type
             var scopedTypesInternal = ScopedTypesInternal(ScopedTypes).ToList();
-            if (!ScopedTypes.Contains(formLink.Type) && !scopedTypesInternal.Any(x => x.GetInterfaces().Contains(formLink.Type))) return false;
+            if (scopedTypesInternal.ContainsInterface(formLink.Type)) return false;
 
             // FormKey must not be blacklisted
             if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
