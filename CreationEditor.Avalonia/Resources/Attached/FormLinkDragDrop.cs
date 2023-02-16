@@ -15,6 +15,8 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
     public static readonly AttachedProperty<Func<StyledElement, IFormLinkIdentifier>> GetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<StyledElement, IFormLinkIdentifier>>("GetFormLink");
     public static readonly AttachedProperty<Action<IFormLinkIdentifier>> SetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Action<IFormLinkIdentifier>>("SetFormLink");
+    
+    public static readonly AttachedProperty<Func<IFormLinkIdentifier, bool>> CanSetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<IFormLinkIdentifier, bool>>("CanSetFormLink");
 
     public static bool GetAllowDragDataGrid(AvaloniaObject obj) => obj.GetValue(AllowDragDataGridProperty);
     public static void SetAllowDragDataGrid(AvaloniaObject obj, bool value) => obj.SetValue(AllowDragDataGridProperty, value);
@@ -27,6 +29,9 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
     public static Action<IFormLinkIdentifier> GetSetFormLink(AvaloniaObject obj) => obj.GetValue(SetFormLinkProperty);
     public static void SetSetFormLink(AvaloniaObject obj, Action<IFormLinkIdentifier> value) => obj.SetValue(SetFormLinkProperty, value);
+
+    public static Func<IFormLinkIdentifier, bool> GetCanSetFormLink(AvaloniaObject obj) => obj.GetValue(CanSetFormLinkProperty);
+    public static void SetCanSetFormLink(AvaloniaObject obj, Func<IFormLinkIdentifier, bool> value) => obj.SetValue(CanSetFormLinkProperty, value);
 
     public static IBrush? Brush =>
         Application.Current != null
@@ -156,12 +161,12 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
         AdornerLayer.SetAdorner(visual, null);
 
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-        if (e.Data?.Contains(FormLink) is not true) return;
+        var formLink = GetData(e);
+        if (formLink == null) return;
 
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-        var formLinkObject = e.Data?.Get(FormLink);
-        if (formLinkObject is not IFormLinkGetter formLink) return;
+        var canSetFormLink = GetCanSetFormLink(visual);
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (canSetFormLink != null && !canSetFormLink(formLink)) return;
 
         var formLinkSetter = GetSetFormLink(visual);
         formLinkSetter(formLink);
@@ -174,9 +179,15 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (setFormLink == null) return;
 
+        var formLink = GetData(e);
+        if (formLink == null) return;
+
+        var canSetFormLink = GetCanSetFormLink(visual);
+
         // Show adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, new Border {
-            BorderBrush = Brush,
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            BorderBrush = canSetFormLink != null && canSetFormLink(formLink) ? Brush : Brushes.Red,
             BorderThickness = new Thickness(2),
             IsHitTestVisible = false,
         });
@@ -189,7 +200,20 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (setFormLink == null) return;
 
+        var formLink = GetData(e);
+        if (formLink == null) return;
+
         // Hide adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, null);
+    }
+    
+    private static IFormLinkIdentifier? GetData(DragEventArgs e) {
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        if (e.Data?.Contains(FormLink) is not true) return null;
+
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        var formLinkObject = e.Data?.Get(FormLink);
+        
+        return formLinkObject as IFormLinkGetter;
     }
 }

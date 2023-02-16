@@ -51,21 +51,23 @@ public class FormKeyPicker : AFormKeyPicker {
             return record.ToLinkGetter();
         });
 
-        SetValue(FormLinkDragDrop.SetFormLinkProperty, formLink => {
+        SetValue(FormLinkDragDrop.SetFormLinkProperty, formLink => FormKey = formLink.FormKey);
+
+        SetValue(FormLinkDragDrop.CanSetFormLinkProperty, formLink => {
             // FormLink type needs to be in scoped type
             var scopedTypesInternal = ScopedTypesInternal(ScopedTypes).ToList();
-            if (!ScopedTypes.Contains(formLink.Type) && !scopedTypesInternal.Any(x => x.GetInterfaces().Contains(formLink.Type))) return;
+            if (!ScopedTypes.Contains(formLink.Type) && !scopedTypesInternal.Any(x => x.GetInterfaces().Contains(formLink.Type))) return false;
 
             // FormKey must not be blacklisted
-            if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return;
+            if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
 
             // FormKey must be resolved
-            if (LinkCache == null || !LinkCache.TryResolveIdentifier(formLink.FormKey, scopedTypesInternal, out var editorId)) return;
+            if (LinkCache == null || !LinkCache.TryResolveIdentifier(formLink.FormKey, scopedTypesInternal, out var editorId)) return false;
 
             // Record needs to satisfy the filter
-            if (Filter != null && !Filter(formLink.FormKey, editorId)) return;
+            if (Filter != null && !Filter(formLink.FormKey, editorId)) return false;
 
-            FormKey = formLink.FormKey;
+            return true;
         });
     }
 
