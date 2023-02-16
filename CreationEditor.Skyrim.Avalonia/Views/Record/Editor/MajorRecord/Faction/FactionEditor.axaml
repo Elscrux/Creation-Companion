@@ -7,74 +7,76 @@
              x:CompileBindings="True" x:DataType="vm:FactionEditorVM"
              d:DesignHeight="900" d:DesignWidth="900"
              x:Name="Editor">
-    <Grid RowDefinitions="40,65,*">
-        <Menu Grid.Row="0">
-            <MenuItem Header="Save" Command="{Binding Save}"/>
-        </Menu>
+    <ScrollViewer>
+        <Grid RowDefinitions="40,65,*">
+            <Menu Grid.Row="0">
+                <MenuItem Header="Save" Command="{Binding Save}"/>
+            </Menu>
 
-        <StackPanel Grid.Row="1"
-                    Orientation="Horizontal">
-            <HeaderedContentControl Classes="Default"
-                                    Margin="5"
-                                    Header="EditorID">
-                <TextBox Text="{Binding EditableRecord.EditorID}"
-                         Width="400"
-                         HorizontalAlignment="Left"/>
-            </HeaderedContentControl>
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal">
+                <HeaderedContentControl Classes="Default"
+                                        Margin="5"
+                                        Header="EditorID">
+                    <TextBox Text="{Binding EditableRecord.EditorID}"
+                             Width="400"
+                             HorizontalAlignment="Left"/>
+                </HeaderedContentControl>
 
-            <HeaderedContentControl Classes="Default"
-                                    Margin="5"
-                                    Header="Name">
-                <TextBox Text="{Binding EditableRecord.NameStr}"
-                         Width="400"
-                         HorizontalAlignment="Left"/>
-            </HeaderedContentControl>
-        </StackPanel>
+                <HeaderedContentControl Classes="Default"
+                                        Margin="5"
+                                        Header="Name">
+                    <TextBox Text="{Binding EditableRecord.NameStr}"
+                             Width="400"
+                             HorizontalAlignment="Left"/>
+                </HeaderedContentControl>
+            </StackPanel>
 
-        <TabControl Grid.Row="2">
-            <TabItem Header="General">
-                <Grid RowDefinitions="40,*">
-                    <StackPanel Grid.Row="0"
-                                Orientation="Horizontal">
-                        <CheckBox Content="Hidden from PC"
-                                  IsChecked="{Binding EditableRecord.HiddenFromPc}"
-                                  Margin="5"
-                                  ToolTip.Tip="MISSING EXPLANATION"/>
+            <TabControl Grid.Row="2">
+                <TabItem Header="General">
+                    <Grid RowDefinitions="40,*">
+                        <StackPanel Grid.Row="0"
+                                    Orientation="Horizontal">
+                            <CheckBox Content="Hidden from PC"
+                                      IsChecked="{Binding EditableRecord.HiddenFromPc}"
+                                      Margin="5"
+                                      ToolTip.Tip="MISSING EXPLANATION"/>
 
-                        <CheckBox Content="Special Combat"
-                                  ToolTip.Tip="MISSING EXPLANATION"
-                                  IsChecked="{Binding EditableRecord.SpecialCombat}"
-                                  Margin="5"/>
+                            <CheckBox Content="Special Combat"
+                                      ToolTip.Tip="MISSING EXPLANATION"
+                                      IsChecked="{Binding EditableRecord.SpecialCombat}"
+                                      Margin="5"/>
 
-                        <CheckBox
-                            Content="Can Be Owner"
-                            ToolTip.Tip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
-                            IsChecked="{Binding EditableRecord.CanBeOwner}"
-                            Margin="5"/>
-                    </StackPanel>
+                            <CheckBox
+                                Content="Can Be Owner"
+                                ToolTip.Tip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
+                                IsChecked="{Binding EditableRecord.CanBeOwner}"
+                                Margin="5"/>
+                        </StackPanel>
 
-                    <view:RelationsEditor Grid.Row="1"
-                                          DataContext="{Binding RelationEditorVM}"/>
-                </Grid>
-            </TabItem>
+                        <view:RelationsEditor Grid.Row="1"
+                                              DataContext="{Binding RelationEditorVM}"/>
+                    </Grid>
+                </TabItem>
 
-            <TabItem Header="Ranks">
-                <Grid>
-                    <view:RanksEditor DataContext="{Binding RankEditorVM}"/>
-                </Grid>
-            </TabItem>
+                <TabItem Header="Ranks">
+                    <Grid>
+                        <view:RanksEditor DataContext="{Binding RankEditorVM}"/>
+                    </Grid>
+                </TabItem>
 
-            <TabItem Header="Crime">
-                <Grid>
-                    <view:CrimeEditor/>
-                </Grid>
-            </TabItem>
+                <TabItem Header="Crime">
+                    <Grid>
+                        <view:CrimeEditor/>
+                    </Grid>
+                </TabItem>
 
-            <TabItem Header="Vendor">
-                <Grid>
-                    <view:VendorEditor/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>
+                <TabItem Header="Vendor">
+                    <Grid>
+                        <view:VendorEditor/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
