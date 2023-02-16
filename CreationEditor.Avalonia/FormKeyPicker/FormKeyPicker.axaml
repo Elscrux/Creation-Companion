@@ -38,12 +38,30 @@
                                      x:Name="PART_EditorIDBox"
                                      Margin="-1"
                                      Watermark="EditorID"
-                                     Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}" />
+                                     Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
                             <TextBox Grid.Row="0" Grid.Column="2"
                                      x:Name="PART_FormKeyBox"
                                      Margin="-1"
                                      Watermark="FormKey"
-                                     Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}" />
+                                     Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            
+                            <Button Grid.Row="0" Grid.Column="0"
+                                    Command="{TemplateBinding Clear}"
+                                    Width="10" Height="10"
+                                    Padding="0"
+                                    Margin="5"
+                                    HorizontalAlignment="Right"
+                                    HorizontalContentAlignment="Center">
+                                <Button.IsVisible>
+                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                        <Binding Path="$parent.IsPointerOver"/>
+                                        <TemplateBinding Property="Found"/>
+                                    </MultiBinding>
+                                </Button.IsVisible>
+                                
+                                <fluentIcons:FluentIcon Icon="Dismiss12Regular"
+                                                        ToolTip.Tip="Clear" />
+                            </Button>
 
                             <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
                             <!-- PassiveBrush="{TemplateBinding PassiveBrush}" -->

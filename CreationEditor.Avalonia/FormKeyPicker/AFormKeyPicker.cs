@@ -184,12 +184,24 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         set => SetValue(ViewAllowedTypesCommandProperty, value);
     }
     public static readonly StyledProperty<ICommand> ViewAllowedTypesCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(ToggleViewAllowedTypesCommand));
+
+    public ICommand Clear {
+        get => GetValue(ClearProperty);
+        set => SetValue(ClearProperty, value);
+    }
+    public static readonly StyledProperty<ICommand> ClearProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(Clear));
     #endregion
 
     private sealed record State(StatusIndicatorState Status, string Text, FormKey FormKey, string EditorID);
 
     public AFormKeyPicker() {
         ToggleViewAllowedTypesCommand = ReactiveCommand.Create(() => ViewingAllowedTypes = !ViewingAllowedTypes);
+        
+        Clear = ReactiveCommand.Create(() => {
+            FormKey = FormKey.Null;
+            Status = StatusIndicatorState.Passive;
+            Found = false;
+        });
     }
     
     private const string LocatedRecord = "Located record";
