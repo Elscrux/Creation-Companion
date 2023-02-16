@@ -51,6 +51,7 @@
                                     Padding="0"
                                     Margin="5"
                                     HorizontalAlignment="Right"
+                                    Classes="Transparent"
                                     VerticalAlignment="Center">
                                 <Button.IsVisible>
                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
