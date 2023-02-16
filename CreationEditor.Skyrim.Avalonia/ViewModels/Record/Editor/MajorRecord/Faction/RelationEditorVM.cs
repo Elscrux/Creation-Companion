@@ -35,4 +35,9 @@ public class RelationEditorVM : ViewModel {
             FactionEditorVM.EditableRecord.Relations.RemoveAt(SelectedRelationIndex);
         });
     }
+    
+    public bool CanDrop(object o) {
+        return o is EditableRelation relation
+         && !BlacklistedFormKeys.Contains(relation.TargetFormKey);
+    }
 }

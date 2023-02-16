@@ -187,7 +187,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         // Show adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, new Border {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            BorderBrush = canSetFormLink != null && canSetFormLink(formLink) ? Brush : Brushes.Red,
+            BorderBrush = canSetFormLink != null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
             BorderThickness = new Thickness(2),
             IsHitTestVisible = false,
         });

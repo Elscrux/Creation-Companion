@@ -18,7 +18,8 @@
                             Margin="5"
                             Header="Interfaction Relations"
                             FontSize="12">
-        <DataGrid Items="{Binding FactionEditorVM.EditableRecord.Relations}"
+        <DataGrid x:Name="RelationsGrid"
+                  Items="{Binding FactionEditorVM.EditableRecord.Relations}"
                   Background="{DynamicResource SystemControlTransparentBrush}"
                   CanUserReorderColumns="False"
                   CanUserResizeColumns="True"
