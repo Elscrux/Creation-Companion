@@ -216,12 +216,12 @@ public sealed class DragDropExtended : AvaloniaObject {
         outDragItem = dragItem;
         if (dragItem.GetType() != hoverType) {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (selector != null) {
-                var transformedDragItem = selector(dragItem);
-                if (transformedDragItem?.GetType() != hoverType) return false;
+            if (selector == null) return false;
 
-                outDragItem = transformedDragItem;
-            }
+            var transformedDragItem = selector(dragItem);
+            if (transformedDragItem?.GetType() != hoverType) return false;
+
+            outDragItem = transformedDragItem;
         }
         
         outOldRow = oldRow;
