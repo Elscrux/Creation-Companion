@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using CreationEditor.Extension;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -10,5 +11,18 @@ public sealed class EditableRelation : ReactiveObject {
 
     public Relation ToRelation() {
         return new Relation { Reaction = Reaction, Target = new FormLink<IRelatableGetter>(TargetFormKey) };
+    }
+
+    public static EditableRelation? Factory(object o) {
+        return o switch {
+            EditableRelation relation => relation,
+            IFormLinkIdentifier identifier =>
+                identifier.Type.ContainsInterface(typeof(IRelatableGetter)) ?
+                new EditableRelation {
+                    TargetFormKey = identifier.FormKey,
+                    Reaction = CombatReaction.Neutral
+                } : null,
+            _ => null
+        };
     }
 }

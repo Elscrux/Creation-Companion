@@ -20,6 +20,7 @@
                   AutoGenerateColumns="False"
                   attached:FormLinkDragDrop.AllowDragDataGrid="True"
                   attached:FormLinkDragDrop.GetFormLink="{Binding GetFormLink}"
+                  attached:DragDropExtended.AllowDrag="True"
                   attached:DoubleTappedProperty.Command="{Binding RecordProvider.DoubleTapCommand}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
