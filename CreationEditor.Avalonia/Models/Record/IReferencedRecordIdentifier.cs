@@ -6,6 +6,6 @@ public interface IReferenced {
     public HashSet<IFormLinkIdentifier> References { get; }
 }
 
-public interface IReferencedRecordIdentifier : IReferenced {
+public interface IReferencedRecordIdentifier : IReferenced, IFormLinkIdentifier {
     public IMajorRecordIdentifier Record { get; set; }
 }

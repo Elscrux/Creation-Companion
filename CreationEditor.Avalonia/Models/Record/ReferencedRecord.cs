@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using Loqui;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -21,6 +22,9 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
             if (value is TMajorRecordGetter tMajor) Record = tMajor;
         }
     }
+
+    public FormKey FormKey => Record.FormKey;
+    public Type Type => LoquiRegistration.GetRegister(Record.GetType()).GetterType;
 
     public string RecordTypeName => (this as IReferencedRecord).Record.Registration.Name;
 
