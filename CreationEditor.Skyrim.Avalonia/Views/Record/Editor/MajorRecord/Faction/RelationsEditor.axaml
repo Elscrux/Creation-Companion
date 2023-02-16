@@ -7,18 +7,18 @@
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
              xmlns:tooltips="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter"
              xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
-             xmlns:faction="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction"
-             xmlns:majorRecord="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord"
+             xmlns:view="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction"
+             xmlns:vm="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
              xmlns:subrecord="clr-namespace:CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.RelationsEditor"
-             x:CompileBindings="True" x:DataType="majorRecord:FactionEditorVM"
+             x:CompileBindings="True" x:DataType="vm:RelationEditorVM"
              x:Name="Editor">
     <HeaderedContentControl Classes="Default"
                             Margin="5"
                             Header="Interfaction Relations"
                             FontSize="12">
-        <DataGrid Items="{Binding EditableRecord.Relations}"
+        <DataGrid Items="{Binding FactionEditorVM.EditableRecord.Relations}"
                   Background="{DynamicResource SystemControlTransparentBrush}"
                   CanUserReorderColumns="False"
                   CanUserResizeColumns="True"
@@ -61,12 +61,15 @@
                         <TextBlock Text="Target Faction"
                                    ToolTip.Tip="Faction to set combat reaction for"/>
                     </DataGridTemplateColumn.Header>
+
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="subrecord:EditableRelation">
                             <formKeyPicker:FormKeyPicker
+                                FormKeyChangedCommand="{ReflectionBinding $parent[view:RelationsEditor].ViewModel.RelationChanged}"
+                                BlacklistFormKeys="{ReflectionBinding $parent[view:RelationsEditor].ViewModel.BlacklistedFormKeys}"
                                 FormKey="{ReflectionBinding Target.FormKey}"
                                 ScopedTypes="{x:Static constants:FormTypeConstants.RelatableTypes}"
-                                LinkCache="{ReflectionBinding $parent[faction:RelationsEditor].ViewModel.LinkCache}"/>
+                                LinkCache="{ReflectionBinding $parent[view:FactionEditor].ViewModel.LinkCache}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

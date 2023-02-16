@@ -132,7 +132,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Name = parent.Name;
         FormKey = parent.FormKey;
         Flags = parent.Flags;
-        Relations = new ObservableCollection<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, Target = r.Target }));
+        Relations = new ObservableCollection<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, TargetFormKey = r.Target.FormKey }));
         Ranks = new ObservableCollection<Rank>(parent.Ranks);
         
         CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
@@ -150,7 +150,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Conditions = parent.Conditions;
     }
 
-    public void SetFaction(Faction faction) {
+    public void SetTo(Faction faction) {
         faction.EditorID = EditorID;
         faction.Name = Name;
         faction.Flags = Flags;
