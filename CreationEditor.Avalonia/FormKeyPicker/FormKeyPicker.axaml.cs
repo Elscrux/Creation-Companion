@@ -15,6 +15,12 @@ public class FormKeyPicker : AFormKeyPicker {
         set => SetValue(MaxSearchBoxHeightProperty, value);
     }
     public static readonly StyledProperty<double> MaxSearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MaxSearchBoxHeight), 500d);
+    
+    public double MinSearchBoxWidth {
+        get => GetValue(MinSearchBoxWidthProperty);
+        set => SetValue(MinSearchBoxWidthProperty, value);
+    }
+    public static readonly StyledProperty<double> MinSearchBoxWidthProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MinSearchBoxWidth), 250d);
 
     public double SearchBoxHeight {
         get => GetValue(SearchBoxHeightProperty);

@@ -36,6 +36,12 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
 
+    public ICollection<FormKey>? BlacklistFormKeys {
+        get => GetValue(BlacklistFormKeysProperty);
+        set => SetValue(BlacklistFormKeysProperty, value);
+    }
+    public static readonly StyledProperty<ICollection<FormKey>?> BlacklistFormKeysProperty = AvaloniaProperty.Register<AFormKeyPicker, ICollection<FormKey>?>(nameof(BlacklistFormKeys));
+
     public bool Found {
         get => GetValue(FoundProperty);
         set => SetValue(FoundProperty, value);
@@ -50,7 +56,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
     public FormKey FormKey {
         get => GetValue(FormKeyProperty);
-        set => SetValue(FormKeyProperty, value);
+        set {
+            var formKey = FormKey;
+            if (value != formKey) FormKeyChangedCommand?.Execute(new ItemChange<FormKey>(ListChangeReason.Replace, value, formKey));
+            SetValue(FormKeyProperty, value);
+        }
     }
     public static readonly StyledProperty<FormKey> FormKeyProperty = AvaloniaProperty.Register<AFormKeyPicker, FormKey>(nameof(FormKey), defaultBindingMode: BindingMode.TwoWay);
 
@@ -97,6 +107,12 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         set => SetValue(PickerClickCommandProperty, value);
     }
     public static readonly StyledProperty<ICommand> PickerClickCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(PickerClickCommand), defaultBindingMode: BindingMode.TwoWay);
+
+    public ICommand? FormKeyChangedCommand {
+        get => GetValue(FormKeyChangedCommandProperty);
+        set => SetValue(FormKeyChangedCommandProperty, value);
+    }
+    public static readonly StyledProperty<ICommand?> FormKeyChangedCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand?>(nameof(FormKeyChangedCommand));
 
     public bool InSearchMode {
         get => GetValue(InSearchModeProperty);
@@ -259,8 +275,9 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .CombineLatest(
                 this.WhenAnyValue(
                     x => x.LinkCache,
+                    x => x.BlacklistFormKeys,
                     x => x.ScopedTypes),
-                (editorId, sources) => (EditorID: editorId, LinkCache: sources.Item1, Types: sources.Item2))
+                (editorId, sources) => (EditorID: editorId, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Types: sources.Item3))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
             .Do(_ => {
                 _updating = UpdatingEnum.EditorID;
@@ -272,13 +289,15 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
-                    var (editorID, linkCache, types) = x;
+                    var (editorID, linkCache, blacklistFormKeys, types) = x;
                     if (linkCache == null) return new State(StatusIndicatorState.Passive, "No LinkCache is provided for lookup", FormKey.Null, string.Empty);
                     if (string.IsNullOrWhiteSpace(editorID)) return new State(StatusIndicatorState.Passive, "EditorID is empty.  No lookup required", FormKey.Null, string.Empty);
 
                     var scopedTypes = ScopedTypesInternal(types);
                     return linkCache.TryResolveIdentifier(editorID, scopedTypes, out var formKey)
-                        ? new State(StatusIndicatorState.Success, "Located record", formKey, editorID)
+                        ? blacklistFormKeys != null && blacklistFormKeys.Contains(formKey)
+                            ? new State(StatusIndicatorState.Passive, "FormKey is blacklisted", FormKey.Null, string.Empty)
+                            : new State(StatusIndicatorState.Success, "Located record", formKey, editorID)
                         : new State(StatusIndicatorState.Failure, "Could not resolve record", FormKey.Null, string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
@@ -331,10 +350,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .CombineLatest(
                 this.WhenAnyValue(
                     x => x.LinkCache,
+                    x => x.BlacklistFormKeys,
                     x => x.ScopedTypes,
                     x => x.MissingMeansError,
                     x => x.MissingMeansNull),
-                (str, sources) => (Raw: str, LinkCache: sources.Item1, Types: sources.Item2, MissingMeansError: sources.Item3, MissingMeansNull: sources.Item4))
+                (str, sources) => (Raw: str, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Types: sources.Item3, MissingMeansError: sources.Item4, MissingMeansNull: sources.Item5))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormStr)
             .Do(_ => {
                 _updating = UpdatingEnum.FormStr;
@@ -353,7 +373,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     var scopedTypes = ScopedTypesInternal(x.Types);
 
                     if (FormKey.TryFactory(x.Raw, out var formKey)) {
-                        if (x.LinkCache == null) return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
+                        if (x.BlacklistFormKeys != null && x.BlacklistFormKeys.Contains(formKey)) {
+                            return new State(StatusIndicatorState.Passive, "FormKey is blacklisted", FormKey.Null, string.Empty);
+                        }
+
+                        if (x.LinkCache == null) {
+                            return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
+                        }
 
                         if (x.LinkCache.TryResolveIdentifier(formKey, scopedTypes, out var editorId)) {
                             return new State(StatusIndicatorState.Success, "Located record", formKey, editorId ?? string.Empty);
@@ -465,15 +491,20 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         case FormKeyPickerSearchMode.None:
                             return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
                         case FormKeyPickerSearchMode.EditorID:
-                            return this.WhenAnyValue(x => x.EditorID)
+                            return Observable.CombineLatest(
+                                    this.WhenAnyValue(x => x.EditorID),
+                                    this.WhenAnyValue(x => x.BlacklistFormKeys),
+                                    ((editorId, blacklistFormKeys) => (EditorID: editorId, BlacklistFormKeys: blacklistFormKeys)))
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select<string, Func<IMajorRecordIdentifier, bool>>(term => ident => {
-                                    if (term.IsNullOrWhitespace()) return true;
+                                .Select<(string EditorID, ICollection<FormKey> BlacklistFormKeys), Func<IMajorRecordIdentifier, bool>>(data => {
+                                    return ident => {
+                                        if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
+                                        if (data.EditorID.IsNullOrWhitespace()) return true;
 
-                                    var editorID = ident.EditorID;
-                                    return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(term);
-
+                                        var editorID = ident.EditorID;
+                                        return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
+                                    };
                                 });
                         case FormKeyPickerSearchMode.FormKey:
 

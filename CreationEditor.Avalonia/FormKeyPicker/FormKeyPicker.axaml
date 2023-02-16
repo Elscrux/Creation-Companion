@@ -20,6 +20,7 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Border
+                        MinWidth="{TemplateBinding MinSearchBoxWidth}"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
@@ -62,6 +63,7 @@
                                    WindowManagerAddShadowHint="False"
                                    IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                    Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                                   MinWidth="250"
                                    MaxHeight="{TemplateBinding MaxSearchBoxHeight}"
                                    Height="{TemplateBinding SearchBoxHeight}"
                                    HorizontalAlignment="Stretch"
