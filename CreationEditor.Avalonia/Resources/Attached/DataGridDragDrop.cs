@@ -150,7 +150,7 @@ public sealed class DragDropExtended : AvaloniaObject {
 
         var canDrop = GetCanDrop(newDataGrid);
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (canDrop != null && !canDrop(dragItem)) return;
+        if (!ReferenceEquals(oldList, newList) && canDrop != null && !canDrop(dragItem)) return;
         
         // Get indices
         var oldIndex = oldRow.GetIndex();
