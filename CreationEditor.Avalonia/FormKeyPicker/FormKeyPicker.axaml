@@ -51,7 +51,7 @@
                                     Padding="0"
                                     Margin="5"
                                     HorizontalAlignment="Right"
-                                    HorizontalContentAlignment="Center">
+                                    VerticalAlignment="Center">
                                 <Button.IsVisible>
                                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                                         <Binding Path="$parent.IsPointerOver"/>
@@ -61,6 +61,24 @@
                                 
                                 <fluentIcons:FluentIcon Icon="Dismiss12Regular"
                                                         ToolTip.Tip="Clear" />
+                            </Button>
+                            
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    x:Name="PART_Dragger"
+                                    Width="20" Height="20"
+                                    Padding="0"
+                                    Margin="5"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                                <Button.IsVisible>
+                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                        <Binding Path="$parent.IsPointerOver"/>
+                                        <TemplateBinding Property="Found"/>
+                                    </MultiBinding>
+                                </Button.IsVisible>
+                                
+                                <fluentIcons:FluentIcon Icon="Cursor20Regular"
+                                                        ToolTip.Tip="Drag" />
                             </Button>
 
                             <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
