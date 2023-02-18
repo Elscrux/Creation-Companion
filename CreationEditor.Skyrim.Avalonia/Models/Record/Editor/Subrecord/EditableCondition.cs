@@ -23,14 +23,6 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
         }
     }
     
-    public bool ParametersUseAliases {
-        get => (Flags & Flag.ParametersUseAliases) != 0;
-        set {
-            Flags = Flags.SetFlag(Flag.ParametersUseAliases, value);
-            OnPropertyChanged();
-        }
-    }
-    
     public bool UsePackData {
         get => (Flags & Flag.UsePackData) != 0;
         set {

@@ -9,9 +9,9 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="6.5.0" />
-      <PackageReference Include="Mutagen.Bethesda.Core" Version="0.40.0" />
+      <PackageReference Include="Mutagen.Bethesda.Core" Version="0.41.0-pr002" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-      <PackageReference Include="Noggog.CSharpExt" Version="2.54.0" />
+      <PackageReference Include="Noggog.CSharpExt" Version="2.55.0" />
       <PackageReference Include="ReactiveUI" Version="18.4.1" />
       <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
       <PackageReference Include="Serilog" Version="2.12.1-dev-01635" />
@@ -52,10 +52,6 @@
       <Compile Update="Services\Mutagen\Record\RecordController.cs">
         <DependentUpon>IRecordController.cs</DependentUpon>
       </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\Mutagen" />
     </ItemGroup>
 
 </Project>
