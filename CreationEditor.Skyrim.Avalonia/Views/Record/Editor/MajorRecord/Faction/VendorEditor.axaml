@@ -70,7 +70,7 @@
                                     Margin="5"
                                     Header="Vendor Buy/Sell List" FontSize="12">
                 <StackPanel>
-                    <CheckBox Content="Not Buy/Sell"
+                    <CheckBox Content="Buy/Sell Everything not in List"
                               ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list."
                               IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                               Margin="5"/>
