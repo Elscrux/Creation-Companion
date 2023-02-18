@@ -41,8 +41,7 @@ public class InteriorCellsProvider : CellProvider {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
                         
-                        var formLinks = referenceQuery.GetReferences(cell.FormKey, RecordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, formLinks);
+                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, RecordBrowserSettingsVM.LinkCache, referenceQuery);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

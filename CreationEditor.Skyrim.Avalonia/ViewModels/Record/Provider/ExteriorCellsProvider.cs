@@ -47,8 +47,7 @@ public class ExteriorCellsProvider : CellProvider {
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
-                        var formLinks = referenceQuery.GetReferences(cell.FormKey, RecordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, formLinks);
+                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, RecordBrowserSettingsVM.LinkCache, referenceQuery);
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });

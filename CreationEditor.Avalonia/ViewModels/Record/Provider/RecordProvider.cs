@@ -93,8 +93,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                 RecordCache.Refresh();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
+                        var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -113,8 +112,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                    listRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, formLinks);
+                    listRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
                 }
                 
                 // Force update

@@ -1,5 +1,7 @@
-﻿using Loqui;
+﻿using CreationEditor.Services.Mutagen.References;
+using Loqui;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -51,5 +53,10 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
     public ReferencedRecord(TMajorRecordGetter record, HashSet<IFormLinkIdentifier>? references = null) {
         Record = record;
         References = references ?? new HashSet<IFormLinkIdentifier>();
+    }
+
+    public ReferencedRecord(TMajorRecordGetter record, ILinkCache linkCache, IReferenceQuery referenceQuery) {
+        Record = record;
+        References = referenceQuery.GetReferences(record.FormKey, linkCache).ToHashSet();
     }
 }

@@ -110,8 +110,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
 
                     RecordCache.Edit(updater => {
                         foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                            var formLinks = referenceQuery.GetReferences(record.FormKey, recordBrowserSettingsVM.LinkCache);
-                            var referencedRecord = new ReferencedPlacedRecord(record, recordBrowserSettingsVM.LinkCache, formLinks);
+                            var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -131,8 +130,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                    listRecord = new ReferencedRecord<IPlaced, IPlacedGetter>(record, formLinks);
+                    listRecord = new ReferencedRecord<IPlaced, IPlacedGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
                 }
                 
                 // Force update

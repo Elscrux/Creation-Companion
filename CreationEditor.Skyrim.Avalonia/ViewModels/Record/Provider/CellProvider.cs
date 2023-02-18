@@ -106,8 +106,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                    listRecord = new ReferencedRecord<Cell, ICellGetter>(record, formLinks);
+                    listRecord = new ReferencedRecord<Cell, ICellGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
                 }
                 
                 // Force update

@@ -44,8 +44,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.AllIdentifiers(Types)) {
-                        var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, formLinks);
+                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -63,8 +62,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    var formLinks = referenceQuery.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                    listRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, formLinks);
+                    listRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
                 }
                 
                 // Force update

@@ -43,8 +43,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                 RecordCache.Edit(updater => {
                     foreach (var identifier in identifiers) {
                         if (linkCache.TryResolve(identifier.FormKey, identifier.Type, out var record)) {
-                            var formLinks = referenceQuery.GetReferences(record.FormKey, recordBrowserSettingsVM.LinkCache);
-                            var referencedRecord = new ReferencedRecord<IMajorRecord, IMajorRecordGetter>(record, formLinks);
+                            var referencedRecord = new ReferencedRecord<IMajorRecord, IMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
 
                             updater.AddOrUpdate(referencedRecord);
                         }

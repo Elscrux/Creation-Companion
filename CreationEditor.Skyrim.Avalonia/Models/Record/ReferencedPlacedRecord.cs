@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CreationEditor.Avalonia.Models.Record;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -26,5 +28,9 @@ public class ReferencedPlacedRecord : ReferencedRecord<IPlaced, IPlacedGetter> {
             IPlacedTrapGetter placedTrap => placedTrap.Projectile.TryResolve(linkCache),
             _ => throw new ArgumentOutOfRangeException(nameof(record))
         };
+    }
+
+    public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, IReferenceQuery referenceQuery)
+        : this(record, linkCache, referenceQuery.GetReferences(record.FormKey, linkCache).ToHashSet()) {
     }
 }
