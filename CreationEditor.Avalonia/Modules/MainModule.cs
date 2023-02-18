@@ -13,6 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Background;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.Type;
 namespace CreationEditor.Avalonia.Modules; 
 
 public sealed class MainModule : Module {
@@ -33,6 +34,10 @@ public sealed class MainModule : Module {
         
         builder.RegisterType<BackgroundReferenceQuery>()
             .As<IReferenceQuery>()
+            .SingleInstance();
+
+        builder.RegisterType<MutagenTypeProvider>()
+            .As<IMutagenTypeProvider>()
             .SingleInstance();
 
         builder.RegisterType<BusyService>()

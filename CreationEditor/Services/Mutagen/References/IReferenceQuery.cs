@@ -10,9 +10,9 @@ public interface IReferenceQuery {
     public void LoadModReferences(ILinkCache linkCache);
     public void LoadModReferences(IGameEnvironment environment);
 
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> mods);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, ILinkCache linkCache);
-    public HashSet<IFormLinkIdentifier> GetReferences(FormKey formKey, IGameEnvironment environment);
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey);
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod);
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> mods);
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, ILinkCache linkCache);
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IGameEnvironment environment);
 }
