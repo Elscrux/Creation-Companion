@@ -1,11 +1,21 @@
-﻿namespace CreationEditor.Services.Notification;
+﻿using System.Reactive.Linq;
+namespace CreationEditor.Services.Notification;
 
 public sealed class CountingNotifier : ANotifier {
-    private readonly float _countFloat;
-    private readonly int _count;
     private int _currentStep;
 
-    private readonly string _message;
+    private readonly IDisposable _timerSubscription;
+
+    
+    /// <inheritdoc cref="CountingNotifier(CreationEditor.Services.Notification.INotificationService,string,int)"/>
+    /// <param name="timeSpan">Time span in which the current step will be reported</param>
+    public CountingNotifier(INotificationService notificationService, string message, int count, TimeSpan timeSpan)
+        : base(notificationService) {
+        var countFloat = (float) count;
+
+        _timerSubscription = Observable.Timer(TimeSpan.FromMilliseconds(100))
+            .Subscribe(_ => NotificationService.Notify(ID, message, _currentStep / countFloat));
+    }
 
     /// <summary>
     /// CountingNotifier helps with many notifications in a row of the same type.
@@ -27,22 +37,13 @@ public sealed class CountingNotifier : ANotifier {
     /// counter.Stop()
     /// </code>
     /// </example>
-    public CountingNotifier(INotificationService notificationService, string message, int count)
-        : base(notificationService) {
-        _message = message;
-        _countFloat = _count = count;
+    public CountingNotifier(INotificationService notificationService, string message, int count) : this(notificationService, message, count, TimeSpan.FromMilliseconds(100)) {
     }
 
-    public void NextStep() {
-        _currentStep++;
-        NotificationService.Notify(ID, _message, _currentStep / _countFloat);
-        
-        if (_currentStep == _count) {
-            Stop();
-        }
-    }
+    public void NextStep() => Interlocked.Increment(ref _currentStep);
 
     public void Stop() {
+        _timerSubscription.Dispose();
         NotificationService.Stop(ID);
     }
 }
