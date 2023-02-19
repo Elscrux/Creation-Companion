@@ -5,10 +5,10 @@ public sealed class ChainedNotifier : ANotifier {
     private readonly float _countFloat;
     private int _currentStep;
 
-    public ChainedNotifier(INotificationService notificationService, List<string> steps)
+    public ChainedNotifier(INotificationService notificationService, params string[] steps)
         : base(notificationService) {
-        _countFloat = steps.Count;
-        _stepEnumerator = steps.GetEnumerator();
+        _countFloat = steps.Length;
+        _stepEnumerator = steps.AsEnumerable().GetEnumerator();
     }
 
     public void NextStep() {
