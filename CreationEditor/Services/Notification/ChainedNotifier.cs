@@ -19,4 +19,8 @@ public sealed class ChainedNotifier : ANotifier {
             NotificationService.Stop(ID);
         }
     }
+
+    public void Stop() {
+        NotificationService.Stop(ID);
+    }
 }
