@@ -158,8 +158,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (formLink == null) return;
 
         var canSetFormLink = GetCanSetFormLink(visual);
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (canSetFormLink != null && !canSetFormLink(formLink)) return;
+        if (canSetFormLink != null! && !canSetFormLink(formLink)) return;
 
         var formLinkSetter = GetSetFormLink(visual);
         formLinkSetter(formLink);
@@ -169,8 +168,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (sender is not Visual visual) return;
 
         var setFormLink = GetSetFormLink(visual);
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (setFormLink == null) return;
+        if (setFormLink == null!) return;
 
         var formLink = GetData(e);
         if (formLink == null) return;
@@ -179,8 +177,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
         // Show adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, new Border {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            BorderBrush = canSetFormLink != null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+            BorderBrush = canSetFormLink != null! && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
             BorderThickness = new Thickness(2),
             IsHitTestVisible = false,
         });
@@ -190,8 +187,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (sender is not Visual visual) return;
 
         var setFormLink = GetSetFormLink(visual);
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (setFormLink == null) return;
+        if (setFormLink == null!) return;
 
         // Hide adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, null);

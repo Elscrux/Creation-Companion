@@ -126,8 +126,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         
         // Show adorner
         AdornerLayer.SetAdorner(row, new Rectangle {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            Fill = ReferenceEquals(oldList, newList) || canDrop == null || canDrop(dragItem) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+            Fill = ReferenceEquals(oldList, newList) || canDrop == null! || canDrop(dragItem) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
             Height = 2,
             VerticalAlignment = VerticalAlignment.Top,
             IsHitTestVisible = false,
@@ -153,8 +152,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         AdornerLayer.SetAdorner(newRow, null);
 
         var canDrop = GetCanDrop(newDataGrid);
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (!ReferenceEquals(oldList, newList) && canDrop != null && !canDrop(dragItem)) return;
+        if (!ReferenceEquals(oldList, newList) && canDrop != null! && !canDrop(dragItem)) return;
         
         // Get indices
         var oldIndex = oldRow.GetIndex();
@@ -177,7 +175,7 @@ public sealed class DragDropExtended : AvaloniaObject {
     }
 
     private static bool GetData(
-        object sender,
+        object? sender,
         DragEventArgs e,
         [MaybeNullWhen(false)] out DataGridRow outOldRow,
         [MaybeNullWhen(false)] out object outDragItem,
@@ -215,8 +213,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         
         outDragItem = dragItem;
         if (dragItem.GetType() != hoverType) {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (selector == null) return false;
+            if (selector == null!) return false;
 
             var transformedDragItem = selector(dragItem);
             if (transformedDragItem?.GetType() != hoverType) return false;
