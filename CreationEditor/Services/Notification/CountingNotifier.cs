@@ -13,7 +13,7 @@ public sealed class CountingNotifier : ANotifier {
         : base(notificationService) {
         var countFloat = (float) count;
 
-        _timerSubscription = Observable.Timer(TimeSpan.FromMilliseconds(100))
+        _timerSubscription = Observable.Interval(timeSpan)
             .Subscribe(_ => NotificationService.Notify(ID, message, _currentStep / countFloat));
     }
 
