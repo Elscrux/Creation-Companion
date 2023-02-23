@@ -1,5 +1,7 @@
 # Creation-Editor (wip name)
 
+[![.NET](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml)
+
 ## Build from Source
 - Clone
 - Add NuGet source: https://gitlab.com/api/v4/projects/32329418/packages/nuget/index.json
