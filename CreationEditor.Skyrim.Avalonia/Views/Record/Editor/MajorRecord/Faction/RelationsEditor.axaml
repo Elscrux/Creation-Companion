@@ -57,7 +57,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="300">
+                <DataGridTemplateColumn Width="400">
                     <DataGridTemplateColumn.Header>
                         <TextBlock Text="Target Faction"
                                    ToolTip.Tip="Faction to set combat reaction for"/>
