@@ -5,13 +5,11 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
-using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using Serilog;
-namespace CreationEditor.Services.Mutagen.References;
+namespace CreationEditor.Services.Mutagen.References.Query;
 
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
@@ -21,6 +19,8 @@ public class ReferenceQuery : IReferenceQuery {
     private const string CacheSubdirectory = "References";
     private const string CacheExtension = "cache";
     private const string TempCacheExtension = "temp";
+
+    private readonly Version _version = new(1, 0);
 
     private readonly IEnvironmentContext _environmentContext;
     private readonly IFileSystem _fileSystem;
@@ -34,7 +34,28 @@ public class ReferenceQuery : IReferenceQuery {
     private FilePath TempCacheFile(ModKey mod) => _fileSystem.Path.Combine(CacheDirPath, $"{mod.Name}.{TempCacheExtension}");
     private FilePath ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, mod.FileName);
 
-    private readonly Dictionary<ModKey, ReferenceCache> _modCaches = new();
+    public sealed record ModReferenceCache(Dictionary<FormKey, HashSet<IFormLinkIdentifier>> Cache, HashSet<FormKey> FormKeys) {
+        public static ModReferenceCache operator +(ModReferenceCache a, ModReferenceCache b) {
+            var newRefCache = new ModReferenceCache(a.Cache, a.FormKeys);
+
+            foreach (var formKey in b.FormKeys) {
+                newRefCache.FormKeys.Add(formKey);
+            }
+            
+            foreach (var (formKey, references) in b.Cache) {
+                var existingReferences = newRefCache.Cache.GetOrAdd(formKey, () => new HashSet<IFormLinkIdentifier>());
+
+                foreach (var reference in references) {
+                    existingReferences.Add(reference);
+                }
+            }
+
+            return newRefCache;
+        }
+    }
+
+    public IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches => _modCaches;
+    private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
 
     public ReferenceQuery(
         IEnvironmentContext environmentContext,
@@ -79,84 +100,6 @@ public class ReferenceQuery : IReferenceQuery {
     }
 
     /// <summary>
-    /// Loads all references of a link cache
-    /// </summary>
-    /// <param name="linkCache">link cache to load references for</param>
-    public void LoadModReferences(ILinkCache linkCache) {
-        LoadModReferences(linkCache.PriorityOrder);
-    }
-
-    /// <summary>
-    /// Loads all references of an environment
-    /// </summary>
-    /// <param name="environment">environment to load references for</param>
-    public void LoadModReferences(IGameEnvironment environment) {
-        LoadModReferences(environment.LinkCache);
-    }
-
-    /// <summary>
-    /// Returns references of one form key in all loaded mod caches
-    /// </summary>
-    /// <param name="formKey">form key to search references for</param>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {
-        foreach (var referenceCache in _modCaches.Values.Where(refCache => refCache.Cache.ContainsKey(formKey))) {
-            foreach (var formLinkIdentifier in referenceCache.Cache[formKey]) {
-                yield return formLinkIdentifier;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Returns references of one form key in a mod
-    /// </summary>
-    /// <param name="formKey">form key to search references for</param>
-    /// <param name="mod">mod to get references from</param>
-    /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod) {
-        LoadModReferences(mod);
-
-        if (!_modCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)) yield break;
-
-        foreach (var reference in references) {
-            yield return reference;
-        }
-    }
-
-    /// <summary>
-    /// Returns references of one form key in a number of mods
-    /// </summary>
-    /// <param name="formKey">form key to search references for</param>
-    /// <param name="mods">mods to to get references from</param>
-    /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> mods) {
-        foreach (var mod in mods) {
-            foreach (var reference in GetReferences(formKey, mod)) {
-                yield return reference;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Returns references of one form key in a link cache
-    /// </summary>
-    /// <param name="formKey">form key to search references for</param>
-    /// <param name="linkCache">link cache to get references from</param>
-    /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, ILinkCache linkCache) {
-        return GetReferences(formKey, linkCache.PriorityOrder);
-    }
-
-    /// <summary>
-    /// Returns references of one form key in a game environment
-    /// </summary>
-    /// <param name="formKey">form key to search references for</param>
-    /// <param name="environment">environment to get references from</param>
-    /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IGameEnvironment environment) {
-        return GetReferences(formKey, environment.LinkCache);
-    }
-
-    /// <summary>
     /// Check if the cache of a mod is up to date
     /// </summary>
     /// <param name="modKey">mod key to check cache for</param>
@@ -169,10 +112,16 @@ public class ReferenceQuery : IReferenceQuery {
         if (!_fileSystem.File.Exists(cacheFile)) return false;
         if (!_fileSystem.File.Exists(modFilePath)) return false;
 
-        // Read checksum in cache
+        // Open cache reader
         using var fileStream = _fileSystem.File.OpenRead(cacheFile);
         using var zip = new GZipStream(fileStream, CompressionMode.Decompress);
         using var reader = new BinaryReader(zip);
+
+        // Read version in cache
+        if (!Version.TryParse(reader.ReadString(), out var version)
+         || !version.Equals(_version)) return false;
+
+        // Read checksum in cache
         var checksum = reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
         // Read checksum
@@ -186,12 +135,14 @@ public class ReferenceQuery : IReferenceQuery {
     /// </summary>
     /// <param name="mod">mod to build reference cache for</param>
     /// <returns>reference cache of mod</returns>
-    private ReferenceCache BuildReferenceCache(IModGetter mod) {
+    private ModReferenceCache BuildReferenceCache(IModGetter mod) {
         // Fill modCache
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
+        var records = new HashSet<FormKey>();
 
         var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) _modInfoProvider.GetRecordCount(mod));
         foreach (var record in mod.EnumerateMajorRecords()) {
+            records.Add(record.FormKey);
             counter.NextStep();
 
             foreach (var formLink in record.EnumerateFormLinks().Where(formLink => !formLink.IsNull)) {
@@ -208,9 +159,12 @@ public class ReferenceQuery : IReferenceQuery {
         using var zip = new GZipStream(fileStream, CompressionMode.Compress);
         var writer = new BinaryWriter(zip);
 
+        // Write version
+        writer.Write(_version.ToString());
+
         // Write checksum
         var modFilePath = ModFilePath(mod.ModKey);
-        if (!_fileSystem.File.Exists(modFilePath)) return new ReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>());
+        if (!_fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
 
         var checksum = _fileSystem.GetChecksum(modFilePath);
         writer.Write(checksum);
@@ -218,6 +172,12 @@ public class ReferenceQuery : IReferenceQuery {
         // Write game
         var game = _mutagenTypeProvider.GetGameName(mod.EnumerateMajorRecords().First());
         writer.Write(game);
+
+
+        writer.Write(records.Count);
+        foreach (var formKey in records) {
+            writer.Write(formKey.ToString());
+        }
 
         // Write form count
         writer.Write(modCache.Count);
@@ -236,7 +196,7 @@ public class ReferenceQuery : IReferenceQuery {
         }
         counter.Stop();
 
-        return new ReferenceCache(modCache);
+        return new ModReferenceCache(modCache, records);
     }
 
     /// <summary>
@@ -244,10 +204,11 @@ public class ReferenceQuery : IReferenceQuery {
     /// </summary>
     /// <param name="modKey">mod to load cache for</param>
     /// <returns>reference cache of the given mod key</returns>
-    private ReferenceCache LoadReferenceCache(ModKey modKey) {
+    private ModReferenceCache LoadReferenceCache(ModKey modKey) {
         var tempFile = TempCacheFile(modKey);
         try {
             var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
+            var records = new HashSet<FormKey>();
 
             // Decompress cache and copy to temporary uncompressed cache 
             var linearNotifier = new LinearNotifier(_notificationService);
@@ -265,10 +226,19 @@ public class ReferenceQuery : IReferenceQuery {
 
             // Read mod cache file
             using (var reader = new BinaryReader(_fileSystem.File.OpenRead(TempCacheFile(modKey)))) {
+                // Skip version and checksum 
+                reader.ReadString();
                 reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
                 // Read game string
                 var game = reader.ReadString();
+
+                // Build ref cache
+                var recordCount = reader.ReadInt32();
+                for (var i = 0; i < recordCount; i++) {
+                    var formKey = FormKey.Factory(reader.ReadString());
+                    records.Add(formKey);
+                }
 
                 // Build ref cache
                 var formCount = reader.ReadInt32();
@@ -300,7 +270,7 @@ public class ReferenceQuery : IReferenceQuery {
                 counter.Stop();
             }
 
-            return new ReferenceCache(modCache);
+            return new ModReferenceCache(modCache, records);
         } finally {
             if (_fileSystem.File.Exists(tempFile)) _fileSystem.File.Delete(tempFile);
         }
