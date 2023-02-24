@@ -33,7 +33,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         
         _recordChanged.OnNext(record);
 
-        return (record as TMajorRecord)!;
+        return record;
     }
     
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)

@@ -42,9 +42,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
         
         var providerParam = TypedParameter.From<IRecordProvider>(recordProvider);
         var recordListVM = _componentContext.Resolve<IRecordListVM>(providerParam);
-        var recordList = new RecordList(columns) {
-            DataContext = recordListVM
-        };
+        var recordList = new RecordList(columns) { DataContext = recordListVM };
 
         return recordList;
     }
