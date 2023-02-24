@@ -27,12 +27,11 @@
                   AutoGenerateColumns="False"
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
-                  SelectionMode="Single"
                   SelectedIndex="{Binding SelectedRelationIndex}"
                   MinHeight="250"
-                  Classes="NoRowSelection"
+                  Classes="NoCellSelection"
                   attached:ListShortcuts.Add="{Binding AddRelation}"
-                  attached:ListShortcuts.Remove="{Binding RemoveSelectedRelations}">
+                  attached:ListShortcuts.Remove="{Binding RemoveRelation}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>

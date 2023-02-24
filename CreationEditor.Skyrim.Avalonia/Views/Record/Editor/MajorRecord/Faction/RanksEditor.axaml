@@ -20,12 +20,11 @@
                   AutoGenerateColumns="False"
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
-                  SelectionMode="Single"
                   SelectedIndex="{Binding SelectedRankIndex}"
                   MinHeight="250"
-                  Classes="NoRowSelection"
+                  Classes="NoCellSelection"
                   attached:ListShortcuts.Add="{Binding AddRank}"
-                  attached:ListShortcuts.Remove="{Binding RemoveSelectedRank}">
+                  attached:ListShortcuts.Remove="{Binding RemoveRank}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>

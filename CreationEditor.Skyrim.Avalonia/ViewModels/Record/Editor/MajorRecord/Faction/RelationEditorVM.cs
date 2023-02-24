@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Extension;
@@ -14,7 +16,7 @@ public class RelationEditorVM : ViewModel {
     public ReadOnlyObservableCollection<FormKey> BlacklistedFormKeys { get; }
     
     public ReactiveCommand<Unit, Unit> AddRelation { get; }
-    public ReactiveCommand<Unit, Unit> RemoveSelectedRelations { get; }
+    public ReactiveCommand<IList, Unit> RemoveRelation { get; }
 
     public int SelectedRelationIndex { get; set; }
 
@@ -29,10 +31,10 @@ public class RelationEditorVM : ViewModel {
             FactionEditorVM.EditableRecord.Relations.Add(relation);
         });
         
-        RemoveSelectedRelations = ReactiveCommand.Create(() => {
-            if (SelectedRelationIndex < 0 || SelectedRelationIndex >= FactionEditorVM.EditableRecord.Relations.Count) return;
-
-            FactionEditorVM.EditableRecord.Relations.RemoveAt(SelectedRelationIndex);
+        RemoveRelation = ReactiveCommand.Create<IList>(relations => {
+            foreach (var relation in relations.OfType<EditableRelation>().ToList()) {
+                FactionEditorVM.EditableRecord.Relations.Remove(relation);
+            }
         });
     }
     

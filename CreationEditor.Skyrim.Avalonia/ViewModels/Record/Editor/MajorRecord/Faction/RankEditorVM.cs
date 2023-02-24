@@ -1,4 +1,6 @@
-﻿using System.Reactive;
+﻿using System.Collections;
+using System.Linq;
+using System.Reactive;
 using CreationEditor.Avalonia.ViewModels;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -10,7 +12,7 @@ public class RankEditorVM : ViewModel {
     public FactionEditorVM FactionEditorVM { get; }
     
     public ReactiveCommand<Unit, Unit> AddRank { get; }
-    public ReactiveCommand<Unit, Unit> RemoveSelectedRank { get; }
+    public ReactiveCommand<IList, Unit> RemoveRank { get; }
     
     public int SelectedRankIndex { get; set; }
 
@@ -21,16 +23,10 @@ public class RankEditorVM : ViewModel {
             FactionEditorVM.EditableRecord.Ranks.Add(new Rank { Title = new GenderedItem<TranslatedString?>(string.Empty, string.Empty)});
         });
         
-        RemoveSelectedRank = ReactiveCommand.Create(() => {
-            if (SelectedRankIndex < 0 || SelectedRankIndex >= FactionEditorVM.EditableRecord.Ranks.Count) return;
-
-            FactionEditorVM.EditableRecord.Ranks.RemoveAt(SelectedRankIndex);
-        });
-        
-        RemoveSelectedRank = ReactiveCommand.Create(() => {
-            if (SelectedRankIndex < 0 || SelectedRankIndex >= FactionEditorVM.EditableRecord.Ranks.Count) return;
-            
-            FactionEditorVM.EditableRecord.Ranks.RemoveAt(SelectedRankIndex);
+        RemoveRank = ReactiveCommand.Create<IList>(ranks => {
+            foreach (var rank in ranks.OfType<Rank>().ToList()) {
+                FactionEditorVM.EditableRecord.Ranks.Remove(rank);
+            }
         });
     }
 }

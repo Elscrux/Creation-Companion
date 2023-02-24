@@ -4,12 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:setting="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting"
              xmlns:settings="clr-namespace:CreationEditor.Avalonia.Models.Settings"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:CompileBindings="True" x:DataType="setting:StartupDocksSettingVM"
              x:Class="CreationEditor.Avalonia.Views.Setting.StartupDocksSettingView">
     <DataGrid x:Name="ItemsControl"
               Items="{Binding Docks}"
-              Background="{DynamicResource SystemControlTransparentBrush}">
+              Background="{DynamicResource SystemControlTransparentBrush}"
+              attached:ListShortcuts.Add="{Binding AddStartupDock}"
+              attached:ListShortcuts.Remove="{Binding RemoveStartupDock}">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">
                 <DataGridTemplateColumn.CellTemplate>
@@ -38,15 +41,5 @@
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
         </DataGrid.Columns>
-        
-        <DataGrid.ContextFlyout>
-            <MenuFlyout>
-                <MenuItem Header="Add"
-                          Command="{Binding AddStartupDock}"/>
-                <MenuItem Header="Remove"
-                          Command="{Binding RemoveStartupDock}"
-                          CommandParameter="{Binding #ItemsControl.SelectedItems}"/>
-            </MenuFlyout>
-        </DataGrid.ContextFlyout>
     </DataGrid>
 </UserControl>
