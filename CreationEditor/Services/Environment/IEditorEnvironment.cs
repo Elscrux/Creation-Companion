@@ -5,9 +5,9 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
 public interface IEditorEnvironment {
-    public IGameEnvironment Environment { get; }
-    public ILinkCache LinkCache => Environment.LinkCache;
-    public IEnumerable<ModKey> LoadedMods => Environment.LoadOrder.Keys;
+    public IGameEnvironment GameEnvironment { get; }
+    public ILinkCache LinkCache => GameEnvironment.LinkCache;
+    public IEnumerable<ModKey> LoadedMods => GameEnvironment.LoadOrder.Keys;
     
     public IMod ActiveMod { get; }
     public ILinkCache ActiveModLinkCache { get; } //todo potentially remove

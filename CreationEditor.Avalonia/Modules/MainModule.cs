@@ -11,28 +11,24 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Services.Background;
-using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Query;
 using CreationEditor.Services.Mutagen.Type;
-namespace CreationEditor.Avalonia.Modules; 
+namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterType<Lifecycle>()
             .As<ILifecycle>();
-        
+
         builder.RegisterType<MainVM>()
             .SingleInstance();
 
         builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>()
             .SingleInstance();
-        
-        builder.RegisterType<BackgroundTaskManager>()
-            .As<IBackgroundTaskManager>()
-            .SingleInstance();
-        
-        builder.RegisterType<BackgroundReferenceQuery>()
+
+        builder.RegisterType<ReferenceQuery>()
             .As<IReferenceQuery>()
             .SingleInstance();
 
@@ -55,6 +51,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordIdentifiersProvider>()
             .AsSelf();
+
+        builder.RegisterType<ReferenceController>()
+            .As<IReferenceController>()
+            .SingleInstance();
 
         builder.RegisterType<RecordEditorController>()
             .As<IRecordEditorController>()
