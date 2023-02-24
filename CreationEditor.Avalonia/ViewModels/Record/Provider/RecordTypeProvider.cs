@@ -1,13 +1,14 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -30,20 +31,24 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
     public RecordTypeProvider(
         IEnumerable<Type> types,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery,
-        IRecordController recordController) {
+        IRecordController recordController,
+        IReferenceController referenceController) {
         Types = types.ToList();
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(linkCache => {
+                cacheDisposable.Clear();
+
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.AllIdentifiers(Types)) {
-                        var referencedRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                        cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -61,7 +66,8 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    listRecord = new ReferencedRecord<IMajorRecordIdentifier, IMajorRecordIdentifier>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                    referenceController.GetRecord(record, out var outListRecord); 
+                    listRecord = outListRecord;
                 }
                 
                 // Force update

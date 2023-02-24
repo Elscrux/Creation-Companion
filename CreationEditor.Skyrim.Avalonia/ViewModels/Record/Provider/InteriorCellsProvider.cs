@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -7,6 +8,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda;
@@ -26,21 +28,25 @@ public class InteriorCellsProvider : CellProvider {
         IRecordEditorController recordEditorController,
         IViewportRuntimeService viewportRuntimeService,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery)
-        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceQuery) {
+        IReferenceController referenceController)
+        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceController) {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(linkCache => {
+                cacheDisposable.Clear();
+                
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
                         
-                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                        cacheDisposable.Add(referenceController.GetRecord(cell, out var referencedRecord));
 
                         updater.AddOrUpdate(referencedRecord);
                     }

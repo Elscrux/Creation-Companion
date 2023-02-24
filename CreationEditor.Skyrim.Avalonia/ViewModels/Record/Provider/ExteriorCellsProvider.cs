@@ -1,4 +1,5 @@
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Services;
@@ -7,6 +8,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Extension;
 using DynamicData;
@@ -31,22 +33,27 @@ public class ExteriorCellsProvider : CellProvider {
         IRecordEditorController recordEditorController,
         IViewportRuntimeService viewportRuntimeService,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery)
-        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceQuery) {
+        IReferenceController referenceController)
+        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceController) {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = RecordBrowserSettingsVM.SettingsChanged
             .Select(_ => new Func<IReferencedRecord, bool>(
                 record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettingsVM.Filter(record.Record)));
 
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache, x => x.WorldspaceFormKey)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(_ => {
+                cacheDisposable.Clear();
+                
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
-                        var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(cell, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                        cacheDisposable.Add(referenceController.GetRecord(cell, out var referencedRecord));
+
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });

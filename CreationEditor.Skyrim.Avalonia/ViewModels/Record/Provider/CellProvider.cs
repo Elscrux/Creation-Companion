@@ -11,6 +11,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -19,16 +20,16 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider; 
 
-public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord<Cell, ICellGetter>> {
+public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord<ICellGetter>> {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     
-    [Reactive] public ReferencedRecord<Cell, ICellGetter>? SelectedRecord { get; set; }
+    [Reactive] public ReferencedRecord<ICellGetter>? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
         set {
-            if (value is ReferencedRecord<Cell, ICellGetter> referencedRecord) {
+            if (value is ReferencedRecord<ICellGetter> referencedRecord) {
                 SelectedRecord = referencedRecord;
             }
         }
@@ -52,7 +53,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
         IDockFactory dockFactory,
         IRecordEditorController recordEditorController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery) {
+        IReferenceController referenceController) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
@@ -69,7 +70,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
             var newRecord = recordController.CreateRecord<Cell, ICellGetter>();
             recordEditorController.OpenEditor<Cell, ICellGetter>(newRecord);
             
-            var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(newRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -85,7 +86,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
 
             var duplicate = recordController.DuplicateRecord<Cell, ICellGetter>(SelectedRecord.Record);
 
-            var referencedRecord = new ReferencedRecord<Cell, ICellGetter>(duplicate);
+            referenceController.GetRecord(duplicate, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
         
@@ -105,7 +106,8 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    listRecord = new ReferencedRecord<Cell, ICellGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                    referenceController.GetRecord(record, out var outListRecord); 
+                    listRecord = outListRecord;
                 }
                 
                 // Force update

@@ -9,10 +9,10 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record; 
 
-public class ReferencedPlacedRecord : ReferencedRecord<IPlaced, IPlacedGetter> {
+public class ReferencedPlacedRecord : ReferencedRecord<IPlacedGetter> {
     public IMajorRecordIdentifier? Base { get; }
     
-    public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, HashSet<IFormLinkIdentifier>? references = null)
+    public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, IEnumerable<IFormLinkIdentifier>? references = null)
         : base(record, references) {
         
         Base = record switch {
@@ -28,9 +28,5 @@ public class ReferencedPlacedRecord : ReferencedRecord<IPlaced, IPlacedGetter> {
             IPlacedTrapGetter placedTrap => placedTrap.Projectile.TryResolve(linkCache),
             _ => throw new ArgumentOutOfRangeException(nameof(record))
         };
-    }
-
-    public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, IReferenceQuery referenceQuery)
-        : this(record, linkCache, referenceQuery.GetReferences(record.FormKey, linkCache).ToHashSet()) {
     }
 }

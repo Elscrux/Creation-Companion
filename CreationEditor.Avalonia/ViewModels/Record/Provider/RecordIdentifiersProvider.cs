@@ -1,16 +1,18 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
@@ -28,27 +30,34 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     public RecordIdentifiersProvider(
         IEnumerable<IFormLinkIdentifier> identifiers,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery,
-        IRecordController recordController) {
+        IRecordController recordController,
+        IReferenceController referenceController,
+        ILogger logger) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(linkCache => {
+                cacheDisposable.Clear();
+
                 RecordCache.Clear();
-                RecordCache.Refresh();
                 RecordCache.Edit(updater => {
                     foreach (var identifier in identifiers) {
-                        if (linkCache.TryResolve(identifier.FormKey, identifier.Type, out var record)) {
-                            var referencedRecord = new ReferencedRecord<IMajorRecord, IMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
-
+                        var formKey = identifier.FormKey;
+                        if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
+                            cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
+                        
                             updater.AddOrUpdate(referencedRecord);
+                        } else {
+                            logger.Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
                         }
                     }
                 });
-                
+
                 Dispatcher.UIThread.Post(() => IsBusy = false);
             })
             .DisposeWith(this);

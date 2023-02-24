@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -6,6 +7,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Controller;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -15,7 +17,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
-public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel, IRecordProvider<ReferencedRecord<TMajorRecord, TMajorRecordGetter>>
+public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel, IRecordProvider<ReferencedRecord<TMajorRecordGetter>>
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
@@ -23,11 +25,11 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public ReferencedRecord<TMajorRecord, TMajorRecordGetter>? SelectedRecord { get; set; }
+    [Reactive] public ReferencedRecord<TMajorRecordGetter>? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
         set {
-            if (value is ReferencedRecord<TMajorRecord, TMajorRecordGetter> referencedRecord) {
+            if (value is ReferencedRecord<TMajorRecordGetter> referencedRecord) {
                 SelectedRecord = referencedRecord;
             }
         }
@@ -49,7 +51,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         IRecordEditorController recordEditorController,
         IRecordController recordController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceQuery referenceQuery) {
+        IReferenceController referenceController) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
@@ -58,7 +60,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
             
-            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(newRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
         
@@ -74,7 +76,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             
             var duplicate = recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             
-            var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(duplicate);
+            referenceController.GetRecord(duplicate, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
         
@@ -85,14 +87,17 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             RecordCache.Remove(SelectedRecord);
         });
 
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(linkCache => {
+                cacheDisposable.Clear();
+                
                 RecordCache.Clear();
-                RecordCache.Refresh();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        var referencedRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                        cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -111,7 +116,8 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    listRecord = new ReferencedRecord<TMajorRecord, TMajorRecordGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                    referenceController.GetRecord(record, out var outListRecord);
+                    listRecord = outListRecord;
                 }
                 
                 // Force update

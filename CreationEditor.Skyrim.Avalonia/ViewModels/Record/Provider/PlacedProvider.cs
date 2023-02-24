@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -11,6 +12,8 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Cache;
+using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -20,17 +23,17 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider; 
 
-public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord<IPlaced, IPlacedGetter>> {
+public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     [Reactive] public ICellGetter? Cell { get; set; }
     
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     
-    [Reactive] public ReferencedRecord<IPlaced, IPlacedGetter>? SelectedRecord { get; set; }
+    [Reactive] public ReferencedPlacedRecord? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
         set {
-            if (value is ReferencedRecord<IPlaced, IPlacedGetter> referencedRecord) {
+            if (value is ReferencedPlacedRecord referencedRecord) {
                 SelectedRecord = referencedRecord;
             }
         }
@@ -51,7 +54,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
     public PlacedProvider(
         IRecordEditorController recordEditorController,
         IRecordController recordController,
-        IReferenceQuery referenceQuery,
+        IReferenceController referenceController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
@@ -61,7 +64,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
             var newRecord = recordController.CreateRecord<IPlaced, IPlacedGetter>();
             recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newRecord);
 
-            var referencedRecord = new ReferencedRecord<IPlaced, IPlacedGetter>(newRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -87,7 +90,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
 
             var duplicate = recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
 
-            var referencedRecord = new ReferencedRecord<IPlaced, IPlacedGetter>(duplicate);
+            referenceController.GetRecord(duplicate, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -97,10 +100,14 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
             recordController.DeleteRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);
         });
-        
+
+        var cacheDisposable = new CompositeDisposable();
+
         this.WhenAnyValue(x => x.Cell)
             .DoOnGuiAndSwitchBack(_ => IsBusy = true)
             .Subscribe(_ => {
+                cacheDisposable.Clear();
+                
                 RecordCache.Clear();
                 RecordCache.Refresh();
 
@@ -109,7 +116,8 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
 
                     RecordCache.Edit(updater => {
                         foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                            var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                            var references = referenceController.ReferenceCache?.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
+                            var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, references);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -129,7 +137,8 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedRecord
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    listRecord = new ReferencedRecord<IPlaced, IPlacedGetter>(record, RecordBrowserSettingsVM.LinkCache, referenceQuery);
+                    referenceController.GetRecord(record, out var outListRecord); 
+                    listRecord = outListRecord;
                 }
                 
                 // Force update
