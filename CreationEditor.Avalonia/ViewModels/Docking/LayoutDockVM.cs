@@ -108,11 +108,13 @@ public sealed class LayoutDockVM : DockContainerVM {
             .FirstOrDefault();
 
         //Try to add to existing document dock, otherwise add new document dock
-        if (documentDockVM != null) {
-            documentDockVM.Add(dockedItem, DockConfig.Default);
-        } else {
-            var documentControl = DocumentDockVM.CreateControl(dockedItem, this);
-            LayoutGrid.Add(documentControl, config);
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
+            if (documentDockVM != null) {
+                documentDockVM.Add(dockedItem, DockConfig.Default);
+            } else {
+                var documentControl = DocumentDockVM.CreateControl(dockedItem, this);
+                LayoutGrid.Add(documentControl, config);
+            }
         }
     }
     

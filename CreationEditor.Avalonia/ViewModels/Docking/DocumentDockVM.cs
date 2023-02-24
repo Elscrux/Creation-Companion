@@ -38,12 +38,14 @@ public sealed class DocumentDockVM : DockContainerVM {
 
     public override void Add(IDockedItem dockedItem, DockConfig config) {
         if (config.DockMode is not null and not DockMode.Document) return;
-        
-        dockedItem.DockParent = this;
-        Tabs.Add(dockedItem);
-        Focus(dockedItem);
-        
-        (this as IDockObject).DockRoot.OnDockAdded(dockedItem);
+
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
+            dockedItem.DockParent = this;
+            Tabs.Add(dockedItem);
+            Focus(dockedItem);
+
+            (this as IDockObject).DockRoot.OnDockAdded(dockedItem);
+        }
     }
     
     public override bool Remove(IDockedItem dockedItem) {
