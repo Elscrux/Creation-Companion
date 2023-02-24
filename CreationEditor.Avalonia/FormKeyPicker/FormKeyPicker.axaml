@@ -60,7 +60,8 @@
                                     </MultiBinding>
                                 </Button.IsVisible>
                                 
-                                <fluentIcons:FluentIcon Icon="Dismiss12Regular"
+                                <fluentIcons:FluentIcon Icon="Dismiss12Filled"
+                                                        Foreground="{DynamicResource SystemAccentColor}"
                                                         ToolTip.Tip="Clear" />
                             </Button>
                             
@@ -78,8 +79,9 @@
                                     </MultiBinding>
                                 </Button.IsVisible>
                                 
-                                <fluentIcons:FluentIcon Icon="Cursor20Regular"
-                                                        ToolTip.Tip="Drag" />
+                                <fluentIcons:FluentIcon Icon="Cursor20Filled"
+                                                        Foreground="{DynamicResource SystemAccentColor}"
+                                                        ToolTip.Tip="Drag"/>
                             </Button>
 
                             <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
