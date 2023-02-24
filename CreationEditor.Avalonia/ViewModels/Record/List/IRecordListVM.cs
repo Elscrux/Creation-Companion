@@ -9,7 +9,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public interface IRecordListVM : IDisposable {
-    public IEnumerable Records { get; }
+    public IEnumerable? Records { get; }
     
     public IRecordProvider RecordProvider { get; }
     

@@ -9,6 +9,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Extension;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
@@ -23,7 +24,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
     
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
-    public IEnumerable Records { get; }
+    [Reactive] public IEnumerable? Records { get; private set; }
 
     [Reactive] public bool IsBusy { get; set; }
     [Reactive] private bool IsFiltering { get; set; }
@@ -58,12 +59,14 @@ public class RecordListVM : ViewModel, IRecordListVM {
             },
             this.WhenAnyValue(x => x.RecordProvider.SelectedRecord).Select(selected => selected is { References.Count: > 0 }));
 
-        Records = RecordProvider.RecordCache
-            .Connect()
-            .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
-            .Filter(RecordProvider.Filter)
-            .DoOnGuiAndSwitchBack(_ => IsFiltering = false)
-            .ToObservableCollection(this);
+        Task.Run(() => {
+            Records = RecordProvider.RecordCache
+                .Connect()
+                .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
+                .Filter(RecordProvider.Filter)
+                .DoOnGuiAndSwitchBack(_ => IsFiltering = false)
+                .ToObservableCollection(this);
+        });
 
         GetFormLink = element => {
             if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;
