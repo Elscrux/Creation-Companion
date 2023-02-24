@@ -2,7 +2,6 @@
 using Avalonia.Input;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Models.Docking;
-using Noggog;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class DockDragBehavior : Behavior<Control> {
@@ -43,9 +42,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
         }
         
         void SetDragging(bool state) {
-            dockedItem.DockRoot
-                .IterateAllContainerChildren()
-                .ForEach(vm => vm.InEditMode = state);
+            dockedItem.DockRoot.SetEditMode(state);
 
             _isDragging = state;
         }

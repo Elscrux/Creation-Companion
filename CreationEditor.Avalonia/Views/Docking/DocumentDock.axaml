@@ -24,6 +24,7 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     TabDragStarting="TabView_OnTabDragStarting"
+                    TabDragCompleted="TabView_OnTabDragCompleted"
                     CanDragTabs="True"
                     AllowDropTabs="True"
                     TabWidthMode="SizeToContent">

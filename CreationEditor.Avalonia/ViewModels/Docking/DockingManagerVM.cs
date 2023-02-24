@@ -120,6 +120,12 @@ public sealed class DockingManagerVM : DockContainerVM {
         LayoutMinHeight = Math.Clamp(LayoutSize.Height, 0, Layout.LayoutGrid.Bounds.Height);
     }
 
+    public void SetEditMode(bool state) {
+        foreach (var containerVM in IterateAllContainerChildren()) {
+            containerVM.InEditMode = state;
+        }
+    }
+
     private SideDockVM GetSideDock(DockConfig config) {
         return config.Dock switch {
             Dock.Top => TopSide,
