@@ -26,7 +26,7 @@ public class MutagenTypeProvider : IMutagenTypeProvider {
     /// <param name="type">type that was be retrieved from the provided string</param>
     /// <returns>true if the type could be found</returns>
     public bool GetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type) {
-        var name = gameName + '.' + typeName;
+        var name = $"{gameName}.{typeName}";
         if (_typeCache.TryGetValue(name, out var cachedType)) {
             type = cachedType;
             return true;
@@ -39,7 +39,7 @@ public class MutagenTypeProvider : IMutagenTypeProvider {
             return false;
         }
 
-        type = registration.ClassType;
+        type = registration.GetterType;
         _typeCache.Add(name, type);
         return true;
     }
