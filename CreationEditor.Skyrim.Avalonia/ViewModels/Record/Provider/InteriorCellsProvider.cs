@@ -1,6 +1,5 @@
 ﻿using System;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;

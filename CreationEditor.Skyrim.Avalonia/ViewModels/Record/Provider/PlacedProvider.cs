@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;

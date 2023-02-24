@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views;

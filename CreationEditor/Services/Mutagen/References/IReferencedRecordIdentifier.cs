@@ -1,9 +1,9 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Avalonia.Models.Record;
+namespace CreationEditor.Services.Mutagen.References;
 
 public interface IReferenced {
-    public HashSet<IFormLinkIdentifier> References { get; }
+    public ICollection<IFormLinkIdentifier> References { get; }
 }
 
 public interface IReferencedRecordIdentifier : IReferenced, IFormLinkIdentifier {

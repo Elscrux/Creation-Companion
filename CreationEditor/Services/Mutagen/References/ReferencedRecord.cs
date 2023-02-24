@@ -1,14 +1,12 @@
-﻿using CreationEditor.Services.Mutagen.References;
+﻿using System.Collections.ObjectModel;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Avalonia.Models.Record;
+namespace CreationEditor.Services.Mutagen.References;
 
-public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject, IReferencedRecord
-    where TMajorRecord : IMajorRecordIdentifier
+public class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord
     where TMajorRecordGetter : IMajorRecordIdentifier {
 
     IMajorRecordGetter IReferencedRecord.Record {
@@ -26,19 +24,19 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
     }
 
     public FormKey FormKey => Record.FormKey;
-    public Type Type => LoquiRegistration.GetRegister(Record.GetType()).GetterType;
+    public System.Type Type => LoquiRegistration.GetRegister(Record.GetType()).GetterType;
 
     public string RecordTypeName => (this as IReferencedRecord).Record.Registration.Name;
 
     public override bool Equals(object? obj) {
         return obj switch {
-            ReferencedRecord<TMajorRecord, TMajorRecordGetter> referencedRecord => referencedRecord.Equals(this),
+            ReferencedRecord<TMajorRecordGetter> referencedRecord => referencedRecord.Equals(this),
             TMajorRecordGetter record => record.FormKey.Equals(Record.FormKey),
             _ => false
         };
     }
 
-    private bool Equals(ReferencedRecord<TMajorRecord, TMajorRecordGetter> other) {
+    private bool Equals(ReferencedRecord<TMajorRecordGetter> other) {
         return other.Record.FormKey.Equals(Record.FormKey);
     }
     
@@ -48,15 +46,14 @@ public class ReferencedRecord<TMajorRecord, TMajorRecordGetter> : ReactiveObject
     }
 
     [Reactive] public TMajorRecordGetter Record { get; set; }
-    public HashSet<IFormLinkIdentifier> References { get; set; }
 
-    public ReferencedRecord(TMajorRecordGetter record, HashSet<IFormLinkIdentifier>? references = null) {
-        Record = record;
-        References = references ?? new HashSet<IFormLinkIdentifier>();
-    }
+    ICollection<IFormLinkIdentifier> IReferenced.References => References;
+    public ObservableCollection<IFormLinkIdentifier> References { get; }
 
-    public ReferencedRecord(TMajorRecordGetter record, ILinkCache linkCache, IReferenceQuery referenceQuery) {
+    public ReferencedRecord(TMajorRecordGetter record, IEnumerable<IFormLinkIdentifier>? references = null) {
         Record = record;
-        References = referenceQuery.GetReferences(record.FormKey, linkCache).ToHashSet();
+        References = references == null
+            ? new ObservableCollection<IFormLinkIdentifier>()
+            : new ObservableCollection<IFormLinkIdentifier>(references);
     }
 }

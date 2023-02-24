@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
