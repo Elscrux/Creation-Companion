@@ -45,7 +45,6 @@ public class ReferenceController : IReferenceController {
         _referenceCache = new MutableReferenceCache(_referenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
 
         linearNotifier.Stop();
-        Console.WriteLine("Loaded all references in " + Stopwatch.GetElapsedTime(timestamp, Stopwatch.GetTimestamp()));
 
         timestamp = Stopwatch.GetTimestamp();
 
@@ -64,7 +63,6 @@ public class ReferenceController : IReferenceController {
                 action(change);
             }
         }
-        Console.WriteLine($"Updated all {_subscribers.Sum(x => x.Value.Count)} in " + Stopwatch.GetElapsedTime(timestamp, Stopwatch.GetTimestamp()));
 
         return Task.CompletedTask;
     }
