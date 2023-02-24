@@ -114,10 +114,10 @@ public sealed class DockDropBehavior : Behavior<Control> {
         var position = e.GetPosition(visual);
         
         var dockPositions = new List<(double Distance, Dock Dock)> {
-            (position.Distance(visual.Bounds.TopLeft, visual.Bounds.BottomLeft - visual.Bounds.TopLeft), Dock.Left),
-            (position.Distance(visual.Bounds.TopRight, visual.Bounds.BottomRight - visual.Bounds.TopRight), Dock.Right),
-            (position.Distance(visual.Bounds.TopLeft, visual.Bounds.TopRight - visual.Bounds.TopLeft), Dock.Top),
-            (position.Distance(visual.Bounds.BottomLeft, visual.Bounds.BottomRight - visual.Bounds.BottomLeft), Dock.Bottom)
+            (position.Distance(new Point(0, 0), new Point(0, visual.Bounds.Height)), Dock.Left),
+            (position.Distance(new Point(visual.Bounds.Width, 0), new Point(0, visual.Bounds.Height)), Dock.Right),
+            (position.Distance(new Point(0, 0), new Point(visual.Bounds.Width, 0)), Dock.Top),
+            (position.Distance(new Point(0, visual.Bounds.Height), new Point(visual.Bounds.Width, 0)), Dock.Bottom)
         };
 
         return dockPositions.MinBy(x => x.Distance).Dock;
