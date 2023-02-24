@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Collections;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -24,12 +25,20 @@ public sealed class ListShortcuts : AvaloniaObject {
     private const string RemoveHeader = "Remove";
 
     static ListShortcuts() {
-        AddProperty.Changed.Subscribe(args => HandleGesture(args, AddGesture, AddHeader));
+        AddProperty.Changed.Subscribe(args => HandleGesture(args, null, AddGesture, AddHeader));
 
-        RemoveProperty.Changed.Subscribe(args => HandleGesture(args, RemoveGesture, RemoveHeader));
+        RemoveProperty.Changed.Subscribe(args => {
+            var selectedItems = args.Sender switch {
+                DataGrid dataGrid => dataGrid.SelectedItems,
+                ListBox listBox => listBox.SelectedItems,
+                _ => null
+            };
+            
+            HandleGesture(args, selectedItems, RemoveGesture, RemoveHeader);
+        });
     }
 
-    private static void HandleGesture(AvaloniaPropertyChangedEventArgs<ICommand> args, KeyGesture gesture, string header) {
+    private static void HandleGesture(AvaloniaPropertyChangedEventArgs<ICommand> args, IList? selectedItems, KeyGesture gesture, string header) {
         if (args.Sender is not Control control) return;
 
         var newCommand = args.NewValue.GetValueOrDefault();
@@ -38,7 +47,8 @@ public sealed class ListShortcuts : AvaloniaObject {
         if (newCommand != null) {
             control.KeyBindings.Add(new KeyBinding {
                 Command = newCommand,
-                Gesture = gesture
+                Gesture = gesture,
+                CommandParameter = selectedItems!
             });
         } else {
             control.KeyBindings.RemoveWhere(keyBinding => ReferenceEquals(keyBinding.Gesture, gesture));
@@ -50,7 +60,8 @@ public sealed class ListShortcuts : AvaloniaObject {
             if (newCommand != null) {
                 list.Add(new MenuItem {
                     Header = header,
-                    Command = newCommand
+                    Command = newCommand,
+                    CommandParameter = selectedItems
                 });
             } else {
                 list.RemoveWhere(item =>
