@@ -150,7 +150,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Conditions = parent.Conditions;
     }
 
-    public void SetTo(Faction faction) {
+    public void CopyTo(Faction faction) {
         faction.EditorID = EditorID;
         faction.Name = Name;
         faction.Flags = Flags;
