@@ -129,7 +129,7 @@ public class BSERuntimeService : IViewportRuntimeService {
         
                     var model = baseObject switch {
                         IModeledGetter modeled => modeled.Model?.File.DataRelativePath,
-                        IArmorGetter armor => armor.WorldModel.Male.Model?.File.DataRelativePath,
+                        IArmorGetter armor => armor.WorldModel?.Male?.Model?.File.DataRelativePath,
                         ISoundMarkerGetter soundMarker => null,
                         ISpellGetter spell => null,
                         ITextureSetGetter textureSet => null,

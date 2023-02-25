@@ -521,7 +521,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                                     ((editorId, blacklistFormKeys, filter) => (EditorID: editorId, BlacklistFormKeys: blacklistFormKeys, Filter: filter)))
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select<(string EditorID, ICollection<FormKey> BlacklistFormKeys, Func<FormKey, string?, bool>? Filter), Func<IMajorRecordIdentifier, bool>>(data => {
+                                .Select<(string EditorID, ICollection<FormKey>? BlacklistFormKeys, Func<FormKey, string?, bool>? Filter), Func<IMajorRecordIdentifier, bool>>(data => {
                                     return ident => {
                                         if (data.Filter != null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
                                         if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
