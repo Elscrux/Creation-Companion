@@ -2,10 +2,8 @@
 
 [![.NET](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml)
 
-## Build from Source
-- Clone
-- Add NuGet source: https://gitlab.com/api/v4/projects/32329418/packages/nuget/index.json
-- Build
+## Download Latest Build
+Download the latest version [here](https://github.com/Elscrux/Creation-Editor/actions).
 
 ## Contribute
 Join the [Mutagen Discord](https://discord.gg/GdKZ3SH) and ping me there @Elscrux, so we can talk about the project. A basic project setup with issues is already in place and pull requests are always welcome.
