@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using System.Reactive.Subjects;
 using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
@@ -29,9 +28,6 @@ public sealed class LogVM : ViewModel, ILogVM {
     [Reactive] public bool AutoScroll { get; set; } = true;
 
     private readonly SourceCache<ILogItem, Guid> _logAddedCache = new(item => item.Id);
-    
-    private readonly Subject<ILogItem> _logAdded = new();
-    public IObservable<ILogItem> LogAdded => _logAdded;
 
     public LogVM(
         IObservableLogSink observableLogSink) {
