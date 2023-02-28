@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
@@ -21,7 +22,7 @@ public sealed class MainVM : ViewModel {
     public INotificationVM NotificationVM { get; }
     public IBusyService BusyService { get; }
     
-    [Reactive] public string WindowTitle { get; set; } = BaseWindowTitle;
+    public IObservable<string> WindowTitleObs { get; }
 
     public IDockingManagerService DockingManagerService { get; }
 
@@ -57,9 +58,8 @@ public sealed class MainVM : ViewModel {
 
         OpenDockElement = ReactiveCommand.Create<DockElement>(element => dockFactory.Open(element));
 
-        editorEnvironment.ActiveModChanged
-            .Subscribe(activeMod => {
-                WindowTitle = $"{BaseWindowTitle} - {activeMod}";
-            });
+        WindowTitleObs = editorEnvironment.ActiveModChanged
+            .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
+            .StartWith(BaseWindowTitle);
     }
 }
