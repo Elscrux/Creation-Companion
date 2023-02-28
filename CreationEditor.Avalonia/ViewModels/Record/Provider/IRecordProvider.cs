@@ -27,5 +27,6 @@ public interface IRecordProvider<TReferenced> : IRecordProvider
     
     public static readonly Func<IRecordBrowserSettingsVM, IObservable<Func<TReferenced, bool>>> DefaultFilter = recordBrowserSettingsVM =>
         recordBrowserSettingsVM.SettingsChanged
+            .StartWith(Unit.Default)
             .Select(_ => new Func<TReferenced, bool>(record => recordBrowserSettingsVM.Filter(record.Record)));
 }

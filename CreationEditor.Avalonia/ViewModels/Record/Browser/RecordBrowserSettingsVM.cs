@@ -21,7 +21,7 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
     
     private readonly IEditorEnvironment _editorEnvironment;
 
-    private readonly ReplaySubject<Unit> _settingsChanged = new();
+    private readonly Subject<Unit> _settingsChanged = new();
     public IObservable<Unit> SettingsChanged => _settingsChanged;
     
     [Reactive] public bool OnlyActive { get; set; } = false;

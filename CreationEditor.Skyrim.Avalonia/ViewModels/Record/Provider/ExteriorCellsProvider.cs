@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Threading;
@@ -38,6 +39,7 @@ public class ExteriorCellsProvider : CellProvider {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = RecordBrowserSettingsVM.SettingsChanged
+            .StartWith(Unit.Default)
             .Select(_ => new Func<IReferencedRecord, bool>(
                 record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettingsVM.Filter(record.Record)));
 
