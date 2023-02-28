@@ -58,14 +58,13 @@ public class RecordListVM : ViewModel, IRecordListVM {
             },
             this.WhenAnyValue(x => x.RecordProvider.SelectedRecord).Select(selected => selected is { References.Count: > 0 }));
 
-        Task.Run(() => {
-            Records = RecordProvider.RecordCache
-                .Connect()
-                .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
-                .Filter(RecordProvider.Filter)
-                .DoOnGui(_ => IsFiltering = false)
-                .ToObservableCollection(this);
-        });
+        Records = RecordProvider.RecordCache
+            .Connect()
+            .SubscribeOn(RxApp.TaskpoolScheduler)
+            .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
+            .Filter(RecordProvider.Filter)
+            .DoOnGui(_ => IsFiltering = false)
+            .ToObservableCollection(this);
 
         GetFormLink = element => {
             if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;
