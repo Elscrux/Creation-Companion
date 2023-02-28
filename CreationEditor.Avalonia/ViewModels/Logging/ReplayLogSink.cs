@@ -4,7 +4,9 @@ using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging; 
 
 public class ReplayLogSink : IObservableLogSink {
-    private readonly ReplaySubject<ILogItem> _logAdded = new();
+    private const int ReplayLimit = 500;
+
+    private readonly ReplaySubject<ILogItem> _logAdded = new(ReplayLimit);
     public IObservable<ILogItem> LogAdded => _logAdded;
 
     public void Emit(LogEvent logEvent) {
