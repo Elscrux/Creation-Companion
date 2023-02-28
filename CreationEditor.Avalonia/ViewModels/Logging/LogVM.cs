@@ -60,15 +60,11 @@ public sealed class LogVM : ViewModel, ILogVM {
         ToggleAutoScroll = ReactiveCommand.Create(() => {
             AutoScroll = !AutoScroll;
         });
-        
-        this.WhenAnyValue(x => x.VisibilityLevels.Count)
-            .Subscribe(_ => _logAddedCache.Refresh())
-            .DisposeWith(this);
 
         LogItems = _logAddedCache
             .Connect()
-            .Filter(item => VisibilityLevels.Contains(item.Level))
-            .LimitSizeTo(MaxLogCount)
+            .Filter(this.WhenAnyValue(x => x.VisibilityLevels.Count)
+                .Select(_ => new Func<ILogItem, bool>(item => VisibilityLevels.Contains(item.Level))))
             .SortBy(item => item.Time)
             .ToObservableCollection(this);
     }
