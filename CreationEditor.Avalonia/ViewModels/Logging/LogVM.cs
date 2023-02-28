@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
 using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
@@ -15,7 +16,7 @@ public sealed class LogVM : ViewModel, ILogVM {
     
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; } = LogLevels.ToDictionary(x => x, _ => true);
     
-    public int MaxLogCount { get; set; } = 500;
+    public int MaxLogCount { get; set; } = 100;
     
     public IObservableCollection<ILogItem> LogItems { get; }
     
@@ -34,6 +35,14 @@ public sealed class LogVM : ViewModel, ILogVM {
         
         observableLogSink.LogAdded
             .Subscribe(log => _logAddedCache.AddOrUpdate(log));
+
+        _logAddedCache.CountChanged
+            .Subscribe(count => {
+                while (_logAddedCache.Count > MaxLogCount) {
+                    var logItem = _logAddedCache.Items.MinBy(x => x.Time);
+                    if (logItem != null) _logAddedCache.Remove(logItem.Id);
+                }
+            });
         
         Clear = ReactiveCommand.Create<Unit>(_ => _logAddedCache.Clear());
 
