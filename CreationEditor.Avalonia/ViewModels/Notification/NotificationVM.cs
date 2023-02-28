@@ -14,8 +14,8 @@ public sealed class NotificationVM : ViewModel, INotificationVM {
     private readonly IObservableCollection<NotificationItem> _loadingItems;
     public IList<NotificationItem> LoadingItems => _loadingItems;
 
-    public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromMilliseconds(500);
-    
+    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMilliseconds(500);
+
     public IObservable<NotificationItem> LatestNotification { get; }
 
     public NotificationVM(INotificationService notificationService) {
