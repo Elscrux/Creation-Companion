@@ -18,6 +18,12 @@ public static class ObservableExtension {
             .ObserveOnTaskpool();
     }
 
+    public static IObservable<T> DoOnGui<T>(this IObservable<T> obs, Action<T> onNext) {
+        return obs
+            .ObserveOnGui()
+            .Do(onNext);
+    }
+
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<IChangeSet<TObj, TKey>> changeSet,
         IDisposableDropoff disposable)

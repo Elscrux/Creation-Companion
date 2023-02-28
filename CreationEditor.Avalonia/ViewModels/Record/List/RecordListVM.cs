@@ -63,7 +63,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
                 .Connect()
                 .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
                 .Filter(RecordProvider.Filter)
-                .DoOnGuiAndSwitchBack(_ => IsFiltering = false)
+                .DoOnGui(_ => IsFiltering = false)
                 .ToObservableCollection(this);
         });
 
