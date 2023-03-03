@@ -16,27 +16,39 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSettingsVM {
+public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsVM {
     private const char SplitChar = '*';
-    
-    private readonly IEditorEnvironment _editorEnvironment;
 
-    private readonly Subject<Unit> _settingsChanged = new();
-    public IObservable<Unit> SettingsChanged => _settingsChanged;
-    
+    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly Subject<Unit> _changeRequest = new();
+
+    public IObservable<Unit> SettingsChanged { get; }
+
     [Reactive] public bool OnlyActive { get; set; } = false;
     [Reactive] public ILinkCache LinkCache { get; set; }
     [Reactive] public BrowserScope Scope { get; set; } = BrowserScope.Environment;
     [Reactive] public string SearchTerm { get; set; } = string.Empty;
-    public ObservableCollection<ModItem> Mods { get; }
-    private List<ModKey> _selectedMods;
+
+    public ReadOnlyObservableCollection<ModItem> Mods { get; }
+    private readonly IObservableList<ModKey> _selectedMods;
 
     public RecordBrowserSettingsVM(
         IEditorEnvironment editorEnvironment) {
         _editorEnvironment = editorEnvironment;
         LinkCache = _editorEnvironment.LinkCache;
-        Mods = new ObservableCollection<ModItem>(LinkCache.ListedOrder.Select(mod => new ModItem(mod.ModKey) { IsSelected = true }));
-        _selectedMods = Mods.Select(mod => mod.ModKey).ToList();
+
+        Mods = this.WhenAnyValue(x => x.LinkCache)
+            .Select(x => x.ListedOrder.AsObservableChangeSet())
+            .Switch()
+            .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true })
+            .ToObservableCollection(this);
+
+        _selectedMods = Mods
+            .ToObservableChangeSet()
+            .AutoRefresh(mod => mod.IsSelected)
+            .Filter(mod => mod.IsSelected)
+            .Transform(x => x.ModKey)
+            .AsObservableList();
 
         this.WhenAnyValue(x => x.OnlyActive)
             .ObserveOnGui()
@@ -47,46 +59,31 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
             .ObserveOnGui()
             .Subscribe(_ => UpdateScope());
 
-        Mods.ToObservableChangeSet()
-            .AutoRefresh(mod => mod.IsSelected)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .Subscribe(_ => {
-                _selectedMods = Mods
-                    .Where(mod => mod.IsSelected)
-                    .Select(mod => mod.ModKey)
-                    .ToList();
-                
-                RequestUpdate();
-            });
-        
-        this.WhenAnyValue(x => x.SearchTerm)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .Subscribe(RequestUpdate);
+        SettingsChanged = Observable.Merge(
+                this.WhenAnyValue(x => x.SearchTerm).Unit(),
+                _selectedMods.Connect().Unit(),
+                _changeRequest)
+            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
     }
-    
+
     private void UpdateScope() {
         LinkCache = Scope switch {
             BrowserScope.Environment => _editorEnvironment.LinkCache,
             BrowserScope.ActiveMod => _editorEnvironment.ActiveModLinkCache,
             _ => throw new ArgumentOutOfRangeException(nameof(Scope))
         };
-
-        Mods.Clear();
-        foreach (var modItem in LinkCache.ListedOrder.Select(x => new ModItem(x.ModKey) { IsSelected = true })) {
-            Mods.Add(modItem);
-        }
     }
 
-    public void RequestUpdate() => _settingsChanged.OnNext(Unit.Default);
+    public void RequestUpdate() => _changeRequest.OnNext(Unit.Default);
 
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;
 
         return Filter(record as IMajorRecordIdentifier);
     }
-    
+
     public bool Filter(IMajorRecordIdentifier record) {
-        if (!_selectedMods.Contains(record.FormKey.ModKey)) return false;
+        if (!_selectedMods.Items.Contains(record.FormKey.ModKey)) return false;
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;
@@ -97,4 +94,3 @@ public sealed class RecordBrowserSettingsVM : ReactiveObject, IRecordBrowserSett
                 .All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 }
- 

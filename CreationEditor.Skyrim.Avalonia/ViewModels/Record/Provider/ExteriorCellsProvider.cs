@@ -2,7 +2,6 @@ using System;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Threading;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -47,8 +46,8 @@ public class ExteriorCellsProvider : CellProvider {
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache, x => x.WorldspaceFormKey)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(_ => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(_ => {
                 cacheDisposable.Clear();
                 
                 RecordCache.Clear();
@@ -59,10 +58,11 @@ public class ExteriorCellsProvider : CellProvider {
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });
-
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            })
+            }), out var isBusy)
+            .Subscribe()
             .DisposeWith(this);
+        
+        IsBusy = isBusy;
     }
 
     protected override void LoadCell(ICellGetter cell) {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -40,7 +40,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
     }
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    [Reactive] public bool IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; set; }
     
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
@@ -104,29 +104,27 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         var cacheDisposable = new CompositeDisposable();
 
         this.WhenAnyValue(x => x.Cell)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(_ => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(_ => {
                 cacheDisposable.Clear();
                 
                 RecordCache.Clear();
-                RecordCache.Refresh();
+                
+                if (Cell == null) return;
 
-                try {
-                    if (Cell == null) return;
+                RecordCache.Edit(updater => {
+                    foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
+                        var references = referenceController.ReferenceCache?.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
+                        var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, references);
 
-                    RecordCache.Edit(updater => {
-                        foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                            var references = referenceController.ReferenceCache?.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                            var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, references);
-
-                            updater.AddOrUpdate(referencedRecord);
-                        }
-                    });
-                } finally {
-                    Dispatcher.UIThread.Post(() => IsBusy = false);
-                }
-            })
+                        updater.AddOrUpdate(referencedRecord);
+                    }
+                });
+            }), out var isBusy)
+            .Subscribe()
             .DisposeWith(this);
+
+        IsBusy = isBusy;
 
         recordController.RecordChanged
             .Subscribe(majorRecord => {

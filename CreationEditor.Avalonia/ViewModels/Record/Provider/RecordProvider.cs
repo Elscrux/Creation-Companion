@@ -1,7 +1,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
@@ -37,7 +37,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     
-    [Reactive] public bool IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; set; }
     
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; init; }
@@ -90,10 +90,10 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         var cacheDisposable = new CompositeDisposable();
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(linkCache => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(linkCache => {
                 cacheDisposable.Clear();
-                
+
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
@@ -102,10 +102,11 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });
-                
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            })
+            }), out var isBusy)
+            .Subscribe()
             .DisposeWith(this);
+        
+        IsBusy = isBusy;
 
         recordController.RecordChanged
             .Subscribe(majorRecord => {

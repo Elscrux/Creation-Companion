@@ -12,7 +12,7 @@ public interface IRecordBrowserSettingsVM {
     [Reactive] public ILinkCache LinkCache { get; set; }
     [Reactive] public BrowserScope Scope { get; set; }
     [Reactive] public string SearchTerm { get; set; }
-    public ObservableCollection<ModItem> Mods { get; }
+    public ReadOnlyObservableCollection<ModItem> Mods { get; }
     
     public IObservable<Unit> SettingsChanged { get; }
 

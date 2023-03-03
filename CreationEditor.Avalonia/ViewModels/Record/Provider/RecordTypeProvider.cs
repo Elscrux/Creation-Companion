@@ -1,7 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -22,11 +22,10 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    [Reactive] public bool IsBusy { get; set; }
-    
+    public IObservable<bool> IsBusy { get; set; }
+
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
-    
 
     public RecordTypeProvider(
         IEnumerable<Type> types,
@@ -41,8 +40,8 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         var cacheDisposable = new CompositeDisposable();
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(linkCache => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(linkCache => {
                 cacheDisposable.Clear();
 
                 RecordCache.Clear();
@@ -53,23 +52,25 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });
-                
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            });
+            }), out var isBusy)
+            .Subscribe()
+            .DisposeWith(this);
+
+        IsBusy = isBusy;
 
         recordController.RecordChanged
             .Subscribe(record => {
                 if (!Types.Contains(record.GetType())) return;
-                
+
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord); 
+                    referenceController.GetRecord(record, out var outListRecord);
                     listRecord = outListRecord;
                 }
-                
+
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })

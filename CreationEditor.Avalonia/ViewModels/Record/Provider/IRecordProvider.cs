@@ -15,7 +15,7 @@ public interface IRecordProvider {
     
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     
-    public bool IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; set; }
     
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }

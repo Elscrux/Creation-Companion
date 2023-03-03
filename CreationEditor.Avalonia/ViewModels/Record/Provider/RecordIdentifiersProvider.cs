@@ -1,7 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
@@ -22,7 +22,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    [Reactive] public bool IsBusy { get; set; } = true;
+    public IObservable<bool> IsBusy { get; set; }
 
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
@@ -40,8 +40,8 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
         var cacheDisposable = new CompositeDisposable();
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(linkCache => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(linkCache => {
                 cacheDisposable.Clear();
 
                 RecordCache.Clear();
@@ -50,17 +50,18 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                         var formKey = identifier.FormKey;
                         if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
                             cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
-                        
+
                             updater.AddOrUpdate(referencedRecord);
                         } else {
                             logger.Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
                         }
                     }
                 });
-
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            })
+            }), out var isBusy)
+            .Subscribe()
             .DisposeWith(this);
+
+        IsBusy = isBusy;
 
         recordController.RecordChanged
             .Subscribe(record => {

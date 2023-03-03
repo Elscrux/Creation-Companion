@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
@@ -76,6 +77,19 @@ public static class ObservableExtension {
             .DisposeWith(disposable);
 
         return readOnlyObservableCollection;
+    }
+
+    public static IObservable<TResult> WrapInInProgressMarker<T, TResult>(
+        this IObservable<T> changeSet,
+        Func<IObservable<T>, IObservable<TResult>> wrapped,
+        out IObservable<bool> isWorkingObservable) {
+        
+        var isWorking = new ReplaySubject<bool>(1);
+        isWorking.OnNext(false);
+        isWorkingObservable = isWorking;
+
+        return wrapped(changeSet.Do(_ => isWorking.OnNext(true)))
+            .Do(_ => isWorking.OnNext(false));
     }
 
     /// <summary>

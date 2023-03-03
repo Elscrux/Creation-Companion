@@ -12,7 +12,6 @@ using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public class RecordListVM : ViewModel, IRecordListVM {
@@ -23,10 +22,9 @@ public class RecordListVM : ViewModel, IRecordListVM {
     
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
-    [Reactive] public IEnumerable? Records { get; private set; }
+    public IEnumerable? Records { get; }
 
-    [Reactive] public bool IsBusy { get; set; }
-    [Reactive] private bool IsFiltering { get; set; }
+    public IObservable<bool> IsBusy { get; set; }
     
     public ReactiveCommand<Unit, Unit> OpenReferences { get; }
     
@@ -38,13 +36,6 @@ public class RecordListVM : ViewModel, IRecordListVM {
         MainWindow mainWindow) {
         RecordProvider = recordProvider;
         DoubleTapCommand = recordProvider.DoubleTapCommand;
-
-        this.WhenAnyValue(
-                x => x.RecordProvider.IsBusy,
-                x => x.IsFiltering,
-                (isBusy, isFiltering) => (IsBusy: isBusy, IsFiltering: isFiltering))
-            .ObserveOnGui()
-            .Subscribe(busyStates => IsBusy = busyStates.IsBusy || busyStates.IsFiltering);
         
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;
@@ -61,10 +52,17 @@ public class RecordListVM : ViewModel, IRecordListVM {
         Records = RecordProvider.RecordCache
             .Connect()
             .SubscribeOn(RxApp.TaskpoolScheduler)
-            .DoOnGuiAndSwitchBack(_ => IsFiltering = true)
-            .Filter(RecordProvider.Filter)
-            .DoOnGui(_ => IsFiltering = false)
+            .WrapInInProgressMarker(
+                x => x.Filter(RecordProvider.Filter),
+                out var isFiltering)
             .ToObservableCollection(this);
+
+        IsBusy = isFiltering
+            .CombineLatest(
+                RecordProvider.IsBusy,
+                ((filtering, busy) => (Filtering: filtering, Busy: busy)))
+            .ObserveOnGui()
+            .Select(list => list.Filtering || list.Busy);
 
         GetFormLink = element => {
             if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;

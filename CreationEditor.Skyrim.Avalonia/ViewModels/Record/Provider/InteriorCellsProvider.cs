@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reactive.Disposables;
-using Avalonia.Threading;
+using System.Reactive.Linq;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -37,8 +37,8 @@ public class InteriorCellsProvider : CellProvider {
         var cacheDisposable = new CompositeDisposable();
 
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
-            .DoOnGuiAndSwitchBack(_ => IsBusy = true)
-            .Subscribe(linkCache => {
+            .ObserveOnTaskpool()
+            .WrapInInProgressMarker(x => x.Do(linkCache => {
                 cacheDisposable.Clear();
                 
                 RecordCache.Clear();
@@ -51,10 +51,11 @@ public class InteriorCellsProvider : CellProvider {
                         updater.AddOrUpdate(referencedRecord);
                     }
                 });
-
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            })
+            }), out var isBusy)
+            .Subscribe()
             .DisposeWith(this);
+
+        IsBusy = isBusy;
     }
 
     protected override void LoadCell(ICellGetter cell) {
