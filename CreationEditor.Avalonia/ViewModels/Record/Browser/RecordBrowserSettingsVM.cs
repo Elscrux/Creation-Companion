@@ -30,7 +30,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     [Reactive] public string SearchTerm { get; set; } = string.Empty;
 
     public ReadOnlyObservableCollection<ModItem> Mods { get; }
-    private readonly IObservableList<ModKey> _selectedMods;
+    private readonly IObservableCache<ModKey, ModKey> _selectedMods;
 
     public RecordBrowserSettingsVM(
         IEditorEnvironment editorEnvironment) {
@@ -48,7 +48,8 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
             .AutoRefresh(mod => mod.IsSelected)
             .Filter(mod => mod.IsSelected)
             .Transform(x => x.ModKey)
-            .AsObservableList();
+            .AddKey(x => x)
+            .AsObservableCache();
 
         this.WhenAnyValue(x => x.OnlyActive)
             .ObserveOnGui()
@@ -83,7 +84,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     }
 
     public bool Filter(IMajorRecordIdentifier record) {
-        if (!_selectedMods.Items.Contains(record.FormKey.ModKey)) return false;
+        if (!_selectedMods.Lookup(record.FormKey.ModKey).HasValue) return false;
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;
