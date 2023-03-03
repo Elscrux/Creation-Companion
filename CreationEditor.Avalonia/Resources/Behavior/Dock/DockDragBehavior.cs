@@ -17,19 +17,19 @@ public sealed class DockDragBehavior : Behavior<Control> {
             if (!_isPressingDown || _isDragging) return;
 
             if (sender is Control { DataContext: IDockedItem dockedItem }) {
-                Drag(dockedItem, e);
+                Task.Run(() => Drag(dockedItem, e));
             }
         });
-        
+
         AssociatedObject.AddHandler(InputElement.PointerPressedEvent, (_, _) => _isPressingDown = true);
         AssociatedObject.AddHandler(InputElement.PointerExitedEvent, (_, _) => _isPressingDown = false);
-        AssociatedObject?.AddHandler(InputElement.PointerReleasedEvent, (_, _) => _isPressingDown = false);
+        AssociatedObject.AddHandler(InputElement.PointerReleasedEvent, (_, _) => _isPressingDown = false);
     }
 
-    private async void Drag(IDockedItem dockedItem, PointerEventArgs e) {
+    private async Task Drag(IDockedItem dockedItem, PointerEventArgs e) {
         var dataObject = new DataObject();
         dataObject.Set(nameof(DockDragData), new DockDragData { Item = dockedItem });
-        
+
         SetDragging(true);
         var result = await DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
         SetDragging(false);
@@ -40,7 +40,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
                 dragData.Preview?.HidePreview();
             }
         }
-        
+
         void SetDragging(bool state) {
             dockedItem.DockRoot.SetEditMode(state);
 
