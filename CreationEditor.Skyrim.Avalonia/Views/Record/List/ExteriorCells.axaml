@@ -48,8 +48,7 @@
 
         <CheckBox Grid.Row="4"
                   Content="Show Wilderness Cells"
-                  IsChecked="{Binding ExteriorCellsProvider.ShowWildernessCells}"
-                  Command="{Binding ToggleWildernessCells}"/>
+                  IsChecked="{Binding ExteriorCellsProvider.ShowWildernessCells}"/>
 
         <record:RecordBrowserSettings
             Grid.Row="6"
