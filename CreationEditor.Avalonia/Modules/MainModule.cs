@@ -18,40 +18,19 @@ namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
     protected override void Load(ContainerBuilder builder) {
+        // General
         builder.RegisterType<Lifecycle>()
             .As<ILifecycle>();
 
-        builder.RegisterType<MainVM>()
-            .SingleInstance();
-
         builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>()
-            .SingleInstance();
-
-        builder.RegisterType<ReferenceQuery>()
-            .As<IReferenceQuery>()
-            .SingleInstance();
-
-        builder.RegisterType<MutagenTypeProvider>()
-            .As<IMutagenTypeProvider>()
             .SingleInstance();
 
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
             .SingleInstance();
 
-        builder.RegisterType<RecordBrowserSettingsVM>()
-            .As<IRecordBrowserSettingsVM>();
-
-        builder.RegisterType<RecordTypeProvider>()
-            .AsSelf();
-
-        builder.RegisterType<RecordListVM>()
-            .As<IRecordListVM>();
-
-        builder.RegisterType<RecordIdentifiersProvider>()
-            .AsSelf();
-
+        // Controller
         builder.RegisterType<ReferenceController>()
             .As<IReferenceController>()
             .SingleInstance();
@@ -60,21 +39,48 @@ public sealed class MainModule : Module {
             .As<IRecordEditorController>()
             .SingleInstance();
 
+        // Provider
+        builder.RegisterType<MutagenTypeProvider>()
+            .As<IMutagenTypeProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<RecordTypeProvider>()
+            .AsSelf();
+
+        builder.RegisterType<RecordIdentifiersProvider>()
+            .AsSelf();
+
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
             .SingleInstance();
 
+        // Builder
         builder.RegisterType<ExtraColumnsBuilder>()
             .As<IExtraColumnsBuilder>();
 
+        // Factory
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
             .SingleInstance();
 
         builder.RegisterType<BSEViewportFactory>()
             .As<IViewportFactory>();
-        
-        //VMs
+
+        // Query
+        builder.RegisterType<ReferenceQuery>()
+            .As<IReferenceQuery>()
+            .SingleInstance();
+
+        // View Model
+        builder.RegisterType<MainVM>()
+            .SingleInstance();
+
         builder.RegisterType<ModSelectionVM>();
+
+        builder.RegisterType<RecordListVM>()
+            .As<IRecordListVM>();
+
+        builder.RegisterType<RecordBrowserSettingsVM>()
+            .As<IRecordBrowserSettingsVM>();
     }
 }
