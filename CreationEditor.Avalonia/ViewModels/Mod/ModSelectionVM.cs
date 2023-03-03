@@ -20,7 +20,6 @@ namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel {
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IBusyService _busyService;
     private readonly IGameEnvironment _environment;
 
     private readonly SourceCache<LoadOrderModItem, ModKey> _mods = new(x => x.ModKey);
@@ -50,7 +49,6 @@ public sealed class ModSelectionVM : ViewModel {
         IPluginListingsPathProvider pluginListingsProvider,
         IBusyService busyService) {
         _editorEnvironment = editorEnvironment;
-        _busyService = busyService;
         SelectedModDetails = modGetterVM;
         _environment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
@@ -58,7 +56,7 @@ public sealed class ModSelectionVM : ViewModel {
         if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
-        
+
         // Fill mods with active load order
         _mods.Edit(updater => {
             var modKeys = _environment.LoadOrder.Keys.ToList();
@@ -67,22 +65,22 @@ public sealed class ModSelectionVM : ViewModel {
                 updater.AddOrUpdate(new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i));
             }
         });
-        
+
         var connectedMods = _mods.Connect();
 
         DisplayedMods = _mods.Connect()
             .Filter(this.WhenAnyValue(x => x.ModSearchText)
-                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-                    .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>
-                            searchText.IsNullOrEmpty()
-                         || mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
+                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>
+                    searchText.IsNullOrEmpty()
+                 || mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
             .SortBy(mod => mod.LoadOrderIndex)
             .ToObservableCollection(this);
 
         var modSelected = connectedMods
             .AutoRefresh(modItem => modItem.IsSelected)
             .ToCollection();
-        
+
         AnyModsLoaded = modSelected
             .Select(collection => collection.Any(mod => mod.IsSelected));
 
@@ -108,17 +106,21 @@ public sealed class ModSelectionVM : ViewModel {
             .WhenAnyValue(x => x.SelectedMod)
             .NotNull()
             .Select(CanSelect);
-        
+
         ToggleActive = ReactiveCommand.Create(
             canExecute: selectedModValid,
             execute: () => {
                 if (SelectedMod == null) return;
+
                 SelectedMod.IsActive = !SelectedMod.IsActive;
             });
 
-        CloseAndLoadMods = ReactiveCommand.Create<Window>(window => {
+        CloseAndLoadMods = ReactiveCommand.CreateFromTask<Window>(async (window, cancellationToken) => {
             window.Close();
-            LoadMods();
+
+            busyService.IsBusy = true;
+            await Task.Run(LoadMods, cancellationToken);
+            busyService.IsBusy = false;
         });
 
         this.WhenAnyValue(x => x.SelectedMod)
@@ -126,11 +128,11 @@ public sealed class ModSelectionVM : ViewModel {
             .Subscribe(selectedMod => {
                 var mod = _environment.LoadOrder.First(l => l.Key == selectedMod.ModKey).Value.Mod;
                 if (mod == null) return;
-                
+
                 SelectedModDetails.SetTo(mod);
             });
     }
-    
+
     /// <summary>
     /// Build Dictionary _masterInfos with all masters of a single plugin recursively
     /// </summary>
@@ -145,7 +147,7 @@ public sealed class ModSelectionVM : ViewModel {
                 var directMasters = listing.Mod.MasterReferences.Select(m => m.Master).ToList();
                 var masters = new HashSet<ModKey>(directMasters);
                 var valid = true;
-                
+
                 //Check that all masters are valid and compile list of all recursive masters
                 foreach (var master in directMasters) {
                     if (_masterInfos.TryGetValue(master, out var masterInfo)) {
@@ -154,7 +156,7 @@ public sealed class ModSelectionVM : ViewModel {
                             continue;
                         }
                     }
-                    
+
                     valid = false;
                     break;
                 }
@@ -166,26 +168,22 @@ public sealed class ModSelectionVM : ViewModel {
         }
     }
 
-    private async void LoadMods() {
-        _busyService.IsBusy = true;
-        await Task.Run(() => {
-            //Load all mods that are selected, or masters of selected mods
-            var loadedMods = new HashSet<ModKey>();
-            var missingMods = new Queue<ModKey>(SelectedMods);
-            var modKeys = _environment.LoadOrder.Keys.ToHashSet();
+    private void LoadMods() {
+        //Load all mods that are selected, or masters of selected mods
+        var loadedMods = new HashSet<ModKey>();
+        var missingMods = new Queue<ModKey>(SelectedMods);
+        var modKeys = _environment.LoadOrder.Keys.ToHashSet();
 
-            while (missingMods.Any()) {
-                var modKey = missingMods.Dequeue();
-                loadedMods.Add(modKey);
+        while (missingMods.Any()) {
+            var modKey = missingMods.Dequeue();
+            loadedMods.Add(modKey);
 
-                foreach (var master in _masterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
-                    missingMods.Enqueue(master);
-                }
+            foreach (var master in _masterInfos[modKey].Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
+                missingMods.Enqueue(master);
             }
+        }
 
-            var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-            _editorEnvironment.Build(orderedMods, ActiveMod);
-        });
-        _busyService.IsBusy = false;
+        var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
+        _editorEnvironment.Build(orderedMods, ActiveMod);
     }
 }
