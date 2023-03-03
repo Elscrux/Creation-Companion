@@ -20,7 +20,6 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     private const char SplitChar = '*';
 
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly Subject<Unit> _changeRequest = new();
 
     public IObservable<Unit> SettingsChanged { get; }
 
@@ -62,8 +61,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
 
         SettingsChanged = Observable.Merge(
                 this.WhenAnyValue(x => x.SearchTerm).Unit(),
-                _selectedMods.Connect().Unit(),
-                _changeRequest)
+                _selectedMods.Connect().Unit())
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
     }
 
@@ -74,8 +72,6 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
             _ => throw new ArgumentOutOfRangeException(nameof(Scope))
         };
     }
-
-    public void RequestUpdate() => _changeRequest.OnNext(Unit.Default);
 
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;

@@ -16,8 +16,6 @@ public interface IRecordBrowserSettingsVM {
     
     public IObservable<Unit> SettingsChanged { get; }
 
-    public void RequestUpdate();
-
     public bool Filter(IMajorRecordGetter record);
     public bool Filter(IMajorRecordIdentifier record);
 }
