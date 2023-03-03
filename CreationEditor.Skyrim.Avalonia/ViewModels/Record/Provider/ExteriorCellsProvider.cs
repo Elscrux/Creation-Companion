@@ -19,13 +19,14 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public class ExteriorCellsProvider : CellProvider {
+public sealed class ExteriorCellsProvider : CellProvider {
     private readonly IViewportRuntimeService _viewportRuntimeService;
 
     [Reactive] public FormKey WorldspaceFormKey { get; set; }
     [Reactive] public bool ShowWildernessCells { get; set; } = true;
 
     public override IObservable<Func<IReferencedRecord, bool>> Filter { get; }
+    public override IObservable<bool> IsBusy { get; set; }
 
     public ExteriorCellsProvider(
         IRecordController recordController,

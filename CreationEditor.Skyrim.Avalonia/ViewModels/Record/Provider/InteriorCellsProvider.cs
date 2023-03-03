@@ -17,10 +17,11 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public class InteriorCellsProvider : CellProvider {
+public sealed class InteriorCellsProvider : CellProvider {
     private readonly IViewportRuntimeService _viewportRuntimeService;
     
     public override IObservable<Func<IReferencedRecord, bool>> Filter { get; }
+    public override IObservable<bool> IsBusy { get; set; }
 
     public InteriorCellsProvider(
         IRecordController recordController,

@@ -37,8 +37,8 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
     
     public abstract IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    public IObservable<bool> IsBusy { get; set; }
-    
+    public abstract IObservable<bool> IsBusy { get; set; }
+
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
     
