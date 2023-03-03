@@ -11,7 +11,7 @@ using CreationEditor.Skyrim.Extension;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List; 
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public class ExteriorCellsVM : ViewModel {
     public ExteriorCellsProvider ExteriorCellsProvider { get; }
@@ -22,7 +22,6 @@ public class ExteriorCellsVM : ViewModel {
     public RecordList ExteriorList { get; }
 
     public ReactiveCommand<Unit, Unit> SelectGridCell { get; }
-    public ReactiveCommand<Unit, Unit> ToggleWildernessCells { get; }
 
     public ExteriorCellsVM(
         IComponentContext componentContext,
@@ -34,7 +33,7 @@ public class ExteriorCellsVM : ViewModel {
             .AddRecordType<ICellGetter>()
             .AddColumnType<CellGridExtraColumns>()
             .Build();
-        
+
         ExteriorList = new RecordList(columns) {
             DataContext = componentContext.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider))
         };
@@ -52,7 +51,5 @@ public class ExteriorCellsVM : ViewModel {
                 }
             }
         });
-
-        ToggleWildernessCells = ReactiveCommand.Create(exteriorCellsProvider.RecordBrowserSettingsVM.RequestUpdate);
     }
 }

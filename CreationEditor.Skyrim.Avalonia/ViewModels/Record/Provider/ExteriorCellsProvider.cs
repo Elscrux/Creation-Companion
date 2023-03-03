@@ -24,7 +24,7 @@ public class ExteriorCellsProvider : CellProvider {
 
     [Reactive] public FormKey WorldspaceFormKey { get; set; }
     [Reactive] public bool ShowWildernessCells { get; set; } = true;
-    
+
     public override IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
     public ExteriorCellsProvider(
@@ -38,7 +38,7 @@ public class ExteriorCellsProvider : CellProvider {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = RecordBrowserSettingsVM.SettingsChanged
-            .StartWith(Unit.Default)
+            .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(
                 record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettingsVM.Filter(record.Record)));
 
@@ -49,7 +49,7 @@ public class ExteriorCellsProvider : CellProvider {
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(_ => {
                 cacheDisposable.Clear();
-                
+
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
@@ -61,7 +61,7 @@ public class ExteriorCellsProvider : CellProvider {
             }), out var isBusy)
             .Subscribe()
             .DisposeWith(this);
-        
+
         IsBusy = isBusy;
     }
 
