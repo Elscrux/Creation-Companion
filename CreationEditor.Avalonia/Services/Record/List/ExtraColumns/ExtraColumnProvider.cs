@@ -3,14 +3,14 @@ using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnProvider : IExtraColumnProvider {
-    public Dictionary<Type, IExtraColumns> ExtraColumnsCache { get; } = new();
+    public Dictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
 
     public ExtraColumnProvider() {
-        typeof(IExtraColumns)
+        ExtraColumnsCache = typeof(IExtraColumns)
             .GetSubclassesOf()
             .NotNull()
             .Select(type => Activator.CreateInstance(type) as IExtraColumns)
             .NotNull()
-            .ForEach(extraColumns => ExtraColumnsCache.Add(extraColumns.Type, extraColumns));
+            .ToDictionary(extraColumns => extraColumns.Type, extraColumns => extraColumns);
     }
 }
