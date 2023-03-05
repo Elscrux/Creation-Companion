@@ -5,8 +5,8 @@ public sealed class RecordTypeGroup {
     public string GroupName { get; }
     public ObservableCollection<RecordTypeListing> RecordTypes { get; set; }
 
-    public RecordTypeGroup(string groupName, ObservableCollection<RecordTypeListing> recordTypes) {
+    public RecordTypeGroup(string groupName, List<RecordTypeListing> recordTypes) {
         GroupName = groupName;
-        RecordTypes = recordTypes;
+        RecordTypes = new ObservableCollection<RecordTypeListing>(recordTypes);
     }
 }

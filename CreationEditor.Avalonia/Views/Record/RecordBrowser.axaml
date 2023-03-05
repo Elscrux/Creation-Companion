@@ -6,6 +6,7 @@
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Record.Browser"
     xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.Browser"
     xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     x:CompileBindings="True" x:DataType="vm:IRecordBrowserVM"
     d:DesignHeight="720" d:DesignWidth="480"
     x:Name="Browser">
@@ -22,22 +23,55 @@
                 Grid.Row="0"
                 DataContext="{Binding RecordBrowserSettingsVM}"
                 Margin="5"/>
-            
+
             <TreeView Grid.Row="1"
                       Items="{Binding RecordTypeGroups}">
+                <TreeView.Styles>
+                    <Style Selector="TreeViewItem">
+                        <Setter Property="MinHeight" Value="10"></Setter>
+                    </Style>
+                </TreeView.Styles>
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
                         <TextBlock Text="{Binding GroupName}"/>
                     </TreeDataTemplate>
-                    <DataTemplate DataType="model:RecordTypeListing">
-                        <Button
-                            Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
-                            CommandParameter="{Binding}"
-                            FontSize="12"
-                            HorizontalContentAlignment="Left">
-                            <TextBlock Text="{Binding RecordTypeName}"/>
-                        </Button>
-                    </DataTemplate>
+
+                    <TreeDataTemplate DataType="model:RecordTypeListing" ItemsSource="{Binding RecordFilters}">
+                        <TextBlock Text="{Binding DisplayName}"
+                                   Padding="0, 2"
+                                   FontSize="12">
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsSelected}">
+                                    <DataTriggerBehavior.Value>
+                                        <system:Boolean>true</system:Boolean>
+                                    </DataTriggerBehavior.Value>
+
+                                    <InvokeCommandAction
+                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
+                                        CommandParameter="{Binding}"/>
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
+                        </TextBlock>
+                    </TreeDataTemplate>
+
+                    <TreeDataTemplate DataType="model:RecordFilterListing" ItemsSource="{Binding RecordFilters}">
+
+                        <TextBlock Text="{Binding DisplayName}"
+                                   Padding="0"
+                                   FontSize="12">
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsSelected}">
+                                    <DataTriggerBehavior.Value>
+                                        <system:Boolean>true</system:Boolean>
+                                    </DataTriggerBehavior.Value>
+                                    
+                                    <InvokeCommandAction
+                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordFilter}"
+                                        CommandParameter="{Binding}"/>
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
+                        </TextBlock>
+                    </TreeDataTemplate>
                 </TreeView.DataTemplates>
             </TreeView>
         </Grid>

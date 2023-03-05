@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Busy;
+using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Startup;
@@ -50,11 +51,18 @@ public sealed class MainModule : Module {
         builder.RegisterType<RecordIdentifiersProvider>()
             .AsSelf();
 
+        builder.RegisterType<RecordFilterProvider>()
+            .As<IRecordFilterProvider>()
+            .SingleInstance();
+
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
             .SingleInstance();
 
         // Builder
+        builder.RegisterType<RecordFilterBuilder>()
+            .As<IRecordFilterBuilder>();
+
         builder.RegisterType<ExtraColumnsBuilder>()
             .As<IExtraColumnsBuilder>();
 

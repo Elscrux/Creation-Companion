@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Extension;
@@ -22,6 +21,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     private readonly IEditorEnvironment _editorEnvironment;
 
     public IObservable<Unit> SettingsChanged { get; }
+    [Reactive] public Func<IMajorRecordGetter, bool>? RecordFilter { get; set; }
 
     [Reactive] public bool OnlyActive { get; set; } = false;
     [Reactive] public ILinkCache LinkCache { get; set; }
@@ -60,6 +60,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
             .Subscribe(_ => UpdateScope());
 
         SettingsChanged = Observable.Merge(
+                this.WhenAnyValue(x => x.RecordFilter).Unit(),
                 this.WhenAnyValue(x => x.SearchTerm).Unit(),
                 _selectedMods.Connect().Unit())
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
@@ -76,7 +77,8 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;
 
-        return Filter(record as IMajorRecordIdentifier);
+        return Filter(record as IMajorRecordIdentifier)
+         && (RecordFilter == null || RecordFilter(record));
     }
 
     public bool Filter(IMajorRecordIdentifier record) {

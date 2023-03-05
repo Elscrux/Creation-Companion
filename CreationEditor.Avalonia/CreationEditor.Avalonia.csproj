@@ -70,6 +70,24 @@
       <Compile Update="Models\Record\List\ExtraColumns\ExtraColumns.cs">
         <DependentUpon>IExtraColumns.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\Record\Browser\Category\RecordFilterBuilder.cs">
+        <DependentUpon>IRecordFilterBuilder.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\Browser\Category\RecordFilterProvider.cs">
+        <DependentUpon>IRecordFilterProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\Browser\Category\DirectoryFilter.cs">
+        <DependentUpon>IRecordFilter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="ViewModels\Record\Browser\RecordBrowserVM.cs">
+        <DependentUpon>IRecordBrowserVM.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\Browser\Filter\SimpleRecordFilter.cs">
+        <DependentUpon>IRecordFilter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\Browser\Filter\RecordFilter.cs">
+        <DependentUpon>IRecordFilter.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
