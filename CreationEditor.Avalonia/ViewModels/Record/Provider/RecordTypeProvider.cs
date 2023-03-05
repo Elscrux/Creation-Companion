@@ -8,6 +8,7 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.References.Controller;
 using DynamicData;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
@@ -46,10 +47,12 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
-                    foreach (var record in linkCache.AllIdentifiers(Types)) {
-                        cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
+                    foreach (var type in Types) {
+                        foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
+                            cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
 
-                        updater.AddOrUpdate(referencedRecord);
+                            updater.AddOrUpdate(referencedRecord);
+                        }
                     }
                 });
             }), out var isBusy)
