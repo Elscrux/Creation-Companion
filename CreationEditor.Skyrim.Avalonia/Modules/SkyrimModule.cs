@@ -9,6 +9,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
@@ -99,5 +100,12 @@ public sealed class SkyrimModule : Module {
             .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
+
+        // Other
+        builder.RegisterAssemblyTypes(typeof(QuestFilter).Assembly)
+            .InNamespacesOf(typeof(QuestFilter))
+            .Where(type => type.Name.EndsWith("Filter"))
+            .AsSelf()
+            .SingleInstance();
     }
 }
