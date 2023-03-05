@@ -150,4 +150,32 @@ public static class ObservableCollectionExtension {
                 throw new NotSupportedException($"Cannot remove range from {source.GetType().FullName}");
         }
     }
+
+    public static void AddSorted<T>(this IList<T> list, T item) where T : IComparable {
+        var i = 0;
+        while (i < list.Count && list[i].CompareTo(item) < 0) i++;
+
+        list.Insert(i, item);
+    }
+
+    public static void AddSorted<T>(this IList<T> list, T item, IComparer<T> comparer) {
+        var i = 0;
+        while (i < list.Count && comparer.Compare(list[i], item) < 0) i++;
+
+        list.Insert(i, item);
+    }
+
+    public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) => collection.ApplyOrder(collection.OrderBy(selector));
+
+    public static void Sort<T>(this IObservableCollection<T> collection) where T : IComparable => collection.ApplyOrder(collection.Order());
+
+    public static void ApplyOrder<T>(this IObservableCollection<T> collection, IOrderedEnumerable<T> order) {
+        var sortedOrder = order.ToList();
+
+        for (var i = 0; i < sortedOrder.Count; i++) {
+            if (ReferenceEquals(collection[i], sortedOrder[i])) continue;
+
+            collection.Move(collection.IndexOf(sortedOrder[i]), i);
+        }
+    }
 }
