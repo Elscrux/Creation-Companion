@@ -53,6 +53,9 @@ public sealed class SkyrimModule : Module {
             .As<IModInfoProvider<IModGetter>>()
             .As<IModInfoProvider<ISkyrimModGetter>>();
 
+        builder.RegisterType<SkyrimRecordBrowserGroupProvider>()
+            .As<IRecordBrowserGroupProvider>();
+
         builder.RegisterGeneric(typeof(RecordProvider<,>))
             .As(typeof(RecordProvider<,>));
 
@@ -79,9 +82,6 @@ public sealed class SkyrimModule : Module {
             .SingleInstance();
 
         // View Model
-        builder.RegisterType<SkyrimRecordBrowserVM>()
-            .As<IRecordBrowserVM>();
-
         builder.RegisterType<SkyrimModGetterVM>()
             .As<IModGetterVM>();
 
