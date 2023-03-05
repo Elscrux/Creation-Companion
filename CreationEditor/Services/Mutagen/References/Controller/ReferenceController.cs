@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
@@ -38,15 +37,12 @@ public class ReferenceController : IReferenceController {
     }
 
     private Task Init() {
-        var timestamp = Stopwatch.GetTimestamp();
         var linearNotifier = new ChainedNotifier(_notificationService, "Loading References");
 
         var immutableReferenceCache = new ImmutableReferenceCache(_referenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
         _referenceCache = new MutableReferenceCache(_referenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
 
         linearNotifier.Stop();
-
-        timestamp = Stopwatch.GetTimestamp();
 
         var modKeys = _editorEnvironment.LinkCache.PriorityOrder.Select(mod => mod.ModKey).ToList();
         foreach (var subscription in _subscribers.Keys.Where(formKey => !modKeys.Contains(formKey.ModKey))) {
