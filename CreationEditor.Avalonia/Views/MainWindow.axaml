@@ -2,7 +2,6 @@
     x:Class="CreationEditor.Avalonia.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
     xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
     xmlns:notificationView="clr-namespace:CreationEditor.Avalonia.Views.Notification"
     xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
@@ -14,100 +13,79 @@
     MinHeight="480" MinWidth="720"
     x:CompileBindings="True" x:DataType="viewModels:MainVM"
     x:Name="Window">
-    <Grid>
-        <DockPanel IsHitTestVisible="{Binding !BusyService.IsBusy}"
-                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-            <Menu DockPanel.Dock="Top" VerticalAlignment="Top">
-                <Menu.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <DockPanel HorizontalAlignment="Stretch"/>
-                    </ItemsPanelTemplate>
-                </Menu.ItemsPanel>
-                <MenuItem Header="File">
-                    <MenuItem Header="Mods"
-                              Command="{Binding OpenSelectMods}"
-                              CommandParameter="{Binding #Window}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="AppsAddIn24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Settings"
-                              Command="{Binding OpenSettings}"
-                              CommandParameter="{Binding #Window}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="Settings24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Save"
-                              Command="{Binding Save}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="Save24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
+    <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Menu DockPanel.Dock="Top" VerticalAlignment="Top">
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
+            <MenuItem Header="File">
+                <MenuItem Header="Mods"
+                          Command="{Binding OpenSelectMods}"
+                          CommandParameter="{Binding #Window}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="AppsAddIn24Regular"/>
+                    </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="View">
-                    <MenuItem Header="Log"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.Log}">
-                        <MenuItem.Icon>
-                            
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Record Browser"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.RecordBrowser}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="TextBulletListLtr24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Cell Browser"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.CellBrowser}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="AppFolder24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Viewport"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.Viewport}">
-                        <MenuItem.Icon>
-                            <fluentIcons:FluentIcon Icon="Desktop24Regular"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
+                <MenuItem Header="Settings"
+                          Command="{Binding OpenSettings}"
+                          CommandParameter="{Binding #Window}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="Settings24Regular"/>
+                    </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
-                          HorizontalAlignment="Right"
-                          Items="{Binding NotificationVM.LoadingItems}">
-                    <MenuItem.Header>
-                        <notificationView:NotificationView DataContext="{Binding NotificationVM.LatestNotification^}"/>
-                    </MenuItem.Header>
-                    <MenuItem.DataTemplates>
-                        <DataTemplate DataType="notification:NotificationItem">
-                            <notificationView:NotificationView DataContext="{Binding}"/>
-                        </DataTemplate>
-                    </MenuItem.DataTemplates>
+                <MenuItem Header="Save"
+                          Command="{Binding Save}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="Save24Regular"/>
+                    </MenuItem.Icon>
                 </MenuItem>
-            </Menu>
-            
-            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
-        </DockPanel>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Log"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.Log}">
+                    <MenuItem.Icon>
 
-        <avaloniaProgressRing:ProgressRing IsActive="{Binding BusyService.IsBusy}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           Width="500" Height="500"/>
-
-        <ItemsRepeater Items="{Binding NotificationVM.LoadingItems}"
-                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                      IsVisible="{Binding BusyService.IsBusy}"
-                      Margin="0, 256, 0, 0">
-            <ItemsRepeater.DataTemplates>
-                <DataTemplate DataType="notification:NotificationItem">
-                    <StackPanel>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Record Browser"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.RecordBrowser}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="TextBulletListLtr24Regular"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Cell Browser"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.CellBrowser}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="AppFolder24Regular"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Viewport"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.Viewport}">
+                    <MenuItem.Icon>
+                        <fluentIcons:FluentIcon Icon="Desktop24Regular"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
+                      HorizontalAlignment="Right"
+                      Items="{Binding NotificationVM.LoadingItems}">
+                <MenuItem.Header>
+                    <notificationView:NotificationView DataContext="{Binding NotificationVM.LatestNotification^}"/>
+                </MenuItem.Header>
+                <MenuItem.DataTemplates>
+                    <DataTemplate DataType="notification:NotificationItem">
                         <notificationView:NotificationView DataContext="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsRepeater.DataTemplates>
-        </ItemsRepeater>
+                    </DataTemplate>
+                </MenuItem.DataTemplates>
+            </MenuItem>
+        </Menu>
 
-    </Grid>
+        <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+    </DockPanel>
 </windowing:AppWindow>
