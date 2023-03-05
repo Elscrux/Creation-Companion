@@ -23,59 +23,81 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.Modules; 
+using Noggog.Autofac;
+using Module = Autofac.Module;
+namespace CreationEditor.Skyrim.Avalonia.Modules;
 
 public sealed class SkyrimModule : Module {
     protected override void Load(ContainerBuilder builder) {
+        // General
         builder.RegisterType<SkyrimEditorEnvironment>()
             .As<IEditorEnvironment>()
             .As<IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>>()
             .SingleInstance();
 
-        var environmentProvider = EnvironmentContext.Build(GameRelease.SkyrimSE);
-        
-        builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE)).AsImplementedInterfaces();
-        
-        builder.RegisterInstance(environmentProvider).As<IEnvironmentContext>();
-        
-        builder.RegisterType<BSERuntimeService>()
-            .As<IViewportRuntimeService>()
+        builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE))
+            .AsImplementedInterfaces();
+
+        // Controller
+        builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()
+            .As<IRecordController>()
             .SingleInstance();
+
+        // Provider
+        var environmentProvider = EnvironmentContext.Build(GameRelease.SkyrimSE);
+
+        builder.RegisterInstance(environmentProvider)
+            .As<IEnvironmentContext>();
 
         builder.RegisterType<SkyrimModInfoProvider>()
             .As<IModInfoProvider<IModGetter>>()
             .As<IModInfoProvider<ISkyrimModGetter>>();
-        
-        builder.RegisterType<SkyrimRecordBrowserVM>().As<IRecordBrowserVM>();
-        
-        builder.RegisterType<SkyrimModGetterVM>().As<IModGetterVM>();
-        
-        builder.RegisterType<SkyrimRecordListFactory>().As<IRecordListFactory>();
-        
-        builder.RegisterType<SkyrimRecordEditorFactory>().As<IRecordEditorFactory>();
-        
-        builder.RegisterType<SkyrimCellBrowserFactory>().As<ICellBrowserFactory>();
 
         builder.RegisterGeneric(typeof(RecordProvider<,>))
             .As(typeof(RecordProvider<,>));
-        
-        builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()
-            .As<IRecordController>()
+
+        builder.RegisterType<InteriorCellsProvider>()
+            .AsSelf();
+        builder.RegisterType<ExteriorCellsProvider>()
+            .AsSelf();
+        builder.RegisterType<PlacedProvider>()
+            .AsSelf();
+
+        // Factory
+        builder.RegisterType<SkyrimRecordListFactory>()
+            .As<IRecordListFactory>();
+
+        builder.RegisterType<SkyrimRecordEditorFactory>()
+            .As<IRecordEditorFactory>();
+
+        builder.RegisterType<SkyrimCellBrowserFactory>()
+            .As<ICellBrowserFactory>();
+
+        // Service
+        builder.RegisterType<BSERuntimeService>()
+            .As<IViewportRuntimeService>()
             .SingleInstance();
-        
+
+        // View Model
+        builder.RegisterType<SkyrimRecordBrowserVM>()
+            .As<IRecordBrowserVM>();
+
+        builder.RegisterType<SkyrimModGetterVM>()
+            .As<IModGetterVM>();
+
+        builder.RegisterType<InteriorCellsVM>()
+            .AsSelf();
+        builder.RegisterType<ExteriorCellsVM>()
+            .AsSelf();
+        builder.RegisterType<PlacedListVM>()
+            .AsSelf();
+
+        builder.RegisterType<CellBrowserVM>()
+            .As<ICellBrowserVM>();
+
         builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
             .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
-        
-        builder.RegisterType<InteriorCellsProvider>().AsSelf();
-        builder.RegisterType<ExteriorCellsProvider>().AsSelf();
-        builder.RegisterType<PlacedProvider>().AsSelf();
-        
-        builder.RegisterType<InteriorCellsVM>().AsSelf();
-        builder.RegisterType<ExteriorCellsVM>().AsSelf();
-        builder.RegisterType<PlacedListVM>().AsSelf();
-        
-        builder.RegisterType<CellBrowserVM>().As<ICellBrowserVM>();
     }
 }
