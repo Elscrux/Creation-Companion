@@ -38,13 +38,13 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         set => _activeModLinkCache = value;
     }
     
-    private readonly Subject<ModKey> _activeModChanged = new();
+    private readonly ReplaySubject<ModKey> _activeModChanged = new(1);
     public IObservable<ModKey> ActiveModChanged => _activeModChanged;
     
-    private readonly Subject<List<ModKey>> _loadOrderChanged = new();
+    private readonly ReplaySubject<List<ModKey>> _loadOrderChanged = new(1);
     public IObservable<List<ModKey>> LoadOrderChanged => _loadOrderChanged;
     
-    private readonly Subject<ILinkCache> _linkCacheChanged = new();
+    private readonly ReplaySubject<ILinkCache> _linkCacheChanged = new(1);
     public IObservable<ILinkCache> LinkCacheChanged => _linkCacheChanged;
 
     public SkyrimEditorEnvironment(
