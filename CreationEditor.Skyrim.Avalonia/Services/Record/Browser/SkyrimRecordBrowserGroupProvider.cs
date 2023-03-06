@@ -3,7 +3,7 @@ using Autofac;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
+namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 
 public class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
     private readonly IComponentContext _componentContext;
@@ -83,7 +83,7 @@ public class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
                     new(_componentContext, IAnimatedObjectGetter.StaticRegistration),
                     new(_componentContext, IArtObjectGetter.StaticRegistration),
                     new(_componentContext, ICollisionLayerGetter.StaticRegistration),
-                    new(_componentContext, IColorRecordGetter.StaticRegistration),
+                    new(_componentContext, IColorRecordGetter.StaticRegistration, "Color"),
                     new(_componentContext, ICombatStyleGetter.StaticRegistration),
                     new(_componentContext, IFormListGetter.StaticRegistration),
                     new(_componentContext, IGlobalGetter.StaticRegistration),
