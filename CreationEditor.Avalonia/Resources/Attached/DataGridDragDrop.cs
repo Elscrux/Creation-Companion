@@ -5,15 +5,17 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
+using CreationEditor.Avalonia.Behavior;
 using CreationEditor.Avalonia.Constants;
 using Noggog;
 namespace CreationEditor.Avalonia.Attached;
 
 public sealed class DragDropExtended : AvaloniaObject {
     private const string DataGrid = "DataGrid";
+
+    private static readonly DragHandler DragHandler = new(DragStart);
 
     public static readonly AttachedProperty<bool> AllowDragProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrag");
     public static readonly AttachedProperty<bool> AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrop");
@@ -46,18 +48,17 @@ public sealed class DragDropExtended : AvaloniaObject {
                 dataGrid.LoadingRow += OnDataGridOnLoadingRow;
                 void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
-                        // Tunnel routing is required because of the way data grid behaves - otherwise the event is not passed 
-                        args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
-                        args.Row.AddHandler(InputElement.PointerPressedEvent, DragStart, RoutingStrategies.Tunnel);
+                        DragHandler.Unregister(args.Row);
+                        DragHandler.Register(args.Row);
                     } else {
-                        args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
+                        DragHandler.Unregister(args.Row);
                     }
                 }
 
                 dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
                 dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
                 void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
-                    args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
+                    DragHandler.Unregister(args.Row);
                 }
             });
 
@@ -98,7 +99,7 @@ public sealed class DragDropExtended : AvaloniaObject {
             });
     }
 
-    private static void DragStart(object? sender, PointerPressedEventArgs e) {
+    private static void DragStart(object? sender, object? identifier, PointerEventArgs e) {
         if (sender is not DataGridRow { DataContext: {} item } row) return;
         if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
 

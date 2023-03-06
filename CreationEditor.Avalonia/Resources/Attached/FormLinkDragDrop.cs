@@ -3,12 +3,15 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using CreationEditor.Avalonia.Behavior;
 using CreationEditor.Avalonia.Constants;
 using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Avalonia.Attached;
 
 public sealed class FormLinkDragDrop : AvaloniaObject {
     private const string FormLink = "FormLink";
+
+    private static readonly DragHandler DragHandler = new(DragStart);
 
     public static readonly AttachedProperty<bool> AllowDragDataGridProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDragDataGrid");
     public static readonly AttachedProperty<bool> AllowDropDataGridProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDropDataGrid");
@@ -43,31 +46,27 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                         dataGrid.LoadingRow -= DataGridOnLoadingRow;
                         dataGrid.LoadingRow += DataGridOnLoadingRow;
                         void DataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
-                            args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStartDataGrid);
+                            DragHandler.Unregister(args.Row);
 
                             if (state) {
-                                // Tunnel routing is required because of the way data grid behaves - otherwise the event is not passed
-                                args.Row.AddHandler(InputElement.PointerPressedEvent, DragStartDataGrid, RoutingStrategies.Tunnel);
+                                DragHandler.Register(args.Row, dataGrid);
                             }
                         }
 
                         dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
                         dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
-                        void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
-                            args.Row.RemoveHandler(InputElement.PointerPressedEvent, DragStartDataGrid);
-                        }
+                        void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) => DragHandler.Unregister(args.Row);
 
-                        void DragStartDataGrid(object? sender, PointerPressedEventArgs e) => DragStart(dataGrid, sender, e);
                         break;
                     }
                     case Control control:
                         Toggle();
 
                         void Toggle() {
-                            control.RemoveHandler(InputElement.PointerPressedEvent, DragStartControl);
+                            DragHandler.Unregister(control);
 
                             if (state) {
-                                control.AddHandler(InputElement.PointerPressedEvent, DragStartControl, RoutingStrategies.Tunnel);
+                                DragHandler.Register(control);
                             }
                         }
 
@@ -77,9 +76,8 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
                         control.Unloaded -= OnControlOnUnloaded;
                         control.Unloaded += OnControlOnUnloaded;
-                        void OnControlOnUnloaded(object? o, RoutedEventArgs routedEventArgs) => control.RemoveHandler(InputElement.PointerPressedEvent, DragStartControl);
+                        void OnControlOnUnloaded(object? o, RoutedEventArgs routedEventArgs) => DragHandler.Unregister(control);
 
-                        void DragStartControl(object? sender, PointerPressedEventArgs e) => DragStart(sender, sender, e);
                         break;
                 }
             });
@@ -135,9 +133,10 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
             });
     }
 
-    public static void DragStart(object? attachingObject, object? actualPressedSender, PointerPressedEventArgs e) {
-        if (attachingObject is not AvaloniaObject obj) return;
-        if (actualPressedSender is not Visual pressed) return;
+    public static void DragStart(object? sender, object? identifier, PointerEventArgs e) {
+        identifier ??= sender;
+        if (identifier is not AvaloniaObject obj) return;
+        if (sender is not Visual pressed) return;
         if (!e.GetCurrentPoint(pressed).Properties.IsLeftButtonPressed) return;
 
         var formLinkGetter = GetGetFormLink(obj);
