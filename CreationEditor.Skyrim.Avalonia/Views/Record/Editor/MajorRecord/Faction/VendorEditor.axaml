@@ -25,13 +25,27 @@
                     <HeaderedContentControl Classes="Default"
                                             Margin="5"
                                             Header="Vendor Time Window">
-                        <!-- <xctk:RangeSlider Minimum="0" Maximum="24" -->
-                        <!--                   LowerValue="{Binding EditableRecord.VendorValues.StartHour, Mode=TwoWay}" -->
-                        <!--                   HigherValue="{Binding EditableRecord.VendorValues.EndHour, Mode=TwoWay}" -->
-                        <!--                   AutoToolTipPlacement="TopLeft" -->
-                        <!--                   IsSnapToTickEnabled="True" -->
-                        <!--                   RangeBackground="{DynamicResource SystemAccentColor}" -->
-                        <!--                   TickFrequency="1" TickPlacement="TopLeft" /> -->
+                        <StackPanel>
+                            <!-- TODO - Replace with Range Slider when available -->
+                            <HeaderedContentControl Classes="Default"
+                                                    Margin="5"
+                                                    Header="Star Hour">
+                                <NumericUpDown
+                                    Value="{Binding EditableRecord.VendorValues.StartHour}"
+                                    Minimum="0"
+                                    Maximum="24"
+                                    FormatString="N0"/>
+                            </HeaderedContentControl>
+                            <HeaderedContentControl Classes="Default"
+                                                    Margin="5"
+                                                    Header="End Hour">
+                                <NumericUpDown
+                                    Value="{Binding EditableRecord.VendorValues.EndHour}"
+                                    Minimum="0"
+                                    Maximum="24"
+                                    FormatString="N0"/>
+                            </HeaderedContentControl>
+                        </StackPanel>
                     </HeaderedContentControl>
 
                     <HeaderedContentControl Classes="Default"
