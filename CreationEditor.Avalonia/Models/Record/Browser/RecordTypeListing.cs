@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.ViewModels;
@@ -15,6 +16,8 @@ public sealed class RecordTypeListing : ViewModel, IRecordFilterContainer {
     public string DisplayName { get; }
     public IObservableCollection<RecordFilterListing> RecordFilters { get; }
 
+    private readonly BehaviorSubject<bool> _activated = new(false);
+
     public RecordTypeListing(
         IComponentContext componentContext,
         ILoquiRegistration registration,
@@ -24,8 +27,9 @@ public sealed class RecordTypeListing : ViewModel, IRecordFilterContainer {
 
         var editorEnvironment = componentContext.Resolve<IEditorEnvironment>();
 
-        RecordFilters = editorEnvironment.LinkCacheChanged
+        RecordFilters = editorEnvironment.LoadOrderChanged.CombineLatest(_activated, (_, b) => b)
             .ObserveOnTaskpool()
+            .Where(active => active)
             .Select(_ => componentContext.Resolve<IRecordFilterBuilder>()
                 .AddRecordType(registration.GetterType)
                 .Build()
@@ -38,5 +42,9 @@ public sealed class RecordTypeListing : ViewModel, IRecordFilterContainer {
             .AddKey(listing => listing.DisplayName)
             .SortBy(x => x)
             .ToObservableCollection(this);
+    }
+
+    public void Activate() {
+        _activated.OnNext(true);
     }
 }

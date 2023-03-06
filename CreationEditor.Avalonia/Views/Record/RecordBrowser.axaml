@@ -26,6 +26,10 @@
 
             <TreeView Grid.Row="1"
                       Items="{Binding RecordTypeGroups}">
+                <Interaction.Behaviors>
+                    <ToggleIsExpandedOnDoubleTappedBehavior/>
+                </Interaction.Behaviors>
+                
                 <TreeView.Styles>
                     <Style Selector="TreeViewItem">
                         <Setter Property="MinHeight" Value="10"></Setter>
@@ -33,7 +37,19 @@
                 </TreeView.Styles>
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
-                        <TextBlock Text="{Binding GroupName}"/>
+                        <TextBlock Text="{Binding GroupName}">
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsExpanded}">
+                                    <DataTriggerBehavior.Value>
+                                        <system:Boolean>true</system:Boolean>
+                                    </DataTriggerBehavior.Value>
+
+                                    <InvokeCommandAction
+                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordTypeGroup}"
+                                        CommandParameter="{Binding}"/>
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
+                        </TextBlock>
                     </TreeDataTemplate>
 
                     <TreeDataTemplate DataType="model:RecordTypeListing" ItemsSource="{Binding RecordFilters}">
@@ -55,7 +71,6 @@
                     </TreeDataTemplate>
 
                     <TreeDataTemplate DataType="model:RecordFilterListing" ItemsSource="{Binding RecordFilters}">
-
                         <TextBlock Text="{Binding DisplayName}"
                                    Padding="0"
                                    FontSize="12">

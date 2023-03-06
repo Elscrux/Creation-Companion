@@ -13,6 +13,8 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
+
+    public ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
     public ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
 
@@ -26,6 +28,8 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         _recordListFactory = recordListFactory;
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollection<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
+
+        SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => group.Activate());
 
         SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;

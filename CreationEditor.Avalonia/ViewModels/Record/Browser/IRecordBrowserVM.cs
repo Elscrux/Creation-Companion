@@ -11,6 +11,7 @@ public interface IRecordBrowserVM {
 
     [Reactive] public RecordList? RecordList { get; set; }
 
+    public ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
     public ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
 
