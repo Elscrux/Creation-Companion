@@ -83,9 +83,8 @@ public static class ObservableExtension {
         this IObservable<T> changeSet,
         Func<IObservable<T>, IObservable<TResult>> wrapped,
         out IObservable<bool> isWorkingObservable) {
-        
-        var isWorking = new ReplaySubject<bool>(1);
-        isWorking.OnNext(false);
+
+        var isWorking = new BehaviorSubject<bool>(false);
         isWorkingObservable = isWorking;
 
         return wrapped(changeSet.Do(_ => isWorking.OnNext(true)))
