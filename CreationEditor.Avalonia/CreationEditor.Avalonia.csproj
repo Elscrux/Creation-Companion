@@ -88,6 +88,9 @@
       <Compile Update="Services\Record\Browser\Filter\RecordFilter.cs">
         <DependentUpon>IRecordFilter.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\Record\Browser\Filter\AssetFilter.cs">
+        <DependentUpon>IRecordFilter.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

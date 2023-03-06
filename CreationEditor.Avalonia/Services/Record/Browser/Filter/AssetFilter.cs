@@ -2,17 +2,16 @@
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
+using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
-public abstract class DirectoryFilter<T> : IRecordFilter {
+public abstract class AssetFilter<T> : IRecordFilter {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IFileSystem _fileSystem;
 
     public Type Type => typeof(T);
 
-    public DirectoryFilter(
+    public AssetFilter(
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem) {
         _editorEnvironment = editorEnvironment;
@@ -22,7 +21,7 @@ public abstract class DirectoryFilter<T> : IRecordFilter {
     public IEnumerable<RecordFilterListing> GetListings(Type type) {
         var recordFilterListings = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(type)
             .OfType<T>()
-            .GetRecursiveListings(_fileSystem.Path.DirectorySeparatorChar, GetPath)
+            .GetRecursiveListings(_fileSystem.Path.DirectorySeparatorChar, GetPaths)
             .ToList();
 
         // Trim standalone folders
@@ -33,5 +32,11 @@ public abstract class DirectoryFilter<T> : IRecordFilter {
         return recordFilterListings;
     }
 
-    protected abstract string? GetPath(T record);
+    protected virtual IEnumerable<string> GetPaths(T record) {
+        if (record is not IAssetLinkContainerGetter assetLinkContainer) yield break;
+
+        foreach (var assetLink in assetLinkContainer.EnumerateListedAssetLinks()) {
+            yield return assetLink.DataRelativePath;
+        }
+    }
 }
