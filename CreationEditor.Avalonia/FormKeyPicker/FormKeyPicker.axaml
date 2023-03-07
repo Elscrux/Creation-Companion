@@ -3,7 +3,10 @@
         xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
         xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker"
         xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
-        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons">
+        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
+        xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
+        xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
+        xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables">
     <Design.PreviewWith>
         <Border Padding="20">
             <formKeyPicker:FormKeyPicker/>
@@ -12,10 +15,6 @@
 
     <Style Selector="Border.ButtonHover:pointerover">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
-    </Style>
-
-    <Style Selector="TextBlock.Enabled">
-        <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
 
     <Style Selector="formKeyPicker|FormKeyPicker">
@@ -36,7 +35,7 @@
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     MinWidth="{DynamicResource ComboBoxThemeMinWidth}"
                                     CornerRadius="{TemplateBinding CornerRadius}"/>
-                            
+
                             <TextBox Grid.Row="0" Grid.Column="0"
                                      x:Name="PART_EditorIDBox"
                                      Margin="-1"
@@ -47,7 +46,7 @@
                                      Margin="-1"
                                      Watermark="FormKey"
                                      Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            
+
                             <Button Grid.Row="0" Grid.Column="0"
                                     Command="{TemplateBinding Clear}"
                                     Width="10" Height="10"
@@ -62,12 +61,12 @@
                                         <TemplateBinding Property="Found"/>
                                     </MultiBinding>
                                 </Button.IsVisible>
-                                
+
                                 <fluentIcons:FluentIcon Icon="Dismiss12Filled"
                                                         Foreground="{DynamicResource SystemAccentColor}"
-                                                        ToolTip.Tip="Clear" />
+                                                        ToolTip.Tip="Clear"/>
                             </Button>
-                            
+
                             <Button Grid.Row="0" Grid.Column="2"
                                     x:Name="PART_Dragger"
                                     Width="20" Height="20"
@@ -81,11 +80,76 @@
                                         <TemplateBinding Property="Found"/>
                                     </MultiBinding>
                                 </Button.IsVisible>
-                                
+
                                 <fluentIcons:FluentIcon Icon="Cursor20Filled"
                                                         Foreground="{DynamicResource SystemAccentColor}"
                                                         ToolTip.Tip="Drag"/>
                             </Button>
+
+                            <Grid.Resources>
+                                <Grid x:Key="FilterGrid" ColumnDefinitions="*,5,*" MaxHeight="500">
+                                    <ItemsRepeater Grid.Column="0"
+                                                   Items="{TemplateBinding SelectedTypes}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate DataType="selectables:TypeItem">
+                                                <CheckBox IsChecked="{Binding IsSelected}">
+                                                    <CheckBox.Content>
+                                                        <MultiBinding
+                                                            StringFormat="{}{0} ( {1} )">
+                                                            <Binding
+                                                                Path="Type"
+                                                                Converter="{x:Static converter:RecordTypeConverters.ToName}"
+                                                                Mode="OneWay"/>
+                                                            <Binding
+                                                                Path="Type"
+                                                                Converter="{x:Static converter:RecordTypeConverters.ToGame}"
+                                                                Mode="OneWay"/>
+                                                        </MultiBinding>
+                                                    </CheckBox.Content>
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+
+                                        <ItemsRepeater.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="Select All"
+                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
+                                                          CommandParameter="{TemplateBinding SelectedTypes}"/>
+                                                <MenuItem Header="Unselect All"
+                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                                          CommandParameter="{TemplateBinding SelectedTypes}"/>
+                                                <MenuItem Header="Toggle All"
+                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                                          CommandParameter="{TemplateBinding SelectedTypes}"/>
+                                            </MenuFlyout>
+                                        </ItemsRepeater.ContextFlyout>
+                                    </ItemsRepeater>
+
+                                    <ItemsRepeater Grid.Column="2"
+                                                   Items="{TemplateBinding SelectedMods}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate DataType="mod:ModItem">
+                                                <CheckBox Content="{Binding ModKey.FileName}"
+                                                          IsChecked="{Binding IsSelected}"/>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+
+                                        <ItemsRepeater.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="Select All"
+                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
+                                                          CommandParameter="{TemplateBinding SelectedMods}"/>
+                                                <MenuItem Header="Unselect All"
+                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                                          CommandParameter="{TemplateBinding SelectedMods}"/>
+                                                <MenuItem Header="Toggle All"
+                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                                          CommandParameter="{TemplateBinding SelectedMods}"/>
+                                            </MenuFlyout>
+                                        </ItemsRepeater.ContextFlyout>
+                                    </ItemsRepeater>
+                                </Grid>
+                            </Grid.Resources>
 
                             <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
                             <!-- PassiveBrush="{TemplateBinding PassiveBrush}" -->
@@ -124,31 +188,25 @@
                                               Background="{DynamicResource ButtonBackground}">
                                             <TextBlock Grid.Column="0"
                                                        Text="Search"
-                                                       Margin="6,2" />
-                            
-                                            <Button Grid.Column="1"
-                                                    x:Name="TheButton"
-                                                    Command="{Binding ToggleViewAllowedTypesCommand, RelativeSource={RelativeSource TemplatedParent}}">
-                                                <Grid>
-                                                    <fluentIcons:FluentIcon Icon="Search48Regular"
-                                                                            IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                            ToolTip.Tip="See type scoping" />
-                                                    <fluentIcons:FluentIcon Icon="Question48Regular"
-                                                                            IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                            ToolTip.Tip="Search records" />
-                                                </Grid>
+                                                       Margin="6,2"/>
+
+                                            <Button Grid.Column="1">
+                                                <fluentIcons:FluentIcon Icon="Settings24Filled"/>
+
+                                                <Button.Flyout>
+                                                    <Flyout Content="{StaticResource FilterGrid}"/>
+                                                </Button.Flyout>
                                             </Button>
                                         </Grid>
 
                                         <ScrollViewer Grid.Row="1"
-                                                      IsVisible="{Binding !ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}"
                                                       HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
                                                       VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
-                                            <ItemsRepeater
-                                                Items="{TemplateBinding ApplicableEditorIDs}">
+                                            <ItemsRepeater Items="{TemplateBinding ApplicableEditorIDs}">
                                                 <ItemsRepeater.ItemTemplate>
                                                     <DataTemplate DataType="records:IMajorRecordIdentifier">
-                                                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                        <Border HorizontalAlignment="Stretch"
+                                                                VerticalAlignment="Stretch"
                                                                 Classes="ButtonHover"
                                                                 Padding="2"
                                                                 Background="{DynamicResource SystemControlTransparentBrush}"
@@ -172,55 +230,13 @@
                                             </ItemsRepeater>
                                         </ScrollViewer>
 
-                                        <TextBlock Grid.Row="1"
-                                                   Text="No Types Selected!">
-                                            <TextBlock.IsVisible>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="!ViewingAllowedTypes"
-                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
-                                                    <Binding Path="!AnyTypeSelected^"
-                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
-                                                </MultiBinding>
-                                            </TextBlock.IsVisible>
-                                        </TextBlock>
+                                        <StackPanel Grid.Row="1">
+                                            <TextBlock Text="No Types Selected!"
+                                                       IsVisible="{Binding !AnyTypeSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
 
-                                        <ScrollViewer Grid.Row="1"
-                                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
-                                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
-                                                      IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
-                                            <ItemsRepeater Items="{TemplateBinding SelectedTypes}">
-                                                <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate DataType="formKeyPicker:SelectableType">
-                                                        <Grid x:Name="TextBlock"
-                                                              Margin="6,0,0,0">
-                                                            <Interaction.Behaviors>
-                                                                <EventTriggerBehavior
-                                                                    SourceObject="{Binding #TextBlock}"
-                                                                    EventName="PointerPressed">
-                                                                    <InvokeCommandAction Command="{Binding Toggle}"/>
-                                                                </EventTriggerBehavior>
-                                                            </Interaction.Behaviors>
-
-                                                            <TextBlock Margin="0,4"
-                                                                       Classes.Enabled="{Binding IsSelected}">
-                                                                <TextBlock.Text>
-                                                                    <MultiBinding StringFormat="{}{0} ( {1} )">
-                                                                        <Binding
-                                                                            Path="Type"
-                                                                            Converter="{x:Static converter:RecordTypeConverters.ToName}"
-                                                                            Mode="OneWay"/>
-                                                                        <Binding
-                                                                            Path="Type"
-                                                                            Converter="{x:Static converter:RecordTypeConverters.ToGame}"
-                                                                            Mode="OneWay"/>
-                                                                    </MultiBinding>
-                                                                </TextBlock.Text>
-                                                            </TextBlock>
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
-                                        </ScrollViewer>
+                                            <TextBlock Text="No Mods Selected!"
+                                                       IsVisible="{Binding !AnyModSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </Popup>

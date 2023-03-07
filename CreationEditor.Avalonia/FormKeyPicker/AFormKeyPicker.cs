@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.ObjectModel;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,31 +8,17 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
+using CreationEditor.Avalonia.Extension;
+using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Extension;
 using DynamicData;
-using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.FormKeyPicker;
-
-public class SelectableType : ReactiveObject, IReactiveSelectable {
-    public Type Type { get; init; }
-    [Reactive] public bool IsSelected { get; set; }
-
-    public ICommand Toggle { get; }
-
-    public SelectableType(Type type, bool isSelected) {
-        Type = type;
-        IsSelected = isSelected;
-
-        Toggle = ReactiveCommand.Create(() => IsSelected = !IsSelected);
-    }
-}
 
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
@@ -56,17 +40,29 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
 
-    public ReadOnlyObservableCollection<SelectableType> SelectedTypes {
+    public ReadOnlyObservableCollection<TypeItem> SelectedTypes {
         get => GetValue(SelectedTypesProperty);
         set => SetValue(SelectedTypesProperty, value);
     }
-    public static readonly StyledProperty<ReadOnlyObservableCollection<SelectableType>> SelectedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<SelectableType>>(nameof(SelectedTypes));
+    public static readonly StyledProperty<ReadOnlyObservableCollection<TypeItem>> SelectedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<TypeItem>>(nameof(SelectedTypes));
 
     public IObservable<bool> AnyTypeSelected {
         get => GetValue(AnyTypeSelectedProperty);
         set => SetValue(AnyTypeSelectedProperty, value);
     }
     public static readonly StyledProperty<IObservable<bool>> AnyTypeSelectedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyTypeSelected));
+
+    public ReadOnlyObservableCollection<ModItem> SelectedMods {
+        get => GetValue(SelectedModsProperty);
+        set => SetValue(SelectedModsProperty, value);
+    }
+    public static readonly StyledProperty<ReadOnlyObservableCollection<ModItem>> SelectedModsProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<ModItem>>(nameof(SelectedMods));
+
+    public IObservable<bool> AnyModSelected {
+        get => GetValue(AnyModSelectedProperty);
+        set => SetValue(AnyModSelectedProperty, value);
+    }
+    public static readonly StyledProperty<IObservable<bool>> AnyModSelectedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyModSelected));
 
     public ICollection<FormKey>? BlacklistFormKeys {
         get => GetValue(BlacklistFormKeysProperty);
@@ -224,8 +220,6 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     public static readonly StyledProperty<ICommand> ClearProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(Clear));
     #endregion
 
-    private BehaviorSubject<Unit> TypeToggled { get; } = new(Unit.Default);
-
     private sealed record State(StatusIndicatorState Status, string Text, FormKey FormKey, string EditorID);
 
     public AFormKeyPicker() {
@@ -251,18 +245,25 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         SelectedTypes = this.WhenAnyValue(x => x.ScopedTypes)
             .Select(ScopedTypesInternal)
             .ToObservableChangeSet()
-            .ToObservableCollection(x => new SelectableType(x, true), UnloadDisposable);
+            .ToObservableCollection(x => new TypeItem(x), UnloadDisposable);
 
         var selectedTypesChanged = this.WhenAnyValue(x => x.SelectedTypes)
-            .CombineLatest(
-                TypeToggled,
-                SelectedTypes.ToObservableChangeSet()
-                    .AutoRefresh(x => x.IsSelected),
-                (types, _, _) => types);
+            .CombineLatest(SelectedTypes.SelectionChanged(), (types, _) => types);
 
         AnyTypeSelected = selectedTypesChanged
-            .Select(EnabledTypes)
-            .Select(x => x.Any());
+            .Select(x => x.Any(typeItem => typeItem.IsSelected));
+
+        SelectedMods = this.WhenAnyValue(x => x.LinkCache)
+            .NotNull()
+            .Select(linkCache => linkCache.ListedOrder.AsObservableChangeSet())
+            .Switch()
+            .ToObservableCollection(x => new ModItem(x.ModKey) { IsSelected = true }, UnloadDisposable);
+
+        var selectedModsChanged = this.WhenAnyValue(x => x.SelectedMods)
+            .CombineLatest(SelectedMods.SelectionChanged(), (mods, _) => mods);
+
+        AnyModSelected = selectedModsChanged
+            .Select(x => x.Any(modItem => modItem.IsSelected));
 
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
@@ -287,9 +288,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     if (x.FormKey.IsNull) {
                         return new State(StatusIndicatorState.Passive, FormKeyNull, FormKey.Null, string.Empty);
                     }
-                    return x.LinkCache.TryResolveIdentifier(x.FormKey, EnabledTypes(x.Types), out var editorId)
-                        ? new State(StatusIndicatorState.Success, LocatedRecord, x.FormKey, editorId ?? string.Empty)
-                        : new State(StatusIndicatorState.Failure, RecordNotResolved, x.FormKey, string.Empty);
+                    if (!x.LinkCache.TryResolve(x.FormKey, EnabledTypes(x.Types), out var record)) {
+                        return new State(StatusIndicatorState.Failure, RecordNotResolved, x.FormKey, string.Empty);
+                    }
+
+                    return new State(StatusIndicatorState.Success, LocatedRecord, x.FormKey, record.EditorID ?? string.Empty);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
@@ -342,7 +345,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     x => x.BlacklistFormKeys,
                     x => x.Filter),
                 selectedTypesChanged,
-                (editorId, sources, types) => (EditorID: editorId, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Filter: sources.Item3, Types: types))
+                (editorId, sources, types) => (EditorID: editorId, sources.Item2, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Filter: sources.Item3, Types: types))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
             .Do(_ => {
                 _updating = UpdatingEnum.EditorID;
@@ -354,17 +357,23 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
-                    var (editorID, linkCache, blacklistFormKeys, filter, types) = x;
-                    if (linkCache == null) return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
-                    if (string.IsNullOrWhiteSpace(editorID)) return new State(StatusIndicatorState.Passive, "EditorID is empty.  No lookup required", FormKey.Null, string.Empty);
+                    if (x.LinkCache == null) {
+                        return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
+                    }
+                    if (string.IsNullOrWhiteSpace(x.EditorID)) {
+                        return new State(StatusIndicatorState.Passive, "EditorID is empty. No lookup required", FormKey.Null, string.Empty);
+                    }
+                    if (!x.LinkCache.TryResolveIdentifier(x.EditorID, EnabledTypes(x.Types), out var formKey)) {
+                        return new State(StatusIndicatorState.Failure, RecordNotResolved, formKey, x.EditorID);
+                    }
+                    if (x.Filter != null && !x.Filter(formKey, x.EditorID)) {
+                        return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, x.EditorID);
+                    }
+                    if (x.BlacklistFormKeys != null && x.BlacklistFormKeys.Contains(formKey)) {
+                        return new State(StatusIndicatorState.Passive, FormKeyBlacklisted, formKey, x.EditorID);
+                    }
 
-                    return linkCache.TryResolveIdentifier(editorID, EnabledTypes(x.Types), out var formKey)
-                        ? filter == null || filter(formKey, editorID)
-                            ? blacklistFormKeys != null && blacklistFormKeys.Contains(formKey)
-                                ? new State(StatusIndicatorState.Passive, FormKeyBlacklisted, formKey, editorID)
-                                : new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorID)
-                            : new State(StatusIndicatorState.Passive, RecordFiltered, formKey, editorID)
-                        : new State(StatusIndicatorState.Failure, RecordNotResolved, formKey, editorID);
+                    return new State(StatusIndicatorState.Success, LocatedRecord, formKey, x.EditorID);
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
@@ -446,20 +455,20 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                             return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
                         }
 
-                        if (x.LinkCache.TryResolveIdentifier(formKey, EnabledTypes(x.Types), out var editorId)) {
-                            if (x.Filter == null || x.Filter(formKey, editorId)) {
-                                return new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty);
-                            }
-
-                            return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, editorId ?? string.Empty);
+                        if (!x.LinkCache.TryResolve(formKey, EnabledTypes(x.Types), out var record)) {
+                            return new State(
+                                x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
+                                RecordNotResolved,
+                                x.MissingMeansNull ? FormKey.Null : formKey,
+                                string.Empty);
                         }
 
-                        var formKeyToUse = x.MissingMeansNull ? FormKey.Null : formKey;
-                        return new State(
-                            x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
-                            RecordNotResolved,
-                            formKeyToUse,
-                            string.Empty);
+                        var editorID = record.EditorID ?? string.Empty;
+                        if (x.Filter != null && !x.Filter(formKey, editorID)) {
+                            return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, editorID);
+                        }
+
+                        return new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorID);
                     }
 
                     if (x.LinkCache == null) {
@@ -522,20 +531,21 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .Subscribe()
             .DisposeWith(UnloadDisposable);
 
-        ApplicableEditorIDs = Observable.CombineLatest(
-                this.WhenAnyValue(x => x.LinkCache),
-                selectedTypesChanged,
-                (linkCache, enabledTypes) => (LinkCache: linkCache, Types: enabledTypes))
+        ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .CombineLatest(
+                selectedModsChanged,
+                selectedTypesChanged,
+                (linkCache, selectedMods, enabledTypes) => (LinkCache: linkCache, SelectedMods: selectedMods, Types: enabledTypes))
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
                 try {
                     var enabledTypes = EnabledTypes(x.Types);
-                    if (!enabledTypes.Any() || x.LinkCache == null) {
-                        return Task.CompletedTask;
-                    }
+                    if (!enabledTypes.Any() || x.LinkCache == null) return Task.CompletedTask;
+
                     foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
                         if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                        if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
 
                         obs.OnNext(item);
                     }
@@ -628,7 +638,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         return scopedTypes;
     }
 
-    protected IEnumerable<Type> EnabledTypes(IEnumerable<SelectableType> types) { 
+    protected IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) { 
         return types.Where(x => x.IsSelected).Select(x => x.Type);
     }
 
