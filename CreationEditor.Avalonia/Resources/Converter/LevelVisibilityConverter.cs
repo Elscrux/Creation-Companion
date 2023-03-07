@@ -7,7 +7,7 @@ namespace CreationEditor.Avalonia.Converter;
 
 public sealed class LevelVisibilityConverter : AvaloniaObject, IValueConverter {
     public static readonly StyledProperty<Dictionary<LogEventLevel,bool>> LevelsVisibilityProperty
-        = AvaloniaProperty.Register<LevelVisibilityConverter, Dictionary<LogEventLevel,bool>>("LevelsVisibility");
+        = AvaloniaProperty.Register<LevelVisibilityConverter, Dictionary<LogEventLevel,bool>>(nameof(LevelsVisibility));
 
     public Dictionary<LogEventLevel,bool> LevelsVisibility {
         get => GetValue(LevelsVisibilityProperty);
