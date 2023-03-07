@@ -43,6 +43,7 @@
                       IsReadOnly="True"
                       SelectionMode="Extended"
                       GridLinesVisibility="None"
+                      Classes="NoCellSelection"
                       attached:DoubleTappedProperty.Command="{Binding ToggleActive}">
                 
                 <Interaction.Behaviors>
