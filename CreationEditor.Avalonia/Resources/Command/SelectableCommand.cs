@@ -1,5 +1,5 @@
 ﻿using System.Reactive;
-using CreationEditor.Avalonia.Models;
+using CreationEditor.Avalonia.Models.Selectables;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Command;
 

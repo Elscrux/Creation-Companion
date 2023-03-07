@@ -2,8 +2,8 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Mod;
+using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Extension;
 using CreationEditor.Services.Environment;

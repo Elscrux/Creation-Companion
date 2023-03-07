@@ -10,7 +10,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
-using CreationEditor.Avalonia.Models;
+using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;

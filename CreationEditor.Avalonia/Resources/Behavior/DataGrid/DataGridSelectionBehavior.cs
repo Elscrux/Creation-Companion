@@ -10,7 +10,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
-using CreationEditor.Avalonia.Models;
+using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
 using Noggog;
 using ReactiveUI;
