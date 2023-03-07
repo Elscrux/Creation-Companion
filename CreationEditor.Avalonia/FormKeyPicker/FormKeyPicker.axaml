@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
         xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
         xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons">
     <Design.PreviewWith>
@@ -14,7 +13,11 @@
     <Style Selector="Border.ButtonHover:pointerover">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}"/>
     </Style>
-    
+
+    <Style Selector="TextBlock.Enabled">
+        <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+
     <Style Selector="formKeyPicker|FormKeyPicker">
         <Setter Property="Template">
             <Setter.Value>
@@ -169,23 +172,45 @@
                                             </ItemsRepeater>
                                         </ScrollViewer>
 
+                                        <TextBlock Grid.Row="1"
+                                                   Text="No Types Selected!">
+                                            <TextBlock.IsVisible>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="!ViewingAllowedTypes"
+                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                    <Binding Path="!AnyTypeSelected^"
+                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </TextBlock.IsVisible>
+                                        </TextBlock>
 
                                         <ScrollViewer Grid.Row="1"
                                                       HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
                                                       VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
                                                       IsVisible="{Binding ViewingAllowedTypes, RelativeSource={RelativeSource TemplatedParent}}">
-                                            <ItemsRepeater
-                                                Items="{TemplateBinding ScopedTypes}">
+                                            <ItemsRepeater Items="{TemplateBinding SelectedTypes}">
                                                 <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate DataType="system:Type">
-                                                        <Grid Margin="6,0,0,0">
-                                                            <TextBlock Margin="0,4">
+                                                    <DataTemplate DataType="formKeyPicker:SelectableType">
+                                                        <Grid x:Name="TextBlock"
+                                                              Margin="6,0,0,0">
+                                                            <Interaction.Behaviors>
+                                                                <EventTriggerBehavior
+                                                                    SourceObject="{Binding #TextBlock}"
+                                                                    EventName="PointerPressed">
+                                                                    <InvokeCommandAction Command="{Binding Toggle}"/>
+                                                                </EventTriggerBehavior>
+                                                            </Interaction.Behaviors>
+
+                                                            <TextBlock Margin="0,4"
+                                                                       Classes.Enabled="{Binding IsSelected}">
                                                                 <TextBlock.Text>
                                                                     <MultiBinding StringFormat="{}{0} ( {1} )">
                                                                         <Binding
+                                                                            Path="Type"
                                                                             Converter="{x:Static converter:RecordTypeConverters.ToName}"
                                                                             Mode="OneWay"/>
                                                                         <Binding
+                                                                            Path="Type"
                                                                             Converter="{x:Static converter:RecordTypeConverters.ToGame}"
                                                                             Mode="OneWay"/>
                                                                     </MultiBinding>
