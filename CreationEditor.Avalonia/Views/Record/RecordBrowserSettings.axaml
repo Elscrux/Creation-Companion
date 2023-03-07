@@ -12,53 +12,52 @@
     <Design.DataContext>
         <browser:RecordBrowserSettingsVM/>
     </Design.DataContext>
-    
+
     <Grid RowDefinitions="Auto,Auto">
         <Grid Row="0" ColumnDefinitions="Auto,*">
             <Button Grid.Column="0"
                     MinWidth="32" MinHeight="32"
                     Margin="0,0,5,0">
                 <fluentIcons:FluentIcon Icon="Settings24Filled"/>
-        
+
                 <Button.Flyout>
                     <Flyout>
-                        <StackPanel>
-                            <ListBox Items="{Binding Mods}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate DataType="mod:ModItem">
-                                        <CheckBox Content="{Binding ModKey.FileName}"
-                                                  IsChecked="{Binding IsSelected}"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                                
-                                <ListBox.ContextFlyout>
-                                    <MenuFlyout>
-                                        <MenuItem Header="Select All"
-                                                  Command="{x:Static command:SelectableCommand.SelectAll}"
-                                                  CommandParameter="{Binding Mods}"/>
-                                        <MenuItem Header="Unselect All"
-                                                  Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                                  CommandParameter="{Binding Mods}"/>
-                                        <MenuItem Header="Toggle All"
-                                                  Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                                  CommandParameter="{Binding Mods}"/>
-                                    </MenuFlyout>
-                                </ListBox.ContextFlyout>
-                            </ListBox>
-                        </StackPanel>
+                        <ItemsRepeater Items="{Binding Mods}"
+                                       MaxHeight="750">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate DataType="mod:ModItem">
+                                    <CheckBox Content="{Binding ModKey.FileName}"
+                                              IsChecked="{Binding IsSelected}"/>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+
+                            <ItemsRepeater.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuItem Header="Select All"
+                                              Command="{x:Static command:SelectableCommand.SelectAll}"
+                                              CommandParameter="{Binding Mods}"/>
+                                    <MenuItem Header="Unselect All"
+                                              Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                              CommandParameter="{Binding Mods}"/>
+                                    <MenuItem Header="Toggle All"
+                                              Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                              CommandParameter="{Binding Mods}"/>
+                                </MenuFlyout>
+                            </ItemsRepeater.ContextFlyout>
+                        </ItemsRepeater>
                     </Flyout>
                 </Button.Flyout>
             </Button>
-        
+
             <TextBox Grid.Column="1"
                      Text="{Binding SearchTerm}"
                      Watermark="Search..."/>
         </Grid>
-        
+
         <CheckBox Grid.Row="1"
                   Margin="0,5,0,0"
                   Content="Show Only Active"
                   IsChecked="{Binding OnlyActive}"/>
-        
+
     </Grid>
 </UserControl>
