@@ -12,7 +12,8 @@
                             Margin="5"
                             Header="Ranks"
                             FontSize="12">
-        <DataGrid Items="{Binding FactionEditorVM.EditableRecord.Ranks}"
+        <DataGrid x:Name="RankGrid"
+                  Items="{Binding FactionEditorVM.EditableRecord.Ranks}"
                   Background="{DynamicResource SystemControlTransparentBrush}"
                   CanUserReorderColumns="False"
                   CanUserResizeColumns="True"

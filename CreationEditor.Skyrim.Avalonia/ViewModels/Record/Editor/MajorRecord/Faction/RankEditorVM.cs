@@ -29,4 +29,8 @@ public class RankEditorVM : ViewModel {
             }
         });
     }
+
+    public bool CanDrop(object? o) {
+        return o is Rank;
+    }
 }
