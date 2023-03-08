@@ -21,7 +21,7 @@ public class LocationFilter : RecordFilter<ILocationGetter> {
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
-            .GetRecursiveListings(Separator, (GetParentLocationString));
+            .GetRecursiveListings(Separator, GetParentLocationString);
     }
 
     private string GetParentLocationString(ILocationGetter location) {

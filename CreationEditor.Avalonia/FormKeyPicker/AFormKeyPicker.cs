@@ -475,7 +475,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
 
-                    if (FormID.TryFactory(x.Raw, out var formID, strictLength: true)) {
+                    if (FormID.TryFactory(x.Raw, out var formID)) {
                         if (x.LinkCache.ListedOrder.Count >= formID.ModIndex.ID) {
                             var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
                             formKey = new FormKey(targetMod.ModKey, formID.ID);
@@ -575,7 +575,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                                     this.WhenAnyValue(x => x.EditorID),
                                     this.WhenAnyValue(x => x.BlacklistFormKeys),
                                     this.WhenAnyValue(x => x.Filter),
-                                    ((editorId, blacklistFormKeys, filter) => (EditorID: editorId, BlacklistFormKeys: blacklistFormKeys, Filter: filter)))
+                                    (editorId, blacklistFormKeys, filter) => (EditorID: editorId, BlacklistFormKeys: blacklistFormKeys, Filter: filter))
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
                                 .Select<(string EditorID, ICollection<FormKey>? BlacklistFormKeys, Func<FormKey, string?, bool>? Filter), Func<IMajorRecordIdentifier, bool>>(data => {
@@ -593,13 +593,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                             var modKeyToId = x.Cache?.ListedOrder
                                     .Select((mod, index) => (mod, index))
                                     .Take(ModIndex.MaxIndex)
-                                    .ToDictionary(keySelector: x => x.mod.ModKey, elementSelector: x => (byte) x.index)
+                                    .ToDictionary(x => x.mod.ModKey, x => (byte) x.index)
                              ?? default;
 
                             return this.WhenAnyValue(x => x.FormKeyStr)
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, strictLength: false)))
+                                .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
                                 .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
                                     var fk = ident.FormKey;
                                     if (fk == term.FormKey) return true;

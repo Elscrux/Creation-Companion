@@ -60,7 +60,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
         IsBusy = isFiltering
             .CombineLatest(
                 RecordProvider.IsBusy,
-                ((filtering, busy) => (Filtering: filtering, Busy: busy)))
+                (filtering, busy) => (Filtering: filtering, Busy: busy))
             .ObserveOnGui()
             .Select(list => list.Filtering || list.Busy);
 

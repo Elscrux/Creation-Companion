@@ -7,6 +7,6 @@ public static class PointExtension {
     }
 
     public static double Distance(this Point point, Point lineStart, Vector lineVector) {
-        return Math.Abs(Vector.Cross((point - lineStart), lineVector)) / lineVector.Length;
+        return Math.Abs(Vector.Cross(point - lineStart, lineVector)) / lineVector.Length;
     }
 }

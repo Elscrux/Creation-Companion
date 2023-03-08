@@ -21,7 +21,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
 
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
-        = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
+        = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), _ => true);
 
     private bool _isProcessing;
 
@@ -83,7 +83,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
                 return checkBox;
             }),
-            CellTemplate = new FuncDataTemplate<IReactiveSelectable>(((_, _) => {
+            CellTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
                 var checkBox = new CheckBox {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
                     HorizontalAlignment = HorizontalAlignment.Center,
@@ -106,7 +106,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                 if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
 
                 return checkBox;
-            })),
+            }),
             CanUserResize = false,
             CanUserSort = false,
             CanUserReorder = false,

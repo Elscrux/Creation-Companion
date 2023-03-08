@@ -30,7 +30,7 @@ public class NpcFilter : RecordFilter<INpcGetter> {
                     listing.RecordFilters.Add(
                         new RecordFilterListing(
                             gender.ToString(),
-                            (record => record is INpcGetter npc && npc.Race.FormKey == race.FormKey && npc.GetGender() == gender),
+                            record => record is INpcGetter npc && npc.Race.FormKey == race.FormKey && npc.GetGender() == gender,
                             listing));
                 }
 
