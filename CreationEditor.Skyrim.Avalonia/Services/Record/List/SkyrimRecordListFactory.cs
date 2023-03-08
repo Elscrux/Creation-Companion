@@ -13,7 +13,6 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
-using Location = Mutagen.Bethesda.Skyrim.Location;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
 
 public sealed class SkyrimRecordListFactory : IRecordListFactory {

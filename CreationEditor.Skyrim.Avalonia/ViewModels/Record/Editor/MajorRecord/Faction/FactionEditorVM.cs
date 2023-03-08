@@ -7,12 +7,12 @@ using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
+using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using FactionEditor = CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.FactionEditor;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 
 public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesda.Skyrim.Faction, IFactionGetter> {

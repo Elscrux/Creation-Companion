@@ -12,7 +12,6 @@ using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Installs.DI;
-using NotificationModule = CreationEditor.Avalonia.Modules.NotificationModule;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public partial class App : Application {

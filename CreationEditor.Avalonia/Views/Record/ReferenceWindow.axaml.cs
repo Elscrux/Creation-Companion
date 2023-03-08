@@ -1,6 +1,5 @@
 ﻿using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Plugins.Records;
-
 namespace CreationEditor.Avalonia.Views.Record;
 
 public partial class ReferenceWindow : AppWindow {

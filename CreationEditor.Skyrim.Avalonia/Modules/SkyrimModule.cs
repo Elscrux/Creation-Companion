@@ -3,7 +3,6 @@ using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
@@ -25,7 +24,6 @@ using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog.Autofac;
-using Module = Autofac.Module;
 namespace CreationEditor.Skyrim.Avalonia.Modules;
 
 public sealed class SkyrimModule : Module {

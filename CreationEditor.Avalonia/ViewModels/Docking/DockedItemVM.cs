@@ -1,12 +1,12 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Avalonia;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Visual = Avalonia.Visual;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 public sealed class DockedItemVM : ViewModel, IDockedItem {

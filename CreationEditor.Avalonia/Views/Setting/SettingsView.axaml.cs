@@ -1,6 +1,5 @@
 ﻿using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Setting;
-
 namespace CreationEditor.Avalonia.Views.Setting;
 
 public partial class SettingsView : ReactiveUserControl<ISettingsVM> {

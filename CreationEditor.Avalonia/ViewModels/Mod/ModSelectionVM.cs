@@ -9,6 +9,7 @@ using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
+using MessageBox.Avalonia;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -53,7 +54,7 @@ public sealed class ModSelectionVM : ViewModel {
         _environment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
 
         var filePath = pluginListingsProvider.Get(environmentContext.GameReleaseContext.Release);
-        if (!fileSystem.File.Exists(filePath)) MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
+        if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
 

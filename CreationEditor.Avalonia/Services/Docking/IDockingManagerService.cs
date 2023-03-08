@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
-using DockingManagerVM = CreationEditor.Avalonia.ViewModels.Docking.DockingManagerVM;
+using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Services.Docking;
 
 public interface IDockingManagerService {

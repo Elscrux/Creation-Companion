@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using CreationEditor.Avalonia.Models.Logging;
 using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
@@ -8,7 +9,6 @@ using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog.Events;
-using ILogItem = CreationEditor.Avalonia.Models.Logging.ILogItem;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
 public sealed class LogVM : ViewModel, ILogVM {

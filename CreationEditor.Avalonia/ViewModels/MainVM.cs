@@ -13,7 +13,6 @@ using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {

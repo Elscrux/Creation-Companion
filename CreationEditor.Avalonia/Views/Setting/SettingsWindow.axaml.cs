@@ -1,6 +1,5 @@
 ﻿using CreationEditor.Avalonia.ViewModels.Setting;
 using FluentAvalonia.UI.Windowing;
-
 namespace CreationEditor.Avalonia.Views.Setting;
 
 public partial class SettingsWindow : AppWindow {
