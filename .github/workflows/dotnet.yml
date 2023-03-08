@@ -20,10 +20,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         renderer: ["MrTroble/Project-BSE"]
         include:
-            -   os: ubuntu-latest
-                renderer-name: "TGAppLinux"
-            -   os: windows-latest
-                renderer-name: "TGAppWindows"
+          - os: ubuntu-latest
+            renderer-name: "TGAppLinux"
+          - os: windows-latest
+            renderer-name: "TGAppWindows"
     
     steps:
     - uses: actions/checkout@v3
