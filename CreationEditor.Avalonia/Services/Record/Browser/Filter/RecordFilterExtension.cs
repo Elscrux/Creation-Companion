@@ -1,5 +1,4 @@
 ﻿using CreationEditor.Avalonia.Models.Record.Browser;
-using CreationEditor.Extension;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 

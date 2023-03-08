@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using CreationEditor.Extension;
 using CreationEditor.Services.Notification;
 using DynamicData;
 using DynamicData.Binding;

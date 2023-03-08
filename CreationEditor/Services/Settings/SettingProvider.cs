@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using CreationEditor.Extension;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Settings;

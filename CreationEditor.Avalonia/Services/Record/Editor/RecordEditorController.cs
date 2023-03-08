@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
-using CreationEditor.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;

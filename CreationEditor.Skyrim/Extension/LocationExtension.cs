@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Extension;
+namespace CreationEditor.Skyrim;
 
 public static class LocationExtension {
     public static IEnumerable<ILocationGetter> GetAllParentLocations(this ILocationGetter location, ILinkCache linkCache) {

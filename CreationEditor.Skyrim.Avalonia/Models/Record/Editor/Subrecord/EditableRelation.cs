@@ -1,5 +1,4 @@
-﻿using CreationEditor.Extension;
-using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

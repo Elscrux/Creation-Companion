@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Subjects;
-using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;

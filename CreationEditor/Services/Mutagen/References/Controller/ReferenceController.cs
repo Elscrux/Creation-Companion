@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.References.Cache;

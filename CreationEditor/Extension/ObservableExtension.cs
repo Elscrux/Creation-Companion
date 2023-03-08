@@ -5,7 +5,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Extension;
+namespace CreationEditor;
 
 // Mostly copied from Noggog.CSharpExt
 public static class ObservableExtension {

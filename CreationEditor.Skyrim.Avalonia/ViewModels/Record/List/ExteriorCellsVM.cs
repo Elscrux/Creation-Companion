@@ -7,7 +7,6 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Skyrim.Extension;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

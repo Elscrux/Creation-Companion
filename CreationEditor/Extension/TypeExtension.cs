@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Extension;
+﻿namespace CreationEditor;
 
 public static class TypeExtension {
     public static bool ContainsInterface(this Type originalType, Type type) {

@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using CreationEditor.Extension;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.Converter;
 

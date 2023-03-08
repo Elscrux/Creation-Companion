@@ -3,7 +3,6 @@ using System.Reactive.Subjects;
 using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;

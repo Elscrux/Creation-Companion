@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
-namespace CreationEditor.Avalonia.Extension;
+namespace CreationEditor.Avalonia;
 
 public static class SelectableExtension {
     public static IObservable<Unit> SelectionChanged<T>(this ObservableCollection<T> observable)

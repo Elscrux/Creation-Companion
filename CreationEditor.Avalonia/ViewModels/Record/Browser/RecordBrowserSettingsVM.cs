@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Record.Browser;
-using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;

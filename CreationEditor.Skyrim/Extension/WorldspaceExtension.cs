@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Extension;
+namespace CreationEditor.Skyrim;
 
 public static class WorldspaceExtension {
     public static IEnumerable<ICellGetter> EnumerateCells(this IWorldspaceGetter worldspace) {

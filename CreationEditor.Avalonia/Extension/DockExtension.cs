@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-namespace CreationEditor.Avalonia.Extension;
+namespace CreationEditor.Avalonia;
 
 public static class DockExtension {
     public static Dock Opposite(this Dock dock) {

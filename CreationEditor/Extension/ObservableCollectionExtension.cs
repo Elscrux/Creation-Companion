@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
-namespace CreationEditor.Extension;
+namespace CreationEditor;
 
 public static class ObservableCollectionExtension {
     public static ReadOnlyObservableCollection<TTarget> SelectObservableCollection<TSource, TTarget>(

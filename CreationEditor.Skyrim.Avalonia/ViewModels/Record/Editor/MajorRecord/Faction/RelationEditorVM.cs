@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Extension;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;

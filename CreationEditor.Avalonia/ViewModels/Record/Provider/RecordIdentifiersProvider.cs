@@ -3,7 +3,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.References.Controller;

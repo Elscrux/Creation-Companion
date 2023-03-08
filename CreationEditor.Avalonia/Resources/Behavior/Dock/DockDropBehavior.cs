@@ -4,7 +4,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
-using CreationEditor.Avalonia.Extension;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using CreationEditor.Avalonia.Views.Docking;

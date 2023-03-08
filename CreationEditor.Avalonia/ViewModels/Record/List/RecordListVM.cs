@@ -7,7 +7,6 @@ using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;

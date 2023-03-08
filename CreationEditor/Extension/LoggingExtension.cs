@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Serilog;
-namespace CreationEditor.Extension;
+namespace CreationEditor;
 
 public static class LoggingExtension {
     private const string MemberName = "MemberName";

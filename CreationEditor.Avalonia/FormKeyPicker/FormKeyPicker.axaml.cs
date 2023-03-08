@@ -5,7 +5,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Attached;
-using CreationEditor.Extension;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.FormKeyPicker;

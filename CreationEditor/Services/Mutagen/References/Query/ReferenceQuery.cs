@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Compression;
-using CreationEditor.Extension;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Type;

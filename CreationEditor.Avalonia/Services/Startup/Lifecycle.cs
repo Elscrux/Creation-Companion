@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
-using CreationEditor.Extension;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Startup;

@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-namespace CreationEditor.Extension;
+namespace CreationEditor;
 
 public static class GameEnvironmentExtension {
     public static TModGetter? ResolveMod<TModSetter, TModGetter>(this IGameEnvironment<TModSetter, TModGetter> environment, ModKey? modKey)

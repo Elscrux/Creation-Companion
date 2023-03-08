@@ -1,7 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Security.Cryptography;
 using Noggog;
-namespace CreationEditor.Extension;
+namespace CreationEditor;
 
 public static class FileSystemExtension {
     public static byte[] GetChecksum(this IFileSystem fileSystem, FilePath path) {

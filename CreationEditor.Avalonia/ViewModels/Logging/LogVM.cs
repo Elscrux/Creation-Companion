@@ -2,7 +2,6 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Logging;
-using CreationEditor.Extension;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;

@@ -5,7 +5,6 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Extension;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.References.Controller;
