@@ -4,24 +4,24 @@
              xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              xmlns:avalonia="clr-namespace:CreationEditor.Skyrim.Avalonia">
     <Application.DataTemplates>
-        <avalonia:ViewLocator />
+        <avalonia:ViewLocator/>
     </Application.DataTemplates>
 
     <Application.Styles>
         <!-- Base Avalonia Style -->
-        <styling:FluentAvaloniaTheme PreferSystemTheme="True" />
-        <StyleInclude Source="avares://FluentAvalonia.UI.Windowing/Styles/FAWindowingStyles.axaml" />
+        <styling:FluentAvaloniaTheme PreferSystemTheme="True"/>
+        <StyleInclude Source="avares://FluentAvalonia.UI.Windowing/Styles/FAWindowingStyles.axaml"/>
 
         <!-- Avalonia Addons Style -->
-        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml" />
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
 
         <!-- Custom Style -->
-        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ListBoxStyles.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyPicker.axaml" />
-        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyBox.axaml" />
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ListBoxStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyPicker.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyBox.axaml"/>
     </Application.Styles>
 </Application>

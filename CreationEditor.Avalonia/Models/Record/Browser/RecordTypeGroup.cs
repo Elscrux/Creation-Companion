@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-namespace CreationEditor.Avalonia.Models.Record.Browser; 
+namespace CreationEditor.Avalonia.Models.Record.Browser;
 
 public sealed class RecordTypeGroup {
     public string GroupName { get; }

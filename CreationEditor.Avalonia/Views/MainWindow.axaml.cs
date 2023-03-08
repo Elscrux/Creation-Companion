@@ -9,7 +9,7 @@ namespace CreationEditor.Avalonia.Views;
 public partial class MainWindow : AppWindow, IViewFor<MainVM> {
     public static readonly StyledProperty<MainVM?> ViewModelProperty
         = AvaloniaProperty.Register<ReactiveWindow<MainVM>, MainVM?>(nameof(ViewModel));
-    
+
     public MainVM? ViewModel {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);

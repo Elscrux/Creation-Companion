@@ -9,7 +9,8 @@
     </Design.PreviewWith>
 
     <!-- General -->
-    <Style Selector="
+    <Style
+        Selector="
                 docking|DockedControl.BorderedDock,
                 docking|DocumentDock.BorderedDock,
                 ContentControl.BorderedDock">
@@ -17,7 +18,8 @@
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="CornerRadius" Value="3"/>
     </Style>
-    <Style Selector="
+    <Style
+        Selector="
                 docking|DockedControl.BorderedDock.AccentSelected:focus-within,
                 ContentControl.BorderedDock.AccentSelected:focus-within">
         <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}"/>
@@ -31,16 +33,18 @@
         <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlTransparentBrush}"/>
     </Style>
-    
+
     <!-- Document -->
-    <Style Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Path#SelectedBackgroundPath">
+    <Style
+        Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Path#SelectedBackgroundPath">
         <Setter Property="Fill" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
-    <Style Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Border#TabContainerBorder">
+    <Style
+        Selector="docking|DocumentDock.AccentSelected:focus-within fluent|TabViewItem:selected Border#TabContainerBorder">
         <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}"/>
         <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
-    
+
     <!-- Side -->
     <Style Selector="Border.TabBar">
         <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
@@ -55,7 +59,7 @@
     <Style Selector="Grid.TabGrid:focus-within Border.Tab.AccentSelected">
         <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
-    
+
     <!-- Control -->
     <Style Selector="docking|DockedControl.AccentSelected:not(:focus-within) Border#DockTitleBar">
         <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>

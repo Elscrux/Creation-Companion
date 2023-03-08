@@ -2,7 +2,7 @@
 namespace CreationEditor.Avalonia.Models.Docking;
 
 public interface IDockObject {
-    public DockingManagerVM DockRoot { 
+    public DockingManagerVM DockRoot {
         get {
             var root = this;
             while (root.DockParent != null) {
@@ -12,10 +12,10 @@ public interface IDockObject {
             if (root is not DockingManagerVM dockingManagerVM) {
                 throw new Exception("No docking manager found as root");
             }
-            
+
             return dockingManagerVM;
         }
     }
-    
+
     public DockContainerVM? DockParent { get; }
 }

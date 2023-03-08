@@ -31,13 +31,13 @@ public sealed class RecordEditorController : IRecordEditorController {
 
         _dockingManagerService.Closed.Subscribe(OnClosed);
     }
-    
+
     public bool AnyEditorsOpen() => _openRecordEditors.Count > 0;
 
     public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        
+
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
             // Select editor as active
             _dockingManagerService.Focus(editorControl.Control);
@@ -47,7 +47,7 @@ public sealed class RecordEditorController : IRecordEditorController {
                 var control = recordEditorVM.CreateControl(record);
 
                 _dockingManagerService.AddControl(
-                    control, 
+                    control,
                     new DockConfig {
                         DockInfo = new DockInfo {
                             Header = record.EditorID ?? record.FormKey.ToString(),
@@ -62,7 +62,7 @@ public sealed class RecordEditorController : IRecordEditorController {
             }
         }
     }
-    
+
     public void OpenEditor(IMajorRecord record) {
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
             // Select editor as active
@@ -71,7 +71,7 @@ public sealed class RecordEditorController : IRecordEditorController {
             // Open new editor
             if (_recordEditorFactory.FromType(record, out var control, out var editor)) {
                 _dockingManagerService.AddControl(
-                    control, 
+                    control,
                     new DockConfig {
                         DockInfo = new DockInfo {
                             Header = record.EditorID ?? record.FormKey.ToString(),
@@ -86,11 +86,11 @@ public sealed class RecordEditorController : IRecordEditorController {
             }
         }
     }
-    
+
     public void CloseEditor(IMajorRecord record) {
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
             _dockingManagerService.RemoveControl(editorControl.Control);
-            
+
             RemoveEditorCache(editorControl.Control);
         }
     }
@@ -98,7 +98,7 @@ public sealed class RecordEditorController : IRecordEditorController {
     private void OnClosed(IDockedItem dockedItem) {
         RemoveEditorCache(dockedItem.Control);
     }
-    
+
     private void RemoveEditorCache(Control editor) {
         var editorsToRemove = _openRecordEditors
             .Where(x => ReferenceEquals(x.Value.Control, editor))
@@ -106,7 +106,7 @@ public sealed class RecordEditorController : IRecordEditorController {
 
         foreach (var (formKey, editorControl) in editorsToRemove) {
             editorControl.EditorVM.Save.Execute();
-            
+
             _openRecordEditors.Remove(formKey);
         }
     }

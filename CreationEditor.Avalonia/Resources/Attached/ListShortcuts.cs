@@ -33,7 +33,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                 ListBox listBox => listBox.SelectedItems,
                 _ => null
             };
-            
+
             HandleGesture(args, selectedItems, RemoveGesture, RemoveHeader);
         });
     }

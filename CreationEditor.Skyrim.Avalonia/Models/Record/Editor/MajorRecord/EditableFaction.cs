@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 
 public sealed class EditableFaction : Faction, INotifyPropertyChanged {
     public new ObservableCollection<EditableRelation> Relations { get; set; }
@@ -14,7 +14,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
     public new VendorValues VendorValues { get; set; }
 
     public override string? EditorID { get; set; }
-    
+
     public bool HiddenFromPc {
         get => (Flags & FactionFlag.HiddenFromPC) != 0;
         set {
@@ -126,7 +126,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
             OnPropertyChanged();
         }
     }
-    
+
     public EditableFaction(IFaction parent) {
         EditorID = parent.EditorID;
         Name = parent.Name;
@@ -134,7 +134,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Flags = parent.Flags;
         Relations = new ObservableCollection<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, TargetFormKey = r.Target.FormKey }));
         Ranks = new ObservableCollection<Rank>(parent.Ranks);
-        
+
         CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
         JailOutfit = parent.JailOutfit;
         SharedCrimeFactionList = parent.SharedCrimeFactionList;
@@ -142,7 +142,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         FollowerWaitMarker = parent.FollowerWaitMarker;
         PlayerInventoryContainer = parent.PlayerInventoryContainer;
         StolenGoodsContainer = parent.StolenGoodsContainer;
-        
+
         VendorValues = parent.VendorValues ?? new VendorValues();
         VendorLocation = parent.VendorLocation;
         VendorBuySellList = parent.VendorBuySellList;
@@ -156,24 +156,24 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.Flags = Flags;
         faction.Relations.Clear();
         faction.Relations.AddRange(Relations.Select(r => r.ToRelation()));
-        
+
         for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
         faction.Ranks.SetTo(Ranks);
-        
+
         faction.CrimeValues = CrimeGoldUseDefaults ? GetDefaultCrimeValues() : CrimeValues;
         faction.JailOutfit = JailOutfit;
         faction.SharedCrimeFactionList = SharedCrimeFactionList;
         faction.ExteriorJailMarker = ExteriorJailMarker;
         faction.PlayerInventoryContainer = PlayerInventoryContainer;
         faction.StolenGoodsContainer = StolenGoodsContainer;
-        
+
         faction.VendorValues = VendorValues;
         faction.VendorLocation = VendorLocation;
         faction.VendorBuySellList = VendorBuySellList;
         faction.MerchantContainer = MerchantContainer;
         faction.Conditions = Conditions;
     }
-    
+
     private static CrimeValues GetDefaultCrimeValues() {
         return new CrimeValues {
             Arrest = true,
@@ -187,7 +187,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
             Werewolf = 1000
         };
     }
-    
+
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

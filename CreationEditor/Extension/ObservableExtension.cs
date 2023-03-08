@@ -36,7 +36,7 @@ public static class ObservableExtension {
             .Bind(destination)
             .Subscribe()
             .DisposeWith(disposable);
-        
+
         return destination;
     }
 
@@ -50,7 +50,7 @@ public static class ObservableExtension {
             .Bind(destination)
             .Subscribe()
             .DisposeWith(disposable);
-        
+
         return destination;
     }
 
@@ -62,7 +62,7 @@ public static class ObservableExtension {
             .Bind(out var readOnlyObservableCollection)
             .Subscribe()
             .DisposeWith(disposable);
-        
+
         return readOnlyObservableCollection;
     }
 

@@ -16,7 +16,7 @@
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
-    
+
     <ContentControl Content="{Binding LayoutGrid}">
         <ContentControl.Resources>
             <converter:ReturnParameterIfTrueConverter
@@ -25,7 +25,7 @@
                 Converter="{x:Static converter:DoubleConverters.ToThickness}"
                 DefaultValue="0"/>
         </ContentControl.Resources>
-        
+
         <ContentControl.Padding>
             <Binding Path="InEditMode"
                      Converter="{StaticResource ReturnDoubleIfTrue}"

@@ -1,15 +1,15 @@
 ﻿<UserControl x:Class="CreationEditor.Avalonia.Views.Notification.NotificationView"
-                 xmlns="https://github.com/avaloniaui"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:notification="clr-namespace:CreationEditor.Services.Notification;assembly=CreationEditor"
-                 x:CompileBindings="True" x:DataType="notification:NotificationItem"
-                 d:DesignHeight="300" d:DesignWidth="300">
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:notification="clr-namespace:CreationEditor.Services.Notification;assembly=CreationEditor"
+             x:CompileBindings="True" x:DataType="notification:NotificationItem"
+             d:DesignHeight="300" d:DesignWidth="300">
     <StackPanel>
-        <TextBlock Text="{Binding LoadText}" />
+        <TextBlock Text="{Binding LoadText}"/>
         <ProgressBar ShowProgressText="True"
                      IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
                      Minimum="0" Maximum="1"
-                     Value="{Binding  LoadProgress}" />
+                     Value="{Binding  LoadProgress}"/>
     </StackPanel>
 </UserControl>

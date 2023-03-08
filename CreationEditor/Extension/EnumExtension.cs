@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-namespace CreationEditor.Extension; 
+namespace CreationEditor.Extension;
 
 public static class EnumExtension {
-    public static bool TryParse<TEnum>([NotNullWhen(true)] object? value, out TEnum outEnum) 
+    public static bool TryParse<TEnum>([NotNullWhen(true)] object? value, out TEnum outEnum)
         where TEnum : struct, Enum {
         switch (value) {
             case TEnum directLevel:

@@ -21,7 +21,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
-    
+
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
@@ -34,11 +34,11 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             }
         }
     }
-    
+
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
-    
+
     public IObservable<bool> IsBusy { get; set; }
-    
+
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; init; }
 
@@ -59,30 +59,30 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
-            
+
             referenceController.GetRecord(newRecord, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
-        
+
         DoubleTapCommand = EditSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
 
             var newOverride = recordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
         });
-        
+
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
-            
+
             var duplicate = recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            
+
             referenceController.GetRecord(duplicate, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
-        
+
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
-            
+
             recordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);
         });
@@ -105,13 +105,13 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             }), out var isBusy)
             .Subscribe()
             .DisposeWith(this);
-        
+
         IsBusy = isBusy;
 
         recordController.RecordChanged
             .Subscribe(majorRecord => {
                 if (majorRecord is not TMajorRecordGetter record) return;
-                
+
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
                     listRecord.Record = record;
@@ -120,7 +120,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     referenceController.GetRecord(record, out var outListRecord);
                     listRecord = outListRecord;
                 }
-                
+
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })

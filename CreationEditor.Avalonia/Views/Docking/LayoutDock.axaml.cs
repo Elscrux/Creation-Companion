@@ -3,11 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Docking;
-namespace CreationEditor.Avalonia.Views.Docking; 
+namespace CreationEditor.Avalonia.Views.Docking;
 
 public partial class LayoutDock : ReactiveUserControl<LayoutDockVM>, IDockPreview {
     public double PreviewOutlineThickness { get; set; } = 10;
-    
+
     public LayoutDock() {
         InitializeComponent();
     }
@@ -28,8 +28,7 @@ public partial class LayoutDock : ReactiveUserControl<LayoutDockVM>, IDockPrevie
                 dock == Dock.Bottom ? PreviewOutlineThickness : 0
             ),
         };
-        
+
         AdornerLayer.SetAdorner(this, border);
     }
 }
-

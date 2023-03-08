@@ -18,7 +18,7 @@ public sealed class LoadOrderModItem : ModItem {
             .Subscribe(isSelected => {
                 if (!isSelected) IsActive = false;
             });
-        
+
         this.WhenAnyValue(x => x.IsActive)
             .ObserveOnGui()
             .Subscribe(isActive => {

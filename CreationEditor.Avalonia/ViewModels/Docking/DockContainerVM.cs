@@ -36,7 +36,7 @@ public abstract class DockContainerVM : ViewModel, IDockObject {
     }
 
     public abstract bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock);
-    
+
     public abstract bool Focus(IDockedItem dockedItem);
 
     public abstract void Add(IDockedItem dockedItem, DockConfig config);

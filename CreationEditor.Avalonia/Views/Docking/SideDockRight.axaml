@@ -14,18 +14,18 @@
     <Design.DataContext>
         <vm:SideDockVM/>
     </Design.DataContext>
-    
+
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
-    
+
     <Grid ColumnDefinitions="*,20"
           Classes="AccentSelected TabGrid">
         <ContentControl Grid.Column="0"
                         VerticalAlignment="Stretch"
                         Content="{Binding ActiveTab.Control}"
                         Classes="BorderedDock AccentSelected"/>
-        
+
         <LayoutTransformControl Grid.Column="1"
                                 VerticalAlignment="Stretch">
             <LayoutTransformControl.LayoutTransform>

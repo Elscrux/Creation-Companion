@@ -9,7 +9,7 @@ namespace CreationEditor.Avalonia.Views.Viewport;
 public class ViewportHost : NativeControlHost {
     private readonly Process _process;
     private Window? _rootWindow;
-    
+
     private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     public ViewportHost(Process process) {

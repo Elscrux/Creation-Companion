@@ -14,11 +14,11 @@
     <Design.DataContext>
         <vm:SideDockVM/>
     </Design.DataContext>
-    
+
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
-    
+
     <Grid RowDefinitions="20,*"
           Classes="AccentSelected TabGrid">
         <Border Grid.Row="0"

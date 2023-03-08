@@ -8,7 +8,7 @@ public sealed class DisposableCounterLock {
     public DisposableCounterLock(Action freeAction) {
         _freeAction = freeAction;
     }
-    
+
     /// <summary>
     /// Enters a waiting lock
     /// </summary>
@@ -18,7 +18,7 @@ public sealed class DisposableCounterLock {
             return new CounterDisposable(this);
         }
     }
-    
+
     /// <summary>
     /// Enters a waiting lock
     /// </summary>

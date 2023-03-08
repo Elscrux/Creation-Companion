@@ -13,28 +13,29 @@
     <Design.DataContext>
         <vm:CellBrowserVM/>
     </Design.DataContext>
-    
+
     <UserControl.Resources>
         <converter:ReturnParameterIfTrueConverter
             x:Key="ReturnGridLengthIfTrue"
             x:TypeArguments="system:Double"
             Converter="{x:Static converter:DoubleConverters.ToGridLengthPixel}"
             DefaultValue="0"/>
-        
+
         <converter:ReturnParameterIfTrueConverter
             x:Key="ReturnDoubleIfTrue"
             x:TypeArguments="system:Double"
             DefaultValue="0"/>
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="200"/>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="{Binding ShowReferences, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
-                           MinHeight="{Binding ShowReferences, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=200}"/>
+            <RowDefinition
+                Height="{Binding ShowReferences, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
+                MinHeight="{Binding ShowReferences, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=200}"/>
         </Grid.RowDefinitions>
-        
+
         <TabControl Grid.Row="0"
                     SelectedIndex="{Binding SelectedTab}"
                     Padding="4,0">
@@ -46,11 +47,11 @@
                 <ContentControl Content="{Binding ExteriorCells}"/>
             </TabItem>
         </TabControl>
-        
+
         <GridSplitter Grid.Row="1"
                       IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
                       IsEnabled="{Binding ShowReferences}"/>
-        
+
         <Button Grid.Row="1"
                 Height="15" Width="15"
                 Padding="0" Margin="0"
@@ -66,7 +67,7 @@
                                         IsVisible="{Binding !ShowReferences}"/>
             </Grid>
         </Button>
-        
+
         <HeaderedContentControl
             Grid.Row="2"
             Classes="Default"

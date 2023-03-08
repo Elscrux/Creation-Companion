@@ -22,7 +22,7 @@
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
-            
+
             <DataGridTemplateColumn Header="Dock Mode">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="settings:StartupDock">
@@ -31,7 +31,7 @@
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
-            
+
             <DataGridTemplateColumn Header="Dock Layout">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="settings:StartupDock">

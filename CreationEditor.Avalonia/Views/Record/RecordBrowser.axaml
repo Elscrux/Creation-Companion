@@ -29,7 +29,7 @@
                 <Interaction.Behaviors>
                     <ToggleIsExpandedOnDoubleTappedBehavior/>
                 </Interaction.Behaviors>
-                
+
                 <TreeView.Styles>
                     <Style Selector="TreeViewItem">
                         <Setter Property="MinHeight" Value="10"></Setter>
@@ -79,7 +79,7 @@
                                     <DataTriggerBehavior.Value>
                                         <system:Boolean>true</system:Boolean>
                                     </DataTriggerBehavior.Value>
-                                    
+
                                     <InvokeCommandAction
                                         Command="{ReflectionBinding #Browser.ViewModel.SelectRecordFilter}"
                                         CommandParameter="{Binding}"/>

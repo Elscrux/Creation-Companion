@@ -26,8 +26,8 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
     public ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
 
     public DisposableCounterLock RemovalLock { get; }
-    
-    
+
+
     private readonly Subject<IDockedItem> _closed = new();
     public IObservable<IDockedItem> Closed => _closed;
 
@@ -47,7 +47,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
             canExecute: this.WhenAnyValue(x => x.CanClose),
             execute: () => {
                 var oneTimeSubscription = Closed.Take(1);
-                
+
                 DockParent.Remove(this);
 
                 return oneTimeSubscription;

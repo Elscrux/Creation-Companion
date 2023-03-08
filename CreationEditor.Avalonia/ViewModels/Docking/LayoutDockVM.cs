@@ -15,7 +15,7 @@ public sealed class LayoutDockVM : DockContainerVM {
     public LayoutDockVM(IDockedItem dockedItem, DockContainerVM? dockParent) : this(dockParent) {
         AddDockedControl(dockedItem, DockConfig.Default);
     }
-    
+
     public override IEnumerable<IDockObject> Children {
         get {
             foreach (var layoutChild in LayoutGrid.Children) {
@@ -23,10 +23,12 @@ public sealed class LayoutDockVM : DockContainerVM {
                     // Found dock container
                     case { DataContext: DockContainerVM dockableVM } when dockableVM != this:
                         yield return dockableVM;
+
                         break;
                     // Found docked item
                     case DockedControl dockedControl:
                         yield return dockedControl;
+
                         break;
                 }
             }
@@ -117,7 +119,7 @@ public sealed class LayoutDockVM : DockContainerVM {
             }
         }
     }
-    
+
     private void AddDockedControl(IDockedItem dockedItem, DockConfig config) {
         using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             switch (LayoutGrid.Children) {
@@ -183,12 +185,12 @@ public sealed class LayoutDockVM : DockContainerVM {
 
                 LayoutGrid.Children.RemoveAt(index);
                 LayoutGrid.Children.Insert(index, grandchildGrid);
-                
+
                 Grid.SetRow(grandchildGrid, Grid.GetRow(childGrid));
                 Grid.SetRowSpan(grandchildGrid, Grid.GetRowSpan(childGrid));
                 Grid.SetColumn(grandchildGrid, Grid.GetColumn(childGrid));
                 Grid.SetColumnSpan(grandchildGrid, Grid.GetColumnSpan(childGrid));
-            
+
                 grandchildVM.DockParent = this;
                 return true;
             }

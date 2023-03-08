@@ -17,17 +17,17 @@ namespace CreationEditor.Avalonia.ViewModels.Record.List;
 public class RecordListVM : ViewModel, IRecordListVM {
     IRecordProvider IRecordListVM.RecordProvider => RecordProvider;
     public IRecordProvider RecordProvider { get; }
-    
+
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
-    
+
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
     public IEnumerable? Records { get; }
 
     public IObservable<bool> IsBusy { get; set; }
-    
+
     public ReactiveCommand<Unit, Unit> OpenReferences { get; }
-    
+
     public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }
 
     public RecordListVM(
@@ -36,7 +36,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
         MainWindow mainWindow) {
         RecordProvider = recordProvider;
         DoubleTapCommand = recordProvider.DoubleTapCommand;
-        
+
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;
 
@@ -69,7 +69,7 @@ public class RecordListVM : ViewModel, IRecordListVM {
 
             return FormLinkInformation.Factory(referencedRecord.Record);
         };
-        
+
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);
         ContextMenuItems.Add(new MenuItem { Header = "Open References", Command = OpenReferences });
     }

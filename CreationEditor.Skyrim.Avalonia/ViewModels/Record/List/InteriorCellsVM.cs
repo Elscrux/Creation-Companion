@@ -6,12 +6,12 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List; 
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public class InteriorCellsVM : ViewModel {
     public InteriorCellsProvider InteriorCellsProvider { get; }
     public RecordList InteriorList { get; }
-    
+
     public InteriorCellsVM(
         IComponentContext componentContext,
         IExtraColumnsBuilder extraColumnsBuilder,

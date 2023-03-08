@@ -18,7 +18,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
     public static readonly AttachedProperty<Func<StyledElement, IFormLinkIdentifier>> GetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<StyledElement, IFormLinkIdentifier>>("GetFormLink");
     public static readonly AttachedProperty<Action<IFormLinkIdentifier>> SetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Action<IFormLinkIdentifier>>("SetFormLink");
-    
+
     public static readonly AttachedProperty<Func<IFormLinkIdentifier, bool>> CanSetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<IFormLinkIdentifier, bool>>("CanSetFormLink");
 
     public static bool GetAllowDragDataGrid(AvaloniaObject obj) => obj.GetValue(AllowDragDataGridProperty);
@@ -191,14 +191,14 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         // Hide adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, null);
     }
-    
+
     private static IFormLinkIdentifier? GetData(DragEventArgs e) {
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         if (e.Data?.Contains(FormLink) is not true) return null;
 
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         var formLinkObject = e.Data?.Get(FormLink);
-        
+
         return formLinkObject as IFormLinkGetter;
     }
 }

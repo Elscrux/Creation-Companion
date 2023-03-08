@@ -12,7 +12,7 @@ namespace CreationEditor.Skyrim.Services.Environment;
 
 public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
     private static readonly ModKey NewModKey = new("NewMod", ModType.Plugin);
-    
+
     private readonly IEnvironmentContext _environmentContext;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
@@ -23,27 +23,27 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         get => _gameEnvironment;
         set => _gameEnvironment = value;
     }
-    
+
     private ISkyrimMod _activeMod;
     IMod IEditorEnvironment.ActiveMod => _activeMod;
     ISkyrimMod IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.ActiveMod {
         get => _activeMod;
         set => _activeMod = value;
     }
-    
+
     private ILinkCache<ISkyrimMod, ISkyrimModGetter> _activeModLinkCache;
     public ILinkCache ActiveModLinkCache => _activeModLinkCache;
     ILinkCache<ISkyrimMod, ISkyrimModGetter> IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.ActiveModLinkCache {
         get => _activeModLinkCache;
         set => _activeModLinkCache = value;
     }
-    
+
     private readonly ReplaySubject<ModKey> _activeModChanged = new(1);
     public IObservable<ModKey> ActiveModChanged => _activeModChanged;
-    
+
     private readonly ReplaySubject<List<ModKey>> _loadOrderChanged = new(1);
     public IObservable<List<ModKey>> LoadOrderChanged => _loadOrderChanged;
-    
+
     private readonly ReplaySubject<ILinkCache> _linkCacheChanged = new(1);
     public IObservable<ILinkCache> LinkCacheChanged => _linkCacheChanged;
 
@@ -57,7 +57,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
 
         _activeMod = new SkyrimMod(NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
-        
+
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_environmentContext.GameReleaseContext.Release)
             .WithLoadOrder(_activeMod.ModKey)
@@ -73,12 +73,12 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         } else {
             _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.Value.FileName);
         }
-        
+
         _activeMod = new SkyrimMod(activeMod ?? NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         var linearNotifier = new LinearNotifier(_notificationService, activeMod == null ? 1 : 2);
-        
+
         if (activeMod != null) {
             linearNotifier.Next($"Preparing {activeMod.Value.FileName}");
             _activeMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
@@ -87,7 +87,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
                 .Build()
                 .LoadOrder[^1].Mod!);
         }
-        
+
         linearNotifier.Next("Building GameEnvironment");
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_environmentContext.GameReleaseContext.Release)
@@ -95,7 +95,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();
         linearNotifier.Stop();
-        
+
         _activeModChanged.OnNext(_activeMod.ModKey);
         _loadOrderChanged.OnNext(_gameEnvironment.LoadOrder.Select(x => x.Key).ToList());
         _linkCacheChanged.OnNext(_gameEnvironment.LinkCache);

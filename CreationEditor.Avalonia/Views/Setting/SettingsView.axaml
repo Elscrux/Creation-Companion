@@ -10,14 +10,14 @@
     <Design.DataContext>
         <setting:SettingsVM/>
     </Design.DataContext>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="200" Width="200"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition MinWidth="200" />
+            <ColumnDefinition MinWidth="200"/>
         </Grid.ColumnDefinitions>
-        
+
         <TreeView Grid.Column="0"
                   Items="{Binding RootSettings}"
                   SelectedItem="{Binding SelectedSetting}">
@@ -29,13 +29,13 @@
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
         </TreeView>
-        
+
         <GridSplitter Grid.Column="1"/>
-        
+
         <!-- We'll get the view for a setting via ViewLocator -->
         <ContentControl Grid.Column="2"
                         Content="{ReflectionBinding SelectedSetting}"/>
-        
+
         <Button Grid.Column="0"
                 HorizontalAlignment="Left" VerticalAlignment="Bottom"
                 Content="Save"

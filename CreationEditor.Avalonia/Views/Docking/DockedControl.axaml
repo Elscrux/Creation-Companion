@@ -51,7 +51,7 @@
                 </StackPanel>
             </Grid>
         </Border>
-        
+
         <ContentControl Content="{Binding $parent[view:DockedControl].Control}"/>
     </DockPanel>
 </UserControl>

@@ -20,10 +20,10 @@ public sealed class DockGrid : Grid {
         if (DataContext is DockingManagerVM dockingManagerVM) {
             dockingManagerVM.UpdateSize();
         }
-        
+
         return base.ArrangeOverride(finalSize);
     }
-    
+
     public void Add(Control control, DockConfig config) {
         // If there is no content in the layout grid, add something and return
         if (Children.Count == 0) {
@@ -126,7 +126,7 @@ public sealed class DockGrid : Grid {
         // Get control status
         var controlRow = GetRow(control);
         var controlColumn = GetColumn(control);
-        
+
         var controlRowSpan = GetRowSpan(control);
         var controlColumnSpan = GetColumnSpan(control);
 
@@ -139,7 +139,7 @@ public sealed class DockGrid : Grid {
             // The grid splitter will always be here for other controls
             Children.RemoveAt(controlIndex - 1);
         }
-        
+
         bool changeRow;
         if (controlRowSpan > 1) {
             // If we span over multiple rows, remove the column we're in 
@@ -152,7 +152,7 @@ public sealed class DockGrid : Grid {
             // subsumed by our control by row or column - don't delete the row or column in that case
             var removeRow = true;
             var removeColumn = true;
-            
+
             foreach (var child in Children.OfType<Control>()) {
                 var currentRow = GetRow(child);
                 var currentRowSpan = GetRowSpan(child);
@@ -170,7 +170,7 @@ public sealed class DockGrid : Grid {
                     removeColumn = false;
                 }
             }
-            
+
             if (removeRow && removeColumn) {
                 throw new Exception("Both row, and column can be deleted. This state isn't allowed by definition");
             } else if (removeRow) {
@@ -255,7 +255,7 @@ public sealed class DockGrid : Grid {
 
         return true;
     }
-    
+
     public Size AdjustSize(Grid? parentGrid = null) {
         // Recursively get and adjust sizes of all children
         var columnSizes = new double[ColumnDefinitions.Count];
@@ -278,14 +278,14 @@ public sealed class DockGrid : Grid {
                 rowSizes[childRow] = childSize.Height;
             }
         }
-        
+
         // Calculate own size
         var size = new Size(columnSizes.Sum(), rowSizes.Sum());
-        
+
         if (parentGrid != null) {
             var row = GetRow(this);
             var column = GetColumn(this);
-        
+
             parentGrid.RowDefinitions[row].MinHeight = size.Height;
             parentGrid.ColumnDefinitions[column].MinWidth = size.Width;
         }

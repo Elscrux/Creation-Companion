@@ -13,12 +13,12 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 public sealed class DockingManagerVM : DockContainerVM {
     public object EditLock { get; } = new();
     public DisposableCounterLock CleanUpLock { get; }
-    
-    
+
+
     private readonly Subject<IDockedItem> _opened = new();
     public IObservable<IDockedItem> Opened => _opened;
-    
-    
+
+
     private readonly Subject<IDockedItem> _closed = new();
     public IObservable<IDockedItem> Closed => _closed;
 
@@ -41,13 +41,13 @@ public sealed class DockingManagerVM : DockContainerVM {
 
     public DockingManagerVM() {
         CleanUpLock = new DisposableCounterLock(() => CleanUp());
-        
+
         Layout = new LayoutDockVM(this);
         TopSide = new SideDockVM(this);
         BottomSide = new SideDockVM(this);
         LeftSide = new SideDockVM(this);
         RightSide = new SideDockVM(this);
-        
+
         Children = new List<IDockObject> { Layout, TopSide, BottomSide, LeftSide, RightSide };
     }
 
@@ -71,9 +71,9 @@ public sealed class DockingManagerVM : DockContainerVM {
 
         return outDock != null;
     }
-    
+
     public override bool Focus(IDockedItem dockedItem) => ContainerChildren.Any(dockVM => dockVM.Focus(dockedItem));
-    
+
     public override void Add(IDockedItem dockedItem, DockConfig config) {
         switch (config.DockMode) {
             case DockMode.Side:
@@ -102,10 +102,10 @@ public sealed class DockingManagerVM : DockContainerVM {
              || RightSide.Remove(dockedItem);
         }
     }
-    
+
     public override bool CleanUp() {
         var anyChanges = ContainerChildren.Any(child => child.CleanUp());
-        
+
         LayoutSize = Layout.LayoutGrid.AdjustSize();
         UpdateSize();
 
@@ -115,7 +115,7 @@ public sealed class DockingManagerVM : DockContainerVM {
     public void UpdateSize() {
         LayoutWidth = Math.Clamp(Math.Max(Layout.LayoutGrid.Bounds.Width, LayoutSize.Width), 0, Layout.LayoutGrid.Bounds.Width);
         LayoutMinWidth = Math.Clamp(LayoutSize.Width, 0, Layout.LayoutGrid.Bounds.Width);
-        
+
         LayoutHeight = Math.Clamp(Math.Max(Layout.LayoutGrid.Bounds.Height, LayoutSize.Height), 0, Layout.LayoutGrid.Bounds.Height);
         LayoutMinHeight = Math.Clamp(LayoutSize.Height, 0, Layout.LayoutGrid.Bounds.Height);
     }

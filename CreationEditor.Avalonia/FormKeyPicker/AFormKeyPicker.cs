@@ -545,6 +545,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
                     foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
                         if (cancel.IsCancellationRequested) return Task.CompletedTask;
+
                         if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
 
                         obs.OnNext(item);
@@ -638,7 +639,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         return scopedTypes;
     }
 
-    protected IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) { 
+    protected IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) {
         return types.Where(x => x.IsSelected).Select(x => x.Type);
     }
 

@@ -15,7 +15,7 @@
         <record:RecordBrowserSettings
             Grid.Row="0"
             DataContext="{ReflectionBinding PlacedProvider.RecordBrowserSettingsVM}"/>
-        
+
         <ContentControl
             Grid.Row="1"
             Content="{Binding PlacedList}"/>

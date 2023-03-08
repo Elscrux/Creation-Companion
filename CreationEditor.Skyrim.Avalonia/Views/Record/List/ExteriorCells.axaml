@@ -25,7 +25,7 @@
                 LinkCache="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM.LinkCache}"
                 MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
         </HeaderedContentControl>
-    
+
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal">
             <TextBlock Text="X" FontSize="16"
@@ -34,14 +34,14 @@
                            ShowButtonSpinner="False"
                            Increment="1"
                            Margin="0,0,10,0"/>
-    
+
             <TextBlock Text="Y" FontSize="16"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridYValue}"
                            ShowButtonSpinner="False"
                            Increment="1"
                            Margin="0,0,5,0"/>
-    
+
             <Button Content="Search"
                     Command="{Binding SelectGridCell}"/>
         </StackPanel>
@@ -53,7 +53,7 @@
         <record:RecordBrowserSettings
             Grid.Row="6"
             DataContext="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM}"/>
-        
+
         <ContentControl
             Grid.Row="8"
             Content="{Binding ExteriorList}"/>

@@ -1,5 +1,5 @@
 ﻿using CreationEditor.Avalonia.Models.Docking;
-namespace CreationEditor.Avalonia.ViewModels.Docking; 
+namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 public sealed class DockEdit {
     private readonly DockingManagerVM _dockingManagerVM;
@@ -7,14 +7,14 @@ public sealed class DockEdit {
     private readonly object _editLock;
     public DockEdit(DockingManagerVM dockingManagerVM) {
         _dockingManagerVM = dockingManagerVM;
-        
+
         _editLock = _dockingManagerVM.EditLock;
         Monitor.Enter(_editLock);
     }
 
     public DockEdit Add(DockContainerVM containerVM, IDockedItem dockedItem, DockConfig config) {
         containerVM.Add(dockedItem, config);
-        
+
         return this;
     }
 
@@ -24,13 +24,13 @@ public sealed class DockEdit {
                 containerVM.Remove(dockedItem);
             }
         }
-        
+
         return this;
     }
 
     public DockEdit Do(Action action) {
         action();
-        
+
         return this;
     }
 
@@ -56,7 +56,6 @@ public sealed class DockEdit {
         Monitor.Exit(_editLock);
     }
 }
-
 public static class DockEditMixIn {
     public static DockEdit StartEdit(this DockingManagerVM dockingManagerVM) {
         return new DockEdit(dockingManagerVM);

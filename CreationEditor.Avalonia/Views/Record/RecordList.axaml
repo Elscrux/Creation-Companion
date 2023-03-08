@@ -33,7 +33,7 @@
                 <MenuFlyout Items="{Binding ContextMenuItems}"/>
             </DataGrid.ContextFlyout>
         </DataGrid>
-        
+
 
         <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy^}"
                                            HorizontalAlignment="Left" VerticalAlignment="Top"

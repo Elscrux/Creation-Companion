@@ -1,6 +1,6 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Extension; 
+namespace CreationEditor.Skyrim.Extension;
 
 public static class NpcExtension {
     public static MaleFemaleGender GetGender(this INpcGetter npc) {

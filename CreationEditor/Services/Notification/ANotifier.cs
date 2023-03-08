@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Services.Notification; 
+﻿namespace CreationEditor.Services.Notification;
 
 public abstract class ANotifier {
     protected readonly INotificationService NotificationService;

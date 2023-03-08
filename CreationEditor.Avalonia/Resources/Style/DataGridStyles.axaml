@@ -5,15 +5,15 @@
             <!-- Add Controls for Previewer Here -->
         </Border>
     </Design.PreviewWith>
-    
+
     <Style Selector="DataGrid.NoCellSelection Grid#FocusVisual">
-        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="IsVisible" Value="False"/>
     </Style>
-    
+
     <Style Selector="DataGrid.NoRowSelection Rectangle#BackgroundRectangle">
-        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="IsVisible" Value="False"/>
     </Style>
     <Style Selector="DataGrid.NoRowSelection Grid#FocusVisual">
-        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="IsVisible" Value="False"/>
     </Style>
 </Styles>

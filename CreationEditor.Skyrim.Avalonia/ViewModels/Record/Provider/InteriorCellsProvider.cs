@@ -19,7 +19,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public sealed class InteriorCellsProvider : CellProvider {
     private readonly IViewportRuntimeService _viewportRuntimeService;
-    
+
     public override IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     public override IObservable<bool> IsBusy { get; set; }
 
@@ -41,12 +41,12 @@ public sealed class InteriorCellsProvider : CellProvider {
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
                 cacheDisposable.Clear();
-                
+
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
-                        
+
                         cacheDisposable.Add(referenceController.GetRecord(cell, out var referencedRecord));
 
                         updater.AddOrUpdate(referencedRecord);

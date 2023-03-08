@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Views.Viewport;
 
 public class ViewportBSE : ContentPresenter {
     private const string ViewportProcessName = "BSE";
-    
+
     public ViewportBSE(string assetDirectory) {
         Task.Run(() => {
             Interop.initTGEditor(new Interop.InitConfig {
@@ -14,11 +14,11 @@ public class ViewportBSE : ContentPresenter {
                 AssetDirectory = assetDirectory
             });
         });
-        
+
         Interop.addLoadCallback((callbackCount, callbackLoads) => {
             Console.WriteLine($"CALLBACK: {callbackCount}");
             if (callbackCount == 0) return;
-            
+
             foreach (var load in callbackLoads) {
                 Console.WriteLine($"CALLBACK: {load.ToString()}");
             }
@@ -28,7 +28,7 @@ public class ViewportBSE : ContentPresenter {
 
         // Give it a little more time to finish
         Thread.Sleep(250);
-        
+
         var process = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName)
             .NotNull()
             .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);

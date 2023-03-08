@@ -19,7 +19,7 @@ public class FormKeyPicker : AFormKeyPicker {
         set => SetValue(MaxSearchBoxHeightProperty, value);
     }
     public static readonly StyledProperty<double> MaxSearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MaxSearchBoxHeight), 500d);
-    
+
     public double MinSearchBoxWidth {
         get => GetValue(MinSearchBoxWidthProperty);
         set => SetValue(MinSearchBoxWidthProperty, value);
@@ -31,18 +31,18 @@ public class FormKeyPicker : AFormKeyPicker {
         set => SetValue(SearchBoxHeightProperty, value);
     }
     public static readonly StyledProperty<double> SearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(SearchBoxHeight), double.NaN);
-    
+
     private Popup? _popup;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
-        
+
         _popup = e.NameScope.Find<Popup>("PART_Popup");
         var dragger = e.NameScope.Find<Button>("PART_Dragger");
-        
+
         dragger?.SetValue(FormLinkDragDrop.AllowDragDataGridProperty, true);
         SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
-        
+
         dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty, _ => {
             if (LinkCache == null || !LinkCache.TryResolve(FormKey, ScopedTypesInternal(ScopedTypes), out var record)) return FormLinkInformation.Null;
 
@@ -79,11 +79,11 @@ public class FormKeyPicker : AFormKeyPicker {
         if (border?.DataContext is not IMajorRecordIdentifier identifier) return;
 
         FormKey = identifier.FormKey;
-        
+
         // Unfocus twice to ensure the text box doesn't get focus again
         FocusManager.Instance?.Focus(null);
         FocusManager.Instance?.Focus(null);
-        
+
         InSearchMode = false;
     }
 }

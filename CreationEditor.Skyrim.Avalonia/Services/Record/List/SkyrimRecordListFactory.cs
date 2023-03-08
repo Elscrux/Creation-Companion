@@ -39,7 +39,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             .Build();
 
         var recordProvider = _componentContext.Resolve<RecordIdentifiersProvider>(identifiersParam, browserSettingsParam);
-        
+
         var providerParam = TypedParameter.From<IRecordProvider>(recordProvider);
         var recordListVM = _componentContext.Resolve<IRecordListVM>(providerParam);
         var recordList = new RecordList(columns) { DataContext = recordListVM };
@@ -58,7 +58,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(ILeveledNpcGetter) => _componentContext.Resolve<RecordProvider<LeveledNpc, ILeveledNpcGetter>>(browserSettingsParam),
             nameof(IPerkGetter) => _componentContext.Resolve<RecordProvider<Perk, IPerkGetter>>(browserSettingsParam),
             nameof(ITalkingActivatorGetter) => _componentContext.Resolve<RecordProvider<TalkingActivator, ITalkingActivatorGetter>>(browserSettingsParam),
-                
+
             nameof(IAcousticSpaceGetter) => _componentContext.Resolve<RecordProvider<AcousticSpace, IAcousticSpaceGetter>>(browserSettingsParam),
             nameof(IMusicTrackGetter) => _componentContext.Resolve<RecordProvider<MusicTrack, IMusicTrackGetter>>(browserSettingsParam),
             nameof(IMusicTypeGetter) => _componentContext.Resolve<RecordProvider<MusicType, IMusicTypeGetter>>(browserSettingsParam),
@@ -93,7 +93,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IOutfitGetter) => _componentContext.Resolve<RecordProvider<Outfit, IOutfitGetter>>(browserSettingsParam),
             nameof(ISoulGemGetter) => _componentContext.Resolve<RecordProvider<SoulGem, ISoulGemGetter>>(browserSettingsParam),
             nameof(IWeaponGetter) => _componentContext.Resolve<RecordProvider<Weapon, IWeaponGetter>>(browserSettingsParam),
-            
+
             nameof(IDualCastDataGetter) => _componentContext.Resolve<RecordProvider<DualCastData, IDualCastDataGetter>>(browserSettingsParam),
             nameof(IObjectEffectGetter) => _componentContext.Resolve<RecordProvider<ObjectEffect, IObjectEffectGetter>>(browserSettingsParam),
             nameof(ILeveledSpellGetter) => _componentContext.Resolve<RecordProvider<LeveledSpell, ILeveledSpellGetter>>(browserSettingsParam),
@@ -103,7 +103,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IShoutGetter) => _componentContext.Resolve<RecordProvider<Shout, IShoutGetter>>(browserSettingsParam),
             nameof(ISpellGetter) => _componentContext.Resolve<RecordProvider<Spell, ISpellGetter>>(browserSettingsParam),
             nameof(IWordOfPowerGetter) => _componentContext.Resolve<RecordProvider<WordOfPower, IWordOfPowerGetter>>(browserSettingsParam),
-            
+
             nameof(IAnimatedObjectGetter) => _componentContext.Resolve<RecordProvider<AnimatedObject, IAnimatedObjectGetter>>(browserSettingsParam),
             nameof(IArtObjectGetter) => _componentContext.Resolve<RecordProvider<ArtObject, IArtObjectGetter>>(browserSettingsParam),
             nameof(ICollisionLayerGetter) => _componentContext.Resolve<RecordProvider<CollisionLayer, ICollisionLayerGetter>>(browserSettingsParam),
@@ -117,7 +117,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IMaterialObjectGetter) => _componentContext.Resolve<RecordProvider<MaterialObject, IMaterialObjectGetter>>(browserSettingsParam),
             nameof(IMessageGetter) => _componentContext.Resolve<RecordProvider<Message, IMessageGetter>>(browserSettingsParam),
             nameof(ITextureSetGetter) => _componentContext.Resolve<RecordProvider<TextureSet, ITextureSetGetter>>(browserSettingsParam),
-            
+
             nameof(IAddonNodeGetter) => _componentContext.Resolve<RecordProvider<AddonNode, IAddonNodeGetter>>(browserSettingsParam),
             nameof(ICameraShotGetter) => _componentContext.Resolve<RecordProvider<CameraShot, ICameraShotGetter>>(browserSettingsParam),
             nameof(IDebrisGetter) => _componentContext.Resolve<RecordProvider<Debris, IDebrisGetter>>(browserSettingsParam),
@@ -133,7 +133,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IMaterialTypeGetter) => _componentContext.Resolve<RecordProvider<MaterialType, IMaterialTypeGetter>>(browserSettingsParam),
             nameof(IProjectileGetter) => _componentContext.Resolve<RecordProvider<Projectile, IProjectileGetter>>(browserSettingsParam),
             nameof(IVolumetricLightingGetter) => _componentContext.Resolve<RecordProvider<VolumetricLighting, IVolumetricLightingGetter>>(browserSettingsParam),
-            
+
             nameof(IClimateGetter) => _componentContext.Resolve<RecordProvider<Climate, IClimateGetter>>(browserSettingsParam),
             nameof(IEncounterZoneGetter) => _componentContext.Resolve<RecordProvider<EncounterZone, IEncounterZoneGetter>>(browserSettingsParam),
             nameof(ILightingTemplateGetter) => _componentContext.Resolve<RecordProvider<LightingTemplate, ILightingTemplateGetter>>(browserSettingsParam),
@@ -143,7 +143,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IVisualEffectGetter) => _componentContext.Resolve<RecordProvider<VisualEffect, IVisualEffectGetter>>(browserSettingsParam),
             nameof(IWaterGetter) => _componentContext.Resolve<RecordProvider<Water, IWaterGetter>>(browserSettingsParam),
             nameof(IWeatherGetter) => _componentContext.Resolve<RecordProvider<Weather, IWeatherGetter>>(browserSettingsParam),
-            
+
             nameof(IActivatorGetter) => _componentContext.Resolve<RecordProvider<Activator, IActivatorGetter>>(browserSettingsParam),
             nameof(IContainerGetter) => _componentContext.Resolve<RecordProvider<Container, IContainerGetter>>(browserSettingsParam),
             nameof(IDoorGetter) => _componentContext.Resolve<RecordProvider<Door, IDoorGetter>>(browserSettingsParam),
@@ -155,7 +155,7 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
             nameof(IMoveableStaticGetter) => _componentContext.Resolve<RecordProvider<MoveableStatic, IMoveableStaticGetter>>(browserSettingsParam),
             nameof(IStaticGetter) => _componentContext.Resolve<RecordProvider<Static, IStaticGetter>>(browserSettingsParam),
             nameof(ITreeGetter) => _componentContext.Resolve<RecordProvider<Tree, ITreeGetter>>(browserSettingsParam),
-            
+
             _ => _componentContext.Resolve<RecordTypeProvider>(TypedParameter.From(type.AsEnumerable()), browserSettingsParam)
         };
 

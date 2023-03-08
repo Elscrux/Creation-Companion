@@ -1,5 +1,3 @@
-﻿namespace CreationEditor.Avalonia.ViewModels.Viewport; 
+﻿namespace CreationEditor.Avalonia.ViewModels.Viewport;
 
-public class PlacedPickerVM : ViewModel {
-    
-}
+public class PlacedPickerVM : ViewModel {}

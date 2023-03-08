@@ -12,22 +12,22 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
     public double ActiveTabSize { get; set; } = 300;
     public double ActiveTabMinSize { get; set; } = 50;
     public double NoActiveTabSize { get; set; } = 20;
-    
+
     public IDockedItem? PreviousActiveTab { get; set; }
-    
+
     public SideDockVM? SideDock {
         get => GetValue(SideDockProperty);
         set => SetValue(SideDockProperty, value);
     }
-    
+
     public bool UpdateSize { get; set; }
-    
+
     protected override void OnAttached() {
         this.WhenAnyValue(x => x.SideDock,
                 x => x.AssociatedObject)
             .Subscribe(_ => SideDockChanged());
     }
-    
+
     private void SideDockChanged() {
         if (SideDock == null || AssociatedObject == null) return;
 
@@ -37,7 +37,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
                     SideDock.ActiveTab.Size = size.Value;
                 }
             });
-        
+
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(x => {
                 var (editMode, activeTab, tabCount) = x;
@@ -55,10 +55,10 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
                 }
             });
     }
-    
+
     private double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {
         if (vm == null) return 0;
-        
+
         if (!vm.Children.Any()) {
             return vm.InEditMode ? noTabActive : 0;
         }
@@ -73,7 +73,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-    
+
     private StyledProperty<double> GetMinSizeProperty() {
         return AssociatedObject switch {
             ColumnDefinition => ColumnDefinition.MinWidthProperty,

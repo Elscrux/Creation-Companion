@@ -17,7 +17,7 @@
     <Design.DataContext>
         <mod:ModSelectionVM/>
     </Design.DataContext>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"
@@ -26,7 +26,7 @@
             <ColumnDefinition Width="1*"
                               MinWidth="200"/>
         </Grid.ColumnDefinitions>
-        
+
         <Grid RowDefinitions="Auto,*,Auto">
             <TextBox Grid.Row="0"
                      Margin="5"
@@ -45,24 +45,24 @@
                       GridLinesVisibility="None"
                       Classes="NoCellSelection"
                       attached:DoubleTappedProperty.Command="{Binding ToggleActive}">
-                
+
                 <Interaction.Behaviors>
                     <behavior:DataGridSelectionBehavior
                         EnabledMapping="MastersValid"
                         SelectionGuard="{Binding CanSelect}"/>
                     <EventTriggerBehavior/>
                 </Interaction.Behaviors>
-                
+
                 <DataGrid.KeyBindings>
                     <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>
                 </DataGrid.KeyBindings>
-                
+
                 <DataGrid.ContextFlyout>
                     <MenuFlyout>
                         <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}"/>
                     </MenuFlyout>
                 </DataGrid.ContextFlyout>
-                
+
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name"
                                         Binding="{Binding ModKey.FileName.String}"

@@ -12,9 +12,9 @@
                 <ControlTemplate>
                     <Grid RowDefinitions="Auto,*">
                         <ContentPresenter Grid.Row="0"
-                                          Content="{TemplateBinding Header}" />
+                                          Content="{TemplateBinding Header}"/>
                         <ContentPresenter Grid.Row="1"
-                                          Content="{TemplateBinding Content}" />
+                                          Content="{TemplateBinding Content}"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -29,7 +29,7 @@
                         <StackPanel>
                             <Grid RowDefinitions="Auto,*">
                                 <ContentPresenter Grid.Row="0"
-                                                  Content="{TemplateBinding Header}" />
+                                                  Content="{TemplateBinding Header}"/>
                                 <Border Grid.Row="1"
                                         BorderBrush="{DynamicResource ButtonBackground}"
                                         BorderThickness="2"
@@ -37,7 +37,7 @@
                                         CornerRadius="5"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Left">
-                                    <ContentPresenter Content="{TemplateBinding Content}" />
+                                    <ContentPresenter Content="{TemplateBinding Content}"/>
                                 </Border>
                             </Grid>
                         </StackPanel>

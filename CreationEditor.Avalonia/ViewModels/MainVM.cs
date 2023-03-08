@@ -21,7 +21,7 @@ public sealed class MainVM : ViewModel {
 
     public INotificationVM NotificationVM { get; }
     public IBusyService BusyService { get; }
-    
+
     public IObservable<string> WindowTitleObs { get; }
 
     public IDockingManagerService DockingManagerService { get; }
@@ -29,7 +29,7 @@ public sealed class MainVM : ViewModel {
     public ReactiveCommand<Window, Unit> OpenSelectMods { get; }
     public ReactiveCommand<Window, Unit> OpenSettings { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
-    
+
     public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
 
     public MainVM(

@@ -8,9 +8,9 @@ namespace CreationEditor.Avalonia.ViewModels.Setting;
 public sealed class SettingsVM : ViewModel, ISettingsVM {
     public IEnumerable<ISetting> RootSettings => ObservableSettings;
     private ObservableCollection<ISetting> ObservableSettings { get; }
-    
+
     [Reactive] public ISetting? SelectedSetting { get; set; }
-    
+
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public SettingsVM(
@@ -24,7 +24,7 @@ public sealed class SettingsVM : ViewModel, ISettingsVM {
             }
         });
     }
-    
+
     private List<ISetting> GetAllSettings() {
         var settings = new List<ISetting>();
         var settingsQueue = new Queue<ISetting>(RootSettings);

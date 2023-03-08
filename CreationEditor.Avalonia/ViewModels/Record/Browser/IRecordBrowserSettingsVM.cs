@@ -13,10 +13,10 @@ public interface IRecordBrowserSettingsVM {
     [Reactive] public BrowserScope Scope { get; set; }
     [Reactive] public string SearchTerm { get; set; }
     public ReadOnlyObservableCollection<ModItem> Mods { get; }
-    
+
     public IObservable<Unit> SettingsChanged { get; }
 
-    Func<IMajorRecordGetter,bool>? RecordFilter { get; set; }
+    Func<IMajorRecordGetter, bool>? RecordFilter { get; set; }
 
     public bool Filter(IMajorRecordGetter record);
     public bool Filter(IMajorRecordIdentifier record);

@@ -17,29 +17,29 @@ public sealed class DockDropBehavior : Behavior<Control> {
         get => GetValue(DockContainerProperty);
         set => SetValue(DockContainerProperty, value);
     }
-    
+
     protected override void OnAttached() {
         base.OnAttached();
-        
+
         if (AssociatedObject == null) return;
 
         AssociatedObject.AddHandler(DragDrop.DropEvent, Drop);
         AssociatedObject.AddHandler(DragDrop.DragOverEvent, DragOver);
         AssociatedObject.AddHandler(DragDrop.DragLeaveEvent, DragLeave);
-        
+
         AssociatedObject.SetValue(DragDrop.AllowDropProperty, true);
     }
 
     private void DragLeave(object? sender, DragEventArgs e) {
         if (!CanDock(sender, e, out var dragData, out var control)) return;
-        
+
         // Check if we are out of bounds of our control
         if (control is IDockPreview dockPreview
          && dockPreview == dragData.Preview
          && !control.Bounds.ContainsExclusive(e.GetPosition(control))) {
             // Handle preview
             dragData.Preview?.HidePreview();
-            
+
             dragData.Preview = null;
             dragData.Dock = null;
         }
@@ -47,11 +47,11 @@ public sealed class DockDropBehavior : Behavior<Control> {
 
     private void DragOver(object? sender, DragEventArgs e) {
         if (!CanDock(sender, e, out var dragData, out var control)) return;
-        
+
         // Check if the dock type changed or if we aren't the currently previewed object
         var dock = GetDockType(e, control);
         if (dragData.Dock != dock
-         || !ReferenceEquals(dragData.Preview, AssociatedObject)) {   
+         || !ReferenceEquals(dragData.Preview, AssociatedObject)) {
             // Handle preview
             if (control is IDockPreview dockPreview) {
                 dragData.Preview?.HidePreview();
@@ -65,8 +65,9 @@ public sealed class DockDropBehavior : Behavior<Control> {
 
     private void Drop(object? sender, DragEventArgs e) {
         if (!CanDock(sender, e, out var dragData, out var control)) return;
+
         e.Handled = true;
-        
+
         // Handle preview
         dragData.Preview?.HidePreview();
 
@@ -79,12 +80,12 @@ public sealed class DockDropBehavior : Behavior<Control> {
             .StartReporting()
             .FinishEdit();
     }
-    
+
     [MemberNotNullWhen(true, nameof(DockContainer))]
     private bool CanDock(object? sender, DragEventArgs e, [MaybeNullWhen(false)] out DockDragData outDockDragData, [MaybeNullWhen(false)] out Control outControl) {
         outDockDragData = null;
         outControl = null;
-        
+
         // Check null
         if (DockContainer == null || sender == null) return false;
 
@@ -98,21 +99,22 @@ public sealed class DockDropBehavior : Behavior<Control> {
         // Check drag data
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         if (e.Data?.Contains(nameof(DockDragData)) is not true) return false;
+
         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         var data = e.Data?.Get(nameof(DockDragData));
         if (data is not DockDragData dragData) return false;
-        
+
         // Don't allow to drop on ourselves
         if (dragData.Item.DockParent == DockContainer) return false;
-        
+
         outControl = control;
         outDockDragData = dragData;
         return true;
     }
-    
+
     private static Dock GetDockType(DragEventArgs e, IVisual visual) {
         var position = e.GetPosition(visual);
-        
+
         var dockPositions = new List<(double Distance, Dock Dock)> {
             (position.Distance(new Point(0, 0), new Point(0, visual.Bounds.Height)), Dock.Left),
             (position.Distance(new Point(visual.Bounds.Width, 0), new Point(0, visual.Bounds.Height)), Dock.Right),

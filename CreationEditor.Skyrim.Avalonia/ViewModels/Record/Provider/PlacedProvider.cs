@@ -21,14 +21,14 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider; 
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     [Reactive] public ICellGetter? Cell { get; set; }
-    
+
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
-    
+
     [Reactive] public ReferencedPlacedRecord? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
@@ -41,7 +41,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
     public IObservable<bool> IsBusy { get; set; }
-    
+
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
 
@@ -50,7 +50,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
     public ReactiveCommand<Unit, Unit> EditSelectedRecordBase { get; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
-    
+
     public PlacedProvider(
         IRecordEditorController recordEditorController,
         IRecordController recordController,
@@ -107,9 +107,9 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(_ => {
                 cacheDisposable.Clear();
-                
+
                 RecordCache.Clear();
-                
+
                 if (Cell == null) return;
 
                 RecordCache.Edit(updater => {
@@ -129,16 +129,16 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         recordController.RecordChanged
             .Subscribe(majorRecord => {
                 if (majorRecord is not IPlacedGetter record) return;
-                
+
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord); 
+                    referenceController.GetRecord(record, out var outListRecord);
                     listRecord = outListRecord;
                 }
-                
+
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })

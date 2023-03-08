@@ -32,7 +32,7 @@ public class ReferenceController : IReferenceController {
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(_ => Init());
-        
+
         // todo write back the current state of the mutable ref cache state - make sure to write new checksum of the SAVED file - entry point after plugin saved
     }
 
@@ -68,7 +68,7 @@ public class ReferenceController : IReferenceController {
         var recordFormKey = record.FormKey;
         var references = _referenceCache?.GetReferences(recordFormKey, _editorEnvironment.LinkCache);
         outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);
-        
+
         var referencedRecord = outReferencedRecord;
         return SubscribeReferenceUpdate(recordFormKey, change => referencedRecord.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance));
     }
@@ -92,7 +92,7 @@ public class ReferenceController : IReferenceController {
         foreach (var removed in removedReferences) {
             var removedFormKey = removed.FormKey;
             _referenceCache.RemoveReference(removedFormKey, record);
-            
+
             if (!_subscribers.TryGetValue(removedFormKey, out var actions)) continue;
 
             var change = new Change<IFormLinkIdentifier>(ListChangeReason.Remove, record);

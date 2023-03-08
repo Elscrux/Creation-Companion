@@ -7,17 +7,17 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.Models.Record; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record;
 
 public class ReferencedPlacedRecord : ReferencedRecord<IPlacedGetter> {
     public IMajorRecordIdentifier? Base { get; }
-    
+
     public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, IEnumerable<IFormLinkIdentifier>? references = null)
         : base(record, references) {
-        
+
         Base = record switch {
             IPlacedObjectGetter placedObject => placedObject.Base.TryResolve(linkCache),
-            IPlacedNpcGetter placedNpc => placedNpc.Base.TryResolve(linkCache), 
+            IPlacedNpcGetter placedNpc => placedNpc.Base.TryResolve(linkCache),
             IPlacedArrowGetter placedArrow => placedArrow.Projectile.TryResolve(linkCache),
             IPlacedBarrierGetter placedBarrier => placedBarrier.Projectile.TryResolve(linkCache),
             IPlacedBeamGetter placedBeam => placedBeam.Projectile.TryResolve(linkCache),

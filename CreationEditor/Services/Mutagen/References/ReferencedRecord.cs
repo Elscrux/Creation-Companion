@@ -15,7 +15,7 @@ public class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedR
             if (value is TMajorRecordGetter tMajor) Record = tMajor;
         }
     }
-    
+
     IMajorRecordIdentifier IReferencedRecordIdentifier.Record {
         get => Record;
         set {
@@ -39,7 +39,7 @@ public class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedR
     private bool Equals(ReferencedRecord<TMajorRecordGetter> other) {
         return other.Record.FormKey.Equals(Record.FormKey);
     }
-    
+
     public override int GetHashCode() {
         // While the record can change, its form key will always stay the same
         return HashCode.Combine(Record.FormKey);

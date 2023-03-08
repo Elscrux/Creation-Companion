@@ -18,13 +18,13 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider; 
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord<ICellGetter>> {
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
-    
+
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
-    
+
     [Reactive] public ReferencedRecord<ICellGetter>? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
@@ -34,14 +34,14 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
             }
         }
     }
-    
+
     public abstract IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
     public abstract IObservable<bool> IsBusy { get; set; }
 
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> ViewSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> NewCell { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedCell { get; }
@@ -58,18 +58,18 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
-            
+
             dockFactory.Open(DockElement.Viewport);
 
             Thread.Sleep(250);
 
             LoadCell(SelectedRecord.Record);
         });
-        
+
         NewCell = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<Cell, ICellGetter>();
             recordEditorController.OpenEditor<Cell, ICellGetter>(newRecord);
-            
+
             referenceController.GetRecord(newRecord, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
@@ -89,10 +89,10 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
             referenceController.GetRecord(duplicate, out var referencedRecord);
             RecordCache.AddOrUpdate(referencedRecord);
         });
-        
+
         DeleteSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
-            
+
             recordController.DeleteRecord<Cell, ICellGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);
         });
@@ -100,16 +100,16 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
         recordController.RecordChanged
             .Subscribe(majorRecord => {
                 if (majorRecord is not ICellGetter record) return;
-                
+
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord); 
+                    referenceController.GetRecord(record, out var outListRecord);
                     listRecord = outListRecord;
                 }
-                
+
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })

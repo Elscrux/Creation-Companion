@@ -9,23 +9,23 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// </summary>
 public sealed class DocumentDockVM : DockContainerVM {
     public ObservableCollection<IDockedItem> Tabs { get; } = new();
-    
+
     public override IEnumerable<IDockObject> Children => Tabs;
     public override int ChildrenCount => Tabs.Count;
-    
+
     public IDockedItem? ActiveTab { get; set; }
 
     private DocumentDockVM(IDockedItem dockedItem, DockContainerVM? dockParent) {
         DockParent = dockParent;
         Add(dockedItem, DockConfig.Default);
     }
-    
+
     public static Control CreateControl(IDockedItem dockedItem, DockContainerVM? parent) => new DocumentDock(new DocumentDockVM(dockedItem, parent));
 
 
     public override bool TryGetDock(Control control, out IDockedItem outDock) {
         outDock = null!;
-        
+
         foreach (var dockedItem in Tabs) {
             if (ReferenceEquals(dockedItem.Control, control)) {
                 outDock = dockedItem;
@@ -47,14 +47,14 @@ public sealed class DocumentDockVM : DockContainerVM {
             (this as IDockObject).DockRoot.OnDockAdded(dockedItem);
         }
     }
-    
+
     public override bool Remove(IDockedItem dockedItem) {
         if (!Tabs.Contains(dockedItem)) return false;
-        
+
         using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             using (dockedItem.RemovalLock.Lock()) {
                 var oldCount = Tabs.Count;
-        
+
                 // Change active tab if necessary
                 if (dockedItem.Equals(ActiveTab)) ActiveTab = Tabs.FirstOrDefault(tab => !tab.Equals(dockedItem));
 
@@ -70,7 +70,7 @@ public sealed class DocumentDockVM : DockContainerVM {
 
     public override bool Focus(IDockedItem dockedItem) {
         if (!Tabs.Contains(dockedItem)) return false;
-        
+
         foreach (var tab in Tabs) tab.IsSelected = false;
 
         dockedItem.IsSelected = true;

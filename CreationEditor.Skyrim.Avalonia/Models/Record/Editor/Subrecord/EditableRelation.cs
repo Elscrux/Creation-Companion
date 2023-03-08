@@ -18,10 +18,10 @@ public sealed class EditableRelation : ReactiveObject {
             EditableRelation relation => relation,
             IFormLinkIdentifier identifier =>
                 identifier.Type.ContainsInterface(typeof(IRelatableGetter)) ?
-                new EditableRelation {
-                    TargetFormKey = identifier.FormKey,
-                    Reaction = CombatReaction.Neutral
-                } : null,
+                    new EditableRelation {
+                        TargetFormKey = identifier.FormKey,
+                        Reaction = CombatReaction.Neutral
+                    } : null,
             _ => null
         };
     }

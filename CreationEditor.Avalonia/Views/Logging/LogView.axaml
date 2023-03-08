@@ -40,7 +40,7 @@
                     Padding="2">
                 <fluentIcons:FluentIcon Icon="Delete24Filled"/>
             </Button>
-            
+
             <Button Classes="Transparent"
                     Command="{Binding ToggleAutoScroll}"
                     Width="20" Height="20"
@@ -52,7 +52,7 @@
                                             IsVisible="{Binding !AutoScroll}"/>
                 </Grid>
             </Button>
-            
+
             <Button Classes="Transparent"
                     Padding="2"
                     HorizontalAlignment="Center"
@@ -80,11 +80,11 @@
                         </ListBox>
                     </Flyout>
                 </Button.Flyout>
-                
+
                 <fluentIcons:FluentIcon Icon="MoreVertical24Filled"/>
             </Button>
         </StackPanel>
-        
+
         <ListBox Grid.Column="1"
                  Items="{Binding LogItems}"
                  Classes="Compact">

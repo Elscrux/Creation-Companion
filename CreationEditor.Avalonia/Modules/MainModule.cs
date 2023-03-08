@@ -84,7 +84,7 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<ModSelectionVM>();
-        
+
         builder.RegisterType<RecordBrowserVM>()
             .As<IRecordBrowserVM>();
 

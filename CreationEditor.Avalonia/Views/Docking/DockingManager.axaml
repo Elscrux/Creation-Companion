@@ -24,7 +24,7 @@
             <RowDefinition>
                 <Interaction.Behaviors>
                     <behavior:SideDockDefinitionSize SideDock="{Binding TopSide}"
-                                                     ActiveTabSize="5" 
+                                                     ActiveTabSize="5"
                                                      ActiveTabMinSize="5"
                                                      NoActiveTabSize="5"/>
                 </Interaction.Behaviors>
@@ -34,7 +34,7 @@
             <RowDefinition>
                 <Interaction.Behaviors>
                     <behavior:SideDockDefinitionSize SideDock="{Binding BottomSide}"
-                                                     ActiveTabSize="5" 
+                                                     ActiveTabSize="5"
                                                      ActiveTabMinSize="5"
                                                      NoActiveTabSize="5"/>
                 </Interaction.Behaviors>
@@ -57,7 +57,7 @@
             <ColumnDefinition>
                 <Interaction.Behaviors>
                     <behavior:SideDockDefinitionSize SideDock="{Binding LeftSide}"
-                                                     ActiveTabSize="5" 
+                                                     ActiveTabSize="5"
                                                      ActiveTabMinSize="5"
                                                      NoActiveTabSize="5"/>
                 </Interaction.Behaviors>
@@ -67,7 +67,7 @@
             <ColumnDefinition>
                 <Interaction.Behaviors>
                     <behavior:SideDockDefinitionSize SideDock="{Binding RightSide}"
-                                                     ActiveTabSize="5" 
+                                                     ActiveTabSize="5"
                                                      ActiveTabMinSize="5"
                                                      NoActiveTabSize="5"/>
                 </Interaction.Behaviors>

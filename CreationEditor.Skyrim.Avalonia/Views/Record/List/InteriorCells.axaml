@@ -15,7 +15,7 @@
         <record:RecordBrowserSettings
             Grid.Row="0"
             DataContext="{ReflectionBinding InteriorCellsProvider.RecordBrowserSettingsVM}"/>
-    
+
         <ContentControl
             Grid.Row="1"
             Content="{Binding InteriorList}"/>

@@ -13,7 +13,7 @@ namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory : IDockFactory {
     private bool _viewportCreated;
-    
+
     private readonly IComponentContext _componentContext;
     private readonly IViewportFactory _viewportFactory;
     private readonly IDockingManagerService _dockingManagerService;
@@ -29,11 +29,11 @@ public sealed class DockFactory : IDockFactory {
         _dockingManagerService = dockingManagerService;
         _cellBrowserFactory = cellBrowserFactory;
     }
-    
+
     public void Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null) {
         Control control;
         DockConfig dockConfig;
-        
+
         switch (dockElement) {
             case DockElement.Log:
                 control = new LogView(_componentContext.Resolve<ILogVM>());
@@ -71,7 +71,7 @@ public sealed class DockFactory : IDockFactory {
                 break;
             case DockElement.Viewport:
                 if (_viewportCreated && !_viewportFactory.IsMultiInstanceCapable) return;
-                
+
                 control = _viewportFactory.CreateViewport();
                 _viewportCreated = true;
 

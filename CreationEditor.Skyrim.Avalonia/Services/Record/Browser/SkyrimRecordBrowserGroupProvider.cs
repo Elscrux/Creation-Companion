@@ -7,7 +7,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 
 public class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
     private readonly IComponentContext _componentContext;
-    
+
     public SkyrimRecordBrowserGroupProvider(
         IComponentContext componentContext) {
         _componentContext = componentContext;
@@ -15,7 +15,7 @@ public class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
     }
 
     public List<RecordTypeGroup> GetRecordGroups() {
-        return  new List<RecordTypeGroup> {
+        return new List<RecordTypeGroup> {
             new("Actors",
                 new List<RecordTypeListing> {
                     new(_componentContext, INpcGetter.StaticRegistration),

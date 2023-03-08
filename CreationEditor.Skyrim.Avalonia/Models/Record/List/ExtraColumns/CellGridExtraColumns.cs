@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.Resources.Comparer;
-namespace CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 
 public class CellGridExtraColumns : IUntypedExtraColumns {
     public IEnumerable<ExtraColumn> Columns {

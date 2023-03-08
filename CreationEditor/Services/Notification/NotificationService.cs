@@ -8,7 +8,7 @@ public sealed class NotificationService : INotificationService {
     public void Notify(Guid id, string message, float? progress = null) {
         _notifications.OnNext(new NotificationItem(id, message, progress));
     }
-    
+
     public void Stop(Guid id) {
         _notifications.OnNext(new NotificationItem(id));
     }

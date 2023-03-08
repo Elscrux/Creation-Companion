@@ -3,13 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
-namespace CreationEditor.Avalonia.Views.Docking; 
+namespace CreationEditor.Avalonia.Views.Docking;
 
 public interface IDockPreview {
-    public IBrush? Brush => 
+    public IBrush? Brush =>
         Application.Current != null
      && Application.Current.TryFindResource("SystemAccentColor", out var obj)
-     && obj is Color color 
+     && obj is Color color
             ? new SolidColorBrush(color)
             : null;
 
@@ -22,7 +22,7 @@ public interface IDockPreview {
             });
         }
     }
-    
+
     public void HidePreview() {
         if (this is Visual visual) {
             AdornerLayer.SetAdorner(visual, null);

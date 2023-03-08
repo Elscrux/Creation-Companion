@@ -13,11 +13,11 @@
     <Design.DataContext>
         <vm:DocumentDockVM/>
     </Design.DataContext>
-    
+
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
-    
+
     <fluent:TabView TabItems="{Binding Tabs}"
                     SelectedItem="{Binding ActiveTab}"
                     IsAddTabButtonVisible="False"

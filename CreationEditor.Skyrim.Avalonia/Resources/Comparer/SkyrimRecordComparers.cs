@@ -4,17 +4,17 @@ using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.Resources.Comparer; 
+namespace CreationEditor.Skyrim.Avalonia.Resources.Comparer;
 
 public static class SkyrimRecordComparers {
     public static readonly FuncSelectorComparer<ReferencedPlacedRecord, IMajorRecordGetter> BaseComparer
         = new(referencedRecord => referencedRecord.Base as IMajorRecordGetter,
             (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.EditorID, y.EditorID));
-    
+
     public static readonly FuncSelectorComparer<IReferencedRecord, IModeledGetter> ModeledComparer
         = new(referencedRecord => referencedRecord.Record as IModeledGetter,
             (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Model?.File.DataRelativePath, y.Model?.File.DataRelativePath));
-    
+
     public static readonly FuncSelectorComparer<IReferencedRecord, ICellGetter> CellGridComparer
         = new(referencedRecord => referencedRecord.Record as ICellGetter,
             (a, b) => {

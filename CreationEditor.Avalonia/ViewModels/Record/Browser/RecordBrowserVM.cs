@@ -36,6 +36,7 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
             RecordBrowserSettingsVM.RecordFilter = null;
 
             if (_recordListType == recordType) return;
+
             SetRecordList(recordType);
         });
 

@@ -2,11 +2,11 @@
 using System.Runtime.CompilerServices;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord; 
+namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 
 public sealed class EditableCondition : Condition, INotifyPropertyChanged {
     public override ConditionData Data { get; set; }
-    
+
     public bool Or {
         get => (Flags & Flag.OR) != 0;
         set {
@@ -14,7 +14,7 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
             OnPropertyChanged();
         }
     }
-    
+
     public bool UseGlobal {
         get => (Flags & Flag.UseGlobal) != 0;
         set {
@@ -22,7 +22,7 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
             OnPropertyChanged();
         }
     }
-    
+
     public bool UsePackData {
         get => (Flags & Flag.UsePackData) != 0;
         set {
@@ -30,7 +30,7 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
             OnPropertyChanged();
         }
     }
-    
+
     public bool SwapSubjectAndTarget {
         get => (Flags & Flag.SwapSubjectAndTarget) != 0;
         set {
@@ -38,14 +38,13 @@ public sealed class EditableCondition : Condition, INotifyPropertyChanged {
             OnPropertyChanged();
         }
     }
-    
+
     public EditableCondition(ICondition parent) {
         Data = parent.Data;
     }
 
-    public void SetCondition(Condition condition) {
-    }
-    
+    public void SetCondition(Condition condition) {}
+
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

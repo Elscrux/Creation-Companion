@@ -11,10 +11,10 @@ public sealed class LoggingModule : Module {
         var logSink = new ReplayLogSink();
         builder.RegisterInstance(logSink)
             .As<IObservableLogSink>();
-        
+
         builder.RegisterType<LogVM>()
             .As<ILogVM>();
-        
+
         var logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .Enrich.FromLogContext()

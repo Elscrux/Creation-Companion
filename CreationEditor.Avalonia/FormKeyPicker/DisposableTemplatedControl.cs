@@ -9,7 +9,7 @@ public class DisposableTemplatedControl : TemplatedControl {
     public DisposableTemplatedControl() {
         Unloaded += (_, _) => UnloadDisposable.Clear();
     }
-    
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
         TemplateDisposable.Clear();

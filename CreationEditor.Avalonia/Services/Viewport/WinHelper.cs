@@ -12,7 +12,7 @@ public static class WinHelper {
     //Sets window attributes
     [DllImport("user32.dll")]
     public static extern int SetWindowLong(IntPtr hWnd, int nIndex, WinStyle dwNewLong);
-    
+
     [DllImport("user32.dll")]
     public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
     [DllImport("user32.dll")]

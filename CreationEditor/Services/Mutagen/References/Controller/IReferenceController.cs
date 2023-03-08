@@ -4,7 +4,7 @@ namespace CreationEditor.Services.Mutagen.References.Controller;
 
 public interface IReferenceController {
     public IReferenceCache? ReferenceCache { get; }
-    
+
     public IDisposable GetRecord<TMajorRecordGetter>(TMajorRecordGetter record, out ReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordIdentifier;
 

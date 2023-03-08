@@ -5,7 +5,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List; 
+namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public class PlacedListVM {
     public PlacedProvider PlacedProvider { get; }
@@ -20,7 +20,7 @@ public class PlacedListVM {
         var columns = extraColumnsBuilder
             .AddRecordType<IPlacedGetter>()
             .Build();
-        
+
         PlacedList = new RecordList(columns) {
             DataContext = componentContext.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(PlacedProvider))
         };

@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using CreationEditor.Avalonia.Models.Logging;
 using Serilog.Events;
-namespace CreationEditor.Avalonia.ViewModels.Logging; 
+namespace CreationEditor.Avalonia.ViewModels.Logging;
 
 public class ReplayLogSink : IObservableLogSink {
     private const int ReplayLimit = 500;
@@ -16,7 +16,7 @@ public class ReplayLogSink : IObservableLogSink {
 
     private void AddText(string text, LogEventLevel level) {
         var logItem = new LogItem(text, level);
-        
+
         _logAdded.OnNext(logItem);
     }
 }

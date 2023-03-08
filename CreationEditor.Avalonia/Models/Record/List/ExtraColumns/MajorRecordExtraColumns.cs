@@ -2,7 +2,7 @@
 using Avalonia.Data;
 using CreationEditor.Avalonia.Comparer;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns; 
+namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
 public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
     public override IEnumerable<ExtraColumn> Columns {
@@ -16,7 +16,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
                     Width = new DataGridLength(200),
                 },
                 220);
-            
+
             yield return new ExtraColumn(
                 new DataGridTextColumn {
                     Header = "FormKey",

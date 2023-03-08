@@ -3,5 +3,5 @@ namespace CreationEditor.Services.Environment;
 
 public interface IEnvironmentContext {
     public IGameReleaseContext GameReleaseContext { get; }
-    public IDataDirectoryProvider DataDirectoryProvider  { get; }
+    public IDataDirectoryProvider DataDirectoryProvider { get; }
 }

@@ -7,12 +7,12 @@ public class FuncComparer<TCompare> : IComparer<TCompare>, IComparer {
     public FuncComparer(Func<TCompare, TCompare, int> compare) {
         _compare = compare;
     }
-    
+
     public virtual int Compare(object? x, object? y) {
         if (x is TCompare t1 && y is TCompare t2) {
             return Compare(t1, t2);
         }
-        
+
         throw new ArgumentException($"Can't compare {x} and {y}, one of them is not {typeof(TCompare).Name}");
     }
 

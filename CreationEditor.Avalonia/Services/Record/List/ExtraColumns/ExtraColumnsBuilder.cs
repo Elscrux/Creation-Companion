@@ -13,7 +13,7 @@ public sealed class ExtraColumnsBuilder : IExtraColumnsBuilder {
         IExtraColumnProvider provider) {
         _provider = provider;
     }
-    
+
     public IExtraColumnsBuilder AddRecordType(Type type) {
         _extraColumns.AddRange(type.AsEnumerable().Concat(type.GetInterfaces())
             .SelectWhere(@interface => _provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
@@ -23,12 +23,12 @@ public sealed class ExtraColumnsBuilder : IExtraColumnsBuilder {
 
         return this;
     }
-    
+
     public IExtraColumnsBuilder AddRecordType<TRecord>()
         where TRecord : IMajorRecordQueryableGetter {
         return AddRecordType(typeof(TRecord));
     }
-    
+
     public IExtraColumnsBuilder AddColumnType(Type columnType) {
         if (Activator.CreateInstance(columnType) is IUntypedExtraColumns extraColumns) {
             _extraColumns.AddRange(extraColumns.Columns);

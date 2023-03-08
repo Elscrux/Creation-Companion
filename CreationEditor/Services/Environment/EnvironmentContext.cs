@@ -5,8 +5,8 @@ namespace CreationEditor.Services.Environment;
 
 public class EnvironmentContext : IEnvironmentContext {
     public IGameReleaseContext GameReleaseContext { get; }
-    public IDataDirectoryProvider DataDirectoryProvider  { get; }
-    
+    public IDataDirectoryProvider DataDirectoryProvider { get; }
+
     private EnvironmentContext(
         IGameReleaseContext gameReleaseContext,
         IDataDirectoryProvider dataDirectoryProvider) {

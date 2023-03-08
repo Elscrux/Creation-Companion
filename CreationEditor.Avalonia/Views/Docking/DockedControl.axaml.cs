@@ -16,18 +16,18 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
     public IDockedItem DockedItem { get; } = null!;
 
     public Guid Id => DockedItem.Id;
-    
+
     public Control Control => DockedItem.Control;
     public DockContainerVM DockParent {
         get => DockedItem.DockParent;
         set => DockedItem.DockParent = value;
     }
-    
+
     public bool IsSelected {
         get => DockedItem.IsSelected;
         set => DockedItem.IsSelected = value;
     }
-    
+
     public string? Header {
         get => DockedItem.Header;
         set => DockedItem.Header = value;
@@ -47,11 +47,11 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         get => DockedItem.CanClose;
         set => DockedItem.CanClose = value;
     }
-    
+
     public ReactiveCommand<Unit, IObservable<IDockedItem>> Close => DockedItem.Close;
 
     public DisposableCounterLock RemovalLock => DockedItem.RemovalLock;
-    
+
     public IObservable<IDockedItem> Closed => DockedItem.Closed;
 
     public DockedControl() {
@@ -61,13 +61,13 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
     public DockedControl(IDockedItem vm) {
         DataContext = DockedItem = vm;
         Name = Header = vm.Header;
-        
+
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
-        
+
         DetachedFromLogicalTree += (_, _) => CheckRemoved();
         Control.DetachedFromLogicalTree += (_, _) => CheckRemoved();
-        
+
         InitializeComponent();
     }
 
@@ -79,7 +79,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
 
         (this as IDockObject).DockRoot.OnDockRemoved(this);
     }
-    
+
     public void ShowPreview(Dock dock) {
         var grid = new Grid {
             Children = {
@@ -119,4 +119,3 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         return Id == other?.Id;
     }
 }
-

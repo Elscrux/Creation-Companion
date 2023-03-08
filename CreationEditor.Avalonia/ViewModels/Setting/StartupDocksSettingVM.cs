@@ -13,7 +13,6 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
 public sealed record StartupDocksSetting(List<StartupDock> Docks);
-
 public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<DockElement> StartupDockTypes = Enum.GetValues<DockElement>();
     public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>();
@@ -27,7 +26,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
 
     public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
     public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }
-    
+
     [JsonProperty]
     public ObservableCollection<StartupDock> Docks { get; } = new();
 
@@ -37,7 +36,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
         _dockFactory = dockFactory;
 
         AddStartupDock = ReactiveCommand.Create(() => Docks.Add(new StartupDock()));
-        
+
         RemoveStartupDock = ReactiveCommand.Create<IList>(removeDocks => {
             foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
                 Docks.Remove(removeDock);
@@ -53,12 +52,12 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     private void Start(StartupDock startupDock) {
         _dockFactory.Open(startupDock.DockElement, startupDock.DockMode, startupDock.Dock);
     }
-    
+
     public void OnStartup() {
         foreach (var startupDock in Docks) {
             Start(startupDock);
         }
     }
-    
+
     public void OnExit() {}
 }

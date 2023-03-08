@@ -6,7 +6,7 @@ public partial class DockingManager : ReactiveUserControl<DockingManagerVM> {
     public DockingManager() {
         InitializeComponent();
     }
-    
+
     public DockingManager(DockingManagerVM vm) : this() {
         DataContext = vm;
     }

@@ -9,7 +9,6 @@ public interface INotificationVM {
     public IList<NotificationItem> LoadingItems { get; }
     public IObservable<NotificationItem> LatestNotification { get; }
 }
-
 public sealed class NotificationVM : ViewModel, INotificationVM {
     private readonly IObservableCollection<NotificationItem> _loadingItems;
     public IList<NotificationItem> LoadingItems => _loadingItems;
@@ -22,7 +21,7 @@ public sealed class NotificationVM : ViewModel, INotificationVM {
         LatestNotification = notificationService.Notifications
             .Where(x => x.LoadText != null)
             .Sample(UpdateInterval);
-        
+
         _loadingItems = notificationService.Notifications
             .ToObservableChangeSet(x => x.ID)
             .Filter(x => x.LoadText != null)

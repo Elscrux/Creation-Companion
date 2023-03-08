@@ -1,14 +1,14 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Services.Settings;
-namespace CreationEditor.Avalonia.Modules; 
+namespace CreationEditor.Avalonia.Modules;
 
 public sealed class SettingsModule : Module {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterType<SettingProvider>()
             .As<ISettingProvider>()
             .SingleInstance();
-        
+
         builder.RegisterType<SettingPathProvider>()
             .As<ISettingPathProvider>()
             .SingleInstance();

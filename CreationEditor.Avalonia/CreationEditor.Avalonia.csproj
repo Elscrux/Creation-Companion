@@ -10,87 +10,87 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.0-preview4" />
-        <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0-preview20221106001" />
-        <PackageReference Include="FluentAvalonia.FluentIcons" Version="2.0.0-alpha.5" />
-        <PackageReference Include="FluentAvalonia.UI.Windowing" Version="2.0.0-preview4" />
-        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview4" />
-        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-        <PackageReference Include="ReactiveUI" Version="18.4.1" />
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00901" />
-        <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
-        <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
+        <PackageReference Include="Avalonia" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.0-preview4"/>
+        <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0-preview20221106001"/>
+        <PackageReference Include="FluentAvalonia.FluentIcons" Version="2.0.0-alpha.5"/>
+        <PackageReference Include="FluentAvalonia.UI.Windowing" Version="2.0.0-preview4"/>
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview4"/>
+        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+        <PackageReference Include="ReactiveUI" Version="18.4.1"/>
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00901"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947"/>
+        <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
+        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
-      <UpToDateCheckInput Remove="FormKeyPicker\test.axaml" />
-      <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml" />
-      <UpToDateCheckInput Remove="FormKeyPicker\test.axaml" />
-      <UpToDateCheckInput Remove="Style\Styles.axaml" />
+        <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml"/>
+        <UpToDateCheckInput Remove="FormKeyPicker\test.axaml"/>
+        <UpToDateCheckInput Remove="FormKeyPicker\FormKeyStyles.axaml"/>
+        <UpToDateCheckInput Remove="FormKeyPicker\test.axaml"/>
+        <UpToDateCheckInput Remove="Style\Styles.axaml"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
-        <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
-      </Compile>
-      <Compile Update="ViewModels\Record\List\RecordListVM.cs">
-        <DependentUpon>IRecordListVM.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnProvider.cs">
-        <DependentUpon>IExtraColumnProvider.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnsBuilder.cs">
-        <DependentUpon>IExtraColumnsBuilder.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Models\Record\List\ExtraColumns\MajorRecordExtraColumns.cs">
-        <DependentUpon>ExtraColumns.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Models\Record\List\ExtraColumns\NamedRequiredExtraColumns.cs">
-        <DependentUpon>ExtraColumns.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Models\Record\List\ExtraColumns\TypeExtraColumns.cs">
-        <DependentUpon>ExtraColumns.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Models\Record\List\ExtraColumns\WeightValueExtraColumns.cs">
-        <DependentUpon>ExtraColumns.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Models\Record\List\ExtraColumns\ExtraColumns.cs">
-        <DependentUpon>IExtraColumns.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Category\RecordFilterBuilder.cs">
-        <DependentUpon>IRecordFilterBuilder.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Category\RecordFilterProvider.cs">
-        <DependentUpon>IRecordFilterProvider.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Category\DirectoryFilter.cs">
-        <DependentUpon>IRecordFilter.cs</DependentUpon>
-      </Compile>
-      <Compile Update="ViewModels\Record\Browser\RecordBrowserVM.cs">
-        <DependentUpon>IRecordBrowserVM.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Filter\SimpleRecordFilter.cs">
-        <DependentUpon>IRecordFilter.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Filter\RecordFilter.cs">
-        <DependentUpon>IRecordFilter.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Services\Record\Browser\Filter\AssetFilter.cs">
-        <DependentUpon>IRecordFilter.cs</DependentUpon>
-      </Compile>
+        <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
+            <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
+        </Compile>
+        <Compile Update="ViewModels\Record\List\RecordListVM.cs">
+            <DependentUpon>IRecordListVM.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnProvider.cs">
+            <DependentUpon>IExtraColumnProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\List\ExtraColumns\ExtraColumnsBuilder.cs">
+            <DependentUpon>IExtraColumnsBuilder.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Models\Record\List\ExtraColumns\MajorRecordExtraColumns.cs">
+            <DependentUpon>ExtraColumns.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Models\Record\List\ExtraColumns\NamedRequiredExtraColumns.cs">
+            <DependentUpon>ExtraColumns.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Models\Record\List\ExtraColumns\TypeExtraColumns.cs">
+            <DependentUpon>ExtraColumns.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Models\Record\List\ExtraColumns\WeightValueExtraColumns.cs">
+            <DependentUpon>ExtraColumns.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Models\Record\List\ExtraColumns\ExtraColumns.cs">
+            <DependentUpon>IExtraColumns.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Category\RecordFilterBuilder.cs">
+            <DependentUpon>IRecordFilterBuilder.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Category\RecordFilterProvider.cs">
+            <DependentUpon>IRecordFilterProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Category\DirectoryFilter.cs">
+            <DependentUpon>IRecordFilter.cs</DependentUpon>
+        </Compile>
+        <Compile Update="ViewModels\Record\Browser\RecordBrowserVM.cs">
+            <DependentUpon>IRecordBrowserVM.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Filter\SimpleRecordFilter.cs">
+            <DependentUpon>IRecordFilter.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Filter\RecordFilter.cs">
+            <DependentUpon>IRecordFilter.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Browser\Filter\AssetFilter.cs">
+            <DependentUpon>IRecordFilter.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

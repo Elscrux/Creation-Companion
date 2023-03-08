@@ -14,7 +14,7 @@
     <Design.DataContext>
         <vm:SideDockVM/>
     </Design.DataContext>
-    
+
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>

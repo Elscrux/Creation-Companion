@@ -16,14 +16,14 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
 
     public static ICommand GetCommand(AvaloniaObject element) => element.GetValue(CommandProperty);
     public static void SetCommand(AvaloniaObject element, ICommand commandValue) => element.SetValue(CommandProperty, commandValue);
-    
+
     /// <summary>
     /// Identifies the <seealso cref="CommandParameterProperty"/> avalonia attached property.
     /// Use this as the parameter for the <see cref="CommandProperty"/>.
     /// </summary>
     /// <value>Any value of type <see cref="object"/>.</value>
     public static readonly AttachedProperty<object> CommandParameterProperty = AvaloniaProperty.RegisterAttached<DoubleTappedProperty, Interactive, object>("CommandParameter");
-    
+
     public static object GetCommandParameter(AvaloniaObject element) => element.GetValue(CommandParameterProperty);
     public static void SetCommandParameter(AvaloniaObject element, object parameter) => element.SetValue(CommandParameterProperty, parameter);
 
@@ -31,7 +31,7 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
         CommandProperty.Changed
             .Subscribe(args => HandleCommandChanged(args.Sender, args.NewValue.GetValueOrDefault<ICommand>()));
     }
-    
+
     private static void HandleCommandChanged(IAvaloniaObject element, ICommand? commandValue) {
         if (element is Interactive interactElem) {
             if (commandValue != null) {

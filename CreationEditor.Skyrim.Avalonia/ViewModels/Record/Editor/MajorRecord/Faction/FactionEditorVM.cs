@@ -35,20 +35,20 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
         LinkCache = editorEnvironment.LinkCache;
 
         editorEnvironment.LinkCacheChanged.Subscribe(newLinkCache => LinkCache = newLinkCache);
-        
+
         Save = ReactiveCommand.Create(() => {
             referenceController.UpdateReferences(Record, () => EditableRecord.CopyTo(Record));
-            
+
             recordEditorController.CloseEditor(Record);
         });
     }
-    
+
     public Control CreateControl(Mutagen.Bethesda.Skyrim.Faction record) {
         Record = record;
         EditableRecord = new EditableFaction(record);
         RelationEditorVM = new RelationEditorVM(this);
         RankEditorVM = new RankEditorVM(this);
-        
+
         return new FactionEditor(this);
     }
 }

@@ -19,7 +19,7 @@ namespace CreationEditor.Avalonia.Behavior;
 public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     public static readonly StyledProperty<bool?> AllCheckedProperty
         = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
-    
+
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
         = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), (_ => true));
 
@@ -77,10 +77,10 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                     DataContext = this,
                     HorizontalAlignment = HorizontalAlignment.Center,
                 };
-                
+
                 checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => SelectAllItems());
                 checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => SelectAllItems(false));
-                
+
                 return checkBox;
             }),
             CellTemplate = new FuncDataTemplate<IReactiveSelectable>(((_, _) => {
@@ -102,9 +102,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                         },
                     }
                 };
-                
+
                 if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
-                
+
                 return checkBox;
             })),
             CanUserResize = false,
@@ -120,7 +120,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
         AssociatedObject.ContextFlyout ??= new MenuFlyout();
         if (AssociatedObject.ContextFlyout is not MenuFlyout { Items: AvaloniaList<object> menuList }) return;
-        
+
         menuList.InsertRange(0, new TemplatedControl[] {
             new MenuItem {
                 Header = "Select All",
@@ -151,7 +151,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void UpdateAllChecked() {
         if (AssociatedObject?.Items == null) return;
-        
+
         TryProcess(() => {
             var totalCount = 0;
             var selectedCount = 0;
@@ -172,7 +172,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void SelectSelectedItems(bool newState = true) {
         if (AssociatedObject?.SelectedItems == null) return;
-        
+
         TryProcess(() => {
             _isProcessing = true;
             foreach (var selectable in AssociatedObject.SelectedItems.Cast<IReactiveSelectable>()) {
@@ -185,7 +185,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void SelectAllItems(bool newState = true) {
         if (AssociatedObject?.Items == null) return;
-        
+
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
@@ -196,7 +196,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void SelectDynamic(bool newState = true) {
         if (AssociatedObject?.SelectedItems == null) return;
-        
+
         if (AssociatedObject.SelectedItems.Count > 1) {
             // Only select records in selection if multiple are selected
             SelectSelectedItems(newState);
@@ -208,7 +208,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void ToggleSelection() {
         if (AssociatedObject?.SelectedItems == null) return;
-        
+
         TryProcess(() => {
             _isProcessing = true;
             var newStatus = !AssociatedObject.SelectedItems
@@ -225,7 +225,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
 
     private void InvertAll() {
         if (AssociatedObject?.Items == null) return;
-        
+
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = !selectable.IsSelected && SelectionGuard.Invoke(selectable);

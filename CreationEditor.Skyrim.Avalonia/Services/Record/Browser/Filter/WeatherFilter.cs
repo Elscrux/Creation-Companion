@@ -11,4 +11,3 @@ public class WeatherFilter : SimpleRecordFilter<IWeatherGetter> {
         new("Snow", record => (record.Flags & Weather.Flag.Snow) != 0),
     }) {}
 }
-

@@ -7,10 +7,10 @@ public interface IExtraColumnsBuilder {
     public IExtraColumnsBuilder AddRecordType(Type recordType);
     public IExtraColumnsBuilder AddRecordType<TRecord>()
         where TRecord : IMajorRecordQueryableGetter;
-    
+
     public IExtraColumnsBuilder AddColumnType(Type columnType);
     public IExtraColumnsBuilder AddColumnType<TExtraColumns>()
         where TExtraColumns : IUntypedExtraColumns;
-    
+
     public IEnumerable<DataGridColumn> Build();
 }

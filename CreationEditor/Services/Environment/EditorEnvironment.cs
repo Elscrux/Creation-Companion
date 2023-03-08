@@ -8,7 +8,7 @@ public interface IEditorEnvironment<TMod, TModGetter> : IEditorEnvironment
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     public IGameEnvironment<TMod, TModGetter> Environment { get; protected set; }
     public new ILinkCache<TMod, TModGetter> LinkCache => Environment.LinkCache;
-    
+
     public new TMod ActiveMod { get; protected set; }
     public new ILinkCache<TMod, TModGetter> ActiveModLinkCache { get; protected set; }
 }

@@ -6,7 +6,7 @@ public partial class FactionEditor : ReactiveUserControl<FactionEditorVM> {
     public FactionEditor() {
         InitializeComponent();
     }
-    
+
     public FactionEditor(FactionEditorVM vm) : this() {
         DataContext = vm;
     }

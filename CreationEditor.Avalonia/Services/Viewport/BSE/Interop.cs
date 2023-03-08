@@ -31,7 +31,7 @@ public static class Interop {
         public UpdateType Update;
         public string Path;
     }
-    
+
     public struct InitConfig {
         public uint Version;
         public string AssetDirectory;
@@ -59,7 +59,7 @@ public static class Interop {
     public static extern bool addHideCallback(HideCallback callback);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool addDeleteCallback(DeleteCallback  callback);
+    public static extern bool addDeleteCallback(DeleteCallback callback);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void loadReferences(uint count, ReferenceLoad[] load);
@@ -75,10 +75,10 @@ public static class Interop {
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool initTGEditor(InitConfig count);
-    
+
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool isFinished();
-    
+
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void waitFinishedInit();
 }
