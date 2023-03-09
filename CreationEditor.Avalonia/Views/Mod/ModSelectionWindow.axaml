@@ -10,6 +10,7 @@
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Mod"
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
     xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
+    xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
     d:DesignHeight="500" d:DesignWidth="750"
     x:CompileBindings="True" x:DataType="mod:ModSelectionVM"
     MinHeight="480" MinWidth="720" Height="480" Width="720"
@@ -17,6 +18,13 @@
     <Design.DataContext>
         <mod:ModSelectionVM/>
     </Design.DataContext>
+
+    <windowing:AppWindow.KeyBindings>
+        <KeyBinding 
+            Gesture="Escape"
+            Command="{x:Static command:WindowCommands.Close}"
+            CommandParameter="{Binding #Window}"/>
+    </windowing:AppWindow.KeyBindings>
 
     <Grid>
         <Grid.ColumnDefinitions>

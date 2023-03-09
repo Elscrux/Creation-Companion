@@ -1,8 +1,18 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+﻿<windowing:AppWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
+        xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Name="Window"
         x:Class="CreationEditor.Avalonia.Views.Record.ReferenceWindow"
         Height="750" Width="500">
-</Window>
+
+    <windowing:AppWindow.KeyBindings>
+        <KeyBinding 
+            Gesture="Escape"
+            Command="{x:Static command:WindowCommands.Close}"
+            CommandParameter="{Binding #Window}"/>
+    </windowing:AppWindow.KeyBindings>
+</windowing:AppWindow>
