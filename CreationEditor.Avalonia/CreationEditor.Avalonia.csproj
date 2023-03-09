@@ -91,6 +91,12 @@
         <Compile Update="Services\Record\Browser\Filter\AssetFilter.cs">
             <DependentUpon>IRecordFilter.cs</DependentUpon>
         </Compile>
+        <Compile Update="Resources\Command\AddElement.cs">
+          <DependentUpon>ListCommand.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\Command\RemoveElement.cs">
+          <DependentUpon>ListCommand.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
