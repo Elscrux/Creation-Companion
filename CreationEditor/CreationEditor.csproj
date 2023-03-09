@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Autofac" Version="6.5.0"/>
-        <PackageReference Include="Mutagen.Bethesda.Core" Version="0.41.0-pr002"/>
+        <PackageReference Include="Mutagen.Bethesda.Core" Version="0.41.0-pr003"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
         <PackageReference Include="Noggog.CSharpExt" Version="2.55.0"/>
         <PackageReference Include="ReactiveUI" Version="18.4.1"/>
