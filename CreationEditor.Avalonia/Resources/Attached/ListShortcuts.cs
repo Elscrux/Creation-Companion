@@ -3,9 +3,11 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Noggog;
+using ReactiveUI;
 namespace CreationEditor.Avalonia.Attached;
 
 public sealed class ListShortcuts : AvaloniaObject {
@@ -56,18 +58,29 @@ public sealed class ListShortcuts : AvaloniaObject {
 
         // Add context menu
         control.ContextFlyout ??= new MenuFlyout();
-        if (control.ContextFlyout is MenuFlyout { Items: IAvaloniaList<object> list }) {
-            if (newCommand != null) {
-                list.Add(new MenuItem {
-                    Header = header,
-                    Command = newCommand,
-                    CommandParameter = selectedItems
-                });
-            } else {
-                list.RemoveWhere(item =>
-                    item is MenuItem menuItem
-                 && ReferenceEquals(menuItem.Header, header));
-            }
+        AddCommand(selectedItems, header, control.ContextFlyout, newCommand);
+
+        control.GetPropertyChangedObservable(Control.ContextFlyoutProperty)
+            .Subscribe(_ => {
+                control.ContextFlyout ??= new MenuFlyout();
+                AddCommand(selectedItems, header, control.ContextFlyout, newCommand);
+            });
+    }
+
+    private static void AddCommand(IEnumerable? selectedItems, string header, FlyoutBase? flyout, ICommand? newCommand) {
+        if (flyout is not MenuFlyout { Items: IAvaloniaList<object> list }) return;
+        if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
+
+        if (newCommand != null) {
+            list.Add(new MenuItem {
+                Header = header,
+                Command = newCommand,
+                CommandParameter = selectedItems
+            });
+        } else {
+            list.RemoveWhere(item =>
+                item is MenuItem menuItem
+             && ReferenceEquals(menuItem.Header, header));
         }
     }
 }
