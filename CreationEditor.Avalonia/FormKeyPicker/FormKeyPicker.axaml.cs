@@ -43,7 +43,7 @@ public class FormKeyPicker : AFormKeyPicker {
         SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
 
         dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty, _ => {
-            if (LinkCache == null || !LinkCache.TryResolve(FormKey, ScopedTypesInternal(ScopedTypes), out var record)) return FormLinkInformation.Null;
+            if (LinkCache == null || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record)) return FormLinkInformation.Null;
 
             return FormLinkInformation.Factory(record);
         });
@@ -52,14 +52,14 @@ public class FormKeyPicker : AFormKeyPicker {
 
         SetValue(FormLinkDragDrop.CanSetFormLinkProperty, formLink => {
             // FormLink type needs to be in scoped type
-            var scopedTypesInternal = ScopedTypesInternal(ScopedTypes).ToList();
-            if (!scopedTypesInternal.ContainsInterface(formLink.Type)) return false;
+            var selectedTypes = EnabledTypes(SelectableTypes).ToList();
+            if (!selectedTypes.ContainsInterface(formLink.Type)) return false;
 
             // FormKey must not be blacklisted
             if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
 
             // FormKey must be resolved
-            if (LinkCache == null || !LinkCache.TryResolveIdentifier(formLink.FormKey, scopedTypesInternal, out var editorId)) return false;
+            if (LinkCache == null || !LinkCache.TryResolveIdentifier(formLink.FormKey, selectedTypes, out var editorId)) return false;
 
             // Record needs to satisfy the filter
             if (Filter != null && !Filter(formLink.FormKey, editorId)) return false;

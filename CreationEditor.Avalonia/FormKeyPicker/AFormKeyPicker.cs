@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Avalonia;
@@ -11,6 +13,7 @@ using Avalonia.Media;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
+using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -38,11 +41,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
 
-    public ReadOnlyObservableCollection<TypeItem> SelectedTypes {
-        get => GetValue(SelectedTypesProperty);
-        set => SetValue(SelectedTypesProperty, value);
+    public ReadOnlyObservableCollection<TypeItem> SelectableTypes {
+        get => GetValue(SelectableTypesProperty);
+        set => SetValue(SelectableTypesProperty, value);
     }
-    public static readonly StyledProperty<ReadOnlyObservableCollection<TypeItem>> SelectedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<TypeItem>>(nameof(SelectedTypes));
+    public static readonly StyledProperty<ReadOnlyObservableCollection<TypeItem>> SelectableTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<TypeItem>>(nameof(SelectableTypes));
 
     public IObservable<bool> AnyTypeSelected {
         get => GetValue(AnyTypeSelectedProperty);
@@ -50,11 +53,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<IObservable<bool>> AnyTypeSelectedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyTypeSelected));
 
-    public ReadOnlyObservableCollection<ModItem> SelectedMods {
-        get => GetValue(SelectedModsProperty);
-        set => SetValue(SelectedModsProperty, value);
+    public ReadOnlyObservableCollection<ModItem> SelectableMods {
+        get => GetValue(SelectableModsProperty);
+        set => SetValue(SelectableModsProperty, value);
     }
-    public static readonly StyledProperty<ReadOnlyObservableCollection<ModItem>> SelectedModsProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<ModItem>>(nameof(SelectedMods));
+    public static readonly StyledProperty<ReadOnlyObservableCollection<ModItem>> SelectableModsProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<ModItem>>(nameof(SelectableMods));
 
     public IObservable<bool> AnyModSelected {
         get => GetValue(AnyModSelectedProperty);
@@ -240,25 +243,25 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     protected override void OnLoaded() {
         base.OnLoaded();
 
-        SelectedTypes = this.WhenAnyValue(x => x.ScopedTypes)
-            .Select(ScopedTypesInternal)
+        SelectableTypes = this.WhenAnyValue(x => x.ScopedTypes)
+            .Select(GetMajorTypes)
             .ToObservableChangeSet()
             .ToObservableCollection(x => new TypeItem(x), UnloadDisposable);
 
-        var selectedTypesChanged = this.WhenAnyValue(x => x.SelectedTypes)
-            .CombineLatest(SelectedTypes.SelectionChanged(), (types, _) => types);
+        var selectedTypesChanged = this.WhenAnyValue(x => x.SelectableTypes)
+            .CombineLatest(SelectableTypes.SelectionChanged(), (types, _) => types);
 
         AnyTypeSelected = selectedTypesChanged
             .Select(x => x.Any(typeItem => typeItem.IsSelected));
 
-        SelectedMods = this.WhenAnyValue(x => x.LinkCache)
+        SelectableMods = this.WhenAnyValue(x => x.LinkCache)
             .NotNull()
             .Select(linkCache => linkCache.ListedOrder.AsObservableChangeSet())
             .Switch()
             .ToObservableCollection(x => new ModItem(x.ModKey) { IsSelected = true }, UnloadDisposable);
 
-        var selectedModsChanged = this.WhenAnyValue(x => x.SelectedMods)
-            .CombineLatest(SelectedMods.SelectionChanged(), (mods, _) => mods);
+        var selectedModsChanged = this.WhenAnyValue(x => x.SelectableMods)
+            .CombineLatest(SelectableMods.SelectionChanged(), (mods, _) => mods);
 
         AnyModSelected = selectedModsChanged
             .Select(x => x.Any(modItem => modItem.IsSelected));
@@ -630,11 +633,36 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .DisposeWith(UnloadDisposable);
     }
 
-    protected IEnumerable<Type> ScopedTypesInternal(IEnumerable? types) {
+    private static readonly ConcurrentDictionary<Type, IEnumerable<Type>> InterfaceCache = new();
+
+    protected IEnumerable<Type> GetMajorTypes(IEnumerable? types) {
+        var majorRecordType = typeof(IMajorRecordGetter);
+
         if (types is not IEnumerable<Type> scopedTypes || !scopedTypes.Any()) {
-            scopedTypes = typeof(IMajorRecordGetter).AsEnumerable();
+            return majorRecordType.AsEnumerable();
         }
-        return scopedTypes;
+
+        var list = scopedTypes
+            .Select(type => {
+                if (LoquiRegistration.TryGetRegister(type, out _)) return type.AsEnumerable();
+                if (InterfaceCache.TryGetValue(type, out var implementingTypes)) return implementingTypes;
+
+                var list = IMajorRecordGetter.StaticRegistration.GetterType
+                    .GetSubclassesOf()
+                    .Where(x => x.InheritsFrom(type))
+                    .Select(t => LoquiRegistration.TryGetRegister(t, out var registration) ? registration.GetterType : null)
+                    .NotNull()
+                    .Distinct()
+                    .ToList();
+
+                InterfaceCache.TryAdd(type, list);
+                return list;
+            })
+            .SelectMany(x => x)
+            .ToList();
+
+        return list
+            .OrderBy(x => x.Name);
     }
 
     protected IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) {
