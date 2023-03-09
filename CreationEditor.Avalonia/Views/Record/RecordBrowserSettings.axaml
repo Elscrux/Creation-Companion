@@ -22,29 +22,31 @@
 
                 <Button.Flyout>
                     <Flyout>
-                        <ItemsRepeater Items="{Binding Mods}"
-                                       MaxHeight="750">
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate DataType="mod:ModItem">
-                                    <CheckBox Content="{Binding ModKey.FileName}"
-                                              IsChecked="{Binding IsSelected}"/>
-                                </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
+                        <ScrollViewer>
+                            <ItemsRepeater Items="{Binding Mods}"
+                                           MaxHeight="750">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate DataType="mod:ModItem">
+                                        <CheckBox Content="{Binding ModKey.FileName}"
+                                                  IsChecked="{Binding IsSelected}"/>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
 
-                            <ItemsRepeater.ContextFlyout>
-                                <MenuFlyout>
-                                    <MenuItem Header="Select All"
-                                              Command="{x:Static command:SelectableCommand.SelectAll}"
-                                              CommandParameter="{Binding Mods}"/>
-                                    <MenuItem Header="Unselect All"
-                                              Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                              CommandParameter="{Binding Mods}"/>
-                                    <MenuItem Header="Toggle All"
-                                              Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                              CommandParameter="{Binding Mods}"/>
-                                </MenuFlyout>
-                            </ItemsRepeater.ContextFlyout>
-                        </ItemsRepeater>
+                                <ItemsRepeater.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuItem Header="Select All"
+                                                  Command="{x:Static command:SelectableCommand.SelectAll}"
+                                                  CommandParameter="{Binding Mods}"/>
+                                        <MenuItem Header="Unselect All"
+                                                  Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                                  CommandParameter="{Binding Mods}"/>
+                                        <MenuItem Header="Toggle All"
+                                                  Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                                  CommandParameter="{Binding Mods}"/>
+                                    </MenuFlyout>
+                                </ItemsRepeater.ContextFlyout>
+                            </ItemsRepeater>
+                        </ScrollViewer>
                     </Flyout>
                 </Button.Flyout>
             </Button>
