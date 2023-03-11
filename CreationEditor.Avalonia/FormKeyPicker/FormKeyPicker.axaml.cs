@@ -31,6 +31,12 @@ public class FormKeyPicker : AFormKeyPicker {
     }
     public static readonly StyledProperty<double> SearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(SearchBoxHeight), double.NaN);
 
+    public bool ShowFormKeyBox {
+        get => GetValue(ShowFormKeyBoxProperty);
+        set => SetValue(ShowFormKeyBoxProperty, value);
+    }
+    public static readonly StyledProperty<bool> ShowFormKeyBoxProperty = AvaloniaProperty.Register<FormKeyPicker, bool>(nameof(ShowFormKeyBox), true);
+
     private Popup? _popup;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {

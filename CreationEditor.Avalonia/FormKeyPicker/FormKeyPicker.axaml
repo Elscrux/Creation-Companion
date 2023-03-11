@@ -6,7 +6,8 @@
         xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
         xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
         xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
-        xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables">
+        xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime">
     <Design.PreviewWith>
         <Border Padding="20">
             <formKeyPicker:FormKeyPicker/>
@@ -22,18 +23,39 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Border
-                        MinWidth="{TemplateBinding MinSearchBoxWidth}"
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid MinHeight="30" Margin="2" ColumnDefinitions="*,5,*">
+                        <Border.Resources>
+                            <converter:ReturnParameterIfTrueConverter
+                                x:Key="ReturnGridLengthPixelIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter:DoubleConverters.ToGridLengthPixel}"
+                                DefaultValue="0"/>
+                            <converter:ReturnParameterIfTrueConverter
+                                x:Key="ReturnGridLengthStarIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
+                                DefaultValue="0"/>
+                            <converter:ReturnParameterIfTrueConverter
+                                x:Key="ReturnDoubleIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
+                                DefaultValue="150"/>
+                        </Border.Resources>
+                        <Grid MinHeight="30" Margin="1"
+                              MaxWidth="{TemplateBinding MaxWidth}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthPixelIfTrue}, ConverterParameter=5}"/>
+                                <ColumnDefinition Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthStarIfTrue}, ConverterParameter=1}"/>
+                            </Grid.ColumnDefinitions>
                             <Border x:Name="Background"
                                     Grid.Column="0"
                                     Grid.ColumnSpan="3"
                                     Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    MinWidth="{DynamicResource ComboBoxThemeMinWidth}"
                                     CornerRadius="{TemplateBinding CornerRadius}"/>
 
                             <TextBox Grid.Row="0" Grid.Column="0"
@@ -42,6 +64,7 @@
                                      Watermark="EditorID"
                                      Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
                             <TextBox Grid.Row="0" Grid.Column="2"
+                                     IsVisible="{TemplateBinding ShowFormKeyBox}"
                                      x:Name="PART_FormKeyBox"
                                      Margin="-1"
                                      Watermark="FormKey"
@@ -172,7 +195,7 @@
                                    WindowManagerAddShadowHint="False"
                                    IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                    Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
-                                   MinWidth="250"
+                                   MinWidth="{TemplateBinding MinSearchBoxWidth}"
                                    MaxHeight="{TemplateBinding MaxSearchBoxHeight}"
                                    Height="{TemplateBinding SearchBoxHeight}"
                                    HorizontalAlignment="Stretch"
