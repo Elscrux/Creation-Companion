@@ -19,7 +19,12 @@
             <Setter Property="IsVisible" Value="False"/>
         </Style>
     </Style>
-    <Style Selector="DataGrid.NoRowSelection Grid#FocusVisual">
-        <Setter Property="IsVisible" Value="False"/>
+
+    <Style Selector="DataGrid DataGridRow:selected Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="{DynamicResource AccentFillColorDisabled}"/>
+    </Style>
+
+    <Style Selector="DataGrid.AccentSelection DataGridRow:selected Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundBrush}"/>
     </Style>
 </Styles>
