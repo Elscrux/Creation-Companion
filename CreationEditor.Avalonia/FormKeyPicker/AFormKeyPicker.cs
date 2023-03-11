@@ -245,8 +245,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         base.OnLoaded();
 
         SelectableTypes = this.WhenAnyValue(x => x.ScopedTypes)
-            .Select(GetMajorTypes)
-            .ToObservableChangeSet()
+            .Select(x => GetMajorTypes(x).AsObservableChangeSet())
+            .Switch()
             .ToObservableCollection(x => new TypeItem(x), UnloadDisposable);
 
         var selectedTypesChanged = this.WhenAnyValue(x => x.SelectableTypes)
