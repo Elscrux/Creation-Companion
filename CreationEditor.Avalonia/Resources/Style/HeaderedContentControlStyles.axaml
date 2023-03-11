@@ -25,23 +25,19 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Border>
-                        <StackPanel>
-                            <Grid RowDefinitions="Auto,*">
-                                <ContentPresenter Grid.Row="0"
-                                                  Content="{TemplateBinding Header}"/>
-                                <Border Grid.Row="1"
-                                        BorderBrush="{DynamicResource ButtonBackground}"
-                                        BorderThickness="2"
-                                        Padding="5"
-                                        CornerRadius="5"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Left">
-                                    <ContentPresenter Content="{TemplateBinding Content}"/>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
+                    <Grid RowDefinitions="Auto,*">
+                        <ContentPresenter Grid.Row="0"
+                                          Content="{TemplateBinding Header}"/>
+                        <Border Grid.Row="1"
+                                BorderBrush="{DynamicResource ButtonBackground}"
+                                BorderThickness="2"
+                                Padding="5"
+                                CornerRadius="5"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Left">
+                            <ContentPresenter Content="{TemplateBinding Content}"/>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
