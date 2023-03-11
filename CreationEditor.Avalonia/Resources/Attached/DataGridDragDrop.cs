@@ -178,10 +178,9 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not DataGridRow { DataContext: {} item } row) return;
         if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
 
-        // Only allow starting to drag when the source is directly under the data grid cell
+        // Only allow starting to drag when the source is a known background element
         if (e.Source is not StyledElement styledElement) return;
-        if (styledElement.Parent is not DataGridCell
-         && styledElement.TemplatedParent is not DataGridCell) return;
+        if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle") return;
 
         var dataGrid = row.FindAncestorOfType<DataGrid>();
         if (dataGrid == null) return;
