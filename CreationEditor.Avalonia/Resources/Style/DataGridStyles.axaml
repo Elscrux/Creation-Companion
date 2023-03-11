@@ -10,8 +10,14 @@
         <Setter Property="IsVisible" Value="False"/>
     </Style>
 
-    <Style Selector="DataGrid.NoRowSelection Rectangle#BackgroundRectangle">
-        <Setter Property="IsVisible" Value="False"/>
+    <Style Selector="DataGrid.NoRowSelection">
+        <Style Selector="^ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+
+        <Style Selector="^ Grid#FocusVisual">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
     </Style>
     <Style Selector="DataGrid.NoRowSelection Grid#FocusVisual">
         <Setter Property="IsVisible" Value="False"/>
