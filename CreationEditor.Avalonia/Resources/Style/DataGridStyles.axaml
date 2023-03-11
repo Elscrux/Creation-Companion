@@ -27,4 +27,16 @@
     <Style Selector="DataGrid.AccentSelection DataGridRow:selected Rectangle#BackgroundRectangle">
         <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundBrush}"/>
     </Style>
+
+    <Style Selector="DataGrid.LowSpacing DataGridCell">
+        <Setter Property="Margin" Value="1,3"/>
+    </Style>
+
+    <Style Selector="DataGrid.MediumSpacing DataGridCell">
+        <Setter Property="Margin" Value="2,6"/>
+    </Style>
+
+    <Style Selector="DataGrid.HighSpacing DataGridCell">
+        <Setter Property="Margin" Value="4,12"/>
+    </Style>
 </Styles>
