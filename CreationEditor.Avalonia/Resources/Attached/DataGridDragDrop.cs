@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Behavior;
@@ -67,6 +68,22 @@ public sealed class DragDropExtended : AvaloniaObject {
                 if (allowDrop.Sender is not DataGrid dataGrid) return;
 
                 dataGrid.SetValue(DragDrop.AllowDropProperty, allowDrop.NewValue.Value);
+                dataGrid.RemoveHandler(Control.LoadedEvent, DataGridLoadedHandler);
+                dataGrid.AddHandler(Control.LoadedEvent, DataGridLoadedHandler);
+
+                void DataGridLoadedHandler(object? sender, RoutedEventArgs e) {
+                    var border = dataGrid.FindDescendantOfType<Border>();
+                    if (border == null) return;
+
+                    border.RemoveHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
+                    border.AddHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
+
+                    border.RemoveHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
+                    border.AddHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
+
+                    border.RemoveHandler(DragDrop.DropEvent, DataGridDrop);
+                    border.AddHandler(DragDrop.DropEvent, DataGridDrop);
+                }
 
                 var state = allowDrop.NewValue.GetValueOrDefault<bool>();
 
@@ -99,6 +116,64 @@ public sealed class DragDropExtended : AvaloniaObject {
             });
     }
 
+    private static void DataGridDragEnter(object? sender, DragEventArgs e) {
+        if (sender is not Border { Parent: DataGrid dataGrid }) return;
+
+        var row = GetLastRow(dataGrid);
+        if (row == null) return;
+
+        // Get old data
+        if (!GetData(row, e,
+            out var oldDataGrid, out var oldList,
+            out var newDataGrid, out var newList)) return;
+
+        AdornerLayer.SetAdorner(row, new Rectangle {
+            Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
+                ? StandardBrushes.ValidBrush
+                : StandardBrushes.InvalidBrush,
+            Height = 2,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            IsHitTestVisible = false,
+        });
+    }
+
+    private static void DataGridDragLeave(object? sender, DragEventArgs e) {
+        if (sender is not Border { Parent: DataGrid dataGrid }) return;
+
+        var row = GetLastRow(dataGrid);
+        if (row == null) return;
+
+        AdornerLayer.SetAdorner(row, null);
+    }
+
+    private static void DataGridDrop(object? sender, DragEventArgs e) {
+        if (sender is not Border { Parent: DataGrid dataGrid }) return;
+
+        var row = GetLastRow(dataGrid);
+        if (row == null || !GetData(row, e,
+            out var oldDataGrid, out var oldList,
+            out var newDataGrid, out var newList)) return;
+
+        AdornerLayer.SetAdorner(row, null);
+
+        if (!ReferenceEquals(oldList, newList) && !CanDropAny(newDataGrid, oldDataGrid)) return;
+
+        GetItems(oldDataGrid, newDataGrid, out var validItems, out var invalidItems);
+
+        // Remove old items
+        foreach (var selectedItem in validItems) {
+            oldList.Remove(selectedItem);
+        }
+        
+        // Add new items
+        foreach (var selectedItem in validItems) {
+            newList.Add(selectedItem);
+        }
+
+        // Set new selection
+        SetNewSelection(newDataGrid, oldDataGrid, validItems, invalidItems);
+    }
+
     private static void DragStart(object? sender, object? identifier, PointerEventArgs e) {
         if (sender is not DataGridRow { DataContext: {} item } row) return;
         if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
@@ -127,15 +202,17 @@ public sealed class DragDropExtended : AvaloniaObject {
             out var oldDataGrid, out var oldList,
             out var newDataGrid, out var newList)) return;
 
-        var canDropAny = CanDropAny(newDataGrid, oldDataGrid);
-
         // Show adorner
         AdornerLayer.SetAdorner(row, new Rectangle {
-            Fill = ReferenceEquals(oldList, newList) || canDropAny ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+            Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
+                ? StandardBrushes.ValidBrush
+                : StandardBrushes.InvalidBrush,
             Height = 2,
             VerticalAlignment = VerticalAlignment.Top,
             IsHitTestVisible = false,
         });
+
+        e.Handled = true;
     }
 
     private static void DragLeave(object? sender, DragEventArgs e) {
@@ -157,21 +234,7 @@ public sealed class DragDropExtended : AvaloniaObject {
 
         if (!ReferenceEquals(oldList, newList) && !CanDropAny(newDataGrid, oldDataGrid)) return;
 
-        var canDrop = GetCanDropOrDefault(newDataGrid);
-        var selector = GetDropSelectorOrDefault(newDataGrid);
-        var sameGrid = ReferenceEquals(oldDataGrid, newDataGrid);
-
-        var validItems = oldDataGrid.SelectedItems
-            .OfType<object>()
-            .Select(selector)
-            .NotNull()
-            .Where(obj => sameGrid || canDrop(obj))
-            .ToList();
-
-        var invalidItems = oldDataGrid.SelectedItems
-            .OfType<object>()
-            .Except(validItems)
-            .ToList();
+        GetItems(oldDataGrid, newDataGrid, out var validItems, out var invalidItems);
 
         // Remove old items
         foreach (var selectedItem in validItems) {
@@ -190,17 +253,8 @@ public sealed class DragDropExtended : AvaloniaObject {
         }
 
         // Set new selection
-        newDataGrid.SelectedItems.Clear();
-        foreach (var validItem in validItems) {
-            newDataGrid.SelectedItems.Add(validItem);
-        }
-
-        oldDataGrid.SelectedItems.Clear();
-        foreach (var invalidItem in invalidItems) {
-            oldDataGrid.SelectedItems.Add(invalidItem);
-        }
+        SetNewSelection(newDataGrid, oldDataGrid, validItems, invalidItems);
     }
-
     private static bool GetData(
         object? sender,
         DragEventArgs e,
@@ -243,4 +297,45 @@ public sealed class DragDropExtended : AvaloniaObject {
             .NotNull()
             .Any(canDrop);
     }
+
+    private static DataGridRow? GetLastRow(DataGrid dataGrid) {
+        var presenter = dataGrid.FindDescendantOfType<DataGridRowsPresenter>();
+
+        return presenter?.Children
+            .OfType<DataGridRow>()
+            .MaxBy(row => row.GetIndex());
+    }
+
+    private static void GetItems(DataGrid oldDataGrid, DataGrid newDataGrid, out List<object> validItems, out List<object> invalidItems) {
+        var canDrop = GetCanDropOrDefault(newDataGrid);
+        var selector = GetDropSelectorOrDefault(newDataGrid);
+        var sameGrid = ReferenceEquals(oldDataGrid, newDataGrid);
+
+        validItems = oldDataGrid.SelectedItems
+            .OfType<object>()
+            .Select(selector)
+            .NotNull()
+            .Where(obj => sameGrid || canDrop(obj))
+            .ToList();
+
+        invalidItems = oldDataGrid.SelectedItems
+            .OfType<object>()
+            .Except(validItems)
+            .ToList();
+    }
+
+    private static void SetNewSelection(
+        DataGrid newDataGrid, DataGrid oldDataGrid,
+        List<object> validItems, List<object> invalidItems) {
+        newDataGrid.SelectedItems.Clear();
+        foreach (var validItem in validItems) {
+            newDataGrid.SelectedItems.Add(validItem);
+        }
+
+        oldDataGrid.SelectedItems.Clear();
+        foreach (var invalidItem in invalidItems) {
+            oldDataGrid.SelectedItems.Add(invalidItem);
+        }
+    }
+
 }
