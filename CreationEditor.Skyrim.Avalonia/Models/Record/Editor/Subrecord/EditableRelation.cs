@@ -16,7 +16,7 @@ public sealed class EditableRelation : ReactiveObject {
         return o switch {
             EditableRelation relation => relation,
             IFormLinkIdentifier identifier =>
-                identifier.Type.ContainsInterface(typeof(IRelatableGetter)) ?
+                identifier.Type.IsOrContainsInterface(typeof(IRelatableGetter)) ?
                     new EditableRelation {
                         TargetFormKey = identifier.FormKey,
                         Reaction = CombatReaction.Neutral
