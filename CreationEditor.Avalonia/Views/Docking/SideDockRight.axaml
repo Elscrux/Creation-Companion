@@ -52,7 +52,7 @@
                                                x:Name="TabHeader">
                                         <Interaction.Behaviors>
                                             <EventTriggerBehavior EventName="PointerReleased"
-                                                                  SourceObject="{Binding #TabHeader}">
+                                                                  SourceObject="TabHeader">
                                                 <InvokeCommandAction
                                                     Command="{ReflectionBinding #Dock.ViewModel.Activate}"
                                                     CommandParameter="{Binding Path=#TabHeader.DataContext}"/>

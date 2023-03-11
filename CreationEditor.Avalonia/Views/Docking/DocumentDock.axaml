@@ -38,7 +38,7 @@
                                     Content="{Binding}">
                     <Interaction.Behaviors>
                         <EventTriggerBehavior EventName="CloseRequested"
-                                              SourceObject="{Binding #TabViewItem}">
+                                              SourceObject="TabViewItem">
                             <InvokeCommandAction Command="{Binding Close}"/>
                         </EventTriggerBehavior>
                     </Interaction.Behaviors>
