@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
@@ -687,9 +688,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .Subscribe(_ => SearchMode = searchMode)
             .DisposeWith(TemplateDisposable);
 
+        var pressed = new Subject<Unit>();
+        textBox.AddHandler(PointerPressedEvent, (_, _) => pressed.OnNext(Unit.Default), handledEventsToo: true);
+
         textBox.WhenAnyValue(x => x.IsFocused)
             .DistinctUntilChanged()
             .Where(focused => focused)
+            .CombineLatest(pressed, (b, _) => b)
             .WithLatestFrom(
                 this.WhenAnyValue(x => x.Found),
                 (_, found) => found)
