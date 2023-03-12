@@ -11,8 +11,10 @@
     <DataGrid x:Name="ItemsControl"
               Items="{Binding Docks}"
               Background="{DynamicResource SystemControlTransparentBrush}"
+              GridLinesVisibility="Horizontal"
               attached:ListShortcuts.Add="{Binding AddStartupDock}"
-              attached:ListShortcuts.Remove="{Binding RemoveStartupDock}">
+              attached:ListShortcuts.Remove="{Binding RemoveStartupDock}"
+              Classes="NoCellSelection MediumSpacing">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">
                 <DataGridTemplateColumn.CellTemplate>
