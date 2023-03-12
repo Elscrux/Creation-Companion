@@ -13,6 +13,9 @@ public sealed class SettingPathProvider : ISettingPathProvider {
     public FilePath Path => "Settings";
 
     public FilePath GetFullPath(ISetting setting) {
-        return new FilePath(_fileSystem.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path, $"{setting.Name}.json"));
+        return _fileSystem.Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            Path,
+            $"{setting.Name.Replace(" ", "-")}.json");
     }
 }
