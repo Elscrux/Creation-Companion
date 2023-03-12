@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Services.Settings;
+using Noggog.Autofac;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class SettingsModule : Module {
@@ -19,10 +20,13 @@ public sealed class SettingsModule : Module {
         builder.RegisterType<SettingExporter>()
             .As<ISettingExporter>();
 
-        builder.RegisterType<StartupDocksSettingVM>()
-            .SingleInstance();
-
         builder.RegisterType<SettingsVM>()
             .As<ISettingsVM>();
+
+        builder.RegisterAssemblyTypes(typeof(SettingsVM).Assembly)
+            .InNamespacesOf(typeof(SettingsVM))
+            .Where(type => type.Name.EndsWith("SettingVM"))
+            .AsSelf()
+            .SingleInstance();
     }
 }
