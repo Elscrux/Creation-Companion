@@ -15,4 +15,6 @@ public interface ISetting {
     /// Is automatically filled by settings provider
     /// </summary>
     public List<ISetting> Children { get; }
+
+    public void Apply();
 }

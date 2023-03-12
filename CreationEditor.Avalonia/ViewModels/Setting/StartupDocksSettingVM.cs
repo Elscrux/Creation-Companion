@@ -60,4 +60,9 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     }
 
     public void OnExit() {}
+
+    public void Apply() {
+        // Nothing to do on this runtime
+    }
+
 }

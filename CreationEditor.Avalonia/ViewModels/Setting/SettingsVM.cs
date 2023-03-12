@@ -20,6 +20,7 @@ public sealed class SettingsVM : ViewModel, ISettingsVM {
 
         Save = ReactiveCommand.Create(() => {
             foreach (var setting in GetAllSettings()) {
+                setting.Apply();
                 settingExporter.Export(setting);
             }
         });
