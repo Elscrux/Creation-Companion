@@ -11,20 +11,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.0-pr003"/>
-        <PackageReference Include="ReactiveUI" Version="18.4.1"/>
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1"/>
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.0-pr003" />
+        <PackageReference Include="ReactiveUI" Version="18.4.1" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj"/>
-        <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj"/>
-        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj"/>
+        <ProjectReference Include="..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
+        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="ViewModels\Record\Editor\Subrecord"/>
-        <Folder Include="Views\Record\Editor\Subrecord"/>
+        <Folder Include="ViewModels\Record\Editor\Subrecord" />
+        <Folder Include="Views\Record\Editor\Subrecord" />
     </ItemGroup>
 
     <PropertyGroup>
