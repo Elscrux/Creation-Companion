@@ -23,9 +23,8 @@ public sealed class Lifecycle : ILifecycle {
 
         _lifecycleTasks = typeof(ILifecycleTask)
             .GetSubclassesOf()
-            .NotNull()
-            .Select(type => componentContext.Resolve(type) as ILifecycleTask)
-            .NotNull()
+            .Select(componentContext.Resolve)
+            .OfType<ILifecycleTask>()
             .ToList();
     }
 

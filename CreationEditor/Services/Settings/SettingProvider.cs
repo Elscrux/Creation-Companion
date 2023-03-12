@@ -12,9 +12,8 @@ public sealed class SettingProvider : ISettingProvider {
         // Get setting classes via reflection
         var settings = typeof(ISetting)
             .GetSubclassesOf()
-            .NotNull()
-            .Select(type => componentContext.Resolve(type) as ISetting)
-            .NotNull()
+            .Select(componentContext.Resolve)
+            .OfType<ISetting>()
             .ToList();
 
         // From a static parent by type structure, compile all children for runtime use

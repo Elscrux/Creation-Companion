@@ -9,10 +9,8 @@ public class RecordFilterProvider : IRecordFilterProvider {
         IComponentContext componentContext) {
         RecordFilterCache = typeof(IRecordFilter)
             .GetSubclassesOf()
-            .NotNull()
             .Select(componentContext.Resolve)
             .OfType<IRecordFilter>()
-            .NotNull()
             .ToDictionary(subRecordListing => subRecordListing.Type, subRecordListing => subRecordListing);
     }
 }

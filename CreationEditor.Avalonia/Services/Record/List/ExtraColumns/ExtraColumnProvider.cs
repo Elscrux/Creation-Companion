@@ -8,9 +8,8 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
     public ExtraColumnProvider() {
         ExtraColumnsCache = typeof(IExtraColumns)
             .GetSubclassesOf()
-            .NotNull()
-            .Select(type => Activator.CreateInstance(type) as IExtraColumns)
-            .NotNull()
+            .Select(Activator.CreateInstance)
+            .OfType<IExtraColumns>()
             .ToDictionary(extraColumns => extraColumns.Type, extraColumns => extraColumns);
     }
 }
