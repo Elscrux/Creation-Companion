@@ -4,13 +4,13 @@ using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
-using CreationEditor.Avalonia.Models.Settings;
+using CreationEditor.Avalonia.Models.Settings.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Startup;
 using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.ViewModels.Setting;
+namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
 public sealed record StartupDocksSetting(List<StartupDock> Docks);
 public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
