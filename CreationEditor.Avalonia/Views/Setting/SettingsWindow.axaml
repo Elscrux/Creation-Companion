@@ -6,6 +6,7 @@
                      xmlns:setting1="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting"
                      xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
                      mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                     Width="1000" Height="650"
                      x:CompileBindings="True" x:DataType="setting1:ISettingsVM"
                      x:Class="CreationEditor.Avalonia.Views.Setting.SettingsWindow"
                      Title="Settings">
