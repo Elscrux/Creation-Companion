@@ -230,7 +230,7 @@
                                                       VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
                                             <ItemsRepeater Items="{TemplateBinding ApplicableEditorIDs}">
                                                 <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate DataType="records:IMajorRecordIdentifier">
+                                                    <DataTemplate DataType="formKeyPicker:RecordNamePair">
                                                         <Border HorizontalAlignment="Stretch"
                                                                 VerticalAlignment="Stretch"
                                                                 Classes="ButtonHover"
@@ -239,7 +239,7 @@
                                                                 x:Name="Border">
                                                             <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
                                                                 <TextBlock Grid.Column="0"
-                                                                           Text="{CompiledBinding EditorID}"
+                                                                           Text="{CompiledBinding Name}"
                                                                            TextTrimming="CharacterEllipsis"
                                                                            FontSize="15"/>
 
@@ -247,7 +247,7 @@
                                                                            IsVisible="{Binding #Border.IsPointerOver}"
                                                                            Margin="6,0"
                                                                            Foreground="#AAAAAA"
-                                                                           Text="{CompiledBinding FormKey}"
+                                                                           Text="{CompiledBinding Record.FormKey}"
                                                                            FontSize="15"/>
                                                             </Grid>
                                                         </Border>

@@ -82,9 +82,9 @@ public class FormKeyPicker : AFormKeyPicker {
         if (_popup?.IsInsidePopup(source) is not true) return;
 
         var border = source.FindAncestorOfType<Border>(true);
-        if (border?.DataContext is not IMajorRecordIdentifier identifier) return;
+        if (border?.DataContext is not RecordNamePair identifierCustomName) return;
 
-        FormKey = identifier.FormKey;
+        FormKey = identifierCustomName.Record.FormKey;
 
         // Unfocus twice to ensure the text box doesn't get focus again
         FocusManager.Instance?.Focus(null);

@@ -15,6 +15,7 @@ using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
+using DynamicData.Binding;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -22,6 +23,8 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.FormKeyPicker;
+
+public record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
 
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
@@ -203,6 +206,12 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         protected set => SetAndRaise(ApplicableEditorIDsProperty, ref _applicableEditorIDs, value);
     }
     public static readonly DirectProperty<AFormKeyPicker, IEnumerable?> ApplicableEditorIDsProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, IEnumerable?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);
+
+    public Func<IMajorRecordIdentifier, ILinkCache?, string?> NameSelector {
+        get => GetValue(NameSelectorProperty);
+        set => SetValue(NameSelectorProperty, value);
+    }
+    public static readonly StyledProperty<Func<IMajorRecordIdentifier, ILinkCache?, string?>> NameSelectorProperty = AvaloniaProperty.Register<AFormKeyPicker, Func<IMajorRecordIdentifier, ILinkCache?, string?>>(nameof(NameSelector), (record, _) => record.EditorID);
 
     public bool ViewingAllowedTypes {
         get => GetValue(ViewingAllowedTypesProperty);
@@ -575,24 +584,30 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                             return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
                         case FormKeyPickerSearchMode.EditorID:
                             return Observable.CombineLatest(
+                                    this.WhenAnyValue(x => x.LinkCache),
                                     this.WhenAnyValue(x => x.EditorID),
                                     this.WhenAnyValue(x => x.BlacklistFormKeys),
                                     this.WhenAnyValue(x => x.Filter),
-                                    (editorId, blacklistFormKeys, filter) => (EditorID: editorId, BlacklistFormKeys: blacklistFormKeys, Filter: filter))
+                                    this.WhenAnyValue(x => x.NameSelector),
+                                    (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
+                                        => (LinkCache: linkCache,
+                                            EditorID: editorId,
+                                            BlacklistFormKeys: blacklistFormKeys,
+                                            Filter: filter,
+                                            NameSelector: nameSelector))
                                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                                 .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select<(string EditorID, ICollection<FormKey>? BlacklistFormKeys, Func<FormKey, string?, bool>? Filter), Func<IMajorRecordIdentifier, bool>>(data => {
-                                    return ident => {
+                                .Select(data => {
+                                    return new Func<IMajorRecordIdentifier, bool>(ident => {
                                         if (data.Filter != null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
                                         if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
                                         if (data.EditorID.IsNullOrWhitespace()) return true;
 
-                                        var editorID = ident.EditorID;
+                                        var editorID = data.NameSelector == null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
                                         return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
-                                    };
+                                    });
                                 });
                         case FormKeyPickerSearchMode.FormKey:
-
                             var modKeyToId = x.Cache?.ListedOrder
                                     .Select((mod, index) => (mod, index))
                                     .Take(ModIndex.MaxIndex)
@@ -620,7 +635,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                 })
                 .Switch())
             .Sort(RecordComparers.EditorIDComparer)
-            .ToObservableCollection(LoadedDisposable);
+            .ToObservableCollection(x => new RecordNamePair(x, NameSelector(x, LinkCache)), LoadedDisposable);
 
 
         this.WhenAnyValue(x => x.AllowsSearchMode)
