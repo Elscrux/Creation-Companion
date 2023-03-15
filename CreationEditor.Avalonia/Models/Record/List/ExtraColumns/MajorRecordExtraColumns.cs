@@ -12,7 +12,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
                     Header = "EditorID",
                     Binding = new Binding("Record.EditorID", BindingMode.OneWay),
                     CanUserSort = true,
-                    CustomSortComparer = RecordComparers.EditorIDComparer,
+                    CustomSortComparer = ReferencedRecordComparers.EditorIDComparer,
                     Width = new DataGridLength(200),
                 },
                 220);
@@ -22,7 +22,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
                     Header = "FormKey",
                     Binding = new Binding("Record.FormKey", BindingMode.OneWay),
                     CanUserSort = true,
-                    CustomSortComparer = RecordComparers.FormKeyComparer,
+                    CustomSortComparer = ReferencedRecordComparers.FormKeyComparer,
                     Width = new DataGridLength(100),
                 },
                 210);
@@ -32,7 +32,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
                     Header = "References",
                     Binding = new Binding("References.Count", BindingMode.OneWay),
                     CanUserSort = true,
-                    CustomSortComparer = RecordComparers.ReferenceCountComparer
+                    CustomSortComparer = ReferencedRecordComparers.ReferenceCountComparer
                 },
                 200);
         }

@@ -1,21 +1,20 @@
-﻿using CreationEditor.Services.Mutagen.References;
-using Mutagen.Bethesda.Plugins.Aspects;
+﻿using Mutagen.Bethesda.Plugins.Aspects;
+using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Comparer;
 
 public static class RecordComparers {
-    public static readonly FuncComparer<IReferencedRecord> FormKeyComparer
+    public static readonly FuncComparer<IMajorRecordIdentifier> FormKeyComparer
         = new((x, y) => {
-            var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ModKey.Name, y.Record.FormKey.ModKey.Name);
+            var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.FormKey.ModKey.Name, y.FormKey.ModKey.Name);
             if (modKeyCompare != 0) return modKeyCompare;
 
-            return StringComparer.OrdinalIgnoreCase.Compare(x.Record.FormKey.ID, y.Record.FormKey.ID);
+            return StringComparer.OrdinalIgnoreCase.Compare(x.FormKey.ID, y.FormKey.ID);
         });
 
-
-    public static readonly FuncComparer<IReferencedRecord> EditorIDComparer
+    public static readonly FuncComparer<IMajorRecordIdentifier> EditorIDComparer
         = new((x, y) => {
-            var xEditorID = x.Record.EditorID;
-            var yEditorID = y.Record.EditorID;
+            var xEditorID = x.EditorID;
+            var yEditorID = y.EditorID;
 
             var xIsNullOrEmpty = string.IsNullOrEmpty(xEditorID);
             var yIsNullOrEmpty = string.IsNullOrEmpty(yEditorID);
@@ -32,33 +31,7 @@ public static class RecordComparers {
             return FormKeyComparer.Compare(x, y);
         });
 
-    public static readonly FuncComparer<IReferencedRecord> ReferenceCountComparer
-        = new((x, y) => x.References.Count.CompareTo(y.References.Count));
-
-    public static readonly FuncComparer<IReferencedRecord> TypeComparer
-        = new((x, y) => {
-            var typeCompare = StringComparer.OrdinalIgnoreCase.Compare(x.RecordTypeName, y.RecordTypeName);
-            if (typeCompare != 0) return typeCompare;
-
-            return EditorIDComparer.Compare(x, y);
-        });
-
-    public static readonly FuncSelectorComparer<IReferencedRecord, INamedRequiredGetter> NamedRequiredComparer
-        = new(referencedRecord => referencedRecord.Record as INamedRequiredGetter,
-            (x, y) => {
-                var xName = x.Name;
-                var yName = y.Name;
-
-                var xIsNullOrEmpty = string.IsNullOrEmpty(xName);
-                var yIsNullOrEmpty = string.IsNullOrEmpty(yName);
-                if (xIsNullOrEmpty) {
-                    if (yIsNullOrEmpty) return 0;
-
-                    return 1;
-                }
-                if (yIsNullOrEmpty) return -1;
-
-                return StringComparer.OrdinalIgnoreCase.Compare(xName, yName);
-            });
-
+    public static readonly FuncSelectorComparer<IMajorRecordIdentifier, INamedRequiredGetter> NamedRequiredComparer
+        = new(referencedRecord => referencedRecord as INamedRequiredGetter,
+            (x, y) => NamedRequiredComparer.Compare(x, y));
 }

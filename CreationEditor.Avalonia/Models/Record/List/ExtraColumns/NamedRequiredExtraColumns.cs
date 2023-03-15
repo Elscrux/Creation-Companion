@@ -12,7 +12,7 @@ public sealed class NamedRequiredExtraColumns : ExtraColumns<INamedRequiredGette
                     Header = "Name",
                     Binding = new Binding("Record.Name", BindingMode.OneWay),
                     CanUserSort = true,
-                    CustomSortComparer = RecordComparers.NamedRequiredComparer,
+                    CustomSortComparer = ReferencedRecordComparers.NamedRequiredComparer,
                     Width = new DataGridLength(100),
                 },
                 99);

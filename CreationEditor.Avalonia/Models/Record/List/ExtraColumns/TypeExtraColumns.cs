@@ -11,7 +11,7 @@ public class TypeExtraColumns : IUntypedExtraColumns {
                     Header = "Type",
                     Binding = new Binding("RecordTypeName", BindingMode.OneWay),
                     CanUserSort = true,
-                    CustomSortComparer = RecordComparers.TypeComparer,
+                    CustomSortComparer = ReferencedRecordComparers.TypeComparer,
                 },
                 150);
         }
