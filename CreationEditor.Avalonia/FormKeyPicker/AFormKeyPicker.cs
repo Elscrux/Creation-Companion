@@ -11,6 +11,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
+using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
@@ -618,7 +619,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     }
                 })
                 .Switch())
-            .ObserveOnGui()
+            .Sort(RecordComparers.EditorIDComparer)
             .ToObservableCollection(LoadedDisposable);
 
 
