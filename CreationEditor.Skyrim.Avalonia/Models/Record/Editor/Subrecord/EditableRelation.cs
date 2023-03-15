@@ -1,5 +1,6 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
@@ -16,7 +17,7 @@ public sealed class EditableRelation : ReactiveObject {
         return o switch {
             EditableRelation relation => relation,
             IFormLinkIdentifier identifier =>
-                identifier.Type.IsOrContainsInterface(typeof(IRelatableGetter)) ?
+                identifier.Type.InheritsFrom(typeof(IRelatableGetter)) ?
                     new EditableRelation {
                         TargetFormKey = identifier.FormKey,
                         Reaction = CombatReaction.Neutral

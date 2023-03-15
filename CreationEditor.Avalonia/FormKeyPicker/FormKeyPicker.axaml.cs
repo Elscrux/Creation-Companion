@@ -59,8 +59,8 @@ public class FormKeyPicker : AFormKeyPicker {
         SetValue(FormLinkDragDrop.CanSetFormLinkProperty, formLink => {
             // FormLink type needs to be in scoped type
             var selectedTypes = EnabledTypes(SelectableTypes).ToList();
-            if (!selectedTypes.IsOrContainsInterface(typeof(IMajorRecordGetter))
-             && !selectedTypes.IsOrContainsInterface(formLink.Type)) return false;
+            if (!selectedTypes.AnyInheritsFrom(typeof(IMajorRecordGetter))
+             && !selectedTypes.AnyInheritsFrom(formLink.Type)) return false;
 
             // FormKey must not be blacklisted
             if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
