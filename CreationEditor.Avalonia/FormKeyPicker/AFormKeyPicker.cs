@@ -251,7 +251,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .ToObservableCollection(x => new TypeItem(x), UnloadDisposable);
 
         var selectedTypesChanged = this.WhenAnyValue(x => x.SelectableTypes)
-            .CombineLatest(SelectableTypes.SelectionChanged(), (types, _) => types);
+            .CombineLatest(SelectableTypes.SelectionChanged().StartWith(Unit.Default), (types, _) => types);
 
         AnyTypeSelected = selectedTypesChanged
             .Select(x => x.Any(typeItem => typeItem.IsSelected));
