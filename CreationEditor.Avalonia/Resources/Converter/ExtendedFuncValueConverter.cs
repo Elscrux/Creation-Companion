@@ -4,31 +4,31 @@ using Avalonia.Data.Converters;
 using Avalonia.Utilities;
 namespace CreationEditor.Avalonia.Converter;
 
-public class ExtendedFuncValueConverter<TIn, TOut> : IValueConverter {
-    private readonly Func<TIn?, TOut> _convert;
-    private readonly Func<TOut?, TIn> _convertBack;
+public class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverter {
+    private readonly Func<TIn?, TPar?, TOut> _convert;
+    private readonly Func<TOut?, TPar?, TIn>? _convertBack;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtendedFuncValueConverter{TIn, TOut}"/> class.
+    /// Initializes a new instance of the <see cref="ExtendedFuncValueConverter{TIn, TOut, TPar}"/> class.
     /// </summary>
     /// <param name="convert">The convert function.</param>
     /// <param name="convertBack">The convert back function</param>
-    public ExtendedFuncValueConverter(Func<TIn?, TOut> convert, Func<TOut?, TIn> convertBack) {
+    public ExtendedFuncValueConverter(Func<TIn?, TPar?, TOut> convert, Func<TOut?, TPar?, TIn>? convertBack = null) {
         _convert = convert;
         _convertBack = convertBack;
     }
 
     /// <inheritdoc/>
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
-        return TypeUtilities.CanCast<TIn>(value)
-            ? _convert((TIn?) value)
+        return TypeUtilities.CanCast<TIn>(value) && TypeUtilities.CanCast<TPar>(parameter)
+            ? _convert((TIn?) value, (TPar?) parameter)
             : AvaloniaProperty.UnsetValue;
     }
 
     /// <inheritdoc/>
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
-        return TypeUtilities.CanCast<TOut>(value)
-            ? _convertBack((TOut?) value)
+        return _convertBack != null && TypeUtilities.CanCast<TOut>(value) && TypeUtilities.CanCast<TPar>(parameter)
+            ? _convertBack((TOut?) value, (TPar?) parameter)
             : AvaloniaProperty.UnsetValue;
     }
 }
