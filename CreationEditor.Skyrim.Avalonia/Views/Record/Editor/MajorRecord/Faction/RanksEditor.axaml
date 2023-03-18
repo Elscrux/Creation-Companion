@@ -22,7 +22,6 @@
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRankIndex}"
-                  MinHeight="250"
                   Classes="NoCellSelection LowSpacing"
                   attached:ListShortcuts.Add="{Binding AddRank}"
                   attached:ListShortcuts.Remove="{Binding RemoveRank}">

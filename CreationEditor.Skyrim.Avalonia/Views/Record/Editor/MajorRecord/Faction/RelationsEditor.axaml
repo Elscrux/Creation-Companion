@@ -27,7 +27,6 @@
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRelationIndex}"
-                  MinHeight="250"
                   Classes="NoCellSelection LowSpacing"
                   attached:ListShortcuts.Add="{Binding AddRelation}"
                   attached:ListShortcuts.Remove="{Binding RemoveRelation}">
