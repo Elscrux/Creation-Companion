@@ -46,6 +46,15 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
 
+    /// <summary>
+    /// todo too many scoped records break the observable filter flow
+    /// </summary>
+    public IList<IMajorRecordGetter>? ScopedRecords {
+        get => GetValue(ScopedRecordsProperty);
+        set => SetValue(ScopedRecordsProperty, value);
+    }
+    public static readonly StyledProperty<IList<IMajorRecordGetter>?> ScopedRecordsProperty = AvaloniaProperty.Register<AFormKeyPicker, IList<IMajorRecordGetter>?>(nameof(ScopedRecords));
+
     public ReadOnlyObservableCollection<TypeItem> SelectableTypes {
         get => GetValue(SelectableTypesProperty);
         set => SetValue(SelectableTypesProperty, value);
@@ -277,12 +286,25 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         AnyModSelected = selectedModsChanged
             .Select(x => x.Any(modItem => modItem.IsSelected));
 
+        var scopedRecordsCollection = this.WhenAnyValue(x => x.ScopedRecords)
+            .Select(idents => (idents ?? Array.Empty<IMajorRecordGetter>()).AsObservableChangeSet())
+            .Switch()
+            .ToObservableCollection(UnloadDisposable);
+
+        var scopedRecordsChanged = this.WhenAnyValue(x => x.ScopedRecords)
+            .CombineLatest(scopedRecordsCollection.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (idents, _) => idents);
+
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
             .CombineLatest(
                 this.WhenAnyValue(x => x.LinkCache),
                 selectedTypesChanged,
-                (form, linkCache, types) => (FormKey: form, LinkCache: linkCache, Types: types))
+                scopedRecordsChanged,
+                (form, linkCache, types, scopedRecords)
+                    => (FormKey: form,
+                        LinkCache: linkCache,
+                        Types: types,
+                        ScopedRecords: scopedRecords))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormKey)
             .Do(_ => {
                 _updating = UpdatingEnum.FormKey;
@@ -300,7 +322,15 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     if (x.FormKey.IsNull) {
                         return new State(StatusIndicatorState.Passive, FormKeyNull, FormKey.Null, string.Empty);
                     }
-                    if (!x.LinkCache.TryResolve(x.FormKey, EnabledTypes(x.Types), out var record)) {
+
+                    IMajorRecordIdentifier? record = null;
+                    if (x.ScopedRecords != null) {
+                        record = x.ScopedRecords.FirstOrDefault(ident => ident.FormKey == x.FormKey);
+                    } else if (x.LinkCache.TryResolve(x.FormKey, EnabledTypes(x.Types), out var resolvedRecord)) {
+                        record = resolvedRecord;
+                    }
+
+                    if (record == null) {
                         return new State(StatusIndicatorState.Failure, RecordNotResolved, x.FormKey, string.Empty);
                     }
 
@@ -357,7 +387,14 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     x => x.BlacklistFormKeys,
                     x => x.Filter),
                 selectedTypesChanged,
-                (editorId, sources, types) => (EditorID: editorId, sources.Item2, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Filter: sources.Item3, Types: types))
+                scopedRecordsChanged,
+                (editorId, sources, types, scopedRecords)
+                    => (EditorID: editorId,
+                        LinkCache: sources.Item1,
+                        BlacklistFormKeys: sources.Item2,
+                        Filter: sources.Item3,
+                        Types: types,
+                        ScopedRecords: scopedRecords))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
             .Do(_ => {
                 _updating = UpdatingEnum.EditorID;
@@ -375,9 +412,18 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     if (string.IsNullOrWhiteSpace(x.EditorID)) {
                         return new State(StatusIndicatorState.Passive, "EditorID is empty. No lookup required", FormKey.Null, string.Empty);
                     }
-                    if (!x.LinkCache.TryResolveIdentifier(x.EditorID, EnabledTypes(x.Types), out var formKey)) {
+
+                    var formKey = FormKey.Null;
+                    if (x.ScopedRecords != null) {
+                        formKey = x.ScopedRecords.FirstOrDefault(ident => ident.EditorID == x.EditorID)?.FormKey ?? FormKey.Null;
+                    } else if (x.LinkCache.TryResolveIdentifier(x.EditorID, EnabledTypes(x.Types), out var resolvedFormKey)) {
+                        formKey = resolvedFormKey;
+                    }
+
+                    if (formKey.IsNull) {
                         return new State(StatusIndicatorState.Failure, RecordNotResolved, formKey, x.EditorID);
                     }
+
                     if (x.Filter != null && !x.Filter(formKey, x.EditorID)) {
                         return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, x.EditorID);
                     }
@@ -442,7 +488,16 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     x => x.MissingMeansError,
                     x => x.MissingMeansNull),
                 selectedTypesChanged,
-                (str, sources, types) => (Raw: str, LinkCache: sources.Item1, BlacklistFormKeys: sources.Item2, Filter: sources.Item3, Types: types, MissingMeansError: sources.Item4, MissingMeansNull: sources.Item5))
+                scopedRecordsChanged,
+                (str, sources, types, scopedRecords)
+                    => (Raw: str,
+                        LinkCache: sources.Item1,
+                        BlacklistFormKeys: sources.Item2,
+                        Filter: sources.Item3,
+                        Types: types,
+                        ScopedRecords: scopedRecords,
+                        MissingMeansError: sources.Item4,
+                        MissingMeansNull: sources.Item5))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormStr)
             .Do(_ => {
                 _updating = UpdatingEnum.FormStr;
@@ -467,7 +522,14 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                             return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
                         }
 
-                        if (!x.LinkCache.TryResolve(formKey, EnabledTypes(x.Types), out var record)) {
+                        IMajorRecordIdentifier? record = null;
+                        if (x.ScopedRecords != null) {
+                            record = x.ScopedRecords.FirstOrDefault(ident => ident.FormKey == formKey);
+                        } else if (x.LinkCache.TryResolve(formKey, EnabledTypes(x.Types), out var resolvedRecord)) {
+                            record = resolvedRecord;
+                        }
+
+                        if (record == null) {
                             return new State(
                                 x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
                                 RecordNotResolved,
@@ -548,26 +610,37 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .CombineLatest(
                 selectedModsChanged,
                 selectedTypesChanged,
-                (linkCache, selectedMods, enabledTypes) => (LinkCache: linkCache, SelectedMods: selectedMods, Types: enabledTypes))
+                scopedRecordsChanged,
+                (linkCache, selectedMods, enabledTypes, scopedRecords)
+                    => (LinkCache: linkCache,
+                        SelectedMods: selectedMods,
+                        Types: enabledTypes,
+                        ScopedRecords: scopedRecords))
             .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(x => Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
-                try {
-                    var enabledTypes = EnabledTypes(x.Types);
-                    if (!enabledTypes.Any() || x.LinkCache == null) return Task.CompletedTask;
+            .Select(x => {
+                var enabledTypes = EnabledTypes(x.Types).ToList();
+                if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
 
-                    foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
-                        if (cancel.IsCancellationRequested) return Task.CompletedTask;
+                if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => enabledTypes.Any(enabledType => r.Type.InheritsFrom(enabledType))).ToObservable();
 
-                        if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
+                return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
+                    try {
+                        if (x.LinkCache == null) return Task.CompletedTask;
 
-                        obs.OnNext(item);
+                        foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
+                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
+
+                            if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
+
+                            obs.OnNext(item);
+                        }
+                    } catch (Exception ex) {
+                        obs.OnError(ex);
                     }
-                } catch (Exception ex) {
-                    obs.OnError(ex);
-                }
-                obs.OnCompleted();
-                return Task.CompletedTask;
-            }))
+                    obs.OnCompleted();
+                    return Task.CompletedTask;
+                });
+            })
             .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifier>())
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => x.ToObservableChangeSet())
