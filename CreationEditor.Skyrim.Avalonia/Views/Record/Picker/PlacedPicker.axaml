@@ -1,0 +1,44 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="200"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Picker.PlacedPicker"
+             MinWidth="250"
+             MinHeight="175"
+             x:Name="Picker">
+    <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto">
+        <Button Grid.Row="0"
+                Content="Select in Viewport"
+                HorizontalAlignment="Stretch"/>
+
+        <HeaderedContentControl
+            Grid.Row="2"
+            Header="Cell"
+            Classes="Default">
+            <formKeyPicker:FormKeyPicker
+                LinkCache="{Binding #Picker.LinkCache}"
+                FormKey="{Binding #Picker.Cell}"
+                ScopedTypes="{x:Static constants:FormTypeConstants.CellTypes}"
+                NameSelector="{Binding #Picker.CellNameSelector}"/>
+        </HeaderedContentControl>
+
+        <HeaderedContentControl
+            Grid.Row="4"
+            Header="Reference"
+            Classes="Default">
+            <formKeyPicker:FormKeyPicker
+                LinkCache="{Binding #Picker.LinkCache}"
+                FormKey="{Binding #Picker.Placed.FormKey}"
+                ScopedRecords="{Binding #Picker.PlacedRecords}"
+                ScopedTypes="{x:Static constants:FormTypeConstants.PlacedTypes}"
+                NameSelector="{Binding #Picker.PlacedNameSelector}"/>
+        </HeaderedContentControl>
+
+        <Button Grid.Row="6"
+                Content="Go To"
+                HorizontalAlignment="Stretch"/>
+    </Grid>
+</UserControl>
