@@ -90,7 +90,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
                 switch (allowDropDataGrid.Sender) {
                     case DataGrid dataGrid:
-                        dataGrid.LoadingRow += (_, args) => {
+                        void ToggleDataGrid(DataGridRowEventArgs args) {
                             args.Row.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                             args.Row.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                             args.Row.RemoveHandler(DragDrop.DropEvent, DropDataGrid);
@@ -100,16 +100,22 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                                 args.Row.AddHandler(DragDrop.DragLeaveEvent, DragLeave);
                                 args.Row.AddHandler(DragDrop.DropEvent, DropDataGrid);
                             }
-                        };
+                        }
 
-                        dataGrid.UnloadingRow += (_, args) => {
-                            args.Row.RemoveHandler(DragDrop.DropEvent, DropDataGrid);
-                        };
+                        dataGrid.LoadingRow -= OnDataGridLoadedChanged;
+                        dataGrid.LoadingRow += OnDataGridLoadedChanged;
+
+                        dataGrid.UnloadingRow -= OnDataGridLoadedChanged;
+                        dataGrid.UnloadingRow += OnDataGridLoadedChanged;
+                        void OnDataGridLoadedChanged(object? o, DataGridRowEventArgs args) => ToggleDataGrid(args);
 
                         void DropDataGrid(object? sender, DragEventArgs e) => Drop(dataGrid, e);
                         break;
                     case Control control:
-                        void Toggle() {
+                        ToggleControl();
+                        if (state == false) return;
+
+                        void ToggleControl() {
                             control.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                             control.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                             control.RemoveHandler(DragDrop.DropEvent, Drop);
@@ -121,13 +127,13 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                             }
                         }
 
-                        control.Loaded -= OnControlOnLoaded;
-                        control.Loaded += OnControlOnLoaded;
-                        void OnControlOnLoaded(object? o, RoutedEventArgs routedEventArgs) => Toggle();
+                        control.Loaded -= OnControlLoadedChanged;
+                        control.Loaded += OnControlLoadedChanged;
 
-                        control.Unloaded -= OnControlOnUnloaded;
-                        control.Unloaded += OnControlOnUnloaded;
-                        void OnControlOnUnloaded(object? o, RoutedEventArgs routedEventArgs) => control.RemoveHandler(InputElement.PointerPressedEvent, DragStart);
+                        control.Unloaded -= OnControlLoadedChanged;
+                        control.Unloaded += OnControlLoadedChanged;
+
+                        void OnControlLoadedChanged(object? o, RoutedEventArgs routedEventArgs) => ToggleControl();
                         break;
                 }
             });
