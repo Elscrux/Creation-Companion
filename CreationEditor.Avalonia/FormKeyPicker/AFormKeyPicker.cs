@@ -14,6 +14,7 @@ using Avalonia.Media;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
+using CreationEditor.Avalonia.Views;
 using DynamicData;
 using DynamicData.Binding;
 using Loqui;
@@ -31,6 +32,12 @@ public record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
 public class AFormKeyPicker : DisposableTemplatedControl {
     private enum UpdatingEnum { None, FormKey, EditorID, FormStr }
     private UpdatingEnum _updating;
+
+    public enum FormKeyPickerSearchMode {
+        None,
+        EditorID,
+        FormKey,
+    }
 
     public readonly IDisposableDropoff LoadedDisposable = new DisposableBucket();
 

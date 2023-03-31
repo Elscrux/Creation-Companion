@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls.Primitives;
 using Noggog;
-namespace CreationEditor.Avalonia.FormKeyPicker;
+namespace CreationEditor.Avalonia.Views;
 
 public class DisposableTemplatedControl : TemplatedControl {
     protected readonly IDisposableBucket UnloadDisposable = new DisposableBucket();
