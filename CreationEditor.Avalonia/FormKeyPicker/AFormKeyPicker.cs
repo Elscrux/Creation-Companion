@@ -160,6 +160,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<ICommand> PickerClickCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(PickerClickCommand), defaultBindingMode: BindingMode.TwoWay);
 
+    private readonly Subject<FormKey> _formKeyChanged = new();
+    public IObservable<FormKey> FormKeyChanged {
+        get => GetValue(FormKeyChangedProperty);
+        set => SetValue(FormKeyChangedProperty, value);
+    }
+    public static readonly StyledProperty<IObservable<FormKey>> FormKeyChangedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<FormKey>>(nameof(FormKeyChanged), defaultBindingMode: BindingMode.OneWayToSource);
+
     public bool InSearchMode {
         get => GetValue(InSearchModeProperty);
         set => SetValue(InSearchModeProperty, value);
@@ -258,6 +265,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             Status = StatusIndicatorState.Passive;
             Found = false;
         });
+
+        FormKeyChanged = _formKeyChanged;
     }
 
     private const string LocatedRecord = "Located record";
@@ -303,6 +312,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
+            .Do(formKey => _formKeyChanged.OnNext(formKey))
             .CombineLatest(
                 this.WhenAnyValue(x => x.LinkCache),
                 selectedTypesChanged,
