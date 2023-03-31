@@ -35,7 +35,7 @@
                                 x:Key="ReturnGridLengthStarIfTrue"
                                 x:TypeArguments="system:Double"
                                 Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
-                                DefaultValue="0"/>
+                                DefaultValueConverted="{x:Static GridLength.Auto}"/>
                         </Border.Resources>
                         <Grid MinHeight="30" Margin="1"
                               MaxWidth="{TemplateBinding MaxWidth}">
