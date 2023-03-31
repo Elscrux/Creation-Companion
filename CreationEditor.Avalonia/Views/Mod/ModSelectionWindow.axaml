@@ -93,6 +93,7 @@
             <StackPanel Grid.Row="2"
                         Margin="5" Orientation="Horizontal">
                 <Button Padding="5" VerticalAlignment="Center"
+                        Classes="AccentButton"
                         IsEnabled="{Binding AnyModsLoaded^}"
                         Content="Load"
                         Command="{Binding CloseAndLoadMods}"

@@ -10,4 +10,8 @@
         <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlTransparentBrush}"/>
     </Style>
+
+    <Style Selector="Button.AccentButton">
+        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
 </Styles>
