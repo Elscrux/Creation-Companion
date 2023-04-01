@@ -7,6 +7,14 @@
         <avalonia:ViewLocator/>
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://CreationEditor.Avalonia/Views/Basic/ToggleRadioButton.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <!-- Base Avalonia Style -->
         <styling:FluentAvaloniaTheme PreferSystemTheme="True"/>

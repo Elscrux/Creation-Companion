@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <StackPanel Spacing="10">
+                <basic:ToggleRadioButton Content="Option 1" Background="Green"/>
+                <basic:ToggleRadioButton Content="Option 2"/>
+                <basic:ToggleRadioButton IsEnabled="False" Content="Option 3"/>
+                <basic:ToggleRadioButton Content="Option 2"/>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <ControlTheme x:Key="{x:Type basic:ToggleRadioButton}" TargetType="basic:ToggleRadioButton">
+        <ControlTheme.BasedOn>
+            <StaticResource ResourceKey="{x:Type RadioButton}"/>
+        </ControlTheme.BasedOn>
+    </ControlTheme>
+</ResourceDictionary>
