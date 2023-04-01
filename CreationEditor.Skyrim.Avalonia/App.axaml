@@ -22,6 +22,5 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ListBoxStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyPicker.axaml"/>
-        <StyleInclude Source="avares://CreationEditor.Avalonia/FormKeyPicker/FormKeyBox.axaml"/>
     </Application.Styles>
 </Application>
