@@ -13,6 +13,9 @@ public static class DoubleConverters {
     public static readonly FuncValueConverter<double, GridLength> ToGridLengthStar
         = new(d => new GridLength(d, GridUnitType.Star));
 
+    public static readonly FuncValueConverter<double, GridLength> ToGridLengthAuto
+        = new(d => new GridLength(d, GridUnitType.Auto));
+
     public static readonly FuncValueConverter<double, double> DivideInHalf
         = new(d => d / 2);
 
