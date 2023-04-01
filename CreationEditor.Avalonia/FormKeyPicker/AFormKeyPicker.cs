@@ -635,10 +635,10 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                         ScopedRecords: scopedRecords))
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
-                var enabledTypes = EnabledTypes(x.Types).ToList();
+                var enabledTypes = EnabledTypes(x.Types).ToArray();
                 if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
 
-                if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => enabledTypes.Any(enabledType => r.Type.InheritsFrom(enabledType))).ToObservable();
+                if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
 
                 return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
                     try {
