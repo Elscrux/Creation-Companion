@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
-using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Startup;
 
@@ -22,9 +21,7 @@ public sealed class Lifecycle : ILifecycle {
         _mainVm = mainVm;
 
         _lifecycleTasks = typeof(ILifecycleTask)
-            .GetSubclassesOf()
-            .Select(componentContext.Resolve)
-            .OfType<ILifecycleTask>()
+            .GetAllSubClass<ILifecycleTask>(componentContext.Resolve)
             .ToList();
     }
 

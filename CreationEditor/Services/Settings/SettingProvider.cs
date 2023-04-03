@@ -11,9 +11,7 @@ public sealed class SettingProvider : ISettingProvider {
         ILogger logger) {
         // Get setting classes via reflection
         var settings = typeof(ISetting)
-            .GetSubclassesOf()
-            .Select(componentContext.Resolve)
-            .OfType<ISetting>()
+            .GetAllSubClass<ISetting>(componentContext.Resolve)
             .ToList();
 
         // From a static parent by type structure, compile all children for runtime use

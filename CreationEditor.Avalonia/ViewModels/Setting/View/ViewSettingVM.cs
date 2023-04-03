@@ -4,7 +4,6 @@ using CreationEditor.Avalonia.Models.Settings.View;
 using CreationEditor.Avalonia.Services.Startup;
 using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
-using Noggog;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Setting.View;
 
@@ -31,9 +30,7 @@ public class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
         }
 
         _viewModeTemplates = typeof(IViewModeTemplate)
-            .GetSubclassesOf()
-            .Select(Activator.CreateInstance)
-            .OfType<IViewModeTemplate>()
+            .GetAllSubClass<IViewModeTemplate>()
             .ToDictionary(template => template.ViewMode, template => template);
     }
 

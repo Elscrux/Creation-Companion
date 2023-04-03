@@ -1,5 +1,4 @@
 ﻿using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
-using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnProvider : IExtraColumnProvider {
@@ -7,9 +6,7 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
 
     public ExtraColumnProvider() {
         ExtraColumnsCache = typeof(IExtraColumns)
-            .GetSubclassesOf()
-            .Select(Activator.CreateInstance)
-            .OfType<IExtraColumns>()
+            .GetAllSubClass<IExtraColumns>()
             .ToDictionary(extraColumns => extraColumns.Type, extraColumns => extraColumns);
     }
 }

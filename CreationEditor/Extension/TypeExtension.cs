@@ -21,4 +21,19 @@ public static class TypeExtension {
     public static bool AllInheritFromAny(this IEnumerable<Type> types, params Type[] inheritedTypes) {
         return types.All(type => inheritedTypes.Any(inheritedType => type.InheritsFrom(inheritedType)));
     }
+
+    public static IEnumerable<T> GetAllSubClass<T>(this Type type, Func<Type, object?> creator) {
+        return type
+            .GetSubclassesOf()
+            .Select(creator)
+            .OfType<T>();
+    }
+
+    public static IEnumerable<T> GetAllSubClass<T>(this Type type) {
+        return type.GetAllSubClass<T>(Activator.CreateInstance);
+    }
+
+    public static IEnumerable<T> GetAllSubClass<T>() {
+        return GetAllSubClass<T>(typeof(T));
+    }
 }
