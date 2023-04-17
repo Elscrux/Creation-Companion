@@ -25,7 +25,7 @@ public sealed class MainVM : ViewModel {
 
     public IDockingManagerService DockingManagerService { get; }
 
-    public ReactiveCommand<Window, Unit> OpenSelectMods { get; }
+    public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
     public ReactiveCommand<Window, Unit> OpenSettings { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
 
@@ -43,9 +43,8 @@ public sealed class MainVM : ViewModel {
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
 
-        OpenSelectMods = ReactiveCommand.Create<Window>(window => {
-            var modSelectionWindow = new ModSelectionWindow(modSelectionVM);
-            modSelectionWindow.ShowDialog(window);
+        OpenSelectMods = ReactiveCommand.Create(() => {
+            ModSelectionView.ShowAsContentDialog(modSelectionVM);
         });
 
         OpenSettings = ReactiveCommand.Create<Window>(window => {

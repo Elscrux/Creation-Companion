@@ -172,7 +172,7 @@ public sealed class ModSelectionVM : ViewModel {
         }
     }
 
-    private void LoadMods() {
+    public void LoadMods() {
         //Load all mods that are selected, or masters of selected mods
         var loadedMods = new HashSet<ModKey>();
         var missingMods = new Queue<ModKey>(SelectedMods);

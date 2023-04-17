@@ -22,8 +22,7 @@
             </Menu.ItemsPanel>
             <MenuItem Header="File">
                 <MenuItem Header="Mods"
-                          Command="{Binding OpenSelectMods}"
-                          CommandParameter="{Binding #Window}">
+                          Command="{Binding OpenSelectMods}">
                     <MenuItem.Icon>
                         <fluentIcons:FluentIcon Icon="AppsAddIn24Regular"/>
                     </MenuItem.Icon>
