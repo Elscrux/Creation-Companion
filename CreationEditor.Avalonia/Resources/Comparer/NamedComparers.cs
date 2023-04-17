@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins.Aspects;
-namespace CreationEditor.Avalonia.Comparer; 
+namespace CreationEditor.Avalonia.Comparer;
 
 public class NamedComparers {
     public static readonly FuncComparer<INamedRequiredGetter> NamedRequiredComparer

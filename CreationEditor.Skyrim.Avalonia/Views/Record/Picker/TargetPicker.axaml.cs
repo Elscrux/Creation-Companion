@@ -180,7 +180,7 @@ public partial class TargetPicker : LoadedUserControl {
         // Update the target to the selected type when the dialog closes
         this.WhenAnyValue(x => x.IsOpen)
             .Where(isOpen => isOpen == false)
-            .CombineLatest(this.WhenAnyValue(x => x.SelectedType), ((_, type) => type))
+            .CombineLatest(this.WhenAnyValue(x => x.SelectedType), (_, type) => type)
             .Subscribe(type => {
                 Target = type switch {
                     TargetPickerType.Cell => new LocationCell { Link = new FormLink<ICellGetter>(Cell) },

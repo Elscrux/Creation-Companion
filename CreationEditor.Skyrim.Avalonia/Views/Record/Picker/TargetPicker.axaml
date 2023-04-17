@@ -29,7 +29,8 @@
                               Margin="0,0,0,5">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="picker:TargetPickerType">
-                                <TextBlock Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                                <TextBlock
+                                    Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>

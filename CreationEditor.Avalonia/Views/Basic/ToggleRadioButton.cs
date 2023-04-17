@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-namespace CreationEditor.Avalonia.Views.Basic; 
+namespace CreationEditor.Avalonia.Views.Basic;
 
 public class ToggleRadioButton : RadioButton {
     protected override void OnClick() {

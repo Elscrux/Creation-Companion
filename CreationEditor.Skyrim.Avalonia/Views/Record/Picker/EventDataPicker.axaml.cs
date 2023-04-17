@@ -54,7 +54,7 @@ public partial class EventDataPicker : LoadedUserControl {
 
         // Populate the list of event members with the members of the currently selected event in the context
         EventMembers = eventObservable
-            .Select(storyManagerEvent => (storyManagerEvent == null ? Array.Empty<Enum>() : storyManagerEvent.ReferenceEnums))
+            .Select(storyManagerEvent => storyManagerEvent == null ? Array.Empty<Enum>() : storyManagerEvent.ReferenceEnums)
             .ToObservableCollection(UnloadDisposable);
 
         // Force the event member to be the right type when the list of event members changes

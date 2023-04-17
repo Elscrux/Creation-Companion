@@ -21,261 +21,265 @@
     <Style Selector="formKeyPicker|FormKeyPicker">
         <Setter Property="Template">
             <ControlTemplate>
-                    <Border
-                        Background="{DynamicResource SystemControlTransparentBrush}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <Border.Resources>
-                            <converter:ReturnParameterIfTrueConverter
-                                x:Key="ReturnGridLengthPixelIfTrue"
-                                x:TypeArguments="system:Double"
-                                Converter="{x:Static converter:DoubleConverters.ToGridLengthPixel}"
-                                DefaultValue="0"/>
-                            <converter:ReturnParameterIfTrueConverter
-                                x:Key="ReturnGridLengthStarIfTrue"
-                                x:TypeArguments="system:Double"
-                                Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
-                                DefaultValueConverted="{x:Static GridLength.Auto}"/>
-                        </Border.Resources>
-                        <Grid MinHeight="30" Margin="1"
-                              MaxWidth="{TemplateBinding MaxWidth}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthPixelIfTrue}, ConverterParameter=5}"/>
-                                <ColumnDefinition Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthStarIfTrue}, ConverterParameter=1}"/>
-                            </Grid.ColumnDefinitions>
-                            <Border x:Name="Background"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="3"
-                                    Background="{DynamicResource SystemControlTransparentBrush}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="{TemplateBinding CornerRadius}"/>
+                <Border
+                    Background="{DynamicResource SystemControlTransparentBrush}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border.Resources>
+                        <converter:ReturnParameterIfTrueConverter
+                            x:Key="ReturnGridLengthPixelIfTrue"
+                            x:TypeArguments="system:Double"
+                            Converter="{x:Static converter:DoubleConverters.ToGridLengthPixel}"
+                            DefaultValue="0"/>
+                        <converter:ReturnParameterIfTrueConverter
+                            x:Key="ReturnGridLengthStarIfTrue"
+                            x:TypeArguments="system:Double"
+                            Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
+                            DefaultValueConverted="{x:Static GridLength.Auto}"/>
+                    </Border.Resources>
+                    <Grid MinHeight="30" Margin="1"
+                          MaxWidth="{TemplateBinding MaxWidth}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition
+                                Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthPixelIfTrue}, ConverterParameter=5}"/>
+                            <ColumnDefinition
+                                Width="{Binding ShowFormKeyBox, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ReturnGridLengthStarIfTrue}, ConverterParameter=1}"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="Background"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                Background="{DynamicResource SystemControlTransparentBrush}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"/>
 
-                            <TextBox Grid.Row="0" Grid.Column="0"
-                                     x:Name="PART_EditorIDBox"
-                                     Margin="-1"
-                                     Watermark="EditorID"
-                                     Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <TextBox Grid.Row="0" Grid.Column="2"
-                                     IsVisible="{TemplateBinding ShowFormKeyBox}"
-                                     x:Name="PART_FormKeyBox"
-                                     Margin="-1"
-                                     Watermark="FormKey"
-                                     Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        <TextBox Grid.Row="0" Grid.Column="0"
+                                 x:Name="PART_EditorIDBox"
+                                 Margin="-1"
+                                 Watermark="EditorID"
+                                 Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        <TextBox Grid.Row="0" Grid.Column="2"
+                                 IsVisible="{TemplateBinding ShowFormKeyBox}"
+                                 x:Name="PART_FormKeyBox"
+                                 Margin="-1"
+                                 Watermark="FormKey"
+                                 Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
 
-                            <Button Grid.Row="0" Grid.Column="0"
-                                    Command="{TemplateBinding Clear}"
-                                    Width="10" Height="10"
-                                    Padding="0"
-                                    Margin="5"
-                                    HorizontalAlignment="Right"
-                                    Classes="Transparent"
-                                    VerticalAlignment="Center">
-                                <Button.IsVisible>
-                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                        <Binding Path="$parent.IsPointerOver"/>
-                                        <TemplateBinding Property="Found"/>
-                                    </MultiBinding>
-                                </Button.IsVisible>
+                        <Button Grid.Row="0" Grid.Column="0"
+                                Command="{TemplateBinding Clear}"
+                                Width="10" Height="10"
+                                Padding="0"
+                                Margin="5"
+                                HorizontalAlignment="Right"
+                                Classes="Transparent"
+                                VerticalAlignment="Center">
+                            <Button.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <TemplateBinding Property="Found"/>
+                                </MultiBinding>
+                            </Button.IsVisible>
 
-                                <controls:SymbolIcon Symbol="DismissFilled"
-                                                     Foreground="{DynamicResource SystemAccentColor}"
-                                                     ToolTip.Tip="Clear"/>
-                            </Button>
+                            <controls:SymbolIcon Symbol="DismissFilled"
+                                                 Foreground="{DynamicResource SystemAccentColor}"
+                                                 ToolTip.Tip="Clear"/>
+                        </Button>
 
-                            <Button Grid.Row="0" Grid.Column="2"
-                                    x:Name="PART_Dragger"
-                                    Width="20" Height="20"
-                                    Padding="0"
-                                    Margin="5"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center">
-                                <Button.IsVisible>
-                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                        <Binding Path="$parent.IsPointerOver"/>
-                                        <TemplateBinding Property="Found"/>
-                                    </MultiBinding>
-                                </Button.IsVisible>
+                        <Button Grid.Row="0" Grid.Column="2"
+                                x:Name="PART_Dragger"
+                                Width="20" Height="20"
+                                Padding="0"
+                                Margin="5"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <Button.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <TemplateBinding Property="Found"/>
+                                </MultiBinding>
+                            </Button.IsVisible>
 
-                                <controls:SymbolIcon Symbol="Target"
-                                                     Foreground="{DynamicResource SystemAccentColor}"
-                                                     ToolTip.Tip="Drag"/>
-                            </Button>
+                            <controls:SymbolIcon Symbol="Target"
+                                                 Foreground="{DynamicResource SystemAccentColor}"
+                                                 ToolTip.Tip="Drag"/>
+                        </Button>
 
-                            <Grid.Resources>
-                                <Grid x:Key="FilterGrid" ColumnDefinitions="*,5,*" MaxHeight="500">
-                                    <ScrollViewer Grid.Column="0">
-                                        <ItemsRepeater Items="{TemplateBinding SelectableTypes}">
-                                            <ItemsRepeater.ItemTemplate>
-                                                <DataTemplate DataType="selectables:TypeItem">
-                                                    <CheckBox IsChecked="{Binding IsSelected}">
-                                                        <CheckBox.Content>
-                                                            <MultiBinding
-                                                                StringFormat="{}{0} ( {1} )">
-                                                                <Binding
-                                                                    Path="Type"
-                                                                    Converter="{x:Static converter:RecordTypeConverters.ToName}"
-                                                                    Mode="OneWay"/>
-                                                                <Binding
-                                                                    Path="Type"
-                                                                    Converter="{x:Static converter:RecordTypeConverters.ToGame}"
-                                                                    Mode="OneWay"/>
-                                                            </MultiBinding>
-                                                        </CheckBox.Content>
-                                                    </CheckBox>
-                                                </DataTemplate>
-                                            </ItemsRepeater.ItemTemplate>
+                        <Grid.Resources>
+                            <Grid x:Key="FilterGrid" ColumnDefinitions="*,5,*" MaxHeight="500">
+                                <ScrollViewer Grid.Column="0">
+                                    <ItemsRepeater Items="{TemplateBinding SelectableTypes}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate DataType="selectables:TypeItem">
+                                                <CheckBox IsChecked="{Binding IsSelected}">
+                                                    <CheckBox.Content>
+                                                        <MultiBinding
+                                                            StringFormat="{}{0} ( {1} )">
+                                                            <Binding
+                                                                Path="Type"
+                                                                Converter="{x:Static converter:RecordTypeConverters.ToName}"
+                                                                Mode="OneWay"/>
+                                                            <Binding
+                                                                Path="Type"
+                                                                Converter="{x:Static converter:RecordTypeConverters.ToGame}"
+                                                                Mode="OneWay"/>
+                                                        </MultiBinding>
+                                                    </CheckBox.Content>
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
 
-                                            <ItemsRepeater.ContextFlyout>
-                                                <MenuFlyout>
-                                                    <MenuItem Header="Select All"
-                                                              Command="{x:Static command:SelectableCommand.SelectAll}"
-                                                              CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                                    <MenuItem Header="Unselect All"
-                                                              Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                                              CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                                    <MenuItem Header="Toggle All"
-                                                              Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                                              CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                                </MenuFlyout>
-                                            </ItemsRepeater.ContextFlyout>
-                                        </ItemsRepeater>
-                                    </ScrollViewer>
+                                        <ItemsRepeater.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="Select All"
+                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
+                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
+                                                <MenuItem Header="Unselect All"
+                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
+                                                <MenuItem Header="Toggle All"
+                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
+                                            </MenuFlyout>
+                                        </ItemsRepeater.ContextFlyout>
+                                    </ItemsRepeater>
+                                </ScrollViewer>
 
-                                    <ScrollViewer Grid.Column="2">
-                                        <ItemsRepeater
-                                            Items="{TemplateBinding SelectableMods}">
-                                            <ItemsRepeater.ItemTemplate>
-                                                <DataTemplate DataType="mod:ModItem">
-                                                    <CheckBox Content="{Binding ModKey.FileName}"
-                                                              IsChecked="{Binding IsSelected}"/>
-                                                </DataTemplate>
-                                            </ItemsRepeater.ItemTemplate>
+                                <ScrollViewer Grid.Column="2">
+                                    <ItemsRepeater
+                                        Items="{TemplateBinding SelectableMods}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate DataType="mod:ModItem">
+                                                <CheckBox Content="{Binding ModKey.FileName}"
+                                                          IsChecked="{Binding IsSelected}"/>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
 
-                                            <ItemsRepeater.ContextFlyout>
-                                                <MenuFlyout>
-                                                    <MenuItem Header="Select All"
-                                                              Command="{x:Static command:SelectableCommand.SelectAll}"
-                                                              CommandParameter="{TemplateBinding SelectableMods}"/>
-                                                    <MenuItem Header="Unselect All"
-                                                              Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                                              CommandParameter="{TemplateBinding SelectableMods}"/>
-                                                    <MenuItem Header="Toggle All"
-                                                              Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                                              CommandParameter="{TemplateBinding SelectableMods}"/>
-                                                </MenuFlyout>
-                                            </ItemsRepeater.ContextFlyout>
-                                        </ItemsRepeater>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Grid.Resources>
+                                        <ItemsRepeater.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="Select All"
+                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
+                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
+                                                <MenuItem Header="Unselect All"
+                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
+                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
+                                                <MenuItem Header="Toggle All"
+                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
+                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
+                                            </MenuFlyout>
+                                        </ItemsRepeater.ContextFlyout>
+                                    </ItemsRepeater>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid.Resources>
 
-                            <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
-                            <!-- PassiveBrush="{TemplateBinding PassiveBrush}" -->
-                            <!-- SuccessBrush="{TemplateBinding SuccessBrush}" -->
-                            <!-- ProcessingSpinnerForeground="{TemplateBinding ProcessingSpinnerForeground}" -->
-                            <!-- ProcessingSpinnerGlow="{TemplateBinding ProcessingSpinnerGlow}" -->
-                            <!-- Status="{TemplateBinding Status}" -->
-                            <!-- <avaloniaProgressRing:ProgressRing Grid.Row="0" Grid.Column="2" -->
-                            <!--                                    x:Name="PART_ErrorStateCircle" -->
-                            <!--                                    Margin="0,0,5,0" -->
-                            <!--                                    HorizontalAlignment="Right" -->
-                            <!--                                    VerticalAlignment="Center" -->
-                            <!--                                    IsActive="{TemplateBinding Processing}" -->
-                            <!--                                    ToolTip.Tip="{TemplateBinding StatusString}" /> -->
+                        <!-- ErrorBrush="{TemplateBinding ErrorBrush}" -->
+                        <!-- PassiveBrush="{TemplateBinding PassiveBrush}" -->
+                        <!-- SuccessBrush="{TemplateBinding SuccessBrush}" -->
+                        <!-- ProcessingSpinnerForeground="{TemplateBinding ProcessingSpinnerForeground}" -->
+                        <!-- ProcessingSpinnerGlow="{TemplateBinding ProcessingSpinnerGlow}" -->
+                        <!-- Status="{TemplateBinding Status}" -->
+                        <!-- <avaloniaProgressRing:ProgressRing Grid.Row="0" Grid.Column="2" -->
+                        <!--                                    x:Name="PART_ErrorStateCircle" -->
+                        <!--                                    Margin="0,0,5,0" -->
+                        <!--                                    HorizontalAlignment="Right" -->
+                        <!--                                    VerticalAlignment="Center" -->
+                        <!--                                    IsActive="{TemplateBinding Processing}" -->
+                        <!--                                    ToolTip.Tip="{TemplateBinding StatusString}" /> -->
 
-                            <Popup x:Name="PART_Popup"
-                                   WindowManagerAddShadowHint="False"
-                                   IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                                   Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
-                                   MinWidth="{TemplateBinding MinSearchBoxWidth}"
-                                   MaxHeight="{TemplateBinding MaxSearchBoxHeight}"
-                                   Height="{TemplateBinding SearchBoxHeight}"
-                                   HorizontalAlignment="Stretch"
-                                   PlacementTarget="Background"
-                                   IsLightDismissEnabled="True">
-                                <Border Background="{DynamicResource ComboBoxDropDownBackground}"
-                                        BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
-                                        BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
-                                        Margin="0,-1,0,-1"
-                                        Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
-                                        HorizontalAlignment="Stretch"
-                                        CornerRadius="{DynamicResource OverlayCornerRadius}">
-                                    <Grid RowDefinitions="Auto,*">
-                                        <Grid Grid.Row="0"
-                                              ColumnDefinitions="*,Auto"
-                                              Background="{DynamicResource ButtonBackground}">
-                                            <TextBlock Grid.Column="0"
-                                                       Text="Search"
-                                                       Margin="6,2"/>
+                        <Popup x:Name="PART_Popup"
+                               WindowManagerAddShadowHint="False"
+                               IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                               Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                               MinWidth="{TemplateBinding MinSearchBoxWidth}"
+                               MaxHeight="{TemplateBinding MaxSearchBoxHeight}"
+                               Height="{TemplateBinding SearchBoxHeight}"
+                               HorizontalAlignment="Stretch"
+                               PlacementTarget="Background"
+                               IsLightDismissEnabled="True">
+                            <Border Background="{DynamicResource ComboBoxDropDownBackground}"
+                                    BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
+                                    BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
+                                    Margin="0,-1,0,-1"
+                                    Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
+                                    HorizontalAlignment="Stretch"
+                                    CornerRadius="{DynamicResource OverlayCornerRadius}">
+                                <Grid RowDefinitions="Auto,*">
+                                    <Grid Grid.Row="0"
+                                          ColumnDefinitions="*,Auto"
+                                          Background="{DynamicResource ButtonBackground}">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Search"
+                                                   Margin="6,2"/>
 
-                                            <Button Grid.Column="1">
-                                                <controls:SymbolIcon Symbol="SettingsFilled"/>
+                                        <Button Grid.Column="1">
+                                            <controls:SymbolIcon Symbol="SettingsFilled"/>
 
-                                                <Button.Flyout>
-                                                    <Flyout Content="{StaticResource FilterGrid}"/>
-                                                </Button.Flyout>
-                                            </Button>
-                                        </Grid>
-
-                                        <ScrollViewer Grid.Row="1"
-                                                      HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
-                                                      VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
-                                            <ItemsRepeater Items="{TemplateBinding ApplicableEditorIDs}">
-                                                <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate DataType="formKeyPicker:RecordNamePair">
-                                                        <Border HorizontalAlignment="Stretch"
-                                                                VerticalAlignment="Stretch"
-                                                                Classes="ButtonHover"
-                                                                Padding="2"
-                                                                Background="{DynamicResource SystemControlTransparentBrush}"
-                                                                x:Name="Border">
-                                                            <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
-                                                                <TextBlock Grid.Column="0"
-                                                                           Text="{CompiledBinding Name}"
-                                                                           TextTrimming="CharacterEllipsis"
-                                                                           FontSize="15"/>
-
-                                                                <TextBlock Grid.Column="1"
-                                                                           IsVisible="{Binding #Border.IsPointerOver}"
-                                                                           Margin="6,0"
-                                                                           Foreground="#AAAAAA"
-                                                                           Text="{CompiledBinding Record.FormKey}"
-                                                                           FontSize="15"/>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
-                                        </ScrollViewer>
-
-                                        <StackPanel Grid.Row="1">
-                                            <TextBlock Text="Nothing found!">
-                                                <TextBlock.IsVisible>
-                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                        <Binding Path="!CollectingRecords" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                                        <Binding Path="!ApplicableEditorIDs.Count" RelativeSource="{RelativeSource TemplatedParent}"/>
-                                                    </MultiBinding>
-                                                </TextBlock.IsVisible>
-                                            </TextBlock>
-
-                                            <avaloniaProgressRing:ProgressRing Width="20" Height="20"
-                                                                               IsActive="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                               IsVisible="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"/>
-
-                                            <TextBlock Text="No Types Selected!"
-                                                       IsVisible="{Binding !AnyTypeSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
-
-                                            <TextBlock Text="No Mods Selected!"
-                                                       IsVisible="{Binding !AnyModSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
-                                        </StackPanel>
+                                            <Button.Flyout>
+                                                <Flyout Content="{StaticResource FilterGrid}"/>
+                                            </Button.Flyout>
+                                        </Button>
                                     </Grid>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </Border>
-                </ControlTemplate>
+
+                                    <ScrollViewer Grid.Row="1"
+                                                  HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                  VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                        <ItemsRepeater Items="{TemplateBinding ApplicableEditorIDs}">
+                                            <ItemsRepeater.ItemTemplate>
+                                                <DataTemplate DataType="formKeyPicker:RecordNamePair">
+                                                    <Border HorizontalAlignment="Stretch"
+                                                            VerticalAlignment="Stretch"
+                                                            Classes="ButtonHover"
+                                                            Padding="2"
+                                                            Background="{DynamicResource SystemControlTransparentBrush}"
+                                                            x:Name="Border">
+                                                        <Grid Margin="6,0,0,0" ColumnDefinitions="*,Auto">
+                                                            <TextBlock Grid.Column="0"
+                                                                       Text="{CompiledBinding Name}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       FontSize="15"/>
+
+                                                            <TextBlock Grid.Column="1"
+                                                                       IsVisible="{Binding #Border.IsPointerOver}"
+                                                                       Margin="6,0"
+                                                                       Foreground="#AAAAAA"
+                                                                       Text="{CompiledBinding Record.FormKey}"
+                                                                       FontSize="15"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsRepeater.ItemTemplate>
+                                        </ItemsRepeater>
+                                    </ScrollViewer>
+
+                                    <StackPanel Grid.Row="1">
+                                        <TextBlock Text="Nothing found!">
+                                            <TextBlock.IsVisible>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="!CollectingRecords"
+                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                    <Binding Path="!ApplicableEditorIDs.Count"
+                                                             RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </TextBlock.IsVisible>
+                                        </TextBlock>
+
+                                        <avaloniaProgressRing:ProgressRing Width="20" Height="20"
+                                                                           IsActive="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                           IsVisible="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"/>
+
+                                        <TextBlock Text="No Types Selected!"
+                                                   IsVisible="{Binding !AnyTypeSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
+
+                                        <TextBlock Text="No Mods Selected!"
+                                                   IsVisible="{Binding !AnyModSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
         </Setter>
     </Style>
 </Styles>

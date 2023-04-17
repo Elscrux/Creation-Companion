@@ -23,7 +23,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
         if (parameterControls is not [ComboBox functionBox, ComboBox, FormKeyPicker formKeyPicker]) return;
 
         var functionChanged = functionBox.GetObservable(SelectingItemsControl.SelectedItemProperty);
-        functionChanged.Subscribe((selected => {
+        functionChanged.Subscribe(selected => {
             if (selected is not GetEventDataConditionData.EventFunction eventFunction) return;
 
             // Clear the form key picker
@@ -46,7 +46,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                     formKeyPicker.IsVisible = false;
                     break;
             }
-        }));
+        });
 
         questContext.Subscribe(quest => {
             if (quest?.Event == null) return;

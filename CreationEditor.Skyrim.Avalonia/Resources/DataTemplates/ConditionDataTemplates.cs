@@ -213,9 +213,9 @@ public class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
         var parameterIsAlwaysPackageData = parameter.Contains("PackageDataIndex", StringComparison.OrdinalIgnoreCase);
 
         var useAliases = parameterIsAlwaysAlias
-         || QuestContext != null && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.AllAliasTypes);
+         || (QuestContext != null && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.AllAliasTypes));
         var usePackageData = parameterIsAlwaysPackageData
-         || Context is IPackageGetter && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.PackageDataTypes);
+         || (Context is IPackageGetter && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.PackageDataTypes));
 
         if (!useAliases && !usePackageData) return control;
 

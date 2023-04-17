@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
-using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.Services.Busy;

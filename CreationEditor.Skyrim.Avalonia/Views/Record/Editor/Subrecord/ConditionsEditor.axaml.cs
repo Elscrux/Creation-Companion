@@ -124,7 +124,7 @@ public partial class ConditionsEditor : LoadedUserControl {
         get => GetValue(FunctionTemplateProperty);
         set => SetValue(FunctionTemplateProperty, value);
     }
-    
+
     public static Func<object, bool> CanDrop { get; } = o => o is EditableCondition;
 
     public ConditionsEditor() {

@@ -164,7 +164,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         foreach (var selectedItem in validItems) {
             oldList.Remove(selectedItem);
         }
-        
+
         // Add new items
         foreach (var selectedItem in validItems) {
             newList.Add(selectedItem);

@@ -10,7 +10,6 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
 public partial class PlacedPickerButton : UserControl {
@@ -84,7 +83,7 @@ public partial class PlacedPickerButton : UserControl {
         var pickerUpdated = this.WhenAnyValue(
                 x => x.LinkCache,
                 x => x.Cell,
-                ((linkCache, cell) => (LinkCache: linkCache, Cell: cell)))
+                (linkCache, cell) => (LinkCache: linkCache, Cell: cell))
             .CombineLatest(placedChanged, (x, placed) => (x.LinkCache, x.Cell, Placed: placed));
 
         // Update the cell when the cell is not set and placed is set

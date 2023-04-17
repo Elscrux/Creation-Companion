@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim.Avalonia.Resources.Constants; 
+namespace CreationEditor.Skyrim.Avalonia.Resources.Constants;
 
 public class ConditionConstants {
     public static readonly IEnumerable<Condition.Function> PerkOnlyFunctions

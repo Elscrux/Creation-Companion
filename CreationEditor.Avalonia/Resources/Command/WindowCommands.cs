@@ -1,7 +1,7 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.Command; 
+namespace CreationEditor.Avalonia.Command;
 
 public class WindowCommands {
     public static readonly ReactiveCommand<Window?, Unit> Close =

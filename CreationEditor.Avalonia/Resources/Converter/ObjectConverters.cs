@@ -2,5 +2,5 @@
 
 public static class ObjectConverters {
     public new static readonly ExtendedFuncValueConverter<object, bool, object> Equals
-        = new(((obj, parameter) => Equals(obj, parameter)));
+        = new((obj, parameter) => Equals(obj, parameter));
 }

@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Resources.Converter;
 
 public static class CellConverters {
-    public static readonly ExtendedFuncValueConverter<ICellGetter, string?, ILinkCache> ToName = new(((record, linkCache) => {
+    public static readonly ExtendedFuncValueConverter<ICellGetter, string?, ILinkCache> ToName = new((record, linkCache) => {
         if (record == null) return null;
 
         var editorID = record.EditorID;
@@ -19,5 +19,5 @@ public static class CellConverters {
         }
 
         return null;
-    }));
+    });
 }

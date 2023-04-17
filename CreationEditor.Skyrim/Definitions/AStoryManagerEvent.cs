@@ -18,5 +18,5 @@ public abstract class AStoryManagerEvent {
             var int32 = Convert.ToInt32(x);
             return ReferenceValues.All(y => y != int32);
         }).ToList();
-    } 
+    }
 }

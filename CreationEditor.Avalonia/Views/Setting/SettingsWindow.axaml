@@ -13,11 +13,11 @@
                      x:Name="Window"
                      Title="Settings">
     <windowing:AppWindow.KeyBindings>
-        <KeyBinding 
+        <KeyBinding
             Gesture="Escape"
             Command="{x:Static command:WindowCommands.Close}"
             CommandParameter="{Binding #Window}"/>
     </windowing:AppWindow.KeyBindings>
-    
+
     <setting:SettingsView DataContext="{Binding}"/>
 </windowing:AppWindow>
