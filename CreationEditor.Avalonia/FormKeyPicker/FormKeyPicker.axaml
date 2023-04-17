@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker"
         xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
-        xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
         xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
         xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
         xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables"
@@ -80,9 +79,9 @@
                                     </MultiBinding>
                                 </Button.IsVisible>
 
-                                <fluentIcons:FluentIcon Icon="Dismiss12Filled"
-                                                        Foreground="{DynamicResource SystemAccentColor}"
-                                                        ToolTip.Tip="Clear"/>
+                                <controls:SymbolIcon Symbol="DismissFilled"
+                                                     Foreground="{DynamicResource SystemAccentColor}"
+                                                     ToolTip.Tip="Clear"/>
                             </Button>
 
                             <Button Grid.Row="0" Grid.Column="2"
@@ -99,9 +98,9 @@
                                     </MultiBinding>
                                 </Button.IsVisible>
 
-                                <fluentIcons:FluentIcon Icon="Cursor20Filled"
-                                                        Foreground="{DynamicResource SystemAccentColor}"
-                                                        ToolTip.Tip="Drag"/>
+                                <controls:SymbolIcon Symbol="Target"
+                                                     Foreground="{DynamicResource SystemAccentColor}"
+                                                     ToolTip.Tip="Drag"/>
                             </Button>
 
                             <Grid.Resources>
@@ -212,7 +211,7 @@
                                                        Margin="6,2"/>
 
                                             <Button Grid.Column="1">
-                                                <fluentIcons:FluentIcon Icon="Settings24Filled"/>
+                                                <controls:SymbolIcon Symbol="SettingsFilled"/>
 
                                                 <Button.Flyout>
                                                     <Flyout Content="{StaticResource FilterGrid}"/>

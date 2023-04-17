@@ -111,7 +111,7 @@ public sealed class DockDropBehavior : Behavior<Control> {
         return true;
     }
 
-    private static Dock GetDockType(DragEventArgs e, IVisual visual) {
+    private static Dock GetDockType(DragEventArgs e, Visual visual) {
         var position = e.GetPosition(visual);
 
         var dockPositions = new List<(double Distance, Dock Dock)> {

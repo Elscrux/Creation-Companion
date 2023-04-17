@@ -32,7 +32,7 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
             .Subscribe(args => HandleCommandChanged(args.Sender, args.NewValue.GetValueOrDefault<ICommand>()));
     }
 
-    private static void HandleCommandChanged(IAvaloniaObject element, ICommand? commandValue) {
+    private static void HandleCommandChanged(AvaloniaObject element, ICommand? commandValue) {
         if (element is Interactive interactElem) {
             if (commandValue != null) {
                 interactElem.AddHandler(InputElement.DoubleTappedEvent, DoubleTappedEventHandler);

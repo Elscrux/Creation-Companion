@@ -17,8 +17,7 @@
 
     <Application.Styles>
         <!-- Base Avalonia Style -->
-        <styling:FluentAvaloniaTheme PreferSystemTheme="True"/>
-        <StyleInclude Source="avares://FluentAvalonia.UI.Windowing/Styles/FAWindowingStyles.axaml"/>
+        <styling:FluentAvaloniaTheme PreferUserAccentColor="True" PreferSystemTheme="True"/>
 
         <!-- Avalonia Addons Style -->
         <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>

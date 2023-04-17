@@ -2,11 +2,11 @@
     x:Class="CreationEditor.Avalonia.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia.UI.Windowing"
+    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
     xmlns:notificationView="clr-namespace:CreationEditor.Avalonia.Views.Notification"
     xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
     xmlns:viewModels="clr-namespace:CreationEditor.Avalonia.ViewModels"
-    xmlns:fluentIcons="clr-namespace:FluentAvalonia.FluentIcons;assembly=FluentAvalonia.FluentIcons"
+    xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:notification="clr-namespace:CreationEditor.Services.Notification;assembly=CreationEditor"
     xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
     Title="{Binding WindowTitleObs^}"
@@ -24,20 +24,20 @@
                 <MenuItem Header="Mods"
                           Command="{Binding OpenSelectMods}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="AppsAddIn24Regular"/>
+                        <controls:SymbolIcon Symbol="Library"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Settings"
                           Command="{Binding OpenSettings}"
                           CommandParameter="{Binding #Window}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="Settings24Regular"/>
+                        <controls:SymbolIcon Symbol="Settings"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Save"
                           Command="{Binding Save}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="Save24Regular"/>
+                        <controls:SymbolIcon Symbol="Save"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
@@ -46,28 +46,28 @@
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.Log}">
                     <MenuItem.Icon>
-
+                        <controls:SymbolIcon Symbol="Message"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Record Browser"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="TextBulletListLtr24Regular"/>
+                        <controls:SymbolIcon Symbol="BulletList"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Cell Browser"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.CellBrowser}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="AppFolder24Regular"/>
+                        <controls:SymbolIcon Symbol="Image"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Viewport"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.Viewport}">
                     <MenuItem.Icon>
-                        <fluentIcons:FluentIcon Icon="Desktop24Regular"/>
+                        <controls:SymbolIcon Symbol="Pictures"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>

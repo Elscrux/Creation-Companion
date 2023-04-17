@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using FluentAvalonia.UI.Windowing;
 namespace CreationEditor.Skyrim.Avalonia;
 
 internal static class Program {
@@ -17,6 +16,5 @@ internal static class Program {
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
-            .UseFAWindowing()
             .UseReactiveUI();
 }

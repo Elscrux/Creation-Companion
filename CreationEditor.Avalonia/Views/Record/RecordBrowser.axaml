@@ -35,6 +35,8 @@
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
                         <TextBlock Text="{Binding GroupName}">
                             <Interaction.Behaviors>
+                                <!-- todo remove one behavior when bug is fixed that requires to set the expanded state twice -->
+                                <ToggleIsExpandedOnDoubleTappedBehavior/>
                                 <ToggleIsExpandedOnDoubleTappedBehavior/>
                                 <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsExpanded}">
                                     <DataTriggerBehavior.Value>

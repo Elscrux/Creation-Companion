@@ -78,7 +78,7 @@ public class FormKeyPicker : AFormKeyPicker {
     protected override void OnPointerReleased(PointerReleasedEventArgs e) {
         base.OnPointerReleased(e);
 
-        if (e is not { Handled: false, Source: IVisual source }) return;
+        if (e is not { Handled: false, Source: Visual source }) return;
         if (_popup?.IsInsidePopup(source) is not true) return;
 
         var border = source.FindAncestorOfType<Border>(true);
