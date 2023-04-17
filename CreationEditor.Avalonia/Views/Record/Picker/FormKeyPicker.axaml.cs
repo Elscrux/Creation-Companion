@@ -7,7 +7,7 @@ using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Attached;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Avalonia.FormKeyPicker;
+namespace CreationEditor.Avalonia.Views.Record.Picker;
 
 // Ported from Mutagen.Bethesda.WPF by Noggog
 [TemplatePart(Name = "PART_Popup", Type = typeof(Popup))]

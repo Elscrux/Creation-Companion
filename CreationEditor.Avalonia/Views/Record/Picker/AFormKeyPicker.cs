@@ -14,7 +14,6 @@ using Avalonia.Media;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
-using CreationEditor.Avalonia.Views;
 using DynamicData;
 using DynamicData.Binding;
 using Loqui;
@@ -23,9 +22,15 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.FormKeyPicker;
+namespace CreationEditor.Avalonia.Views.Record.Picker;
 
 public record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
+
+public enum StatusIndicatorState {
+    Passive,
+    Success,
+    Failure,
+}
 
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]

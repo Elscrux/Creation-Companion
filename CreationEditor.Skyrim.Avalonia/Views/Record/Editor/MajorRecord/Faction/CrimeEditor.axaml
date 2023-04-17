@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
              xmlns:faction="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
              xmlns:picker="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Picker"
+             xmlns:picker1="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.CrimeEditor"
              x:CompileBindings="True" x:DataType="faction:FactionEditorVM">
@@ -125,7 +125,7 @@
                                                 Margin="5"
                                                 Header="Jail Outfit"
                                                 ToolTip.Tip="The clothes given to the player in prison. Usually BeggarOutfit.">
-                            <formKeyPicker:FormKeyPicker
+                            <picker1:FormKeyPicker
                                 FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.OutfitTypes}"
                                 LinkCache="{Binding LinkCache}"/>
@@ -135,7 +135,7 @@
                                                 Margin="5"
                                                 Header="Shared Crime Faction List"
                                                 ToolTip.Tip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown.">
-                            <formKeyPicker:FormKeyPicker
+                            <picker1:FormKeyPicker
                                 FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
                                 LinkCache="{Binding LinkCache}"/>

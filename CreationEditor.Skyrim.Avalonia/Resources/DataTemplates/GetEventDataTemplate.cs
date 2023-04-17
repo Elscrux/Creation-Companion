@@ -9,7 +9,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using CreationEditor.Avalonia.Converter;
-using CreationEditor.Avalonia.FormKeyPicker;
+using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using CreationEditor.Skyrim.Definitions;
 using Mutagen.Bethesda.Plugins;

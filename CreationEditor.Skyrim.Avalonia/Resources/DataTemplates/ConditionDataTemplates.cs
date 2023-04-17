@@ -11,7 +11,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using CreationEditor.Avalonia;
-using CreationEditor.Avalonia.FormKeyPicker;
+using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Picker;

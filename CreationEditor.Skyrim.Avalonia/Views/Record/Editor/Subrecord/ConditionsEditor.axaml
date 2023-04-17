@@ -6,7 +6,6 @@
              xmlns:model="clr-namespace:CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord"
              xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
-             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:subrecord="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord"
              xmlns:dataTemplates="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.DataTemplates"
              xmlns:converter="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter"
@@ -14,6 +13,7 @@
              xmlns:picker="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Picker"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:picker1="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord.ConditionsEditor"
              x:Name="Editor">
@@ -222,7 +222,7 @@
                                 </NumericUpDown.IsVisible>
                             </NumericUpDown>
 
-                            <formKeyPicker:FormKeyPicker
+                            <picker1:FormKeyPicker
                                 Grid.Column="1"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Stretch"

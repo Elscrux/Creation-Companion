@@ -6,10 +6,10 @@
              xmlns:skyrim="clr-namespace:Mutagen.Bethesda.Skyrim;assembly=Mutagen.Bethesda.Skyrim"
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
              xmlns:tooltips="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Converter"
-             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:view="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction"
              xmlns:vm="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
              xmlns:subrecord="clr-namespace:CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord"
+             xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.RelationsEditor"
              x:CompileBindings="True" x:DataType="vm:RelationEditorVM">
@@ -62,7 +62,7 @@
 
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="subrecord:EditableRelation">
-                            <formKeyPicker:FormKeyPicker
+                            <picker:FormKeyPicker
                                 BlacklistFormKeys="{ReflectionBinding $parent[view:RelationsEditor].ViewModel.BlacklistedFormKeys}"
                                 FormKey="{ReflectionBinding TargetFormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.RelatableTypes}"

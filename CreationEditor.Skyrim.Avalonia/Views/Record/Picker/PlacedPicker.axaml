@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
+             xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="200"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Picker.PlacedPicker"
              MinWidth="250"
@@ -18,7 +18,7 @@
             Grid.Row="2"
             Header="Cell"
             Classes="Default">
-            <formKeyPicker:FormKeyPicker
+            <picker:FormKeyPicker
                 LinkCache="{Binding #Picker.LinkCache}"
                 FormKey="{Binding #Picker.Cell}"
                 ScopedTypes="{x:Static constants:RecordTypeConstants.CellTypes}"
@@ -29,7 +29,7 @@
             Grid.Row="4"
             Header="Reference"
             Classes="Default">
-            <formKeyPicker:FormKeyPicker
+            <picker:FormKeyPicker
                 x:Name="FormKeyPicker"
                 LinkCache="{Binding #Picker.LinkCache}"
                 FormKey="{Binding #Picker.PlacedFormKey}"
