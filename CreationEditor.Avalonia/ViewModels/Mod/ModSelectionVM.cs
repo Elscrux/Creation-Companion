@@ -85,20 +85,24 @@ public sealed class ModSelectionVM : ViewModel {
             .Select(collection => collection.Any(mod => mod.IsSelected));
 
         var modActivated = connectedMods
-            .AutoRefresh(modItem => modItem.IsActive)
-            .ToCollection();
+            .AutoRefresh(modItem => modItem.IsActive);
 
         AnyModsActive = modActivated
+            .ToCollection()
             .Select(collection => collection.Any(mod => mod.IsActive));
 
         modActivated
-            .Subscribe(changedMods => {
-                foreach (var changedMod in changedMods) {
-                    if (changedMod is { IsActive: true }) {
-                        _mods.Items.Where(mod => mod != changedMod)
-                            .ForEach(modItem => modItem.IsActive = false);
+            .CombineLatest(this.WhenAnyValue(x => x._mods), (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
+            .Subscribe(x => {
+                var loadOrderModItems = x.ChangedMods.Select(x => x.Current).Where(x => x.IsActive).ToList();
+                if (loadOrderModItems.Count == 0) return;
+
+                var newActive = loadOrderModItems.First();
+
+                foreach (var item in x.AllMods.Items) {
+                    if (newActive != item) {
+                        item.IsActive = false;
                     }
-                    break;
                 }
             });
 
