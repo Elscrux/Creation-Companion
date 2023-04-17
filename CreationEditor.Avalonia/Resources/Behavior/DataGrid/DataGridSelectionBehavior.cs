@@ -78,8 +78,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                     HorizontalAlignment = HorizontalAlignment.Center,
                 };
 
-                checkBox.AddHandler(ToggleButton.CheckedEvent, (_, _) => SelectAllItems());
-                checkBox.AddHandler(ToggleButton.UncheckedEvent, (_, _) => SelectAllItems(false));
+                checkBox.AddHandler(ToggleButton.IsCheckedChangedEvent, (_, e) => {
+                    if (e.Source is ToggleButton { IsChecked: {} isChecked }) {
+                        SelectAllItems(isChecked);
+                    }
+                });
 
                 return checkBox;
             }),
