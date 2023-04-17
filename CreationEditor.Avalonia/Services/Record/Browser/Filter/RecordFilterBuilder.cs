@@ -1,5 +1,4 @@
-﻿using AvaloniaEdit.Utils;
-using CreationEditor.Avalonia.Models.Record.Browser;
+﻿using CreationEditor.Avalonia.Models.Record.Browser;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;

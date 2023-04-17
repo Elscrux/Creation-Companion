@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels;
 using FluentAvalonia.UI.Windowing;
@@ -19,7 +18,6 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         get => ViewModel;
         set => ViewModel = (MainVM?) value;
     }
-    public Window XWindow => this;
 
     public MainWindow() {
         InitializeComponent();

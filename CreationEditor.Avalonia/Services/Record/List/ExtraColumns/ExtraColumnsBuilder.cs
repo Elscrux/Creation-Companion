@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using AvaloniaEdit.Utils;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;

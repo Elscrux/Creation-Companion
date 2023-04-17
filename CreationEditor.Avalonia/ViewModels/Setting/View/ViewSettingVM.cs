@@ -8,9 +8,9 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Setting.View;
 
 public sealed record ViewSetting(ViewMode ViewMode);
-public class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<ViewMode> ViewModes = Enum.GetValues<ViewMode>();
-    
+
     public string Name => "View";
     public Type? Parent => null;
     public List<ISetting> Children { get; } = new();

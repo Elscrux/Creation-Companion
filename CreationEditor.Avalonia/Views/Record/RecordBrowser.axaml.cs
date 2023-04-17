@@ -7,9 +7,7 @@ public partial class RecordBrowser : ReactiveUserControl<IRecordBrowserVM> {
         InitializeComponent();
     }
 
-    public RecordBrowser(IRecordBrowserVM recordBrowserVM) {
-        InitializeComponent();
-
+    public RecordBrowser(IRecordBrowserVM recordBrowserVM) : this() {
         DataContext = recordBrowserVM;
     }
 }
