@@ -16,4 +16,17 @@ public static class EnumExtension {
                 return false;
         }
     }
+
+    public static Enum ToEnum(this Enum @enum) {
+        return @enum.ToEnum(@enum.GetType());
+    }
+
+    public static Enum ToEnum(this Enum @enum, Type type) {
+        return (Enum) Enum.ToObject(type, @enum);
+    }
+
+    public static TEnum ToEnum<TEnum>(this Enum @enum)
+        where TEnum : Enum {
+        return (TEnum) Enum.ToObject(typeof(TEnum), @enum);
+    }
 }
