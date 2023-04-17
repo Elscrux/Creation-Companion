@@ -186,6 +186,13 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly DirectProperty<AFormKeyPicker, FormKeyPickerSearchMode> SearchModeProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, FormKeyPickerSearchMode>(nameof(SearchMode), picker => picker.SearchMode);
 
+    public static readonly StyledProperty<bool> CollectingRecordsProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(CollectingRecords));
+
+    public bool CollectingRecords {
+        get => GetValue(CollectingRecordsProperty);
+        set => SetValue(CollectingRecordsProperty, value);
+    }
+
     #region Theming
     public Brush ProcessingSpinnerForeground {
         get => GetValue(ProcessingSpinnerForegroundProperty);
@@ -223,12 +230,12 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     }
     public static readonly StyledProperty<bool> AllowsSearchModeProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(AllowsSearchMode), true, defaultBindingMode: BindingMode.TwoWay);
 
-    private IEnumerable? _applicableEditorIDs;
-    public IEnumerable? ApplicableEditorIDs {
+    private IList? _applicableEditorIDs;
+    public IList? ApplicableEditorIDs {
         get => _applicableEditorIDs;
         protected set => SetAndRaise(ApplicableEditorIDsProperty, ref _applicableEditorIDs, value);
     }
-    public static readonly DirectProperty<AFormKeyPicker, IEnumerable?> ApplicableEditorIDsProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, IEnumerable?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);
+    public static readonly DirectProperty<AFormKeyPicker, IList?> ApplicableEditorIDsProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, IList?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);
 
     public Func<IMajorRecordIdentifier, ILinkCache?, string?> NameSelector {
         get => GetValue(NameSelectorProperty);
@@ -312,7 +319,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
 
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
-            .Do(formKey => _formKeyChanged.OnNext(formKey))
+            .Subscribe(formKey => _formKeyChanged.OnNext(formKey))
+            .DisposeWith(UnloadDisposable);
+
+        this.WhenAnyValue(x => x.FormKey)
+            .DistinctUntilChanged()
             .CombineLatest(
                 this.WhenAnyValue(x => x.LinkCache),
                 selectedTypesChanged,
@@ -623,110 +634,114 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .DisposeWith(UnloadDisposable);
 
         ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-            .CombineLatest(
-                selectedModsChanged,
-                selectedTypesChanged,
-                scopedRecordsChanged,
-                (linkCache, selectedMods, enabledTypes, scopedRecords)
-                    => (LinkCache: linkCache,
-                        SelectedMods: selectedMods,
-                        Types: enabledTypes,
-                        ScopedRecords: scopedRecords))
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(x => {
-                var enabledTypes = EnabledTypes(x.Types).ToArray();
-                if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
-
-                if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
-
-                return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
-                    try {
-                        if (x.LinkCache == null) return Task.CompletedTask;
-
-                        foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
-                            if (cancel.IsCancellationRequested) return Task.CompletedTask;
-
-                            if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
-
-                            obs.OnNext(item);
-                        }
-                    } catch (Exception ex) {
-                        obs.OnError(ex);
-                    }
-                    obs.OnCompleted();
-                    return Task.CompletedTask;
-                });
-            })
-            .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifier>())
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(x => x.ToObservableChangeSet())
-            .Switch()
-            .ObserveOnGui()
-            .Filter(Observable.CombineLatest(
-                    this.WhenAnyValue(x => x.SearchMode)
-                        .DistinctUntilChanged(),
-                    this.WhenAnyValue(x => x.LinkCache),
-                    (searchMode, cache) => (SearchMode: searchMode, Cache: cache))
+            .WrapInInProgressMarker(x => x
+                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .CombineLatest(
+                    selectedModsChanged,
+                    selectedTypesChanged,
+                    scopedRecordsChanged,
+                    (linkCache, selectedMods, enabledTypes, scopedRecords)
+                        => (LinkCache: linkCache,
+                            SelectedMods: selectedMods,
+                            Types: enabledTypes,
+                            ScopedRecords: scopedRecords))
+                .ObserveOn(RxApp.TaskpoolScheduler)
                 .Select(x => {
-                    switch (x.SearchMode) {
-                        case FormKeyPickerSearchMode.None:
-                            return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
-                        case FormKeyPickerSearchMode.EditorID:
-                            return Observable.CombineLatest(
-                                    this.WhenAnyValue(x => x.LinkCache),
-                                    this.WhenAnyValue(x => x.EditorID),
-                                    this.WhenAnyValue(x => x.BlacklistFormKeys),
-                                    this.WhenAnyValue(x => x.Filter),
-                                    this.WhenAnyValue(x => x.NameSelector),
-                                    (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
-                                        => (LinkCache: linkCache,
-                                            EditorID: editorId,
-                                            BlacklistFormKeys: blacklistFormKeys,
-                                            Filter: filter,
-                                            NameSelector: nameSelector))
-                                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-                                .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select(data => {
-                                    return new Func<IMajorRecordIdentifier, bool>(ident => {
-                                        if (data.Filter != null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
-                                        if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
-                                        if (data.EditorID.IsNullOrWhitespace()) return true;
+                    var enabledTypes = EnabledTypes(x.Types).ToArray();
+                    if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
 
-                                        var editorID = data.NameSelector == null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
-                                        return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
-                                    });
-                                });
-                        case FormKeyPickerSearchMode.FormKey:
-                            var modKeyToId = x.Cache?.ListedOrder
-                                    .Select((mod, index) => (mod, index))
-                                    .Take(ModIndex.MaxIndex)
-                                    .ToDictionary(x => x.mod.ModKey, x => (byte) x.index)
-                             ?? default;
+                    if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
 
-                            return this.WhenAnyValue(x => x.FormKeyStr)
-                                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
-                                .ObserveOn(RxApp.TaskpoolScheduler)
-                                .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
-                                .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
-                                    var fk = ident.FormKey;
-                                    if (fk == term.FormKey) return true;
-                                    if (term.ID == null) return false;
+                    return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
+                        try {
+                            if (x.LinkCache == null) return Task.CompletedTask;
 
-                                    if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
-                                    if (modKeyToId == null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
+                            foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
+                                if (cancel.IsCancellationRequested) return Task.CompletedTask;
 
-                                    var formID = new FormID(new ModIndex(index), fk.ID);
-                                    return formID.Raw == term.ID.Value.Raw;
-                                });
-                        default:
-                            throw new NotImplementedException();
-                    }
+                                if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
+
+                                obs.OnNext(item);
+                            }
+                        } catch (Exception ex) {
+                            obs.OnError(ex);
+                        }
+                        obs.OnCompleted();
+                        return Task.CompletedTask;
+                    });
                 })
-                .Switch())
-            .Sort(RecordComparers.EditorIDComparer)
+                .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifier>())
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .Select(x => x.ToObservableChangeSet())
+                .Switch()
+                .ObserveOnGui()
+                .Filter(Observable.CombineLatest(
+                        this.WhenAnyValue(x => x.SearchMode)
+                            .DistinctUntilChanged(),
+                        this.WhenAnyValue(x => x.LinkCache),
+                        (searchMode, cache) => (SearchMode: searchMode, Cache: cache))
+                    .Select(x => {
+                        switch (x.SearchMode) {
+                            case FormKeyPickerSearchMode.None:
+                                return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
+                            case FormKeyPickerSearchMode.EditorID:
+                                return Observable.CombineLatest(
+                                        this.WhenAnyValue(x => x.LinkCache),
+                                        this.WhenAnyValue(x => x.EditorID),
+                                        this.WhenAnyValue(x => x.BlacklistFormKeys),
+                                        this.WhenAnyValue(x => x.Filter),
+                                        this.WhenAnyValue(x => x.NameSelector),
+                                        (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
+                                            => (LinkCache: linkCache,
+                                                EditorID: editorId,
+                                                BlacklistFormKeys: blacklistFormKeys,
+                                                Filter: filter,
+                                                NameSelector: nameSelector))
+                                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                                    .ObserveOn(RxApp.TaskpoolScheduler)
+                                    .Select(data => {
+                                        return new Func<IMajorRecordIdentifier, bool>(ident => {
+                                            if (data.Filter != null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
+                                            if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
+                                            if (data.EditorID.IsNullOrWhitespace()) return true;
+
+                                            var editorID = data.NameSelector == null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
+                                            return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
+                                        });
+                                    });
+                            case FormKeyPickerSearchMode.FormKey:
+                                var modKeyToId = x.Cache?.ListedOrder
+                                        .Select((mod, index) => (mod, index))
+                                        .Take(ModIndex.MaxIndex)
+                                        .ToDictionary(x => x.mod.ModKey, x => (byte) x.index)
+                                 ?? default;
+
+                                return this.WhenAnyValue(x => x.FormKeyStr)
+                                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                                    .ObserveOn(RxApp.TaskpoolScheduler)
+                                    .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
+                                    .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
+                                        var fk = ident.FormKey;
+                                        if (fk == term.FormKey) return true;
+                                        if (term.ID == null) return false;
+
+                                        if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
+                                        if (modKeyToId == null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
+
+                                        var formID = new FormID(new ModIndex(index), fk.ID);
+                                        return formID.Raw == term.ID.Value.Raw;
+                                    });
+                            default:
+                                throw new NotImplementedException();
+                        }
+                    })
+                    .Switch())
+                .Sort(RecordComparers.EditorIDComparer), out var collectingRecords)
             .ToObservableCollection(x => new RecordNamePair(x, NameSelector(x, LinkCache)), LoadedDisposable);
 
+        collectingRecords
+            .ObserveOnGui()
+            .Subscribe(x => CollectingRecords = x);
 
         this.WhenAnyValue(x => x.AllowsSearchMode)
             .Where(x => !x)

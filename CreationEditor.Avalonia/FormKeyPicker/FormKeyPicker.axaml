@@ -6,7 +6,9 @@
         xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
         xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
         xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime">
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing">
     <Design.PreviewWith>
         <Border Padding="20">
             <formKeyPicker:FormKeyPicker/>
@@ -19,8 +21,7 @@
 
     <Style Selector="formKeyPicker|FormKeyPicker">
         <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate>
+            <ControlTemplate>
                     <Border
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
@@ -251,6 +252,19 @@
                                         </ScrollViewer>
 
                                         <StackPanel Grid.Row="1">
+                                            <TextBlock Text="Nothing found!">
+                                                <TextBlock.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                        <Binding Path="!CollectingRecords" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                        <Binding Path="!ApplicableEditorIDs.Count" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                    </MultiBinding>
+                                                </TextBlock.IsVisible>
+                                            </TextBlock>
+
+                                            <avaloniaProgressRing:ProgressRing Width="20" Height="20"
+                                                                               IsActive="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                               IsVisible="{Binding CollectingRecords, RelativeSource={RelativeSource TemplatedParent}}"/>
+
                                             <TextBlock Text="No Types Selected!"
                                                        IsVisible="{Binding !AnyTypeSelected^, RelativeSource={RelativeSource TemplatedParent}}"/>
 
@@ -263,7 +277,6 @@
                         </Grid>
                     </Border>
                 </ControlTemplate>
-            </Setter.Value>
         </Setter>
     </Style>
 </Styles>
