@@ -79,6 +79,69 @@ public static class ObservableExtension {
         return readOnlyObservableCollection;
     }
 
+    public static ReadOnlyObservableCollection<T> ToObservableCollection<T>(
+        this IObservable<IEnumerable<T>> listObservable,
+        IDisposableDropoff disposable) {
+        return listObservable
+            .ObserveOnGui()
+            .Pairwise()
+            .Select(x => {
+                if (x.Previous == null) {
+                    if (x.Current == null) {
+                        return new ChangeSet<T>();
+                    }
+                    return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
+                }
+                if (x.Current == null) {
+                    return new ChangeSet<T>();
+                }
+
+                var prev = x.Previous.ToArray();
+                var cur = x.Current.ToArray();
+                return new ChangeSet<T>(
+                    prev
+                        .Except(cur)
+                        .Select(item => new Change<T>(ListChangeReason.Remove, item))
+                        .Concat(
+                            cur
+                                .Except(prev)
+                                .Select(item => new Change<T>(ListChangeReason.Add, item))));
+            })
+            .ToObservableCollection(disposable);
+    }
+
+    public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<T, TTarget>(
+        this IObservable<IEnumerable<T>> listObservable,
+        Func<T, TTarget> selector,
+        IDisposableDropoff disposable) {
+        return listObservable
+            .ObserveOnGui()
+            .Pairwise()
+            .Select(x => {
+                if (x.Previous == null) {
+                    if (x.Current == null) {
+                        return new ChangeSet<T>();
+                    }
+                    return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
+                }
+                if (x.Current == null) {
+                    return new ChangeSet<T>();
+                }
+
+                var prev = x.Previous.ToArray();
+                var cur = x.Current.ToArray();
+                return new ChangeSet<T>(
+                    prev
+                        .Except(cur)
+                        .Select(item => new Change<T>(ListChangeReason.Remove, item))
+                        .Concat(
+                            cur
+                                .Except(prev)
+                                .Select(item => new Change<T>(ListChangeReason.Add, item))));
+            })
+            .ToObservableCollection(selector, disposable);
+    }
+
     public static IObservable<TResult> WrapInInProgressMarker<T, TResult>(
         this IObservable<T> changeSet,
         Func<IObservable<T>, IObservable<TResult>> wrapped,
