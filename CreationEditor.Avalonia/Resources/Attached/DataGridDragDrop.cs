@@ -180,7 +180,7 @@ public sealed class DragDropExtended : AvaloniaObject {
 
         // Only allow starting to drag when the source is a known background element
         if (e.Source is not StyledElement styledElement) return;
-        if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle") return;
+        if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle" and not "InvalidVisualElement") return;
 
         var dataGrid = row.FindAncestorOfType<DataGrid>();
         if (dataGrid == null) return;
