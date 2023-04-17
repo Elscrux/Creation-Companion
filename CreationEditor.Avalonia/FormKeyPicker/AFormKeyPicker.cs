@@ -276,8 +276,8 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     private const string RecordNotResolved = "Could not resolve record";
     private const string RecordFiltered = "Record filtered out";
 
-    protected override void OnLoaded() {
-        base.OnLoaded();
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnAttachedToVisualTree(e);
 
         SelectableTypes = this.WhenAnyValue(x => x.ScopedTypes)
             .Select(x => GetMajorTypes(x).AsObservableChangeSet())
