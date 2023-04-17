@@ -143,8 +143,9 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         PlayerInventoryContainer = parent.PlayerInventoryContainer;
         StolenGoodsContainer = parent.StolenGoodsContainer;
 
-        VendorValues = parent.VendorValues ?? new VendorValues();
-        VendorLocation = parent.VendorLocation;
+        VendorValues = parent.VendorValues ?? new VendorValues { StartHour = 0, EndHour = 24 };
+        VendorLocation = parent.VendorLocation ?? new LocationTargetRadius();
+        VendorLocation.Target ??= new LocationFallback { Type = LocationTargetRadius.LocationType.NearSelf };
         VendorBuySellList = parent.VendorBuySellList;
         MerchantContainer = parent.MerchantContainer;
         Conditions = parent.Conditions;
@@ -164,6 +165,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.JailOutfit = JailOutfit;
         faction.SharedCrimeFactionList = SharedCrimeFactionList;
         faction.ExteriorJailMarker = ExteriorJailMarker;
+        faction.FollowerWaitMarker = FollowerWaitMarker;
         faction.PlayerInventoryContainer = PlayerInventoryContainer;
         faction.StolenGoodsContainer = StolenGoodsContainer;
 
