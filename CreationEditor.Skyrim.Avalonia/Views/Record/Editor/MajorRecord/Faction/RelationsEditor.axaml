@@ -27,7 +27,7 @@
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRelationIndex}"
-                  Classes="NoCellSelection LowSpacing"
+                  Classes="NoCellSelection LowSpacing Mutable"
                   attached:ListShortcuts.Add="{Binding AddRelation}"
                   attached:ListShortcuts.Remove="{Binding RemoveRelation}">
             <DataGrid.Columns>
