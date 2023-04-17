@@ -11,9 +11,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.0-pr003" />
-        <PackageReference Include="ReactiveUI" Version="18.4.1" />
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.1-pr001" />
+        <PackageReference Include="ReactiveUI" Version="18.4.26" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.26" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +25,22 @@
     <ItemGroup>
         <Folder Include="ViewModels\Record\Editor\Subrecord" />
         <Folder Include="Views\Record\Editor\Subrecord" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\DataTemplates\GetVatsValueTemplate.cs">
+        <DependentUpon>CustomConditionDataTemplate.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Resources\DataTemplates\GetEventDataTemplate.cs">
+        <DependentUpon>CustomConditionDataTemplate.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Views\Record\Picker\EventDataPicker.axaml.cs">
+        <DependentUpon>EventMemberPicker.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Services\Record\Editor\ConditionCopyController.cs">
+        <DependentUpon>IConditionCopyPasteController.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <PropertyGroup>

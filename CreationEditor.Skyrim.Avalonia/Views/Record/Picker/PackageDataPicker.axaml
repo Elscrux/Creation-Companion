@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:picker="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Picker"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Picker.PackageDataPicker"
+             x:Name="Picker">
+    <ComboBox ItemsSource="{Binding #Picker.Data}"
+              SelectedIndex="{Binding #Picker.PackageDataIndex}"
+              HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+            <DataTemplate DataType="picker:PackageData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding
+                            StringFormat="{}{0} {1} = {2}">
+                            <Binding Path="Type"/>
+                            <Binding Path="Name"/>
+                            <Binding Path="Value"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
+    </ComboBox>
+</UserControl>

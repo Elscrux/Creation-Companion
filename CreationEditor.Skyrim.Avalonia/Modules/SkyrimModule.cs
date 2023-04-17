@@ -42,6 +42,10 @@ public sealed class SkyrimModule : Module {
             .As<IRecordController>()
             .SingleInstance();
 
+        builder.RegisterType<ConditionCopyPasteController>()
+            .As<IConditionCopyPasteController>()
+            .SingleInstance();
+
         // Provider
         var environmentProvider = EnvironmentContext.Build(GameRelease.SkyrimSE);
 

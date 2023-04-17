@@ -10,6 +10,7 @@ namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 public sealed class EditableFaction : Faction, INotifyPropertyChanged {
     public new ObservableCollection<EditableRelation> Relations { get; set; }
     public new ObservableCollection<Rank> Ranks { get; set; }
+    public new ObservableCollection<EditableCondition> Conditions { get; set; }
     public new CrimeValues CrimeValues { get; set; }
     public new VendorValues VendorValues { get; set; }
 
@@ -148,7 +149,9 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         VendorLocation.Target ??= new LocationFallback { Type = LocationTargetRadius.LocationType.NearSelf };
         VendorBuySellList = parent.VendorBuySellList;
         MerchantContainer = parent.MerchantContainer;
-        Conditions = parent.Conditions;
+        Conditions = parent.Conditions != null
+            ? new ObservableCollection<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)))
+            : new ObservableCollection<EditableCondition>();
     }
 
     public void CopyTo(Faction faction) {
@@ -173,7 +176,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.VendorLocation = VendorLocation;
         faction.VendorBuySellList = VendorBuySellList;
         faction.MerchantContainer = MerchantContainer;
-        faction.Conditions = Conditions;
+        faction.Conditions = Conditions.Select(c => c.ToCondition()).ToExtendedList();
     }
 
     private static CrimeValues GetDefaultCrimeValues() {

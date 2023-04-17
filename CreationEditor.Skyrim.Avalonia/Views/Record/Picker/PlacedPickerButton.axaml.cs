@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
@@ -17,16 +18,22 @@ public partial class PlacedPickerButton : UserControl {
         = AvaloniaProperty.Register<PlacedPickerButton, IFormLinkGetter?>(nameof(Placed));
 
     public static readonly StyledProperty<FormKey> CellProperty
-        = AvaloniaProperty.Register<PlacedPickerButton, FormKey>(nameof(Cell));
+        = PlacedPicker.CellProperty.AddOwner<PlacedPickerButton>();
+
+    public static readonly StyledProperty<IEnumerable<Type>> ScopedTypesProperty
+        = PlacedPicker.ScopedTypesProperty.AddOwner<PlacedPickerButton>();
 
     public static readonly StyledProperty<ILinkCache?> LinkCacheProperty
-        = AvaloniaProperty.Register<PlacedPickerButton, ILinkCache?>(nameof(LinkCache));
+        = PlacedPicker.LinkCacheProperty.AddOwner<PlacedPickerButton>();
+
+    public static readonly StyledProperty<Func<IPlacedGetter, bool>> FilterProperty
+        = PlacedPicker.FilterProperty.AddOwner<PlacedPickerButton>();
 
     public static readonly StyledProperty<bool> IsOpenProperty
         = AvaloniaProperty.Register<PlacedPickerButton, bool>(nameof(IsOpen));
 
-    public static readonly StyledProperty<IObservable<string?>> ButtonTextProperty
-        = AvaloniaProperty.Register<PlacedPickerButton, IObservable<string?>>(nameof(ButtonText));
+    public static readonly StyledProperty<IObservable<string?>?> ButtonTextProperty
+        = AvaloniaProperty.Register<PlacedPickerButton, IObservable<string?>?>(nameof(ButtonText));
 
     public IFormLinkGetter? Placed {
         get => GetValue(PlacedProperty);
@@ -38,9 +45,19 @@ public partial class PlacedPickerButton : UserControl {
         set => SetValue(CellProperty, value);
     }
 
+    public IEnumerable<Type> ScopedTypes {
+        get => GetValue(ScopedTypesProperty);
+        set => SetValue(ScopedTypesProperty, value);
+    }
+
     public ILinkCache? LinkCache {
         get => GetValue(LinkCacheProperty);
         set => SetValue(LinkCacheProperty, value);
+    }
+
+    public Func<IPlacedGetter, bool> Filter {
+        get => GetValue(FilterProperty);
+        set => SetValue(FilterProperty, value);
     }
 
     public bool IsOpen {
@@ -48,30 +65,63 @@ public partial class PlacedPickerButton : UserControl {
         set => SetValue(IsOpenProperty, value);
     }
 
-    public IObservable<string?> ButtonText {
+    public IObservable<string?>? ButtonText {
         get => GetValue(ButtonTextProperty);
         set => SetValue(ButtonTextProperty, value);
     }
 
     public PlacedPickerButton() {
         InitializeComponent();
+    }
 
-        ButtonText = this.WhenAnyValue(x => x.IsOpen)
-            .Where(isOpen => isOpen == false)
-            .Select(_ => {
-                if (LinkCache != null && Placed != null) {
-                    if (LinkCache.TryResolve<ICellGetter>(Cell, out var cell)) {
-                        var placed = cell.Temporary.Concat(cell.Persistent).FirstOrDefault(placed => placed.FormKey == Placed.FormKey);
-                        if (placed != null) {
-                            if (placed.EditorID == null) {
-                                return PlacedConverters.ToName.Convert(placed, LinkCache) as string ?? placed.FormKey.ToString();
-                            }
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnAttachedToVisualTree(e);
 
-                            return placed.EditorID;
-                        }
-                    }
-                }
-                return "Select";
+        var placedChanged = PlacedPicker.PlacedChanged
+            .Merge(this.WhenAnyValue(x => x.Placed)
+                .Select(x => x?.FormKey ?? FormKey.Null));
+
+        var pickerUpdated = this.WhenAnyValue(
+                x => x.LinkCache,
+                x => x.Cell,
+                ((linkCache, cell) => (LinkCache: linkCache, Cell: cell)))
+            .CombineLatest(placedChanged, (x, placed) => (x.LinkCache, x.Cell, Placed: placed));
+
+        // Update the cell when the cell is not set and placed is set
+        pickerUpdated
+            .ObserveOnTaskpool()
+            .Select(x => {
+                if (x.Placed.IsNull || !x.Cell.IsNull || x.LinkCache == null) return FormKey.Null;
+                if (!x.LinkCache.TryResolveSimpleContext<IPlacedGetter>(x.Placed, out var placed)) return FormKey.Null;
+                if (placed.Parent?.Record is ICellGetter cell) return cell.FormKey;
+
+                return FormKey.Null;
+            })
+            .Where(x => x != FormKey.Null)
+            .ObserveOnGui()
+            .Subscribe(cell => Cell = cell);
+
+        // Update button text to the latest placed record
+        ButtonText = pickerUpdated
+            .ObserveOnTaskpool()
+            .Select(x => {
+                const string defaultText = "Select";
+
+                if (x is not { LinkCache: not null }) return defaultText;
+                if (x.Placed.IsNull) return defaultText;
+
+                // In case the cell can't be resolved, return null to show spinner
+                if (!x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var cell)) return null;
+
+                var placed = cell.Temporary.Concat(cell.Persistent).FirstOrDefault(placed => placed.FormKey == x.Placed);
+                if (placed == null) return defaultText;
+
+                var placedEditorID = PlacedConverters.ToName.Convert(placed, x.LinkCache) as string;
+
+                var cellEditorID = cell.EditorID;
+                return cellEditorID == null
+                    ? placedEditorID
+                    : $"{cellEditorID}: {placedEditorID}";
             });
     }
 }

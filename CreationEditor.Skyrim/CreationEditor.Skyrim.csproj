@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="3.0.0" />
-        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.41.0-pr003" />
+        <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="3.1.0" />
+        <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.41.1-pr001" />
     </ItemGroup>
 
 </Project>

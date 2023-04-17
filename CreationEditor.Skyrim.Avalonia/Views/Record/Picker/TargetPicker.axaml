@@ -1,0 +1,109 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:formKeyPicker="clr-namespace:CreationEditor.Avalonia.FormKeyPicker;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:picker="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Picker"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Picker.TargetPicker"
+             x:Name="Picker">
+    <Button HorizontalAlignment="Stretch">
+        <Button.Content>
+            <Binding Path="#Picker.ButtonText^">
+                <Binding.FallbackValue>
+                    <avaloniaProgressRing:ProgressRing
+                        Width="20" Height="20"/>
+                </Binding.FallbackValue>
+            </Binding>
+        </Button.Content>
+        <Button.Flyout>
+            <Flyout IsOpen="{Binding #Picker.IsOpen, Mode=OneWayToSource}"
+                    Placement="TopEdgeAlignedLeft">
+                <StackPanel MinHeight="75" MinWidth="200">
+                    <ComboBox ItemsSource="{Binding #Picker.Types}"
+                              SelectedItem="{Binding #Picker.SelectedType}"
+                              HorizontalAlignment="Stretch"
+                              Margin="0,0,0,5">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="picker:TargetPickerType">
+                                <TextBlock Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <formKeyPicker:FormKeyPicker
+                        FormKey="{Binding #Picker.Cell}"
+                        ScopedTypes="{x:Static constants:RecordTypeConstants.CellTypes}"
+                        LinkCache="{Binding #Picker.LinkCache}">
+                        <formKeyPicker:FormKeyPicker.IsVisible>
+                            <Binding Path="#Picker.SelectedType"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <picker:TargetPickerType>Cell</picker:TargetPickerType>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </formKeyPicker:FormKeyPicker.IsVisible>
+                    </formKeyPicker:FormKeyPicker>
+
+                    <formKeyPicker:FormKeyPicker
+                        FormKey="{Binding #Picker.Keyword}"
+                        ScopedTypes="{x:Static constants:RecordTypeConstants.KeywordTypes}"
+                        LinkCache="{Binding #Picker.LinkCache}">
+                        <formKeyPicker:FormKeyPicker.IsVisible>
+                            <Binding Path="#Picker.SelectedType"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <picker:TargetPickerType>LinkedRef</picker:TargetPickerType>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </formKeyPicker:FormKeyPicker.IsVisible>
+                    </formKeyPicker:FormKeyPicker>
+
+                    <picker:PlacedPicker
+                        x:Name="PlacedPicker"
+                        PlacedFormKey="{Binding #Picker.Reference, Mode=TwoWay}"
+                        ScopedTypes="{x:Static constants:RecordTypeConstants.PlacedTypes}"
+                        LinkCache="{Binding #Picker.LinkCache}">
+                        <formKeyPicker:FormKeyPicker.IsVisible>
+                            <Binding Path="#Picker.SelectedType"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <picker:TargetPickerType>Reference</picker:TargetPickerType>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </formKeyPicker:FormKeyPicker.IsVisible>
+                    </picker:PlacedPicker>
+
+                    <formKeyPicker:FormKeyPicker
+                        FormKey="{Binding #Picker.Object}"
+                        ScopedTypes="{x:Static constants:RecordTypeConstants.ObjectIdTypes}"
+                        LinkCache="{Binding #Picker.LinkCache}">
+                        <formKeyPicker:FormKeyPicker.IsVisible>
+                            <Binding Path="#Picker.SelectedType"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <picker:TargetPickerType>Object</picker:TargetPickerType>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </formKeyPicker:FormKeyPicker.IsVisible>
+                    </formKeyPicker:FormKeyPicker>
+
+                    <ComboBox ItemsSource="{x:Static constants:EnumConstants.ObjectTypes}"
+                              SelectedItem="{Binding #Picker.ObjectType}">
+                        <ComboBox.IsVisible>
+                            <Binding Path="#Picker.SelectedType"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <picker:TargetPickerType>ObjectType</picker:TargetPickerType>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </ComboBox.IsVisible>
+                    </ComboBox>
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

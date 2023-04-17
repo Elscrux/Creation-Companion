@@ -21,7 +21,7 @@
             <formKeyPicker:FormKeyPicker
                 LinkCache="{Binding #Picker.LinkCache}"
                 FormKey="{Binding #Picker.Cell}"
-                ScopedTypes="{x:Static constants:FormTypeConstants.CellTypes}"
+                ScopedTypes="{x:Static constants:RecordTypeConstants.CellTypes}"
                 NameSelector="{Binding #Picker.CellNameSelector}"/>
         </HeaderedContentControl>
 
@@ -30,11 +30,13 @@
             Header="Reference"
             Classes="Default">
             <formKeyPicker:FormKeyPicker
+                x:Name="FormKeyPicker"
                 LinkCache="{Binding #Picker.LinkCache}"
-                FormKey="{Binding #Picker.Placed.FormKey}"
+                FormKey="{Binding #Picker.PlacedFormKey}"
                 ScopedRecords="{Binding #Picker.PlacedRecords}"
-                ScopedTypes="{x:Static constants:FormTypeConstants.PlacedTypes}"
-                NameSelector="{Binding #Picker.PlacedNameSelector}"/>
+                ScopedTypes="{Binding #Picker.ScopedTypes}"
+                NameSelector="{Binding #Picker.PlacedNameSelector}"
+                FormKeyChanged="{Binding #Picker.PlacedChanged}"/>
         </HeaderedContentControl>
 
         <Button Grid.Row="6"

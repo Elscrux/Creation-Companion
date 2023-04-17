@@ -22,6 +22,83 @@
             </HeaderedContentControl.Header>
 
             <StackPanel IsEnabled="{Binding EditableRecord.Vendor}">
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0">
+                        <HeaderedContentControl Classes="GroupBoxStretch"
+                                                Margin="5"
+                                                Header="Vendor Chest"
+                                                ToolTip.Tip="Sets what container the merchant will sell goods from. Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list.">
+                            <picker:PlacedPickerButton
+                                Placed="{Binding EditableRecord.MerchantContainer}"
+                                Filter="{Binding ChestFilter}"
+                                LinkCache="{Binding LinkCache}"/>
+                        </HeaderedContentControl>
+
+                        <HeaderedContentControl Classes="GroupBoxStretch"
+                                                Margin="5"
+                                                Header="Vendor Location" FontSize="12">
+                            <StackPanel>
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Location"
+                                                        ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
+                                    <picker:TargetPicker
+                                        Target="{Binding EditableRecord.VendorLocation.Target, Mode=TwoWay}"
+                                        LinkCache="{Binding LinkCache}">
+                                        <picker:TargetPicker.Types>
+                                            <generic:List x:TypeArguments="picker:TargetPickerType">
+                                                <picker:TargetPickerType>Cell</picker:TargetPickerType>
+                                                <picker:TargetPickerType>Reference</picker:TargetPickerType>
+                                                <picker:TargetPickerType>LinkedRef</picker:TargetPickerType>
+                                                <picker:TargetPickerType>Self</picker:TargetPickerType>
+                                                <picker:TargetPickerType>EditorLocation</picker:TargetPickerType>
+                                                <picker:TargetPickerType>PackageStart</picker:TargetPickerType>
+                                            </generic:List>
+                                        </picker:TargetPicker.Types>
+                                    </picker:TargetPicker>
+                                </HeaderedContentControl>
+
+                                <HeaderedContentControl Classes="Default"
+                                                        Margin="5"
+                                                        Header="Radius"
+                                                        ToolTip.Tip="How close the merchant needs to be to the set location.">
+                                    <NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
+                                                   Minimum="0"
+                                                   Maximum="65535"
+                                                   FormatString="N0"/>
+                                </HeaderedContentControl>
+                            </StackPanel>
+                        </HeaderedContentControl>
+                    </StackPanel>
+
+                    <HeaderedContentControl Grid.Column="1"
+                                            Classes="GroupBoxStretch"
+                                            Margin="5"
+                                            Header="Vendor Buy/Sell List" FontSize="12">
+                        <StackPanel>
+                            <CheckBox Content="Only Buy Stolen Items"
+                                      ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
+                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      Margin="5"/>
+
+                            <HeaderedContentControl Classes="Default"
+                                                    Margin="5"
+                                                    Header="List"
+                                                    ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
+                                <formKeyPicker:FormKeyPicker
+                                    FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
+                                    ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
+                                    LinkCache="{Binding LinkCache}"/>
+                            </HeaderedContentControl>
+
+                            <CheckBox Content="Buy/Sell Everything not in List"
+                                      ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword(s) in the selected list."
+                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      Margin="5"/>
+                        </StackPanel>
+                    </HeaderedContentControl>
+                </Grid>
+
                 <HeaderedContentControl Classes="GroupBox"
                                         Margin="5"
                                         Header="Limitations" FontSize="12">
@@ -51,88 +128,22 @@
                                 </HeaderedContentControl>
                             </StackPanel>
                         </HeaderedContentControl>
-                    </StackPanel>
-                </HeaderedContentControl>
-
-                <HeaderedContentControl Classes="GroupBox"
-                                        Margin="5"
-                                        Header="Vendor Location" FontSize="12">
-                    <StackPanel>
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
-                                                Header="Location"
-                                                ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
-                            <picker:TargetPicker
-                                Target="{Binding EditableRecord.VendorLocation.Target, Mode=TwoWay}"
-                                LinkCache="{Binding LinkCache}">
-                                <picker:TargetPicker.Types>
-                                    <generic:List x:TypeArguments="picker:TargetPickerType">
-                                        <picker:TargetPickerType>Cell</picker:TargetPickerType>
-                                        <picker:TargetPickerType>Reference</picker:TargetPickerType>
-                                        <picker:TargetPickerType>LinkedRef</picker:TargetPickerType>
-                                        <picker:TargetPickerType>Self</picker:TargetPickerType>
-                                        <picker:TargetPickerType>EditorLocation</picker:TargetPickerType>
-                                        <picker:TargetPickerType>PackageStart</picker:TargetPickerType>
-                                    </generic:List>
-                                </picker:TargetPicker.Types>
-                            </picker:TargetPicker>
-                        </HeaderedContentControl>
 
                         <HeaderedContentControl Classes="Default"
-                                                Margin="5"
-                                                Header="Radius"
-                                                ToolTip.Tip="How close the merchant needs to be to the set location.">
-                            <NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
-                                           Minimum="0"
-                                           Maximum="65535"
-                                           FormatString="N0"/>
+                                                Margin="5">
+                            <HeaderedContentControl.Header>
+                                <TextBlock ToolTip.Tip="Further limitations when the vendor offers goods.">
+                                    Vendor Conditions
+                                </TextBlock>
+                            </HeaderedContentControl.Header>
+
+                            <view:ConditionsEditor
+                                Height="500"
+                                Conditions="{Binding EditableRecord.Conditions}"
+                                LinkCache="{Binding LinkCache}"
+                                CopyPasteController="{Binding ConditionsCopyPasteController}"/>
                         </HeaderedContentControl>
                     </StackPanel>
-                </HeaderedContentControl>
-
-                <HeaderedContentControl Classes="GroupBox"
-                                        Margin="5"
-                                        Header="Vendor Buy/Sell List" FontSize="12">
-                    <StackPanel>
-                        <CheckBox Content="Buy/Sell Everything not in List"
-                                  ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword in the selected list."
-                                  IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
-                                  Margin="5"/>
-
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
-                                                Header="List"
-                                                ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
-                            <formKeyPicker:FormKeyPicker
-                                FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
-                                ScopedTypes="{x:Static constants:FormTypeConstants.FormListTypes}"
-                                LinkCache="{Binding LinkCache}"/>
-                        </HeaderedContentControl>
-                    </StackPanel>
-                </HeaderedContentControl>
-
-                <HeaderedContentControl Classes="GroupBox"
-                                        Margin="5"
-                                        Header="Vendor Chest"
-                                        ToolTip.Tip="Sets what container the merchant will sell goods from. Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list mentioned above.">
-                    <picker:PlacedPicker
-                        Placed="{Binding EditableRecord.MerchantContainer}"
-                        Filter="{Binding ChestFilter}"
-                        LinkCache="{Binding LinkCache}"/>
-                </HeaderedContentControl>
-
-                <CheckBox Content="Only Buy Stolen Items"
-                          ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
-                          IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
-                          Margin="5"/>
-
-                <HeaderedContentControl Classes="Default"
-                                        Margin="5">
-                    <HeaderedContentControl.Header>
-                        <TextBlock ToolTip.Tip="Further limitations when the vendor offers goods.">
-                            Vendor Conditions
-                        </TextBlock>
-                    </HeaderedContentControl.Header>
                 </HeaderedContentControl>
             </StackPanel>
         </HeaderedContentControl>
