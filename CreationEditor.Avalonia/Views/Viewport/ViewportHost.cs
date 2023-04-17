@@ -17,7 +17,7 @@ public class ViewportHost : NativeControlHost {
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        if (e.Root is not Window { PlatformImpl: {} } window) return;
+        if (e.Root is not Window { PlatformImpl: not null } window) return;
 
         _rootWindow = window;
 

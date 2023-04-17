@@ -226,7 +226,7 @@ public sealed class DragDropExtended : AvaloniaObject {
             out var oldDataGrid, out var oldList,
             out var newDataGrid, out var newList)) return;
 
-        if (sender is not DataGridRow { DataContext: {} } newRow) return;
+        if (sender is not DataGridRow { DataContext: not null } newRow) return;
 
         // Hide adorner
         AdornerLayer.SetAdorner(newRow, null);
@@ -266,7 +266,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         outNewDataGrid = null;
         outNewList = null;
 
-        if (sender is not DataGridRow { DataContext: {} hoverItem } newRow) return false;
+        if (sender is not DataGridRow { DataContext: not null } newRow) return false;
 
         // Get old data
         if (e.Data?.Contains(DataGrid) is not true) return false;
