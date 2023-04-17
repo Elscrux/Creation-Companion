@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PlayerAddItem : AStoryManagerEvent {
-    public enum PlayerAddItemEvent : ushort {
+    private enum PlayerAddItemEvent : ushort {
         OwnerRef = 0x3152,
         OriginalContainer = 0x3252,
         Location = 0x314C,

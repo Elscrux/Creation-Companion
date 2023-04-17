@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class DeadBody : AStoryManagerEvent {
-    public enum DeadBodyEvent : ushort {
+    private enum DeadBodyEvent : ushort {
         Actor = 0x3152,
         DeadActor = 0x3252,
         Location = 0x314C,

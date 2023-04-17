@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class TrespassActor : AStoryManagerEvent {
-    public enum TrespassActorEvent : ushort {
+    private enum TrespassActorEvent : ushort {
         Victim = 0x3152,
         Trespasser = 0x3252,
         Location = 0x314C,

@@ -49,7 +49,7 @@ public partial class EventDataPicker : LoadedUserControl {
                 if (quest?.Event == null) return null;
 
                 var eventType = quest.Event.Value.TypeInt;
-                return SkyrimDefinitions.StoryManagerEvents.FirstOrDefault(e => e.Type == eventType);
+                return SkyrimDefinitions.StoryManagerEvents.FirstOrDefault(@event => @event.Type == eventType);
             });
 
         // Populate the list of event members with the members of the currently selected event in the context

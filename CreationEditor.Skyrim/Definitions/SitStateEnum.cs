@@ -14,7 +14,7 @@ public class SitStateEnum : IConditionValueEnums {
         GettingReadyToDismount = 14
     }
 
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<SitState>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<SitState>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function is Condition.Function.GetSitting;
 }

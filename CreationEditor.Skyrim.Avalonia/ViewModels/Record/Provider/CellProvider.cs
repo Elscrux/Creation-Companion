@@ -48,7 +48,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
     public ReactiveCommand<Unit, Unit> DuplicateSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedCell { get; }
 
-    public CellProvider(
+    protected CellProvider(
         IRecordController recordController,
         IDockFactory dockFactory,
         IRecordEditorController recordEditorController,

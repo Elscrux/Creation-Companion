@@ -21,5 +21,5 @@ public abstract class CustomConditionDataTemplate<T> : ICustomConditionDataTempl
         if (data is T t) Apply(context, questContext, condition, t, parameterControls);
     }
 
-    public abstract void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, T data, IList<Control> parameterControls);
+    protected abstract void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, T data, IList<Control> parameterControls);
 }

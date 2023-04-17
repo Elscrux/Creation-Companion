@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Flatter : AStoryManagerEvent {
-    public enum FlatterEvent : ushort {
+    private enum FlatterEvent : ushort {
         Actor = 0x3152,
     }
 

@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class NewVoicePower : AStoryManagerEvent {
-    public enum NewVoicePowerEvent : ushort {
+    private enum NewVoicePowerEvent : ushort {
         Actor = 0x3152,
         VoicePower = 0x3146,
     }

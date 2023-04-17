@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class ServedTime : AStoryManagerEvent {
-    public enum ServedTimeEvent : ushort {
+    private enum ServedTimeEvent : ushort {
         Location = 0x314C,
         CrimeGroup = 0x3146,
         CrimeGold = 0x3156,

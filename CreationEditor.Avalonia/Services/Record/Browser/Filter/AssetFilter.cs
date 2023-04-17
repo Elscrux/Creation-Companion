@@ -11,7 +11,7 @@ public abstract class AssetFilter<T> : IRecordFilter {
 
     public Type Type => typeof(T);
 
-    public AssetFilter(
+    protected AssetFilter(
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem) {
         _editorEnvironment = editorEnvironment;

@@ -16,10 +16,7 @@ public class ListBoxAutoScrollToBottom : Behavior<ListBox> {
     protected override void OnAttached() {
         base.OnAttached();
 
-        if (AssociatedObject == null) return;
-
-
-        AssociatedObject.WhenAnyValue(x => x.ItemCount)
+        AssociatedObject?.WhenAnyValue(x => x.ItemCount)
             .Throttle(TimeSpan.FromMicroseconds(250), RxApp.MainThreadScheduler)
             .Subscribe(_ => {
                 if (!ScrollingEnabled) return;

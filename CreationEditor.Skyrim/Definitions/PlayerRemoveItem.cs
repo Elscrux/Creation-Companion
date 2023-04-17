@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PlayerRemoveItem : AStoryManagerEvent {
-    public enum PlayerRemoveItemEvent : ushort {
+    private enum PlayerRemoveItemEvent : ushort {
         OwnerRef = 0x3152,
         ItemRef = 0x3252,
         Location = 0x314C,

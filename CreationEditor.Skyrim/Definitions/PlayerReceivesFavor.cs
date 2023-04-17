@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PlayerReceivesFavor : AStoryManagerEvent {
-    public enum PlayerReceivesFavorEvent : ushort {
+    private enum PlayerReceivesFavorEvent : ushort {
         Actor = 0x3152,
     }
 

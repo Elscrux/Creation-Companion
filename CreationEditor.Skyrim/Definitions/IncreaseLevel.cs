@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class IncreaseLevel : AStoryManagerEvent {
-    public enum IncreaseLevelEvent : ushort {
+    private enum IncreaseLevelEvent : ushort {
         NewLevel = 0x3156,
     }
 

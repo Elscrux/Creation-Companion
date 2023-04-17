@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Bribe : AStoryManagerEvent {
-    public enum BribeEvent : ushort {
+    private enum BribeEvent : ushort {
         Actor = 0x3152,
         GoldValue = 0x3156,
     }

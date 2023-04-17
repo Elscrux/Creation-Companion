@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PlayerCured : AStoryManagerEvent {
-    public enum PlayerCuredEvent : ushort {
+    private enum PlayerCuredEvent : ushort {
         Infection = 0x3146,
     }
 

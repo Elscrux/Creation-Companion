@@ -8,7 +8,7 @@ public class CombatStateEnum : IConditionValueEnums {
         Searching,
     }
 
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<CombatState>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<CombatState>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function is Condition.Function.GetCombatState;
 }

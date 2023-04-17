@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class ActorDialogue : AStoryManagerEvent {
-    public enum ActorDialogueEvent : ushort {
+    private enum ActorDialogueEvent : ushort {
         Location = 0x314C,
         Actor1 = 0x3152,
         Actor2 = 0x3252,

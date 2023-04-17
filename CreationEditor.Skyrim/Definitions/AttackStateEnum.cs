@@ -12,7 +12,7 @@ public class AttackStateEnum : IConditionValueEnums {
         Bash
     }
 
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<AttackState>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<AttackState>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function is Condition.Function.GetAttackState;
 }

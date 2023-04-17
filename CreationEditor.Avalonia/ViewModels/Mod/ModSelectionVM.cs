@@ -37,7 +37,6 @@ public sealed class ModSelectionVM : ViewModel {
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
 
-    public ReactiveCommand<Window, Unit> CloseAndLoadMods { get; }
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
@@ -94,7 +93,7 @@ public sealed class ModSelectionVM : ViewModel {
         modActivated
             .CombineLatest(this.WhenAnyValue(x => x._mods), (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
             .Subscribe(x => {
-                var loadOrderModItems = x.ChangedMods.Select(x => x.Current).Where(x => x.IsActive).ToList();
+                var loadOrderModItems = x.ChangedMods.Select(change => change.Current).Where(mod => mod.IsActive).ToList();
                 if (loadOrderModItems.Count == 0) return;
 
                 var newActive = loadOrderModItems.First();
@@ -118,14 +117,6 @@ public sealed class ModSelectionVM : ViewModel {
 
                 SelectedMod.IsActive = !SelectedMod.IsActive;
             });
-
-        CloseAndLoadMods = ReactiveCommand.CreateFromTask<Window>(async (window, cancellationToken) => {
-            window.Close();
-
-            busyService.IsBusy = true;
-            await Task.Run(LoadMods, cancellationToken);
-            busyService.IsBusy = false;
-        });
 
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()

@@ -14,7 +14,7 @@ public class KnockedStateEnum : IConditionValueEnums {
         Down = 7
     }
 
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<KnockedState>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<KnockedState>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function is Condition.Function.GetKnockedStateEnum;
 }

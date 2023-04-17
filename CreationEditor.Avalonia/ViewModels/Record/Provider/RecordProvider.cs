@@ -39,7 +39,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     public IObservable<bool> IsBusy { get; set; }
 
     public IList<IMenuItem> ContextMenuItems { get; }
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; init; }
+    public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }

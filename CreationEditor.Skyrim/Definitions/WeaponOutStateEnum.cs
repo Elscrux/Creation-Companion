@@ -8,7 +8,7 @@ public class WeaponOutStateEnum : IConditionValueEnums {
         AnyWeaponNotSpell
     }
 
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<WeaponOutState>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<WeaponOutState>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function is Condition.Function.IsWeaponOut;
 }

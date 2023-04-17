@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PayFine : AStoryManagerEvent {
-    public enum PayFineEvent : ushort {
+    private enum PayFineEvent : ushort {
         Criminal = 0x3152,
         Guard = 0x3252,
         CrimeGroup = 0x3146,

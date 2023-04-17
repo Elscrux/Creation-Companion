@@ -1,10 +1,9 @@
-﻿using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim;
+﻿using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Definitions;
 
 public class BoolEnum : IConditionValueEnums {
     private enum TrueFalse { False, True }
-    public IList<Enum> Enums { get; set; } = new List<Enum> { TrueFalse.True, TrueFalse.False };
+    public IList<Enum> Enums { get; } = new List<Enum> { TrueFalse.True, TrueFalse.False };
 
     public bool Match(Condition.Function function) {
         return function

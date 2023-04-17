@@ -184,8 +184,8 @@ public sealed class DockGrid : Grid {
 
         if (changeRow) {
             // Adjust remaining control positions
-            foreach (var c in Children) {
-                if (c is not Control child) continue;
+            foreach (var child in Children) {
+                if (child == null) continue;
 
                 var currentRow = GetRow(child);
                 var currentRowSpan = GetRowSpan(child);
@@ -213,8 +213,8 @@ public sealed class DockGrid : Grid {
             }
         } else {
             // Adjust remaining control positions
-            foreach (var c in Children) {
-                if (c is not Control child) continue;
+            foreach (var child in Children) {
+                if (child == null) continue;
 
                 var currentColumn = GetColumn(child);
                 var currentColumnSpan = GetColumnSpan(child);

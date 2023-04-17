@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class ActorHello : AStoryManagerEvent {
-    public enum ActorHelloEvent : ushort {
+    private enum ActorHelloEvent : ushort {
         Location = 0x314C,
         Actor1 = 0x3152,
         Actor2 = 0x3252,

@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class AssaultActor : AStoryManagerEvent {
-    public enum AssaultActorEvent : ushort {
+    private enum AssaultActorEvent : ushort {
         Victim = 0x3152,
         Attacker = 0x3252,
         Location = 0x314C,

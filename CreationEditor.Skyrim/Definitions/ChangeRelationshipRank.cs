@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class ChangeRelationshipRank : AStoryManagerEvent {
-    public enum ChangeRelationshipRankEvent : ushort {
+    private enum ChangeRelationshipRankEvent : ushort {
         NPC1 = 0x3152,
         NPC2 = 0x3252,
         OldRelationship = 0x3156,

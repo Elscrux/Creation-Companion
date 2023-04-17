@@ -5,7 +5,6 @@ using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public class SpellFilter : RecordFilter<ISpellGetter> {

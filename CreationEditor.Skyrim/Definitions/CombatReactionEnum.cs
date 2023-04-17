@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class CombatReactionEnum : IConditionValueEnums {
-    public IList<Enum> Enums { get; set; } = Enum.GetValues<CombatReaction>().Cast<Enum>().ToList();
+    public IList<Enum> Enums { get; } = Enum.GetValues<CombatReaction>().Cast<Enum>().ToList();
 
     public bool Match(Condition.Function function) => function
         is Condition.Function.GetFactionRelation

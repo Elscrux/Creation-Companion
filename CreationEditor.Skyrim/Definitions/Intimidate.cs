@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Intimidate : AStoryManagerEvent {
-    public enum IntimidateEvent : ushort {
+    private enum IntimidateEvent : ushort {
         Actor = 0x3152,
     }
 

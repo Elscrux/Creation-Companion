@@ -19,7 +19,7 @@ using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
 public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataConditionData> {
-    public override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, GetEventDataConditionData data, IList<Control> parameterControls) {
+    protected override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, GetEventDataConditionData data, IList<Control> parameterControls) {
         if (parameterControls is not [ComboBox functionBox, ComboBox, FormKeyPicker formKeyPicker]) return;
 
         var functionChanged = functionBox.GetObservable(SelectingItemsControl.SelectedItemProperty);

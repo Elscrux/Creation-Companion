@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class KillActor : AStoryManagerEvent {
-    public enum KillActorEvent : ushort {
+    private enum KillActorEvent : ushort {
         Victim = 0x3152,
         Killer = 0x3252,
         Location = 0x314C,

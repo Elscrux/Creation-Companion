@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class CrimeGold : AStoryManagerEvent {
-    public enum CrimeGoldEvent : ushort {
+    private enum CrimeGoldEvent : ushort {
         Victim = 0x3152,
         Criminal = 0x3252,
         CrimeFaction = 0x3146,

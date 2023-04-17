@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class ChangeLocation : AStoryManagerEvent {
-    public enum ChangeLocationEvent : ushort {
+    private enum ChangeLocationEvent : ushort {
         Actor = 0x3152,
         OldLocation = 0x314C,
         NewLocation = 0x324C,

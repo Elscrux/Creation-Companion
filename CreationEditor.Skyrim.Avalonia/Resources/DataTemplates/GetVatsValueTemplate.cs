@@ -38,7 +38,7 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
         CastingType,
     }
 
-    public override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, AGetVATSValueConditionData data, IList<Control> parameterControls) {
+    protected override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, AGetVATSValueConditionData data, IList<Control> parameterControls) {
         parameterControls.Clear();
         var comboBox = new ComboBox {
             DataContext = condition,

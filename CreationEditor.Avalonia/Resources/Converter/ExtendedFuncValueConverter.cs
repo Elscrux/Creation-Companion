@@ -65,11 +65,4 @@ public class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiValueConve
             ? _convert(converted, (TPar?) parameter)
             : AvaloniaProperty.UnsetValue;
     }
-
-    /// <inheritdoc/>
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
-        return _convertBack != null && TypeUtilities.CanCast<TOut>(value) && TypeUtilities.CanCast<TPar>(parameter)
-            ? _convertBack((TOut?) value, (TPar?) parameter)
-            : AvaloniaProperty.UnsetValue;
-    }
 }

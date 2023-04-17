@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class SkillIncrease : AStoryManagerEvent {
-    public enum SkillIncreaseEvent : ushort {
+    private enum SkillIncreaseEvent : ushort {
         Skill = 0x3156,
     }
 

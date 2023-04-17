@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class CraftItem : AStoryManagerEvent {
-    public enum CraftItemEvent : ushort {
+    private enum CraftItemEvent : ushort {
         Workbench = 0x3152,
         BenchLocation = 0x314C,
         CreatedObject = 0x314F,

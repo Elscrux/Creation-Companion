@@ -50,7 +50,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
         _viewModeResourceDictionary.Clear();
 
         foreach (var (name, value) in viewModeTemplate.Spacings) {
-            _viewModeResourceDictionary.AddDeferred(name, x => value);
+            _viewModeResourceDictionary.AddDeferred(name, _ => value);
         }
     }
 }

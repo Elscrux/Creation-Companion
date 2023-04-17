@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class PlayerActivateActor : AStoryManagerEvent {
-    public enum PlayerActivateActorEvent : ushort {
+    private enum PlayerActivateActorEvent : ushort {
         Location = 0x314C,
         Actor = 0x3152,
     }

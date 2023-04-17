@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Arrest : AStoryManagerEvent {
-    public enum ArrestEvent : ushort {
+    private enum ArrestEvent : ushort {
         ArrestingGuard = 0x3152,
         Criminal = 0x3252,
         Location = 0x314C,

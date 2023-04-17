@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class EscapeJail : AStoryManagerEvent {
-    public enum EscapeJailEvent : ushort {
+    private enum EscapeJailEvent : ushort {
         Location = 0x314C,
         CrimeGroup = 0x3146,
     }

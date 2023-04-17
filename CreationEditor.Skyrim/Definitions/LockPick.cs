@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class LockPick : AStoryManagerEvent {
-    public enum LockPickEvent : ushort {
+    private enum LockPickEvent : ushort {
         Actor = 0x3152,
         LockObject = 0x3252,
     }

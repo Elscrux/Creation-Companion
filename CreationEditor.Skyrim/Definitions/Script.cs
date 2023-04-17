@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Script : AStoryManagerEvent {
-    public enum ScriptEvent : ushort {
+    private enum ScriptEvent : ushort {
         Keyword = 0x314B,
         Location = 0x314C,
         Ref1 = 0x3152,

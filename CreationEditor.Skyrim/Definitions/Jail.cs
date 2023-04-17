@@ -2,7 +2,7 @@
 namespace CreationEditor.Skyrim.Definitions;
 
 public class Jail : AStoryManagerEvent {
-    public enum JailEvent : ushort {
+    private enum JailEvent : ushort {
         Guard = 0x3152,
         CrimeGroup = 0x3146,
         Location = 0x314C,

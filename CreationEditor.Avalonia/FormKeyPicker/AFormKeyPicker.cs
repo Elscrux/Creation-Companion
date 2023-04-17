@@ -634,7 +634,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .DisposeWith(UnloadDisposable);
 
         ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
-            .WrapInInProgressMarker(x => x
+            .WrapInInProgressMarker(observable => observable
                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                 .CombineLatest(
                     selectedModsChanged,
