@@ -207,4 +207,10 @@ public static class ObservableExtension {
                     .SubscribeSafe(observer);
             });
     }
+
+    public static IObservable<bool> Negate(this IObservable<bool> obs) => obs.Select(x => !x);
+    public static IObservable<bool?> Negate(this IObservable<bool?> obs) => obs.Select(x => !x);
+
+    public static IObservable<bool> WhereTrue(this IObservable<bool> obs) => obs.Where(x => x);
+    public static IObservable<bool?> WhereTrue(this IObservable<bool?> obs) => obs.Where(x => x is true);
 }
