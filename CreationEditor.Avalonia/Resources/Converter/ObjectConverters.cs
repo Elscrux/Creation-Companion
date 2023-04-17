@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Avalonia.Converter;
 
 public static class ObjectConverters {
-    public static readonly ExtendedFuncValueConverter<object, bool, object> Equals
-        = new(((x, y) => Equals(x, y)));
+    public new static readonly ExtendedFuncValueConverter<object, bool, object> Equals
+        = new(((obj, parameter) => Equals(obj, parameter)));
 }
