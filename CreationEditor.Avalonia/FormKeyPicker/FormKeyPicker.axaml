@@ -23,7 +23,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                     <Border
-                        Background="{TemplateBinding Background}"
+                        Background="{DynamicResource SystemControlTransparentBrush}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
                         <Border.Resources>
@@ -48,7 +48,7 @@
                             <Border x:Name="Background"
                                     Grid.Column="0"
                                     Grid.ColumnSpan="3"
-                                    Background="{TemplateBinding Background}"
+                                    Background="{DynamicResource SystemControlTransparentBrush}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="{TemplateBinding CornerRadius}"/>
