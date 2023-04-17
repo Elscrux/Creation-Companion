@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Settings.View;
-using CreationEditor.Avalonia.Services.Startup;
+using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 using ReactiveUI.Fody.Helpers;

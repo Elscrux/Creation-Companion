@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Avalonia.Services.Startup;
+﻿namespace CreationEditor.Services.Lifecycle;
 
 public interface ILifecycle {
     public void Start();

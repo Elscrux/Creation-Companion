@@ -1,8 +1,9 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
+using CreationEditor.Services.Lifecycle;
 using Serilog;
-namespace CreationEditor.Avalonia.Services.Startup;
+namespace CreationEditor.Avalonia.Services.Lifecycle;
 
 public sealed class Lifecycle : ILifecycle {
     private readonly ILogger _logger;
