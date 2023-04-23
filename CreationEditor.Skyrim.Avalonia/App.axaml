@@ -2,7 +2,8 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
-             xmlns:avalonia="clr-namespace:CreationEditor.Skyrim.Avalonia">
+             xmlns:avalonia="clr-namespace:CreationEditor.Skyrim.Avalonia"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
     <Application.DataTemplates>
         <avalonia:ViewLocator/>
     </Application.DataTemplates>
@@ -12,6 +13,36 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://CreationEditor.Avalonia/Views/Basic/ToggleRadioButton.axaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- TreeDataGrid Resources -->
+            <Color x:Key="SystemBaseMediumLowColor">DarkGray</Color>
+            <ControlTheme x:Key="FluentTreeViewExpandCollapseChevron" TargetType="ToggleButton">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Width" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}" />
+                <Setter Property="Height" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}" />
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border Background="Transparent"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                            <controls:SymbolIcon
+                                Symbol="ChevronRight"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+
+                <Style Selector="^:checked /template/ Path#ChevronPath">
+                    <Setter Property="Data">
+                        <Template>
+                            <controls:SymbolIcon Symbol="ChevronLeft"/>
+                        </Template>
+                    </Setter>
+                </Style>
+            </ControlTheme>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -20,6 +51,7 @@
         <styling:FluentAvaloniaTheme PreferUserAccentColor="True" PreferSystemTheme="True"/>
 
         <!-- Avalonia Addons Style -->
+        <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
         <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
 
         <!-- Custom Style -->
