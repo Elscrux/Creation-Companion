@@ -24,6 +24,7 @@
 
         <!-- Custom Style -->
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/CheckBoxStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/TreeViewStyles.axaml"/>
