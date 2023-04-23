@@ -25,12 +25,8 @@
                 Margin="5"/>
 
             <TreeView Grid.Row="1"
-                      Items="{Binding RecordTypeGroups}">
-                <TreeView.Styles>
-                    <Style Selector="TreeViewItem">
-                        <Setter Property="MinHeight" Value="10"></Setter>
-                    </Style>
-                </TreeView.Styles>
+                      Items="{Binding RecordTypeGroups}"
+                      Classes="Compact">
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
                         <TextBlock Text="{Binding GroupName}">
