@@ -16,6 +16,7 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {
+    private readonly ModSelectionVM _modSelectionVM;
     private const string BaseWindowTitle = "Creation Editor";
 
     public INotificationVM NotificationVM { get; }
@@ -43,9 +44,7 @@ public sealed class MainVM : ViewModel {
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
 
-        OpenSelectMods = ReactiveCommand.Create(() => {
-            ModSelectionView.ShowAsContentDialog(modSelectionVM);
-        });
+        OpenSelectMods = ReactiveCommand.Create(ShowModSelection);
 
         OpenSettings = ReactiveCommand.Create<Window>(window => {
             var settingsWindow = new SettingsWindow(componentContext.Resolve<ISettingsVM>());
@@ -59,5 +58,9 @@ public sealed class MainVM : ViewModel {
         WindowTitleObs = editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
+    }
+
+    public void ShowModSelection() {
+        ModSelectionView.ShowAsContentDialog(_modSelectionVM);
     }
 }

@@ -26,6 +26,13 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         this.GetObservable(ViewModelProperty).Subscribe(OnViewModelChanged);
     }
 
+    protected override void OnLoaded() {
+        base.OnLoaded();
+
+        // Show mod selection on startup
+        ViewModel?.ShowModSelection();
+    }
+
     private void OnDataContextChanged(object? value) => ViewModel = value as MainVM;
 
     private void OnViewModelChanged(object? value) {
