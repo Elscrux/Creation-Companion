@@ -28,8 +28,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Settings"
-                          Command="{Binding OpenSettings}"
-                          CommandParameter="{Binding #Window}">
+                          Command="{Binding OpenSettings}">
                     <MenuItem.Icon>
                         <controls:SymbolIcon Symbol="Settings"/>
                     </MenuItem.Icon>

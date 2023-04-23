@@ -27,7 +27,7 @@ public sealed class MainVM : ViewModel {
     public IDockingManagerService DockingManagerService { get; }
 
     public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
-    public ReactiveCommand<Window, Unit> OpenSettings { get; }
+    public ReactiveCommand<Unit, Unit> OpenSettings { get; }
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
@@ -39,16 +39,18 @@ public sealed class MainVM : ViewModel {
         IEditorEnvironment editorEnvironment,
         ModSelectionVM modSelectionVM,
         IDockingManagerService dockingManagerService,
-        IDockFactory dockFactory) {
+        IDockFactory dockFactory,
+        MainWindow mainWindow) {
+        _modSelectionVM = modSelectionVM;
         NotificationVM = notificationVM;
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
 
         OpenSelectMods = ReactiveCommand.Create(ShowModSelection);
 
-        OpenSettings = ReactiveCommand.Create<Window>(window => {
+        OpenSettings = ReactiveCommand.Create(() => {
             var settingsWindow = new SettingsWindow(componentContext.Resolve<ISettingsVM>());
-            settingsWindow.ShowDialog(window);
+            settingsWindow.ShowDialog(mainWindow);
         });
 
         Save = ReactiveCommand.Create(() => {});
