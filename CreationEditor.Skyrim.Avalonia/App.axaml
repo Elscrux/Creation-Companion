@@ -28,6 +28,9 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ListBoxStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml"/>
+
+        <!-- Custom Controls -->
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/SelectList.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Record/Picker/FormKeyPicker.axaml"/>
     </Application.Styles>
 </Application>

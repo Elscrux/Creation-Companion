@@ -7,7 +7,8 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-        xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker">
+        xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker"
+        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic">
     <Design.PreviewWith>
         <Border Padding="20">
             <picker:FormKeyPicker/>
@@ -107,69 +108,32 @@
 
                         <Grid.Resources>
                             <Grid x:Key="FilterGrid" ColumnDefinitions="*,5,*" MaxHeight="500">
-                                <ScrollViewer Grid.Column="0">
-                                    <ItemsRepeater Items="{TemplateBinding SelectableTypes}">
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate DataType="selectables:TypeItem">
-                                                <CheckBox IsChecked="{Binding IsSelected}">
-                                                    <CheckBox.Content>
-                                                        <MultiBinding
-                                                            StringFormat="{}{0} ( {1} )">
-                                                            <Binding
-                                                                Path="Type"
-                                                                Converter="{x:Static converter:RecordTypeConverters.ToName}"
-                                                                Mode="OneWay"/>
-                                                            <Binding
-                                                                Path="Type"
-                                                                Converter="{x:Static converter:RecordTypeConverters.ToGame}"
-                                                                Mode="OneWay"/>
-                                                        </MultiBinding>
-                                                    </CheckBox.Content>
-                                                </CheckBox>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
+                                <basic:SelectList Grid.Column="0" Items="{TemplateBinding SelectableTypes}">
+                                    <DataTemplate DataType="selectables:TypeItem">
+                                        <CheckBox IsChecked="{Binding IsSelected}">
+                                            <CheckBox.Content>
+                                                <MultiBinding
+                                                    StringFormat="{}{0} ( {1} )">
+                                                    <Binding
+                                                        Path="Type"
+                                                        Converter="{x:Static converter:RecordTypeConverters.ToName}"
+                                                        Mode="OneWay"/>
+                                                    <Binding
+                                                        Path="Type"
+                                                        Converter="{x:Static converter:RecordTypeConverters.ToGame}"
+                                                        Mode="OneWay"/>
+                                                </MultiBinding>
+                                            </CheckBox.Content>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </basic:SelectList>
 
-                                        <ItemsRepeater.ContextFlyout>
-                                            <MenuFlyout>
-                                                <MenuItem Header="Select All"
-                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
-                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                                <MenuItem Header="Unselect All"
-                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                                <MenuItem Header="Toggle All"
-                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                                          CommandParameter="{TemplateBinding SelectableTypes}"/>
-                                            </MenuFlyout>
-                                        </ItemsRepeater.ContextFlyout>
-                                    </ItemsRepeater>
-                                </ScrollViewer>
-
-                                <ScrollViewer Grid.Column="2">
-                                    <ItemsRepeater
-                                        Items="{TemplateBinding SelectableMods}">
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate DataType="mod:ModItem">
-                                                <CheckBox Content="{Binding ModKey.FileName}"
-                                                          IsChecked="{Binding IsSelected}"/>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
-
-                                        <ItemsRepeater.ContextFlyout>
-                                            <MenuFlyout>
-                                                <MenuItem Header="Select All"
-                                                          Command="{x:Static command:SelectableCommand.SelectAll}"
-                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
-                                                <MenuItem Header="Unselect All"
-                                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
-                                                <MenuItem Header="Toggle All"
-                                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                                          CommandParameter="{TemplateBinding SelectableMods}"/>
-                                            </MenuFlyout>
-                                        </ItemsRepeater.ContextFlyout>
-                                    </ItemsRepeater>
-                                </ScrollViewer>
+                                <basic:SelectList Grid.Column="2" Items="{TemplateBinding SelectableMods}">
+                                    <DataTemplate DataType="mod:ModItem">
+                                        <CheckBox Content="{Binding ModKey.FileName}"
+                                                  IsChecked="{Binding IsSelected}"/>
+                                    </DataTemplate>
+                                </basic:SelectList>
                             </Grid>
                         </Grid.Resources>
 
