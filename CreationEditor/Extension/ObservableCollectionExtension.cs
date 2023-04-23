@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Reflection;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
@@ -132,6 +134,26 @@ public static class ObservableCollectionExtension {
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> itemsToAdd) {
+        if (itemsToAdd == null) {
+            throw new ArgumentNullException(nameof(itemsToAdd));
+        }
+
+        var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var internalList = itemsField.GetValue(collection) as IList<T>;
+        if (internalList == null) throw new InvalidOperationException("Unable to get internal list");
+
+        var list = itemsToAdd.ToList();
+        foreach (var item in list) {
+            internalList.Add(item);
+        }
+        var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, types: new[] { typeof(NotifyCollectionChangedEventArgs) })!;
+        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
+        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
+        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, 0) });
     }
 
     private static void RemoveRange<T>(this IList<T> source, int index, int count) {
