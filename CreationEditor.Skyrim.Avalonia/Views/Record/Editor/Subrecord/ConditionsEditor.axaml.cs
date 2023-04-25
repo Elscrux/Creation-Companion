@@ -139,14 +139,14 @@ public partial class ConditionsEditor : LoadedUserControl {
             this.WhenAnyValue(x => x.Conditions.Count).Select(count => count > 0));
 
         Paste = ReactiveCommand.Create<int>(
-            index => CopyPasteController?.Paste((IList<EditableCondition>) ConditionsGrid.Items, index + 1),
+            index => CopyPasteController?.Paste((IList<EditableCondition>) ConditionsGrid.ItemsSource, index + 1),
             this.WhenAnyValue(x => x.CopyPasteController)
                 .NotNull()
                 .CombineLatest(this.WhenAnyValue(x => x.CopyPasteController!.CanPaste), (_, x) => x));
 
         FunctionTemplate = new FuncDataTemplate<EditableCondition>((condition, _) => {
             var autoCompleteBox = new AutoCompleteBox {
-                [!AutoCompleteBox.ItemsProperty] = this.GetObservable(FunctionsProperty).ToBinding(),
+                [!AutoCompleteBox.ItemsSourceProperty] = this.GetObservable(FunctionsProperty).ToBinding(),
                 FilterMode = AutoCompleteFilterMode.ContainsOrdinal,
                 IsTextCompletionEnabled = true,
                 MaxDropDownHeight = 750,

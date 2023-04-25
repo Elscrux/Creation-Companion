@@ -23,7 +23,7 @@
 
                 <Button.Flyout>
                     <Flyout>
-                        <basic:SelectList Items="{Binding Mods}">
+                        <basic:SelectList ItemsSource="{Binding Mods}">
                             <DataTemplate DataType="mod:ModItem">
                                 <CheckBox Content="{Binding ModKey.FileName}"
                                           IsChecked="{Binding IsSelected}"/>

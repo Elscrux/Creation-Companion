@@ -33,7 +33,7 @@
             </LayoutTransformControl.LayoutTransform>
 
             <Border Classes="TabBar">
-                <ItemsRepeater Items="{Binding Tabs}">
+                <ItemsRepeater ItemsSource="{Binding Tabs}">
                     <ItemsRepeater.Layout>
                         <StackLayout Orientation="Horizontal"/>
                     </ItemsRepeater.Layout>

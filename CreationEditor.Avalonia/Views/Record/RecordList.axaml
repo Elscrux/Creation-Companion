@@ -13,7 +13,7 @@
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
         <DataGrid x:Name="RecordGrid"
                   Background="{DynamicResource SystemControlTransparentBrush}"
-                  Items="{Binding Records}"
+                  ItemsSource="{Binding Records}"
                   SelectedItem="{Binding RecordProvider.SelectedRecord}"
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
@@ -30,7 +30,7 @@
                             Command="{ReflectionBinding RecordProvider.DuplicateSelectedRecord}"/>
             </DataGrid.KeyBindings>
             <DataGrid.ContextFlyout>
-                <MenuFlyout Items="{Binding ContextMenuItems}"/>
+                <MenuFlyout ItemsSource="{Binding ContextMenuItems}"/>
             </DataGrid.ContextFlyout>
         </DataGrid>
 

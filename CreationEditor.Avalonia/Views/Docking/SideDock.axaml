@@ -23,7 +23,7 @@
           Classes="AccentSelected TabGrid">
         <Border Grid.Row="0"
                 Classes="TabBar">
-            <ItemsRepeater Items="{Binding Tabs}">
+            <ItemsRepeater ItemsSource="{Binding Tabs}">
                 <ItemsRepeater.Layout>
                     <StackLayout Orientation="Horizontal"/>
                 </ItemsRepeater.Layout>

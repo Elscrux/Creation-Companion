@@ -104,7 +104,7 @@ public class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
 
         // Return an item repeater with the parameters
         return parameterControls.Any()
-            ? new ItemsRepeater { Items = parameterControls }
+            ? new ItemsRepeater { ItemsSource = parameterControls }
             : null;
     }
 

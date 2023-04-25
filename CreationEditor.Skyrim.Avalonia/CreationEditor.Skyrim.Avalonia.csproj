@@ -12,8 +12,8 @@
 
     <ItemGroup>
         <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.1-pr001" />
-        <PackageReference Include="ReactiveUI" Version="18.4.26" />
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.26" />
+        <PackageReference Include="ReactiveUI" Version="18.4.34" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
     </ItemGroup>
 
     <ItemGroup>

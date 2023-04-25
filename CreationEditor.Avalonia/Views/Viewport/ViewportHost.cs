@@ -17,11 +17,13 @@ public class ViewportHost : NativeControlHost {
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        if (e.Root is not Window { PlatformImpl: not null } window) return;
+        if (e.Root is not Window window) return;
+
+        var handle = _rootWindow?.TryGetPlatformHandle();
+        if (handle == null) return;
 
         _rootWindow = window;
-
-        WinHelper.SetParent(_process.MainWindowHandle, _rootWindow.PlatformImpl.Handle.Handle);
+        WinHelper.SetParent(_process.MainWindowHandle, handle.Handle);
 
         long style = WinHelper.GetWindowLongPtr(_process.MainWindowHandle, WinHelper.StyleIndex);
         style &= (long) ~WinHelper.WinStyle.ResizeBar;

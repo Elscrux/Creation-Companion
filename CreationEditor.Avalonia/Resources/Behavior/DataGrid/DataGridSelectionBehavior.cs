@@ -56,7 +56,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     protected override void OnAttachedToVisualTree() {
         base.OnAttachedToVisualTree();
 
-        if (AssociatedObject?.Items is IEnumerable<IReactiveSelectable> selectables) {
+        if (AssociatedObject?.ItemsSource is IEnumerable<IReactiveSelectable> selectables) {
             var observableSelectables = selectables
                 .ToObservable()
                 .ToObservableChangeSet();
@@ -91,7 +91,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     MinWidth = 20,
-                    Classes = new Classes("CenteredBorder"),
+                    Classes = { "CenteredBorder" },
                     Styles = {
                         new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
                             Setters = {
@@ -122,7 +122,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         if (AssociatedObject == null) return;
 
         AssociatedObject.ContextFlyout ??= new MenuFlyout();
-        if (AssociatedObject.ContextFlyout is not MenuFlyout { Items: AvaloniaList<object> menuList }) return;
+        if (AssociatedObject.ContextFlyout is not MenuFlyout { ItemsSource: AvaloniaList<object> menuList }) return;
 
         menuList.InsertRange(0, new TemplatedControl[] {
             new MenuItem {
@@ -153,12 +153,12 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     }
 
     private void UpdateAllChecked() {
-        if (AssociatedObject?.Items == null) return;
+        if (AssociatedObject?.ItemsSource == null) return;
 
         TryProcess(() => {
             var totalCount = 0;
             var selectedCount = 0;
-            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
+            foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
                 totalCount++;
                 if (selectable.IsSelected) selectedCount++;
             }
@@ -187,10 +187,10 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     }
 
     private void SelectAllItems(bool newState = true) {
-        if (AssociatedObject?.Items == null) return;
+        if (AssociatedObject?.ItemsSource == null) return;
 
         TryProcess(() => {
-            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
+            foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
                 AllChecked = newState;
             }
@@ -227,10 +227,10 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
     }
 
     private void InvertAll() {
-        if (AssociatedObject?.Items == null) return;
+        if (AssociatedObject?.ItemsSource == null) return;
 
         TryProcess(() => {
-            foreach (var selectable in AssociatedObject.Items.Cast<IReactiveSelectable>()) {
+            foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
                 selectable.IsSelected = !selectable.IsSelected && SelectionGuard.Invoke(selectable);
             }
         });

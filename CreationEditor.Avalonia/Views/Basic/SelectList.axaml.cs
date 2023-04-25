@@ -6,12 +6,12 @@ using Avalonia.Metadata;
 namespace CreationEditor.Avalonia.Views.Basic; 
 
 public class SelectList : TemplatedControl {
-    public static readonly StyledProperty<IEnumerable> ItemsProperty
-        = AvaloniaProperty.Register<SelectList, IEnumerable>(nameof(Items));
+    public static readonly StyledProperty<IEnumerable> ItemsSourceProperty
+        = AvaloniaProperty.Register<SelectList, IEnumerable>(nameof(ItemsSource));
 
-    public IEnumerable Items {
-        get => GetValue(ItemsProperty);
-        set => SetValue(ItemsProperty, value);
+    public IEnumerable ItemsSource {
+        get => GetValue(ItemsSourceProperty);
+        set => SetValue(ItemsSourceProperty, value);
     }
 
     public static readonly StyledProperty<IDataTemplate> DataTemplateProperty

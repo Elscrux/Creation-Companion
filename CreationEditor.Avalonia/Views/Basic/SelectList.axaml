@@ -11,19 +11,19 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <ScrollViewer MaxHeight="750">
-                    <ItemsRepeater Items="{TemplateBinding Items}"
+                    <ItemsRepeater ItemsSource="{TemplateBinding ItemsSource}"
                                    ItemTemplate="{TemplateBinding DataTemplate}">
                         <ItemsRepeater.ContextFlyout>
                             <MenuFlyout>
                                 <MenuItem Header="Select All"
                                           Command="{x:Static command:SelectableCommand.SelectAll}"
-                                          CommandParameter="{TemplateBinding Items}"/>
+                                          CommandParameter="{TemplateBinding ItemsSource}"/>
                                 <MenuItem Header="Unselect All"
                                           Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                          CommandParameter="{TemplateBinding Items}"/>
+                                          CommandParameter="{TemplateBinding ItemsSource}"/>
                                 <MenuItem Header="Toggle All"
                                           Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                          CommandParameter="{TemplateBinding Items}"/>
+                                          CommandParameter="{TemplateBinding ItemsSource}"/>
                             </MenuFlyout>
                         </ItemsRepeater.ContextFlyout>
                     </ItemsRepeater>

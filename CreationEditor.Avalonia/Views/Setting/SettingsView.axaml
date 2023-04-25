@@ -19,7 +19,7 @@
         </Grid.ColumnDefinitions>
 
         <TreeView Grid.Column="0"
-                  Items="{Binding RootSettings}"
+                  ItemsSource="{Binding RootSettings}"
                   SelectedItem="{Binding SelectedSetting}">
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="settings:ISetting" ItemsSource="{Binding Children}">

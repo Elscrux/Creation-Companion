@@ -48,8 +48,8 @@
                     Padding="2"
                     ToolTip.Tip="Toggle Auto Scroll">
                 <Grid>
-                    <controls:SymbolIcon Symbol="ChevronDownFilled"/>
-                    <controls:SymbolIcon Symbol="DismissFilled"
+                    <controls:SymbolIcon Symbol="ChevronDown"/>
+                    <controls:SymbolIcon Symbol="Dismiss"
                                          HasMirrorTransform="True"
                                          IsVisible="{Binding !AutoScroll}"/>
                 </Grid>
@@ -62,7 +62,7 @@
                     ToolTip.Tip="Toggle Log Levels">
                 <Button.Flyout>
                     <Flyout>
-                        <ListBox Items="{x:Static vm:LogVM.LogLevels}">
+                        <ListBox ItemsSource="{x:Static vm:LogVM.LogLevels}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate DataType="events:LogEventLevel">
                                     <CheckBox Classes="LogLevelColor"
@@ -84,12 +84,12 @@
                     </Flyout>
                 </Button.Flyout>
 
-                <controls:SymbolIcon Symbol="MoreVerticalFilled"/>
+                <controls:SymbolIcon Symbol="MoreVertical"/>
             </Button>
         </StackPanel>
 
         <ListBox Grid.Column="1"
-                 Items="{Binding LogItems}"
+                 ItemsSource="{Binding LogItems}"
                  Classes="Compact">
             <Interaction.Behaviors>
                 <behavior:ListBoxAutoScrollToBottom ScrollingEnabled="{Binding AutoScroll}"/>

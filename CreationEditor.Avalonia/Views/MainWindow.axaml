@@ -72,7 +72,7 @@
             </MenuItem>
             <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
                       HorizontalAlignment="Right"
-                      Items="{Binding NotificationVM.LoadingItems}">
+                      ItemsSource="{Binding NotificationVM.LoadingItems}">
                 <MenuItem.Header>
                     <notificationView:NotificationView DataContext="{Binding NotificationVM.LatestNotification^}"/>
                 </MenuItem.Header>

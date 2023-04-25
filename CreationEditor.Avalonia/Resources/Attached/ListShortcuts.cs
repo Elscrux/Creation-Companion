@@ -80,7 +80,7 @@ public sealed class ListShortcuts : AvaloniaObject {
             },
             Content = new SymbolIcon { Symbol = Symbol.Delete },
             Foreground = Brushes.Red,
-            Classes = new Classes("Transparent"),
+            Classes = { "Transparent" },
             Command = command,
             HorizontalAlignment = HorizontalAlignment.Left,
             HorizontalContentAlignment = HorizontalAlignment.Left,

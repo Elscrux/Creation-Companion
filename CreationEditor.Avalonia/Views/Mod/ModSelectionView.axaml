@@ -33,7 +33,7 @@
                       Margin="5"
                       Height="500"
                       VerticalAlignment="Top"
-                      Items="{Binding DisplayedMods}"
+                      ItemsSource="{Binding DisplayedMods}"
                       SelectedItem="{Binding SelectedMod}"
                       AutoGenerateColumns="False"
                       CanUserReorderColumns="False" CanUserResizeColumns="True"

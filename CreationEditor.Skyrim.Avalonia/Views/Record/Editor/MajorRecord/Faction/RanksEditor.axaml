@@ -13,7 +13,7 @@
                             Header="Ranks"
                             FontSize="12">
         <DataGrid x:Name="RankGrid"
-                  Items="{Binding FactionEditorVM.EditableRecord.Ranks}"
+                  ItemsSource="{Binding FactionEditorVM.EditableRecord.Ranks}"
                   Background="{DynamicResource SystemControlTransparentBrush}"
                   CanUserReorderColumns="False"
                   CanUserResizeColumns="True"

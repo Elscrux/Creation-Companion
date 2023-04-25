@@ -272,11 +272,11 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (e.Data?.Contains(DataGrid) is not true) return false;
 
         var oldDataGridObject = e.Data?.Get(DataGrid);
-        if (oldDataGridObject is not DataGrid { Items: IList oldList } oldDataGrid) return false;
+        if (oldDataGridObject is not DataGrid { ItemsSource: IList oldList } oldDataGrid) return false;
 
         // Get new data
         var newDataGrid = newRow.FindAncestorOfType<DataGrid>();
-        if (newDataGrid?.Items is not IList newList) return false;
+        if (newDataGrid?.ItemsSource is not IList newList) return false;
 
         outOldDataGrid = oldDataGrid;
         outOldList = oldList;

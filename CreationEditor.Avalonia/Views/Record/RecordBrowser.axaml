@@ -25,7 +25,7 @@
                 Margin="5"/>
 
             <TreeView Grid.Row="1"
-                      Items="{Binding RecordTypeGroups}"
+                      ItemsSource="{Binding RecordTypeGroups}"
                       Classes="Compact">
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">

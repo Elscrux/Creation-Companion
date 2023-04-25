@@ -18,7 +18,7 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord.ConditionsEditor"
              x:Name="Editor">
     <DataGrid x:Name="ConditionsGrid"
-              Items="{Binding #Editor.Conditions}"
+              ItemsSource="{Binding #Editor.Conditions}"
               Background="{DynamicResource SystemControlTransparentBrush}"
               CanUserReorderColumns="False"
               CanUserResizeColumns="True"
@@ -195,7 +195,7 @@
 
                             <ComboBox
                                 Grid.Column="1"
-                                Items="{Binding CustomEnumsValues}"
+                                ItemsSource="{Binding CustomEnumsValues}"
                                 SelectedItem="{Binding EnumValue}"
                                 VerticalAlignment="Top"
                                 HorizontalAlignment="Stretch">

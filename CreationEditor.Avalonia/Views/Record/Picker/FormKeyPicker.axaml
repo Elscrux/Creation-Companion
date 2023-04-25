@@ -82,7 +82,7 @@
                                 </MultiBinding>
                             </Button.IsVisible>
 
-                            <controls:SymbolIcon Symbol="DismissFilled"
+                            <controls:SymbolIcon Symbol="Dismiss"
                                                  Foreground="{DynamicResource SystemAccentColor}"
                                                  ToolTip.Tip="Clear"/>
                         </Button>
@@ -108,7 +108,7 @@
 
                         <Grid.Resources>
                             <Grid x:Key="FilterGrid" ColumnDefinitions="*,5,*" MaxHeight="500">
-                                <basic:SelectList Grid.Column="0" Items="{TemplateBinding SelectableTypes}">
+                                <basic:SelectList Grid.Column="0" ItemsSource="{TemplateBinding SelectableTypes}">
                                     <DataTemplate DataType="selectables:TypeItem">
                                         <CheckBox IsChecked="{Binding IsSelected}">
                                             <CheckBox.Content>
@@ -128,7 +128,7 @@
                                     </DataTemplate>
                                 </basic:SelectList>
 
-                                <basic:SelectList Grid.Column="2" Items="{TemplateBinding SelectableMods}">
+                                <basic:SelectList Grid.Column="2" ItemsSource="{TemplateBinding SelectableMods}">
                                     <DataTemplate DataType="mod:ModItem">
                                         <CheckBox Content="{Binding ModKey.FileName}"
                                                   IsChecked="{Binding IsSelected}"/>
@@ -188,7 +188,7 @@
                                     <ScrollViewer Grid.Row="1"
                                                   HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
                                                   VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
-                                        <ItemsRepeater Items="{TemplateBinding ApplicableEditorIDs}">
+                                        <ItemsRepeater ItemsSource="{TemplateBinding ApplicableEditorIDs}">
                                             <ItemsRepeater.ItemTemplate>
                                                 <DataTemplate DataType="picker:RecordNamePair">
                                                     <Border HorizontalAlignment="Stretch"
