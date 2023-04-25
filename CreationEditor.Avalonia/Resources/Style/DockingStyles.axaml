@@ -48,6 +48,15 @@
         <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
     </Style>
 
+    <Style Selector="docking|Tab TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="4,2"/>
+    </Style>
+    <Style Selector="docking|Tab.Large TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="10,5"/>
+    </Style>
+
     <!-- Control -->
     <Style Selector="docking|DockedControl.AccentSelected:not(:focus-within) Border#DockTitleBar">
         <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>

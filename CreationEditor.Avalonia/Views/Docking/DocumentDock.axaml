@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Docking.DocumentDock"
              x:Name="Dock"
@@ -30,37 +30,9 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate DataType="model:IDockedItem">
-                        <Border Classes="Tab"
-                                Classes.AccentSelected="{Binding IsSelected}">
-                            <Interaction.Behaviors>
-                                <behavior:DockDragBehavior/>
-                            </Interaction.Behaviors>
-
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Header}"
-                                           FontSize="13"
-                                           Padding="10,5"
-                                           x:Name="TabHeader">
-                                    <Interaction.Behaviors>
-                                        <EventTriggerBehavior EventName="PointerReleased"
-                                                              SourceObject="TabHeader">
-                                            <InvokeCommandAction
-                                                Command="{ReflectionBinding #Dock.ViewModel.Activate}"
-                                                CommandParameter="{Binding Path=#TabHeader.DataContext}"/>
-                                        </EventTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                </TextBlock>
-
-                                <!-- Close -->
-                                <Button Classes="DockClose"
-                                        Command="{Binding Close}"
-                                        IsVisible="{Binding CanClose}">
-
-                                    <controls:SymbolIcon Symbol="Dismiss"
-                                                         ToolTip.Tip="Close"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
+                        <docking:Tab DockContainer="{Binding #Dock.DataContext}"
+                                         DockedItem="{Binding}"
+                                         Classes="Large"/>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>
