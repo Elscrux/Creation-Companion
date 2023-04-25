@@ -11,7 +11,7 @@ public sealed class DocumentDockVM : TabbedDockVM {
 
     public DocumentDockVM(DockContainerVM dockParent) : base(dockParent) {}
 
-    public static Control CreateControl(IDockedItem dockedItem, DockContainerVM? parent) {
+    public static Control CreateControl(IDockedItem dockedItem, DockContainerVM parent) {
         var documentDockVM = new DocumentDockVM(parent);
         documentDockVM.Add(dockedItem, DockConfig.Default);
 
