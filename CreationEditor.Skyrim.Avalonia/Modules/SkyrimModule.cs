@@ -7,6 +7,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
+using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
@@ -82,6 +83,10 @@ public sealed class SkyrimModule : Module {
         // Service
         builder.RegisterType<BSERuntimeService>()
             .As<IViewportRuntimeService>()
+            .SingleInstance();
+
+        builder.RegisterType<PluginService<ISkyrimMod, ISkyrimModGetter>>()
+            .As<IPluginService>()
             .SingleInstance();
 
         // View Model
