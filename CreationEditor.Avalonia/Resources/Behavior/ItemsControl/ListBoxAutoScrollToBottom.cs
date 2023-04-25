@@ -13,10 +13,12 @@ public class ListBoxAutoScrollToBottom : Behavior<ListBox> {
         set => SetValue(ScrollingEnabledProperty, value);
     }
 
-    protected override void OnAttached() {
+    private IDisposable? _attachedDisposable;
+
+    protected override void OnAttachedToVisualTree() {
         base.OnAttached();
 
-        AssociatedObject?.WhenAnyValue(x => x.ItemCount)
+        _attachedDisposable = AssociatedObject?.WhenAnyValue(x => x.ItemCount)
             .Throttle(TimeSpan.FromMicroseconds(250), RxApp.MainThreadScheduler)
             .Subscribe(_ => {
                 if (!ScrollingEnabled) return;
@@ -27,5 +29,11 @@ public class ListBoxAutoScrollToBottom : Behavior<ListBox> {
                         break;
                 }
             });
+    }
+
+    protected override void OnDetachedFromVisualTree() {
+        base.OnDetaching();
+
+        _attachedDisposable?.Dispose();
     }
 }

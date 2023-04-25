@@ -29,6 +29,16 @@ public sealed class DockDropBehavior : Behavior<Control> {
         AssociatedObject.SetValue(DragDrop.AllowDropProperty, true);
     }
 
+    protected override void OnDetaching() {
+        base.OnDetaching();
+
+        if (AssociatedObject == null) return;
+
+        AssociatedObject.RemoveHandler(DragDrop.DropEvent, Drop);
+        AssociatedObject.RemoveHandler(DragDrop.DragOverEvent, DragOver);
+        AssociatedObject.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
+    }
+
     private void DragLeave(object? sender, DragEventArgs e) {
         if (!CanDock(sender, e, out var dragData, out var control)) return;
 

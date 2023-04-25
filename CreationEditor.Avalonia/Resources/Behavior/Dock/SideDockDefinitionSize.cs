@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
-using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
@@ -13,8 +12,6 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
     public double ActiveTabMinSize { get; set; } = 50;
     public double NoActiveTabSize { get; set; } = 20;
 
-    public IDockedItem? PreviousActiveTab { get; set; }
-
     public SideDockVM? SideDock {
         get => GetValue(SideDockProperty);
         set => SetValue(SideDockProperty, value);
@@ -22,10 +19,18 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
 
     public bool UpdateSize { get; set; }
 
+    private IDisposable? _attachedDisposable;
+
     protected override void OnAttached() {
-        this.WhenAnyValue(x => x.SideDock,
+        _attachedDisposable = this.WhenAnyValue(x => x.SideDock,
                 x => x.AssociatedObject)
             .Subscribe(_ => SideDockChanged());
+    }
+
+    protected override void OnDetaching() {
+        base.OnDetaching();
+
+        _attachedDisposable?.Dispose();
     }
 
     private void SideDockChanged() {
@@ -41,18 +46,14 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(x => {
                 var (editMode, activeTab, tabCount) = x;
-                try {
-                    if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
+                if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
 
-                    var activeTabSize = UpdateSize && activeTab?.Size != null ? activeTab.Size.Value : ActiveTabSize;
-                    var size = new GridLength(ReturnIf(SideDock, activeTabSize, NoActiveTabSize), GridUnitType.Pixel);
-                    AssociatedObject.SetValue(GetSizeProperty(), size);
+                var activeTabSize = UpdateSize && activeTab?.Size != null ? activeTab.Size.Value : ActiveTabSize;
+                var size = new GridLength(ReturnIf(SideDock, activeTabSize, NoActiveTabSize), GridUnitType.Pixel);
+                AssociatedObject.SetValue(GetSizeProperty(), size);
 
-                    var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
-                    AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
-                } finally {
-                    PreviousActiveTab = SideDock.ActiveTab;
-                }
+                var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
+                AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
             });
     }
 

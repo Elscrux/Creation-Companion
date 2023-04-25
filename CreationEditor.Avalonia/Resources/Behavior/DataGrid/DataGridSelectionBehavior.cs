@@ -43,6 +43,8 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         set => SetValue(SelectionGuardProperty, value);
     }
 
+    private IDisposable? _attachedDisposable;
+
     protected override void OnAttached() {
         base.OnAttached();
 
@@ -57,14 +59,18 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         base.OnAttachedToVisualTree();
 
         if (AssociatedObject?.ItemsSource is IEnumerable<IReactiveSelectable> selectables) {
-            var observableSelectables = selectables
+            _attachedDisposable = selectables
                 .ToObservable()
-                .ToObservableChangeSet();
-
-            observableSelectables
+                .ToObservableChangeSet()
                 .AutoRefresh(selectable => selectable.IsSelected)
                 .Subscribe(UpdateAllChecked);
         }
+    }
+
+    protected override void OnDetachedFromVisualTree() {
+        base.OnDetachedFromVisualTree();
+
+        _attachedDisposable?.Dispose();
     }
 
     private void AddSelectionColumn() {
