@@ -9,6 +9,8 @@
              x:Name="Control">
     <Interaction.Behaviors>
         <behavior:DockDragBehavior/>
+        <behavior:TabReorderBehavior
+            DockContainer="{Binding #Control.DockContainer}"/>
     </Interaction.Behaviors>
 
     <Border Classes="Tab"

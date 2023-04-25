@@ -9,7 +9,7 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 using CreationEditor.Avalonia.Views.Docking;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class DockDropBehavior : Behavior<Control> {
+public class DockDropBehavior : Behavior<Control> {
     public static readonly StyledProperty<DockContainerVM?> DockContainerProperty = AvaloniaProperty.Register<Control, DockContainerVM?>(nameof(DockContainer));
 
     public DockContainerVM? DockContainer {
@@ -39,8 +39,8 @@ public sealed class DockDropBehavior : Behavior<Control> {
         AssociatedObject.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
     }
 
-    private void DragLeave(object? sender, DragEventArgs e) {
-        if (!CanDock(sender, e, out var dragData, out var control)) return;
+    protected virtual void DragLeave(object? sender, DragEventArgs e) {
+        if (!CanDock<Control>(sender, e, out var dragData, out var control)) return;
 
         // Check if we are out of bounds of our control
         if (control is IDockPreview dockPreview
@@ -54,8 +54,8 @@ public sealed class DockDropBehavior : Behavior<Control> {
         }
     }
 
-    private void DragOver(object? sender, DragEventArgs e) {
-        if (!CanDock(sender, e, out var dragData, out var control)) return;
+    protected virtual void DragOver(object? sender, DragEventArgs e) {
+        if (!CanDock<Control>(sender, e, out var dragData, out var control)) return;
 
         // Check if the dock type changed or if we aren't the currently previewed object
         var dock = GetDockType(e, control);
@@ -72,8 +72,8 @@ public sealed class DockDropBehavior : Behavior<Control> {
         }
     }
 
-    private void Drop(object? sender, DragEventArgs e) {
-        if (!CanDock(sender, e, out var dragData, out var control)) return;
+    protected virtual void Drop(object? sender, DragEventArgs e) {
+        if (!CanDock<Control>(sender, e, out var dragData, out var control)) return;
 
         e.Handled = true;
 
@@ -91,7 +91,8 @@ public sealed class DockDropBehavior : Behavior<Control> {
     }
 
     [MemberNotNullWhen(true, nameof(DockContainer))]
-    private bool CanDock(object? sender, DragEventArgs e, [MaybeNullWhen(false)] out DockDragData outDockDragData, [MaybeNullWhen(false)] out Control outControl) {
+    protected bool CanDock<T>(object? sender, DragEventArgs e, [MaybeNullWhen(false)] out DockDragData outDockDragData, [MaybeNullWhen(false)] out T outControl)
+        where T : Control {
         outDockDragData = null;
         outControl = null;
 
@@ -99,29 +100,31 @@ public sealed class DockDropBehavior : Behavior<Control> {
         if (DockContainer == null || sender == null) return false;
 
         // Check control
-        if (sender is not Control control) return false;
+        if (sender is not T control) return false;
 
         // Check if we're the nearest dock preview ancestor
         if (e.Source is not Control source) return false;
         if (!ReferenceEquals(source.FindAncestorOfType<IDockPreview>(), AssociatedObject)) return false;
 
         // Check drag data
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         if (e.Data?.Contains(nameof(DockDragData)) is not true) return false;
 
-        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         var data = e.Data?.Get(nameof(DockDragData));
         if (data is not DockDragData dragData) return false;
 
         // Don't allow to drop on ourselves
-        if (dragData.Item.DockParent == DockContainer) return false;
+        if (CheckSelf(dragData, control)) return false;
 
         outControl = control;
         outDockDragData = dragData;
         return true;
     }
 
-    private static Dock GetDockType(DragEventArgs e, Visual visual) {
+    protected virtual bool CheckSelf(DockDragData dragData, Control control) {
+        return dragData.Item.DockParent == DockContainer;
+    }
+
+    protected virtual Dock GetDockType(DragEventArgs e, Visual visual) {
         var position = e.GetPosition(visual);
 
         var dockPositions = new List<(double Distance, Dock Dock)> {
