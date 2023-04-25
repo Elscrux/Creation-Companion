@@ -20,13 +20,13 @@
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid RowDefinitions="30,*"
+    <Grid RowDefinitions="Auto,*"
           Classes="AccentSelected TabGrid">
         <Border Grid.Row="0"
                 Classes="TabBar">
             <ItemsRepeater ItemsSource="{Binding Tabs}">
                 <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal"/>
+                    <WrapLayout Orientation="Horizontal"/>
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate DataType="model:IDockedItem">
