@@ -169,7 +169,8 @@ public class ReferenceQuery : IReferenceQuery {
         writer.Write(checksum);
 
         // Write game
-        var game = _mutagenTypeProvider.GetGameName(mod.EnumerateMajorRecords().First());
+        var game = mod.GetType().Namespace;
+        if (game == null) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
         writer.Write(game);
 
 
