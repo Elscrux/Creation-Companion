@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputPath>bin\Debug\net7.0\Plugins</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <RootNamespace>SearchPlugin</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
+      <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\TextSearchView.axaml.cs">
+        <DependentUpon>TextSearchView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.41.1-pr001" />
+      <PackageReference Include="ReactiveUI" Version="18.4.34" />
+      <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
+    </Target>
+</Project>
