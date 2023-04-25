@@ -159,7 +159,9 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.Name = Name;
         faction.Flags = Flags;
         faction.Relations.Clear();
-        faction.Relations.AddRange(Relations.Select(r => r.ToRelation()));
+        faction.Relations.AddRange(Relations
+            .Where(r => !r.TargetFormKey.IsNull)
+            .Select(r => r.ToRelation()));
 
         for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
         faction.Ranks.SetTo(Ranks);
