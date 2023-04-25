@@ -22,7 +22,7 @@ namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {
     private readonly ModSelectionVM _modSelectionVM;
-    private const string BaseWindowTitle = "Creation Editor";
+    private const string BaseWindowTitle = "Creation Companion";
 
     public INotificationVM NotificationVM { get; }
     public IBusyService BusyService { get; }

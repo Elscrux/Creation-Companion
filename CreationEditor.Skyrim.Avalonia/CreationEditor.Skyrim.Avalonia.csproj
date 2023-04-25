@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
-        <AssemblyName>CreationEditor.Skyrim.Avalonia</AssemblyName>
+        <AssemblyName>Creation Companion</AssemblyName>
         <RootNamespace>CreationEditor.Skyrim.Avalonia</RootNamespace>
     </PropertyGroup>
 
