@@ -48,9 +48,6 @@ public sealed class EditableCondition : ReactiveObject {
     [Reactive] public sbyte PackageData { get; set; }
     [Reactive] public Enum? EventData { get; set; }
 
-    private MemorySlice<byte> Unknown1 { get; }
-    private ushort Unknown2 { get; }
-
     public IObservable<bool>? ShowMoreRunOn { get; }
     public IObservable<bool>? ShowReference { get; }
     public IObservable<bool>? ShowQuestAlias { get; }
@@ -144,9 +141,6 @@ public sealed class EditableCondition : ReactiveObject {
         Or = (parent.Flags & Condition.Flag.OR) != 0;
         SwapSubjectAndTarget = (parent.Flags & Condition.Flag.SwapSubjectAndTarget) != 0;
 
-        Unknown1 = parent.Unknown1;
-        Unknown2 = parent.Unknown2;
-
         switch (Data.RunOnType) {
             case Condition.RunOnType.QuestAlias:
                 QuestAlias = Data.Unknown3;
@@ -175,14 +169,12 @@ public sealed class EditableCondition : ReactiveObject {
         if (SwapSubjectAndTarget) condition.Flags |= Condition.Flag.SwapSubjectAndTarget;
 
         condition.CompareOperator = CompareOperator;
-        condition.Unknown1 = Unknown1;
-        condition.Unknown2 = Unknown2;
 
         condition.Data.Unknown3 = RunOnType switch {
             ExtendedRunOnType.QuestAlias => QuestAlias,
             ExtendedRunOnType.PackageData => PackageData,
             ExtendedRunOnType.EventData => Convert.ToInt32(EventData),
-            _ => 0
+            _ => -1
         };
 
         return condition;
