@@ -12,7 +12,8 @@ public interface IEditorEnvironment {
     public IMod ActiveMod { get; }
     public ILinkCache ActiveModLinkCache { get; } //todo potentially remove
 
-    public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null);
+    public void Build(IEnumerable<ModKey> modKeys, ModKey activeMod);
+    public void Build(IEnumerable<ModKey> modKeys, string newModName, ModType modType);
 
     public IObservable<ModKey> ActiveModChanged { get; }
     public IObservable<List<ModKey>> LoadOrderChanged { get; }

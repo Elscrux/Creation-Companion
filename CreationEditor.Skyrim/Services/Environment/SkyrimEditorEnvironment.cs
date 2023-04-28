@@ -10,8 +10,6 @@ using Serilog;
 namespace CreationEditor.Skyrim.Services.Environment;
 
 public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
-    private static readonly ModKey NewModKey = new("NewMod", ModType.Plugin);
-
     private readonly IEnvironmentContext _environmentContext;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
@@ -54,7 +52,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         _notificationService = notificationService;
         _logger = logger;
 
-        _activeMod = new SkyrimMod(NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(ModKey.Null, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
@@ -63,37 +61,54 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
             .Build();
     }
 
-    public void Build(IEnumerable<ModKey> modKeys, ModKey? activeMod = null) {
+    public void Build(IEnumerable<ModKey> modKeys, ModKey activeMod) {
         var modKeysArray = modKeys.ToArray();
 
         var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
-        if (activeMod == null) {
-            _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
-        } else {
-            _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.Value.FileName);
-        }
+        _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.FileName);
 
-        _activeMod = new SkyrimMod(activeMod ?? NewModKey, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(activeMod, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
-        var linearNotifier = new LinearNotifier(_notificationService, activeMod == null ? 1 : 2);
+        var linearNotifier = new LinearNotifier(_notificationService, 2);
 
-        if (activeMod != null) {
-            linearNotifier.Next($"Preparing {activeMod.Value.FileName}");
-            _activeMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-                .Create(_environmentContext.GameReleaseContext.Release)
-                .WithLoadOrder(activeMod.Value)
-                .Build()
-                .LoadOrder[^1].Mod!);
-        }
+        linearNotifier.Next($"Preparing {activeMod.FileName}");
+        _activeMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
+            .Create(_environmentContext.GameReleaseContext.Release)
+            .WithLoadOrder(activeMod)
+            .Build()
+            .LoadOrder[^1].Mod!);
 
         linearNotifier.Next("Building GameEnvironment");
+
+        BuildEnvironment(modKeysArray);
+
+        linearNotifier.Stop();
+    }
+
+    public void Build(IEnumerable<ModKey> modKeys, string newModName, ModType modType) {
+        var modKeysArray = modKeys.ToArray();
+
+        var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
+        _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
+
+        _activeMod = new SkyrimMod(new ModKey(newModName, modType), _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeModLinkCache = _activeMod.ToMutableLinkCache();
+
+        var linearNotifier = new LinearNotifier(_notificationService);
+        linearNotifier.Next("Building GameEnvironment");
+
+        BuildEnvironment(modKeysArray);
+
+        linearNotifier.Stop();
+    }
+
+    private void BuildEnvironment(ModKey[] modKeys) {
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_environmentContext.GameReleaseContext.Release)
-            .WithLoadOrder(modKeysArray)
+            .WithLoadOrder(modKeys)
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();
-        linearNotifier.Stop();
 
         _activeModChanged.OnNext(_activeMod.ModKey);
         _loadOrderChanged.OnNext(_gameEnvironment.LoadOrder.Select(x => x.Key).ToList());

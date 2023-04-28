@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
-using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
@@ -39,13 +38,17 @@ public sealed class ModSelectionVM : ViewModel {
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
+    [Reactive] public string NewName { get; set; } = "NewMod";
+    [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
+
+    public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
+
     public ModSelectionVM(
         IEnvironmentContext environmentContext,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
-        IPluginListingsPathProvider pluginListingsProvider,
-        IBusyService busyService) {
+        IPluginListingsPathProvider pluginListingsProvider) {
         _editorEnvironment = editorEnvironment;
         SelectedModDetails = modGetterVM;
         _environment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
@@ -178,6 +181,10 @@ public sealed class ModSelectionVM : ViewModel {
         }
 
         var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-        _editorEnvironment.Build(orderedMods, ActiveMod);
+        if (ActiveMod == null) {
+            _editorEnvironment.Build(orderedMods, NewName, NewModType);
+        } else {
+            _editorEnvironment.Build(orderedMods, ActiveMod.Value);
+        }
     }
 }
