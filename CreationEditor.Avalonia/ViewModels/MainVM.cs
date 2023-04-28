@@ -4,7 +4,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services;
@@ -33,10 +32,10 @@ public sealed class MainVM : ViewModel {
 
     public IDockingManagerService DockingManagerService { get; }
     public IPluginService? PluginService { get; }
-    public IList<IVisualPluginDefinition>? VisualPlugins { get; }
+    public IList<IMenuPluginDefinition>? MenuBarPlugins { get; }
 
     public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
-    public ReactiveCommand<IVisualPluginDefinition, Unit> OpenPlugin { get; }
+    public ReactiveCommand<IMenuPluginDefinition, Unit> OpenPlugin { get; }
     public ReactiveCommand<Unit, Unit> OpenSettings { get; }
 
     public ReactiveCommand<Unit, Unit> OpenGameFolder { get; }
@@ -62,11 +61,11 @@ public sealed class MainVM : ViewModel {
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
-        VisualPlugins = PluginService?.Plugins.OfType<IVisualPluginDefinition>().ToList();
+        MenuBarPlugins = PluginService?.Plugins.OfType<IMenuPluginDefinition>().ToList();
 
         OpenSelectMods = ReactiveCommand.Create(ShowModSelection);
 
-        OpenPlugin = ReactiveCommand.Create<IVisualPluginDefinition>(plugin => {
+        OpenPlugin = ReactiveCommand.Create<IMenuPluginDefinition>(plugin => {
             DockingManagerService.AddControl(
                 plugin.GetControl(),
                 new DockConfig {
