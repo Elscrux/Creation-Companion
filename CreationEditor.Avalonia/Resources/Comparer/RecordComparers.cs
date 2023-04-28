@@ -33,5 +33,19 @@ public static class RecordComparers {
 
     public static readonly FuncSelectorComparer<IMajorRecordIdentifier, INamedRequiredGetter> NamedRequiredComparer
         = new(referencedRecord => referencedRecord as INamedRequiredGetter,
-            (x, y) => NamedRequiredComparer.Compare(x, y));
+            (x, y) => {
+                var xName = x.Name;
+                var yName = y.Name;
+
+                var xIsNullOrEmpty = string.IsNullOrEmpty(xName);
+                var yIsNullOrEmpty = string.IsNullOrEmpty(yName);
+                if (xIsNullOrEmpty) {
+                    if (yIsNullOrEmpty) return 0;
+
+                    return 1;
+                }
+                if (yIsNullOrEmpty) return -1;
+
+                return StringComparer.OrdinalIgnoreCase.Compare(xName, yName);
+            });
 }

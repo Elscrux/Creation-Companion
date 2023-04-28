@@ -12,7 +12,7 @@ public static class ReferencedRecordComparers {
 
     public static readonly FuncSelectorComparer<IReferencedRecord, INamedRequiredGetter> NamedRequiredComparer
         = new(referencedRecord => referencedRecord.Record as INamedRequiredGetter,
-            (x, y) => NamedRequiredComparer.Compare(x, y));
+            (x, y) => RecordComparers.NamedRequiredComparer.Compare(x, y));
 
     public static readonly FuncComparer<IReferencedRecord> ReferenceCountComparer
         = new((x, y) => x.References.Count.CompareTo(y.References.Count));
