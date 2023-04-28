@@ -25,18 +25,18 @@ public sealed class TabReorderBehavior : DockDropBehavior {
 
         switch (dragData.Dock) {
             case Dock.Left:
-                tab.DockContainer.Tabs
+                tab.DockContainer
                     .Move(movingTabIndex,
                         selectedTabIndex == 0
                             ? 0
-                            : selectedTabIndex - 1);
+                            : selectedTabIndex);
                 break;
             case Dock.Right:
-                tab.DockContainer.Tabs
+                tab.DockContainer
                     .Move(movingTabIndex,
                         selectedTabIndex + 1 == tab.DockContainer.Tabs.Count
                             ? selectedTabIndex
-                            : selectedTabIndex - 1);
+                            : selectedTabIndex + 1);
                 break;
         }
     }

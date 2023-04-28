@@ -84,5 +84,13 @@ public abstract class TabbedDockVM : DockContainerVM {
         }
     }
 
+    public void Move(int oldIndex, int newIndex) {
+        if (oldIndex == newIndex) return;
+
+        var item = Tabs[oldIndex];
+        Tabs.RemoveAt(oldIndex);
+        Tabs.Insert(newIndex, item);
+    }
+
     public override bool CleanUp() => false;
 }
