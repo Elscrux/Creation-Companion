@@ -100,10 +100,6 @@
         <Compile Update="ViewModels\Setting\SettingsVM.cs">
           <DependentUpon>ISettingsVM.cs</DependentUpon>
         </Compile>
-        <Compile Update="Views\Record\Picker\FormKeyPicker.axaml.cs">
-          <DependentUpon>FormKeyPicker.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
     <ItemGroup>
