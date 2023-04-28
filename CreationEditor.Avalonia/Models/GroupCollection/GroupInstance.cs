@@ -7,6 +7,8 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// <param name="Class">Common class</param>
 /// <param name="Items">Items with common class</param>
 public record GroupInstance(object Class, ObservableCollection<object> Items) {
+    private object _modifyLock = new();
+
     /// <summary>
     /// Add items to the group instance
     /// </summary>
@@ -15,45 +17,47 @@ public record GroupInstance(object Class, ObservableCollection<object> Items) {
     /// <typeparam name="T">Type of items that are grouped</typeparam>
     public void Add<T>(IEnumerable<T> items, IReadOnlyList<Group<T>> groups) => Add(items, groups, 0);
     private void Add<T>(IEnumerable<T> items, IReadOnlyList<Group<T>> groups, int currentGroup) {
-        if (currentGroup < groups.Count) {
-            var group = groups[currentGroup];
-            var nextGroup = currentGroup + 1;
+        lock (_modifyLock) {
+            if (currentGroup < groups.Count) {
+                var group = groups[currentGroup];
+                var nextGroup = currentGroup + 1;
 
-            if (Items.Count > 0) {
-                // If the collection already has items, add the new items to existing groups or add new groups
-                var groupedItems = items
-                    .GroupBy(group.Selector);
+                if (Items.Count > 0) {
+                    // If the collection already has items, add the new items to existing groups or add new groups
+                    var groupedItems = items
+                        .GroupBy(group.Selector);
 
-                foreach (var grouping in groupedItems) {
-                    var @class = grouping.Key;
+                    foreach (var grouping in groupedItems) {
+                        var @class = grouping.Key;
 
-                    // If the group instance doesn't exist, create it and add it to the list
-                    var groupInstance = GetClass(@class);
-                    if (groupInstance == null) {
-                        groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
-                        Items.Add(groupInstance);
+                        // If the group instance doesn't exist, create it and add it to the list
+                        var groupInstance = GetClass(@class);
+                        if (groupInstance == null) {
+                            groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
+                            Items.Add(groupInstance);
+                        }
+
+                        groupInstance.Add(grouping, groups, nextGroup);
                     }
+                } else {
+                    // If the collection doesn't have any items, add all groups as new groups
+                    var groupedItems = items
+                        .GroupBy(group.Selector);
 
-                    groupInstance.Add(grouping, groups, nextGroup);
+                    foreach (var grouping in groupedItems) {
+                        var @class = grouping.Key;
+
+                        // Create a new group instance and add it to the list
+                        var groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
+                        Items.Add(groupInstance);
+
+                        groupInstance.Add(grouping, groups, nextGroup);
+                    }
                 }
             } else {
-                // If the collection doesn't have any items, add all groups as new groups
-                var groupedItems = items
-                    .GroupBy(group.Selector);
-
-                foreach (var grouping in groupedItems) {
-                    var @class = grouping.Key;
-
-                    // Create a new group instance and add it to the list
-                    var groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
-                    Items.Add(groupInstance);
-
-                    groupInstance.Add(grouping, groups, nextGroup);
-                }
+                // If there are no more groups, add the items to the current group
+                Items.AddRange(items.OfType<object>());
             }
-        } else {
-            // If there are no more groups, add the items to the current group
-            Items.AddRange(items.OfType<object>());
         }
     }
 
@@ -64,36 +68,38 @@ public record GroupInstance(object Class, ObservableCollection<object> Items) {
     /// <typeparam name="T">Type of items that are grouped</typeparam>
     /// <returns></returns>
     public bool Remove<T>(IEnumerable<T> items) {
-        var itemList = items.ToList();
+        lock (_modifyLock) {
+            var itemList = items.ToList();
 
-        // We're a leaf group instance, remove the items from this group instance
-        if (Items.FirstOrDefault() is T) {
-            var anyRemoved = false;
-            foreach (var item in itemList) {
-                if (item == null) continue;
+            // We're a leaf group instance, remove the items from this group instance
+            if (Items.FirstOrDefault() is T) {
+                var anyRemoved = false;
+                foreach (var item in itemList) {
+                    if (item == null) continue;
 
-                if (Items.Remove(item)) {
-                    anyRemoved = true;
+                    if (Items.Remove(item)) {
+                        anyRemoved = true;
+                    }
                 }
+                return anyRemoved;
             }
-            return anyRemoved;
+
+            // Remove the items from the sub group instances
+            var any = false;
+            var groupInstances = Items.OfType<GroupInstance>().ToList();
+            for (var i = groupInstances.Count - 1; i >= 0; i--) {
+                var subGroupInstance = groupInstances[i];
+
+                // Remove the items from the sub group instance
+                if (!subGroupInstance.Remove(itemList)) continue;
+
+                // Remove the sub group instance if it is empty
+                if (subGroupInstance.Items.Count == 0) Items.RemoveAt(i);
+                any = true;
+            }
+
+            return any;
         }
-
-        // Remove the items from the sub group instances
-        var any = false;
-        var groupInstances = Items.OfType<GroupInstance>().ToList();
-        for (var i = 0; i < groupInstances.Count; i++) {
-            var subGroupInstance = groupInstances[i];
-
-            // Remove the items from the sub group instance
-            if (!subGroupInstance.Remove(itemList)) continue;
-
-            // Remove the sub group instance if it is empty
-            if (subGroupInstance.Items.Count == 0) Items.RemoveAt(i);
-            any = true;
-        }
-
-        return any;
     }
 
     /// <summary>
@@ -102,33 +108,35 @@ public record GroupInstance(object Class, ObservableCollection<object> Items) {
     /// <param name="group">Group to group items by</param>
     /// <typeparam name="T">Type of items that are grouped</typeparam>
     public void GroupBy<T>(Group<T> group) {
-        var i = 0;
-        while (i < Items.Count) {
-            switch (Items[i]) {
-                case T t:
-                    // Get the class of this item
-                    var @class = group.Selector(t);
+        lock (_modifyLock) {
+            var i = 0;
+            while (i < Items.Count) {
+                switch (Items[i]) {
+                    case T t:
+                        // Get the class of this item
+                        var @class = group.Selector(t);
 
-                    // Remove the item from the list
-                    Items.RemoveAt(i);
+                        // Remove the item from the list
+                        Items.RemoveAt(i);
 
-                    // Check if we already have a group for this class
-                    var groupInstance = GetClass(@class);
+                        // Check if we already have a group for this class
+                        var groupInstance = GetClass(@class);
 
-                    if (groupInstance == null) {
-                        // Create new group instance
-                        Items.Insert(i, new GroupInstance(@class, new ObservableCollection<object> { t }));
+                        if (groupInstance == null) {
+                            // Create new group instance
+                            Items.Insert(i, new GroupInstance(@class, new ObservableCollection<object> { t }));
+                            i++;
+                        } else {
+                            // Add to existing group instance
+                            groupInstance.Items.Add(t);
+                        }
+                        break;
+                    case GroupInstance subGroupInstance:
+                        // Group the sub group instance
+                        subGroupInstance.GroupBy(group);
                         i++;
-                    } else {
-                        // Add to existing group instance
-                        groupInstance.Items.Add(t);
-                    }
-                    break;
-                case GroupInstance subGroupInstance:
-                    // Group the sub group instance
-                    subGroupInstance.GroupBy(group);
-                    i++;
-                    break;
+                        break;
+                }
             }
         }
     }
@@ -139,21 +147,23 @@ public record GroupInstance(object Class, ObservableCollection<object> Items) {
     /// <param name="level">Level of group to remove</param>
     /// <typeparam name="T">Type of items that are grouped</typeparam>
     public void Ungroup<T>(int level) {
-        if (level == 0) {
-            // We reached the level of our group
-            var groupInstances = Items.OfType<GroupInstance>().ToList();
+        lock (_modifyLock) {
+            if (level == 0) {
+                // We reached the level of our group
+                var groupInstances = Items.OfType<GroupInstance>().ToList();
 
-            // Replace the group instances with their items
-            Items.Clear();
-            Items.AddRange(groupInstances.SelectMany(x => x.Items));
+                // Replace the group instances with their items
+                Items.Clear();
+                Items.AddRange(groupInstances.SelectMany(x => x.Items));
 
-            // Cleanup duplicate group instances
-            Cleanup();
-        } else {
-            // Otherwise, keep going down
-            var nextLevel = level - 1;
-            foreach (var groupInstance in Items.OfType<GroupInstance>()) {
-                groupInstance.Ungroup<T>(nextLevel);
+                // Cleanup duplicate group instances
+                Cleanup();
+            } else {
+                // Otherwise, keep going down
+                var nextLevel = level - 1;
+                foreach (var groupInstance in Items.OfType<GroupInstance>()) {
+                    groupInstance.Ungroup<T>(nextLevel);
+                }
             }
         }
     }
