@@ -9,6 +9,6 @@
     <HeaderedContentControl Header="Mode"
                             Classes="Default">
         <ComboBox ItemsSource="{x:Static view:ViewSettingVM.ViewModes}"
-                  SelectedItem="{Binding ViewMode}"/>
+                  SelectedItem="{Binding Setting.ViewMode}"/>
     </HeaderedContentControl>
 </UserControl>

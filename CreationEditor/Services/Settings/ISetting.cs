@@ -16,5 +16,11 @@ public interface ISetting {
     /// </summary>
     public List<ISetting> Children { get; }
 
+    public ISettingModel Model { get; } 
+    
     public void Apply();
+}
+
+public interface ISettingModel {
+    
 }

@@ -24,7 +24,7 @@ public sealed class SettingExporter : ISettingExporter {
         if (!filePath.Directory.Value.Exists) filePath.Directory.Value.Create();
 
         _logger.Here().Information("Exporting setting {Name} to {Path}", setting.Name, filePath);
-        var content = JsonConvert.SerializeObject(setting, Formatting.Indented);
+        var content = JsonConvert.SerializeObject(setting.Model, Formatting.Indented);
         _fileSystem.File.WriteAllText(filePath, content);
 
         return true;

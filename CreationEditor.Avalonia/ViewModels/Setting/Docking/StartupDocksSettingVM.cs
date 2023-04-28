@@ -8,11 +8,9 @@ using CreationEditor.Avalonia.Models.Settings.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
-using Newtonsoft.Json;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
-public sealed record StartupDocksSetting(List<StartupDock> Docks);
 public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<DockElement> StartupDockTypes = Enum.GetValues<DockElement>();
     public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>();
@@ -27,26 +25,23 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
     public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }
 
-    [JsonProperty]
-    public ObservableCollection<StartupDock> Docks { get; } = new();
+    public StartupDocksSetting Settings { get; }
+    public ISettingModel Model => Settings;
 
     public StartupDocksSettingVM(
         IDockFactory dockFactory,
         ISettingImporter<StartupDocksSetting> settingImporter) {
         _dockFactory = dockFactory;
 
-        AddStartupDock = ReactiveCommand.Create(() => Docks.Add(new StartupDock()));
+        Settings = settingImporter.Import(this) ?? new StartupDocksSetting(new ObservableCollection<StartupDock>());
+
+        AddStartupDock = ReactiveCommand.Create(() => Settings.Docks.Add(new StartupDock()));
 
         RemoveStartupDock = ReactiveCommand.Create<IList>(removeDocks => {
             foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
-                Docks.Remove(removeDock);
+                Settings.Docks.Remove(removeDock);
             }
         });
-
-        var startupDocksSettingVM = settingImporter.Import(this);
-        if (startupDocksSettingVM != null) {
-            Docks = new ObservableCollection<StartupDock>(startupDocksSettingVM.Docks);
-        }
     }
 
     private void Start(StartupDock startupDock) {
@@ -54,7 +49,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     }
 
     public void OnStartup() {
-        foreach (var startupDock in Docks) {
+        foreach (var startupDock in Settings.Docks) {
             Start(startupDock);
         }
     }
@@ -64,5 +59,4 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public void Apply() {
         // Nothing to do on this runtime
     }
-
 }

@@ -3,11 +3,8 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Settings.View;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
-using Newtonsoft.Json;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Setting.View;
 
-public sealed record ViewSetting(ViewMode ViewMode);
 public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<ViewMode> ViewModes = Enum.GetValues<ViewMode>();
 
@@ -15,19 +12,16 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     public Type? Parent => null;
     public List<ISetting> Children { get; } = new();
 
+    public ISettingModel Model => Setting;
+    public ViewSetting Setting { get; }
+
     private readonly ResourceDictionary _viewModeResourceDictionary = new();
 
     private readonly IDictionary<ViewMode, IViewModeTemplate> _viewModeTemplates;
 
-    [JsonProperty]
-    [Reactive] public ViewMode ViewMode { get; set; } = ViewMode.Normal;
-
     public ViewSettingVM(
         ISettingImporter<ViewSetting> settingsImporter) {
-        var viewSetting = settingsImporter.Import(this);
-        if (viewSetting != null) {
-            ViewMode = viewSetting.ViewMode;
-        }
+        Setting = settingsImporter.Import(this) ?? new ViewSetting();
 
         _viewModeTemplates = typeof(IViewModeTemplate)
             .GetAllSubClass<IViewModeTemplate>()
@@ -45,7 +39,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     public void OnExit() {}
 
     public void Apply() {
-        if (!_viewModeTemplates.TryGetValue(ViewMode, out var viewModeTemplate)) return;
+        if (!_viewModeTemplates.TryGetValue(Setting.ViewMode, out var viewModeTemplate)) return;
 
         _viewModeResourceDictionary.Clear();
 
