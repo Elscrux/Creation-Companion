@@ -1,4 +1,6 @@
-﻿using System.Reactive;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
+using System.Reactive;
 using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
@@ -36,6 +38,10 @@ public sealed class MainVM : ViewModel {
     public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
     public ReactiveCommand<IVisualPluginDefinition, Unit> OpenPlugin { get; }
     public ReactiveCommand<Unit, Unit> OpenSettings { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenGameFolder { get; }
+    public ReactiveCommand<Unit, Unit> OpenDataFolder { get; }
+
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
@@ -49,7 +55,8 @@ public sealed class MainVM : ViewModel {
         IDockingManagerService dockingManagerService,
         IDockFactory dockFactory,
         MainWindow mainWindow,
-        IPluginService? pluginService) {
+        IPluginService? pluginService,
+        IFileSystem fileSystem) {
         _modSelectionVM = modSelectionVM;
         NotificationVM = notificationVM;
         BusyService = busyService;
@@ -67,6 +74,25 @@ public sealed class MainVM : ViewModel {
                     DockMode = DockMode.Side,
                     Dock = Dock.Top,
                 });
+        });
+
+        OpenGameFolder = ReactiveCommand.Create(() => {
+            var gameFolder = fileSystem.Directory.GetParent(editorEnvironment.GameEnvironment.DataFolderPath);
+            if (gameFolder != null) {
+                Process.Start(new ProcessStartInfo {
+                    FileName = gameFolder.FullName,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+        });
+
+        OpenDataFolder = ReactiveCommand.Create(() => {
+            Process.Start(new ProcessStartInfo {
+                FileName = editorEnvironment.GameEnvironment.DataFolderPath,
+                UseShellExecute = true,
+                Verb = "open"
+            });
         });
 
         OpenSettings = ReactiveCommand.Create(() => {

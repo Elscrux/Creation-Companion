@@ -30,6 +30,27 @@
                     </MenuItem.Icon>
                 </MenuItem>
 
+                <MenuItem Header="Open"
+                          Command="{Binding OpenSelectMods}">
+                    <MenuItem.Icon>
+                        <controls:SymbolIcon Symbol="Open"/>
+                    </MenuItem.Icon>
+
+                    <MenuItem Header="Game Folder"
+                              Command="{Binding OpenGameFolder}">
+                        <MenuItem.Icon>
+                            <controls:SymbolIcon Symbol="Message"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <MenuItem Header="Data Folder"
+                              Command="{Binding OpenDataFolder}">
+                        <MenuItem.Icon>
+                            <controls:SymbolIcon Symbol="Message"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+
                 <MenuItem Header="Settings"
                           Command="{Binding OpenSettings}">
                     <MenuItem.Icon>
