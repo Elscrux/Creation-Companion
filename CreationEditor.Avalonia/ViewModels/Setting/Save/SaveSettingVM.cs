@@ -16,7 +16,7 @@ public enum SaveLocation {
 }
 
 public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly IEnvironmentContext _environmentContext;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
@@ -27,7 +27,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public string AbsoluteCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrAbsoluteCustomSaveLocation)
         ? Settings.DataRelativeOrAbsoluteCustomSaveLocation
-        : _fileSystem.Path.Combine(_editorEnvironment.GameEnvironment.DataFolderPath, Settings.DataRelativeOrAbsoluteCustomSaveLocation);
+        : _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, Settings.DataRelativeOrAbsoluteCustomSaveLocation);
 
     public ReactiveCommand<Unit, Unit> SelectCustomDirectory { get; }
 
@@ -40,12 +40,12 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public SaveSettingVM(
         ISettingImporter<SaveSettings> settingsImporter,
-        IEditorEnvironment editorEnvironment,
+        IEnvironmentContext environmentContext,
         IFileSystem fileSystem,
         ISavePipeline savePipeline,
         IModSaveLocationProvider modSaveLocationProvider,
         MainWindow mainWindow) {
-        _editorEnvironment = editorEnvironment;
+        _environmentContext = environmentContext;
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
         _modSaveLocationProvider = modSaveLocationProvider;
@@ -69,12 +69,12 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
             if (directory == null) return;
 
             var localPath = directory.Path.LocalPath;
-            if (localPath == _editorEnvironment.GameEnvironment.DataFolderPath) {
+            if (localPath == _environmentContext.DataDirectoryProvider.Path) {
                 Settings.SaveLocation = SaveLocation.DataFolder;
             } else {
                 Settings.DataRelativeOrAbsoluteCustomSaveLocation
-                    = localPath.StartsWith(_editorEnvironment.GameEnvironment.DataFolderPath)
-                        ? $"./{_fileSystem.Path.GetRelativePath(_editorEnvironment.GameEnvironment.DataFolderPath, localPath)}"
+                    = localPath.StartsWith(_environmentContext.DataDirectoryProvider.Path)
+                        ? $"./{_fileSystem.Path.GetRelativePath(_environmentContext.DataDirectoryProvider.Path, localPath)}"
                         : localPath;
             }
 

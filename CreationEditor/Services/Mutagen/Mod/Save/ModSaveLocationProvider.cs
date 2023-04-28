@@ -6,20 +6,20 @@ namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public class ModSaveLocationProvider : IModSaveLocationProvider {
     private readonly IFileSystem _fileSystem;
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly IEnvironmentContext _environmentContext;
 
     private DirectoryPath _directoryPath;
 
     public ModSaveLocationProvider(
         IFileSystem fileSystem,
-        IEditorEnvironment editorEnvironment) {
+        IEnvironmentContext environmentContext) {
         _fileSystem = fileSystem;
-        _editorEnvironment = editorEnvironment;
+        _environmentContext = environmentContext;
 
-        _directoryPath = _editorEnvironment.GameEnvironment.DataFolderPath;
+        _directoryPath = _environmentContext.DataDirectoryProvider.Path;
     }
 
-    public void SaveInDataFolder() => _directoryPath = _editorEnvironment.GameEnvironment.DataFolderPath;
+    public void SaveInDataFolder() => _directoryPath = _environmentContext.DataDirectoryProvider.Path;
     public void SaveInCustomDirectory(DirectoryPath absolutePath) => _directoryPath = absolutePath;
 
     public DirectoryPath GetSaveLocation() => _directoryPath;
