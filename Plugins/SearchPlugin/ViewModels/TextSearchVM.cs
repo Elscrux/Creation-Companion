@@ -124,6 +124,7 @@ public sealed class TextSearchVM : ViewModel {
                                 VerticalAlignment = VerticalAlignment.Center,
                                 MinHeight = 50,
                                 MaxHeight = 500,
+                                AcceptsReturn = true,
                             },
                             GroupInstance groupInstance => new TextBlock {
                                 Text = groupInstance.Class is IMajorRecordQueryableGetter record ? record.GetName() : groupInstance.Class.ToString(),
