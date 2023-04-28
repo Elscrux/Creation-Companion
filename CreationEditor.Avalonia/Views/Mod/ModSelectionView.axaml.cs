@@ -36,15 +36,18 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
             },
             DataContext = modSelectionVM,
             [!ContentDialog.IsPrimaryButtonEnabledProperty] = new Binding($"{nameof(ModSelectionVM.AnyModsLoaded)}^"),
+            [!ContentDialog.IsSecondaryButtonEnabledProperty] = new Binding(nameof(ModSelectionVM.ModsLoadedOnce)),
             Title = "Select Mods",
             Content = new ModSelectionView(modSelectionVM),
             FullSizeDesired = true,
             PrimaryButtonText = "Load",
             PrimaryButtonCommand = ReactiveCommand.Create(modSelectionVM.LoadMods),
-            CloseButtonText = "Cancel",
+            SecondaryButtonText = "Cancel",
             KeyBindings = { new KeyBinding { Command = ReactiveCommand.Create(modSelectionVM.LoadMods), Gesture = new KeyGesture(Key.Escape) } },
             DefaultButton = ContentDialogButton.Primary,
         };
+        contentDialog.SecondaryButtonCommandParameter = ReactiveCommand.Create(() => contentDialog.Hide());
+
         contentDialog.ShowAsync();
     }
 }

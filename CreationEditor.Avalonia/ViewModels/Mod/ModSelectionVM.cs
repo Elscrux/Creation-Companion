@@ -35,6 +35,8 @@ public sealed class ModSelectionVM : ViewModel {
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
 
+    [Reactive] public bool ModsLoadedOnce { get; set; }
+
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
@@ -186,5 +188,7 @@ public sealed class ModSelectionVM : ViewModel {
         } else {
             _editorEnvironment.Build(orderedMods, ActiveMod.Value);
         }
+
+        ModsLoadedOnce = true;
     }
 }
