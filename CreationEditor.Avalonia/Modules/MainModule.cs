@@ -13,6 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Lifecycle;
+using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Services.Mutagen.References.Query;
 using CreationEditor.Services.Mutagen.Type;
@@ -30,6 +31,14 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
+            .SingleInstance();
+
+        builder.RegisterType<ModSaveService>()
+            .As<IModSaveService>()
+            .SingleInstance();
+
+        builder.RegisterType<AutoSaveService>()
+            .As<IAutoSaveService>()
             .SingleInstance();
 
         // Controller
@@ -58,6 +67,15 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<ModSaveLocationProvider>()
+            .As<IModSaveLocationProvider>()
+            .SingleInstance();
+
+        // Pipeline
+        builder.RegisterType<SavePipeline>()
+            .As<ISavePipeline>()
             .SingleInstance();
 
         // Builder

@@ -17,6 +17,7 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Plugin;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
@@ -55,6 +56,7 @@ public sealed class MainVM : ViewModel {
         IDockFactory dockFactory,
         MainWindow mainWindow,
         IPluginService? pluginService,
+        IModSaveService modSaveService,
         IFileSystem fileSystem) {
         _modSelectionVM = modSelectionVM;
         NotificationVM = notificationVM;
@@ -99,7 +101,7 @@ public sealed class MainVM : ViewModel {
             settingsWindow.ShowDialog(mainWindow);
         });
 
-        Save = ReactiveCommand.Create(() => {});
+        Save = ReactiveCommand.Create(() => modSaveService.SaveMod(editorEnvironment.LinkCache, editorEnvironment.ActiveMod));
 
         OpenDockElement = ReactiveCommand.Create<DockElement>(element => dockFactory.Open(element));
 
