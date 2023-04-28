@@ -5,6 +5,8 @@
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Docking"
              xmlns:docking1="clr-namespace:CreationEditor.Avalonia.Models.Settings.Docking"
+             xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:CompileBindings="True" x:DataType="docking:StartupDocksSettingVM"
              x:Class="CreationEditor.Avalonia.Views.Setting.Docking.StartupDocksSettingView">
@@ -19,7 +21,14 @@
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="docking1:StartupDock">
                         <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
-                                  SelectedItem="{Binding DockElement}"/>
+                                  SelectedItem="{Binding DockElement}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="models:DockElement">
+                                    <TextBlock
+                                        Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
