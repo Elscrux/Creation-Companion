@@ -24,6 +24,8 @@
 
             <MenuItem Header="File">
                 <MenuItem Header="Mods"
+                          HotKey="Ctrl+Alt+M"
+                          InputGesture="Ctrl+Alt+M"
                           Command="{Binding OpenSelectMods}">
                     <MenuItem.Icon>
                         <controls:SymbolIcon Symbol="Library"/>
@@ -52,6 +54,8 @@
                 </MenuItem>
 
                 <MenuItem Header="Settings"
+                          HotKey="Ctrl+Alt+S"
+                          InputGesture="Ctrl+Alt+S"
                           Command="{Binding OpenSettings}">
                     <MenuItem.Icon>
                         <controls:SymbolIcon Symbol="Settings"/>
@@ -59,6 +63,8 @@
                 </MenuItem>
 
                 <MenuItem Header="Save"
+                          HotKey="Ctrl+S"
+                          InputGesture="Ctrl+S"
                           Command="{Binding Save}">
                     <MenuItem.Icon>
                         <controls:SymbolIcon Symbol="Save"/>
@@ -68,6 +74,8 @@
 
             <MenuItem Header="View">
                 <MenuItem Header="Log"
+                          HotKey="Ctrl+Alt+L"
+                          InputGesture="Ctrl+Alt+L"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.Log}">
                     <MenuItem.Icon>
@@ -76,6 +84,8 @@
                 </MenuItem>
 
                 <MenuItem Header="Record Browser"
+                          HotKey="Ctrl+Alt+B"
+                          InputGesture="Ctrl+Alt+B"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                     <MenuItem.Icon>
@@ -84,6 +94,8 @@
                 </MenuItem>
 
                 <MenuItem Header="Cell Browser"
+                          HotKey="Ctrl+Alt+C"
+                          InputGesture="Ctrl+Alt+C"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.CellBrowser}">
                     <MenuItem.Icon>
