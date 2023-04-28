@@ -10,7 +10,7 @@
     <StackPanel Spacing="5">
         <HeaderedContentControl Header="Save Location"
                                 Classes="Default">
-            <StackPanel Spacing="5">
+            <StackPanel Spacing="2">
                 <ComboBox ItemsSource="{Binding SaveLocations}"
                           SelectedItem="{Binding Settings.SaveLocation}">
                     <ComboBox.ItemTemplate>
@@ -40,5 +40,8 @@
                 </StackPanel>
             </StackPanel>
         </HeaderedContentControl>
+
+        <CheckBox Content="Remove 'Identical to Master' Records"
+                  IsChecked="{Binding Settings.RemoveIdenticalToMasterRecords}"/>
     </StackPanel>
 </UserControl>
