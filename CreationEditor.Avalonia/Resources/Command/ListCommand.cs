@@ -11,6 +11,7 @@ public abstract class ListCommand<T> : AvaloniaObject, ICommand {
         set => SetValue(ListProperty, value);
     }
 
+    #pragma warning disable CS0067
     public event EventHandler? CanExecuteChanged;
 
     public virtual bool CanExecute(object? parameter) => true;
