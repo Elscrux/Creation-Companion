@@ -96,9 +96,7 @@ public sealed class TextSearchVM : ViewModel {
                             // Replace text if requested
                             if (Replace) {
                                 foreach (var recordReferences in refs) {
-                                    // foreach (var reference in recordReferences.References) {
                                     recordReferences.Diff.New = recordReferences.Diff.Old.Replace(SearchText, ReplaceText, ComparisonType);
-                                    // }
                                 }
                             }
 
@@ -166,7 +164,10 @@ public sealed class TextSearchVM : ViewModel {
                         DataContext = recordReferences,
                         [!Visual.IsVisibleProperty] = recordReferences.Diff.IsDifferent.ToBinding(),
                         Content = "Replace",
-                        Command = ReactiveCommand.Create(() => ReplaceRecordReferences(recordReferences)),
+                        Command = ReactiveCommand.CreateFromTask(async () => {
+                            await ReplaceRecordReferences(recordReferences);
+                            References.Remove(recordReferences);
+                        }),
                     },
                     GroupInstance groupInstance => new Button {
                         DataContext = groupInstance,
@@ -235,10 +236,14 @@ public sealed class TextSearchVM : ViewModel {
                             .Switch()
                             .Select(count => $"Replace {count}")
                             .ToBinding(),
-                        Command = ReactiveCommand.Create(() => {
-                            foreach (var recordReferences in groupInstance.GetItems<RecordReferences<ISkyrimMod, ISkyrimModGetter>>().ToList()) {
-                                ReplaceRecordReferences(recordReferences);
+                        Command = ReactiveCommand.CreateFromTask(async () => {
+                            var recordReferencesList = groupInstance.GetItems<RecordReferences<ISkyrimMod, ISkyrimModGetter>>().ToList();
+
+                            foreach (var recordReferences in recordReferencesList) {
+                                await ReplaceRecordReferences(recordReferences);
                             }
+
+                            References.RemoveRange(recordReferencesList);
                         }),
                     },
                     _ => null
@@ -247,18 +252,17 @@ public sealed class TextSearchVM : ViewModel {
         };
     }
 
-    private void ReplaceRecordReferences(RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences) {
+    private async Task ReplaceRecordReferences(RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences) {
         var diff = recordReferences.Diff;
         if (diff.Old == diff.New) return;
 
-        recordReferences.TextSearcher.ReplaceTextReference(
-            recordReferences.Record,
-            _pluginContext.EditorEnvironment.LinkCache,
-            _pluginContext.EditorEnvironment.ActiveMod,
-            diff.Old,
-            diff.New,
-            ComparisonType);
-
-        References.Remove(recordReferences);
+        await Task.Run(() =>
+            recordReferences.TextSearcher.ReplaceTextReference(
+                recordReferences.Record,
+                _pluginContext.EditorEnvironment.LinkCache,
+                _pluginContext.EditorEnvironment.ActiveMod,
+                diff.Old,
+                diff.New,
+                ComparisonType));
     }
 }

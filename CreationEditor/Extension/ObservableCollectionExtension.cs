@@ -156,6 +156,26 @@ public static class ObservableCollectionExtension {
         collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, 0) });
     }
 
+    public static void RemoveRange<T>(this ObservableCollection<T> collection, IEnumerable<T> itemsToRemove) {
+        if (itemsToRemove == null) {
+            throw new ArgumentNullException(nameof(itemsToRemove));
+        }
+
+        var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var internalList = itemsField.GetValue(collection) as IList<T>;
+        if (internalList == null) throw new InvalidOperationException("Unable to get internal list");
+
+        var list = itemsToRemove.ToList();
+        foreach (var item in list) {
+            internalList.Remove(item);
+        }
+        var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, types: new[] { typeof(NotifyCollectionChangedEventArgs) })!;
+        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
+        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
+        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list) });
+    }
+
     private static void RemoveRange<T>(this IList<T> source, int index, int count) {
         if (source is null) {
             throw new ArgumentNullException(nameof(source));
