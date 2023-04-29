@@ -166,14 +166,24 @@ public static class ObservableCollectionExtension {
         if (internalList == null) throw new InvalidOperationException("Unable to get internal list");
 
         var list = itemsToRemove.ToList();
+        int? smallestIndex = null;
         foreach (var item in list) {
-            internalList.Remove(item);
+            var index = internalList.IndexOf(item);
+            if (index == -1) continue;
+
+            if (index < smallestIndex || smallestIndex == null) {
+                smallestIndex = index;
+            }
+
+            internalList.RemoveAt(index);
         }
+        if (smallestIndex == null) return;
+
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, types: new[] { typeof(NotifyCollectionChangedEventArgs) })!;
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
-        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list) });
+        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value) });
     }
 
     private static void RemoveRange<T>(this IList<T> source, int index, int count) {
