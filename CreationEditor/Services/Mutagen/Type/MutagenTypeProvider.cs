@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Loqui;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Type;
 
@@ -34,18 +35,24 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
         return true;
     }
 
+    public string GetGameName(IModGetter mod) {
+        return mod.GetType().Namespace![BaseNamespace.Length..];
+    }
+
     public string GetGameName(IMajorRecordGetter record) {
-        return record.Registration.ProtocolKey.Namespace;
+        return record.Registration.ProtocolKey.Namespace[BaseNamespace.Length..];
     }
 
     public string GetTypeName(IMajorRecordGetter record) {
         return record.Registration.ClassType.FullName!.Split('.').Last();
     }
 
-    public string GetTypeName(System.Type type) {
-        var fullName = type.FullName;
+    public string GetTypeName(IFormLinkIdentifier formLinkIdentifier) {
+        // Selecting the type name from the full name
+        var fullName = formLinkIdentifier.Type.FullName;
         var startIndex = fullName!.LastIndexOf('.') + 2;
 
+        // Cutting of the "Getter" part of the type name
         return fullName[startIndex..^6];
     }
 }

@@ -175,10 +175,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         writer.Write(checksum);
 
         // Write game
-        var game = mod.GetType().Namespace;
-        if (game == null) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
-        writer.Write(game);
-
+        writer.Write(_mutagenTypeProvider.GetGameName(mod));
 
         writer.Write(records.Count);
         foreach (var formKey in records) {
