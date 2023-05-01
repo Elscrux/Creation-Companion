@@ -66,11 +66,11 @@ public sealed class ReferenceController : IReferenceController, IDisposable {
         return Task.CompletedTask;
     }
 
-    public IDisposable GetRecord<TMajorRecordGetter>(TMajorRecordGetter record, out ReferencedRecord<TMajorRecordGetter> outReferencedRecord)
+    public IDisposable GetRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordIdentifier {
         var recordFormKey = record.FormKey;
         var references = _referenceCache?.GetReferences(recordFormKey, _editorEnvironment.LinkCache);
-        outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);
+        var referencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references); // todo share record objects?
 
         outReferencedRecord = referencedRecord;
         return SubscribeReferenceUpdate(recordFormKey, change => referencedRecord.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance));

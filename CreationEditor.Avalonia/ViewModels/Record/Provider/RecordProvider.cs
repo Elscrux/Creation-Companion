@@ -16,7 +16,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
-public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel, IRecordProvider<ReferencedRecord<TMajorRecordGetter>>
+public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel, IRecordProvider<IReferencedRecord<TMajorRecordGetter>>
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
     private readonly CompositeDisposable _referencesDisposable = new();
@@ -25,11 +25,11 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public ReferencedRecord<TMajorRecordGetter>? SelectedRecord { get; set; }
+    [Reactive] public IReferencedRecord<TMajorRecordGetter>? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
         set {
-            if (value is ReferencedRecord<TMajorRecordGetter> referencedRecord) {
+            if (value is IReferencedRecord<TMajorRecordGetter> referencedRecord) {
                 SelectedRecord = referencedRecord;
             }
         }

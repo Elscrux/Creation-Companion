@@ -21,17 +21,17 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord<ICellGetter>> {
+public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
     protected readonly CompositeDisposable ReferencesDisposable = new();
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public ReferencedRecord<ICellGetter>? SelectedRecord { get; set; }
+    [Reactive] public IReferencedRecord<ICellGetter>? SelectedRecord { get; set; }
     IReferencedRecord? IRecordProvider.SelectedRecord {
         get => SelectedRecord;
         set {
-            if (value is ReferencedRecord<ICellGetter> referencedRecord) {
+            if (value is IReferencedRecord<ICellGetter> referencedRecord) {
                 SelectedRecord = referencedRecord;
             }
         }
