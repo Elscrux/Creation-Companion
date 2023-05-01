@@ -3,7 +3,7 @@ using Loqui;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Type;
 
-public class MutagenTypeProvider : IMutagenTypeProvider {
+public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     private const string BaseNamespace = "Mutagen.Bethesda.";
 
     private readonly Dictionary<string, System.Type> _typeCache = new();

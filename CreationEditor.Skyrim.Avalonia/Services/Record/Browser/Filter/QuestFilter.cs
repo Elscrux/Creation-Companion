@@ -7,7 +7,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class QuestFilter : RecordFilter<IQuestGetter> {
+public sealed class QuestFilter : RecordFilter<IQuestGetter> {
     private const char QuestFilterSeparator = '\\';
 
     private readonly IEditorEnvironment _editorEnvironment;

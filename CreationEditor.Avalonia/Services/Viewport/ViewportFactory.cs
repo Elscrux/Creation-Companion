@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Views.Viewport;
 using CreationEditor.Services.Environment;
 namespace CreationEditor.Avalonia.Services.Viewport;
 
-public class BSEViewportFactory : IViewportFactory {
+public sealed class BSEViewportFactory : IViewportFactory {
     private readonly IEnvironmentContext _environmentContext;
 
     public bool IsMultiInstanceCapable => false;

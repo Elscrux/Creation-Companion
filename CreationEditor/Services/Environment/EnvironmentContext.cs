@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Installs;
 namespace CreationEditor.Services.Environment;
 
-public class EnvironmentContext : IEnvironmentContext {
+public sealed class EnvironmentContext : IEnvironmentContext {
     public IGameReleaseContext GameReleaseContext { get; }
     public IDataDirectoryProvider DataDirectoryProvider { get; }
 

@@ -12,7 +12,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
-public class ExteriorCellsVM : ViewModel {
+public sealed class ExteriorCellsVM : ViewModel {
     public ExteriorCellsProvider ExteriorCellsProvider { get; }
 
     [Reactive] public int GridXValue { get; set; }

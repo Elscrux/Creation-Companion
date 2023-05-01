@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record;
 
-public class ReferencedPlacedRecord : ReferencedRecord<IPlacedGetter> {
+public sealed class ReferencedPlacedRecord : IReferencedRecord<IPlacedGetter> {
     public IMajorRecordIdentifier? Base { get; }
 
     public ReferencedPlacedRecord(IPlacedGetter record, ILinkCache linkCache, IEnumerable<IFormLinkIdentifier>? references = null)

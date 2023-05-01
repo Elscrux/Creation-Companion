@@ -3,7 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public sealed class LoadOrderModItem : ModItem {
+public sealed class LoadOrderModItem : ModItem, IDisposableDropoff {
     public uint LoadOrderIndex { get; }
     [Reactive] public bool IsActive { get; set; }
     [Reactive] public bool MastersValid { get; set; }

@@ -24,7 +24,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record.Picker;
 
-public record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
+public sealed record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
 
 public enum StatusIndicatorState {
     Passive,

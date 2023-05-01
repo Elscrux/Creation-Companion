@@ -3,7 +3,7 @@ using DynamicData.Binding;
 using DynamicData.Kernel;
 namespace CreationEditor;
 
-public class ObservableCollectionSelectorAdaptor<T, TTarget> {
+public sealed class ObservableCollectionSelectorAdaptor<T, TTarget> {
     private readonly Func<T, TTarget> _selector;
     private readonly IObservableCollection<TTarget> _collection;
 

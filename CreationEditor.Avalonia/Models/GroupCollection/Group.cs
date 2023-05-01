@@ -2,7 +2,7 @@
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.GroupCollection;
 
-public class Group<T> : ReactiveObject {
+public sealed class Group<T> : ReactiveObject {
     public Func<T, object> Selector { get; }
     [Reactive] public bool IsGrouped { get; set; }
 

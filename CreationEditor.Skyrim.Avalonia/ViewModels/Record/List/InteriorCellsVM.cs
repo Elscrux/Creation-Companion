@@ -8,7 +8,7 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
-public class InteriorCellsVM : ViewModel {
+public sealed class InteriorCellsVM : ViewModel {
     public InteriorCellsProvider InteriorCellsProvider { get; }
     public RecordList InteriorList { get; }
 

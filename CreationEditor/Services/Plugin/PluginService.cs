@@ -8,7 +8,7 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public record PluginContext<TMod, TModGetter>(Version EditorVersion, IEditorEnvironment<TMod, TModGetter> EditorEnvironment, IRecordController RecordController)
+public sealed record PluginContext<TMod, TModGetter>(Version EditorVersion, IEditorEnvironment<TMod, TModGetter> EditorEnvironment, IRecordController RecordController)
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter>;
 

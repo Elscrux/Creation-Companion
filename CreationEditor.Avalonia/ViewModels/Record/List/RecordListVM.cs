@@ -13,7 +13,7 @@ using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public class RecordListVM : ViewModel, IRecordListVM {
+public sealed class RecordListVM : ViewModel, IRecordListVM {
     IRecordProvider IRecordListVM.RecordProvider => RecordProvider;
     public IRecordProvider RecordProvider { get; }
 

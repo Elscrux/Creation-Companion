@@ -11,8 +11,9 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public record PackageData(sbyte Index, string? Name, string Type, object? Value);
-public partial class PackageDataPicker : LoadedUserControl {
+public sealed record PackageData(sbyte Index, string? Name, string Type, object? Value);
+
+public partial class PackageDataPicker : ActivatableUserControl {
     public static readonly StyledProperty<IPackageGetter?> PackageProperty
         = AvaloniaProperty.Register<PackageDataPicker, IPackageGetter?>(nameof(Package));
 
@@ -65,9 +66,7 @@ public partial class PackageDataPicker : LoadedUserControl {
         InitializeComponent();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         // Populate the data when the package changes
         this.WhenAnyValue(
                 x => x.Package,
@@ -129,7 +128,8 @@ public partial class PackageDataPicker : LoadedUserControl {
                 PackageDataIndex = -1;
                 Data = list;
                 PackageDataIndex = (sbyte) (c >= 0 && c < Data.Count ? c : 0);
-            });
+            })
+            .DisposeWith(ActivatedDisposable);
 
         // Set the selected data when index or package data changes
         this.WhenAnyValue(
@@ -145,7 +145,7 @@ public partial class PackageDataPicker : LoadedUserControl {
                     SelectedData = alias ?? x.Data.FirstOrDefault();
                 }
             })
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
     }
 }

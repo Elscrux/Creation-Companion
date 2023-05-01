@@ -8,7 +8,7 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// Groups items by their properties in a <see cref="ObservableCollection{T}"/>
 /// </summary>
 /// <typeparam name="T">Type of items</typeparam>
-public class GroupCollection<T> {
+public sealed class GroupCollection<T> {
     private readonly List<Group<T>> _activeGroups = new();
     private readonly ObservableCollection<T> _source;
     private readonly GroupInstance _topLevelGroup;

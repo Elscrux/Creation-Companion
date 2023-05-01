@@ -24,7 +24,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
-public class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
+public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
     public static readonly StyledProperty<ILinkCache> LinkCacheProperty
         = AvaloniaProperty.Register<ConditionDataTemplate, ILinkCache>(nameof(LinkCache));
 

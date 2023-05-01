@@ -5,7 +5,7 @@ using Avalonia.Xaml.Interactivity;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
-public class ListBoxAutoScrollToBottom : Behavior<ListBox> {
+public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox> {
     public static readonly StyledProperty<bool> ScrollingEnabledProperty = AvaloniaProperty.Register<ListBoxAutoScrollToBottom, bool>(nameof(ScrollingEnabled));
 
     public bool ScrollingEnabled {

@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Models.Logging;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
-public class ReplayLogSink : IObservableLogSink {
+public sealed class ReplayLogSink : IObservableLogSink {
     private const int ReplayLimit = 500;
 
     private readonly ReplaySubject<ILogItem> _logAdded = new(ReplayLimit);

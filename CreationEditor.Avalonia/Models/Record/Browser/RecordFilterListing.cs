@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Models.Record.Browser;
 
-public record RecordFilterListing(
+public sealed record RecordFilterListing(
     string DisplayName,
     Func<IMajorRecordGetter, bool> FilterInternal,
     IRecordFilterContainer? Parent = null) : IRecordFilterContainer, IComparable, IComparable<RecordFilterListing> {

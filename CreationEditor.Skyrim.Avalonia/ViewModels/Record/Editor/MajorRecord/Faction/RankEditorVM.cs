@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Strings;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 
-public class RankEditorVM : ViewModel {
+public sealed class RankEditorVM : ViewModel {
     public FactionEditorVM FactionEditorVM { get; }
 
     public ReactiveCommand<Unit, Unit> AddRank { get; }

@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class AcousticSpaceFilter : RecordFilter<IAcousticSpaceGetter> {
+public sealed class AcousticSpaceFilter : RecordFilter<IAcousticSpaceGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
 
     public AcousticSpaceFilter(

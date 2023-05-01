@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public class ImmutableReferenceCache : IReferenceCache {
+public sealed class ImmutableReferenceCache : IReferenceCache {
     private readonly IReadOnlyDictionary<ModKey, ReferenceQuery.ModReferenceCache> _modCaches;
 
     public ImmutableReferenceCache(IReferenceQuery referenceQuery, IReadOnlyList<IModGetter> mods) {

@@ -8,7 +8,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class LocationFilter : RecordFilter<ILocationGetter> {
+public sealed class LocationFilter : RecordFilter<ILocationGetter> {
     private const char Separator = '\\';
 
     private readonly IEditorEnvironment _editorEnvironment;

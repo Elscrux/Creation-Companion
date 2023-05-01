@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class LandscapeTextureFilter : RecordFilter<ILandscapeTextureGetter> {
+public sealed class LandscapeTextureFilter : RecordFilter<ILandscapeTextureGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
 
     public LandscapeTextureFilter(

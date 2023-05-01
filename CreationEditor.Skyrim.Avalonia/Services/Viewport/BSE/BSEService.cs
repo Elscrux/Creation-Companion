@@ -13,7 +13,7 @@ public interface IViewportRuntimeService {
     public void LoadInteriorCell(ICellGetter cell);
     public void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell);
 }
-public class BSERuntimeService : IViewportRuntimeService {
+public sealed class BSERuntimeService : IViewportRuntimeService {
     private record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
 
     private readonly IEditorEnvironment _editorEnvironment;

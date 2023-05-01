@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class CombatStyleFilter : SimpleRecordFilter<ICombatStyleGetter> {
+public sealed class CombatStyleFilter : SimpleRecordFilter<ICombatStyleGetter> {
     public CombatStyleFilter() : base(new List<SimpleRecordFilterEntry> {
         new("Melee", record => IsBiggest(record, record.EquipmentScoreMultMelee)),
         new("Ranged", record => IsBiggest(record, record.EquipmentScoreMultRanged)),

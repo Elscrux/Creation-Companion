@@ -5,7 +5,7 @@ using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class ModeledFilter : AssetFilter<IModeledGetter> {
+public sealed class ModeledFilter : AssetFilter<IModeledGetter> {
     public ModeledFilter(
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem)

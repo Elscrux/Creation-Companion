@@ -5,7 +5,7 @@ using CreationEditor.Avalonia.Services.Record.Browser;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 
-public class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
+public sealed class SkyrimRecordBrowserGroupProvider : IRecordBrowserGroupProvider {
     private readonly IComponentContext _componentContext;
 
     public SkyrimRecordBrowserGroupProvider(

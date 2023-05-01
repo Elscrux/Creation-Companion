@@ -4,7 +4,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Utilities;
 namespace CreationEditor.Avalonia.Converter;
 
-public class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverter {
+public sealed class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverter {
     private readonly Func<TIn?, TPar?, TOut> _convert;
     private readonly Func<TOut?, TPar?, TIn>? _convertBack;
 
@@ -32,7 +32,7 @@ public class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverter {
             : AvaloniaProperty.UnsetValue;
     }
 }
-public class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiValueConverter {
+public sealed class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiValueConverter {
     private readonly Func<IEnumerable<TIn?>, TPar?, TOut> _convert;
     private readonly Func<TOut?, TPar?, TIn>? _convertBack;
 

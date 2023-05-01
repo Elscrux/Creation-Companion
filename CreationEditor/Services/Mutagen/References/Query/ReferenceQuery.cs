@@ -13,7 +13,7 @@ namespace CreationEditor.Services.Mutagen.References.Query;
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
-public class ReferenceQuery : IReferenceQuery {
+public sealed class ReferenceQuery : IReferenceQuery {
     private const string CacheDirectory = "MutagenCache";
     private const string CacheSubdirectory = "References";
     private const string CacheExtension = "cache";

@@ -5,7 +5,7 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Browser;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 
-public class SkyrimCellBrowserFactory : ICellBrowserFactory {
+public sealed class SkyrimCellBrowserFactory : ICellBrowserFactory {
     private readonly IComponentContext _componentContext;
 
     public SkyrimCellBrowserFactory(

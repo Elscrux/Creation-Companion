@@ -3,7 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 namespace CreationEditor.Avalonia.Behavior;
 
-public class DragHandler {
+public sealed class DragHandler {
     private Point _clickPosition;
     private bool _isPressingDown;
 

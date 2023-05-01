@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace SearchPlugin.Models;
 
-public record RecordReferences<TMod, TModGetter>(
+public sealed record RecordReferences<TMod, TModGetter>(
     ITextSearcher<TMod, TModGetter> TextSearcher,
     IMajorRecordQueryableGetter Record,
     TextDiff Diff)

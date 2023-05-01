@@ -14,7 +14,7 @@ public sealed class RecordEditorController : IRecordEditorController {
     private readonly IDockingManagerService _dockingManagerService;
     private readonly IRecordEditorFactory _recordEditorFactory;
 
-    private record EditorControl(Control Control, IRecordEditorVM EditorVM);
+    private sealed record EditorControl(Control Control, IRecordEditorVM EditorVM);
 
     private readonly Dictionary<FormKey, EditorControl> _openRecordEditors = new();
 

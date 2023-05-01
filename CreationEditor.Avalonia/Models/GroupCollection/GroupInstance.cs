@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// </summary>
 /// <param name="Class">Common class</param>
 /// <param name="Items">Items with common class</param>
-public record GroupInstance(object Class, ObservableCollection<object> Items) {
+public sealed record GroupInstance(object Class, ObservableCollection<object> Items) {
     private object _modifyLock = new();
 
     /// <summary>

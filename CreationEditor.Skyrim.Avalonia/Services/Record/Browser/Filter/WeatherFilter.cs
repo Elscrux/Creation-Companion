@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class WeatherFilter : SimpleRecordFilter<IWeatherGetter> {
+public sealed class WeatherFilter : SimpleRecordFilter<IWeatherGetter> {
     public WeatherFilter() : base(new List<SimpleRecordFilterEntry> {
         new("Cloudy", record => (record.Flags & Weather.Flag.Cloudy) != 0),
         new("Pleasant", record => (record.Flags & Weather.Flag.Pleasant) != 0),

@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public class ModSaveLocationProvider : IModSaveLocationProvider {
+public sealed class ModSaveLocationProvider : IModSaveLocationProvider {
     private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentContext _environmentContext;
 

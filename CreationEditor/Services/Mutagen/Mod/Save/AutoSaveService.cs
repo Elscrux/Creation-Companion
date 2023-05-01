@@ -2,7 +2,7 @@
 using CreationEditor.Services.Environment;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public class AutoSaveService : IAutoSaveService {
+public sealed class AutoSaveService : IAutoSaveService {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IModSaveService _modSaveService;
 

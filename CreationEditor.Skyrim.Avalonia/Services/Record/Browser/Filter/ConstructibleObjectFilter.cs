@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class ConstructibleObjectFilter : RecordFilter<IConstructibleObjectGetter> {
+public sealed class ConstructibleObjectFilter : RecordFilter<IConstructibleObjectGetter> {
     private const string Byoh = "BYOH";
 
     private readonly IEditorEnvironment _editorEnvironment;

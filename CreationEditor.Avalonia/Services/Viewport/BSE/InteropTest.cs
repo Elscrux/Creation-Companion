@@ -3,7 +3,7 @@ using Xunit;
 namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 
 //Must be run in debug mode to include dll
-public class InteropTest {
+public sealed class InteropTest {
     private readonly Interop.ReferenceLoad _testReference = new() {
         FormKey = "123456:Skyrim.esm",
         Path = "test.nif",

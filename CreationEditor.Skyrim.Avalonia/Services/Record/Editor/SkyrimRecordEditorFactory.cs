@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Skyrim;
 using Location = Mutagen.Bethesda.Skyrim.Location;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 
-public class SkyrimRecordEditorFactory : IRecordEditorFactory {
+public sealed class SkyrimRecordEditorFactory : IRecordEditorFactory {
     private readonly IComponentContext _componentContext;
 
     public SkyrimRecordEditorFactory(

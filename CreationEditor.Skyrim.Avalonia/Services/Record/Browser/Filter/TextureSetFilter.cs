@@ -4,7 +4,7 @@ using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class TextureSetFilter : AssetFilter<ITextureSetGetter> {
+public sealed class TextureSetFilter : AssetFilter<ITextureSetGetter> {
     public TextureSetFilter(
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem)

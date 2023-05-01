@@ -14,5 +14,5 @@ public abstract class SimpleRecordFilter<T> : IRecordFilter {
 
     public IEnumerable<RecordFilterListing> GetListings(Type type) => _filters;
 
-    public record SimpleRecordFilterEntry(string Name, Func<T, bool> Filter);
+    protected sealed record SimpleRecordFilterEntry(string Name, Func<T, bool> Filter);
 }

@@ -4,7 +4,7 @@ using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class ArmorAddonFilter : AssetFilter<IArmorAddonGetter> {
+public sealed class ArmorAddonFilter : AssetFilter<IArmorAddonGetter> {
     public ArmorAddonFilter(
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem)

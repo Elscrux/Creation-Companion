@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 
-public class RelationEditorVM : ViewModel {
+public sealed class RelationEditorVM : ViewModel {
     public FactionEditorVM FactionEditorVM { get; }
 
     public ReadOnlyObservableCollection<FormKey> BlacklistedFormKeys { get; }

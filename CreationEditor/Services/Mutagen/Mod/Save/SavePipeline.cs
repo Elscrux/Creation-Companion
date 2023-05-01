@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public class SavePipeline : ISavePipeline {
+public sealed class SavePipeline : ISavePipeline {
     private readonly List<ISaveStep> _steps = new();
 
     public SavePipeline() {

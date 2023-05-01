@@ -8,7 +8,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class PackageFilter : RecordFilter<IPackageGetter> {
+public sealed class PackageFilter : RecordFilter<IPackageGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
 
     public PackageFilter(

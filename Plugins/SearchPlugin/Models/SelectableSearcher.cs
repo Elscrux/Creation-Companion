@@ -3,7 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace SearchPlugin.Models;
 
-public class SelectableSearcher : ReactiveObject, IReactiveSelectable {
+public sealed class SelectableSearcher : ReactiveObject, IReactiveSelectable {
     public ITextSearcherDefinition Searcher { get; }
     [Reactive] public bool IsSelected { get; set; } = true;
 

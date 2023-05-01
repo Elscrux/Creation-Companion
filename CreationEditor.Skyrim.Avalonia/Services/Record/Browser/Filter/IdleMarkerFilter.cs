@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class IdleMarkerFilter : SimpleRecordFilter<IIdleMarkerGetter> {
+public sealed class IdleMarkerFilter : SimpleRecordFilter<IIdleMarkerGetter> {
     public IdleMarkerFilter() : base(new List<SimpleRecordFilterEntry> {
         new("Ignored by Sandbox", record => (record.Flags & IdleMarker.Flag.IgnoredBySandbox) != 0),
         new("Do Once", record => (record.Flags & IdleMarker.Flag.DoOnce) != 0),

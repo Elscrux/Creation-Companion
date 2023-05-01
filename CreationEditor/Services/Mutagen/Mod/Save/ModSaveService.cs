@@ -6,7 +6,7 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public class ModSaveService : IModSaveService {
+public sealed class ModSaveService : IModSaveService {
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;

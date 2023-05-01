@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Services.Mod;
 
-public class SkyrimModInfoProvider : IModInfoProvider<ISkyrimModGetter>, IModInfoProvider<IModGetter> {
+public sealed class SkyrimModInfoProvider : IModInfoProvider<ISkyrimModGetter>, IModInfoProvider<IModGetter> {
     public uint GetRecordCount(ISkyrimModGetter mod) => mod.ModHeader.Stats.NumRecords;
 
     public uint GetRecordCount(IModGetter mod) {

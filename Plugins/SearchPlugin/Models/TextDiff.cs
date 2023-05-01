@@ -3,7 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace SearchPlugin.Models;
 
-public class TextDiff : ReactiveObject {
+public sealed class TextDiff : ReactiveObject {
     public TextDiff(string old, string @new) {
         Old = old;
         New = @new;

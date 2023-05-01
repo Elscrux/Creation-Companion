@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class RaceFilter : SimpleRecordFilter<IRaceGetter> {
+public sealed class RaceFilter : SimpleRecordFilter<IRaceGetter> {
     public RaceFilter() : base(new List<SimpleRecordFilterEntry> {
         new("Child", record => (record.Flags & Race.Flag.Child) != 0),
         new("Playable", record => (record.Flags & Race.Flag.Playable) != 0),

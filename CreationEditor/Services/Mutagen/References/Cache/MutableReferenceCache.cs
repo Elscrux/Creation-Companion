@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public class MutableReferenceCache : IReferenceCache {
+public sealed class MutableReferenceCache : IReferenceCache {
     private readonly IModGetter _mutableMod;
     private readonly ImmutableReferenceCache? _immutableReferenceCache;
     private readonly ReferenceQuery.ModReferenceCache _mutableModReferenceCache;

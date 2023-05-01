@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Controller;
 
-public class ReferenceController : IReferenceController {
+public sealed class ReferenceController : IReferenceController {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IReferenceQuery _referenceQuery;
     private readonly INotificationService _notificationService;

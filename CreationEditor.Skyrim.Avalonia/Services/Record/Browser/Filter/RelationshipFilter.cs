@@ -8,7 +8,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class RelationshipFilter : RecordFilter<IRelationshipGetter> {
+public sealed class RelationshipFilter : RecordFilter<IRelationshipGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
 
     public RelationshipFilter(

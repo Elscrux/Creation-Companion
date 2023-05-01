@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public class NpcFilter : RecordFilter<INpcGetter> {
+public sealed class NpcFilter : RecordFilter<INpcGetter> {
     private readonly IEditorEnvironment _editorEnvironment;
 
     public NpcFilter(
