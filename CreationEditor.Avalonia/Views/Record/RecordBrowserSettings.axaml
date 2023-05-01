@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:browser="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.Browser"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
-             xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"

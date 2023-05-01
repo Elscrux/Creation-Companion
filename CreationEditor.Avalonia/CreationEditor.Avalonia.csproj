@@ -102,8 +102,4 @@
         </Compile>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Views\FormKeyPicker\" />
-    </ItemGroup>
-
 </Project>

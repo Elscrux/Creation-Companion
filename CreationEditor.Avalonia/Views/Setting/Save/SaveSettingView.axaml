@@ -32,7 +32,8 @@
                         </Binding>
                     </StackPanel.IsVisible>
 
-                    <TextBox IsReadOnly="True" Text="{Binding Settings.DataRelativeOrAbsoluteCustomSaveLocation, FallbackValue='None'}"
+                    <TextBox IsReadOnly="True"
+                             Text="{Binding Settings.DataRelativeOrAbsoluteCustomSaveLocation, FallbackValue='None'}"
                              VerticalAlignment="Center"/>
 
                     <Button Content="..."

@@ -83,7 +83,7 @@
             </DataGrid>
 
             <StackPanel Grid.Row="2"
-                        Margin="5" 
+                        Margin="5"
                         VerticalAlignment="Center"
                         IsVisible="{Binding !AnyModsActive^}">
                 <TextBlock Padding="5" VerticalAlignment="Center"
@@ -100,7 +100,8 @@
                               Padding="5">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="plugins:ModType">
-                                <TextBlock Text="{Binding Converter={x:Static converter:ModTypeConverter.ToFileExtension}}"/>
+                                <TextBlock
+                                    Text="{Binding Converter={x:Static converter:ModTypeConverter.ToFileExtension}}"/>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>

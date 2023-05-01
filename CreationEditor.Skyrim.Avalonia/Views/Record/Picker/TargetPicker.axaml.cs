@@ -24,6 +24,7 @@ public enum TargetPickerType {
     ReferenceAlias,
     LocationAlias,
 }
+
 public partial class TargetPicker : ActivatableUserControl {
     public static readonly StyledProperty<IObservable<string>> ButtonTextProperty
         = AvaloniaProperty.Register<TargetPicker, IObservable<string>>(nameof(ButtonText));

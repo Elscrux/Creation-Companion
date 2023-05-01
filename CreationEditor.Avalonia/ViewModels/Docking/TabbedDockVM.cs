@@ -18,7 +18,7 @@ public abstract class TabbedDockVM : DockContainerVM {
 
     public abstract DockMode DockMode { get; }
 
-    public TabbedDockVM(DockContainerVM dockParent) {
+    protected TabbedDockVM(DockContainerVM dockParent) {
         DockParent = dockParent;
 
         Activate = ReactiveCommand.Create<IDockedItem>(tab => {
@@ -46,8 +46,7 @@ public abstract class TabbedDockVM : DockContainerVM {
         return true;
     }
 
-    protected virtual void Unfocus() {
-    }
+    protected virtual void Unfocus() {}
 
     public override void Add(IDockedItem dockedItem, DockConfig config) {
         if (config.DockMode != null && config.DockMode != DockMode) return;

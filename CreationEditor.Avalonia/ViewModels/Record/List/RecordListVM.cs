@@ -16,14 +16,11 @@ namespace CreationEditor.Avalonia.ViewModels.Record.List;
 public sealed class RecordListVM : ViewModel, IRecordListVM {
     IRecordProvider IRecordListVM.RecordProvider => RecordProvider;
     public IRecordProvider RecordProvider { get; }
-
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
-
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
     public IEnumerable? Records { get; }
 
-    public IObservable<bool> IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; }
 
     public ReactiveCommand<Unit, Unit> OpenReferences { get; }
 
@@ -34,7 +31,6 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
         IRecordListFactory recordListFactory,
         MainWindow mainWindow) {
         RecordProvider = recordProvider;
-        DoubleTapCommand = recordProvider.DoubleTapCommand;
 
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;

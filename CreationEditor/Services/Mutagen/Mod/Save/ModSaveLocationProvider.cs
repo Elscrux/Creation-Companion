@@ -25,7 +25,7 @@ public sealed class ModSaveLocationProvider : IModSaveLocationProvider {
     public DirectoryPath GetSaveLocation() => _directoryPath;
     public FilePath GetSaveLocation(ModKey modKey) => _fileSystem.Path.Combine(_directoryPath, modKey.FileName);
     public FilePath GetSaveLocation(IModKeyed mod) => GetSaveLocation(mod.ModKey.FileName);
-    
+
     public DirectoryPath GetBackupSaveLocation() => _fileSystem.Path.Combine(_directoryPath, "Backup");
     public FilePath GetBackupSaveLocation(ModKey modKey) => _fileSystem.Path.Combine(GetBackupSaveLocation(), modKey.FileName);
     public FilePath GetBackupSaveLocation(IModKeyed mod) => GetBackupSaveLocation(mod.ModKey.FileName);

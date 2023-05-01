@@ -56,6 +56,7 @@ public sealed class DockEdit {
         Monitor.Exit(_editLock);
     }
 }
+
 public static class DockEditMixIn {
     public static DockEdit StartEdit(this DockingManagerVM dockingManagerVM) {
         return new DockEdit(dockingManagerVM);

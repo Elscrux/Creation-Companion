@@ -17,9 +17,9 @@
             <!-- TreeDataGrid Resources -->
             <Color x:Key="SystemBaseMediumLowColor">DarkGray</Color>
             <ControlTheme x:Key="FluentTreeViewExpandCollapseChevron" TargetType="ToggleButton">
-                <Setter Property="Margin" Value="0" />
-                <Setter Property="Width" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}" />
-                <Setter Property="Height" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}" />
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Width" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}"/>
+                <Setter Property="Height" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}"/>
                 <Setter Property="Template">
                     <ControlTemplate>
                         <Border Background="Transparent"

@@ -1,16 +1,16 @@
 ﻿using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
-namespace SearchPlugin.Models; 
+namespace SearchPlugin.Models;
 
 public class Topic : TextSearcher<ISkyrimMod, ISkyrimModGetter, IDialogTopic, IDialogTopicGetter> {
     public override string SearcherName => "Topic";
 
     protected override IEnumerable<string?> GetText(IDialogTopicGetter record) {
         yield return record.Name?.String;
-        
+
         foreach (var dialog in record.Responses) {
             yield return dialog.Prompt?.String;
-            
+
             foreach (var response in dialog.Responses) yield return response.Text.String;
         }
     }
@@ -20,7 +20,7 @@ public class Topic : TextSearcher<ISkyrimMod, ISkyrimModGetter, IDialogTopic, ID
 
         foreach (var resp in record.Responses) {
             if (oldText.Equals(resp.Prompt?.String, comparison)) resp.Prompt = new TranslatedString(TranslatedString.DefaultLanguage, newText);
-            
+
             foreach (var response in resp.Responses.Where(response => oldText.Equals(response.Text.String, comparison))) {
                 response.Text = new TranslatedString(TranslatedString.DefaultLanguage, newText);
             }

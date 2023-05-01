@@ -22,6 +22,7 @@ public sealed class ReturnParameterIfTrueConverter<TIn> : IValueConverter
         throw new NotImplementedException();
     }
 }
+
 public sealed class ReturnParameterIfTrueMultiConverter<TIn> : IMultiValueConverter
     where TIn : IParsable<TIn> {
     public TIn? DefaultValue { get; set; }

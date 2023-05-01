@@ -19,7 +19,7 @@ public sealed class SkyrimRecordEditorFactory : IRecordEditorFactory {
 
     public bool FromType(IMajorRecord record, [MaybeNullWhen(false)] out Control control, [MaybeNullWhen(false)] out IRecordEditorVM recordEditor) {
         var newScope = _lifetimeScope.BeginLifetimeScope();
-        switch (record) {        
+        switch (record) {
             case Npc npc: {
                 if (newScope.TryResolve<IRecordEditorVM<Npc, INpcGetter>>(out var editor)) {
                     control = editor.CreateControl(npc);

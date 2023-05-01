@@ -31,8 +31,8 @@
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate DataType="model:IDockedItem">
                         <docking:Tab DockContainer="{Binding #Dock.DataContext}"
-                                         DockedItem="{Binding}"
-                                         Classes="Large"/>
+                                     DockedItem="{Binding}"
+                                     Classes="Large"/>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>

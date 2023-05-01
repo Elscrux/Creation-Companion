@@ -82,7 +82,7 @@ public sealed class TextSearchVM : ViewModel {
                     .ToList();
 
                 var recordReferencesEnumerable = await Task.WhenAll(
-                    (Searchers
+                    Searchers
                         .Where(searcher => searcher.IsSelected)
                         .Select(searcher => searcher.Searcher)
                         .OfType<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
@@ -101,7 +101,7 @@ public sealed class TextSearchVM : ViewModel {
                             }
 
                             return Task.FromResult(refs);
-                        }))));
+                        })));
 
                 var recordRefs = recordReferencesEnumerable.SelectMany(x => x).ToList();
                 Dispatcher.UIThread.Post(() => {
@@ -132,7 +132,7 @@ public sealed class TextSearchVM : ViewModel {
                             },
                             _ => null
                         }),
-                        new GridLength(500, GridUnitType.Pixel), new TemplateColumnOptions<object>() {
+                        new GridLength(500, GridUnitType.Pixel), new TemplateColumnOptions<object> {
                             IsTextSearchEnabled = true,
                             TextSearchValueSelector = obj => obj is RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences ? recordReferences.Diff.New : null
                         }

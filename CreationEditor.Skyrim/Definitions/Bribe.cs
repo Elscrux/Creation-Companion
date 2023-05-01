@@ -6,6 +6,7 @@ public class Bribe : AStoryManagerEvent {
         Actor = 0x3152,
         GoldValue = 0x3156,
     }
+
     public override IList<Enum> Enums { get; } = Enum.GetValues<BribeEvent>().Cast<Enum>().ToList();
     public override int Type => RecordTypeInts.BRIB;
 }

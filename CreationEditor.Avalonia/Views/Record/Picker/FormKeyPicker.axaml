@@ -2,7 +2,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
         xmlns:mod="clr-namespace:CreationEditor.Avalonia.Models.Mod"
-        xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
         xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"

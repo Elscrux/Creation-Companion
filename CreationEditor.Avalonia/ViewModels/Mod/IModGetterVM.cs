@@ -17,6 +17,7 @@ public interface IModGetterVM {
 
     public void SetTo(IModGetter mod);
 }
+
 public interface IModGetterVM<in TModGetter> : IModGetterVM
     where TModGetter : class, IModGetter {
     public void SetTo(TModGetter mod);

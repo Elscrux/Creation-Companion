@@ -142,15 +142,14 @@ public static class ObservableCollectionExtension {
         }
 
         var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var internalList = itemsField.GetValue(collection) as IList<T>;
-        if (internalList == null) throw new InvalidOperationException("Unable to get internal list");
+        if (itemsField.GetValue(collection) is not IList<T> internalList) throw new InvalidOperationException("Unable to get internal list");
 
         var list = itemsToAdd.ToList();
         foreach (var item in list) {
             internalList.Add(item);
         }
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, types: new[] { typeof(NotifyCollectionChangedEventArgs) })!;
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(NotifyCollectionChangedEventArgs) })!;
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
         collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, 0) });
@@ -162,8 +161,7 @@ public static class ObservableCollectionExtension {
         }
 
         var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var internalList = itemsField.GetValue(collection) as IList<T>;
-        if (internalList == null) throw new InvalidOperationException("Unable to get internal list");
+        if (itemsField.GetValue(collection) is not IList<T> internalList) throw new InvalidOperationException("Unable to get internal list");
 
         var list = itemsToRemove.ToList();
         int? smallestIndex = null;
@@ -180,7 +178,7 @@ public static class ObservableCollectionExtension {
         if (smallestIndex == null) return;
 
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, types: new[] { typeof(NotifyCollectionChangedEventArgs) })!;
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(NotifyCollectionChangedEventArgs) })!;
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
         collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value) });

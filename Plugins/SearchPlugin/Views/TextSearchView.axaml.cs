@@ -1,6 +1,6 @@
 ﻿using Avalonia.ReactiveUI;
 using SearchPlugin.ViewModels;
-namespace SearchPlugin.Views; 
+namespace SearchPlugin.Views;
 
 public partial class TextSearchView : ReactiveUserControl<TextSearchVM> {
     public TextSearchView() {

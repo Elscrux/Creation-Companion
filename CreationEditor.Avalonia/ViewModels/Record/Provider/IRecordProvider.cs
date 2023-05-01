@@ -15,11 +15,12 @@ public interface IRecordProvider : IDisposable {
 
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
-    public IObservable<bool> IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; }
 
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 }
+
 public interface IRecordProvider<TReferenced> : IRecordProvider
     where TReferenced : IReferencedRecord {
     public new TReferenced? SelectedRecord { get; set; }

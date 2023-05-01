@@ -9,7 +9,7 @@ public interface IReferencedRecord : IReferencedRecordIdentifier {
     public string RecordTypeName { get; }
 }
 
-public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord,  IEquatable<IReferencedRecord<TMajorRecordGetter>>
+public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord, IEquatable<IReferencedRecord<TMajorRecordGetter>>
     where TMajorRecordGetter : IMajorRecordIdentifier {
 
     public new TMajorRecordGetter Record { get; set; }

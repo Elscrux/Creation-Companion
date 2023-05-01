@@ -10,6 +10,7 @@ public interface IRecordEditorVM : IDisposableDropoff {
 
     public ReactiveCommand<Unit, Unit> Save { get; }
 }
+
 public interface IRecordEditorVM<TMajorRecord, TMajorRecordGetter> : ISubRecordEditorVM<TMajorRecord>
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {

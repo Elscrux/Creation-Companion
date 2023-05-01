@@ -84,8 +84,8 @@
                 </MenuItem>
 
                 <MenuItem Header="Record Browser"
-                          HotKey="Ctrl+Alt+B"
-                          InputGesture="Ctrl+Alt+B"
+                          HotKey="Ctrl+Alt+R"
+                          InputGesture="Ctrl+Alt+R"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                     <MenuItem.Icon>

@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Metadata;
-namespace CreationEditor.Avalonia.Views.Basic; 
+namespace CreationEditor.Avalonia.Views.Basic;
 
 public class SelectList : TemplatedControl {
     public static readonly StyledProperty<IEnumerable> ItemsSourceProperty
@@ -23,4 +23,3 @@ public class SelectList : TemplatedControl {
         set => SetValue(DataTemplateProperty, value);
     }
 }
-

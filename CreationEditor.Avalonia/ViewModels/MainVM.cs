@@ -72,7 +72,7 @@ public sealed class MainVM : ViewModel {
             DockingManagerService.AddControl(
                 plugin.GetControl(),
                 new DockConfig {
-                    DockInfo = new DockInfo { Header = plugin.Name, },
+                    DockInfo = new DockInfo { Header = plugin.Name },
                     DockMode = DockMode.Side,
                     Dock = Dock.Top,
                 });

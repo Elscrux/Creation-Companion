@@ -32,18 +32,17 @@ public sealed class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverte
             : AvaloniaProperty.UnsetValue;
     }
 }
+
 public sealed class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiValueConverter {
     private readonly Func<IEnumerable<TIn?>, TPar?, TOut> _convert;
-    private readonly Func<TOut?, TPar?, TIn>? _convertBack;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtendedFuncMultiValueConverter{TIn, TOut, TPar}"/> class.
     /// </summary>
     /// <param name="convert">The convert function.</param>
     /// <param name="convertBack">The convert back function</param>
-    public ExtendedFuncMultiValueConverter(Func<IEnumerable<TIn?>, TPar?, TOut> convert, Func<TOut?, TPar?, TIn>? convertBack = null) {
+    public ExtendedFuncMultiValueConverter(Func<IEnumerable<TIn?>, TPar?, TOut> convert) {
         _convert = convert;
-        _convertBack = convertBack;
     }
 
     /// <inheritdoc/>

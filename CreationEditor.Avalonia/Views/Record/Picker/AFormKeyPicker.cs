@@ -269,7 +269,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
     private sealed record State(StatusIndicatorState Status, string Text, FormKey FormKey, string EditorID);
 
-    public AFormKeyPicker() {
+    protected AFormKeyPicker() {
         ToggleViewAllowedTypesCommand = ReactiveCommand.Create(() => ViewingAllowedTypes = !ViewingAllowedTypes);
 
         Clear = ReactiveCommand.Create(() => {

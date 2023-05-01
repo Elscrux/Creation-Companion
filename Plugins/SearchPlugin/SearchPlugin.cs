@@ -5,6 +5,7 @@ using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Skyrim;
 using SearchPlugin.ViewModels;
+using SearchPlugin.Views;
 using Key = Avalonia.Input.Key;
 namespace SearchPlugin;
 
@@ -22,7 +23,7 @@ public class SearchPlugin : IMenuPlugin<ISkyrimMod, ISkyrimModGetter> {
     }
 
     public Control GetControl() {
-        return new Views.TextSearchView(new TextSearchVM(_pluginContext));
+        return new TextSearchView(new TextSearchVM(_pluginContext));
     }
     public object GetIcon() {
         return new SymbolIcon { Symbol = Symbol.Find };

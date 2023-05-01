@@ -28,11 +28,11 @@ public sealed class AutoSaveService : IAutoSaveService, IDisposable {
     private void OnShutdown() {
         _onShutdownDisposable?.Dispose();
         _onShutdownDisposable = Observable.FromEvent<EventHandler, EventArgs>(
-                x => (sender, args) => x(args),
+                x => (_, args) => x(args),
                 handler => AppDomain.CurrentDomain.ProcessExit += handler,
                 handler => AppDomain.CurrentDomain.ProcessExit -= handler)
             .Merge(Observable.FromEvent<UnhandledExceptionEventHandler, UnhandledExceptionEventArgs>(
-                x => (sender, args) => x(args),
+                x => (_, args) => x(args),
                 handler => AppDomain.CurrentDomain.UnhandledException += handler,
                 handler => AppDomain.CurrentDomain.UnhandledException -= handler))
             .Subscribe(_ => PerformAutoSave());

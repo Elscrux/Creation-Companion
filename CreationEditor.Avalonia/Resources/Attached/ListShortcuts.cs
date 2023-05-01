@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
@@ -135,7 +134,7 @@ public sealed class ListShortcuts : AvaloniaObject {
     }
 
     private static void AddCommand(IEnumerable? selectedItems, string header, FlyoutBase? flyout, ICommand? newCommand, Symbol menuIcon) {
-        if (flyout is not MenuFlyout { Items: IAvaloniaList<object> list }) return;
+        if (flyout is not MenuFlyout { Items: {} list }) return;
         if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
 
         if (newCommand != null) {
@@ -146,9 +145,11 @@ public sealed class ListShortcuts : AvaloniaObject {
                 CommandParameter = selectedItems
             });
         } else {
-            list.RemoveWhere(item =>
-                item is MenuItem menuItem
-             && ReferenceEquals(menuItem.Header, header));
+            for (var i = list.Count - 1; i >= 0; i--) {
+                if (list[i] is MenuItem menuItem && ReferenceEquals(menuItem.Header, header)) {
+                    list.RemoveAt(i);
+                }
+            }
         }
     }
 }

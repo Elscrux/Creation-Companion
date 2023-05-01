@@ -38,7 +38,7 @@ public sealed class DragHandler {
 
         if (identifier != null) {
             _elementIdentifiers.Remove(element);
-            
+
             if (_identifierElements.TryGetValue(identifier, out var list)) {
                 list.Remove(element);
             }
