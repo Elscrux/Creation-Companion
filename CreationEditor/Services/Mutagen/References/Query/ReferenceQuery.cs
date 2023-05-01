@@ -13,7 +13,7 @@ namespace CreationEditor.Services.Mutagen.References.Query;
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
-public sealed class ReferenceQuery : IReferenceQuery {
+public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     private const string CacheDirectory = "MutagenCache";
     private const string CacheSubdirectory = "References";
     private const string CacheExtension = "cache";
@@ -21,6 +21,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
 
     private readonly Version _version = new(1, 0);
 
+    private readonly IDisposableDropoff _disposables = new DisposableBucket();
     private readonly IEnvironmentContext _environmentContext;
     private readonly IFileSystem _fileSystem;
     private readonly INotificationService _notificationService;
@@ -62,6 +63,7 @@ public sealed class ReferenceQuery : IReferenceQuery {
         IMutagenTypeProvider mutagenTypeProvider,
         INotificationService notificationService,
         IModInfoProvider<IModGetter> modInfoProvider,
+        ILifetimeScope lifetimeScope,
         ILogger logger) {
         _environmentContext = environmentContext;
         _fileSystem = fileSystem;
@@ -69,7 +71,13 @@ public sealed class ReferenceQuery : IReferenceQuery {
         _notificationService = notificationService;
         _modInfoProvider = modInfoProvider;
         _logger = logger;
+
+        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
     }
+
+    public void Dispose() => _disposables.Dispose();
+
+    public void Add(IDisposable disposable) => _disposables.Add(disposable);
 
     /// <summary>
     /// Loads all references of a mod
@@ -139,24 +147,25 @@ public sealed class ReferenceQuery : IReferenceQuery {
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();
 
-        var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) _modInfoProvider.GetRecordCount(mod));
-        foreach (var record in mod.EnumerateMajorRecords()) {
-            records.Add(record.FormKey);
-            counter.NextStep();
+        using (var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) _modInfoProvider.GetRecordCount(mod))) {
+            foreach (var record in mod.EnumerateMajorRecords()) {
+                records.Add(record.FormKey);
+                counter.NextStep();
 
-            foreach (var formLink in record.EnumerateFormLinks().Where(formLink => !formLink.IsNull)) {
-                var references = modCache.GetOrAdd(formLink.FormKey);
-                references.Add(FormLinkInformation.Factory(record));
+                foreach (var formLink in record.EnumerateFormLinks().Where(formLink => !formLink.IsNull)) {
+                    var references = modCache.GetOrAdd(formLink.FormKey);
+                    references.Add(FormLinkInformation.Factory(record));
+                }
             }
+            counter.Stop();
         }
-        counter.Stop();
 
         // Write modCache to file
         var cacheFile = CacheFile(mod.ModKey);
         if (!_fileSystem.File.Exists(cacheFile)) cacheFile.Directory?.Create();
         using var fileStream = _fileSystem.File.OpenWrite(cacheFile.Path);
         using var zip = new GZipStream(fileStream, CompressionMode.Compress);
-        var writer = new BinaryWriter(zip);
+        using var writer = new BinaryWriter(zip);
 
         // Write version
         writer.Write(_version.ToString());
@@ -183,20 +192,20 @@ public sealed class ReferenceQuery : IReferenceQuery {
         writer.Write(modCache.Count);
 
         // Write references
-        counter = new CountingNotifier(_notificationService, "Saving Cache", modCache.Values.Sum(x => x.Count), TimeSpan.Zero);
-        foreach (var (formKey, references) in modCache) {
-            counter.NextStep();
+        using (var counter = new CountingNotifier(_notificationService, "Saving Cache", modCache.Values.Sum(x => x.Count), TimeSpan.Zero)) {
+            foreach (var (formKey, references) in modCache) {
+                counter.NextStep();
 
-            writer.Write(formKey.ToString());
-            writer.Write(references.Count);
-            foreach (var reference in references) {
-                writer.Write(reference.FormKey.ToString());
-                writer.Write(_mutagenTypeProvider.GetTypeName(reference.Type));
+                writer.Write(formKey.ToString());
+                writer.Write(references.Count);
+                foreach (var reference in references) {
+                    writer.Write(reference.FormKey.ToString());
+                    writer.Write(_mutagenTypeProvider.GetTypeName(reference));
+                }
             }
-        }
-        counter.Stop();
 
-        return new ModReferenceCache(modCache, records);
+            return new ModReferenceCache(modCache, records);
+        }
     }
 
     /// <summary>
@@ -242,32 +251,30 @@ public sealed class ReferenceQuery : IReferenceQuery {
 
                 // Build ref cache
                 var formCount = reader.ReadInt32();
-                var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount);
-                for (var i = 0; i < formCount; i++) {
-                    counter.NextStep();
-
-                    var formKey = FormKey.Factory(reader.ReadString());
-                    var referenceCount = reader.ReadInt32();
-                    var references = new HashSet<IFormLinkIdentifier>();
-                    for (var j = 0; j < referenceCount; j++) {
-                        var referenceFormKey = FormKey.Factory(reader.ReadString());
-                        var typeString = reader.ReadString();
-
-                        if (_mutagenTypeProvider.GetType(game, typeString, out var type)) {
-                            references.Add(new FormLinkInformation(referenceFormKey, type));
-                        } else {
-                            _logger.Here().Error(
-                                new ArgumentException($"Unknown object type: {typeString}"),
-                                "Error while reading reference cache of '{Name}, Unknown object type: {TypeString} of {Key}",
-                                modKey.Name,
-                                typeString,
-                                formKey);
+                using (var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount)) {
+                    for (var i = 0; i < formCount; i++) {
+                        counter.NextStep();
+                        var formKey = FormKey.Factory(reader.ReadString());
+                        var referenceCount = reader.ReadInt32();
+                        var references = new HashSet<IFormLinkIdentifier>();
+                        for (var j = 0; j < referenceCount; j++) {
+                            var referenceFormKey = FormKey.Factory(reader.ReadString());
+                            var typeString = reader.ReadString();
+                            if (_mutagenTypeProvider.GetType(game, typeString, out var type)) {
+                                references.Add(new FormLinkInformation(referenceFormKey, type));
+                            } else {
+                                _logger.Here().Error(
+                                    new ArgumentException($"Unknown object type: {typeString}"),
+                                    "Error while reading reference cache of '{Name}, Unknown object type: {TypeString} of {Key}",
+                                    modKey.Name,
+                                    typeString,
+                                    formKey);
+                            }
                         }
-                    }
 
-                    modCache.Add(formKey, references);
+                        modCache.Add(formKey, references);
+                    }
                 }
-                counter.Stop();
             }
 
             return new ModReferenceCache(modCache, records);

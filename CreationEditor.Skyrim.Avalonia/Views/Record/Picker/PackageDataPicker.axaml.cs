@@ -66,7 +66,9 @@ public partial class PackageDataPicker : ActivatableUserControl {
         InitializeComponent();
     }
 
-    protected override void WhenActivated() {
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnAttachedToVisualTree(e);
+
         // Populate the data when the package changes
         this.WhenAnyValue(
                 x => x.Package,

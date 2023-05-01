@@ -45,21 +45,28 @@ public sealed class DragDropExtended : AvaloniaObject {
 
                 var state = allowDrag.NewValue.GetValueOrDefault<bool>();
 
+                dataGrid.Unloaded -= OnDataGridUnloaded;
+                dataGrid.Unloaded += OnDataGridUnloaded;
+                void OnDataGridUnloaded(object? sender, RoutedEventArgs e) {
+                    DragHandler.UnregisterIdentifier(dataGrid);
+                    dataGrid.Unloaded -= OnDataGridUnloaded;
+                }
+
                 dataGrid.LoadingRow -= OnDataGridOnLoadingRow;
                 dataGrid.LoadingRow += OnDataGridOnLoadingRow;
                 void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
                         DragHandler.Unregister(args.Row);
-                        DragHandler.Register(args.Row);
+                        DragHandler.Register(args.Row, dataGrid);
                     } else {
-                        DragHandler.Unregister(args.Row);
+                        DragHandler.Unregister(args.Row, dataGrid);
                     }
                 }
 
                 dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
                 dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
                 void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
-                    DragHandler.Unregister(args.Row);
+                    DragHandler.Unregister(args.Row, dataGrid);
                 }
             });
 

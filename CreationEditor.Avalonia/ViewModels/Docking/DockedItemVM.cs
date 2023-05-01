@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
@@ -41,7 +42,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
 
         RemovalLock = new DisposableCounterLock(CheckRemoved);
 
-        Control.DetachedFromLogicalTree += (_, _) => CheckRemoved();
+        Control.DetachedFromLogicalTree += CheckRemoved;
 
         Close = ReactiveCommand.Create(
             canExecute: this.WhenAnyValue(x => x.CanClose),
@@ -54,6 +55,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
             });
     }
 
+    private void CheckRemoved(object? o, LogicalTreeAttachmentEventArgs logicalTreeAttachmentEventArgs) => CheckRemoved();
     private void CheckRemoved() {
         if (RemovalLock.IsLocked()
          || Control.GetValue(Visual.VisualParentProperty) != null
@@ -61,6 +63,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
 
         _closed.OnNext(this);
         (this as IDockObject).DockRoot.OnDockRemoved(this);
+        Control.DetachedFromLogicalTree -= CheckRemoved;
     }
 
     public bool Equals(IDockedItem? other) {

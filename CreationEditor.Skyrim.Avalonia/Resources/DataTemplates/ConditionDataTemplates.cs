@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
@@ -24,7 +25,9 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
-public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
+public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisposable {
+    private readonly CompositeDisposable _disposable = new();
+
     public static readonly StyledProperty<ILinkCache> LinkCacheProperty
         = AvaloniaProperty.Register<ConditionDataTemplate, ILinkCache>(nameof(LinkCache));
 
@@ -74,7 +77,8 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
                 if (context is IQuestGetter quest) {
                     QuestContext = quest;
                 }
-            });
+            })
+            .DisposeWith(_disposable);
     }
 
     public bool Match(object? data) => data is ConditionData;
@@ -324,7 +328,9 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
         }
     }
 
-    public class SubstituteUsageContext : ReactiveObject {
+    public sealed class SubstituteUsageContext : ReactiveObject, IDisposable {
+        private readonly CompositeDisposable _disposable = new();
+
         [Reactive] public bool UseAliases { get; set; }
         [Reactive] public bool UsePackageData { get; set; }
 
@@ -334,15 +340,21 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
 
             this.WhenAnyValue(x => x.UseAliases)
                 .WhereTrue()
-                .Subscribe(_ => UsePackageData = false);
+                .Subscribe(_ => UsePackageData = false)
+                .DisposeWith(_disposable);
 
             this.WhenAnyValue(x => x.UsePackageData)
                 .WhereTrue()
-                .Subscribe(_ => UseAliases = false);
+                .Subscribe(_ => UseAliases = false)
+                .DisposeWith(_disposable);
         }
+
+        public void Dispose() => _disposable.Dispose();
     }
 
-    public class IndexDataContext : ReactiveObject {
+    public sealed class IndexDataContext : ReactiveObject, IDisposable {
+        private readonly CompositeDisposable _disposable = new();
+
         [Reactive] public uint? AliasIndex { get; set; }
         [Reactive] public sbyte? PackageDataIndex { get; set; }
 
@@ -369,15 +381,22 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate {
             var substituteUsedChanged = substituteUsageContext.WhenAnyValue(useExpression);
 
             substituteUsedChanged
-                .Subscribe(use => data.TrySetProperty(useProperty, use));
+                .Subscribe(use => data.TrySetProperty(useProperty, use))
+                .DisposeWith(_disposable);
 
             substituteUsedChanged
                 .WhereTrue()
                 .CombineLatest(this.WhenAnyValue(indexExpression), (_, index) => index)
-                .Subscribe(setExpression);
+                .Subscribe(setExpression)
+                .DisposeWith(_disposable);
 
             this.WhenAnyValue(indexExpression)
-                .Subscribe(setExpression);
+                .Subscribe(setExpression)
+                .DisposeWith(_disposable);
         }
+
+        public void Dispose() => _disposable.Dispose();
     }
+
+    public void Dispose() => _disposable.Dispose();
 }

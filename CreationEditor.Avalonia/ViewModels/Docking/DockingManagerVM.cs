@@ -60,6 +60,9 @@ public sealed class DockingManagerVM : DockContainerVM {
     public void OnDockRemoved(IDockedItem dockedItem) {
         if (IsReporting) {
             _closed.OnNext(dockedItem);
+            if (dockedItem.Control.DataContext is IDisposable disposable) {
+                disposable.Dispose();
+            }
         }
     }
 

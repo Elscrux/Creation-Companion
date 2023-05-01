@@ -15,6 +15,8 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedRecord> {
+    private readonly CompositeDisposable _referencesDisposable = new();
+
     public IList<Type> Types { get; }
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
@@ -37,18 +39,16 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                cacheDisposable.Clear();
+                _referencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var type in Types) {
                         foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
-                            cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
+                            referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -69,7 +69,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord);
+                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
@@ -77,5 +77,13 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                 RecordCache.AddOrUpdate(listRecord);
             })
             .DisposeWith(this);
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        _referencesDisposable.Dispose();
+        RecordCache.Clear();
+        RecordCache.Dispose();
     }
 }

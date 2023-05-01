@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.Reactive.Disposables;
+using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
@@ -8,7 +9,8 @@ using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
-public sealed class RecordEditorController : IRecordEditorController {
+public sealed class RecordEditorController : IRecordEditorController, IDisposable {
+    private readonly CompositeDisposable _disposable = new();
     private readonly ILogger _logger;
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IDockingManagerService _dockingManagerService;
@@ -28,7 +30,9 @@ public sealed class RecordEditorController : IRecordEditorController {
         _dockingManagerService = dockingManagerService;
         _recordEditorFactory = recordEditorFactory;
 
-        _dockingManagerService.Closed.Subscribe(OnClosed);
+        _dockingManagerService.Closed
+            .Subscribe(OnClosed)
+            .DisposeWith(_disposable);
     }
 
     public bool AnyEditorsOpen() => _openRecordEditors.Count > 0;
@@ -109,4 +113,6 @@ public sealed class RecordEditorController : IRecordEditorController {
             _openRecordEditors.Remove(formKey);
         }
     }
+
+    public void Dispose() => _disposable.Dispose();
 }

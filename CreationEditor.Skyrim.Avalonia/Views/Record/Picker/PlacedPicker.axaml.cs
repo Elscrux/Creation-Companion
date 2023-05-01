@@ -20,7 +20,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public partial class PlacedPicker : LoadedUserControl {
+public partial class PlacedPicker : ActivatableUserControl {
     public static readonly StyledProperty<ILinkCache?> LinkCacheProperty
         = AvaloniaProperty.Register<PlacedPicker, ILinkCache?>(nameof(LinkCache));
 
@@ -125,12 +125,10 @@ public partial class PlacedPicker : LoadedUserControl {
             : null;
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         this.WhenAnyValue(x => x.PlacedFormKey)
             .Subscribe(placed => PlacedLink.SetTo(placed))
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         // Initialize cell based on placed on load - after cell is set once, it will be set by the picker itself
         this.WhenAnyValue(
@@ -151,7 +149,7 @@ public partial class PlacedPicker : LoadedUserControl {
             })
             .ObserveOnGui()
             .Subscribe(x => Cell = x)
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         // Set placed to null when the cell is deselected
         this.WhenAnyValue(x => x.Cell)
@@ -162,7 +160,7 @@ public partial class PlacedPicker : LoadedUserControl {
                     PlacedFormKey = FormKey.Null;
                 }
             })
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         // Refresh list of available placed records when cell changes
         PlacedRecords = this.WhenAnyValue(
@@ -182,7 +180,7 @@ public partial class PlacedPicker : LoadedUserControl {
                 : new List<IMajorRecordGetter>()
                     .AsObservableChangeSet())
             .Switch()
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
 
         this.WhenAnyValue(
                 x => x.Cell,
@@ -203,6 +201,6 @@ public partial class PlacedPicker : LoadedUserControl {
             .Select(x => new List<IMajorRecordGetter>(x.PlacedRecords).FirstOrDefault(y => y.FormKey == x.Placed) as IPlacedGetter)
             .ObserveOnGui()
             .Subscribe(placed => ResolvedPlaced = placed)
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
     }
 }

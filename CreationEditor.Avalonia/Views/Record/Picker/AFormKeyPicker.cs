@@ -10,6 +10,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
@@ -34,7 +36,7 @@ public enum StatusIndicatorState {
 
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
-public class AFormKeyPicker : DisposableTemplatedControl {
+public class AFormKeyPicker : ActivatableTemplatedControl {
     private enum UpdatingEnum { None, FormKey, EditorID, FormStr }
     private UpdatingEnum _updating;
 
@@ -43,8 +45,6 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         EditorID,
         FormKey,
     }
-
-    public readonly IDisposableDropoff LoadedDisposable = new DisposableBucket();
 
     public ILinkCache? LinkCache {
         get => GetValue(LinkCacheProperty);
@@ -288,13 +288,11 @@ public class AFormKeyPicker : DisposableTemplatedControl {
     private const string RecordNotResolved = "Could not resolve record";
     private const string RecordFiltered = "Record filtered out";
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         SelectableTypes = this.WhenAnyValue(x => x.ScopedTypes)
             .Select(x => GetMajorTypes(x).AsObservableChangeSet())
             .Switch()
-            .ToObservableCollection(x => new TypeItem(x), UnloadDisposable);
+            .ToObservableCollection(x => new TypeItem(x), ActivatedDisposable);
 
         var selectedTypesChanged = this.WhenAnyValue(x => x.SelectableTypes)
             .CombineLatest(SelectableTypes.SelectionChanged().StartWith(Unit.Default), (types, _) => types);
@@ -306,7 +304,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .NotNull()
             .Select(linkCache => linkCache.ListedOrder.AsObservableChangeSet())
             .Switch()
-            .ToObservableCollection(x => new ModItem(x.ModKey) { IsSelected = true }, UnloadDisposable);
+            .ToObservableCollection(x => new ModItem(x.ModKey) { IsSelected = true }, ActivatedDisposable);
 
         var selectedModsChanged = this.WhenAnyValue(x => x.SelectableMods)
             .CombineLatest(SelectableMods.SelectionChanged(), (mods, _) => mods);
@@ -317,7 +315,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         var scopedRecordsCollection = this.WhenAnyValue(x => x.ScopedRecords)
             .Select(idents => (idents ?? Array.Empty<IMajorRecordGetter>()).AsObservableChangeSet())
             .Switch()
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
 
         var scopedRecordsChanged = this.WhenAnyValue(x => x.ScopedRecords)
             .CombineLatest(scopedRecordsCollection.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (idents, _) => idents);
@@ -325,7 +323,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
             .Subscribe(formKey => _formKeyChanged.OnNext(formKey))
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()
@@ -409,7 +407,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             })
             .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.EditorID)
             .Skip(1)
@@ -507,7 +505,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             })
             .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.FormKeyStr)
             .Skip(1)
@@ -636,7 +634,7 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             })
             .Do(_ => _updating = UpdatingEnum.None)
             .Subscribe()
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
             .WrapInInProgressMarker(observable => observable
@@ -742,22 +740,23 @@ public class AFormKeyPicker : DisposableTemplatedControl {
                     })
                     .Switch())
                 .Sort(RecordComparers.EditorIDComparer), out var collectingRecords)
-            .ToObservableCollection(x => new RecordNamePair(x, NameSelector(x, LinkCache)), LoadedDisposable);
+            .ToObservableCollection(x => new RecordNamePair(x, NameSelector(x, LinkCache)), ActivatedDisposable);
 
         collectingRecords
             .ObserveOnGui()
-            .Subscribe(x => CollectingRecords = x);
+            .Subscribe(x => CollectingRecords = x)
+            .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.AllowsSearchMode)
             .Where(x => !x)
             .Subscribe(_ => InSearchMode = false)
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.InSearchMode)
             .Where(x => !x)
             .ObserveOnGui()
             .Subscribe(_ => ViewingAllowedTypes = false)
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
     }
 
     private static readonly ConcurrentDictionary<Type, IEnumerable<Type>> InterfaceCache = new();
@@ -815,7 +814,10 @@ public class AFormKeyPicker : DisposableTemplatedControl {
             .DisposeWith(TemplateDisposable);
 
         var pressed = new Subject<Unit>();
-        textBox.AddHandler(PointerPressedEvent, (_, _) => pressed.OnNext(Unit.Default), handledEventsToo: true);
+        textBox.RemoveHandler(PointerPressedEvent, PressHandler);
+        textBox.AddDisposableHandler(PointerPressedEvent, PressHandler, handledEventsToo: true)
+            .DisposeWith(TemplateDisposable);
+        void PressHandler(object? o, PointerPressedEventArgs pointerPressedEventArgs) => pressed.OnNext(Unit.Default);
 
         textBox.WhenAnyValue(x => x.IsFocused)
             .DistinctUntilChanged()

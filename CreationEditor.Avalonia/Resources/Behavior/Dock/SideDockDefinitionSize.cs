@@ -5,7 +5,7 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
+public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposable {
     public static readonly StyledProperty<SideDockVM?> SideDockProperty = AvaloniaProperty.Register<Control, SideDockVM?>(nameof(SideDock));
 
     public double ActiveTabSize { get; set; } = 300;
@@ -32,6 +32,8 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase> {
 
         _attachedDisposable?.Dispose();
     }
+
+    public void Dispose() => _attachedDisposable?.Dispose();
 
     private void SideDockChanged() {
         if (SideDock == null || AssociatedObject == null) return;

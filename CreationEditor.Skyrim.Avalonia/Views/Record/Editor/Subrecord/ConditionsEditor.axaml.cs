@@ -20,7 +20,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord;
 
-public partial class ConditionsEditor : LoadedUserControl {
+public partial class ConditionsEditor : ActivatableUserControl {
     public static readonly StyledProperty<ObservableCollection<EditableCondition>> ConditionsProperty
         = AvaloniaProperty.Register<ConditionsEditor, ObservableCollection<EditableCondition>>(nameof(Conditions));
 
@@ -159,15 +159,14 @@ public partial class ConditionsEditor : LoadedUserControl {
                 .NotNull()
                 .OfType<Condition.Function>()
                 .ObserveOnGui()
-                .Subscribe(function => condition.Function = function);
+                .Subscribe(function => condition.Function = function)
+                .DisposeWith(ActivatedDisposable);
 
             return autoCompleteBox;
         });
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         // Update RunOnTypes when the context changes
         RunOnTypes = this.WhenAnyValue(x => x.Context)
             .Select(context => {
@@ -216,7 +215,7 @@ public partial class ConditionsEditor : LoadedUserControl {
                         };
                 }
             })
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
 
         // Update Function when the context changes
         Functions = this.WhenAnyValue(x => x.Context)
@@ -234,6 +233,6 @@ public partial class ConditionsEditor : LoadedUserControl {
                 };
             })
             .Select(additional => ConditionConstants.BaseFunctions.Concat(additional))
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
     }
 }

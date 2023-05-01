@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
-using Avalonia.Controls;
 using CreationEditor.Avalonia;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.Resources.Converter;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public partial class PlacedPickerButton : UserControl {
+public partial class PlacedPickerButton : ActivatableUserControl {
     public static readonly StyledProperty<IFormLinkGetter?> PlacedProperty
         = AvaloniaProperty.Register<PlacedPickerButton, IFormLinkGetter?>(nameof(Placed));
 
@@ -73,9 +74,7 @@ public partial class PlacedPickerButton : UserControl {
         InitializeComponent();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         var placedChanged = PlacedPicker.PlacedChanged
             .Merge(this.WhenAnyValue(x => x.Placed)
                 .Select(x => x?.FormKey ?? FormKey.Null));
@@ -98,7 +97,8 @@ public partial class PlacedPickerButton : UserControl {
             })
             .Where(x => x != FormKey.Null)
             .ObserveOnGui()
-            .Subscribe(cell => Cell = cell);
+            .Subscribe(cell => Cell = cell)
+            .DisposeWith(ActivatedDisposable);
 
         // Update button text to the latest placed record
         ButtonText = pickerUpdated

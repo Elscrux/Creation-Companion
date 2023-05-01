@@ -24,7 +24,7 @@ public enum TargetPickerType {
     ReferenceAlias,
     LocationAlias,
 }
-public partial class TargetPicker : LoadedUserControl {
+public partial class TargetPicker : ActivatableUserControl {
     public static readonly StyledProperty<IObservable<string>> ButtonTextProperty
         = AvaloniaProperty.Register<TargetPicker, IObservable<string>>(nameof(ButtonText));
 
@@ -123,9 +123,7 @@ public partial class TargetPicker : LoadedUserControl {
             : "None";
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         // Initialize the target values
         this.WhenAnyValue(x => x.Target)
             .Take(1)
@@ -149,7 +147,7 @@ public partial class TargetPicker : LoadedUserControl {
                         break;
                 }
             })
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         // Update the button text when the target changes
         ButtonText = this.WhenAnyValue(
@@ -194,7 +192,7 @@ public partial class TargetPicker : LoadedUserControl {
                     _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
                 };
             })
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
     }
 
     private static TargetPickerType TargetToType(ALocationTarget target) {

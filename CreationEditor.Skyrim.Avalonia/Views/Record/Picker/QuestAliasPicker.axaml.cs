@@ -11,7 +11,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public partial class QuestAliasPicker : LoadedUserControl {
+public partial class QuestAliasPicker : ActivatableUserControl {
     public static readonly StyledProperty<IQuestGetter?> QuestProperty
         = AvaloniaProperty.Register<QuestAliasPicker, IQuestGetter?>(nameof(Quest));
 
@@ -56,9 +56,7 @@ public partial class QuestAliasPicker : LoadedUserControl {
         InitializeComponent();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         // Update the selected alias when index or quest changes
         this.WhenAnyValue(
                 x => x.AliasIndex,
@@ -72,7 +70,7 @@ public partial class QuestAliasPicker : LoadedUserControl {
                     SelectedAlias = alias ?? x.Quest.Aliases.FirstOrDefault();
                 }
             })
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
 
         // Populate aliases when quest changes
         Aliases = this.WhenAnyValue(
@@ -89,12 +87,12 @@ public partial class QuestAliasPicker : LoadedUserControl {
             })
             .NotNull()
             .Switch()
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
 
         // Update the index when the selected alias changes
         this.WhenAnyValue(x => x.SelectedAlias)
             .NotNull()
             .Subscribe(alias => AliasIndex = alias.ID)
-            .DisposeWith(UnloadDisposable);
+            .DisposeWith(ActivatedDisposable);
     }
 }

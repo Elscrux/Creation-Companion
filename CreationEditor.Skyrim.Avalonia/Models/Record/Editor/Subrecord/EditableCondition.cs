@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using CreationEditor.Skyrim.Definitions;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
@@ -23,6 +23,8 @@ public sealed class EditableCondition : ReactiveObject {
         EventData,
         Player
     }
+
+    private readonly CompositeDisposable _disposable = new();
 
     [Reactive] public ExtendedRunOnType RunOnType { get; set; }
     [Reactive] public FormLink<IPlacedGetter> ReferenceLink { get; set; } = new();
@@ -93,7 +95,8 @@ public sealed class EditableCondition : ReactiveObject {
                 } else {
                     UseCustomValue = false;
                 }
-            });
+            })
+            .DisposeWith(_disposable);
 
         // Set the reference to the player when RunOnType is player
         this.WhenAnyValue(x => x.RunOnType)
@@ -102,7 +105,8 @@ public sealed class EditableCondition : ReactiveObject {
                 if (runOnType == ExtendedRunOnType.Player) {
                     ReferenceLink.SetTo(Mutagen.Bethesda.FormKeys.SkyrimSE.Skyrim.PlayerRef.FormKey);
                 }
-            });
+            })
+            .DisposeWith(_disposable);
     }
 
     private static readonly PropertyInfo? FunctionProperty = typeof(IConditionDataGetter).GetProperty(nameof(IConditionDataGetter.Function));

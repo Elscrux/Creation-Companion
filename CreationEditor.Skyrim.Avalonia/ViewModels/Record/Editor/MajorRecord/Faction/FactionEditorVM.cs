@@ -12,6 +12,7 @@ using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
@@ -46,7 +47,9 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
             return placeableObjectGetter is IContainerGetter;
         };
 
-        editorEnvironment.LinkCacheChanged.Subscribe(newLinkCache => LinkCache = newLinkCache);
+        editorEnvironment.LinkCacheChanged
+            .Subscribe(newLinkCache => LinkCache = newLinkCache)
+            .DisposeWith(this);
 
         Save = ReactiveCommand.Create(() => {
             referenceController.UpdateReferences(Record, () => EditableRecord.CopyTo(Record));
@@ -58,9 +61,20 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
     public Control CreateControl(Mutagen.Bethesda.Skyrim.Faction record) {
         Record = record;
         EditableRecord = new EditableFaction(record);
+        RelationEditorVM?.Dispose();
         RelationEditorVM = new RelationEditorVM(this);
+        RelationEditorVM.DisposeWith(this);
+        RankEditorVM?.Dispose();
         RankEditorVM = new RankEditorVM(this);
+        RankEditorVM.DisposeWith(this);
 
         return new FactionEditor(this);
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        RelationEditorVM?.Dispose();
+        RankEditorVM?.Dispose();
     }
 }

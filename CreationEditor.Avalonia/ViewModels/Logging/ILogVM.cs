@@ -1,11 +1,12 @@
 ﻿using System.Reactive;
 using CreationEditor.Avalonia.Models.Logging;
 using DynamicData.Binding;
+using Noggog;
 using ReactiveUI;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
-public interface ILogVM {
+public interface ILogVM : IDisposableDropoff {
     public IObservableCollection<ILogItem> LogItems { get; }
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; }
 

@@ -9,7 +9,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
-public interface ICellBrowserVM {
+public interface ICellBrowserVM : IDisposableDropoff {
     public InteriorCellsVM InteriorCellsVM { get; }
     public ExteriorCellsVM ExteriorCellsVM { get; }
     public PlacedListVM PlacedListVM { get; }
@@ -23,6 +23,7 @@ public interface ICellBrowserVM {
     public bool ShowReferences { get; set; }
     public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
 }
+
 public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
     public InteriorCellsVM InteriorCellsVM { get; }
     public ExteriorCellsVM ExteriorCellsVM { get; }
@@ -61,5 +62,13 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .Subscribe(cell => PlacedListVM.PlacedProvider.Cell = cell?.Record)
             .DisposeWith(this);
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        InteriorCellsVM.Dispose();
+        ExteriorCellsVM.Dispose();
+        PlacedListVM.Dispose();
     }
 }

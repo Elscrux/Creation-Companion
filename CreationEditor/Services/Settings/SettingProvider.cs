@@ -1,16 +1,20 @@
 ﻿using Autofac;
+using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Settings;
 
-public sealed class SettingProvider : ISettingProvider {
+public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
+    private readonly IDisposableDropoff _disposables = new DisposableBucket();
     public IEnumerable<ISetting> Settings { get; }
 
     public SettingProvider(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         ILogger logger) {
+        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
+
         // Get setting classes via reflection
         var settings = typeof(ISetting)
-            .GetAllSubClass<ISetting>(componentContext.Resolve)
+            .GetAllSubClass<ISetting>(newScope.Resolve)
             .ToList();
 
         // From a static parent by type structure, compile all children for runtime use
@@ -35,4 +39,7 @@ public sealed class SettingProvider : ISettingProvider {
             .Where(setting => setting.Parent == null)
             .ToList();
     }
+
+    public void Add(IDisposable disposable) => _disposables.Add(disposable);
+    public void Dispose() => _disposables.Dispose();
 }

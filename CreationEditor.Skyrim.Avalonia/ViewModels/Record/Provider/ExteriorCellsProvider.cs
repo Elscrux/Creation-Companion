@@ -40,18 +40,16 @@ public sealed class ExteriorCellsProvider : CellProvider {
             .Select(_ => new Func<IReferencedRecord, bool>(
                 record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettingsVM.Filter(record.Record)));
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache, x => x.WorldspaceFormKey)
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(_ => {
-                cacheDisposable.Clear();
+                ReferencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
-                        cacheDisposable.Add(referenceController.GetRecord(cell, out var referencedRecord));
+                        referenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

@@ -19,6 +19,7 @@ using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Plugin;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
@@ -47,7 +48,7 @@ public sealed class MainVM : ViewModel {
     public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
 
     public MainVM(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         INotificationVM notificationVM,
         IBusyService busyService,
         IEditorEnvironment editorEnvironment,
@@ -97,7 +98,10 @@ public sealed class MainVM : ViewModel {
         });
 
         OpenSettings = ReactiveCommand.Create(() => {
-            var settingsWindow = new SettingsWindow(componentContext.Resolve<ISettingsVM>());
+            var newScope = lifetimeScope.BeginLifetimeScope();
+            var settingsVM = newScope.Resolve<ISettingsVM>();
+            newScope.DisposeWith(settingsVM);
+            var settingsWindow = new SettingsWindow(settingsVM);
             settingsWindow.ShowDialog(mainWindow);
         });
 

@@ -65,7 +65,8 @@ public sealed class ModSelectionVM : ViewModel {
             var modKeys = _environment.LoadOrder.Keys.ToList();
             for (var i = 0; i < modKeys.Count; i++) {
                 var modKey = modKeys[i];
-                updater.AddOrUpdate(new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i));
+                var modItem = new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i).DisposeWith(this);
+                updater.AddOrUpdate(modItem);
             }
         });
 
@@ -107,7 +108,8 @@ public sealed class ModSelectionVM : ViewModel {
                         item.IsActive = false;
                     }
                 }
-            });
+            })
+            .DisposeWith(this);
 
         var selectedModValid = this
             .WhenAnyValue(x => x.SelectedMod)
@@ -129,7 +131,8 @@ public sealed class ModSelectionVM : ViewModel {
                 if (mod == null) return;
 
                 SelectedModDetails.SetTo(mod);
-            });
+            })
+            .DisposeWith(this);
     }
 
     /// <summary>

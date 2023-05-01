@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reactive.Linq;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Models.GroupCollection;
 
@@ -34,7 +35,8 @@ public sealed class GroupCollection<T> {
 
                         _topLevelGroup.Ungroup<T>(level);
                     }
-                });
+                })
+                .DisposeWith(group);
         }
 
         _source.CollectionChanged += (_, args) => {

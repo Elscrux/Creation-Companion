@@ -1,8 +1,11 @@
-﻿using ReactiveUI;
+﻿using Noggog;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.GroupCollection;
 
-public sealed class Group<T> : ReactiveObject {
+public sealed class Group<T> : ReactiveObject, IDisposableDropoff {
+    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+
     public Func<T, object> Selector { get; }
     [Reactive] public bool IsGrouped { get; set; }
 
@@ -10,4 +13,7 @@ public sealed class Group<T> : ReactiveObject {
         Selector = selector;
         IsGrouped = isGrouped;
     }
+
+    public void Dispose() => _disposables.Dispose();
+    public void Add(IDisposable disposable) => _disposables.Add(disposable);
 }

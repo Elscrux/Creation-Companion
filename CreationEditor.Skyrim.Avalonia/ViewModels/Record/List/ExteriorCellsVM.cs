@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
@@ -23,7 +24,7 @@ public sealed class ExteriorCellsVM : ViewModel {
     public ReactiveCommand<Unit, Unit> SelectGridCell { get; }
 
     public ExteriorCellsVM(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         IExtraColumnsBuilder extraColumnsBuilder,
         ExteriorCellsProvider exteriorCellsProvider) {
         ExteriorCellsProvider = exteriorCellsProvider;
@@ -33,9 +34,11 @@ public sealed class ExteriorCellsVM : ViewModel {
             .AddColumnType<CellGridExtraColumns>()
             .Build();
 
-        ExteriorList = new RecordList(columns) {
-            DataContext = componentContext.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider))
-        };
+        var newScope = lifetimeScope.BeginLifetimeScope();
+        var recordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider));
+        newScope.DisposeWith(recordListVM);
+
+        ExteriorList = new RecordList(columns) { DataContext = recordListVM };
 
         SelectGridCell = ReactiveCommand.Create(() => {
             if (exteriorCellsProvider.RecordBrowserSettingsVM.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) {

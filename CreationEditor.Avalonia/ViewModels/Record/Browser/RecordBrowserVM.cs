@@ -52,9 +52,16 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
             }
         });
     }
+
     private void SetRecordList(Type recordType) {
         RecordList?.ViewModel?.Dispose();
         RecordList = _recordListFactory.FromType(recordType, RecordBrowserSettingsVM);
         _recordListType = recordType;
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        RecordList?.ViewModel?.Dispose();
     }
 }

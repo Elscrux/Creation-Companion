@@ -15,6 +15,8 @@ using Serilog;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
+    private readonly CompositeDisposable _referencesDisposable = new();
+
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
@@ -36,19 +38,17 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                cacheDisposable.Clear();
+                _referencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var identifier in identifiers) {
                         var formKey = identifier.FormKey;
                         if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                            cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
+                            referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         } else {
@@ -74,5 +74,13 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                 RecordCache.AddOrUpdate(listRecord);
             })
             .DisposeWith(this);
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        _referencesDisposable.Dispose();
+        RecordCache.Clear();
+        RecordCache.Dispose();
     }
 }

@@ -11,7 +11,6 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Cache;
 using CreationEditor.Services.Mutagen.References.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using DynamicData;
@@ -23,6 +22,8 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
+    private readonly CompositeDisposable _referencesDisposable = new();
+
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
     [Reactive] public ICellGetter? Cell { get; set; }
 
@@ -63,7 +64,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             var newRecord = recordController.CreateRecord<IPlaced, IPlacedGetter>();
             recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newRecord);
 
-            referenceController.GetRecord(newRecord, out var referencedRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(this);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -89,7 +90,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
             var duplicate = recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
 
-            referenceController.GetRecord(duplicate, out var referencedRecord);
+            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(this);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -100,12 +101,10 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             RecordCache.Remove(SelectedRecord);
         });
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.Cell)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(_ => {
-                cacheDisposable.Clear();
+                _referencesDisposable.Clear();
 
                 RecordCache.Clear();
 
@@ -113,10 +112,10 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
                 RecordCache.Edit(updater => {
                     foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                        var references = referenceController.ReferenceCache?.GetReferences(record.FormKey, RecordBrowserSettingsVM.LinkCache);
-                        var referencedRecord = new ReferencedPlacedRecord(record, RecordBrowserSettingsVM.LinkCache, references);
+                        referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                        var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettingsVM.LinkCache);
 
-                        updater.AddOrUpdate(referencedRecord);
+                        updater.AddOrUpdate(referencedPlacedRecord);
                     }
                 });
             }), out var isBusy)
@@ -134,7 +133,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord);
+                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 
@@ -150,5 +149,13 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord },
             new MenuItem { Header = "Delete", Command = DeleteSelectedRecord },
         };
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        _referencesDisposable.Dispose();
+        RecordCache.Clear();
+        RecordCache.Dispose();
     }
 }

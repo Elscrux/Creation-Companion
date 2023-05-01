@@ -33,15 +33,17 @@ public sealed class LogVM : ViewModel, ILogVM {
         IObservableLogSink observableLogSink) {
 
         observableLogSink.LogAdded
-            .Subscribe(log => _logAddedCache.AddOrUpdate(log));
+            .Subscribe(log => _logAddedCache.AddOrUpdate(log))
+            .DisposeWith(this);
 
         _logAddedCache.CountChanged
             .Subscribe(count => {
-                while (_logAddedCache.Count > MaxLogCount) {
+                while (count > MaxLogCount) {
                     var logItem = _logAddedCache.Items.MinBy(x => x.Time);
                     if (logItem != null) _logAddedCache.Remove(logItem.Id);
                 }
-            });
+            })
+            .DisposeWith(this);
 
         Clear = ReactiveCommand.Create<Unit>(_ => _logAddedCache.Clear());
 

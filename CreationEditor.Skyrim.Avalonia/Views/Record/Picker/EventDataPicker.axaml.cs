@@ -12,7 +12,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public partial class EventDataPicker : LoadedUserControl {
+public partial class EventDataPicker : ActivatableUserControl {
     public static readonly StyledProperty<IQuestGetter?> QuestProperty
         = AvaloniaProperty.Register<EventDataPicker, IQuestGetter?>(nameof(Quest));
 
@@ -41,9 +41,7 @@ public partial class EventDataPicker : LoadedUserControl {
         InitializeComponent();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnAttachedToVisualTree(e);
-
+    protected override void WhenActivated() {
         var eventObservable = this.WhenAnyValue(x => x.Quest)
             .Select(quest => {
                 if (quest?.Event == null) return null;
@@ -55,7 +53,7 @@ public partial class EventDataPicker : LoadedUserControl {
         // Populate the list of event members with the members of the currently selected event in the context
         EventMembers = eventObservable
             .Select(storyManagerEvent => storyManagerEvent == null ? Array.Empty<Enum>() : storyManagerEvent.ReferenceEnums)
-            .ToObservableCollection(UnloadDisposable);
+            .ToObservableCollection(ActivatedDisposable);
 
         // Force the event member to be the right type when the list of event members changes
         this.WhenAnyValue(x => x.EventMembers)
@@ -71,6 +69,7 @@ public partial class EventDataPicker : LoadedUserControl {
                 } else {
                     EventMember = GetEventDataConditionData.EventMember.None;
                 }
-            });
+            })
+            .DisposeWith(ActivatedDisposable);
     }
 }

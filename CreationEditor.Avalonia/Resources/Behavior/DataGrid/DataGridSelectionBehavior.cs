@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -16,7 +17,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
+public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable {
     public static readonly StyledProperty<bool?> AllCheckedProperty
         = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
 
@@ -43,7 +44,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         set => SetValue(SelectionGuardProperty, value);
     }
 
-    private IDisposable? _attachedDisposable;
+    private readonly CompositeDisposable _attachedDisposable = new();
+
+    public void Dispose() => _attachedDisposable?.Dispose();
 
     protected override void OnAttached() {
         base.OnAttached();
@@ -59,11 +62,12 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
         base.OnAttachedToVisualTree();
 
         if (AssociatedObject?.ItemsSource is IEnumerable<IReactiveSelectable> selectables) {
-            _attachedDisposable = selectables
+            selectables
                 .ToObservable()
                 .ToObservableChangeSet()
                 .AutoRefresh(selectable => selectable.IsSelected)
-                .Subscribe(UpdateAllChecked);
+                .Subscribe(UpdateAllChecked)
+                .DisposeWith(_attachedDisposable);
         }
     }
 
@@ -112,7 +116,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid> {
                     }
                 };
 
-                if (EnabledMapping != null) checkBox.Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping));
+                if (EnabledMapping != null) {
+                    checkBox
+                        .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
+                        .DisposeWith(_attachedDisposable);
+                }
 
                 return checkBox;
             }),

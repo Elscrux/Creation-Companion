@@ -51,12 +51,14 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
 
         this.WhenAnyValue(x => x.OnlyActive)
             .ObserveOnGui()
-            .Subscribe(_ => Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment);
+            .Subscribe(_ => Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment)
+            .DisposeWith(this);
 
         this.WhenAnyValue(x => x.Scope)
             .CombineLatest(editorEnvironment.LoadOrderChanged)
             .ObserveOnGui()
-            .Subscribe(_ => UpdateScope());
+            .Subscribe(_ => UpdateScope())
+            .DisposeWith(this);
 
         SettingsChanged = Observable.Merge(
                 this.WhenAnyValue(x => x.RecordFilter).Unit(),

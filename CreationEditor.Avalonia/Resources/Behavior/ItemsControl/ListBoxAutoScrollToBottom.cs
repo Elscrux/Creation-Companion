@@ -5,7 +5,7 @@ using Avalonia.Xaml.Interactivity;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox> {
+public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox>, IDisposable {
     public static readonly StyledProperty<bool> ScrollingEnabledProperty = AvaloniaProperty.Register<ListBoxAutoScrollToBottom, bool>(nameof(ScrollingEnabled));
 
     public bool ScrollingEnabled {
@@ -16,8 +16,9 @@ public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox> {
     private IDisposable? _attachedDisposable;
 
     protected override void OnAttachedToVisualTree() {
-        base.OnAttached();
+        base.OnAttachedToVisualTree();
 
+        _attachedDisposable?.Dispose();
         _attachedDisposable = AssociatedObject?.WhenAnyValue(x => x.ItemCount)
             .Throttle(TimeSpan.FromMicroseconds(250), RxApp.MainThreadScheduler)
             .Subscribe(_ => {
@@ -32,8 +33,10 @@ public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox> {
     }
 
     protected override void OnDetachedFromVisualTree() {
-        base.OnDetaching();
+        base.OnDetachedFromVisualTree();
 
         _attachedDisposable?.Dispose();
     }
+
+    public void Dispose() => _attachedDisposable?.Dispose();
 }

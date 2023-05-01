@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reactive.Disposables;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.References.Cache;
@@ -10,12 +11,13 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Controller;
 
-public sealed class ReferenceController : IReferenceController {
+public sealed class ReferenceController : IReferenceController, IDisposable {
+    private readonly CompositeDisposable _disposable = new();
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IReferenceQuery _referenceQuery;
     private readonly INotificationService _notificationService;
-
     private MutableReferenceCache? _referenceCache;
+
     public IReferenceCache? ReferenceCache => _referenceCache;
 
     private readonly ConcurrentDictionary<FormKey, List<Action<Change<IFormLinkIdentifier>>>> _subscribers = new();
@@ -30,13 +32,15 @@ public sealed class ReferenceController : IReferenceController {
 
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
-            .Subscribe(_ => Init());
-
+            .Subscribe(_ => Init())
+            .DisposeWith(_disposable);
         // todo write back the current state of the mutable ref cache state - make sure to write new checksum of the SAVED file - entry point after plugin saved
     }
 
+    public void Dispose() => _disposable.Dispose();
+
     private Task Init() {
-        var linearNotifier = new ChainedNotifier(_notificationService, "Loading References");
+        using var linearNotifier = new ChainedNotifier(_notificationService, "Loading References");
 
         var immutableReferenceCache = new ImmutableReferenceCache(_referenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
         _referenceCache = new MutableReferenceCache(_referenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
@@ -68,7 +72,7 @@ public sealed class ReferenceController : IReferenceController {
         var references = _referenceCache?.GetReferences(recordFormKey, _editorEnvironment.LinkCache);
         outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);
 
-        var referencedRecord = outReferencedRecord;
+        outReferencedRecord = referencedRecord;
         return SubscribeReferenceUpdate(recordFormKey, change => referencedRecord.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance));
     }
 

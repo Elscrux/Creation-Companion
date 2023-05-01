@@ -19,8 +19,9 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel, IRecordProvider<ReferencedRecord<TMajorRecordGetter>>
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    private readonly CompositeDisposable _referencesDisposable = new();
 
+    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
@@ -59,7 +60,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
 
-            referenceController.GetRecord(newRecord, out var referencedRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(_referencesDisposable);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -75,7 +76,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
             var duplicate = recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
 
-            referenceController.GetRecord(duplicate, out var referencedRecord);
+            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(_referencesDisposable);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -86,17 +87,15 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             RecordCache.Remove(SelectedRecord);
         });
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                cacheDisposable.Clear();
+                _referencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        cacheDisposable.Add(referenceController.GetRecord(record, out var referencedRecord));
+                        referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -116,7 +115,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord);
+                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
@@ -131,5 +130,13 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord },
             new MenuItem { Header = "Delete", Command = DeleteSelectedRecord },
         };
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        _referencesDisposable.Dispose();
+        RecordCache.Clear();
+        RecordCache.Dispose();
     }
 }

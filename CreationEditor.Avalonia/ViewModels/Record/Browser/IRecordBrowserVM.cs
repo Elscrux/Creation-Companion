@@ -2,11 +2,12 @@
 using System.Reactive;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Views.Record;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public interface IRecordBrowserVM {
+public interface IRecordBrowserVM : IDisposableDropoff {
     public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 
     [Reactive] public RecordList? RecordList { get; set; }

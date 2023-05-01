@@ -9,22 +9,23 @@ using CreationEditor.Avalonia.ViewModels.Logging;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
+using Noggog;
 namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory : IDockFactory {
     private bool _viewportCreated;
 
-    private readonly IComponentContext _componentContext;
+    private readonly ILifetimeScope _lifetimeScope;
     private readonly IViewportFactory _viewportFactory;
     private readonly IDockingManagerService _dockingManagerService;
     private readonly ICellBrowserFactory _cellBrowserFactory;
 
     public DockFactory(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
         ICellBrowserFactory cellBrowserFactory) {
-        _componentContext = componentContext;
+        _lifetimeScope = lifetimeScope;
         _viewportFactory = viewportFactory;
         _dockingManagerService = dockingManagerService;
         _cellBrowserFactory = cellBrowserFactory;
@@ -34,9 +35,12 @@ public sealed class DockFactory : IDockFactory {
         Control control;
         DockConfig dockConfig;
 
+        var newScope = _lifetimeScope.BeginLifetimeScope();
         switch (dockElement) {
             case DockElement.Log:
-                control = new LogView(_componentContext.Resolve<ILogVM>());
+                var logVM = newScope.Resolve<ILogVM>();
+                newScope.DisposeWith(logVM);
+                control = new LogView(logVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Log",
@@ -47,7 +51,9 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.RecordBrowser:
-                control = new RecordBrowser(_componentContext.Resolve<IRecordBrowserVM>());
+                var recordBrowserVM = newScope.Resolve<IRecordBrowserVM>();
+                newScope.DisposeWith(recordBrowserVM);
+                control = new RecordBrowser(recordBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Record Browser",

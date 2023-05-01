@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 namespace CreationEditor.Services.Notification;
 
-public sealed class CountingNotifier : ANotifier {
+public sealed class CountingNotifier : ANotifier, IDisposable {
     private int _currentStep;
 
     private readonly IDisposable _timerSubscription;
@@ -45,4 +45,6 @@ public sealed class CountingNotifier : ANotifier {
         _timerSubscription.Dispose();
         NotificationService.Stop(ID);
     }
+
+    public void Dispose() => Stop();
 }

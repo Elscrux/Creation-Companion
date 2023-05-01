@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Services.Notification;
 
-public sealed class ChainedNotifier : ANotifier {
+public sealed class ChainedNotifier : ANotifier, IDisposable {
     private readonly IEnumerator<string> _stepEnumerator;
     private readonly float _countFloat;
     private int _currentStep;
@@ -22,5 +22,9 @@ public sealed class ChainedNotifier : ANotifier {
 
     public void Stop() {
         NotificationService.Stop(ID);
+    }
+
+    public void Dispose() {
+        _stepEnumerator?.Dispose();
     }
 }

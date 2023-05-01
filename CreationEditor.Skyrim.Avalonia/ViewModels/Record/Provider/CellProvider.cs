@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Threading;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
@@ -21,6 +22,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord<ICellGetter>> {
+    protected readonly CompositeDisposable ReferencesDisposable = new();
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
@@ -70,7 +72,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
             var newRecord = recordController.CreateRecord<Cell, ICellGetter>();
             recordEditorController.OpenEditor<Cell, ICellGetter>(newRecord);
 
-            referenceController.GetRecord(newRecord, out var referencedRecord);
+            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(this);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -86,7 +88,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
 
             var duplicate = recordController.DuplicateRecord<Cell, ICellGetter>(SelectedRecord.Record);
 
-            referenceController.GetRecord(duplicate, out var referencedRecord);
+            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(this);
             RecordCache.AddOrUpdate(referencedRecord);
         });
 
@@ -106,7 +108,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord);
+                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 
@@ -125,4 +127,12 @@ public abstract class CellProvider : ViewModel, IRecordProvider<ReferencedRecord
     }
 
     protected abstract void LoadCell(ICellGetter cell);
+
+    public override void Dispose() {
+        base.Dispose();
+
+        RecordCache.Clear();
+        RecordCache.Dispose();
+        ReferencesDisposable.Dispose();
+    }
 }

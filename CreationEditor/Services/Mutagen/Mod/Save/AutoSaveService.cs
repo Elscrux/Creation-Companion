@@ -2,7 +2,7 @@
 using CreationEditor.Services.Environment;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public sealed class AutoSaveService : IAutoSaveService {
+public sealed class AutoSaveService : IAutoSaveService, IDisposable {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IModSaveService _modSaveService;
 
@@ -19,12 +19,14 @@ public sealed class AutoSaveService : IAutoSaveService {
     }
 
     private void OnInterval(double minutes) {
+        _onIntervalDisposable?.Dispose();
         _onIntervalDisposable = Observable
             .Interval(TimeSpan.FromMinutes(minutes))
             .Subscribe(_ => PerformAutoSave());
     }
 
     private void OnShutdown() {
+        _onShutdownDisposable?.Dispose();
         _onShutdownDisposable = Observable.FromEvent<EventHandler, EventArgs>(
                 x => (sender, args) => x(args),
                 handler => AppDomain.CurrentDomain.ProcessExit += handler,
@@ -55,5 +57,10 @@ public sealed class AutoSaveService : IAutoSaveService {
     public void PerformAutoSave() {
         _modSaveService.BackupMod(_editorEnvironment.ActiveMod, _maxBackups);
         _modSaveService.SaveMod(_editorEnvironment.LinkCache, _editorEnvironment.ActiveMod);
+    }
+
+    public void Dispose() {
+        _onIntervalDisposable?.Dispose();
+        _onShutdownDisposable?.Dispose();
     }
 }

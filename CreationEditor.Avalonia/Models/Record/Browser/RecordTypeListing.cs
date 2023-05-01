@@ -7,6 +7,7 @@ using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
 using Loqui;
+using Noggog;
 namespace CreationEditor.Avalonia.Models.Record.Browser;
 
 public sealed class RecordTypeListing : ViewModel, IRecordFilterContainer {
@@ -18,18 +19,19 @@ public sealed class RecordTypeListing : ViewModel, IRecordFilterContainer {
     private readonly BehaviorSubject<bool> _activated = new(false);
 
     public RecordTypeListing(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         ILoquiRegistration registration,
         string? displayName = null) {
         Registration = registration;
         DisplayName = displayName ?? string.Concat(registration.Name.Select((c, i) => i != 0 && char.IsUpper(c) ? " " + c : c.ToString()));
 
-        var editorEnvironment = componentContext.Resolve<IEditorEnvironment>();
+        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
+        var editorEnvironment = newScope.Resolve<IEditorEnvironment>();
 
         RecordFilters = editorEnvironment.LoadOrderChanged.CombineLatest(_activated, (_, b) => b)
             .ObserveOnTaskpool()
             .Where(active => active)
-            .Select(_ => componentContext.Resolve<IRecordFilterBuilder>()
+            .Select(_ => newScope.Resolve<IRecordFilterBuilder>()
                 .AddRecordType(registration.GetterType)
                 .Build()
                 .Select(x => {

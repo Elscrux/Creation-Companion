@@ -72,4 +72,10 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);
         ContextMenuItems.Add(new MenuItem { Header = "Open References", Command = OpenReferences });
     }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        RecordProvider.Dispose();
+    }
 }

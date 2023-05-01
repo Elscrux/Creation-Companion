@@ -34,19 +34,17 @@ public sealed class InteriorCellsProvider : CellProvider {
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
-        var cacheDisposable = new CompositeDisposable();
-
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                cacheDisposable.Clear();
+                ReferencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                        cacheDisposable.Add(referenceController.GetRecord(cell, out var referencedRecord));
+                        referenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

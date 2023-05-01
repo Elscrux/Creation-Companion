@@ -8,7 +8,7 @@ using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
-public interface IRecordProvider {
+public interface IRecordProvider : IDisposable {
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; }
     public IReferencedRecord? SelectedRecord { get; set; }
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }

@@ -6,13 +6,28 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
 // Adapted from Noggog.WPF
-public class ViewModel : ReactiveObject, IDisposableDropoff {
+public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDisposableDropoff {
+    protected readonly IDisposableBucket ActivatedDisposable = new DisposableBucket();
     private readonly Lazy<CompositeDisposable> _compositeDisposable = new();
+    public ViewModelActivator Activator { get; } = new();
+
+    protected ViewModel() {
+        this.WhenActivated(disposable => {
+            Disposable
+                .Create(() => ActivatedDisposable.Clear())
+                .DisposeWith(disposable);
+
+            WhenActivated();
+        });
+    }
+
+    protected virtual void WhenActivated() {}
 
     public virtual void Dispose() {
-        if (!_compositeDisposable.IsValueCreated) return;
-
-        _compositeDisposable.Value.Dispose();
+        ActivatedDisposable.Dispose();
+        if (_compositeDisposable.IsValueCreated) {
+            _compositeDisposable.Value.Dispose();
+        }
     }
 
     protected void RaiseAndSetIfChanged<T>(ref T item, T newItem, [CallerMemberName] string? propertyName = null) {

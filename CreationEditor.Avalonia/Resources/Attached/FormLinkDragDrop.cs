@@ -43,10 +43,17 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
                 switch (allowDragDataGrid.Sender) {
                     case DataGrid dataGrid: {
+                        dataGrid.Unloaded -= OnDataGridUnloaded;
+                        dataGrid.Unloaded += OnDataGridUnloaded;
+                        void OnDataGridUnloaded(object? sender, RoutedEventArgs e) {
+                            DragHandler.UnregisterIdentifier(dataGrid);
+                            dataGrid.Unloaded -= OnDataGridUnloaded;
+                        }
+
                         dataGrid.LoadingRow -= DataGridOnLoadingRow;
                         dataGrid.LoadingRow += DataGridOnLoadingRow;
                         void DataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
-                            DragHandler.Unregister(args.Row);
+                            DragHandler.Unregister(args.Row, dataGrid);
 
                             if (state) {
                                 DragHandler.Register(args.Row, dataGrid);
@@ -55,7 +62,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
                         dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
                         dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
-                        void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) => DragHandler.Unregister(args.Row);
+                        void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) => DragHandler.Unregister(args.Row, dataGrid);
 
                         break;
                     }

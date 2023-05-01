@@ -6,6 +6,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public sealed class InteriorCellsVM : ViewModel {
@@ -13,7 +14,7 @@ public sealed class InteriorCellsVM : ViewModel {
     public RecordList InteriorList { get; }
 
     public InteriorCellsVM(
-        IComponentContext componentContext,
+        ILifetimeScope lifetimeScope,
         IExtraColumnsBuilder extraColumnsBuilder,
         InteriorCellsProvider interiorCellsProvider) {
         InteriorCellsProvider = interiorCellsProvider;
@@ -22,8 +23,16 @@ public sealed class InteriorCellsVM : ViewModel {
             .AddRecordType<ICellGetter>()
             .Build();
 
-        InteriorList = new RecordList(columns) {
-            DataContext = componentContext.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider))
-        };
+        var newScope = lifetimeScope.BeginLifetimeScope();
+        var recordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider));
+        newScope.DisposeWith(recordListVM);
+
+        InteriorList = new RecordList(columns) { DataContext = recordListVM };
+    }
+
+    public override void Dispose() {
+        base.Dispose();
+
+        InteriorList?.ViewModel?.Dispose();
     }
 }
