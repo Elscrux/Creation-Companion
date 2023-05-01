@@ -12,6 +12,7 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Cache;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Controller;
@@ -40,6 +41,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<AutoSaveService>()
             .As<IAutoSaveService>()
             .SingleInstance();
+
+        builder.RegisterType<CacheLocationProvider>()
+            .As<ICacheLocationProvider>();
 
         // Controller
         builder.RegisterType<ReferenceController>()
