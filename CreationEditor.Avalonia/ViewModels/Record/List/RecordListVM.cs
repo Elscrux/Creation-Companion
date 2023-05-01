@@ -48,7 +48,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
             .Connect()
             .SubscribeOn(RxApp.TaskpoolScheduler)
             .WrapInInProgressMarker(
-                x => x.Filter(RecordProvider.Filter),
+                x => x.Filter(RecordProvider.Filter, false),
                 out var isFiltering)
             .ToObservableCollection(this);
 
