@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Views.Record;
+using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -12,7 +12,7 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly IRecordListFactory _recordListFactory;
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
-    public ObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
+    public IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 
     public ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
     public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
@@ -27,7 +27,7 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         IRecordBrowserSettingsVM recordBrowserSettingsVM) {
         _recordListFactory = recordListFactory;
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
-        RecordTypeGroups = new ObservableCollection<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
+        RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
 
         SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => group.Activate());
 

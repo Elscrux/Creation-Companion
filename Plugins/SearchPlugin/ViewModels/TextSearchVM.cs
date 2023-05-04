@@ -26,7 +26,7 @@ namespace SearchPlugin.ViewModels;
 
 public sealed class TextSearchVM : ViewModel {
     private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;
-    public ObservableCollection<RecordReferences<ISkyrimMod, ISkyrimModGetter>> References { get; } = new();
+    public ObservableCollectionExtended<RecordReferences<ISkyrimMod, ISkyrimModGetter>> References { get; } = new();
 
     public IList<SelectableSearcher> Searchers { get; }
 
@@ -50,7 +50,7 @@ public sealed class TextSearchVM : ViewModel {
     public TextSearchVM(PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
         _pluginContext = pluginContext;
 
-        Searchers = new ObservableCollection<SelectableSearcher>(
+        Searchers = new ObservableCollectionExtended<SelectableSearcher>(
             typeof(ITextSearcher<ISkyrimMod, ISkyrimModGetter>)
                 .GetAllSubClass<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
                 .Select(searcher => new SelectableSearcher(searcher)));
@@ -179,7 +179,7 @@ public sealed class TextSearchVM : ViewModel {
                                 return CheckRec(groupInstance.Items);
 
                                 // Check if any children have diffs
-                                IObservable<bool> CheckRec(ObservableCollection<object> objects) {
+                                IObservable<bool> CheckRec(IObservableCollection<object> objects) {
                                     var collectionChanges = objects
                                         .ObserveCollectionChanges().Unit()
                                         .StartWith(Unit.Default);
@@ -211,7 +211,7 @@ public sealed class TextSearchVM : ViewModel {
                                 return CheckRec(groupInstance.Items);
 
                                 // Sum of children with diffs
-                                IObservable<int> CheckRec(ObservableCollection<object> objects) {
+                                IObservable<int> CheckRec(IObservableCollection<object> objects) {
                                     var collectionChanges = objects
                                         .ObserveCollectionChanges().Unit()
                                         .StartWith(Unit.Default);

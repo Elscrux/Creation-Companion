@@ -12,4 +12,9 @@ public static class FileSystemExtension {
     }
 
     public static int GetChecksumBytesLength(this IFileSystem _) => MD5.HashSizeInBytes;
+    
+    public static bool IsChecksumValid(this IFileSystem fileSystem, FilePath path, byte[] checksum) {
+        var actualChecksum = fileSystem.GetChecksum(path);
+        return actualChecksum.SequenceEqual(checksum);
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reactive.Linq;
+using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Models.GroupCollection;
@@ -11,14 +12,14 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// <typeparam name="T">Type of items</typeparam>
 public sealed class GroupCollection<T> {
     private readonly List<Group<T>> _activeGroups = new();
-    private readonly ObservableCollection<T> _source;
+    private readonly IObservableCollection<T> _source;
     private readonly GroupInstance _topLevelGroup;
 
-    public ObservableCollection<object> Items => _topLevelGroup.Items;
+    public IObservableCollection<object> Items => _topLevelGroup.Items;
 
-    public GroupCollection(ObservableCollection<T> source, params Group<T>[] groups) {
+    public GroupCollection(IObservableCollection<T> source, params Group<T>[] groups) {
         _source = source;
-        _topLevelGroup = new GroupInstance(null!, new ObservableCollection<object>(_source.OfType<object>()));
+        _topLevelGroup = new GroupInstance(null!, new ObservableCollectionExtended<object>(_source.OfType<object>()));
 
         foreach (var group in groups) {
             group.WhenAnyValue(x => x.IsGrouped)

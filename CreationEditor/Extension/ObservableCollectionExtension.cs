@@ -14,8 +14,8 @@ public static class ObservableCollectionExtension {
         Expression<Func<TSource, TTarget>> selector,
         IDisposableDropoff disposable)
         where TSource : INotifyPropertyChanged {
-        if (source is null) throw new ArgumentNullException(nameof(source));
-        if (selector is null) throw new ArgumentNullException(nameof(selector));
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(selector);
 
         return source
             .ToObservableChangeSet()
@@ -97,8 +97,8 @@ public static class ObservableCollectionExtension {
                 // ignore this case because WhereReasonsAre removes the index [in which case call RemoveMany]
                 //// if (item.Range.Index < 0)
                 ////    throw new UnspecifiedIndexException("ListChangeReason.RemoveRange should not have an index specified index");
-                if (item.Range.Index >= 0 && source is DynamicData.IExtendedList<T> or List<T>) {
-                    source.RemoveRange(item.Range.Index, item.Range.Count);
+                if (item.Range.Index >= 0 && source is ObservableCollectionExtended<T> extended) {
+                    extended.RemoveRange(item.Range.Index, item.Range.Count);
                 } else {
                     foreach (var remove in item.Range) {
                         var index = source.IndexOf(remove, comparer);
@@ -136,29 +136,8 @@ public static class ObservableCollectionExtension {
         }
     }
 
-    public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> itemsToAdd) {
-        if (itemsToAdd == null) {
-            throw new ArgumentNullException(nameof(itemsToAdd));
-        }
-
-        var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        if (itemsField.GetValue(collection) is not IList<T> internalList) throw new InvalidOperationException("Unable to get internal list");
-
-        var list = itemsToAdd.ToList();
-        foreach (var item in list) {
-            internalList.Add(item);
-        }
-        var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(NotifyCollectionChangedEventArgs) })!;
-        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
-        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
-        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, 0) });
-    }
-
     public static void RemoveRange<T>(this ObservableCollection<T> collection, IEnumerable<T> itemsToRemove) {
-        if (itemsToRemove == null) {
-            throw new ArgumentNullException(nameof(itemsToRemove));
-        }
+        ArgumentNullException.ThrowIfNull(itemsToRemove);
 
         var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
         if (itemsField.GetValue(collection) is not IList<T> internalList) throw new InvalidOperationException("Unable to get internal list");
@@ -185,9 +164,7 @@ public static class ObservableCollectionExtension {
     }
 
     private static void RemoveRange<T>(this IList<T> source, int index, int count) {
-        if (source is null) {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         switch (source) {
             case List<T> list:

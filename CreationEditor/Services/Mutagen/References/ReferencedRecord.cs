@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
@@ -23,13 +23,13 @@ public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IRefe
 
     [Reactive] public TMajorRecordGetter Record { get; set; }
 
-    public ObservableCollection<IFormLinkIdentifier> References { get; }
+    public IObservableCollection<IFormLinkIdentifier> References { get; }
     ICollection<IFormLinkIdentifier> IReferenced.References => References;
 
     public ReferencedRecord(TMajorRecordGetter record, IEnumerable<IFormLinkIdentifier>? references = null) {
         Record = record;
         References = references == null
-            ? new ObservableCollection<IFormLinkIdentifier>()
-            : new ObservableCollection<IFormLinkIdentifier>(references);
+            ? new ObservableCollectionExtended<IFormLinkIdentifier>()
+            : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
     }
 }

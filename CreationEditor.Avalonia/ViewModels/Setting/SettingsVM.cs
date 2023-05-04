@@ -1,13 +1,13 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using CreationEditor.Services.Settings;
+using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
 public sealed class SettingsVM : ViewModel, ISettingsVM {
     public IEnumerable<ISetting> RootSettings => ObservableSettings;
-    private ObservableCollection<ISetting> ObservableSettings { get; }
+    private IObservableCollection<ISetting> ObservableSettings { get; }
 
     [Reactive] public ISetting? SelectedSetting { get; set; }
 
@@ -16,7 +16,7 @@ public sealed class SettingsVM : ViewModel, ISettingsVM {
     public SettingsVM(
         ISettingProvider settingProvider,
         ISettingExporter settingExporter) {
-        ObservableSettings = new ObservableCollection<ISetting>(settingProvider.Settings);
+        ObservableSettings = new ObservableCollectionExtended<ISetting>(settingProvider.Settings);
 
         Save = ReactiveCommand.Create(() => {
             foreach (var setting in GetAllSettings()) {

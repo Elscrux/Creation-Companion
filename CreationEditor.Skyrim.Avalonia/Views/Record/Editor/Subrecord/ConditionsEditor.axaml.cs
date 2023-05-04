@@ -13,6 +13,7 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -21,8 +22,8 @@ using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord;
 
 public partial class ConditionsEditor : ActivatableUserControl {
-    public static readonly StyledProperty<ObservableCollection<EditableCondition>> ConditionsProperty
-        = AvaloniaProperty.Register<ConditionsEditor, ObservableCollection<EditableCondition>>(nameof(Conditions));
+    public static readonly StyledProperty<IObservableCollection<EditableCondition>> ConditionsProperty
+        = AvaloniaProperty.Register<ConditionsEditor, IObservableCollection<EditableCondition>>(nameof(Conditions));
 
     public static readonly StyledProperty<IMajorRecordGetter?> ContextProperty
         = AvaloniaProperty.Register<ConditionsEditor, IMajorRecordGetter?>(nameof(Context));
@@ -54,7 +55,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
     /// <summary>
     /// List of conditions which can be modified in the editor.
     /// </summary>
-    public ObservableCollection<EditableCondition> Conditions {
+    public IObservableCollection<EditableCondition> Conditions {
         get => GetValue(ConditionsProperty);
         set => SetValue(ConditionsProperty, value);
     }

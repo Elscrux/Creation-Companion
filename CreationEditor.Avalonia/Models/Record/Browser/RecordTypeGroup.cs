@@ -1,15 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using DynamicData.Binding;
 namespace CreationEditor.Avalonia.Models.Record.Browser;
 
 public sealed class RecordTypeGroup {
     public string GroupName { get; }
-    public ObservableCollection<RecordTypeListing> RecordTypes { get; set; }
+    public IObservableCollection<RecordTypeListing> RecordTypes { get; set; }
 
     private bool _activated;
 
     public RecordTypeGroup(string groupName, List<RecordTypeListing> recordTypes) {
         GroupName = groupName;
-        RecordTypes = new ObservableCollection<RecordTypeListing>(recordTypes);
+        RecordTypes = new ObservableCollectionExtended<RecordTypeListing>(recordTypes);
     }
 
     public void Activate() {

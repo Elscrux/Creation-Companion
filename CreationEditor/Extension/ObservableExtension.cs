@@ -169,9 +169,7 @@ public static class ObservableExtension {
         Func<T, TTarget> selector,
         out ReadOnlyObservableCollection<TTarget> readOnlyObservableCollection,
         int resetThreshold = 25) {
-        if (source is null) {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         var target = new ObservableCollectionExtended<TTarget>();
         var result = new ReadOnlyObservableCollection<TTarget>(target);
@@ -196,8 +194,8 @@ public static class ObservableExtension {
     public static IObservable<IChangeSet<TTarget>> Adapt<T, TTarget>(
         this IObservable<IChangeSet<T>> source,
         ObservableCollectionSelectorAdaptor<T, TTarget> adaptor) {
-        if (source is null) throw new ArgumentNullException(nameof(source));
-        if (adaptor is null) throw new ArgumentNullException(nameof(adaptor));
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(adaptor);
 
         return Observable.Create<IChangeSet<TTarget>>(
             observer => {

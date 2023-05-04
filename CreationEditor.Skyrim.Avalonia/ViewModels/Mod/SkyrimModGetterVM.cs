@@ -1,7 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -17,7 +17,7 @@ public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter
     [Reactive] public string Description { get; set; } = string.Empty;
     [Reactive] public bool Localization { get; set; }
     [Reactive] public int FormVersion { get; set; }
-    public ObservableCollection<string> Masters { get; set; } = new();
+    public IObservableCollection<string> Masters { get; set; } = new ObservableCollectionExtended<string>();
 
     public void SetTo(IModGetter mod) {
         if (mod is ISkyrimModGetter skyrimMod) SetTo(skyrimMod);

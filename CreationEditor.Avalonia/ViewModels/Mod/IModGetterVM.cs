@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI.Fody.Helpers;
@@ -13,7 +13,7 @@ public interface IModGetterVM {
     [Reactive] public string Description { get; set; }
     [Reactive] public bool Localization { get; set; }
     [Reactive] public int FormVersion { get; set; }
-    public ObservableCollection<string> Masters { get; set; }
+    public IObservableCollection<string> Masters { get; set; }
 
     public void SetTo(IModGetter mod);
 }

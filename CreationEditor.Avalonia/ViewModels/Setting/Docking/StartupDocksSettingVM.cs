@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
@@ -8,6 +7,7 @@ using CreationEditor.Avalonia.Models.Settings.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
+using DynamicData.Binding;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
@@ -33,7 +33,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
         ISettingImporter<StartupDocksSetting> settingImporter) {
         _dockFactory = dockFactory;
 
-        Settings = settingImporter.Import(this) ?? new StartupDocksSetting(new ObservableCollection<StartupDock>());
+        Settings = settingImporter.Import(this) ?? new StartupDocksSetting(new ObservableCollectionExtended<StartupDock>());
 
         AddStartupDock = ReactiveCommand.Create(() => Settings.Docks.Add(new StartupDock()));
 

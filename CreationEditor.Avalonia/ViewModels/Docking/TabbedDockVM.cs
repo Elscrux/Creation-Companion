@@ -1,14 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
+using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 public abstract class TabbedDockVM : DockContainerVM {
-    public ObservableCollection<IDockedItem> Tabs { get; set; } = new();
+    public IObservableCollection<IDockedItem> Tabs { get; set; } = new ObservableCollectionExtended<IDockedItem>();
 
     public override IEnumerable<IDockObject> Children => Tabs;
     public override int ChildrenCount => Tabs.Count;

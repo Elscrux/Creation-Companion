@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Logging;
 using DynamicData;
@@ -19,7 +18,7 @@ public sealed class LogVM : ViewModel, ILogVM {
 
     public IObservableCollection<ILogItem> LogItems { get; }
 
-    public ObservableCollection<LogEventLevel> VisibilityLevels { get; } = new(LogLevels);
+    public IObservableCollection<LogEventLevel> VisibilityLevels { get; } = new ObservableCollectionExtended<LogEventLevel>(LogLevels);
 
     public ReactiveCommand<Unit, Unit> Clear { get; }
     public ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }

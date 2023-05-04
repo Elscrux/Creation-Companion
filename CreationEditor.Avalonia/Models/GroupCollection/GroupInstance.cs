@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using DynamicData.Binding;
 namespace CreationEditor.Avalonia.Models.GroupCollection;
 
 /// <summary>
@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// </summary>
 /// <param name="Class">Common class</param>
 /// <param name="Items">Items with common class</param>
-public sealed record GroupInstance(object Class, ObservableCollection<object> Items) {
+public sealed record GroupInstance(object Class, IObservableCollection<object> Items) {
     private readonly object _modifyLock = new();
 
     /// <summary>
@@ -33,7 +33,7 @@ public sealed record GroupInstance(object Class, ObservableCollection<object> It
                         // If the group instance doesn't exist, create it and add it to the list
                         var groupInstance = GetClass(@class);
                         if (groupInstance == null) {
-                            groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
+                            groupInstance = new GroupInstance(@class, new ObservableCollectionExtended<object>());
                             Items.Add(groupInstance);
                         }
 
@@ -48,7 +48,7 @@ public sealed record GroupInstance(object Class, ObservableCollection<object> It
                         var @class = grouping.Key;
 
                         // Create a new group instance and add it to the list
-                        var groupInstance = new GroupInstance(@class, new ObservableCollection<object>());
+                        var groupInstance = new GroupInstance(@class, new ObservableCollectionExtended<object>());
                         Items.Add(groupInstance);
 
                         groupInstance.Add(grouping, groups, nextGroup);
@@ -124,7 +124,7 @@ public sealed record GroupInstance(object Class, ObservableCollection<object> It
 
                         if (groupInstance == null) {
                             // Create new group instance
-                            Items.Insert(i, new GroupInstance(@class, new ObservableCollection<object> { t }));
+                            Items.Insert(i, new GroupInstance(@class, new ObservableCollectionExtended<object> { t }));
                             i++;
                         } else {
                             // Add to existing group instance
@@ -203,7 +203,7 @@ public sealed record GroupInstance(object Class, ObservableCollection<object> It
         // Merge group instances with the same keys
         var mergedGroupInstances = groupInstances
             .GroupBy(x => x.Class)
-            .Select(x => new GroupInstance(x.Key, new ObservableCollection<object>(x.SelectMany(g => g.Items))));
+            .Select(x => new GroupInstance(x.Key, new ObservableCollectionExtended<object>(x.SelectMany(g => g.Items))));
 
         // Add merged group instances
         Items.AddRange(mergedGroupInstances);

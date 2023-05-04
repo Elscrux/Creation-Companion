@@ -1,16 +1,16 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 
 public sealed class EditableFaction : Faction, INotifyPropertyChanged {
-    public new ObservableCollection<EditableRelation> Relations { get; set; }
-    public new ObservableCollection<Rank> Ranks { get; set; }
-    public new ObservableCollection<EditableCondition> Conditions { get; set; }
+    public new ObservableCollectionExtended<EditableRelation> Relations { get; set; }
+    public new ObservableCollectionExtended<Rank> Ranks { get; set; }
+    public new ObservableCollectionExtended<EditableCondition> Conditions { get; set; }
     public new CrimeValues CrimeValues { get; set; }
     public new VendorValues VendorValues { get; set; }
 
@@ -133,8 +133,8 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Name = parent.Name;
         FormKey = parent.FormKey;
         Flags = parent.Flags;
-        Relations = new ObservableCollection<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, TargetFormKey = r.Target.FormKey }));
-        Ranks = new ObservableCollection<Rank>(parent.Ranks);
+        Relations = new ObservableCollectionExtended<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, TargetFormKey = r.Target.FormKey }));
+        Ranks = new ObservableCollectionExtended<Rank>(parent.Ranks);
 
         CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
         JailOutfit = parent.JailOutfit;
@@ -150,8 +150,8 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         VendorBuySellList = parent.VendorBuySellList;
         MerchantContainer = parent.MerchantContainer;
         Conditions = parent.Conditions != null
-            ? new ObservableCollection<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)))
-            : new ObservableCollection<EditableCondition>();
+            ? new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)))
+            : new ObservableCollectionExtended<EditableCondition>();
     }
 
     public void CopyTo(Faction faction) {
