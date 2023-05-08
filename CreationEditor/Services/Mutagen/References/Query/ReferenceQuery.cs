@@ -128,10 +128,8 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         // Read checksum in cache
         var checksum = reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
-        // Read checksum
-        var actualChecksum = _fileSystem.GetChecksum(modFilePath);
-
-        return actualChecksum.SequenceEqual(checksum);
+        // Validate checksum
+        return _fileSystem.IsChecksumValid(modFilePath, checksum);
     }
 
     /// <summary>
