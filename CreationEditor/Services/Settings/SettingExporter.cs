@@ -18,14 +18,14 @@ public sealed class SettingExporter : ISettingExporter {
     }
 
     public bool Export(ISetting setting) {
-        var filePath = _settingPathProvider.GetFullPath(setting);
+        var filePath = _fileSystem.FileInfo.New(_settingPathProvider.GetFullPath(setting));
         if (filePath.Directory == null) return false;
 
-        if (!filePath.Directory.Value.Exists) filePath.Directory.Value.Create();
+        if (!filePath.Directory.Exists) filePath.Directory.Create();
 
         _logger.Here().Information("Exporting setting {Name} to {Path}", setting.Name, filePath);
         var content = JsonConvert.SerializeObject(setting.Model, Formatting.Indented);
-        _fileSystem.File.WriteAllText(filePath, content);
+        _fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
     }

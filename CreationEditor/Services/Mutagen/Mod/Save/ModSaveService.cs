@@ -2,7 +2,6 @@
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
@@ -51,15 +50,15 @@ public sealed class ModSaveService : IModSaveService {
 
     public void BackupMod(IMod mod, int limit = -1) {
         var backupSaveLocation = _modSaveLocationProvider.GetBackupSaveLocation();
-        var filePath = _modSaveLocationProvider.GetSaveLocation(mod);
+        var filePath = _fileSystem.FileInfo.New(_modSaveLocationProvider.GetSaveLocation(mod));
 
         if (!filePath.Exists) return;
 
-        var fileInfo = _fileSystem.FileInfo.New(filePath);
-        var writeTime = fileInfo.LastWriteTime;
-
         try {
-            _fileSystem.File.Copy(filePath, _fileSystem.Path.Combine(backupSaveLocation, GetBackFileName(filePath, writeTime)), true);
+            _fileSystem.File.Copy(
+                filePath.FullName,
+                _fileSystem.Path.Combine(backupSaveLocation, GetBackupFileName(filePath.Name, filePath.LastWriteTime)),
+                true);
         } catch (Exception e) {
             _logger.Warning(
                 "Failed to create backup of mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
@@ -88,11 +87,6 @@ public sealed class ModSaveService : IModSaveService {
         }
     }
 
-    private string GetBackFileName(FilePath filePath, DateTime writeTime) {
-        return $"{filePath.Name}.{GetTimeFileName(writeTime)}.bak";
-    }
-
-    public string GetTimeFileName(DateTime dateTime) {
-        return dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
-    }
+    private string GetBackupFileName(string fileName, DateTime writeTime) => $"{fileName}.{GetTimeFileName(writeTime)}.bak";
+    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }

@@ -1,8 +1,7 @@
-﻿using Noggog;
-namespace CreationEditor.Services.Settings;
+﻿namespace CreationEditor.Services.Settings;
 
 public interface ISettingPathProvider {
-    public FilePath Path { get; }
+    public string Path { get; }
 
-    public FilePath GetFullPath(ISetting setting);
+    public string GetFullPath(ISetting setting);
 }

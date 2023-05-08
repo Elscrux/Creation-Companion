@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using Noggog;
 namespace CreationEditor.Services.Settings;
 
 public sealed class SettingPathProvider : ISettingPathProvider {
@@ -10,9 +9,9 @@ public sealed class SettingPathProvider : ISettingPathProvider {
         _fileSystem = fileSystem;
     }
 
-    public FilePath Path => "Settings";
+    public string Path => "Settings";
 
-    public FilePath GetFullPath(ISetting setting) {
+    public string GetFullPath(ISetting setting) {
         return _fileSystem.Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             Path,

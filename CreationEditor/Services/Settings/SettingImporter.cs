@@ -18,11 +18,11 @@ public sealed class SettingImporter<TSetting> : ISettingImporter<TSetting> {
     }
 
     public TSetting? Import(ISetting setting) {
-        var filePath = _settingPathProvider.GetFullPath(setting);
+        var filePath = _fileSystem.FileInfo.New(_settingPathProvider.GetFullPath(setting));
         if (!filePath.Exists) return default;
 
         _logger.Here().Information("Importing setting {Name} from {Path}", setting.Name, filePath);
-        var content = _fileSystem.File.ReadAllText(filePath);
+        var content = _fileSystem.File.ReadAllText(filePath.FullName);
         return JsonConvert.DeserializeObject<TSetting>(content);
     }
 }

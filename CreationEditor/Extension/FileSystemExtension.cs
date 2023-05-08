@@ -4,7 +4,7 @@ using Noggog;
 namespace CreationEditor;
 
 public static class FileSystemExtension {
-    public static byte[] GetChecksum(this IFileSystem fileSystem, FilePath path) {
+    public static byte[] GetChecksum(this IFileSystem fileSystem, string path) {
         using var md5 = MD5.Create();
         using var modFileStream = fileSystem.File.OpenRead(path);
 
@@ -13,7 +13,7 @@ public static class FileSystemExtension {
 
     public static int GetChecksumBytesLength(this IFileSystem _) => MD5.HashSizeInBytes;
     
-    public static bool IsChecksumValid(this IFileSystem fileSystem, FilePath path, byte[] checksum) {
+    public static bool IsChecksumValid(this IFileSystem fileSystem, string path, byte[] checksum) {
         var actualChecksum = fileSystem.GetChecksum(path);
         return actualChecksum.SequenceEqual(checksum);
     }

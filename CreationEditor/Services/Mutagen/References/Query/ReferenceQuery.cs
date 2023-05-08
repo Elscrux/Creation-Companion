@@ -28,7 +28,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     private readonly ILogger _logger;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
 
-    private FilePath ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, mod.FileName);
+    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, mod.FileName);
 
     public sealed record ModReferenceCache(Dictionary<FormKey, HashSet<IFormLinkIdentifier>> Cache, HashSet<FormKey> FormKeys) {
         public static ModReferenceCache operator +(ModReferenceCache a, ModReferenceCache b) {
@@ -158,9 +158,9 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         }
 
         // Write modCache to file
-        var cacheFile = _cacheLocationProvider.CacheFile(mod.ModKey.FileName);
-        if (!_fileSystem.File.Exists(cacheFile)) cacheFile.Directory?.Create();
-        using var fileStream = _fileSystem.File.OpenWrite(cacheFile.Path);
+        var cacheFile = _fileSystem.FileInfo.New(_cacheLocationProvider.CacheFile(mod.ModKey.FileName));
+        if (!cacheFile.Exists) cacheFile.Directory?.Create();
+        using var fileStream = _fileSystem.File.OpenWrite(cacheFile.FullName);
         using var zip = new GZipStream(fileStream, CompressionMode.Compress);
         using var writer = new BinaryWriter(zip);
 
@@ -208,7 +208,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     /// <param name="modKey">mod to load cache for</param>
     /// <returns>reference cache of the given mod key</returns>
     private ModReferenceCache LoadReferenceCache(ModKey modKey) {
-        var tempFile = _cacheLocationProvider.TempCacheFile(modKey.FileName);
+        var tempFile = _fileSystem.FileInfo.New(_cacheLocationProvider.TempCacheFile(modKey.FileName));
         try {
             var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
             var records = new HashSet<FormKey>();
@@ -219,8 +219,8 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
 
             using (var fileStream = _fileSystem.File.OpenRead(_cacheLocationProvider.CacheFile(modKey.FileName))) {
                 using (var zip = new GZipStream(fileStream, CompressionMode.Decompress)) {
-                    if (!_fileSystem.File.Exists(tempFile)) tempFile.Directory?.Create();
-                    using (var tempFileStream = _fileSystem.File.OpenWrite(tempFile.Path)) {
+                    if (!tempFile.Exists) tempFile.Directory?.Create();
+                    using (var tempFileStream = _fileSystem.File.OpenWrite(tempFile.FullName)) {
                         zip.CopyTo(tempFileStream);
                     }
                 }
@@ -228,8 +228,8 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
             linearNotifier.Stop();
 
             // Read mod cache file
-            using (var reader = new BinaryReader(_fileSystem.File.OpenRead(tempFile))) {
-                // Skip version and checksum 
+            using (var reader = new BinaryReader(_fileSystem.File.OpenRead(tempFile.FullName))) {
+                // Skip version and checksum
                 reader.ReadString();
                 reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
@@ -273,7 +273,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
 
             return new ModReferenceCache(modCache, records);
         } finally {
-            if (_fileSystem.File.Exists(tempFile)) _fileSystem.File.Delete(tempFile);
+            if (tempFile.Exists) tempFile.Delete();
         }
     }
 }
