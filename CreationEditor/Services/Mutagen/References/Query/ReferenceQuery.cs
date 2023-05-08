@@ -39,7 +39,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
             }
 
             foreach (var (formKey, references) in b.Cache) {
-                var existingReferences = newRefCache.Cache.GetOrAdd(formKey, () => new HashSet<IFormLinkIdentifier>());
+                var existingReferences = newRefCache.Cache.GetOrAdd(formKey);
 
                 foreach (var reference in references) {
                     existingReferences.Add(reference);
