@@ -19,26 +19,10 @@ public sealed class SettingsVM : ViewModel, ISettingsVM {
         ObservableSettings = new ObservableCollectionExtended<ISetting>(settingProvider.Settings);
 
         Save = ReactiveCommand.Create(() => {
-            foreach (var setting in GetAllSettings()) {
+            foreach (var setting in RootSettings.GetAllChildren(s => s.Children, true)) {
                 setting.Apply();
                 settingExporter.Export(setting);
             }
         });
-    }
-
-    private List<ISetting> GetAllSettings() {
-        var settings = new List<ISetting>();
-        var settingsQueue = new Queue<ISetting>(RootSettings);
-
-        while (settingsQueue.Count > 0) {
-            var setting = settingsQueue.Dequeue();
-            settings.Add(setting);
-
-            foreach (var settingChild in setting.Children) {
-                settingsQueue.Enqueue(settingChild);
-            }
-        }
-
-        return settings;
     }
 }
