@@ -26,7 +26,7 @@ public sealed class DragHandler {
 
         if (identifier != null) {
             _elementIdentifiers.TryAdd(element, identifier);
-            var list = _identifierElements.GetOrAdd(identifier, () => new List<Interactive>());
+            var list = _identifierElements.GetOrAdd(identifier);
             list.Add(element);
         }
     }
