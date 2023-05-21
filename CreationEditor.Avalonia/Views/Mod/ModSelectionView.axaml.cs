@@ -25,7 +25,7 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
                     .OfType<ContentDialog>()
                     .Class(":fullsize")
                     .Template()
-                    .OfType<Border>()
+                    .OfType<FABorder>()
                     .Name("BackgroundElement")
                 ) {
                     Setters = {
@@ -35,7 +35,7 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
                 },
             },
             DataContext = modSelectionVM,
-            [!ContentDialog.IsPrimaryButtonEnabledProperty] = new Binding($"{nameof(ModSelectionVM.AnyModsLoaded)}^"),
+            [!ContentDialog.IsPrimaryButtonEnabledProperty] = new Binding($"{nameof(ModSelectionVM.CanLoad)}^"),
             [!ContentDialog.IsSecondaryButtonEnabledProperty] = new Binding(nameof(ModSelectionVM.ModsLoadedOnce)),
             Title = "Select Mods",
             Content = new ModSelectionView(modSelectionVM),

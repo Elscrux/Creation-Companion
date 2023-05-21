@@ -90,9 +90,14 @@
                            Foreground="IndianRed"
                            Text="No Active Mod Selected. Create New Plugin:"/>
 
+                <TextBlock Padding="5" VerticalAlignment="Center"
+                           Foreground="IndianRed"
+                           IsVisible="{Binding !NewModValid^}"
+                           Text="This name is already used!"/>
+
                 <StackPanel Orientation="Horizontal"
                             Spacing="2">
-                    <TextBox Text="{Binding NewName}"
+                    <TextBox Text="{Binding NewModName}"
                              Padding="5"/>
 
                     <ComboBox ItemsSource="{x:Static mod:ModSelectionVM.ModTypes}"

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using DynamicData.Binding;
@@ -17,23 +19,33 @@ public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter
     [Reactive] public string Description { get; set; } = string.Empty;
     [Reactive] public bool Localization { get; set; }
     [Reactive] public int FormVersion { get; set; }
-    public IObservableCollection<string> Masters { get; set; } = new ObservableCollectionExtended<string>();
+    public IObservableCollection<ModKey> Masters { get; set; } = new ObservableCollectionExtended<ModKey>();
 
-    public void SetTo(IModGetter mod) {
-        if (mod is ISkyrimModGetter skyrimMod) SetTo(skyrimMod);
+    [Reactive] public ModInfo? ActiveModInfo { get; private set; }
+
+    public IEnumerable<ModInfo> GetModInfos(IEnumerable<IModGetter> mods) => GetModInfos(mods.OfType<ISkyrimModGetter>());
+    public IEnumerable<ModInfo> GetModInfos(IEnumerable<ISkyrimModGetter> mods) {
+        return mods
+            .Select(mod => new ModInfo(
+                mod.ModKey,
+                mod.ModHeader.Author,
+                mod.ModHeader.Description,
+                (mod.ModHeader.Flags & SkyrimModHeader.HeaderFlag.Localized) != 0,
+                mod.ModHeader.FormVersion,
+                mod.ModHeader.MasterReferences.Select(master => master.Master).ToArray()));
     }
 
-    public void SetTo(ISkyrimModGetter mod) {
-        Name = mod.ModKey.Name;
-        Type = mod.ModKey.Type;
+    public void SetTo(ModInfo modInfo) {
+        Name = modInfo.ModKey.Name;
+        Type = modInfo.ModKey.Type;
 
-        Author = mod.ModHeader.Author ?? string.Empty;
-        Description = mod.ModHeader.Description ?? string.Empty;
+        Author = modInfo.Author ?? string.Empty;
+        Description = modInfo.Description ?? string.Empty;
 
-        Localization = (mod.ModHeader.Flags & SkyrimModHeader.HeaderFlag.Localized) != 0;
-        FormVersion = mod.ModHeader.FormVersion;
+        Localization = modInfo.Localization;
+        FormVersion = modInfo.FormVersion;
 
         Masters.Clear();
-        Masters.AddRange(mod.ModHeader.MasterReferences.Select(master => master.Master.FileName.String));
+        Masters.AddRange(modInfo.Masters);
     }
 }

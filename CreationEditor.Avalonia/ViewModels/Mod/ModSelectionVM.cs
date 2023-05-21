@@ -17,8 +17,11 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel {
+    private const string NewModBaseName = "NewMod";
+    private static string ReplacementName(int index) => $"{NewModBaseName} ({index})";
+
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IGameEnvironment _environment;
+    private readonly ModInfo[] _modInfos;
 
     private readonly SourceCache<LoadOrderModItem, ModKey> _mods = new(x => x.ModKey);
     public IObservableCollection<LoadOrderModItem> DisplayedMods { get; }
@@ -32,15 +35,17 @@ public sealed class ModSelectionVM : ViewModel {
     public ModKey? ActiveMod => _mods.Items.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => _mods.Items.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
+    public IObservable<bool> CanLoad { get; }
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
+    public IObservable<bool> NewModValid { get; }
 
     [Reactive] public bool ModsLoadedOnce { get; set; }
 
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
-    [Reactive] public string NewName { get; set; } = "NewMod";
+    [Reactive] public string NewModName { get; set; } = NewModBaseName;
     [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
 
     public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
@@ -53,7 +58,26 @@ public sealed class ModSelectionVM : ViewModel {
         IPluginListingsPathProvider pluginListingsProvider) {
         _editorEnvironment = editorEnvironment;
         SelectedModDetails = modGetterVM;
-        _environment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers());
+
+        // Collect mod infos
+        using (var gameEnvironment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers())) {
+            _modInfos = SelectedModDetails.GetModInfos(gameEnvironment.LinkCache.ListedOrder).ToArray();
+        }
+
+        // Try use NewModBaseName as new name for the mod, otherwise find a new name
+        if (_modInfos.Any(modInfo => modInfo.ModKey.Name == NewModBaseName)) {
+            var counter = 2;
+            while (_modInfos.Any(modInfo => modInfo.ModKey.Name == ReplacementName(counter))) {
+                counter++;
+            }
+            NewModName = ReplacementName(counter);
+        }
+
+        NewModValid = this.WhenAnyValue(
+                x => x.NewModName,
+                x => x.NewModType,
+                (name, type) => (Name: name, Type: type))
+            .Select(x => _modInfos.All(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
 
         var filePath = pluginListingsProvider.Get(environmentContext.GameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
@@ -62,9 +86,8 @@ public sealed class ModSelectionVM : ViewModel {
 
         // Fill mods with active load order
         _mods.Edit(updater => {
-            var modKeys = _environment.LoadOrder.Keys.ToList();
-            for (var i = 0; i < modKeys.Count; i++) {
-                var modKey = modKeys[i];
+            for (var i = 0; i < _modInfos.Length; i++) {
+                var modKey = _modInfos[i].ModKey;
                 var modItem = new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i).DisposeWith(this);
                 updater.AddOrUpdate(modItem);
             }
@@ -127,12 +150,15 @@ public sealed class ModSelectionVM : ViewModel {
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()
             .Subscribe(selectedMod => {
-                var mod = _environment.LoadOrder.First(l => l.Key == selectedMod.ModKey).Value.Mod;
+                var mod = _modInfos.First(modInfo => modInfo.ModKey == selectedMod.ModKey);
                 if (mod == null) return;
 
                 SelectedModDetails.SetTo(mod);
             })
             .DisposeWith(this);
+
+        CanLoad = NewModValid.CombineLatest(AnyModsLoaded, AnyModsActive,
+                (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
     /// <summary>
@@ -140,33 +166,29 @@ public sealed class ModSelectionVM : ViewModel {
     /// </summary>
     private void UpdateMasterInfos() {
         _masterInfos.Clear();
-        var modKeys = _environment.LoadOrder.Keys.ToHashSet();
+        var modKeys = _modInfos.Select(x => x.ModKey).ToHashSet();
 
-        foreach (var listing in _environment.LoadOrder.Items) {
-            if (listing.Mod == null) {
-                _masterInfos.Add(listing.ModKey, (new HashSet<ModKey>(), false));
-            } else {
-                var directMasters = listing.Mod.MasterReferences.Select(m => m.Master).ToList();
-                var masters = new HashSet<ModKey>(directMasters);
-                var valid = true;
+        foreach (var modInfo in _modInfos) {
+            var masters = new HashSet<ModKey>(modInfo.Masters);
+            var valid = true;
 
-                //Check that all masters are valid and compile list of all recursive masters
-                foreach (var master in directMasters) {
-                    if (_masterInfos.TryGetValue(master, out var masterInfo)) {
-                        if (masterInfo.Valid) {
-                            masters.Add(masterInfo.Masters);
-                            continue;
-                        }
+            //Check that all masters are valid and compile list of all recursive masters
+            foreach (var master in modInfo.Masters) {
+                if (_masterInfos.TryGetValue(master, out var masterInfo)) {
+                    if (masterInfo.Valid) {
+                        masters.Add(masterInfo.Masters);
+                        continue;
                     }
-
-                    valid = false;
-                    break;
                 }
 
-                if (!valid) masters.Clear();
-                masters = masters.OrderBy(key => modKeys.IndexOf(key)).ToHashSet();
-                _masterInfos.Add(listing.ModKey, (masters, valid));
+                valid = false;
+                break;
             }
+
+            if (!valid) masters.Clear();
+            masters = masters.OrderBy(key => modKeys.IndexOf(key)).ToHashSet();
+            _masterInfos.Add(modInfo.ModKey, (masters, valid));
+
         }
     }
 
@@ -174,7 +196,7 @@ public sealed class ModSelectionVM : ViewModel {
         //Load all mods that are selected, or masters of selected mods
         var loadedMods = new HashSet<ModKey>();
         var missingMods = new Queue<ModKey>(SelectedMods);
-        var modKeys = _environment.LoadOrder.Keys.ToHashSet();
+        var modKeys = _modInfos.Select(x => x.ModKey).ToHashSet();
 
         while (missingMods.Any()) {
             var modKey = missingMods.Dequeue();
@@ -187,7 +209,7 @@ public sealed class ModSelectionVM : ViewModel {
 
         var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
         if (ActiveMod == null) {
-            _editorEnvironment.Build(orderedMods, NewName, NewModType);
+            _editorEnvironment.Build(orderedMods, NewModName, NewModType);
         } else {
             _editorEnvironment.Build(orderedMods, ActiveMod.Value);
         }
