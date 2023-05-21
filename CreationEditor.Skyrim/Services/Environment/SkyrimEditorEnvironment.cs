@@ -1,4 +1,5 @@
-﻿using System.Reactive.Subjects;
+﻿using System.IO.Abstractions;
+using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;
@@ -10,6 +11,7 @@ using Serilog;
 namespace CreationEditor.Skyrim.Services.Environment;
 
 public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
+    private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentContext _environmentContext;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
@@ -45,9 +47,11 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
     public IObservable<ILinkCache> LinkCacheChanged => _linkCacheChanged;
 
     public SkyrimEditorEnvironment(
+        IFileSystem fileSystem,
         IEnvironmentContext environmentContext,
         INotificationService notificationService,
         ILogger logger) {
+        _fileSystem = fileSystem;
         _environmentContext = environmentContext;
         _notificationService = notificationService;
         _logger = logger;
@@ -67,17 +71,12 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
         _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.FileName);
 
-        _activeMod = new SkyrimMod(activeMod, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
-        _activeModLinkCache = _activeMod.ToMutableLinkCache();
-
         var linearNotifier = new LinearNotifier(_notificationService, 2);
 
         linearNotifier.Next($"Preparing {activeMod.FileName}");
-        _activeMod.DeepCopyIn(GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-            .Create(_environmentContext.GameReleaseContext.Release)
-            .WithLoadOrder(activeMod)
-            .Build()
-            .LoadOrder[^1].Mod!);
+        var activeModPath = new ModPath(_fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, activeMod.FileName));
+        _activeMod = ModInstantiator<ISkyrimMod>.Importer(activeModPath, _environmentContext.GameReleaseContext.Release, _fileSystem);
+        _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         linearNotifier.Next("Building GameEnvironment");
 
