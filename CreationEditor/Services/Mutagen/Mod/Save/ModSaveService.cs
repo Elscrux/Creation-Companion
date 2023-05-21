@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -23,6 +24,7 @@ public sealed class ModSaveService : IModSaveService {
     }
 
     public void SaveMod(ILinkCache linkCache, IMod mod) {
+        if (mod.ModKey == ModKey.Null) return;
         var filePath = _modSaveLocationProvider.GetSaveLocation(mod);
 
         // todo add options for localization export!
@@ -50,7 +52,7 @@ public sealed class ModSaveService : IModSaveService {
     }
 
     public void BackupMod(IMod mod, int limit = -1) {
-        var backupSaveLocation = _modSaveLocationProvider.GetBackupSaveLocation();
+        if (mod.ModKey == ModKey.Null) return;
         var filePath = _fileSystem.FileInfo.New(_modSaveLocationProvider.GetSaveLocation(mod));
 
         if (!filePath.Exists) return;
