@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using CreationEditor.Services.Environment;
+using Noggog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class AutoSaveService : IAutoSaveService, IDisposable {
@@ -27,14 +28,12 @@ public sealed class AutoSaveService : IAutoSaveService, IDisposable {
 
     private void OnShutdown() {
         _onShutdownDisposable?.Dispose();
-        _onShutdownDisposable = Observable.FromEvent<EventHandler, EventArgs>(
-                x => (_, args) => x(args),
+        _onShutdownDisposable = Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => AppDomain.CurrentDomain.ProcessExit += handler,
-                handler => AppDomain.CurrentDomain.ProcessExit -= handler)
-            .Merge(Observable.FromEvent<UnhandledExceptionEventHandler, UnhandledExceptionEventArgs>(
-                x => (_, args) => x(args),
+                handler => AppDomain.CurrentDomain.ProcessExit -= handler).Unit()
+            .Merge(Observable.FromEventPattern<UnhandledExceptionEventHandler, UnhandledExceptionEventArgs>(
                 handler => AppDomain.CurrentDomain.UnhandledException += handler,
-                handler => AppDomain.CurrentDomain.UnhandledException -= handler))
+                handler => AppDomain.CurrentDomain.UnhandledException -= handler).Unit())
             .Subscribe(_ => PerformAutoSave());
     }
 
