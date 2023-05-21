@@ -37,13 +37,14 @@ public sealed class ModSaveService : IModSaveService {
         try {
             // Try to save mod
             mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
-        } catch (Exception) {
+        } catch (Exception e) {
+            _logger.Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
             try {
                 // Save at backup location if failed once
                 filePath = _modSaveLocationProvider.GetBackupSaveLocation(mod);
                 mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
-            } catch (Exception e) {
-                _logger.Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            } catch (Exception e2) {
+                _logger.Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
             }
         }
     }
@@ -57,27 +58,27 @@ public sealed class ModSaveService : IModSaveService {
         try {
             _fileSystem.File.Copy(
                 filePath.FullName,
-                _fileSystem.Path.Combine(backupSaveLocation, GetBackupFileName(filePath.Name, filePath.LastWriteTime)),
+                GetBackupFilePath(filePath.Name, filePath.LastWriteTime),
                 true);
         } catch (Exception e) {
             _logger.Warning(
                 "Failed to create backup of mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
         }
 
-        LimitBackups(limit, filePath.Name);
+        LimitBackups(limit, mod);
     }
 
-    private void LimitBackups(int limit, string fileName) {
+    private void LimitBackups(int limit, IModGetter mod) {
         if (limit <= 0) return;
 
-        var backupNameStart = $"{fileName}.*.bak";
+        var backupNameStart = $"{mod.ModKey.FileName}.*.bak";
         var backupFiles = _fileSystem.Directory
             .EnumerateFiles(_modSaveLocationProvider.GetBackupSaveLocation(), backupNameStart)
             .ToList();
 
         if (backupFiles.Count > limit) {
             var filesToDelete = backupFiles
-                .OrderByDescending(time => time)
+                .OrderByDescending(fileName => fileName)
                 .Skip(limit)
                 .ToList();
 
@@ -87,6 +88,6 @@ public sealed class ModSaveService : IModSaveService {
         }
     }
 
-    private string GetBackupFileName(string fileName, DateTime writeTime) => $"{fileName}.{GetTimeFileName(writeTime)}.bak";
-    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
+    private string GetBackupFilePath(string fileName, DateTime writeTime) => _fileSystem.Path.Combine(_modSaveLocationProvider.GetBackupSaveLocation(), $"{fileName}.{GetTimeFileName(writeTime)}.bak");
+    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString( "yyyy-MM-dd_HH-mm-ss");
 }
