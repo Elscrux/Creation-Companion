@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 namespace CreationEditor.Services.Mutagen.Type;
 
 public sealed class MutagenTypeProvider : IMutagenTypeProvider {
@@ -31,7 +32,7 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
         }
 
         type = registration.GetterType;
-        _typeCache.Add(name, type);
+        _typeCache.UpdateOrAdd(name, _ => registration.GetterType);
         return true;
     }
 
