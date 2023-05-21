@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Reactive.Linq;
 using System.Reflection;
 using DynamicData;
 using DynamicData.Binding;
@@ -21,6 +22,101 @@ public static class ObservableCollectionExtension {
             .ToObservableChangeSet()
             .AutoRefresh(selector)
             .ToObservableCollection(selector.Compile(), disposable);
+    }
+
+    public static ReadOnlyObservableCollection<T> Combine<T>(this IObservableCollection<T> lhs, IDisposableDropoff disposableDropoff, params IObservableCollection<T>[] rhsList) {
+        var internalCollection = new ObservableCollectionExtended<T>();
+        foreach (var rhs in rhsList) {
+            internalCollection.AddRange(rhs);
+        }
+
+        Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => lhs.CollectionChanged += h,
+                h => lhs.CollectionChanged -= h)
+            .Subscribe(e => {
+                if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
+                    internalCollection.Clear();
+
+                    foreach (var rhs in rhsList) {
+                        internalCollection.AddRange(rhs);
+                    }
+                } else {
+                    internalCollection.Apply(e.EventArgs);
+                }
+            })
+            .DisposeWith(disposableDropoff);
+
+        rhsList
+            .Select(x => Observable
+                .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                    h => x.CollectionChanged += h,
+                    h => x.CollectionChanged -= h)).Merge()
+            .Subscribe(e => {
+                if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
+                    internalCollection.Clear();
+
+                    internalCollection.AddRange(lhs);
+                    foreach (var rhs in rhsList) {
+                        internalCollection.AddRange(rhs);
+                    }
+                } else {
+                    internalCollection.Apply(e.EventArgs);
+                }
+            })
+            .DisposeWith(disposableDropoff);
+
+        return new ReadOnlyObservableCollection<T>(internalCollection);
+    }
+
+    public static void Apply<T>(this IObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null) {
+        var comparer = equalityComparer ?? EqualityComparer<T>.Default;
+
+        switch (change.Action) {
+            case NotifyCollectionChangedAction.Add:
+                if (change.NewItems == null) break;
+
+                source.AddOrInsertRange(change.NewItems.OfType<T>(), change.NewStartingIndex);
+                break;
+            case NotifyCollectionChangedAction.Remove:
+                if (change.OldItems == null) break;
+                var removeItems = change.OldItems.OfType<T>();
+
+                source.RemoveMany(removeItems);
+                break;
+            case NotifyCollectionChangedAction.Replace:
+                if (change.OldItems == null || change.NewItems == null) break;
+
+                source.RemoveMany(change.OldItems.OfType<T>());
+                source.AddOrInsertRange(change.NewItems.OfType<T>(), change.NewStartingIndex);
+                break;
+            case NotifyCollectionChangedAction.Move:
+                if (change.NewItems == null) break;
+
+                var moveItems = change.NewItems.OfType<T>().ToArray();
+                if (moveItems.Length == 0) break;
+
+                var oldIndex = change.OldStartingIndex == -1 ? source.IndexOf(moveItems[0], comparer) : change.OldStartingIndex;
+                var newIndex = change.NewStartingIndex;
+                if (oldIndex == newIndex) break;
+
+                source.RemoveRange(oldIndex, moveItems.Length);
+
+                if (oldIndex < newIndex) {
+                    source.AddOrInsertRange(moveItems, newIndex);
+                } else {
+                    source.AddOrInsertRange(moveItems, newIndex - moveItems.Length);
+                }
+                break;
+            case NotifyCollectionChangedAction.Reset:
+                source.Clear();
+                if (change.NewItems == null) break;
+
+                source.AddRange(change.NewItems.OfType<T>());
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     public static void Apply<T>(this IList<T> source, Change<T> item, IEqualityComparer<T>? equalityComparer = null) {
@@ -124,9 +220,17 @@ public static class ObservableCollectionExtension {
                         observableCollection.Move(change.PreviousIndex, change.CurrentIndex);
                         break;
                     default:
-                        // check this works whatever the index is
-                        source.RemoveAt(change.PreviousIndex);
-                        source.Insert(change.CurrentIndex, change.Current);
+                        var oldIndex = change.PreviousIndex == -1 ? source.IndexOf(change.Current, comparer) : change.PreviousIndex;
+                        var newIndex = change.CurrentIndex;
+                        if (oldIndex == newIndex) break;
+
+                        source.RemoveAt(oldIndex);
+
+                        if (oldIndex < newIndex) {
+                            source.Insert(newIndex, change.Current);
+                        } else {
+                            source.Insert(newIndex - 1, change.Current);
+                        }
                         break;
                 }
                 break;
