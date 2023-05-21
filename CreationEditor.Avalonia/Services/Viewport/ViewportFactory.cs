@@ -1,21 +1,21 @@
 ﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Views.Viewport;
-using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Avalonia.Services.Viewport;
 
 public sealed class BSEViewportFactory : IViewportFactory {
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
 
     public bool IsMultiInstanceCapable => false;
 
     public BSEViewportFactory(
-        IEnvironmentContext environmentContext) {
-        _environmentContext = environmentContext;
+        IDataDirectoryProvider dataDirectoryProvider) {
+        _dataDirectoryProvider = dataDirectoryProvider;
     }
 
     public Control CreateViewport() {
         return new ViewportBSE(
-            @"E:\TES\Skyrim\vanilla-files\" //_environmentContext.DataDirectoryProvider.Path
+            @"E:\TES\Skyrim\vanilla-files\" //_dataDirectoryProvider.Path
         );
     }
 }

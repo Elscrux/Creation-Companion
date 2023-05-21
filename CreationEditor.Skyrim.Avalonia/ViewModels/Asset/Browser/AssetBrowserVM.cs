@@ -33,6 +33,7 @@ using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using FluentAvalonia.UI.Controls;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -46,7 +47,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IAssetController _assetController;
     private readonly IModelModificationService _modelModificationService;
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IRecordController _recordController;
     private readonly IRecordListFactory _recordListFactory;
     private readonly MainWindow _mainWindow;
@@ -80,7 +81,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetController assetController,
         IModelModificationService modelModificationService,
         IEditorEnvironment editorEnvironment,
-        IEnvironmentContext environmentContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IRecordController recordController,
         IAssetSymbolService assetSymbolService,
         IDockFactory dockFactory,
@@ -92,7 +93,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _assetController = assetController;
         _modelModificationService = modelModificationService;
         _editorEnvironment = editorEnvironment;
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _recordController = recordController;
         _recordListFactory = recordListFactory;
         _mainWindow = mainWindow;
@@ -480,8 +481,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         ? _fileSystem.Path.GetFileName(basePath)
                         : _fileSystem.Path.GetRelativePath(basePath, childOrSelf.Path));
 
-            var dataRelativePath = _fileSystem.Path.GetRelativePath(_environmentContext.DataDirectoryProvider.Path, fullNewPath);
-            
+            var dataRelativePath = _fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, fullNewPath);
+
             // Path without the base folder prefix
             // Change meshes\clutter\test\test.nif to clutter\test.nif
             var shortenedPath = _fileSystem.Path.GetRelativePath(file.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
@@ -499,7 +500,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
             // Remap references in NIFs
             foreach (var reference in file.ReferencedAsset.NifReferences) {
-                var fullPath = _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, reference);
+                var fullPath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, reference);
                 _modelModificationService.RemapReferences(fullPath, path => !path.IsNullOrWhitespace() && childOrSelf.Path.EndsWith(path, AssetCompare.PathComparison), dataRelativePath);
             }
         }

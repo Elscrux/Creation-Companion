@@ -44,9 +44,6 @@
         <Compile Update="Services\Notification\NotificationService.cs">
             <DependentUpon>INotificationService.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Environment\EnvironmentContext.cs">
-            <DependentUpon>IEnvironmentContext.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Environment\EditorEnvironment.cs">
             <DependentUpon>IEditorEnvironment.cs</DependentUpon>
         </Compile>

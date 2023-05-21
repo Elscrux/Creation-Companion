@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -12,7 +13,8 @@ namespace CreationEditor.Skyrim.Services.Environment;
 
 public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> {
     private readonly IFileSystem _fileSystem;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IGameReleaseContext _gameReleaseContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
 
@@ -48,19 +50,21 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
 
     public SkyrimEditorEnvironment(
         IFileSystem fileSystem,
-        IEnvironmentContext environmentContext,
+        IGameReleaseContext gameReleaseContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         INotificationService notificationService,
         ILogger logger) {
         _fileSystem = fileSystem;
-        _environmentContext = environmentContext;
+        _gameReleaseContext = gameReleaseContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _notificationService = notificationService;
         _logger = logger;
 
-        _activeMod = new SkyrimMod(ModKey.Null, _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(ModKey.Null, _gameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-            .Create(_environmentContext.GameReleaseContext.Release)
+            .Create(_gameReleaseContext.Release)
             .WithLoadOrder(_activeMod.ModKey)
             .Build();
     }
@@ -74,8 +78,8 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         var linearNotifier = new LinearNotifier(_notificationService, 2);
 
         linearNotifier.Next($"Preparing {activeMod.FileName}");
-        var activeModPath = new ModPath(_fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, activeMod.FileName));
-        _activeMod = ModInstantiator<ISkyrimMod>.Importer(activeModPath, _environmentContext.GameReleaseContext.Release, _fileSystem);
+        var activeModPath = new ModPath(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, activeMod.FileName));
+        _activeMod = ModInstantiator<ISkyrimMod>.Importer(activeModPath, _gameReleaseContext.Release, _fileSystem);
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         linearNotifier.Next("Building GameEnvironment");
@@ -91,7 +95,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
         _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
 
-        _activeMod = new SkyrimMod(new ModKey(newModName, modType), _environmentContext.GameReleaseContext.Release.ToSkyrimRelease());
+        _activeMod = new SkyrimMod(new ModKey(newModName, modType), _gameReleaseContext.Release.ToSkyrimRelease());
         _activeModLinkCache = _activeMod.ToMutableLinkCache();
 
         var linearNotifier = new LinearNotifier(_notificationService);
@@ -104,7 +108,7 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
 
     private void BuildEnvironment(ModKey[] modKeys) {
         _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
-            .Create(_environmentContext.GameReleaseContext.Release)
+            .Create(_gameReleaseContext.Release)
             .WithLoadOrder(modKeys)
             .WithOutputMod(_activeMod, OutputModTrimming.Self)
             .Build();

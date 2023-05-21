@@ -1,15 +1,15 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive.Linq;
 using CreationEditor.Services.Asset;
-using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 namespace CreationEditor.Services.Archive;
 
 public sealed class BsaArchiveService : IArchiveService {
     private sealed record ArchiveDirectory(string Name, IList<ArchiveDirectory> Subdirectories);
 
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IGameReleaseContext _gameReleaseContext;
     private readonly IFileSystem _fileSystem;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
     private readonly IFileSystemWatcher _watcher;
@@ -23,15 +23,16 @@ public sealed class BsaArchiveService : IArchiveService {
 
     private string? _archiveExtension;
     public string GetExtension() => _archiveExtension ?? LoadExtension();
-    private string LoadExtension() => _archiveExtension = global::Mutagen.Bethesda.Archives.Archive.GetExtension(_environmentContext.GameReleaseContext.Release);
+    private string LoadExtension() => _archiveExtension = global::Mutagen.Bethesda.Archives.Archive.GetExtension(_gameReleaseContext.Release);
 
     public BsaArchiveService(
-        IEnvironmentContext environmentContext,
+        IGameReleaseContext gameReleaseContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem) {
-        _environmentContext = environmentContext;
+        _gameReleaseContext = gameReleaseContext;
         _fileSystem = fileSystem;
 
-        _dataDirectory = environmentContext.DataDirectoryProvider.Path;
+        _dataDirectory = dataDirectoryProvider.Path;
         _watcher = fileSystem.FileSystemWatcher.New(_dataDirectory, BsaFilter);
         _watcher.EnableRaisingEvents = true;
         _watcher.IncludeSubdirectories = false;
@@ -78,7 +79,7 @@ public sealed class BsaArchiveService : IArchiveService {
     public IArchiveReader GetReader(string path) {
         if (_archives.TryGetValue(path, out var reader)) return reader;
 
-        return global::Mutagen.Bethesda.Archives.Archive.CreateReader(_environmentContext.GameReleaseContext.Release, path);
+        return global::Mutagen.Bethesda.Archives.Archive.CreateReader(_gameReleaseContext.Release, path);
     }
 
     public IEnumerable<string> GetFilesInFolder(string path) {
@@ -149,7 +150,7 @@ public sealed class BsaArchiveService : IArchiveService {
     private void Add(string fullPath) {
         if (_archives.ContainsKey(fullPath)) return;
 
-        var reader = global::Mutagen.Bethesda.Archives.Archive.CreateReader(_environmentContext.GameReleaseContext.Release, fullPath);
+        var reader = global::Mutagen.Bethesda.Archives.Archive.CreateReader(_gameReleaseContext.Release, fullPath);
         _archives.Add(fullPath, reader);
     }
 

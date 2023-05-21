@@ -3,10 +3,10 @@ using System.Reactive;
 using Avalonia.Platform.Storage;
 using CreationEditor.Avalonia.Models.Settings.Save;
 using CreationEditor.Avalonia.Views;
-using CreationEditor.Services.Environment;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Settings;
+using Mutagen.Bethesda.Environments.DI;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Save;
 
@@ -16,7 +16,7 @@ public enum SaveLocation {
 }
 
 public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
@@ -27,7 +27,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public string AbsoluteCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrAbsoluteCustomSaveLocation)
         ? Settings.DataRelativeOrAbsoluteCustomSaveLocation
-        : _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, Settings.DataRelativeOrAbsoluteCustomSaveLocation);
+        : _fileSystem.Path.Combine(_dataDirectoryProvider.Path, Settings.DataRelativeOrAbsoluteCustomSaveLocation);
 
     public ReactiveCommand<Unit, Unit> SelectCustomDirectory { get; }
 
@@ -40,12 +40,12 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public SaveSettingVM(
         ISettingImporter<SaveSettings> settingsImporter,
-        IEnvironmentContext environmentContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         ISavePipeline savePipeline,
         IModSaveLocationProvider modSaveLocationProvider,
         MainWindow mainWindow) {
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
         _modSaveLocationProvider = modSaveLocationProvider;
@@ -69,12 +69,12 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
             if (directory == null) return;
 
             var localPath = directory.Path.LocalPath;
-            if (localPath == _environmentContext.DataDirectoryProvider.Path) {
+            if (localPath == _dataDirectoryProvider.Path) {
                 Settings.SaveLocation = SaveLocation.DataFolder;
             } else {
                 Settings.DataRelativeOrAbsoluteCustomSaveLocation
-                    = localPath.StartsWith(_environmentContext.DataDirectoryProvider.Path)
-                        ? $"./{_fileSystem.Path.GetRelativePath(_environmentContext.DataDirectoryProvider.Path, localPath)}"
+                    = localPath.StartsWith(_dataDirectoryProvider.Path)
+                        ? $"./{_fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, localPath)}"
                         : localPath;
             }
 

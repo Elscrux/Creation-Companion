@@ -54,11 +54,6 @@ public sealed class SkyrimModule : Module {
             .SingleInstance();
 
         // Provider
-        var environmentProvider = EnvironmentContext.Build(GameRelease.SkyrimSE);
-
-        builder.RegisterInstance(environmentProvider)
-            .As<IEnvironmentContext>();
-
         builder.RegisterType<SkyrimModInfoProvider>()
             .As<IModInfoProvider<IModGetter>>()
             .As<IModInfoProvider<ISkyrimModGetter>>();

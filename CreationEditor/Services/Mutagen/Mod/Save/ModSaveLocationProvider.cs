@@ -1,24 +1,24 @@
 ﻿using System.IO.Abstractions;
-using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveLocationProvider : IModSaveLocationProvider {
     private readonly IFileSystem _fileSystem;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
 
     private string _directoryPath;
 
     public ModSaveLocationProvider(
         IFileSystem fileSystem,
-        IEnvironmentContext environmentContext) {
+        IDataDirectoryProvider dataDirectoryProvider) {
         _fileSystem = fileSystem;
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
 
-        _directoryPath = _environmentContext.DataDirectoryProvider.Path;
+        _directoryPath = _dataDirectoryProvider.Path;
     }
 
-    public void SaveInDataFolder() => _directoryPath = _environmentContext.DataDirectoryProvider.Path;
+    public void SaveInDataFolder() => _directoryPath = _dataDirectoryProvider.Path;
     public void SaveInCustomDirectory(string absolutePath) => _directoryPath = absolutePath;
 
     public string GetSaveLocation() => _directoryPath;

@@ -8,6 +8,7 @@ using DynamicData;
 using DynamicData.Binding;
 using MessageBox.Avalonia;
 using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Order.DI;
@@ -51,7 +52,7 @@ public sealed class ModSelectionVM : ViewModel {
     public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
 
     public ModSelectionVM(
-        IEnvironmentContext environmentContext,
+        IGameReleaseContext gameReleaseContext,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
@@ -60,7 +61,7 @@ public sealed class ModSelectionVM : ViewModel {
         SelectedModDetails = modGetterVM;
 
         // Collect mod infos
-        using (var gameEnvironment = GameEnvironment.Typical.Construct(environmentContext.GameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers())) {
+        using (var gameEnvironment = GameEnvironment.Typical.Construct(gameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers())) {
             _modInfos = SelectedModDetails.GetModInfos(gameEnvironment.LinkCache.ListedOrder).ToArray();
         }
 
@@ -79,7 +80,7 @@ public sealed class ModSelectionVM : ViewModel {
                 (name, type) => (Name: name, Type: type))
             .Select(x => _modInfos.All(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
 
-        var filePath = pluginListingsProvider.Get(environmentContext.GameReleaseContext.Release);
+        var filePath = pluginListingsProvider.Get(gameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();

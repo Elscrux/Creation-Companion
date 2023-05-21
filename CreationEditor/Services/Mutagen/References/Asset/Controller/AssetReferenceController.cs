@@ -13,6 +13,7 @@ using CreationEditor.Services.Mutagen.References.Asset.Query;
 using CreationEditor.Services.Notification;
 using DynamicData;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
@@ -26,7 +27,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly IArchiveService _archiveService;
     private readonly INotificationService _notificationService;
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly ModAssetQuery _modAssetQuery;
     private readonly NifDirectoryAssetQuery _nifDirectoryAssetQuery;
     private readonly NifArchiveAssetQuery _nifArchiveAssetQuery;
@@ -65,7 +66,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         IArchiveService archiveService,
         INotificationService notificationService,
         IEditorEnvironment editorEnvironment,
-        IEnvironmentContext environmentContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IRecordController recordController,
         ModAssetQuery modAssetQuery,
         NifDirectoryAssetQuery nifDirectoryAssetQuery,
@@ -74,7 +75,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         _archiveService = archiveService;
         _notificationService = notificationService;
         _editorEnvironment = editorEnvironment;
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _modAssetQuery = modAssetQuery;
         _nifDirectoryAssetQuery = nifDirectoryAssetQuery;
         _nifArchiveAssetQuery = nifArchiveAssetQuery;
@@ -132,7 +133,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private void InitNifDirectoryReferences() {
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Nif References");
 
-        _nifDirectoryAssetCache = new AssetCache<string, string>(_nifDirectoryAssetQuery, _environmentContext.DataDirectoryProvider.Path);
+        _nifDirectoryAssetCache = new AssetCache<string, string>(_nifDirectoryAssetQuery, _dataDirectoryProvider.Path);
 
         linearNotifier.Stop();
 
@@ -146,7 +147,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     private void InitNifArchiveReferences() {
         var extension = _archiveService.GetExtension();
-        var dataDirectory = _environmentContext.DataDirectoryProvider.Path;
+        var dataDirectory = _dataDirectoryProvider.Path;
 
         var archiveWatcher = _fileSystem.FileSystemWatcher
             .New(dataDirectory, extension)

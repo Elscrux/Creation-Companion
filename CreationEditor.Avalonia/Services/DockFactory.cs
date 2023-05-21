@@ -12,7 +12,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.Views.Asset.Browser;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 namespace CreationEditor.Avalonia.Services;
 
@@ -20,7 +20,7 @@ public sealed class DockFactory : IDockFactory {
     private bool _viewportCreated;
 
     private readonly ILifetimeScope _lifetimeScope;
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IViewportFactory _viewportFactory;
     private readonly IDockingManagerService _dockingManagerService;
@@ -28,13 +28,13 @@ public sealed class DockFactory : IDockFactory {
 
     public DockFactory(
         ILifetimeScope lifetimeScope,
-        IEnvironmentContext environmentContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
         ICellBrowserFactory cellBrowserFactory) {
         _lifetimeScope = lifetimeScope;
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _viewportFactory = viewportFactory;
         _dockingManagerService = dockingManagerService;
@@ -88,7 +88,7 @@ public sealed class DockFactory : IDockFactory {
             case DockElement.AssetBrowser:
                 var folder = parameter is string path
                     ? TypedParameter.From(path)
-                    : TypedParameter.From<string>(_environmentContext.DataDirectoryProvider.Path);
+                    : TypedParameter.From<string>(_dataDirectoryProvider.Path);
 
                 var assetBrowserVM = newScope.Resolve<IAssetBrowserVM>(folder);
                 newScope.DisposeWith(assetBrowserVM);

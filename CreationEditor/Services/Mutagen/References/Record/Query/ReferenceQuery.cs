@@ -6,6 +6,7 @@ using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
 using ICSharpCode.SharpZipLib.GZip;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -19,7 +20,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     private readonly Version _version = new(1, 0);
 
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly INotificationService _notificationService;
     private readonly IModInfoProvider<IModGetter> _modInfoProvider;
@@ -27,7 +28,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     private readonly ILogger _logger;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
 
-    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, mod.FileName);
+    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_dataDirectoryProvider.Path, mod.FileName);
 
     public sealed record ModReferenceCache(Dictionary<FormKey, HashSet<IFormLinkIdentifier>> Cache, HashSet<FormKey> FormKeys) {
         public static ModReferenceCache operator +(ModReferenceCache a, ModReferenceCache b) {
@@ -53,14 +54,14 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
 
     public ReferenceQuery(
-        IEnvironmentContext environmentContext,
+        IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IMutagenTypeProvider mutagenTypeProvider,
         INotificationService notificationService,
         IModInfoProvider<IModGetter> modInfoProvider,
         ILifetimeScope lifetimeScope,
         ILogger logger) {
-        _environmentContext = environmentContext;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _mutagenTypeProvider = mutagenTypeProvider;
         _notificationService = notificationService;

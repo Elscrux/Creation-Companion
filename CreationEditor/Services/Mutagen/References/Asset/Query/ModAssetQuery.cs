@@ -2,6 +2,7 @@
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Type;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
@@ -9,7 +10,7 @@ using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ModAssetQuery : AssetQuery<IModGetter, IFormLinkGetter> {
-    private readonly IEnvironmentContext _environmentContext;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
     private IAssetLinkCache _assetLinkCache;
 
@@ -20,7 +21,7 @@ public sealed class ModAssetQuery : AssetQuery<IModGetter, IFormLinkGetter> {
     public ModAssetQuery(ILifetimeScope lifetimeScope) : base(lifetimeScope) {
         var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
         var editorEnvironment = newScope.Resolve<IEditorEnvironment>();
-        _environmentContext = newScope.Resolve<IEnvironmentContext>();
+        _dataDirectoryProvider = newScope.Resolve<IDataDirectoryProvider>();
         _mutagenTypeProvider = newScope.Resolve<IMutagenTypeProvider>();
 
         _assetLinkCache = editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
@@ -52,7 +53,7 @@ public sealed class ModAssetQuery : AssetQuery<IModGetter, IFormLinkGetter> {
     }
 
     protected override void WriteCacheCheck(BinaryWriter writer, IModGetter origin) {
-        var modFilePath = FileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, origin.ModKey.FileName);
+        var modFilePath = FileSystem.Path.Combine(_dataDirectoryProvider.Path, origin.ModKey.FileName);
         if (!FileSystem.File.Exists(modFilePath)) return;
 
         var checksum = FileSystem.GetFileChecksum(modFilePath);
@@ -72,7 +73,7 @@ public sealed class ModAssetQuery : AssetQuery<IModGetter, IFormLinkGetter> {
     }
 
     protected override bool IsCacheUpToDate(BinaryReader binaryReader, IModGetter origin) {
-        var modFilePath = FileSystem.Path.Combine(_environmentContext.DataDirectoryProvider.Path, origin.ModKey.FileName);
+        var modFilePath = FileSystem.Path.Combine(_dataDirectoryProvider.Path, origin.ModKey.FileName);
         if (!FileSystem.Path.Exists(modFilePath)) return false;
 
         // Read checksum in cache
