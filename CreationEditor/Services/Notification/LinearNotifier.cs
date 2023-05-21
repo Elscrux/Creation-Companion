@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Services.Notification;
 
-public sealed class LinearNotifier : ANotifier {
+public sealed class LinearNotifier : ANotifier, IDisposable {
     private readonly float? _countFloat;
     private int _currentStep;
 
@@ -46,4 +46,6 @@ public sealed class LinearNotifier : ANotifier {
     public void Stop() {
         NotificationService.Stop(ID);
     }
+
+    public void Dispose() => Stop();
 }
