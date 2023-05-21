@@ -14,7 +14,9 @@
     </Interaction.Behaviors>
 
     <Border Classes="Tab"
-            Classes.AccentSelected="{Binding #Control.DockedItem.IsSelected}">
+            Classes.AccentSelected="{Binding #Control.DockedItem.IsSelected}"
+            PointerReleased="OnTabPointerReleased">
+        
         <StackPanel Orientation="Horizontal">
             <TextBlock x:Name="TabHeader"
                        Text="{Binding #Control.DockedItem.Header}">
@@ -32,7 +34,6 @@
             <Button Classes="DockClose"
                     Command="{Binding #Control.DockedItem.Close}"
                     IsVisible="{Binding #Control.DockedItem.CanClose}">
-
                 <controls:SymbolIcon Symbol="Dismiss"
                                      ToolTip.Tip="Close"/>
             </Button>

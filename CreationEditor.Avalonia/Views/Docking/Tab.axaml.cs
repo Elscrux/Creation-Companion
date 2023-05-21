@@ -1,7 +1,9 @@
-﻿using Avalonia;
+﻿using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
+using Avalonia.Input;
 using Avalonia.Layout;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
@@ -44,5 +46,14 @@ public partial class Tab : UserControl, IDockPreview {
             IsHitTestVisible = false,
             Opacity = 0.5
         });
+    }
+
+    private void OnTabPointerReleased(object? sender, PointerReleasedEventArgs e) {
+        if (sender is not Control control) return;
+
+        var currentPoint = e.GetCurrentPoint(control);
+        if (currentPoint.Properties.PointerUpdateKind != PointerUpdateKind.MiddleButtonReleased) return;
+
+        (DockedItem.Close as ICommand).Execute(null);
     }
 }
