@@ -43,6 +43,26 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
 
+        EditSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord?.Record is not {} record) return;
+
+            var newOverride = recordController.GetOrAddOverride(record);
+            recordEditorController.OpenEditor(newOverride);
+        });
+
+        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord?.Record is not {} record) return;
+
+            recordController.DuplicateRecord(record);
+        });
+
+        DeleteSelectedRecord = ReactiveCommand.Create(() => {
+            if (SelectedRecord?.Record is not {} record) return;
+
+            recordController.DeleteRecord(record);
+            RecordCache.Remove(SelectedRecord);
+        });
+
         this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
