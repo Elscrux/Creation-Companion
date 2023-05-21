@@ -48,9 +48,9 @@
                     Padding="2"
                     ToolTip.Tip="Toggle Auto Scroll">
                 <Grid>
-                    <controls:SymbolIcon Symbol="ChevronDown"/>
-                    <controls:SymbolIcon Symbol="Dismiss"
-                                         HasMirrorTransform="True"
+                    <controls:SymbolIcon Symbol="MapPinFilled"
+                                         IsVisible="{Binding AutoScroll}"/>
+                    <controls:SymbolIcon Symbol="UnPin"
                                          IsVisible="{Binding !AutoScroll}"/>
                 </Grid>
             </Button>
