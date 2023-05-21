@@ -1,18 +1,24 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
+using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Plugin;
+using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
+using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
@@ -70,6 +76,10 @@ public sealed class SkyrimModule : Module {
         builder.RegisterType<PlacedProvider>()
             .AsSelf();
 
+        builder.RegisterType<SkyrimAssetTypeProvider>()
+            .As<IAssetTypeProvider>()
+            .SingleInstance();
+
         // Factory
         builder.RegisterType<SkyrimRecordListFactory>()
             .As<IRecordListFactory>();
@@ -89,6 +99,9 @@ public sealed class SkyrimModule : Module {
             .As<IPluginService>()
             .SingleInstance();
 
+        builder.RegisterType<BsaArchiveService>()
+            .As<IArchiveService>();
+
         // View Model
         builder.RegisterType<SkyrimModGetterVM>()
             .As<IModGetterVM>();
@@ -103,6 +116,9 @@ public sealed class SkyrimModule : Module {
         builder.RegisterType<CellBrowserVM>()
             .As<ICellBrowserVM>();
 
+        builder.RegisterType<AssetBrowserVM>()
+            .As<IAssetBrowserVM>();
+
         builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
             .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
@@ -111,7 +127,7 @@ public sealed class SkyrimModule : Module {
         // Other
         builder.RegisterAssemblyTypes(typeof(QuestFilter).Assembly)
             .InNamespacesOf(typeof(QuestFilter))
-            .Where(type => type.Name.EndsWith("Filter"))
+            .Where(type => type.Name.EndsWith("Filter", StringComparison.Ordinal))
             .AsSelf()
             .SingleInstance();
     }

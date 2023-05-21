@@ -103,6 +103,16 @@
                     </MenuItem.Icon>
                 </MenuItem>
 
+                <MenuItem Header="Asset Browser"
+                          HotKey="Ctrl+Alt+A"
+                          InputGesture="Ctrl+Alt+A"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.AssetBrowser}">
+                    <MenuItem.Icon>
+                        <controls:SymbolIcon Symbol="Folder"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+
                 <MenuItem Header="Viewport"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.Viewport}">

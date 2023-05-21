@@ -10,21 +10,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.0-preview6.1" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview7" />
-        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.0-preview7" />
+        <PackageReference Include="Avalonia" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview8" />
+        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.0-preview8" />
         <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.0-preview20230425001" />
-        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview7" />
-        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev6" />
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview8" />
+        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev7.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Noggog.Autofac" Version="2.56.0" />
-        <PackageReference Include="ReactiveUI" Version="18.4.34" />
-        <PackageReference Include="ReactiveUI.Fody" Version="18.4.34" />
+        <PackageReference Include="Noggog.Autofac" Version="2.57.0" />
+        <PackageReference Include="ReactiveUI" Version="18.4.44" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.44" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.1-dev-00910" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
     </ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Lifecycle;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
@@ -12,12 +13,16 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
+using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References.Asset.Query;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Query;
 using CreationEditor.Services.Mutagen.Type;
+using Noggog.Autofac;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
@@ -42,16 +47,30 @@ public sealed class MainModule : Module {
             .As<IAutoSaveService>()
             .SingleInstance();
 
-        builder.RegisterType<CacheLocationProvider>()
-            .As<ICacheLocationProvider>();
+        builder.RegisterType<NifModificationService>()
+            .As<IModelModificationService>();
+
+        builder.RegisterType<AssetSymbolService>()
+            .As<IAssetSymbolService>();
+
+        builder.RegisterType<AssetTypeService>()
+            .As<IAssetTypeService>();
 
         // Controller
-        builder.RegisterType<ReferenceController>()
-            .As<IReferenceController>()
+        builder.RegisterType<RecordReferenceController>()
+            .As<IRecordReferenceController>()
             .SingleInstance();
 
         builder.RegisterType<RecordEditorController>()
             .As<IRecordEditorController>()
+            .SingleInstance();
+
+        builder.RegisterType<AssetController>()
+            .As<IAssetController>()
+            .SingleInstance();
+
+        builder.RegisterType<AssetReferenceController>()
+            .As<IAssetReferenceController>()
             .SingleInstance();
 
         // Provider
@@ -75,6 +94,13 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ModSaveLocationProvider>()
             .As<IModSaveLocationProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<CacheLocationProvider>()
+            .As<ICacheLocationProvider>();
+
+        builder.RegisterType<AssetProvider>()
+            .As<IAssetProvider>()
             .SingleInstance();
 
         // Pipeline
@@ -101,6 +127,17 @@ public sealed class MainModule : Module {
         builder.RegisterType<ReferenceQuery>()
             .As<IReferenceQuery>()
             .SingleInstance();
+
+        builder.RegisterAssemblyTypes(typeof(ModAssetQuery).Assembly)
+            .InNamespacesOf(typeof(ModAssetQuery))
+            .Where(type => type.Name.EndsWith("Query", StringComparison.Ordinal))
+            .AsSelf();
+
+        builder.RegisterType<DirectoryAssetQuery>()
+            .AsSelf();
+
+        builder.RegisterType<NifDirectoryAssetQuery>()
+            .AsSelf();
 
         // View Model
         builder.RegisterType<MainVM>()
