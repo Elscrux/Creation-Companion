@@ -1,22 +1,21 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
 using Autofac;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
+using ICSharpCode.SharpZipLib.GZip;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using Serilog;
-namespace CreationEditor.Services.Mutagen.References.Query;
+namespace CreationEditor.Services.Mutagen.References.Record.Query;
 
 /// <summary>
 /// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
 public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
-    private const string CacheDirectory = "References";
     private readonly Version _version = new(1, 0);
 
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
@@ -69,7 +68,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         _logger = logger;
 
         var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-        _cacheLocationProvider = newScope.Resolve<ICacheLocationProvider>(TypedParameter.From(CacheDirectory));
+        _cacheLocationProvider = newScope.Resolve<ICacheLocationProvider>(TypedParameter.From(new [] { "References", "Record" }));
     }
 
     public void Dispose() => _disposables.Dispose();
@@ -83,9 +82,9 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     public void LoadModReferences(IModGetter mod) {
         if (_modCaches.ContainsKey(mod.ModKey)) return;
 
-        _logger.Here().Debug("Starting to load references of {ModKey}", mod.ModKey);
+        _logger.Here().Debug("Starting to load Record References of {ModKey}", mod.ModKey);
         _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
-        _logger.Here().Debug("Finished loading references of {ModKey}", mod.ModKey);
+        _logger.Here().Debug("Finished loading Record References of {ModKey}", mod.ModKey);
     }
 
     /// <summary>
@@ -97,7 +96,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
 
         var notify = new LinearNotifier(_notificationService, mods.Count);
         foreach (var mod in mods) {
-            notify.Next($"Loading References in {mod.ModKey}");
+            notify.Next($"Loading Record References in {mod.ModKey}");
             LoadModReferences(mod);
         }
         notify.Stop();
@@ -118,7 +117,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
 
         // Open cache reader
         using var fileStream = _fileSystem.File.OpenRead(cacheFile);
-        using var zip = new GZipStream(fileStream, CompressionMode.Decompress);
+        using var zip = new GZipInputStream(fileStream);
         using var reader = new BinaryReader(zip);
 
         // Read version in cache
@@ -129,7 +128,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         var checksum = reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
         // Validate checksum
-        return _fileSystem.IsChecksumValid(modFilePath, checksum);
+        return _fileSystem.IsFileChecksumValid(modFilePath, checksum);
     }
 
     /// <summary>
@@ -159,7 +158,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         var cacheFile = _fileSystem.FileInfo.New(_cacheLocationProvider.CacheFile(mod.ModKey.FileName));
         if (!cacheFile.Exists) cacheFile.Directory?.Create();
         using var fileStream = _fileSystem.File.OpenWrite(cacheFile.FullName);
-        using var zip = new GZipStream(fileStream, CompressionMode.Compress);
+        using var zip = new GZipOutputStream(fileStream);
         using var writer = new BinaryWriter(zip);
 
         // Write version
@@ -169,7 +168,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         var modFilePath = ModFilePath(mod.ModKey);
         if (!_fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
 
-        var checksum = _fileSystem.GetChecksum(modFilePath);
+        var checksum = _fileSystem.GetFileChecksum(modFilePath);
         writer.Write(checksum);
 
         // Write game
@@ -206,72 +205,58 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
     /// <param name="modKey">mod to load cache for</param>
     /// <returns>reference cache of the given mod key</returns>
     private ModReferenceCache LoadReferenceCache(ModKey modKey) {
-        var tempFile = _fileSystem.FileInfo.New(_cacheLocationProvider.TempCacheFile(modKey.FileName));
-        try {
-            var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
-            var records = new HashSet<FormKey>();
+        using var linearNotifier = new LinearNotifier(_notificationService);
+        linearNotifier.Next("Decompressing Cache");
+        var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
+        var records = new HashSet<FormKey>();
 
-            // Decompress cache and copy to temporary uncompressed cache 
-            var linearNotifier = new LinearNotifier(_notificationService);
-            linearNotifier.Next("Decompressing Cache");
+        // Read mod cache file
+        var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
+        var fileStream = _fileSystem.File.OpenRead(cacheFile);
+        var zip = new GZipInputStream(fileStream);
+        using (var reader = new BinaryReader(zip)) {
+            // Skip version and checksum
+            reader.ReadString();
+            reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
 
-            using (var fileStream = _fileSystem.File.OpenRead(_cacheLocationProvider.CacheFile(modKey.FileName))) {
-                using (var zip = new GZipStream(fileStream, CompressionMode.Decompress)) {
-                    if (!tempFile.Exists) tempFile.Directory?.Create();
-                    using (var tempFileStream = _fileSystem.File.OpenWrite(tempFile.FullName)) {
-                        zip.CopyTo(tempFileStream);
-                    }
-                }
+            // Read game string
+            var game = reader.ReadString();
+
+            // Build ref cache
+            var recordCount = reader.ReadInt32();
+            for (var i = 0; i < recordCount; i++) {
+                var formKey = FormKey.Factory(reader.ReadString());
+                records.Add(formKey);
             }
-            linearNotifier.Stop();
 
-            // Read mod cache file
-            using (var reader = new BinaryReader(_fileSystem.File.OpenRead(tempFile.FullName))) {
-                // Skip version and checksum
-                reader.ReadString();
-                reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
-
-                // Read game string
-                var game = reader.ReadString();
-
-                // Build ref cache
-                var recordCount = reader.ReadInt32();
-                for (var i = 0; i < recordCount; i++) {
+            // Build ref cache
+            var formCount = reader.ReadInt32();
+            using (var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount)) {
+                for (var i = 0; i < formCount; i++) {
+                    counter.NextStep();
                     var formKey = FormKey.Factory(reader.ReadString());
-                    records.Add(formKey);
-                }
-
-                // Build ref cache
-                var formCount = reader.ReadInt32();
-                using (var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount)) {
-                    for (var i = 0; i < formCount; i++) {
-                        counter.NextStep();
-                        var formKey = FormKey.Factory(reader.ReadString());
-                        var referenceCount = reader.ReadInt32();
-                        var references = new HashSet<IFormLinkIdentifier>();
-                        for (var j = 0; j < referenceCount; j++) {
-                            var referenceFormKey = FormKey.Factory(reader.ReadString());
-                            var typeString = reader.ReadString();
-                            if (_mutagenTypeProvider.GetType(game, typeString, out var type)) {
-                                references.Add(new FormLinkInformation(referenceFormKey, type));
-                            } else {
-                                _logger.Here().Error(
-                                    new ArgumentException($"Unknown object type: {typeString}"),
-                                    "Error while reading reference cache of '{Name}, Unknown object type: {TypeString} of {Key}",
-                                    modKey.Name,
-                                    typeString,
-                                    formKey);
-                            }
+                    var referenceCount = reader.ReadInt32();
+                    var references = new HashSet<IFormLinkIdentifier>();
+                    for (var j = 0; j < referenceCount; j++) {
+                        var referenceFormKey = FormKey.Factory(reader.ReadString());
+                        var typeString = reader.ReadString();
+                        if (_mutagenTypeProvider.GetType(game, typeString, out var type)) {
+                            references.Add(new FormLinkInformation(referenceFormKey, type));
+                        } else {
+                            _logger.Here().Error(
+                                new ArgumentException($"Unknown object type: {typeString}"),
+                                "Error while reading reference cache of '{Name}, Unknown object type: {TypeString} of {Key}",
+                                modKey.Name,
+                                typeString,
+                                formKey);
                         }
-
-                        modCache.Add(formKey, references);
                     }
+
+                    modCache.Add(formKey, references);
                 }
             }
-
-            return new ModReferenceCache(modCache, records);
-        } finally {
-            if (tempFile.Exists) tempFile.Delete();
         }
+
+        return new ModReferenceCache(modCache, records);
     }
 }

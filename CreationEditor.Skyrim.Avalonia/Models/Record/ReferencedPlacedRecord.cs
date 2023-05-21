@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Record;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -31,7 +31,7 @@ public sealed class ReferencedPlacedRecord : ReactiveObject, IReferencedRecord<I
         };
     }
 
-    public ICollection<IFormLinkIdentifier> References => _referencedRecord.References;
+    public IObservableCollection<IFormLinkIdentifier> References => _referencedRecord.References;
     public IPlacedGetter Record {
         get => _referencedRecord.Record;
         set => _referencedRecord.Record = value;

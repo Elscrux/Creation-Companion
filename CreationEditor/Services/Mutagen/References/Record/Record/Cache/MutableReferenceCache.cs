@@ -1,8 +1,8 @@
-﻿using CreationEditor.Services.Mutagen.References.Query;
+﻿using CreationEditor.Services.Mutagen.References.Record.Query;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-namespace CreationEditor.Services.Mutagen.References.Cache;
+namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
 public sealed class MutableReferenceCache : IReferenceCache {
     private readonly IModGetter _mutableMod;
@@ -26,16 +26,26 @@ public sealed class MutableReferenceCache : IReferenceCache {
     }
 
     public bool AddRecord(IMajorRecordGetter record, IEnumerable<IFormLinkGetter> links) {
-        var anyNew = false;
+        // var anyNew = false;
 
-        _mutableModReferenceCache.FormKeys.Add(record.FormKey);
-
-        foreach (var link in links) {
-            var references = _mutableModReferenceCache.Cache.GetOrAdd(link.FormKey);
-            if (references.Add(record)) anyNew = true;
-        }
-
-        return anyNew;
+        return _mutableModReferenceCache.FormKeys.Add(record.FormKey);
+        
+        // foreach (var link in links) {
+        //     var references = _mutableModReferenceCache.Cache.GetOrAdd(link.FormKey);
+        //     if (references.Add(record)) anyNew = true;
+        // }
+        //
+        // return anyNew;
+        // var anyNew = false;
+        //
+        // _mutableModReferenceCache.FormKeys.Add(record.FormKey);
+        //
+        // foreach (var link in links) {
+        //     var references = _mutableModReferenceCache.Cache.GetOrAdd(link.FormKey);
+        //     if (references.Add(record)) anyNew = true;
+        // }
+        //
+        // return anyNew;
     }
 
     public bool RemoveReference(FormKey formKey, IFormLinkIdentifier oldReference) {

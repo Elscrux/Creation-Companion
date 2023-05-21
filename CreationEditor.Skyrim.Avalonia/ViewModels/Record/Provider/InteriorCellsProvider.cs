@@ -6,8 +6,8 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda;
@@ -28,8 +28,8 @@ public sealed class InteriorCellsProvider : CellProvider {
         IRecordEditorController recordEditorController,
         IViewportRuntimeService viewportRuntimeService,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceController referenceController)
-        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceController) {
+        IRecordReferenceController recordReferenceController)
+        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, recordReferenceController) {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
@@ -44,7 +44,7 @@ public sealed class InteriorCellsProvider : CellProvider {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                        referenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
+                        recordReferenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

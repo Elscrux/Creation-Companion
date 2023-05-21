@@ -15,8 +15,8 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
-using CreationEditor.Services.Mutagen.References.Controller;
-using CreationEditor.Services.Mutagen.References.Query;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References.Record.Query;
 using CreationEditor.Services.Mutagen.Type;
 namespace CreationEditor.Avalonia.Modules;
 

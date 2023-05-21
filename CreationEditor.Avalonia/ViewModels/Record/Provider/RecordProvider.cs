@@ -5,8 +5,8 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -51,7 +51,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         IRecordEditorController recordEditorController,
         IRecordController recordController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceController referenceController) {
+        IRecordReferenceController recordReferenceController) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
@@ -59,9 +59,6 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
-
-            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(_referencesDisposable);
-            RecordCache.AddOrUpdate(referencedRecord);
         });
 
         DoubleTapCommand = EditSelectedRecord = ReactiveCommand.Create(() => {
@@ -74,10 +71,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
 
-            var duplicate = recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-
-            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(_referencesDisposable);
-            RecordCache.AddOrUpdate(referencedRecord);
+            recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
@@ -95,7 +89,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                        recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -107,6 +101,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         IsBusy = isBusy;
 
         recordController.RecordChanged
+            .Merge(recordController.RecordCreated)
             .Subscribe(majorRecord => {
                 if (majorRecord is not TMajorRecordGetter record) return;
 
@@ -115,13 +110,17 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
+            .DisposeWith(this);
+
+        recordController.RecordDeleted
+            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
         ContextMenuItems = new List<IMenuItem> {

@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
-namespace CreationEditor.Services.Mutagen.References.Cache;
+namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
 public static class ReferenceCacheMixIn {
     /// <summary>

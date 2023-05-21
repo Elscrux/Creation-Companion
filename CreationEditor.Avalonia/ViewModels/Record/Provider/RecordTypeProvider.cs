@@ -4,8 +4,8 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -33,7 +33,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         IEnumerable<Type> types,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordController recordController,
-        IReferenceController referenceController) {
+        IRecordReferenceController recordReferenceController) {
         Types = types.ToList();
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
@@ -48,7 +48,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                 RecordCache.Edit(updater => {
                     foreach (var type in Types) {
                         foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
-                            referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -61,6 +61,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         IsBusy = isBusy;
 
         recordController.RecordChanged
+            .Merge(recordController.RecordCreated)
             .Subscribe(record => {
                 if (!Types.Contains(record.GetType())) return;
 
@@ -69,13 +70,17 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
+            .DisposeWith(this);
+
+        recordController.RecordDeleted
+            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
     }
 

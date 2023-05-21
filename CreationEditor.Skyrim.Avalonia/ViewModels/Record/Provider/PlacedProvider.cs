@@ -10,8 +10,8 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -54,7 +54,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
     public PlacedProvider(
         IRecordEditorController recordEditorController,
         IRecordController recordController,
-        IReferenceController referenceController,
+        IRecordReferenceController recordReferenceController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
@@ -63,9 +63,6 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<IPlaced, IPlacedGetter>();
             recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newRecord);
-
-            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(this);
-            RecordCache.AddOrUpdate(referencedRecord);
         });
 
         EditSelectedRecord = ReactiveCommand.Create(() => {
@@ -88,10 +85,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
 
-            var duplicate = recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
-
-            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(this);
-            RecordCache.AddOrUpdate(referencedRecord);
+            recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
@@ -112,7 +106,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
                 RecordCache.Edit(updater => {
                     foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                        referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                        recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
                         var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettingsVM.LinkCache);
 
                         updater.AddOrUpdate(referencedPlacedRecord);
@@ -125,6 +119,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         IsBusy = isBusy;
 
         recordController.RecordChanged
+            .Merge(recordController.RecordCreated)
             .Subscribe(majorRecord => {
                 if (majorRecord is not IPlacedGetter record) return;
 
@@ -133,13 +128,17 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
+                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
+            .DisposeWith(this);
+
+        recordController.RecordDeleted
+            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
         ContextMenuItems = new List<IMenuItem> {

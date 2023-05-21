@@ -5,7 +5,7 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction;
@@ -33,7 +33,7 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
 
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
-        IReferenceController referenceController,
+        IRecordController recordController,
         IEditorEnvironment editorEnvironment,
         IConditionCopyPasteController conditionsCopyPasteController) {
         ConditionsCopyPasteController = conditionsCopyPasteController;
@@ -52,7 +52,7 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
             .DisposeWith(this);
 
         Save = ReactiveCommand.Create(() => {
-            referenceController.UpdateReferences(Record, () => EditableRecord.CopyTo(Record));
+            recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));
 
             recordEditorController.CloseEditor(Record);
         });

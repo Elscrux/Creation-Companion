@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
@@ -11,8 +12,8 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -55,7 +56,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         IDockFactory dockFactory,
         IRecordEditorController recordEditorController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceController referenceController) {
+        IRecordReferenceController recordReferenceController) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
@@ -71,9 +72,6 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         NewCell = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<Cell, ICellGetter>();
             recordEditorController.OpenEditor<Cell, ICellGetter>(newRecord);
-
-            referenceController.GetRecord(newRecord, out var referencedRecord).DisposeWith(this);
-            RecordCache.AddOrUpdate(referencedRecord);
         });
 
         EditSelectedCell = ReactiveCommand.Create(() => {
@@ -86,10 +84,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         DuplicateSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
 
-            var duplicate = recordController.DuplicateRecord<Cell, ICellGetter>(SelectedRecord.Record);
-
-            referenceController.GetRecord(duplicate, out var referencedRecord).DisposeWith(this);
-            RecordCache.AddOrUpdate(referencedRecord);
+            recordController.DuplicateRecord<Cell, ICellGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedCell = ReactiveCommand.Create(() => {
@@ -100,6 +95,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         });
 
         recordController.RecordChanged
+            .Merge(recordController.RecordCreated)
             .Subscribe(majorRecord => {
                 if (majorRecord is not ICellGetter record) return;
 
@@ -108,13 +104,17 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    referenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
+                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
+            .DisposeWith(this);
+
+        recordController.RecordDeleted
+            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
         ContextMenuItems = new List<IMenuItem> {

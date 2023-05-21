@@ -1,6 +1,6 @@
 ﻿using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins.Cache;
-namespace CreationEditor.Services.Mutagen.References.Query;
+namespace CreationEditor.Services.Mutagen.References.Record.Query;
 
 public static class ReferenceQueryMixIn {
     /// <summary>

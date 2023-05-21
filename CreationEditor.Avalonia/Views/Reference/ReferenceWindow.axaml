@@ -4,9 +4,10 @@
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
                      xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
+                     xmlns:reference="clr-namespace:CreationEditor.Avalonia.Views.Reference"
                      mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                      x:Name="Window"
-                     x:Class="CreationEditor.Avalonia.Views.Record.ReferenceWindow"
+                     x:Class="CreationEditor.Avalonia.Views.Reference.ReferenceWindow"
                      Height="750" Width="500">
 
     <windowing:AppWindow.KeyBindings>
@@ -15,4 +16,6 @@
             Command="{x:Static command:WindowCommands.Close}"
             CommandParameter="{Binding #Window}"/>
     </windowing:AppWindow.KeyBindings>
+
+    <reference:ReferenceList Tabs="{Binding #Window.Tabs}"/>
 </windowing:AppWindow>

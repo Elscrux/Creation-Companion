@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;

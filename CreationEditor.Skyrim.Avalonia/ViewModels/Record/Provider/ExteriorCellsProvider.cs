@@ -5,8 +5,8 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -31,8 +31,8 @@ public sealed class ExteriorCellsProvider : CellProvider {
         IRecordEditorController recordEditorController,
         IViewportRuntimeService viewportRuntimeService,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IReferenceController referenceController)
-        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, referenceController) {
+        IRecordReferenceController recordReferenceController)
+        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, recordReferenceController) {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = RecordBrowserSettingsVM.SettingsChanged
@@ -49,7 +49,7 @@ public sealed class ExteriorCellsProvider : CellProvider {
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
-                        referenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
+                        recordReferenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

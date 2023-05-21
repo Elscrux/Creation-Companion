@@ -1,7 +1,7 @@
-﻿using CreationEditor.Services.Mutagen.References.Query;
+﻿using CreationEditor.Services.Mutagen.References.Record.Query;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Services.Mutagen.References.Cache;
+namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
 public sealed class ImmutableReferenceCache : IReferenceCache {
     private readonly IReadOnlyDictionary<ModKey, ReferenceQuery.ModReferenceCache> _modCaches;

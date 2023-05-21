@@ -1,4 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References;
+﻿using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Comparer;
 

@@ -14,11 +14,21 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     private readonly Subject<IMajorRecordGetter> _recordChanged = new();
     public IObservable<IMajorRecordGetter> RecordChanged => _recordChanged;
 
+    private readonly Subject<UpdateAction<IMajorRecordGetter>> _recordChangedDiff = new();
+    public JoinedObservable<IMajorRecordGetter> RecordChangedDiff { get; }
+
+    private readonly Subject<IMajorRecordGetter> _recordCreated = new();
+    public IObservable<IMajorRecordGetter> RecordCreated => _recordCreated;
+
+    private readonly Subject<IMajorRecordGetter> _recordDeleted = new();
+    public IObservable<IMajorRecordGetter> RecordDeleted => _recordDeleted;
+
     public RecordController(
         ILogger logger,
         IEditorEnvironment<TMod, TModGetter> editorEnvironment) {
         _logger = logger;
         _editorEnvironment = editorEnvironment;
+        RecordChangedDiff = new JoinedObservable<IMajorRecordGetter>(_recordChangedDiff);
     }
 
     public TMajorRecord CreateRecord<TMajorRecord, TMajorRecordGetter>()
@@ -30,7 +40,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
             record, typeof(TMajorRecord), _editorEnvironment.ActiveMod.ModKey);
 
-        _recordChanged.OnNext(record);
+        _recordCreated.OnNext(record);
 
         return record;
     }
@@ -44,7 +54,19 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
             duplicate, record, _editorEnvironment.ActiveMod.ModKey);
 
-        _recordChanged.OnNext(duplicate);
+        _recordCreated.OnNext(duplicate);
+
+        return duplicate;
+    }
+
+    public IMajorRecord DuplicateRecord(IMajorRecordGetter record) {
+        var resolveContext = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, record.Registration.GetterType);
+        var duplicate = resolveContext.DuplicateIntoAsNewRecord(_editorEnvironment.ActiveMod);
+
+        _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
+            duplicate, record, _editorEnvironment.ActiveMod.ModKey);
+
+        _recordCreated.OnNext(duplicate);
 
         return duplicate;
     }
@@ -58,7 +80,17 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         _logger.Here().Verbose("Deleting record {Record} from {Mod}",
             record, _editorEnvironment.ActiveMod);
 
-        _recordChanged.OnNext(newOverride);
+        _recordDeleted.OnNext(newOverride);
+    }
+
+    public void DeleteRecord(IMajorRecordGetter record) {
+        var newOverride = GetOrAddOverride(record);
+        newOverride.IsDeleted = true;
+
+        _logger.Here().Verbose("Deleting record {Record} from {Mod}",
+            record, _editorEnvironment.ActiveMod);
+
+        _recordDeleted.OnNext(newOverride);
     }
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
@@ -72,10 +104,39 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         if (context.ModKey != _editorEnvironment.ActiveMod.ModKey) {
             _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
                 record, _editorEnvironment.ActiveMod.ModKey);
+
+            _recordChanged.OnNext(newOverride);
         }
 
-        _recordChanged.OnNext(newOverride);
+        return newOverride;
+    }
+
+    public IMajorRecord GetOrAddOverride(IMajorRecordGetter record) {
+        if (!_editorEnvironment.LinkCache.TryResolveContext(record.FormKey, record.Registration.GetterType, out var context)) {
+            context = _editorEnvironment.ActiveModLinkCache.ResolveContext(record);
+        }
+
+        var newOverride = context.GetOrAddAsOverride(_editorEnvironment.ActiveMod);
+        if (context.ModKey != _editorEnvironment.ActiveMod.ModKey) {
+            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
+                record, _editorEnvironment.ActiveMod.ModKey);
+
+            _recordChanged.OnNext(newOverride);
+        }
 
         return newOverride;
+    }
+
+    public void RegisterUpdate(IMajorRecordGetter record, Action updateAction) {
+        var changeSubject = new Subject<IMajorRecordGetter>();
+
+        // Notify pre update
+        _recordChangedDiff.OnNext(new UpdateAction<IMajorRecordGetter>(record, updateAction));
+
+        updateAction();
+
+        // Notify post update
+        changeSubject.OnNext(record);
+        _recordChanged.OnNext(record);
     }
 }

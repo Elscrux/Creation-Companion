@@ -2,10 +2,11 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
+using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Mutagen.References.Controller;
+using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
@@ -25,14 +26,18 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
     public IObservable<bool> IsBusy { get; set; }
 
-    public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
+    public IList<IMenuItem> ContextMenuItems { get; }
+    public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; set; }
+    public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; set; }
+    public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; set; }
+    public ReactiveCommand<Unit, Unit> DoubleTapCommand => EditSelectedRecord;
 
     public RecordIdentifiersProvider(
         IEnumerable<IFormLinkIdentifier> identifiers,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordController recordController,
-        IReferenceController referenceController,
+        IRecordReferenceController recordReferenceController,
+        IRecordEditorController recordEditorController,
         ILogger logger) {
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
@@ -48,7 +53,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                     foreach (var identifier in identifiers) {
                         var formKey = identifier.FormKey;
                         if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                            referenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         } else {
@@ -63,6 +68,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
         IsBusy = isBusy;
 
         recordController.RecordChanged
+            .Merge(recordController.RecordCreated)
             .Subscribe(record => {
                 // Don't add if record not in the original identifiers list
                 if (!RecordCache.TryGetValue(record.FormKey, out var listRecord)) return;
@@ -74,6 +80,16 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                 RecordCache.AddOrUpdate(listRecord);
             })
             .DisposeWith(this);
+
+        recordController.RecordDeleted
+            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+            .DisposeWith(this);
+
+        ContextMenuItems = new List<IMenuItem> {
+            new MenuItem { Header = "Edit", Command = EditSelectedRecord },
+            new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord },
+            new MenuItem { Header = "Delete", Command = DeleteSelectedRecord },
+        };
     }
 
     public override void Dispose() {

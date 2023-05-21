@@ -6,11 +6,11 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.Views;
-using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
+using ReferenceWindow = CreationEditor.Avalonia.Views.Reference.ReferenceWindow;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed class RecordListVM : ViewModel, IRecordListVM {
