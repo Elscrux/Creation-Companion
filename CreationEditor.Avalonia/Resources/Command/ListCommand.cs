@@ -4,7 +4,7 @@ namespace CreationEditor.Avalonia.Command;
 
 public abstract class ListCommand<T> : AvaloniaObject, ICommand {
     public static readonly StyledProperty<IList<T>?> ListProperty
-        = AvaloniaProperty.Register<ListCommand<T>, IList<T>?>(nameof(List));
+        = AvaloniaProperty.Register<AvaloniaObject, IList<T>?>(nameof(List));
 
     public IList<T>? List {
         get => GetValue(ListProperty);
