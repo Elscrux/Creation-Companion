@@ -18,11 +18,9 @@
             PointerReleased="OnTabPointerReleased">
         
         <StackPanel Orientation="Horizontal">
-            <TextBlock x:Name="TabHeader"
-                       Text="{Binding #Control.DockedItem.Header}">
+            <TextBlock Text="{Binding #Control.DockedItem.Header}">
                 <Interaction.Behaviors>
-                    <EventTriggerBehavior EventName="PointerReleased"
-                                          SourceObject="TabHeader">
+                    <EventTriggerBehavior EventName="PointerReleased">
                         <InvokeCommandAction
                             Command="{ReflectionBinding #Control.DockContainer.Activate}"
                             CommandParameter="{Binding Path=#Control.DockedItem}"/>

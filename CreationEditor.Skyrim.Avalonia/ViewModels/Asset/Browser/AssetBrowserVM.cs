@@ -536,6 +536,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 new MenuItem {
                     Icon = new SymbolIcon { Symbol = Symbol.List },
                     Header = "Open References",
+                    InputGesture = new KeyGesture(Key.R, KeyModifiers.Control),
+                    HotKey = new KeyGesture(Key.R, KeyModifiers.Control),
                     Command = OpenReferences,
                     CommandParameter = asset
                 },

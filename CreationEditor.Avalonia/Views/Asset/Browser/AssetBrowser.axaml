@@ -68,9 +68,11 @@
                 Height="{Binding $parent.Bounds.Height}"
                 Source="{Binding AssetTreeSource}"
                 AutoDragDropRows="True"
-                RowDragStarted="TreeDataGrid_OnRowDragStarted"
-                RowDragOver="TreeDataGrid_OnRowDragOver"
-                RowDrop="TreeDataGrid_OnRowDrop">
+                RowDragStarted="AssetTree_OnRowDragStarted"
+                RowDragOver="AssetTree_OnRowDragOver"
+                RowDrop="AssetTree_OnRowDrop"
+                DoubleTapped="AssetTree_OnDoubleTapped"
+                KeyDown="AssetTree_OnKeyDown">
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
                 </Interaction.Behaviors>

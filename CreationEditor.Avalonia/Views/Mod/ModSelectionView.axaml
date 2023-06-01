@@ -50,7 +50,6 @@
                     <behavior:DataGridSelectionBehavior
                         EnabledMapping="MastersValid"
                         SelectionGuard="{Binding CanSelect}"/>
-                    <EventTriggerBehavior/>
                 </Interaction.Behaviors>
 
                 <DataGrid.KeyBindings>
