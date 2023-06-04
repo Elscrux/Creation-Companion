@@ -56,11 +56,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     private Task Init() {
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Record References");
 
-        var elapsedTime = Stopwatch.GetTimestamp();
         var immutableReferenceCache = new ImmutableReferenceCache(_referenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
         _referenceCache = new MutableReferenceCache(_referenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
-
-        Console.WriteLine($"REF: {Stopwatch.GetElapsedTime(elapsedTime, Stopwatch.GetTimestamp())}");
 
         linearNotifier.Stop();
 
