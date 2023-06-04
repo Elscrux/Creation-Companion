@@ -11,7 +11,7 @@ namespace CreationEditor;
 
 public static class ObservableCollectionExtension {
     public static ReadOnlyObservableCollection<TTarget> SelectObservableCollection<TSource, TTarget>(
-        this ObservableCollection<TSource> source,
+        this IObservableCollection<TSource> source,
         Expression<Func<TSource, TTarget>> selector,
         IDisposableDropoff disposable)
         where TSource : INotifyPropertyChanged {
@@ -19,7 +19,7 @@ public static class ObservableCollectionExtension {
         ArgumentNullException.ThrowIfNull(selector);
 
         return source
-            .ToObservableChangeSet()
+            .ToObservableChangeSet<IObservableCollection<TSource>, TSource>()
             .AutoRefresh(selector)
             .ToObservableCollection(selector.Compile(), disposable);
     }
@@ -204,43 +204,7 @@ public static class ObservableCollectionExtension {
                     }
                 }
 
-                break;
-            }
-            case ListChangeReason.Moved: {
-                var change = item.Item;
-                if (change.CurrentIndex < 0) {
-                    throw new UnspecifiedIndexException("Cannot move as an index was not specified");
-                }
-
-                switch (source) {
-                    case DynamicData.IExtendedList<T> extendedList:
-                        extendedList.Move(change.PreviousIndex, change.CurrentIndex);
-                        break;
-                    case ObservableCollection<T> observableCollection:
-                        observableCollection.Move(change.PreviousIndex, change.CurrentIndex);
-                        break;
-                    default:
-                        var oldIndex = change.PreviousIndex == -1 ? source.IndexOf(change.Current, comparer) : change.PreviousIndex;
-                        var newIndex = change.CurrentIndex;
-                        if (oldIndex == newIndex) break;
-
-                        source.RemoveAt(oldIndex);
-
-                        if (oldIndex < newIndex) {
-                            source.Insert(newIndex, change.Current);
-                        } else {
-                            source.Insert(newIndex - 1, change.Current);
-                        }
-                        break;
-                }
-                break;
-            }
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    public static void RemoveRange<T>(this ObservableCollection<T> collection, IEnumerable<T> itemsToRemove) {
+    public static void RemoveRange<T>(this IObservableCollection<T> collection, IEnumerable<T> itemsToRemove) {
         ArgumentNullException.ThrowIfNull(itemsToRemove);
 
         var itemsField = typeof(Collection<T>).GetField("items", BindingFlags.NonPublic | BindingFlags.Instance)!;
