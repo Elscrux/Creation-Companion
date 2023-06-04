@@ -236,7 +236,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         Task.Run(() => {
             var assetContainer = assetProvider.GetAssetContainer(_root);
-            var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter, true);
+            var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter);
             Dispatcher.UIThread.Post(() => {
                 AssetTreeSource.Items = rootTree.Children;
                 IsBusyLoadingAssets = false;

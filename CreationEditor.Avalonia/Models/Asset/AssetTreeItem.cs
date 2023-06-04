@@ -11,9 +11,10 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Models.Asset;
 
-public sealed record AssetTreeItem : IAsset {
+public sealed class AssetTreeItem : IAsset {
     private readonly IFileSystem _fileSystem;
-    private readonly IObservable<Func<IAsset, bool>> _filter;
+    private readonly IObservable<Func<IAsset, bool>> _filterObservable;
+    private Func<IAsset, bool> _filter = null!;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
     public IAsset Asset { get; }
@@ -24,19 +25,33 @@ public sealed record AssetTreeItem : IAsset {
     public bool IsVirtual => Asset.IsVirtual;
     public IEnumerable<IReferencedAsset> GetReferencedAssets() => Asset.GetReferencedAssets();
 
-    public ReadOnlyObservableCollection<AssetTreeItem> Children { get; }
-    // public ReadOnlyObservableCollection<AssetTreeItem> Children => _children ?? LoadChildren();
-    // private ReadOnlyObservableCollection<AssetTreeItem>? _children;
-    // private ReadOnlyObservableCollection<AssetTreeItem> LoadChildren() {
-    //     return _children = Asset is AssetDirectory assetDirectory
-    //         ? assetDirectory.Assets
-    //             .Connect()
-    //             .SubscribeOn(RxApp.TaskpoolScheduler)
-    //             .Filter(_filter)
-    //             .Sort(AssetComparers.PathComparer)
-    //             .ToObservableCollection((a, _) => new AssetTreeItem(_fileSystem.Path.Combine(Path, _fileSystem.Path.GetFileName(a.Path)), a, _fileSystem, _filter), _disposables)
-    //         : new ReadOnlyObservableCollection<AssetTreeItem>(new ObservableCollectionExtended<AssetTreeItem>());
-    // }
+    public ReadOnlyObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
+    private ReadOnlyObservableCollection<AssetTreeItem>? _children;
+
+    private ReadOnlyObservableCollection<AssetTreeItem> LoadChildren() {
+        if (Asset is AssetDirectory assetDirectory) {
+            AssetTreeItem Selector(IAsset a) => new(_fileSystem.Path.Combine(Path, _fileSystem.Path.GetFileName(a.Path)), a, _fileSystem, _filterObservable);
+
+            // Load up with initial items so the returning collection is already filled with something
+            // Otherwise the TreeDataGrid doesn't like it, see https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132
+            // There might be more issues that this one though
+            var filtered = _filter == null ? assetDirectory.Children : assetDirectory.Children.Where(_filter);
+            var initialItem = filtered
+                .Select(Selector)
+                .Order(AssetComparers.PathComparer)
+                .Cast<AssetTreeItem>();
+
+            return assetDirectory.Assets
+                .Connect()
+                .SubscribeOn(RxApp.TaskpoolScheduler)
+                .Filter(_filterObservable)
+                .Transform((Func<IAsset, AssetTreeItem>) Selector)
+                .Sort(AssetComparers.PathComparer)
+                .ToObservableCollectionSync(initialItem, _disposables);
+        }
+
+        return new ReadOnlyObservableCollection<AssetTreeItem>(new ObservableCollectionExtended<AssetTreeItem>());
+    }
 
     // public IObservable<bool> AnyOrphaned { get; }
     public IObservable<bool> AnyOrphaned => _anyOrphaned ?? LoadAnyOrphaned();
@@ -53,22 +68,15 @@ public sealed record AssetTreeItem : IAsset {
     }
     private IObservable<bool>? _anyOrphaned;
 
-    public AssetTreeItem(string path, IAsset asset, IFileSystem fileSystem, IObservable<Func<IAsset, bool>> filter, bool forceLoad = false) {
+    public AssetTreeItem(string path, IAsset asset, IFileSystem fileSystem, IObservable<Func<IAsset, bool>> filterObservable) {
         _fileSystem = fileSystem;
-        _filter = filter;
+        _filterObservable = filterObservable;
         Path = path;
         Asset = asset;
 
-        // if (forceLoad) LoadChildren();
-
-        Children = Asset is AssetDirectory assetDirectory
-            ? assetDirectory.Assets
-                .Connect()
-                .SubscribeOn(RxApp.TaskpoolScheduler)
-                .Filter(filter)
-                .Sort(AssetComparers.PathComparer)
-                .ToObservableCollection((a, _) => new AssetTreeItem(fileSystem.Path.Combine(path, fileSystem.Path.GetFileName(a.Path)), a, fileSystem, filter), _disposables)
-            : new ReadOnlyObservableCollection<AssetTreeItem>(new ObservableCollectionExtended<AssetTreeItem>());
+        filterObservable
+            .Subscribe(f => _filter = f)
+            .DisposeWith(_disposables);
 
         // AnyOrphaned = Children
         //     .ObserveCollectionChanges().Unit()

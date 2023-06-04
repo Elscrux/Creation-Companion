@@ -20,20 +20,20 @@ public sealed class AssetDirectory : IAsset {
     public bool IsDirectory => true;
     public bool HasChildren {
         get {
-            if (!_loadedAssets) LoadAssets();
+             LoadAssets();
             return Assets.Count > 0;
         }
     }
     public bool IsVirtual { get; }
 
-    public IEnumerable<IAsset> Children => _loadedAssets ? Assets.Items : Array.Empty<IAsset>();
-    // public IEnumerable<IAsset> Children {
-    //     get {
-    //         if (!_loadedAssets) LoadAssets();
-    //
-    //         return Assets.Items;
-    //     }
-    // }
+    public IEnumerable<IAsset> Children {
+        get {
+             LoadAssets();
+    
+            return Assets.Items;
+        }
+    }
+
     private bool _loadedAssets;
     public SourceCache<IAsset, string> Assets { get; } = new(a => a.Path);
 
@@ -52,8 +52,6 @@ public sealed class AssetDirectory : IAsset {
         _assetReferenceController = assetReferenceController;
         Directory = directory;
         IsVirtual = isVirtual;
-
-        LoadAssets();
     }
 
     private void Add(IFileSystem fileSystem, string path) {
