@@ -24,6 +24,27 @@ public static class ObservableCollectionExtension {
             .ToObservableCollection(selector.Compile(), disposable);
     }
 
+    public static ReadOnlyObservableCollection<TTarget> SelectObservableCollectionSync<TSource, TTarget>(
+        this IObservableCollection<TSource> source,
+        Func<TSource, TTarget> selector,
+        IDisposableDropoff disposable) {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(selector);
+
+        var internalCollection = new ObservableCollectionExtended<TTarget>(source.Select(selector));
+
+        Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => source.CollectionChanged += h,
+                h => source.CollectionChanged -= h)
+            .Subscribe(e => {
+                internalCollection.Apply(e.EventArgs.Transform(selector));
+            })
+            .DisposeWith(disposable);
+
+        return new ReadOnlyObservableCollection<TTarget>(internalCollection);
+    }
+
     public static ReadOnlyObservableCollection<T> Combine<T>(this IObservableCollection<T> lhs, IDisposableDropoff disposableDropoff, params IObservableCollection<T>[] rhsList) {
         var internalCollection = new ObservableCollectionExtended<T>();
         foreach (var rhs in rhsList) {

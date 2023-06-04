@@ -25,6 +25,36 @@ public static class ObservableExtension {
             .Do(onNext);
     }
 
+    public static ReadOnlyObservableCollection<TObj> ToObservableCollectionSync<TObj, TKey>(
+        this IObservable<ISortedChangeSet<TObj, TKey>> observable,
+        IEnumerable<TObj> initial,
+        IDisposableDropoff disposable)
+        where TKey : notnull {
+        var collection = new ObservableCollectionExtended<TObj>(initial);
+        var adaptor = new SortedObservableCollectionAdaptor<TObj, TKey>();
+
+        observable
+            .Subscribe(sortedChangeSet => adaptor.Adapt(sortedChangeSet, collection))
+            .DisposeWith(disposable);
+
+        return new ReadOnlyObservableCollection<TObj>(collection);
+    }
+
+    public static ReadOnlyObservableCollection<TObj> ToObservableCollectionSync<TObj, TKey>(
+        this IObservable<IChangeSet<TObj, TKey>> observable,
+        IEnumerable<TObj> initial,
+        IDisposableDropoff disposable)
+        where TKey : notnull {
+        var collection = new ObservableCollectionExtended<TObj>(initial);
+        var adaptor = new ObservableCollectionAdaptor<TObj, TKey>();
+
+        observable
+            .Subscribe(changeSet => adaptor.Adapt(changeSet, collection))
+            .DisposeWith(disposable);
+
+        return new ReadOnlyObservableCollection<TObj>(collection);
+    }
+
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<IChangeSet<TObj, TKey>> changeSet,
         IDisposableDropoff disposable)
