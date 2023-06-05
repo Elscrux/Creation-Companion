@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Asset;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Lifecycle;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
@@ -74,6 +75,10 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         // Provider
+        builder.RegisterType<MenuItemProvider>()
+            .As<IMenuItemProvider>()
+            .SingleInstance();
+
         builder.RegisterType<MutagenTypeProvider>()
             .As<IMutagenTypeProvider>()
             .SingleInstance();

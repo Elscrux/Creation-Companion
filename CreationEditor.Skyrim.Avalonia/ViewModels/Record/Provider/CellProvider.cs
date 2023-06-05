@@ -4,9 +4,11 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
+using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -51,13 +53,15 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
     public ReactiveCommand<Unit, Unit> DuplicateSelectedCell { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedCell { get; }
 
-    protected CellProvider(
-        IRecordController recordController,
-        IDockFactory dockFactory,
-        IRecordEditorController recordEditorController,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM,
-        IRecordReferenceController recordReferenceController) {
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+    protected CellProvider(ILifetimeScope lifetimeScope) {
+        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
+        var menuItemProvider = newScope.Resolve<IMenuItemProvider>();
+        var recordController = newScope.Resolve<IRecordController>();
+        var dockFactory = newScope.Resolve<IDockFactory>();
+        var recordEditorController = newScope.Resolve<IRecordEditorController>();
+        var recordReferenceController = newScope.Resolve<IRecordReferenceController>();
+
+        RecordBrowserSettingsVM = newScope.Resolve<IRecordBrowserSettingsVM>();
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord == null) return;
@@ -118,11 +122,11 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
             .DisposeWith(this);
 
         ContextMenuItems = new List<IMenuItem> {
-            new MenuItem { Header = "View", Command = ViewSelectedCell },
-            new MenuItem { Header = "New", Command = NewCell },
-            new MenuItem { Header = "Edit", Command = EditSelectedCell },
-            new MenuItem { Header = "Duplicate", Command = DuplicateSelectedCell },
-            new MenuItem { Header = "Delete", Command = DeleteSelectedCell },
+            menuItemProvider.View(ViewSelectedCell),
+            menuItemProvider.New(NewCell),
+            menuItemProvider.Edit(EditSelectedCell),
+            menuItemProvider.Duplicate(DuplicateSelectedCell),
+            menuItemProvider.Delete(DeleteSelectedCell),
         };
     }
 

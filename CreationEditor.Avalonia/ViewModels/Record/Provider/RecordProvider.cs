@@ -2,6 +2,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Services.Mutagen.Record;
@@ -48,6 +49,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
 
     public RecordProvider(
+        IMenuItemProvider menuItemProvider,
         IRecordEditorController recordEditorController,
         IRecordController recordController,
         IRecordBrowserSettingsVM recordBrowserSettingsVM,
@@ -124,10 +126,10 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             .DisposeWith(this);
 
         ContextMenuItems = new List<IMenuItem> {
-            new MenuItem { Header = "New", Command = NewRecord },
-            new MenuItem { Header = "Edit", Command = EditSelectedRecord },
-            new MenuItem { Header = "Duplicate", Command = DuplicateSelectedRecord },
-            new MenuItem { Header = "Delete", Command = DeleteSelectedRecord },
+            menuItemProvider.New(NewRecord),
+            menuItemProvider.Edit(EditSelectedRecord),
+            menuItemProvider.Duplicate(DuplicateSelectedRecord),
+            menuItemProvider.Delete(DeleteSelectedRecord),
         };
     }
 

@@ -1,10 +1,7 @@
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services;
-using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Services.Mutagen.Record;
+using Autofac;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
@@ -26,13 +23,10 @@ public sealed class ExteriorCellsProvider : CellProvider {
     public override IObservable<bool> IsBusy { get; set; }
 
     public ExteriorCellsProvider(
-        IRecordController recordController,
-        IDockFactory dockFactory,
-        IRecordEditorController recordEditorController,
+        ILifetimeScope lifetimeScope,
         IViewportRuntimeService viewportRuntimeService,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM,
         IRecordReferenceController recordReferenceController)
-        : base(recordController, dockFactory, recordEditorController, recordBrowserSettingsVM, recordReferenceController) {
+        : base(lifetimeScope) {
         _viewportRuntimeService = viewportRuntimeService;
 
         Filter = RecordBrowserSettingsVM.SettingsChanged

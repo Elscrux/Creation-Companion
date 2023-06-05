@@ -100,6 +100,9 @@
         <Compile Update="ViewModels\Setting\SettingsVM.cs">
           <DependentUpon>ISettingsVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Avalonia\MenuItemProvider.cs">
+          <DependentUpon>IMenuItemProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
