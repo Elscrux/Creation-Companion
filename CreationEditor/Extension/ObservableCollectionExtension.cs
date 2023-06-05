@@ -33,10 +33,7 @@ public static class ObservableCollectionExtension {
 
         var internalCollection = new ObservableCollectionExtended<TTarget>(source.Select(selector));
 
-        Observable
-            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => source.CollectionChanged += h,
-                h => source.CollectionChanged -= h)
+        source.ObserveCollectionChanges()
             .Subscribe(e => {
                 internalCollection.Apply(e.EventArgs.Transform(selector));
             })
@@ -51,10 +48,7 @@ public static class ObservableCollectionExtension {
             internalCollection.AddRange(rhs);
         }
 
-        Observable
-            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => lhs.CollectionChanged += h,
-                h => lhs.CollectionChanged -= h)
+        lhs.ObserveCollectionChanges()
             .Subscribe(e => {
                 if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
                     internalCollection.Clear();
@@ -69,10 +63,8 @@ public static class ObservableCollectionExtension {
             .DisposeWith(disposableDropoff);
 
         rhsList
-            .Select(x => Observable
-                .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                    h => x.CollectionChanged += h,
-                    h => x.CollectionChanged -= h)).Merge()
+            .Select(x => x.ObserveCollectionChanges())
+            .Merge()
             .Subscribe(e => {
                 if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
                     internalCollection.Clear();
@@ -90,7 +82,7 @@ public static class ObservableCollectionExtension {
         return new ReadOnlyObservableCollection<T>(internalCollection);
     }
 
-    public static void Apply<T>(this IObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null) {
+    public static void Apply<T>(this ObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null) {
         var comparer = equalityComparer ?? EqualityComparer<T>.Default;
 
         switch (change.Action) {
