@@ -1,10 +1,12 @@
-﻿using System.Reactive;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
 using Autofac;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
@@ -19,7 +21,8 @@ public sealed class ExteriorCellsVM : ViewModel {
     [Reactive] public int GridXValue { get; set; }
     [Reactive] public int GridYValue { get; set; }
 
-    public RecordList ExteriorList { get; }
+    public IRecordListVM RecordListVM { get; }
+    public IList<DataGridColumn> ExteriorListColumns { get; }
 
     public ReactiveCommand<Unit, Unit> SelectGridCell { get; }
 
@@ -29,16 +32,15 @@ public sealed class ExteriorCellsVM : ViewModel {
         ExteriorCellsProvider exteriorCellsProvider) {
         ExteriorCellsProvider = exteriorCellsProvider;
 
-        var columns = extraColumnsBuilder
+        ExteriorListColumns = extraColumnsBuilder
             .AddRecordType<ICellGetter>()
             .AddColumnType<CellGridExtraColumns>()
-            .Build();
+            .Build()
+            .ToList();
 
         var newScope = lifetimeScope.BeginLifetimeScope();
-        var recordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider));
-        newScope.DisposeWith(recordListVM);
-
-        ExteriorList = new RecordList(columns) { DataContext = recordListVM };
+        RecordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider));
+        newScope.DisposeWith(RecordListVM);
 
         SelectGridCell = ReactiveCommand.Create(() => {
             if (exteriorCellsProvider.RecordBrowserSettingsVM.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) {
@@ -48,7 +50,8 @@ public sealed class ExteriorCellsVM : ViewModel {
                     var gridPoint = cell.Grid.Point;
                     if (gridPoint.X != GridXValue || gridPoint.Y != GridYValue) continue;
 
-                    ExteriorList.ScrollToItem(cell);
+                    ExteriorCellsProvider.TrySelect(cell); 
+                    // ExteriorList.ScrollToItem(cell);
                     break;
                 }
             }

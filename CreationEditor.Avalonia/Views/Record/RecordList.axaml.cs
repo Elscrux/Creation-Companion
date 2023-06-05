@@ -1,36 +1,63 @@
-﻿using Avalonia.Controls;
+﻿using System.Reactive.Disposables;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Services.Mutagen.References.Record;
+using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record;
 
 public partial class RecordList : ReactiveUserControl<IRecordListVM> {
-    public RecordList() {
-        InitializeComponent();
+    public static readonly StyledProperty<IList<DataGridColumn>?> ColumnsProperty
+        = AvaloniaProperty.Register<RecordList, IList<DataGridColumn>?>(nameof(Columns));
+
+    public IList<DataGridColumn>? Columns {
+        get => GetValue(ColumnsProperty);
+        set => SetValue(ColumnsProperty, value);
     }
 
-    public RecordList(IEnumerable<DataGridColumn> columns) : this() {
-        foreach (var column in columns) {
-            AddColumn(column);
+    public RecordList() {
+        InitializeComponent();
+
+        this.WhenActivated(x => {
+            this.WhenAnyValue(list => list.ViewModel)
+                .Subscribe(vm => {
+                    vm.WhenAnyValue(vm => vm.RecordProvider.SelectedRecord)
+                        .Subscribe(ScrollToItem)
+                        .DisposeWith(x);
+                })
+                .DisposeWith(x);
+        });
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == ColumnsProperty) {
+            RecordGrid.Columns.Clear();
+
+            if (Columns != null) {
+                RecordGrid.Columns.AddRange(Columns);
+                Sort();
+            }
         }
     }
 
-    public void InsertColumn(int index, DataGridColumn column) {
-        RecordGrid?.Columns.Insert(index, column);
-    }
+    private void ScrollToItem(IReferencedRecord? referencedRecord) {
+        if (RecordGrid == null || referencedRecord == null) return;
 
-    public void AddColumn(DataGridColumn column) {
-        RecordGrid?.Columns.Add(column);
-    }
-
-    public void ScrollToItem(object item) {
-        if (RecordGrid == null) return;
-
-        RecordGrid.SelectedItem = item;
+        RecordGrid.SelectedItem = referencedRecord;
         RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, RecordGrid.Columns.First());
     }
 
     protected override void OnLoaded() {
         base.OnLoaded();
+
+        Sort();
+    }
+
+    private void Sort() {
+        if (!RecordGrid.Columns.Any()) return;
 
         RecordGrid.Columns.First().ClearSort();
         RecordGrid.Columns.First().Sort();

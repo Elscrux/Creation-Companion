@@ -132,6 +132,14 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
 
     protected abstract void LoadCell(ICellGetter cell);
 
+    public void TrySelect(ICellGetter cell) {
+        if (!RecordCache.TryGetValue(cell.FormKey, out var referencedRecord)) return;
+        if (referencedRecord is not IReferencedRecord<ICellGetter> referencedCell) return;
+
+        SelectedRecord = null;
+        SelectedRecord = referencedCell;
+    }
+
     public override void Dispose() {
         base.Dispose();
 

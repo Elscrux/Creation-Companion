@@ -34,8 +34,7 @@
             </DataGrid.ContextFlyout>
         </DataGrid>
 
-
-        <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy^}"
+        <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy^, FallbackValue=false}"
                                            HorizontalAlignment="Left" VerticalAlignment="Top"
                                            Width="100" Height="100"
                                            Margin="50"/>

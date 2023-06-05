@@ -1,13 +1,13 @@
 ﻿using Avalonia.ReactiveUI;
-using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.List;
 
-public partial class ExteriorCells : ReactiveUserControl<ExteriorCellsProvider> {
+public partial class ExteriorCells : ReactiveUserControl<ExteriorCellsVM> {
     public ExteriorCells() {
         InitializeComponent();
     }
 
-    public ExteriorCells(ExteriorCellsProvider exteriorCellsProvider) : this() {
-        DataContext = exteriorCellsProvider;
+    public ExteriorCells(ExteriorCellsVM vm) : this() {
+        DataContext = vm;
     }
 }

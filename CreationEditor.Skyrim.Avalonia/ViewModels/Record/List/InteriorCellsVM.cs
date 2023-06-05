@@ -1,9 +1,11 @@
-﻿using Autofac;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Autofac;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -11,28 +13,26 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public sealed class InteriorCellsVM : ViewModel {
     public InteriorCellsProvider InteriorCellsProvider { get; }
-    public RecordList InteriorList { get; }
+
+    public IRecordListVM RecordListVM { get; }
+    public IList<DataGridColumn> InteriorListColumns { get; }
 
     public InteriorCellsVM(
         ILifetimeScope lifetimeScope,
         IExtraColumnsBuilder extraColumnsBuilder,
         InteriorCellsProvider interiorCellsProvider) {
-        InteriorCellsProvider = interiorCellsProvider;
+        InteriorCellsProvider = interiorCellsProvider.DisposeWith(this);
 
-        var columns = extraColumnsBuilder
+        InteriorListColumns = extraColumnsBuilder
             .AddRecordType<ICellGetter>()
-            .Build();
+            .Build()
+            .ToList();
 
         var newScope = lifetimeScope.BeginLifetimeScope();
-        var recordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider));
-        newScope.DisposeWith(recordListVM);
+        RecordListVM = newScope
+            .Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider))
+            .DisposeWith(this);
 
-        InteriorList = new RecordList(columns) { DataContext = recordListVM };
-    }
-
-    public override void Dispose() {
-        base.Dispose();
-
-        InteriorList?.ViewModel?.Dispose();
+        newScope.DisposeWith(this);
     }
 }

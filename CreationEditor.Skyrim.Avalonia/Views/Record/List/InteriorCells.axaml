@@ -6,7 +6,8 @@
              xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.InteriorCells"
-             x:CompileBindings="True" x:DataType="list:InteriorCellsVM">
+             x:CompileBindings="True" x:DataType="list:InteriorCellsVM"
+             x:Name="Control">
     <Design.DataContext>
         <list:InteriorCellsVM/>
     </Design.DataContext>
@@ -16,8 +17,9 @@
             Grid.Row="0"
             DataContext="{ReflectionBinding InteriorCellsProvider.RecordBrowserSettingsVM}"/>
 
-        <ContentControl
+        <record:RecordList
             Grid.Row="1"
-            Content="{Binding InteriorList}"/>
+            DataContext="{ReflectionBinding #Control.ViewModel.RecordListVM}"
+            Columns="{ReflectionBinding #Control.ViewModel.InteriorListColumns}"/>
     </Grid>
 </UserControl>

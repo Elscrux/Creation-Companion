@@ -11,6 +11,7 @@ public interface IRecordListVM : IDisposableDropoff {
 
     public IRecordProvider RecordProvider { get; }
 
+    public IList<DataGridColumn> Columns { get; }
     public IList<IMenuItem> ContextMenuItems { get; }
 
     public IObservable<bool> IsBusy { get; }

@@ -23,6 +23,8 @@ namespace CreationEditor.Avalonia.ViewModels.Record.List;
 public sealed class RecordListVM : ViewModel, IRecordListVM {
     IRecordProvider IRecordListVM.RecordProvider => RecordProvider;
     public IRecordProvider RecordProvider { get; }
+
+    public IList<DataGridColumn> Columns { get; } = new List<DataGridColumn>();
     public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
 
     public IEnumerable? Records { get; }

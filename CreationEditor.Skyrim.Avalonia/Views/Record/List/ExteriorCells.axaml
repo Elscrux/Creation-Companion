@@ -54,8 +54,9 @@
             Grid.Row="6"
             DataContext="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM}"/>
 
-        <ContentControl
+        <record:RecordList
             Grid.Row="8"
-            Content="{Binding ExteriorList}"/>
+            DataContext="{ReflectionBinding #Control.ViewModel.RecordListVM}"
+            Columns="{ReflectionBinding #Control.ViewModel.ExteriorListColumns}"/>
     </Grid>
 </UserControl>

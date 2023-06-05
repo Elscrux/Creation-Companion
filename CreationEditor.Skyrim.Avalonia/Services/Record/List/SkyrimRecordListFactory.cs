@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autofac;
-using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.List;
-using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Activator = Mutagen.Bethesda.Skyrim.Activator;
@@ -26,29 +22,22 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
         _defaultRecordBrowserSettingsVM = defaultRecordBrowserSettingsVM;
     }
 
-    public RecordList FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettingsVM? browserSettings = null) {
+    public IRecordListVM FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettingsVM? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettingsVM;
         var browserSettingsParam = TypedParameter.From(browserSettings);
         var identifiersParam = TypedParameter.From(identifiers);
 
         var newScope = _lifetimeScope.BeginLifetimeScope();
-        var extraColumnsBuilder = newScope.Resolve<IExtraColumnsBuilder>();
-        var columns = extraColumnsBuilder
-            .AddRecordType<IMajorRecordGetter>()
-            .AddColumnType<TypeExtraColumns>()
-            .Build();
-
         var recordProvider = newScope.Resolve<RecordIdentifiersProvider>(identifiersParam, browserSettingsParam);
 
         var providerParam = TypedParameter.From<IRecordProvider>(recordProvider);
         var recordListVM = newScope.Resolve<IRecordListVM>(providerParam);
-        var recordList = new RecordList(columns) { DataContext = recordListVM };
         newScope.DisposeWith(recordListVM);
 
-        return recordList;
+        return recordListVM;
     }
 
-    public RecordList FromType(Type type, IRecordBrowserSettingsVM? browserSettings = null) {
+    public IRecordListVM FromType(Type type, IRecordBrowserSettingsVM? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettingsVM;
         var browserSettingsParam = TypedParameter.From(browserSettings);
 
@@ -164,15 +153,8 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
 
         var recordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From(recordProvider));
 
-        var extraColumnsBuilder = newScope.Resolve<IExtraColumnsBuilder>();
-        var columns = extraColumnsBuilder
-            .AddRecordType(type)
-            .Build();
-
-        var recordList = new RecordList(columns) { DataContext = recordListVM };
-
         newScope.DisposeWith(recordListVM);
 
-        return recordList;
+        return recordListVM;
     }
 }
