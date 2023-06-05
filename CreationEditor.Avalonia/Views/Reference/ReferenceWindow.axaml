@@ -9,7 +9,6 @@
                      x:Name="Window"
                      x:Class="CreationEditor.Avalonia.Views.Reference.ReferenceWindow"
                      Height="750" Width="500">
-
     <windowing:AppWindow.KeyBindings>
         <KeyBinding
             Gesture="Escape"
@@ -17,5 +16,5 @@
             CommandParameter="{Binding #Window}"/>
     </windowing:AppWindow.KeyBindings>
 
-    <reference:ReferenceList Tabs="{Binding #Window.Tabs}"/>
+    <reference:ReferenceBrowser DataContext="{ReflectionBinding #Window.ReferenceBrowserVM}"/>
 </windowing:AppWindow>

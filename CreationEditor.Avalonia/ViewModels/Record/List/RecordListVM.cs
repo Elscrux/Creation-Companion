@@ -1,14 +1,21 @@
 ﻿using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Record.List;
+using CreationEditor.Avalonia.Models.Reference;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
+using CreationEditor.Avalonia.Views.Reference;
+using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
+using Noggog;
 using ReactiveUI;
 using ReferenceWindow = CreationEditor.Avalonia.Views.Reference.ReferenceWindow;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
@@ -27,17 +34,30 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
     public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }
 
     public RecordListVM(
+        IMenuItemProvider menuItemProvider,
         IRecordProvider recordProvider,
-        IRecordListFactory recordListFactory,
+        ILifetimeScope lifetimeScope,
         MainWindow mainWindow) {
         RecordProvider = recordProvider;
 
         OpenReferences = ReactiveCommand.Create(() => {
                 if (RecordProvider.SelectedRecord == null) return;
 
-                var fromIdentifiers = recordListFactory.FromIdentifiers(RecordProvider.SelectedRecord.References);
+                var newScope = lifetimeScope.BeginLifetimeScope();
+                var editorEnvironment = newScope.Resolve<IEditorEnvironment>();
+                var recordReferenceController = newScope.Resolve<IRecordReferenceController>();
+
+                var references = RecordProvider.SelectedRecord.References
+                    .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
+                    .Cast<IReference>()
+                    .ToArray();
+
+                var identifiersParam = TypedParameter.From(references);
+                var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(identifiersParam);
+                newScope.DisposeWith(referenceBrowserVM);
+
                 var referenceWindow = new ReferenceWindow(RecordProvider.SelectedRecord.Record) {
-                    Content = fromIdentifiers
+                    Content = new ReferenceBrowser(referenceBrowserVM)
                 };
 
                 referenceWindow.Show(mainWindow);
@@ -66,7 +86,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
         };
 
         ContextMenuItems.AddRange(RecordProvider.ContextMenuItems);
-        ContextMenuItems.Add(new MenuItem { Header = "Open References", Command = OpenReferences });
+        ContextMenuItems.Add(menuItemProvider.References(OpenReferences));
     }
 
     public override void Dispose() {

@@ -1,37 +1,36 @@
-﻿using System.Reactive.Linq;
-using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia;
+using CreationEditor.Avalonia.ViewModels.Reference;
 using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Views.Reference;
 
 public partial class ReferenceWindow : AppWindow {
-    public static readonly StyledProperty<IEnumerable<TabItem>> TabsProperty
-        = AvaloniaProperty.Register<ReferenceWindow, IEnumerable<TabItem>>(nameof(Tabs));
+    public static readonly StyledProperty<ReferenceBrowserVM?> RecordReferenceBrowserVMProperty
+        = AvaloniaProperty.Register<ReferenceWindow, ReferenceBrowserVM?>(nameof(ReferenceBrowserVM));
 
-    public IEnumerable<TabItem> Tabs {
-        get => GetValue(TabsProperty);
-        set => SetValue(TabsProperty, value);
+    public ReferenceBrowserVM? ReferenceBrowserVM {
+        get => GetValue(RecordReferenceBrowserVMProperty);
+        set => SetValue(RecordReferenceBrowserVMProperty, value);
     }
 
     public ReferenceWindow() {
         InitializeComponent();
     }
 
-    public ReferenceWindow(string name) : this() {
+    public ReferenceWindow(
+        string name,
+        ReferenceBrowserVM? referenceBrowserVM = null) : this() {
         Title = $"References of {name}";
+
+        ReferenceBrowserVM = referenceBrowserVM;
     }
 
-    public ReferenceWindow(string name, params TabItem[] tabs) : this(name) {
-        Tabs = tabs;
-    }
-
-    public ReferenceWindow(string name, IEnumerable<TabItem> tabs) : this(name) {
-        Tabs = tabs;
-    }
-
-    public ReferenceWindow(IMajorRecordIdentifier record) : this() {
+    public ReferenceWindow(
+        IMajorRecordIdentifier record,
+        ReferenceBrowserVM? referenceBrowserVM = null) : this() {
         var editorId = record.EditorID;
         Title = $"References of {record.FormKey}" + (editorId == null ? string.Empty : $" - {editorId}");
+
+        ReferenceBrowserVM = referenceBrowserVM;
     }
 }

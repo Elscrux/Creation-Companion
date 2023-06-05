@@ -6,25 +6,26 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Attached;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Asset;
+using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Asset;
-using CreationEditor.Avalonia.Services.Record.List;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Asset;
@@ -32,6 +33,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
@@ -39,18 +41,21 @@ using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Key = Avalonia.Input.Key;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IFileSystem _fileSystem;
+    private readonly IMenuItemProvider _menuItemProvider;
+    private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
     private readonly IModelModificationService _modelModificationService;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IRecordController _recordController;
-    private readonly IRecordListFactory _recordListFactory;
+    private readonly IRecordReferenceController _recordReferenceController;
+    private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
+    private readonly ILifetimeScope _lifetimeScope;
     private readonly string _root;
 
     [Reactive] public string SearchText { get; set; } = string.Empty;
@@ -77,29 +82,36 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public AssetBrowserVM(
         IFileSystem fileSystem,
+        IMenuItemProvider menuItemProvider,
         IAssetReferenceController assetReferenceController,
         IAssetController assetController,
+        IAssetTypeService assetTypeService,
+        IAssetSymbolService assetSymbolService,
         IModelModificationService modelModificationService,
         IEditorEnvironment editorEnvironment,
         IDataDirectoryProvider dataDirectoryProvider,
         IRecordController recordController,
-        IAssetSymbolService assetSymbolService,
+        IRecordReferenceController recordReferenceController,
         IDockFactory dockFactory,
-        IRecordListFactory recordListFactory,
         MainWindow mainWindow,
         IAssetProvider assetProvider,
+        ILifetimeScope lifetimeScope,
         string root) {
         _fileSystem = fileSystem;
+        _menuItemProvider = menuItemProvider;
+        _assetReferenceController = assetReferenceController;
         _assetController = assetController;
+        _assetTypeService = assetTypeService;
         _modelModificationService = modelModificationService;
         _editorEnvironment = editorEnvironment;
         _dataDirectoryProvider = dataDirectoryProvider;
         _recordController = recordController;
-        _recordListFactory = recordListFactory;
+        _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
+        _lifetimeScope = lifetimeScope;
         _root = root;
 
-        assetReferenceController.IsLoading
+        _assetReferenceController.IsLoading
             .ObserveOnGui()
             .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
             .DisposeWith(this);
@@ -260,14 +272,19 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<AssetTreeItem?>>(async assets => {
             var deleteAssets = assets.NotNull().ToArray();
-            var referenceTabs = GetReferenceTabs(deleteAssets);
             Control? content = null;
-            if (referenceTabs.Count > 0) {
-                var referenceList = new ReferenceList(referenceTabs);
+
+            // var recordReferenceBrowser = GetRecordReferenceBrowser(deleteAssets);
+            // var assetReferenceBrowser = GetAssetReferenceBrowser(deleteAssets);
+            // if (recordReferenceBrowser != null || assetReferenceBrowser != null) {
+
+            var referenceBrowserVM = GetReferenceBrowserVM(deleteAssets);
+            if (referenceBrowserVM != null) {
+                var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
                 content = new StackPanel {
                     Children = {
                         new TextBlock { Text = "Do you really want to proceed? There are still references to these assets." },
-                        referenceList,
+                        referenceBrowser,
                     }
                 };
             }
@@ -291,11 +308,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             var textBox = new TextBox { Text = name };
             var content = new StackPanel { Children = { textBox } };
 
-            var referenceTabs = GetReferenceTabs(asset);
-            if (referenceTabs.Count > 0) {
-                var referenceList = new ReferenceList(referenceTabs);
+            var referenceBrowserVM = GetReferenceBrowserVM(asset);
+            if (referenceBrowserVM != null) {
+                var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
                 content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
-                content.Children.Add(referenceList);
+                content.Children.Add(referenceBrowser);
             }
 
             var renameDialog = CreateAssetDialog($"Rename {name}", content);
@@ -308,10 +325,10 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         });
 
         OpenReferences = ReactiveCommand.Create<AssetTreeItem>(asset => {
-                var referenceTabs = GetReferenceTabs(asset);
+                var referenceBrowserVM = GetReferenceBrowserVM(asset);
                 var relativePath = _fileSystem.Path.GetRelativePath(_root, asset.Path);
 
-                var referenceWindow = new ReferenceWindow(relativePath, referenceTabs);
+                var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
                 referenceWindow.Show(mainWindow);
             },
             this.WhenAnyValue(x => x.AssetTreeSource.RowSelection!.SelectedItem)
@@ -334,51 +351,30 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         });
     }
 
-    private List<TabItem> GetReferenceTabs(params AssetTreeItem[] assets) {
+    private ReferenceBrowserVM? GetReferenceBrowserVM(params AssetTreeItem[] assets) {
         var recordReferences = new HashSet<IFormLinkGetter>(FormLinkIdentifierEqualityComparer.Instance);
         var assetReferences = new HashSet<string>(AssetCompare.PathComparer);
 
         // Gather all references to all assets
-        var references = assets
+        var referencedAssets = assets
             .NotNull()
             .SelectMany(a => a.GetReferencedAssets())
             .DistinctBy(a => a.AssetLink.DataRelativePath.ToLowerInvariant());
 
-        foreach (var referencedAsset in references) {
+        foreach (var referencedAsset in referencedAssets) {
             recordReferences.AddRange(referencedAsset.RecordReferences);
             assetReferences.AddRange(referencedAsset.NifReferences);
         }
 
-        // Create record reference tab
-        var tabs = new List<TabItem>();
-        if (recordReferences.Count > 0) {
-            tabs.Add(new TabItem {
-                Header = "Record",
-                Content = _recordListFactory.FromIdentifiers(recordReferences)
-            });
-        }
+        var references = assetReferences
+            .Select(path => new AssetReference(path, _editorEnvironment, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Cast<IReference>()
+            .Combine(recordReferences.Select(x => new RecordReference(x, _editorEnvironment, _recordReferenceController)))
+            .ToArray();
 
-        // Create asset reference tab
-        if (assetReferences.Count > 0) {
-            var stackPanel = new StackPanel();
-            var listBox = new ListBox {
-                [!Layoutable.MaxHeightProperty] = stackPanel.GetObservable(Visual.BoundsProperty).Select(b => b.Height).ToBinding(),
-                Classes = { "Compact" },
-                ItemsSource = assetReferences,
-                ItemTemplate = new FuncDataTemplate<string>((path, _) => new TextBlock {
-                    Text = path,
-                    [DoubleTappedProperty.CommandProperty] = MoveTo,
-                    [DoubleTappedProperty.CommandParameterProperty] = path,
-                }),
-            };
-            stackPanel.Children.Add(listBox);
-            tabs.Add(new TabItem {
-                Header = "Asset",
-                Content = stackPanel
-            });
-        }
+        if (references.Length == 0) return null;
 
-        return tabs;
+        return _lifetimeScope.Resolve<ReferenceBrowserVM>(TypedParameter.From(references));
     }
 
     public async Task Drop(TreeDataGridRowDragEventArgs e) {
@@ -442,11 +438,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
         };
 
-        var referenceTabs = GetReferenceTabs(draggedAssets);
-        if (referenceTabs.Count > 0) {
-            var referenceList = new ReferenceList(referenceTabs);
+        var referenceBrowserVM = GetReferenceBrowserVM(draggedAssets);
+        if (referenceBrowserVM != null) {
+            var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
             content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
-            content.Children.Add(referenceList);
+            content.Children.Add(referenceBrowser);
         }
 
         // Show a confirmation dialog
@@ -511,38 +507,15 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         var contextFlyout = new MenuFlyout {
             Items = {
-                new MenuItem {
-                    Icon = new SymbolIcon { Symbol = Symbol.OpenFile },
-                    Header = "Open",
-                    Command = Open,
-                    CommandParameter = AssetTreeSource.RowSelection!.SelectedItems
-                },
-                new MenuItem {
-                    Icon = new SymbolIcon { Symbol = Symbol.Rename },
-                    Header = "Rename",
-                    InputGesture = new KeyGesture(Key.F2),
-                    HotKey = new KeyGesture(Key.F2),
-                    Command = Rename,
-                    CommandParameter = asset
-                },
-                new MenuItem {
-                    Icon = new SymbolIcon { Symbol = Symbol.Delete },
-                    Header = "Delete",
-                    InputGesture = new KeyGesture(Key.Delete),
-                    HotKey = new KeyGesture(Key.Delete),
-                    Command = Delete,
-                    CommandParameter = AssetTreeSource.RowSelection!.SelectedItems
-                },
-                new MenuItem {
-                    Icon = new SymbolIcon { Symbol = Symbol.List },
-                    Header = "Open References",
-                    InputGesture = new KeyGesture(Key.R, KeyModifiers.Control),
-                    HotKey = new KeyGesture(Key.R, KeyModifiers.Control),
-                    Command = OpenReferences,
-                    CommandParameter = asset
-                },
+                _menuItemProvider.File(Open, AssetTreeSource.RowSelection!.SelectedItems),
+                _menuItemProvider.Rename(Rename, asset),
+                _menuItemProvider.Delete(Delete, AssetTreeSource.RowSelection!.SelectedItems),
             }
         };
+
+        if (asset.GetReferencedAssets().Any()) {
+            contextFlyout.Items.Add(_menuItemProvider.References(OpenReferences, asset));
+        }
 
         if (asset.Asset is AssetDirectory dir) {
             contextFlyout.Items.Add(new Separator());

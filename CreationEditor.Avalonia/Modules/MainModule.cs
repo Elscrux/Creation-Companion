@@ -14,6 +14,7 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Lifecycle;
@@ -155,6 +156,12 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordListVM>()
             .As<IRecordListVM>();
+
+        builder.RegisterType<ReferenceBrowserVM>()
+            .As<ReferenceBrowserVM>();
+
+        builder.RegisterType<ReferenceBrowserVM>()
+            .As<ReferenceBrowserVM>();
 
         builder.RegisterType<RecordBrowserSettingsVM>()
             .As<IRecordBrowserSettingsVM>();

@@ -8,8 +8,8 @@ public interface IReferencedAsset {
     IAssetLink AssetLink { get; }
     IObservableCollection<IFormLinkGetter> RecordReferences { get; }
     IEnumerable<string> NifReferences { get; }
-    internal IObservableCollection<string> NifDirectoryReferences { get; }
-    internal IObservableCollection<string> NifArchiveReferences { get; }
+    IObservableCollection<string> NifDirectoryReferences { get; }
+    IObservableCollection<string> NifArchiveReferences { get; }
 
     bool HasReferences { get; }
     IObservable<int> ReferenceCount { get; }

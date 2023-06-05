@@ -1,5 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using CreationEditor.Services.Mutagen.References.Record.Cache;
+﻿using CreationEditor.Services.Mutagen.References.Record.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 

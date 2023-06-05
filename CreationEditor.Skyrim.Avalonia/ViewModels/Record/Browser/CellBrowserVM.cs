@@ -20,7 +20,7 @@ public interface ICellBrowserVM : IDisposableDropoff {
 
     public int SelectedTab { get; set; }
 
-    public bool ShowReferences { get; set; }
+    public bool OpenReferences { get; set; }
     public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
 }
 
@@ -34,7 +34,7 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
     public PlacedList PlacedList { get; } = new();
 
     [Reactive] public int SelectedTab { get; set; }
-    [Reactive] public bool ShowReferences { get; set; }
+    [Reactive] public bool OpenReferences { get; set; }
 
     public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
 
@@ -46,12 +46,12 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
         ExteriorCells.DataContext = ExteriorCellsVM = exteriorCellsVM;
         PlacedList.DataContext = PlacedListVM = placedListVM;
 
-        ToggleReferences = ReactiveCommand.Create(() => { ShowReferences = !ShowReferences; });
+        ToggleReferences = ReactiveCommand.Create(() => { OpenReferences = !OpenReferences; });
 
         this.WhenAnyValue(x => x.PlacedListVM.PlacedProvider.Cell)
             .NotNull()
             .Take(1)
-            .Subscribe(_ => ShowReferences = true)
+            .Subscribe(_ => OpenReferences = true)
             .DisposeWith(this);
 
         this.WhenAnyValue(
