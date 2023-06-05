@@ -20,7 +20,8 @@ public sealed class AssetDirectory : IAsset {
     public bool IsDirectory => true;
     public bool HasChildren {
         get {
-             LoadAssets();
+            if (!_loadedAssets) LoadAssets();
+
             return Assets.Count > 0;
         }
     }
@@ -28,7 +29,7 @@ public sealed class AssetDirectory : IAsset {
 
     public IEnumerable<IAsset> Children {
         get {
-             LoadAssets();
+            if (!_loadedAssets) LoadAssets();
     
             return Assets.Items;
         }
