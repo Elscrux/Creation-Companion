@@ -14,7 +14,6 @@ namespace CreationEditor.Avalonia.Models.Asset;
 public sealed class AssetTreeItem : IAsset {
     private readonly IFileSystem _fileSystem;
     private readonly IObservable<Func<IAsset, bool>> _filterObservable;
-    private Func<IAsset, bool> _filter = null!;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
     public IAsset Asset { get; }
@@ -35,8 +34,7 @@ public sealed class AssetTreeItem : IAsset {
             // Load up with initial items so the returning collection is already filled with something
             // Otherwise the TreeDataGrid doesn't like it, see https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132
             // There might be more issues that this one though
-            var filtered = _filter == null ? assetDirectory.Children : assetDirectory.Children.Where(_filter);
-            var initialItem = filtered
+            var initialItem = assetDirectory.Children
                 .Select(Selector)
                 .Order(AssetComparers.PathComparer)
                 .Cast<AssetTreeItem>();
@@ -74,10 +72,6 @@ public sealed class AssetTreeItem : IAsset {
         Path = path;
         Asset = asset;
 
-        filterObservable
-            .Subscribe(f => _filter = f)
-            .DisposeWith(_disposables);
-
         // AnyOrphaned = Children
         //     .ObserveCollectionChanges().Unit()
         //     .StartWith(Unit.Default)
@@ -87,8 +81,5 @@ public sealed class AssetTreeItem : IAsset {
         //     .Switch();
     }
 
-    public void Dispose() {
-        _disposables.Dispose();
-        // todo decrease asset ref count
-    }
+    public void Dispose() => _disposables.Dispose();
 }
