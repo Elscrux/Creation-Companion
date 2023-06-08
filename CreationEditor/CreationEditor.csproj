@@ -132,5 +132,8 @@
         <Compile Update="Services\Mutagen\References\Record\Record\Cache\MutableReferenceCache.cs">
           <DependentUpon>IReferenceCache.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Asset\DeleteDirectoryProvider.cs">
+          <DependentUpon>IDeleteDirectoryProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

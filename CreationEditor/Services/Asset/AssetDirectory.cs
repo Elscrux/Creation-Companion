@@ -11,6 +11,7 @@ public sealed class AssetDirectory : IAsset {
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
     private readonly IFileSystem _fileSystem;
+    private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
@@ -43,6 +44,7 @@ public sealed class AssetDirectory : IAsset {
     public AssetDirectory(
         IDirectoryInfo directory,
         IFileSystem fileSystem,
+        IDeleteDirectoryProvider deleteDirectoryProvider,
         IAssetReferenceController assetReferenceController,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService,
@@ -50,6 +52,7 @@ public sealed class AssetDirectory : IAsset {
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
         _fileSystem = fileSystem;
+        _deleteDirectoryProvider = deleteDirectoryProvider;
         _assetReferenceController = assetReferenceController;
         Directory = directory;
         IsVirtual = isVirtual;
@@ -67,7 +70,7 @@ public sealed class AssetDirectory : IAsset {
                 _assetReferenceController.RegisterCreation(asset);
                 Assets.AddOrUpdate(asset);
             } else {
-                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _assetReferenceController, _assetTypeService, _archiveService);
+                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService);
                 assetDirectory.DisposeWith(_disposables);
                 Assets.AddOrUpdate(assetDirectory);
             }
@@ -186,13 +189,14 @@ public sealed class AssetDirectory : IAsset {
         IEnumerable<IAsset> assets = Array.Empty<IAsset>();
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
-                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _assetReferenceController, _assetTypeService, _archiveService) : null)
+                .Where(dir => !string.Equals(dir.FullName, _deleteDirectoryProvider.DeleteDirectory, AssetCompare.PathComparison))
+                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService) : null)
                 .NotNull());
         }
 
         assets = assets.Concat(_archiveService.GetSubdirectories(Path)
             .Select(dirPath => _fileSystem.DirectoryInfo.New(dirPath))
-            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _fileSystem, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
+            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
             .NotNull());
 
         var addedFiles = new HashSet<string>();

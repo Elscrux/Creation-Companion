@@ -31,13 +31,10 @@ using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
-using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -48,10 +45,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
-    private readonly IModelModificationService _modelModificationService;
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
-    private readonly IRecordController _recordController;
     private readonly IRecordReferenceController _recordReferenceController;
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
@@ -87,10 +81,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetController assetController,
         IAssetTypeService assetTypeService,
         IAssetSymbolService assetSymbolService,
-        IModelModificationService modelModificationService,
         IEditorEnvironment editorEnvironment,
-        IDataDirectoryProvider dataDirectoryProvider,
-        IRecordController recordController,
         IRecordReferenceController recordReferenceController,
         IDockFactory dockFactory,
         MainWindow mainWindow,
@@ -102,10 +93,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _assetReferenceController = assetReferenceController;
         _assetController = assetController;
         _assetTypeService = assetTypeService;
-        _modelModificationService = modelModificationService;
         _editorEnvironment = editorEnvironment;
-        _dataDirectoryProvider = dataDirectoryProvider;
-        _recordController = recordController;
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
         _lifetimeScope = lifetimeScope;
@@ -320,7 +308,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 var newName = _fileSystem.Path.Combine(directory, textBox.Text);
                 if (string.Equals(newName, name, AssetCompare.PathComparison)) return;
 
-                MoveAndRemapReferences(asset, newName + _fileSystem.Path.GetExtension(asset.Path));
+                _assetController.Rename(asset.Path, newName + _fileSystem.Path.GetExtension(asset.Path));
             }
         });
 
@@ -449,56 +437,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var moveDialog = CreateAssetDialog(draggedAssets, "Confirm", content);
         if (await moveDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
             // Move all assets and remap their references
-            foreach (var asset in draggedAssets) MoveAndRemapReferences(asset, directory.Path);
+            foreach (var asset in draggedAssets) _assetController.Move(asset.Path, directory.Path);
 
-        }
-    }
-
-    private void MoveAndRemapReferences(AssetTreeItem assetTreeItem, string destination) {
-        var basePath = assetTreeItem.Path;
-        var destinationIsFile = _fileSystem.Path.HasExtension(destination);
-
-        foreach (var childOrSelf in assetTreeItem.GetAllChildren(a => a.Children, true)) {
-            if (childOrSelf.Asset is not AssetFile file) continue;
-
-            // Calculate the full path of that the file should be moved to
-            var fullNewPath = destinationIsFile
-                // If the destination is a file, we already have the full path
-                ? destination
-                // Otherwise, combine the destination directory with the rest of the path to the file
-                // Example meshes\clutter to meshes\clutter-new
-                // basePath:          meshes\clutter
-                // childOrSelf.Path:  meshes\clutter\test.nif
-                // destination:       meshes\clutter-new\
-                // fullNewPath:       meshes\clutter-new\test.nif
-                : _fileSystem.Path.Combine(
-                    destination,
-                    string.Equals(basePath, childOrSelf.Path, AssetCompare.PathComparison)
-                        ? _fileSystem.Path.GetFileName(basePath)
-                        : _fileSystem.Path.GetRelativePath(basePath, childOrSelf.Path));
-
-            var dataRelativePath = _fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, fullNewPath);
-
-            // Path without the base folder prefix
-            // Change meshes\clutter\test\test.nif to clutter\test.nif
-            var shortenedPath = _fileSystem.Path.GetRelativePath(file.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
-
-            // Move the asset
-            _assetController.Move(childOrSelf.Path, fullNewPath);
-
-            // Remap references in records
-            foreach (var formLink in file.ReferencedAsset.RecordReferences) {
-                if (!_editorEnvironment.LinkCache.TryResolve(formLink, out var record)) continue;
-
-                var recordOverride = _recordController.GetOrAddOverride(record);
-                recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) { { file.ReferencedAsset.AssetLink, shortenedPath } });
-            }
-
-            // Remap references in NIFs
-            foreach (var reference in file.ReferencedAsset.NifReferences) {
-                var fullPath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, reference);
-                _modelModificationService.RemapReferences(fullPath, path => !path.IsNullOrWhitespace() && childOrSelf.Path.EndsWith(path, AssetCompare.PathComparison), dataRelativePath);
-            }
         }
     }
 

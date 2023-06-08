@@ -10,6 +10,7 @@ public interface IAssetProvider {
 public sealed class AssetProvider : IAssetProvider {
     private readonly IFileSystem _fileSystem;
     private readonly IAssetReferenceController _assetReferenceController;
+    private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
 
@@ -18,10 +19,12 @@ public sealed class AssetProvider : IAssetProvider {
     public AssetProvider(
         IFileSystem fileSystem,
         IAssetReferenceController assetReferenceController,
+        IDeleteDirectoryProvider deleteDirectoryProvider,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService) {
         _fileSystem = fileSystem;
         _assetReferenceController = assetReferenceController;
+        _deleteDirectoryProvider = deleteDirectoryProvider;
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
     }
@@ -41,7 +44,7 @@ public sealed class AssetProvider : IAssetProvider {
             }
         }
 
-        var assetDirectory = new AssetDirectory(_fileSystem.DirectoryInfo.New(directory), _fileSystem, _assetReferenceController, _assetTypeService, _archiveService);
+        var assetDirectory = new AssetDirectory(_fileSystem.DirectoryInfo.New(directory), _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService);
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }
