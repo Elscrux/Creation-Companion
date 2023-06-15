@@ -43,7 +43,7 @@ public sealed class ExteriorCellsProvider : CellProvider {
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
-                        recordReferenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
+                        recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

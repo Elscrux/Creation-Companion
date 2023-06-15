@@ -38,7 +38,7 @@ public sealed class InteriorCellsProvider : CellProvider {
                     foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                         if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                        recordReferenceController.GetRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
+                        recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }

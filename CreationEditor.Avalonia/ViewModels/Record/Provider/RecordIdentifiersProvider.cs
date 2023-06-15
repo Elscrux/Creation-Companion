@@ -75,7 +75,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                     foreach (var identifier in identifiers) {
                         var formKey = identifier.FormKey;
                         if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                            recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         } else {

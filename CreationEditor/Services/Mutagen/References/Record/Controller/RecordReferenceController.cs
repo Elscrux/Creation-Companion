@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.Record;
@@ -79,7 +77,11 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         return Task.CompletedTask;
     }
 
-    public IDisposable GetRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
+    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {
+        return _referenceCache?.GetReferences(formKey, _editorEnvironment.LinkCache) ?? Array.Empty<IFormLinkIdentifier>();
+    } 
+
+    public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter {
         var references = _referenceCache?.GetReferences(record.FormKey, _editorEnvironment.LinkCache);
         outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);

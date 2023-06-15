@@ -108,7 +108,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
+                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 

@@ -108,7 +108,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
                 RecordCache.Edit(updater => {
                     foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
-                        recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                        recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
                         var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettingsVM.LinkCache);
 
                         updater.AddOrUpdate(referencedPlacedRecord);
@@ -130,7 +130,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(this);
+                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(this);
                     listRecord = outListRecord;
                 }
 

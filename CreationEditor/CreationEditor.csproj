@@ -116,7 +116,6 @@
         <Compile Update="Services\Asset\AssetController.cs">
           <DependentUpon>IAssetController.cs</DependentUpon>
         </Compile>
-        <Compile Remove="Services\Mutagen\References\Record\Cache\ImmutableReferenceCache.cs" />
         <Compile Update="Services\Mutagen\References\Asset\Controller\AssetReferenceController.cs">
           <DependentUpon>IAssetReferenceController.cs</DependentUpon>
         </Compile>
@@ -125,12 +124,6 @@
         </Compile>
         <Compile Update="Services\Mutagen\References\Asset\ReferencedAsset.cs">
           <DependentUpon>IReferencedAsset.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Record\Cache\ImmutableReferenceCache.cs">
-          <DependentUpon>IReferenceCache.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Record\Cache\MutableReferenceCache.cs">
-          <DependentUpon>IReferenceCache.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Asset\DeleteDirectoryProvider.cs">
           <DependentUpon>IDeleteDirectoryProvider.cs</DependentUpon>

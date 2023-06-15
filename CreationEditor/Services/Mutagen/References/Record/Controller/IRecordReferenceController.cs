@@ -1,10 +1,10 @@
-﻿using CreationEditor.Services.Mutagen.References.Record.Cache;
+﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 
 public interface IRecordReferenceController : IReferenceController<IMajorRecordGetter> {
-    public IReferenceCache? ReferenceCache { get; }
+    public  IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey);
 
-    public IDisposable GetRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
+    public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter;
 }

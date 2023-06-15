@@ -18,7 +18,7 @@ public sealed class RecordReference : IReference, IDisposable {
         get {
             if (_referencedRecord == null) {
                 _recordReferenceController
-                    .GetRecord(Record, out var referencedRecord)
+                    .GetReferencedRecord(Record, out var referencedRecord)
                     .DisposeWith(_disposables);
 
                 _referencedRecord = referencedRecord;

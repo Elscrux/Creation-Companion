@@ -91,7 +91,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
                     foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                        recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
                     }
@@ -112,7 +112,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 

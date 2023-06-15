@@ -48,7 +48,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                 RecordCache.Edit(updater => {
                     foreach (var type in Types) {
                         foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
-                            recordReferenceController.GetRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -70,7 +70,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
