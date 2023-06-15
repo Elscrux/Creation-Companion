@@ -24,6 +24,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
         = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), _ => true);
 
+    private bool _attached;
     private bool _isProcessing;
 
     public string? EnabledMapping { get; init; }
@@ -50,6 +51,10 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     protected override void OnAttached() {
         base.OnAttached();
+        
+        if (_attached) return;
+
+        _attached = true;
 
         if (AddColumn) AddSelectionColumn();
         if (AddContextFlyout) AddSelectionMenu();
