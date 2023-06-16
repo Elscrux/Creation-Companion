@@ -19,13 +19,14 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
+    public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
     public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    public IObservable<bool> IsBusy { get; set; }
+    public IObservable<bool> IsBusy { get; }
 
     public IList<IMenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; set; }
@@ -41,6 +42,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
         IRecordReferenceController recordReferenceController,
         IRecordEditorController recordEditorController,
         ILogger logger) {
+        Identifiers = identifiers;
         RecordBrowserSettingsVM = recordBrowserSettingsVM;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
@@ -65,16 +67,19 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
             RecordCache.Remove(SelectedRecord);
         });
 
-        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
+        this.WhenAnyValue(
+                x => x.RecordBrowserSettingsVM.LinkCache,
+                x => x.Identifiers,
+                (linkCache, idents) => (LinkCache: linkCache, Identifiers: idents))
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(linkCache => {
+            .WrapInInProgressMarker(w => w.Do(x => {
                 _referencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
-                    foreach (var identifier in identifiers) {
+                    foreach (var identifier in x.Identifiers) {
                         var formKey = identifier.FormKey;
-                        if (linkCache.TryResolve(formKey, identifier.Type, out var record)) {
+                        if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
                             recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);

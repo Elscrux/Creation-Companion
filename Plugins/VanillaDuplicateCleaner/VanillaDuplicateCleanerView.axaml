@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:dlcMapper="clr-namespace:DLCMapper"
+             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DLCMapper.VanillaDuplicateCleanerView"
+             x:Name="Control"
+             x:DataType="dlcMapper:VanillaDuplicateCleanerVM" x:CompileBindings="True">
+    <Grid>
+        <ScrollViewer IsEnabled="{Binding !IsBusy}">
+            <StackPanel Spacing="5">
+                <Expander Header="1. Select Mod to Clean">
+                    <mod:ModPicker
+                        DataContext="{Binding ModPickerVM}"
+                        MaxHeight="500"/>
+                </Expander>
+
+                <Expander Header="2. Select Records to Replace">
+                    <DataGrid Background="{DynamicResource SystemControlTransparentBrush}"
+                              ItemsSource="{Binding Records}"
+                              CanUserSortColumns="True"
+                              CanUserReorderColumns="True" CanUserResizeColumns="True"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              ScrollViewer.IsScrollChainingEnabled="False"
+                              Height="500">
+
+                        <Interaction.Behaviors>
+                            <behavior:DataGridSelectionBehavior/>
+                        </Interaction.Behaviors>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Mod FormKey">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Modified.FormKey}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn
+                                x:DataType="dlcMapper:RecordReplacement"
+                                Header="Mod EditorID"
+                                Binding="{Binding Modified.EditorID}"/>
+
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="🡒"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Vanilla FormKey">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding VanillaReplacement.FormKey}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn
+                                x:DataType="dlcMapper:RecordReplacement"
+                                Header="Vanilla EditorID"
+                                Binding="{Binding VanillaReplacement.EditorID}"/>
+
+                            <DataGridTextColumn
+                                x:DataType="dlcMapper:RecordReplacement"
+                                Header="Type"
+                                Binding="{Binding Type}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+
+                <Expander Header="3. Run">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="5">
+                        <Button Content="Run" Command="{Binding Run}"/>
+                        <TextBlock IsVisible="{Binding RecordReferenceController.IsLoading^}"
+                                   VerticalAlignment="Center"
+                                   Text="Warning! Record references were not yet loaded. Cleaning will be limited."
+                                   Foreground="IndianRed"/>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+
+        <avaloniaProgressRing:ProgressRing
+            IsActive="{Binding IsBusy}"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            Width="100" Height="100"/>
+    </Grid>
+</UserControl>

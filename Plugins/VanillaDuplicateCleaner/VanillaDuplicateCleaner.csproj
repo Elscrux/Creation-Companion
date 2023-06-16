@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>DLCMapper</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
+        <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ReactiveUI" Version="18.4.44" />
+        <PackageReference Include="ReactiveUI.Fody" Version="18.4.44" />
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
+    </Target>
+</Project>

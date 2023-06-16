@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reactive.Disposables;
+using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.Record;
@@ -24,6 +25,9 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
     private MutableReferenceCache? _referenceCache;
     public IReferenceCache? ReferenceCache => _referenceCache;
+
+    private readonly BehaviorSubject<bool> _isLoading = new(true);
+    public IObservable<bool> IsLoading => _isLoading;
 
     private readonly ReferenceSubscriptionManager<FormKey, IReferencedRecord, IFormLinkIdentifier> _referenceSubscriptionManager
         = new((record, change) => record.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
@@ -52,6 +56,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     public void Dispose() => _disposable.Dispose();
 
     private Task Init() {
+        _isLoading.OnNext(true);
+
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Record References");
 
         var immutableReferenceCache = new ImmutableReferenceCache(_referenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
@@ -74,12 +80,13 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         while (_recordCreations.TryDequeue(out var record)) RegisterCreation(record);
         while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
+        _isLoading.OnNext(false);
         return Task.CompletedTask;
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {
         return _referenceCache?.GetReferences(formKey, _editorEnvironment.LinkCache) ?? Array.Empty<IFormLinkIdentifier>();
-    } 
+    }
 
     public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter {
@@ -106,7 +113,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             RemoveRecordReferences(_referenceCache, newRecord, removedReferences);
 
             // Add the record to its new references
-                        // Add to the active mod's mutable reference cache if wasn't present before
+            // Add to the active mod's mutable reference cache if wasn't present before
             var recordIsNew = _referenceCache.AddRecord(newRecord, after);
             AddRecordReferences(_referenceCache, newRecord, addedReferences);
         };

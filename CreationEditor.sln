@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{E1F8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchPlugin", "Plugins\SearchPlugin\SearchPlugin.csproj", "{230A2302-FF8A-473C-B24C-02B53892958F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VanillaDuplicateCleaner", "Plugins\VanillaDuplicateCleaner\VanillaDuplicateCleaner.csproj", "{F7CABF36-A297-43F4-91A5-409C94EC4B95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,8 +40,13 @@ Global
 		{230A2302-FF8A-473C-B24C-02B53892958F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{230A2302-FF8A-473C-B24C-02B53892958F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{230A2302-FF8A-473C-B24C-02B53892958F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7CABF36-A297-43F4-91A5-409C94EC4B95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7CABF36-A297-43F4-91A5-409C94EC4B95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7CABF36-A297-43F4-91A5-409C94EC4B95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7CABF36-A297-43F4-91A5-409C94EC4B95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{230A2302-FF8A-473C-B24C-02B53892958F} = {E1F85481-4715-40F4-9143-3CF8579C96FA}
+		{F7CABF36-A297-43F4-91A5-409C94EC4B95} = {E1F85481-4715-40F4-9143-3CF8579C96FA}
 	EndGlobalSection
 EndGlobal

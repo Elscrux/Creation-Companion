@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -38,7 +38,14 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
             [!ContentDialog.IsPrimaryButtonEnabledProperty] = new Binding($"{nameof(ModSelectionVM.CanLoad)}^"),
             [!ContentDialog.IsSecondaryButtonEnabledProperty] = new Binding(nameof(ModSelectionVM.ModsLoadedOnce)),
             Title = "Select Mods",
-            Content = new ModSelectionView(modSelectionVM),
+            Content = new ModSelectionView(modSelectionVM) {
+                [!MaxHeightProperty] = new Binding("Bounds.Height") {
+                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
+                        AncestorType = typeof(ContentPresenter),
+                        Tree = TreeType.Visual
+                    },
+                }
+            },
             FullSizeDesired = true,
             PrimaryButtonText = "Load",
             PrimaryButtonCommand = ReactiveCommand.Create(modSelectionVM.LoadMods),
