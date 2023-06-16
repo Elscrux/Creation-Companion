@@ -169,5 +169,8 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordBrowserSettingsVM>()
             .As<IRecordBrowserSettingsVM>();
+
+        builder.RegisterType<ModPickerVM>()
+            .As<ModPickerVM>();
     }
 }

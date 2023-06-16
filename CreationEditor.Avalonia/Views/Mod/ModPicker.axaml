@@ -1,0 +1,41 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Mod"
+             xmlns:mod1="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Mod.ModPicker"
+             x:CompileBindings="True" x:DataType="mod1:ModPickerVM">
+    <StackPanel>
+        <TextBox Margin="5"
+                 Watermark="Search..."
+                 Text="{Binding ModSearchText}"/>
+
+        <StackPanel>
+            <DataGrid Margin="5"
+                      VerticalAlignment="Top"
+                      ItemsSource="{Binding Mods}"
+                      AutoGenerateColumns="False"
+                      CanUserReorderColumns="False" CanUserResizeColumns="True"
+                      CanUserSortColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Extended"
+                      GridLinesVisibility="None"
+                      Classes="NoCellSelection">
+
+                <Interaction.Behaviors>
+                    <behavior:DataGridSelectionBehavior MultiSelect="{Binding MultiSelect}"/>
+                </Interaction.Behaviors>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name"
+                                        Binding="{Binding ModKey.FileName.String}"
+                                        IsReadOnly="True"
+                                        x:DataType="model:ModItem"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

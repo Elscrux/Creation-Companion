@@ -96,7 +96,7 @@ public sealed class ModSelectionVM : ViewModel {
 
         var connectedMods = _mods.Connect();
 
-        DisplayedMods = _mods.Connect()
+        DisplayedMods = connectedMods
             .Filter(this.WhenAnyValue(x => x.ModSearchText)
                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                 .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>

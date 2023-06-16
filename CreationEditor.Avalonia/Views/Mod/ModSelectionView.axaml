@@ -35,6 +35,7 @@
                       Margin="5"
                       Height="450"
                       VerticalAlignment="Top"
+                      Background="{DynamicResource SystemControlTransparentBrush}"
                       ItemsSource="{Binding DisplayedMods}"
                       SelectedItem="{Binding SelectedMod}"
                       AutoGenerateColumns="False"
