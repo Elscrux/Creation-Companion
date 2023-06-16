@@ -25,6 +25,7 @@ public sealed class ModSaveService : IModSaveService {
 
     public void SaveMod(ILinkCache linkCache, IMod mod) {
         if (mod.ModKey == ModKey.Null) return;
+
         var filePath = _modSaveLocationProvider.GetSaveLocation(mod);
 
         // todo add options for localization export!
@@ -36,23 +37,25 @@ public sealed class ModSaveService : IModSaveService {
 
         _savePipeline.Execute(linkCache, mod);
 
+        _logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {
             // Try to save mod
             mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
         } catch (Exception e) {
-            _logger.Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            _logger.Here().Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
             try {
                 // Save at backup location if failed once
                 filePath = _modSaveLocationProvider.GetBackupSaveLocation(mod);
                 mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
             } catch (Exception e2) {
-                _logger.Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
+                _logger.Here().Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
             }
         }
     }
 
     public void BackupMod(IMod mod, int limit = -1) {
         if (mod.ModKey == ModKey.Null) return;
+
         var filePath = _fileSystem.FileInfo.New(_modSaveLocationProvider.GetSaveLocation(mod));
 
         if (!filePath.Exists) return;
@@ -63,7 +66,7 @@ public sealed class ModSaveService : IModSaveService {
                 GetBackupFilePath(filePath.Name, filePath.LastWriteTime),
                 true);
         } catch (Exception e) {
-            _logger.Warning(
+            _logger.Here().Warning(
                 "Failed to create backup of mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
         }
 
@@ -91,5 +94,5 @@ public sealed class ModSaveService : IModSaveService {
     }
 
     private string GetBackupFilePath(string fileName, DateTime writeTime) => _fileSystem.Path.Combine(_modSaveLocationProvider.GetBackupSaveLocation(), $"{fileName}.{GetTimeFileName(writeTime)}.bak");
-    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString( "yyyy-MM-dd_HH-mm-ss");
+    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }
