@@ -1,4 +1,5 @@
-﻿using System.Reactive.Disposables;
+﻿using System.Collections.Specialized;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Collections;
@@ -24,6 +25,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
         = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), _ => true);
 
+    public static readonly StyledProperty<bool> MultiSelectProperty
+        = AvaloniaProperty.Register<DataGridSelectionBehavior, bool>(nameof(MultiSelect), true);
+
     private bool _attached;
     private bool _isProcessing;
 
@@ -45,7 +49,13 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         set => SetValue(SelectionGuardProperty, value);
     }
 
+    public bool MultiSelect {
+        get => GetValue(MultiSelectProperty);
+        set => SetValue(MultiSelectProperty, value);
+    }
+
     private readonly CompositeDisposable _attachedDisposable = new();
+    private IDisposable? _currentCollectionChanged;
 
     public void Dispose() => _attachedDisposable?.Dispose();
 
@@ -66,13 +76,46 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     protected override void OnAttachedToVisualTree() {
         base.OnAttachedToVisualTree();
 
-        if (AssociatedObject?.ItemsSource is IEnumerable<IReactiveSelectable> selectables) {
-            selectables
-                .ToObservable()
-                .ToObservableChangeSet()
-                .AutoRefresh(selectable => selectable.IsSelected)
-                .Subscribe(UpdateAllChecked)
-                .DisposeWith(_attachedDisposable);
+        Register();
+
+        if (AssociatedObject?.ItemsSource is INotifyCollectionChanged collectionChanged) {
+            void Changed(object? o, NotifyCollectionChangedEventArgs e) => Register();
+            collectionChanged.CollectionChanged -= Changed;
+            collectionChanged.CollectionChanged += Changed;
+        }
+
+        void Register() {
+            if (AssociatedObject?.ItemsSource is IEnumerable<IReactiveSelectable> reactiveSelectables) {
+                _currentCollectionChanged?.Dispose();
+                _currentCollectionChanged = reactiveSelectables
+                    .ToObservable()
+                    .ToObservableChangeSet()
+                    .AutoRefresh(selectable => selectable.IsSelected)
+                    .Subscribe(OnSelectionToggled)
+                    .DisposeWith(_attachedDisposable);
+            }
+        }
+    }
+
+    public void OnSelectionToggled(IChangeSet<IReactiveSelectable> changeSet) {
+        if (AssociatedObject?.ItemsSource == null) return;
+
+        UpdateAllChecked();
+
+        if (!MultiSelect) {
+            if (changeSet.Count == 0) return;
+
+            var selectableChange = changeSet.First();
+            var selectable = selectableChange.Item.Current;
+            if (selectable == null) return;
+
+            if (!selectable.IsSelected) return;
+
+            foreach (var modItem in AssociatedObject.ItemsSource
+                .OfType<IReactiveSelectable>()
+                .Where(m => m.IsSelected && m != selectable)) {
+                modItem.IsSelected = false;
+            }
         }
     }
 
