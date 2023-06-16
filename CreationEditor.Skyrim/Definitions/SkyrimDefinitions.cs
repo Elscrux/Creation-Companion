@@ -1,4 +1,6 @@
-﻿using Mutagen.Bethesda.FormKeys.SkyrimSE;
+﻿using CreationEditor.Skyrim.Definitions.Enums;
+using CreationEditor.Skyrim.Definitions.StoryManagerEvents;
+using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Skyrim.Definitions;
 
