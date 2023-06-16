@@ -79,7 +79,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     protected override void OnDetachedFromVisualTree() {
         base.OnDetachedFromVisualTree();
 
-        _attachedDisposable?.Dispose();
+        _attachedDisposable?.Clear();
     }
 
     private void AddSelectionColumn() {
