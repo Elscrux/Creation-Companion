@@ -182,7 +182,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                 if (selectable.IsSelected) selectedCount++;
             }
 
-            if (selectedCount == totalCount) {
+            if (totalCount == 0) {
+                AllChecked = false;
+            } else if (selectedCount == totalCount) {
                 AllChecked = true;
             } else if (selectedCount > 0) {
                 AllChecked = null;
