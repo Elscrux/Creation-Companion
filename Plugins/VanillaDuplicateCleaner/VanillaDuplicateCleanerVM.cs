@@ -39,7 +39,6 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     
     public IRecordReferenceController RecordReferenceController { get; }
     public ModPickerVM ModPickerVM { get; }
-    public RecordSelectionVM RecordSelectionVM { get; }
     public ObservableCollection<RecordReplacement> Records { get; } = new();
 
     [Reactive] public bool IsBusy { get; set; }
@@ -51,16 +50,10 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
         _pluginContext = pluginContext;
         RecordReferenceController = _pluginContext.LifetimeScope.Resolve<IRecordReferenceController>();
-        
-        // _recordReferenceController.RegisterCreation();
 
         ModPickerVM = pluginContext.LifetimeScope.Resolve<ModPickerVM>();
         ModPickerVM.Filter = mod => !Enumerable.Contains(SkyrimDefinitions.SkyrimModKeys, mod.ModKey);
         ModPickerVM.MultiSelect = false;
-
-        var emptyIdentifiers = TypedParameter.From<IEnumerable<IFormLinkIdentifier>>(Array.Empty<IFormLinkIdentifier>());
-        var identifiersProvider = pluginContext.LifetimeScope.Resolve<RecordIdentifiersProvider>(emptyIdentifiers);
-        RecordSelectionVM = new RecordSelectionVM(identifiersProvider);
 
         ModPickerVM.SelectedMods
             .Subscribe(mods => {
