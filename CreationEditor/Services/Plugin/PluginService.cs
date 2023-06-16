@@ -1,14 +1,17 @@
 ﻿using System.IO.Abstractions;
 using System.Reflection;
+using Autofac;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Lifecycle;
-using CreationEditor.Services.Mutagen.Record;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public sealed record PluginContext<TMod, TModGetter>(Version EditorVersion, IEditorEnvironment<TMod, TModGetter> EditorEnvironment, IRecordController RecordController)
+public sealed record PluginContext<TMod, TModGetter>(
+    Version EditorVersion,
+    IEditorEnvironment<TMod, TModGetter> EditorEnvironment,
+    ILifetimeScope LifetimeScope)
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter>;
 
@@ -32,11 +35,11 @@ public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycle
         IFileSystem fileSystem,
         ILogger logger,
         IEditorEnvironment<TMod, TModGetter> editorEnvironment,
-        IRecordController recordController) {
+        ILifetimeScope lifetimeScope) {
         _fileSystem = fileSystem;
         _logger = logger;
 
-        PluginContext = new PluginContext<TMod, TModGetter>(new Version(1, 0), editorEnvironment, recordController);
+        PluginContext = new PluginContext<TMod, TModGetter>(new Version(1, 0), editorEnvironment, lifetimeScope);
     }
 
     public void OnStartup() {
