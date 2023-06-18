@@ -15,7 +15,7 @@ public sealed class BSEViewportFactory : IViewportFactory {
 
     public Control CreateViewport() {
         return new ViewportBSE(
-            @"E:\TES\Skyrim\vanilla-files\" //_dataDirectoryProvider.Path
+            _dataDirectoryProvider.Path
         );
     }
 }
