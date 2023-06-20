@@ -7,12 +7,16 @@ namespace CreationEditor.Avalonia.Views.Viewport;
 public class ViewportBSE : ContentPresenter {
     private const string ViewportProcessName = "BSE";
 
-    public ViewportBSE(string assetDirectory) {
+    public ViewportBSE(string assetDirectory, string[] bsaFileNames) {
         Task.Run(() => {
-            Interop.initTGEditor(new Interop.InitConfig {
+            var initConfig = new Interop.InitConfig {
                 Version = 1,
-                AssetDirectory = assetDirectory
-            });
+                AssetDirectory = assetDirectory,
+                SizeOfWindowHandles = 0,
+                WindowHandles = Array.Empty<nint>(),
+            };
+            
+            Interop.initTGEditor(initConfig, bsaFileNames, (ulong) bsaFileNames.Length);
         });
 
         Interop.addLoadCallback((callbackCount, callbackLoads) => {

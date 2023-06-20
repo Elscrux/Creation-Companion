@@ -35,19 +35,21 @@ public static class Interop {
     public struct InitConfig {
         public uint Version;
         public string AssetDirectory;
+        public ulong SizeOfWindowHandles;
+        public IntPtr[] WindowHandles;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void LoadCallback(uint count, ReferenceLoad[] load);
+    public delegate void LoadCallback(ulong count, ReferenceLoad[] load);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void UpdateCallback(uint count, ReferenceUpdate[] load);
+    public delegate void UpdateCallback(ulong count, ReferenceUpdate[] load);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void HideCallback(uint count, string[] keys, bool hide);
+    public delegate void HideCallback(ulong count, string[] keys, bool hide);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void DeleteCallback(uint count, string[] keys, bool hide);
+    public delegate void DeleteCallback(ulong count, string[] keys, bool hide);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addLoadCallback(LoadCallback callback);
@@ -62,19 +64,19 @@ public static class Interop {
     public static extern bool addDeleteCallback(DeleteCallback callback);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern void loadReferences(uint count, ReferenceLoad[] load);
+    public static extern void loadReferences(ulong count, ReferenceLoad[] load);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool updateReferences(uint count, ReferenceUpdate[] keys);
+    public static extern bool updateReferences(ulong count, ReferenceUpdate[] keys);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool hideReferences(uint count, string[] formKeys, bool hide);
+    public static extern bool hideReferences(ulong count, string[] formKeys, bool hide);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool deleteReferences(uint count, string[] formKeys);
+    public static extern bool deleteReferences(ulong count, string[] formKeys);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool initTGEditor(InitConfig count);
+    public static extern bool initTGEditor(InitConfig config, string[] formKeys, ulong count);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool isFinished();

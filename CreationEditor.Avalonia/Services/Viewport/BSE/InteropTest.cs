@@ -17,10 +17,15 @@ public sealed class InteropTest {
     [Fact]
     public void TestInit() {
         var task = Xunit.Record.ExceptionAsync(() => Task.Run(() => {
-            Interop.initTGEditor(new Interop.InitConfig {
-                Version = 1,
-                AssetDirectory = "test"
-            });
+            Interop.initTGEditor(
+                new Interop.InitConfig {
+                    Version = 1,
+                    AssetDirectory = "test",
+                    SizeOfWindowHandles = 0,
+                    WindowHandles = new IntPtr[] {},
+                },
+                Array.Empty<string>(),
+                0);
         }));
 
         Interop.waitFinishedInit();
