@@ -33,6 +33,6 @@ public class ViewportBSE : ContentPresenter {
             .NotNull()
             .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);
 
-        if (process != null) Content = new ViewportHost(process);
+        if (process is not null) Content = new ViewportHost(process);
     }
 }

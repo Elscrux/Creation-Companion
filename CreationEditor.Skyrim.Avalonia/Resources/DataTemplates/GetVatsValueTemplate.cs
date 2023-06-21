@@ -108,7 +108,7 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
         var type = condition.Data.GetType();
         const string valueName = "Value";
         var value = type.GetProperty(valueName);
-        if (value == null) return;
+        if (value is null) return;
 
         Control? control = null;
         if (value.PropertyType.InheritsFrom(typeof(IFormLinkGetter))) {
@@ -124,6 +124,6 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
         }
 
         // Needs margin because the control is hidden sometimes for some reason
-        if (control != null) parameterControls.Add(new Grid { Margin = new Thickness(1), Children = { control } });
+        if (control is not null) parameterControls.Add(new Grid { Margin = new Thickness(1), Children = { control } });
     }
 }

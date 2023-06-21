@@ -58,7 +58,7 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
     private void CheckRemoved(object? o, LogicalTreeAttachmentEventArgs logicalTreeAttachmentEventArgs) => CheckRemoved();
     private void CheckRemoved() {
         if (RemovalLock.IsLocked()
-         || Control.GetValue(Visual.VisualParentProperty) != null
+         || Control.GetValue(Visual.VisualParentProperty) is not null
          || DockParent.TryGetDock(Control, out _)) return;
 
         _closed.OnNext(this);

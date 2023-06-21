@@ -72,7 +72,7 @@ public sealed class DockingManagerVM : DockContainerVM {
             .NotNull()
             .FirstOrDefault();
 
-        return outDock != null;
+        return outDock is not null;
     }
 
     public override bool Focus(IDockedItem dockedItem) => ContainerChildren.Any(dockVM => dockVM.Focus(dockedItem));

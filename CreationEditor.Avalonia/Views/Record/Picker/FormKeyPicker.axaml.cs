@@ -49,7 +49,7 @@ public class FormKeyPicker : AFormKeyPicker {
         SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
 
         dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty, _ => {
-            if (LinkCache == null || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record)) return FormLinkInformation.Null;
+            if (LinkCache is null || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record)) return FormLinkInformation.Null;
 
             return FormLinkInformation.Factory(record);
         });
@@ -63,13 +63,13 @@ public class FormKeyPicker : AFormKeyPicker {
              && !selectedTypes.AnyInheritsFrom(formLink.Type)) return false;
 
             // FormKey must not be blacklisted
-            if (BlacklistFormKeys != null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
+            if (BlacklistFormKeys is not null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
 
             // FormKey must be resolved
-            if (LinkCache == null || !LinkCache.TryResolveIdentifier(formLink.FormKey, selectedTypes, out var editorId)) return false;
+            if (LinkCache is null || !LinkCache.TryResolveIdentifier(formLink.FormKey, selectedTypes, out var editorId)) return false;
 
             // Record needs to satisfy the filter
-            if (Filter != null && !Filter(formLink.FormKey, editorId)) return false;
+            if (Filter is not null && !Filter(formLink.FormKey, editorId)) return false;
 
             return true;
         });

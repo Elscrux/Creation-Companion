@@ -24,7 +24,7 @@ public sealed class DragHandler {
         element.AddHandler(InputElement.PointerMovedEvent, Moved, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         element.AddHandler(InputElement.PointerReleasedEvent, Released, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
 
-        if (identifier != null) {
+        if (identifier is not null) {
             _elementIdentifiers.TryAdd(element, identifier);
             var list = _identifierElements.GetOrAdd(identifier);
             list.Add(element);
@@ -36,7 +36,7 @@ public sealed class DragHandler {
         element.RemoveHandler(InputElement.PointerMovedEvent, Moved);
         element.RemoveHandler(InputElement.PointerReleasedEvent, Released);
 
-        if (identifier != null) {
+        if (identifier is not null) {
             _elementIdentifiers.Remove(element);
 
             if (_identifierElements.TryGetValue(identifier, out var list)) {

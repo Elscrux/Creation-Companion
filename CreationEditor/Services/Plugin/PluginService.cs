@@ -49,7 +49,7 @@ public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycle
     private void LoadPlugins() {
         // Get application directory
         var applicationDirectory = Path.GetDirectoryName(typeof(PluginService<TMod, TModGetter>).Assembly.Location);
-        if (applicationDirectory == null) {
+        if (applicationDirectory is null) {
             _logger.Warning("Couldn't load any plugins because the application directory couldn't be found");
             return;
         }
@@ -72,7 +72,7 @@ public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycle
         Plugins = pluginPaths
             .SelectMany(pluginPath => {
                 var assembly = Assembly.LoadFrom(pluginPath);
-                var plugins = assembly == null ? Array.Empty<IPlugin<TMod, TModGetter>>() : CreatePlugins(assembly).ToArray();
+                var plugins = assembly is null ? Array.Empty<IPlugin<TMod, TModGetter>>() : CreatePlugins(assembly).ToArray();
 
                 if (plugins.Length == 0) {
                     _logger.Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin<TMod, TModGetter>));

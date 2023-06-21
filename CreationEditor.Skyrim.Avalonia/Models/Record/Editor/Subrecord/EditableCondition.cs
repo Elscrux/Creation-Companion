@@ -88,7 +88,7 @@ public sealed class EditableCondition : ReactiveObject {
             .Subscribe(function => {
                 Data = function.ToCondition();
                 var customConditionValueEnums = SkyrimDefinitions.ConditionValueEnums.FirstOrDefault(condition => condition.Match(function));
-                if (customConditionValueEnums != null) {
+                if (customConditionValueEnums is not null) {
                     UseCustomValue = true;
                     CustomEnumsValues = customConditionValueEnums.Enums;
                     EnumValue = customConditionValueEnums.Enums.First();
@@ -119,7 +119,7 @@ public sealed class EditableCondition : ReactiveObject {
             case IConditionFloat conditionFloat:
                 UseGlobal = false;
                 FloatValue = conditionFloat.ComparisonValue;
-                if (CustomEnumsValues != null) {
+                if (CustomEnumsValues is not null) {
                     var enumType = CustomEnumsValues.First().GetType();
                     EnumValue = (Enum?) Enum.ToObject(enumType, (int) conditionFloat.ComparisonValue);
                 }

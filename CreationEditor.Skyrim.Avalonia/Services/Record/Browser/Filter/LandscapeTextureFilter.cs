@@ -24,7 +24,7 @@ public sealed class LandscapeTextureFilter : RecordFilter<ILandscapeTextureGette
             .SelectWhere(landscapeTexture => {
                 if (finishedFormKeys.Contains(landscapeTexture.MaterialType.FormKey)) return TryGet<RecordFilterListing>.Failure;
                 if (!landscapeTexture.MaterialType.TryResolve(_editorEnvironment.LinkCache, out var materialType)) return TryGet<RecordFilterListing>.Failure;
-                if (materialType.EditorID == null) return TryGet<RecordFilterListing>.Failure;
+                if (materialType.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(materialType.FormKey);
 

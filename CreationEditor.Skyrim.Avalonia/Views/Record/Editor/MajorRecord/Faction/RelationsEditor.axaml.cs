@@ -8,7 +8,7 @@ public partial class RelationsEditor : ReactiveUserControl<RelationEditorVM> {
     public RelationsEditor() {
         InitializeComponent();
 
-        RelationsGrid.SetValue(DragDropExtended.CanDropProperty, o => ViewModel != null && ViewModel.CanDrop(o));
+        RelationsGrid.SetValue(DragDropExtended.CanDropProperty, o => ViewModel is not null && ViewModel.CanDrop(o));
         RelationsGrid.SetValue(DragDropExtended.DropSelectorProperty, EditableRelation.Factory);
     }
 }

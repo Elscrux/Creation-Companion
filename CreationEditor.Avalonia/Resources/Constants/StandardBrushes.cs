@@ -5,7 +5,7 @@ namespace CreationEditor.Avalonia.Constants;
 
 public static class StandardBrushes {
     public static IBrush? ValidBrush =>
-        Application.Current != null
+        Application.Current is not null
      && Application.Current.TryFindResource("SystemAccentColor", out var obj)
      && obj is Color color
             ? new SolidColorBrush(color)

@@ -22,14 +22,14 @@ public sealed class ModelAssetQuery : AssetQuery<string, string> {
         using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
         for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
             using var shaderTextureSet = blockCache.EditableBlockById<BSShaderTextureSet>(blockId);
-            if (shaderTextureSet != null) {
+            if (shaderTextureSet is not null) {
                 using var vectorNiString = shaderTextureSet.textures.items();
                 foreach (var niString in vectorNiString) {
                     foreach (var result in GetAssets(niString)) yield return result;
                 }
             } else {
                 var effectShader = blockCache.EditableBlockById<BSEffectShaderProperty>(blockId);
-                if (effectShader != null) {
+                if (effectShader is not null) {
                     foreach (var result in GetAssets(effectShader.greyscaleTexture)) yield return result;
                     foreach (var result in GetAssets(effectShader.lightingTexture)) yield return result;
                     foreach (var result in GetAssets(effectShader.normalTexture)) yield return result;
@@ -40,7 +40,7 @@ public sealed class ModelAssetQuery : AssetQuery<string, string> {
                     foreach (var result in GetAssets(effectShader.envMaskTexture)) yield return result;
                 } else {
                     var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
-                    if (shaderNoLighting == null) continue;
+                    if (shaderNoLighting is null) continue;
 
                     foreach (var result in GetAssets(shaderNoLighting.baseTexture)) yield return result;
                 }
@@ -48,12 +48,12 @@ public sealed class ModelAssetQuery : AssetQuery<string, string> {
         }
 
         IEnumerable<AssetQueryResult<string>> GetAssets(NiString? asset) {
-            if (asset == null) yield break;
+            if (asset is null) yield break;
 
             var assetString = asset.get();
             if (!string.IsNullOrEmpty(assetString)) {
                 var assetLink = AssetTypeService.GetAssetLink(assetString);
-                if (assetLink != null) {
+                if (assetLink is not null) {
                     yield return new AssetQueryResult<string>(assetLink, path);
                 }
             }

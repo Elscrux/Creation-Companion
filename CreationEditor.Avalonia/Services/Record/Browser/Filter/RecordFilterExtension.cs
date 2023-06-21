@@ -22,7 +22,7 @@ public static class RecordFilterExtension {
                     accumulatedPath += i == directories.Length - 1 ? directory : directory + separator;
 
                     var listing = currentRoot.RecordFilters.FirstOrDefault(x => string.Equals(x.DisplayName, directory, StringComparison.OrdinalIgnoreCase));
-                    if (listing == null) {
+                    if (listing is null) {
                         var path = accumulatedPath;
                         listing = new RecordFilterListing(
                             directory,
@@ -58,7 +58,7 @@ public static class RecordFilterExtension {
         return elements.GetRecursiveListings(separator,
             t => {
                 var selector = stringSelector(t);
-                return selector != null ? selector.AsEnumerable() : Enumerable.Empty<string>();
+                return selector is not null ? selector.AsEnumerable() : Enumerable.Empty<string>();
             });
     }
 }

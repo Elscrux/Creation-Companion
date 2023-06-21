@@ -28,13 +28,13 @@ public sealed class NifModificationService : IModelModificationService {
         for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
             // Remap BS Shader Texture Set
             using var shaderTextureSet = blockCache.EditableBlockById<BSShaderTextureSet>(blockId);
-            if (shaderTextureSet != null) {
+            if (shaderTextureSet is not null) {
                 // Find all indices where the old path is used
                 var items = shaderTextureSet.textures.items();
                 var occurenceIndices = new List<int>();
                 for (var index = 0; index < items.Count; index++) {
                     var niString = items[index];
-                    if (niString == null) continue;
+                    if (niString is null) continue;
 
                     if (shouldReplace(niString.get())) {
                         occurenceIndices.Add(index);
@@ -59,7 +59,7 @@ public sealed class NifModificationService : IModelModificationService {
                 // Remap BS Effect Shader Property
                 var effectShader = blockCache.EditableBlockById<BSEffectShaderProperty>(blockId);
 
-                if (effectShader != null) {
+                if (effectShader is not null) {
                     var modifiedEffectShader = false;
 
                     if (shouldReplace(effectShader.greyscaleTexture.get())) {
@@ -102,7 +102,7 @@ public sealed class NifModificationService : IModelModificationService {
                 } else {
                     // Remap BS Shader No  Lighting Property
                     var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
-                    if (shaderNoLighting != null && shouldReplace(shaderNoLighting.baseTexture.get())) {
+                    if (shaderNoLighting is not null && shouldReplace(shaderNoLighting.baseTexture.get())) {
                         shaderNoLighting.baseTexture = new NiString(newReference);
                         niHeader.ReplaceBlock(blockId, shaderNoLighting);
 

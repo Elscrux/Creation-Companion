@@ -87,7 +87,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         var recordEqualsMasks = new HashSet<RecordEqualsMask>();
         var testingMod = _pluginContext.EditorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == testingModKey);
         foreach (var record in GetRecords(testingMod.AsEnumerable())) {
-            if (record.EditorID == null) continue;
+            if (record.EditorID is null) continue;
 
             var store = new RecordEqualsMask(record);
             recordEqualsMasks.Add(store);
@@ -100,7 +100,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
             .ToArray();
 
         foreach (var vanillaRecord in GetRecords(vanillaMods)) {
-            if (vanillaRecord.EditorID == null) continue;
+            if (vanillaRecord.EditorID is null) continue;
 
             var vanillaEqualsMask = new RecordEqualsMask(vanillaRecord);
             if (recordEqualsMasks.TryGetValue(vanillaEqualsMask, out var match)) {
@@ -137,7 +137,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
                 } else {
                     var modName = $"Cleaned{context.ModKey.Name}From{modKey.Name}";
                     var cleanedMod = cleanedOtherMods.FirstOrDefault(m => m.ModKey.Name == modName);
-                    if (cleanedMod == null) {
+                    if (cleanedMod is null) {
                         cleanedMod = new SkyrimMod(ModKey.FromName(modName, ModType.Plugin), SkyrimRelease.SkyrimSE);
                         cleanedOtherMods.Add(cleanedMod);
                     }

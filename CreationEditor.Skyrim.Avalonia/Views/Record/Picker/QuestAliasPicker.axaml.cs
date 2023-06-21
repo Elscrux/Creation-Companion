@@ -63,7 +63,7 @@ public partial class QuestAliasPicker : ActivatableUserControl {
                 x => x.Quest,
                 (index, quest) => (Index: index, Quest: quest))
             .Subscribe(x => {
-                if (x.Quest == null) {
+                if (x.Quest is null) {
                     SelectedAlias = null;
                 } else {
                     var alias = x.Quest.Aliases.FirstOrDefault(alias => alias.ID == x.Index);
@@ -78,8 +78,8 @@ public partial class QuestAliasPicker : ActivatableUserControl {
                 x => x.ScopedAliasTypes,
                 (quest, scopedAliasTypes) => (Quest: quest, ScopedAliasTypes: scopedAliasTypes))
             .Select(x => {
-                if (x.Quest == null) return null;
-                if (x.ScopedAliasTypes == null) return x.Quest.Aliases.AsObservableChangeSet();
+                if (x.Quest is null) return null;
+                if (x.ScopedAliasTypes is null) return x.Quest.Aliases.AsObservableChangeSet();
 
                 return x.Quest.Aliases
                     .Where(alias => x.ScopedAliasTypes.Contains(alias.Type))

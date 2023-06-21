@@ -6,7 +6,7 @@ public static class EnumConverters {
         = new(e => e?.ToString() ?? string.Empty);
 
     public static readonly FuncValueConverter<Enum, string> ToStringWithSpaces
-        = new(e => e == null
+        = new(e => e is null
             ? string.Empty
             : string.Concat(e.ToString().Select((c, i) => i != 0 && char.IsUpper(c) ? " " + c : c.ToString())));
 }

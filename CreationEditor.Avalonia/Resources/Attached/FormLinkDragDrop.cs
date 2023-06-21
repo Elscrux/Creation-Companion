@@ -167,10 +167,10 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         AdornerLayer.SetAdorner(visual, null);
 
         var formLink = GetData(e);
-        if (formLink == null) return;
+        if (formLink is null) return;
 
         var canSetFormLink = GetCanSetFormLink(visual);
-        if (canSetFormLink != null! && !canSetFormLink(formLink)) return;
+        if (canSetFormLink is not null && !canSetFormLink(formLink)) return;
 
         var formLinkSetter = GetSetFormLink(visual);
         formLinkSetter(formLink);
@@ -180,16 +180,16 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (sender is not Visual visual) return;
 
         var setFormLink = GetSetFormLink(visual);
-        if (setFormLink == null!) return;
+        if (setFormLink is null) return;
 
         var formLink = GetData(e);
-        if (formLink == null) return;
+        if (formLink is null) return;
 
         var canSetFormLink = GetCanSetFormLink(visual);
 
         // Show adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, new Border {
-            BorderBrush = canSetFormLink != null! && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+            BorderBrush = canSetFormLink is not null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
             BorderThickness = new Thickness(2),
             IsHitTestVisible = false,
         });
@@ -199,7 +199,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (sender is not Visual visual) return;
 
         var setFormLink = GetSetFormLink(visual);
-        if (setFormLink == null!) return;
+        if (setFormLink is null) return;
 
         // Hide adorner when target has setter for form link
         AdornerLayer.SetAdorner(visual, null);

@@ -43,17 +43,17 @@ public sealed class GroupCollection<T> {
         _source.CollectionChanged += (_, args) => {
             switch (args.Action) {
                 case NotifyCollectionChangedAction.Add:
-                    if (args.NewItems == null) break;
+                    if (args.NewItems is null) break;
 
                     _topLevelGroup.Add(args.NewItems.OfType<T>(), _activeGroups);
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (args.OldItems == null) break;
+                    if (args.OldItems is null) break;
 
                     _topLevelGroup.Remove(args.OldItems.OfType<T>());
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    if (args.OldItems == null || args.NewItems == null) break;
+                    if (args.OldItems is null || args.NewItems is null) break;
 
                     _topLevelGroup.Remove(args.OldItems.OfType<T>());
                     _topLevelGroup.Add(args.NewItems.OfType<T>(), _activeGroups);

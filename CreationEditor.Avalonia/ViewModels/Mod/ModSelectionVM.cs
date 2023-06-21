@@ -143,7 +143,7 @@ public sealed class ModSelectionVM : ViewModel {
         ToggleActive = ReactiveCommand.Create(
             canExecute: selectedModValid,
             execute: () => {
-                if (SelectedMod == null) return;
+                if (SelectedMod is null) return;
 
                 SelectedMod.IsActive = !SelectedMod.IsActive;
             });
@@ -152,7 +152,7 @@ public sealed class ModSelectionVM : ViewModel {
             .NotNull()
             .Subscribe(selectedMod => {
                 var mod = _modInfos.First(modInfo => modInfo.ModKey == selectedMod.ModKey);
-                if (mod == null) return;
+                if (mod is null) return;
 
                 SelectedModDetails.SetTo(mod);
             })
@@ -209,7 +209,7 @@ public sealed class ModSelectionVM : ViewModel {
         }
 
         var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-        if (ActiveMod == null) {
+        if (ActiveMod is null) {
             _editorEnvironment.Build(orderedMods, NewModName, NewModType);
         } else {
             _editorEnvironment.Build(orderedMods, ActiveMod.Value);

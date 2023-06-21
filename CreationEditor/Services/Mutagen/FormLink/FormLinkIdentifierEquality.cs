@@ -6,7 +6,7 @@ public sealed class FormLinkIdentifierEqualityComparer : IEqualityComparer<IForm
 
     public bool Equals(IFormLinkIdentifier? x, IFormLinkIdentifier? y) {
         if (ReferenceEquals(x, y)) return true;
-        if (x == null || y == null) return false;
+        if (x is null || y is null) return false;
 
         return Equals(x.FormKey, y.FormKey);
     }

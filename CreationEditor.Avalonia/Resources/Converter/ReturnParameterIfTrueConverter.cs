@@ -11,9 +11,9 @@ public sealed class ReturnParameterIfTrueConverter<TIn> : IValueConverter
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         var parsedValue = value is true ? TIn.Parse(parameter as string ?? string.Empty, ParseFormatProvider) : DefaultValue;
-        if (Converter == null) return parsedValue;
+        if (Converter is null) return parsedValue;
 
-        if (value is not true && DefaultValueConverted != null) return DefaultValueConverted;
+        if (value is not true && DefaultValueConverted is not null) return DefaultValueConverted;
 
         return Converter?.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture) ?? DefaultValueConverted;
     }
@@ -33,9 +33,9 @@ public sealed class ReturnParameterIfTrueMultiConverter<TIn> : IMultiValueConver
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) {
         var pass = values.All(x => x is true);
         var parsedValue = pass ? TIn.Parse(parameter as string ?? string.Empty, ParseFormatProvider) : DefaultValue;
-        if (Converter == null) return parsedValue;
+        if (Converter is null) return parsedValue;
 
-        if (pass is not true && DefaultValueConverted != null) return DefaultValueConverted;
+        if (pass is not true && DefaultValueConverted is not null) return DefaultValueConverted;
 
         return Converter?.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture);
     }

@@ -27,7 +27,7 @@ public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IRefe
 
     public ReferencedRecord(TMajorRecordGetter record, IEnumerable<IFormLinkIdentifier>? references = null) {
         Record = record;
-        References = references == null
+        References = references is null
             ? new ObservableCollectionExtended<IFormLinkIdentifier>()
             : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
     }

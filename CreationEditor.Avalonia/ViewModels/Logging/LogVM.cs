@@ -39,7 +39,7 @@ public sealed class LogVM : ViewModel, ILogVM {
             .Subscribe(_ => {
                 while (_logAddedCache.Count > MaxLogCount) {
                     var logItem = _logAddedCache.Items.MinBy(x => x.Time);
-                    if (logItem != null) _logAddedCache.Remove(logItem.Id);
+                    if (logItem is not null) _logAddedCache.Remove(logItem.Id);
                 }
             })
             .DisposeWith(this);

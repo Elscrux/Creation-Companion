@@ -5,7 +5,7 @@ public interface IDockObject {
     public DockingManagerVM DockRoot {
         get {
             var root = this;
-            while (root.DockParent != null) {
+            while (root.DockParent is not null) {
                 root = root.DockParent;
             }
 

@@ -70,7 +70,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         if (AddContextFlyout) AddSelectionMenu();
         if (AddKeyBind) AddKeyBindings();
 
-        if (AssociatedObject != null) AssociatedObject.LayoutUpdated += (_, _) => UpdateAllChecked();
+        if (AssociatedObject is not null) AssociatedObject.LayoutUpdated += (_, _) => UpdateAllChecked();
     }
 
     protected override void OnAttachedToVisualTree() {
@@ -98,7 +98,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     public void OnSelectionToggled(IChangeSet<IReactiveSelectable> changeSet) {
-        if (AssociatedObject?.ItemsSource == null) return;
+        if (AssociatedObject?.ItemsSource is null) return;
 
         UpdateAllChecked();
 
@@ -107,7 +107,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
             var selectableChange = changeSet.First();
             var selectable = selectableChange.Item.Current;
-            if (selectable == null) return;
+            if (selectable is null) return;
 
             if (!selectable.IsSelected) return;
 
@@ -164,7 +164,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     }
                 };
 
-                if (EnabledMapping != null) {
+                if (EnabledMapping is not null) {
                     checkBox
                         .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
                         .DisposeWith(_attachedDisposable);
@@ -181,7 +181,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void AddSelectionMenu() {
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.ContextFlyout ??= new MenuFlyout();
         if (AssociatedObject.ContextFlyout is not MenuFlyout { ItemsSource: AvaloniaList<object> menuList }) return;
@@ -215,7 +215,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void UpdateAllChecked() {
-        if (AssociatedObject?.ItemsSource == null) return;
+        if (AssociatedObject?.ItemsSource is null) return;
 
         TryProcess(() => {
             var totalCount = 0;
@@ -238,7 +238,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void SelectSelectedItems(bool newState = true) {
-        if (AssociatedObject?.SelectedItems == null) return;
+        if (AssociatedObject?.SelectedItems is null) return;
 
         TryProcess(() => {
             _isProcessing = true;
@@ -251,7 +251,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void SelectAllItems(bool newState = true) {
-        if (AssociatedObject?.ItemsSource == null) return;
+        if (AssociatedObject?.ItemsSource is null) return;
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
@@ -262,7 +262,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void SelectDynamic(bool newState = true) {
-        if (AssociatedObject?.SelectedItems == null) return;
+        if (AssociatedObject?.SelectedItems is null) return;
 
         if (AssociatedObject.SelectedItems.Count > 1) {
             // Only select records in selection if multiple are selected
@@ -274,7 +274,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void ToggleSelection() {
-        if (AssociatedObject?.SelectedItems == null) return;
+        if (AssociatedObject?.SelectedItems is null) return;
 
         TryProcess(() => {
             _isProcessing = true;
@@ -291,7 +291,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void InvertAll() {
-        if (AssociatedObject?.ItemsSource == null) return;
+        if (AssociatedObject?.ItemsSource is null) return;
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {

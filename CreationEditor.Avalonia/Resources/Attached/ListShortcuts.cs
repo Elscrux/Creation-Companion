@@ -63,7 +63,7 @@ public sealed class ListShortcuts : AvaloniaObject {
 
         void Function(object? sender, RoutedEventArgs routedEventArgs) {
             var addButton = dg.FindDescendantOfType<Button>();
-            if (addButton == null) return;
+            if (addButton is null) return;
 
             addButton.IsVisible = true;
             addButton.Command = args.NewValue.GetValueOrDefault();
@@ -112,7 +112,7 @@ public sealed class ListShortcuts : AvaloniaObject {
         var newCommand = args.NewValue.GetValueOrDefault();
 
         // Add key bindings
-        if (newCommand != null) {
+        if (newCommand is not null) {
             control.KeyBindings.Add(new KeyBinding {
                 Command = newCommand,
                 Gesture = gesture,
@@ -137,7 +137,7 @@ public sealed class ListShortcuts : AvaloniaObject {
         if (flyout is not MenuFlyout { Items: {} list }) return;
         if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
 
-        if (newCommand != null) {
+        if (newCommand is not null) {
             list.Add(new MenuItem {
                 Icon = new SymbolIcon { Symbol = menuIcon },
                 Header = header,

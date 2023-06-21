@@ -185,7 +185,7 @@ public sealed class DockGrid : Grid {
         if (changeRow) {
             // Adjust remaining control positions
             foreach (var child in Children) {
-                if (child == null) continue;
+                if (child is null) continue;
 
                 var currentRow = GetRow(child);
                 var currentRowSpan = GetRowSpan(child);
@@ -214,7 +214,7 @@ public sealed class DockGrid : Grid {
         } else {
             // Adjust remaining control positions
             foreach (var child in Children) {
-                if (child == null) continue;
+                if (child is null) continue;
 
                 var currentColumn = GetColumn(child);
                 var currentColumnSpan = GetColumnSpan(child);
@@ -282,7 +282,7 @@ public sealed class DockGrid : Grid {
         // Calculate own size
         var size = new Size(columnSizes.Sum(), rowSizes.Sum());
 
-        if (parentGrid != null) {
+        if (parentGrid is not null) {
             var row = GetRow(this);
             var column = GetColumn(this);
 

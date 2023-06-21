@@ -20,7 +20,7 @@ public class ViewportHost : NativeControlHost {
         if (e.Root is not Window window) return;
 
         var handle = _rootWindow?.TryGetPlatformHandle();
-        if (handle == null) return;
+        if (handle is null) return;
 
         _rootWindow = window;
         WinHelper.SetParent(_process.MainWindowHandle, handle.Handle);

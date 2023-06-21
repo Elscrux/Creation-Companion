@@ -32,7 +32,7 @@ public sealed record GroupInstance(object Class, IObservableCollection<object> I
 
                         // If the group instance doesn't exist, create it and add it to the list
                         var groupInstance = GetClass(@class);
-                        if (groupInstance == null) {
+                        if (groupInstance is null) {
                             groupInstance = new GroupInstance(@class, new ObservableCollectionExtended<object>());
                             Items.Add(groupInstance);
                         }
@@ -75,7 +75,7 @@ public sealed record GroupInstance(object Class, IObservableCollection<object> I
             if (Items.FirstOrDefault() is T) {
                 var anyRemoved = false;
                 foreach (var item in itemList) {
-                    if (item == null) continue;
+                    if (item is null) continue;
 
                     if (Items.Remove(item)) {
                         anyRemoved = true;
@@ -122,7 +122,7 @@ public sealed record GroupInstance(object Class, IObservableCollection<object> I
                         // Check if we already have a group for this class
                         var groupInstance = GetClass(@class);
 
-                        if (groupInstance == null) {
+                        if (groupInstance is null) {
                             // Create new group instance
                             Items.Insert(i, new GroupInstance(@class, new ObservableCollectionExtended<object> { t }));
                             i++;

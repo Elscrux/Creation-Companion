@@ -6,7 +6,7 @@ public sealed class AssetLinkEqualityComparer : IEqualityComparer<IAssetLinkGett
 
     public bool Equals(IAssetLinkGetter? x, IAssetLinkGetter? y) {
         if (ReferenceEquals(x, y)) return true;
-        if (x == null || y == null) return false;
+        if (x is null || y is null) return false;
 
         return string.Equals(x.DataRelativePath, y.DataRelativePath, AssetCompare.PathComparison);
     }

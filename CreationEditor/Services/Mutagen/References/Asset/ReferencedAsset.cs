@@ -19,15 +19,15 @@ public sealed class ReferencedAsset : IReferencedAsset {
         IAssetLink assetLink, IEnumerable<IFormLinkGetter>? recordReferences, IEnumerable<string>? nifDirectoryReferences, IEnumerable<string>? nifArchiveReferences) {
         AssetLink = assetLink;
 
-        RecordReferences = recordReferences == null
+        RecordReferences = recordReferences is null
             ? new ObservableCollectionExtended<IFormLinkGetter>()
             : new ObservableCollectionExtended<IFormLinkGetter>(recordReferences);
 
-        NifDirectoryReferences = nifDirectoryReferences == null
+        NifDirectoryReferences = nifDirectoryReferences is null
             ? new ObservableCollectionExtended<string>()
             : new ObservableCollectionExtended<string>(nifDirectoryReferences);
 
-        NifArchiveReferences = nifArchiveReferences == null
+        NifArchiveReferences = nifArchiveReferences is null
             ? new ObservableCollectionExtended<string>()
             : new ObservableCollectionExtended<string>(nifArchiveReferences);
 

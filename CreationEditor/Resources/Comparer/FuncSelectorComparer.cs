@@ -16,12 +16,12 @@ public sealed class FuncSelectorComparer<TSelector, TCompare> : FuncComparer<TCo
     }
 
     public int Compare(TSelector? x, TSelector? y) {
-        if (x == null) {
-            if (y == null) return 0;
+        if (x is null) {
+            if (y is null) return 0;
 
             return -1;
         }
-        if (y == null) return 1;
+        if (y is null) return 1;
 
         return base.Compare(_selector(x), _selector(y));
     }

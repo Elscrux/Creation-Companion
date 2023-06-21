@@ -19,12 +19,12 @@ public static class SkyrimRecordComparers {
     public static readonly FuncSelectorComparer<IReferencedRecord, ICellGetter> CellGridComparer
         = new(referencedRecord => referencedRecord.Record as ICellGetter,
             (a, b) => {
-                if (a.Grid == null) {
-                    if (b.Grid == null) return 0;
+                if (a.Grid is null) {
+                    if (b.Grid is null) return 0;
 
                     return -1;
                 }
-                if (b.Grid == null) return 1;
+                if (b.Grid is null) return 1;
 
                 var pointA = a.Grid.Point;
                 var pointB = b.Grid.Point;

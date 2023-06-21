@@ -79,7 +79,7 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
         if (record.IsDeleted) return false;
 
         return Filter(record as IMajorRecordIdentifier)
-         && (RecordFilter == null || RecordFilter(record));
+         && (RecordFilter is null || RecordFilter(record));
     }
 
     public bool Filter(IMajorRecordIdentifier record) {

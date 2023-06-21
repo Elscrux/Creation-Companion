@@ -22,7 +22,7 @@ public sealed class MutableReferenceCache : IReferenceCache {
         referenceQuery.LoadModReferences(mutableMod);
         _mutableModReferenceCache = referenceQuery.ModCaches[mutableMod.ModKey];
 
-        if (immutableReferenceCache != null) _immutableReferenceCache = new ImmutableReferenceCache(immutableReferenceCache);
+        if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableReferenceCache(immutableReferenceCache);
     }
 
     public bool AddRecord(IMajorRecordGetter record, IEnumerable<IFormLinkGetter> links) {
@@ -81,7 +81,7 @@ public sealed class MutableReferenceCache : IReferenceCache {
             foreach (var reference in references) {
                 yield return reference;
             }
-        } else if (_immutableReferenceCache != null) {
+        } else if (_immutableReferenceCache is not null) {
             foreach (var reference in _immutableReferenceCache.GetReferences(formKey, modOrder)) {
                 yield return reference;
             }

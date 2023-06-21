@@ -9,7 +9,7 @@ public sealed class SideDockVM : TabbedDockVM {
     public SideDockVM(DockContainerVM dockParent) : base(dockParent) {}
 
     protected override void Unfocus() {
-        if (ActiveTab != null) ActiveTab.IsSelected = false;
+        if (ActiveTab is not null) ActiveTab.IsSelected = false;
 
         ActiveTab = null;
     }

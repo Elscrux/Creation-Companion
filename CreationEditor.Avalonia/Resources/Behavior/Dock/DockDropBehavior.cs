@@ -20,7 +20,7 @@ public class DockDropBehavior : Behavior<Control> {
     protected override void OnAttached() {
         base.OnAttached();
 
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.AddHandler(DragDrop.DropEvent, Drop);
         AssociatedObject.AddHandler(DragDrop.DragOverEvent, DragOver);
@@ -32,7 +32,7 @@ public class DockDropBehavior : Behavior<Control> {
     protected override void OnDetaching() {
         base.OnDetaching();
 
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.RemoveHandler(DragDrop.DropEvent, Drop);
         AssociatedObject.RemoveHandler(DragDrop.DragOverEvent, DragOver);
@@ -97,7 +97,7 @@ public class DockDropBehavior : Behavior<Control> {
         outControl = null;
 
         // Check null
-        if (DockContainer == null || sender == null) return false;
+        if (DockContainer is null || sender is null) return false;
 
         // Check control
         if (sender is not T control) return false;

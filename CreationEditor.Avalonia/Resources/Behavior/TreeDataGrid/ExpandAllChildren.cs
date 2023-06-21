@@ -12,13 +12,13 @@ public sealed class ExpandAllChildren<T> : Behavior<global::Avalonia.Controls.Tr
     }
 
     protected override void OnDetachedFromVisualTree() {
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.Tapped -= Expand;
     }
 
     private void Expand(object? sender, TappedEventArgs e) {
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         // Check if Alt is pressed
         if ((e.KeyModifiers & KeyModifiers.Alt) == 0) return;

@@ -29,7 +29,7 @@ public partial class ReferenceWindow : AppWindow {
         IMajorRecordIdentifier record,
         ReferenceBrowserVM? referenceBrowserVM = null) : this() {
         var editorId = record.EditorID;
-        Title = $"References of {record.FormKey}" + (editorId == null ? string.Empty : $" - {editorId}");
+        Title = $"References of {record.FormKey}" + (editorId is null ? string.Empty : $" - {editorId}");
 
         ReferenceBrowserVM = referenceBrowserVM;
     }

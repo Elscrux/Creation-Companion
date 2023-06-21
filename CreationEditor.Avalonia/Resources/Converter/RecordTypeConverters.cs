@@ -5,7 +5,7 @@ namespace CreationEditor.Avalonia.Converter;
 public abstract class RecordTypeConverters {
     public static readonly FuncValueConverter<Type, string?> ToName
         = new(type => {
-            if (type == null) return null;
+            if (type is null) return null;
 
             return LoquiRegistration.TryGetRegister(type, out var register)
                 ? register.ClassType.Name
@@ -14,7 +14,7 @@ public abstract class RecordTypeConverters {
 
     public static readonly FuncValueConverter<Type, string?> ToGame
         = new(type => {
-            if (type == null) return null;
+            if (type is null) return null;
 
             return LoquiRegistration.TryGetRegister(type, out var registration)
                 ? registration.ProtocolKey.Namespace

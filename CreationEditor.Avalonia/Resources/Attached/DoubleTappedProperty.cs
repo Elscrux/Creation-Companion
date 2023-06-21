@@ -34,7 +34,7 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
 
     private static void HandleCommandChanged(AvaloniaObject element, ICommand? commandValue) {
         if (element is Interactive interactElem) {
-            if (commandValue != null) {
+            if (commandValue is not null) {
                 interactElem.AddHandler(InputElement.DoubleTappedEvent, DoubleTappedEventHandler);
             } else {
                 interactElem.RemoveHandler(InputElement.DoubleTappedEvent, DoubleTappedEventHandler);

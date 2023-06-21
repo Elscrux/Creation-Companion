@@ -19,7 +19,7 @@ public sealed class PackageFilter : RecordFilter<IPackageGetter> {
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IPackageGetter>()
             .Where(package => package.Type == Package.Types.PackageTemplate)
-            .Where(template => template.EditorID != null)
+            .Where(template => template.EditorID is not null)
             .Select(template => new RecordFilterListing(template.EditorID!, record => record is IPackageGetter package && package.PackageTemplate.FormKey == template.FormKey));
     }
 }

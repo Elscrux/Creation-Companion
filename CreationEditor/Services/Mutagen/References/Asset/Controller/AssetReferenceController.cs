@@ -217,7 +217,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
         void Remove(string archive) {
             var cache = _nifArchiveAssetCaches.FirstOrDefault(c => string.Equals(c.Origin, archive, AssetCompare.PathComparison));
-            if (cache == null) return;
+            if (cache is null) return;
 
             // Change existing subscriptions
             _nifArchiveAssetReferenceManager.Change(asset => {
@@ -242,7 +242,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public Action<AssetFile> RegisterUpdate(AssetFile assetFileFile) {
-        if (_nifDirectoryAssetCache == null) return _ => {};
+        if (_nifDirectoryAssetCache is null) return _ => {};
 
         ValidateAsset(assetFileFile);
 
@@ -264,7 +264,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterCreation(AssetFile file) {
-        if (_nifDirectoryAssetCache == null) {
+        if (_nifDirectoryAssetCache is null) {
             _assetCreations.Enqueue(file);
             return;
         }
@@ -275,7 +275,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterDeletion(AssetFile file) {
-        if (_nifDirectoryAssetCache == null) {
+        if (_nifDirectoryAssetCache is null) {
             _assetDeletions.Enqueue(file);
             return;
         }
@@ -311,7 +311,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     public Action<IMajorRecordGetter> RegisterUpdate(IMajorRecordGetter record) {
         var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
-        if (modCache == null) return _ => {};
+        if (modCache is null) return _ => {};
 
         // Collect the references before and after the update
         HashSet<IAssetLinkGetter> before;
@@ -339,26 +339,26 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterCreation(IMajorRecordGetter record) {
-        if (_nifDirectoryAssetCache == null) {
+        if (_nifDirectoryAssetCache is null) {
             _recordCreations.Enqueue(record);
             return;
         }
 
         var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
-        if (modCache == null) return;
+        if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
         AddRecordReferences(modCache, record.ToLinkFromRuntimeType(), record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
     public void RegisterDeletion(IMajorRecordGetter record) {
-        if (_nifDirectoryAssetCache == null) {
+        if (_nifDirectoryAssetCache is null) {
             _recordDeletions.Enqueue(record);
             return;
         }
 
         var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
-        if (modCache == null) return;
+        if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
         RemoveRecordReferences(modCache, record.ToLinkFromRuntimeType(), record.EnumerateAllAssetLinks(assetLinkCache));

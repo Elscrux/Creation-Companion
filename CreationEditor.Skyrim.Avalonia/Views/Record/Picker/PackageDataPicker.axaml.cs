@@ -78,7 +78,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .ObserveOnTaskpool()
             .Select(x => {
-                if (x.Package == null || x.LinkCache == null) return null;
+                if (x.Package is null || x.LinkCache is null) return null;
 
                 var names = x.Package.GetNameFromTemplate(x.LinkCache);
 
@@ -86,7 +86,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
 
                 return x.Package?.Data
                     .Where(d => {
-                        if (types == null) return true;
+                        if (types is null) return true;
 
                         var packageTypes = d.Value switch {
                             IPackageDataBoolGetter => RecordTypeConstants.PackageDataNumericTypes,
@@ -97,7 +97,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
                             IPackageDataObjectListGetter => RecordTypeConstants.AllPlacedInterfaceTypes,
                             _ => null
                         };
-                        return packageTypes != null && packageTypes.AnyInheritsFromAny(types);
+                        return packageTypes is not null && packageTypes.AnyInheritsFromAny(types);
                     })
                     .Select(d => {
                         var valueName = d.Value.Name ?? names[d.Key];
@@ -138,9 +138,9 @@ public partial class PackageDataPicker : ActivatableUserControl {
                 x => x.PackageDataIndex,
                 x => x.Data,
                 (index, data) => (Index: index, Data: data))
-            .Where(x => x.Data != null && x.Data.Any())
+            .Where(x => x.Data is not null && x.Data.Any())
             .Subscribe(x => {
-                if (x.Data == null) {
+                if (x.Data is null) {
                     SelectedData = null;
                 } else {
                     var alias = x.Data.FirstOrDefault(d => d.Index == x.Index);

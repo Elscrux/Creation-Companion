@@ -31,7 +31,7 @@ public sealed class AssetReference : IReference, IDisposable {
         RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _editorEnvironment, _recordReferenceController);
         AssetReference? GetAssetReference(string path) {
             var assetLink = _assetTypeService.GetAssetLink(path);
-            if (assetLink == null) return null;
+            if (assetLink is null) return null;
 
             return new AssetReference(assetLink, _editorEnvironment, _assetTypeService, _assetReferenceController, _recordReferenceController);
         }
@@ -50,7 +50,7 @@ public sealed class AssetReference : IReference, IDisposable {
 
                     foreach (var path in ReferencedAsset.NifArchiveReferences.Concat(ReferencedAsset.NifDirectoryReferences)) {
                         var reference = GetAssetReference(path);
-                        if (reference != null) {
+                        if (reference is not null) {
                             collection.Add(reference);
                         }
                     }
@@ -66,14 +66,14 @@ public sealed class AssetReference : IReference, IDisposable {
 
                     foreach (var path in ReferencedAsset.NifDirectoryReferences) {
                         var reference = GetAssetReference(path);
-                        if (reference != null) {
+                        if (reference is not null) {
                             collection.Add(reference);
                         }
                     }
 
                     foreach (var formLink in ReferencedAsset.RecordReferences) {
                         var reference = GetRecordReference(formLink);
-                        if (reference != null) {
+                        if (reference is not null) {
                             collection.Add(reference);
                         }
                     }
@@ -89,14 +89,14 @@ public sealed class AssetReference : IReference, IDisposable {
 
                     foreach (var path in ReferencedAsset.NifArchiveReferences) {
                         var reference = GetAssetReference(path);
-                        if (reference != null) {
+                        if (reference is not null) {
                             collection.Add(reference);
                         }
                     }
 
                     foreach (var formLink in ReferencedAsset.RecordReferences) {
                         var reference = GetRecordReference(formLink);
-                        if (reference != null) {
+                        if (reference is not null) {
                             collection.Add(reference);
                         }
                     }
@@ -111,7 +111,7 @@ public sealed class AssetReference : IReference, IDisposable {
     private IReferencedAsset? _referencedAsset;
     public IReferencedAsset ReferencedAsset {
         get {
-            if (_referencedAsset == null) {
+            if (_referencedAsset is null) {
                 _assetReferenceController
                     .GetReferencedAsset(Asset, out var referencedAsset)
                     .DisposeWith(_disposables);

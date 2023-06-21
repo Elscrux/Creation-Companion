@@ -24,7 +24,7 @@ public sealed class AcousticSpaceFilter : RecordFilter<IAcousticSpaceGetter> {
             .SelectWhere(acousticSpace => {
                 if (finishedFormKeys.Contains(acousticSpace.EnvironmentType.FormKey)) return TryGet<RecordFilterListing>.Failure;
                 if (!acousticSpace.EnvironmentType.TryResolve(_editorEnvironment.LinkCache, out var reverbParameters)) return TryGet<RecordFilterListing>.Failure;
-                if (reverbParameters.EditorID == null) return TryGet<RecordFilterListing>.Failure;
+                if (reverbParameters.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(reverbParameters.FormKey);
 

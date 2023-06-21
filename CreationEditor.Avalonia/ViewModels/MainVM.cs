@@ -80,7 +80,7 @@ public sealed class MainVM : ViewModel {
 
         OpenGameFolder = ReactiveCommand.Create(() => {
             var gameFolder = fileSystem.Directory.GetParent(editorEnvironment.GameEnvironment.DataFolderPath);
-            if (gameFolder != null) {
+            if (gameFolder is not null) {
                 Process.Start(new ProcessStartInfo {
                     FileName = gameFolder.FullName,
                     UseShellExecute = true,

@@ -7,7 +7,7 @@ namespace CreationEditor.Avalonia.Views.Docking;
 
 public interface IDockPreview {
     public IBrush? Brush =>
-        Application.Current != null
+        Application.Current is not null
      && Application.Current.TryFindResource("SystemAccentColor", out var obj)
      && obj is Color color
             ? new SolidColorBrush(color)

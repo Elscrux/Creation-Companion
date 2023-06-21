@@ -20,7 +20,7 @@ public partial class ReferenceBrowser : ReactiveUserControl<ReferenceBrowserVM> 
         if (e.Source is not Visual visual) return;
 
         var expanderCell = visual.FindAncestorOfType<TreeDataGridExpanderCell>();
-        if (expanderCell != null) {
+        if (expanderCell is not null) {
             expanderCell.IsExpanded = !expanderCell.IsExpanded;
         }
     }

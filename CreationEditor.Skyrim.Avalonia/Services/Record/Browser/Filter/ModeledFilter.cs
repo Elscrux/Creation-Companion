@@ -12,6 +12,6 @@ public sealed class ModeledFilter : AssetFilter<IModeledGetter> {
         : base(editorEnvironment, fileSystem) {}
 
     protected override IEnumerable<string> GetPaths(IModeledGetter record) {
-        if (record.Model != null) yield return record.Model.File.DataRelativePath;
+        if (record.Model is not null) yield return record.Model.File.DataRelativePath;
     }
 }

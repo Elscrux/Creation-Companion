@@ -112,7 +112,7 @@ public partial class PlacedPicker : ActivatableUserControl {
     public PlacedPicker() {
         InitializeComponent();
 
-        PlacedNameSelector = (identifier, linkCache) => linkCache == null
+        PlacedNameSelector = (identifier, linkCache) => linkCache is null
             ? null
             : identifier is IPlacedGetter placed
                 ? placed.GetSelfOrBaseEditorID(linkCache)
@@ -120,7 +120,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                     ? referencedPlaced.GetSelfOrBaseEditorID(linkCache)
                     : null;
 
-        CellNameSelector = (identifier, linkCache) => linkCache != null && linkCache.TryResolve<ICellGetter>(identifier.FormKey, out var cell)
+        CellNameSelector = (identifier, linkCache) => linkCache is not null && linkCache.TryResolve<ICellGetter>(identifier.FormKey, out var cell)
             ? CellConverters.ToName.Convert(cell, linkCache) as string
             : null;
     }
@@ -135,7 +135,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                 x => x.LinkCache,
                 x => x.PlacedFormKey,
                 (linkCache, placed) => (LinkCache: linkCache, Placed: placed))
-            .Where(x => x.LinkCache != null && x.Placed != FormKey.Null)
+            .Where(x => x.LinkCache is not null && x.Placed != FormKey.Null)
             .Take(1)
             .ObserveOnTaskpool()
             .Select(x => {
@@ -170,7 +170,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                 (cell, filter, linkCache) => (Cell: cell, Filter: filter, LinkCache: linkCache))
             .DistinctUntilChanged()
             .ObserveOnTaskpool()
-            .Select(x => x.LinkCache != null && x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var record)
+            .Select(x => x.LinkCache is not null && x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var record)
                 ? record.Temporary
                     .Concat(record.Persistent)
                     .Where(x.Filter)

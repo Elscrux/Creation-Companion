@@ -19,7 +19,7 @@ public sealed class SettingExporter : ISettingExporter {
 
     public bool Export(ISetting setting) {
         var filePath = _fileSystem.FileInfo.New(_settingPathProvider.GetFullPath(setting));
-        if (filePath.Directory == null) return false;
+        if (filePath.Directory is null) return false;
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 

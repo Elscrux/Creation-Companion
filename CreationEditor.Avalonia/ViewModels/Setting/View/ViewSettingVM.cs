@@ -29,7 +29,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     }
 
     public void OnStartup() {
-        if (Application.Current == null) throw new AppDomainUnloadedException("Application not started successfully");
+        if (Application.Current is null) throw new AppDomainUnloadedException("Application not started successfully");
 
         Application.Current.Resources.MergedDictionaries.Add(_viewModeResourceDictionary);
 

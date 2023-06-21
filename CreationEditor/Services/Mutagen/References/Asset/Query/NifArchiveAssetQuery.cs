@@ -30,11 +30,11 @@ public sealed class NifArchiveAssetQuery : ArchiveAssetQuery {
         var archiveReader = ArchiveService.GetReader(archive);
 
         var directory = FileSystem.Path.GetDirectoryName(filePath);
-        if (directory == null) yield break;
+        if (directory is null) yield break;
         if (!archiveReader.TryGetFolder(directory, out var archiveDirectory)) yield break;
 
         var archiveFile = archiveDirectory.Files.FirstOrDefault(file => file.Path.Equals(filePath, AssetCompare.PathComparison));
-        if (archiveFile == null) yield break;
+        if (archiveFile is null) yield break;
 
         foreach (var result in ParseArchiveFile(archiveFile)) {
             yield return result;

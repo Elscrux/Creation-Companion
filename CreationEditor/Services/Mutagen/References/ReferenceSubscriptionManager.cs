@@ -69,7 +69,7 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
     public void Change(Func<TIdentifier, Change<TReference>> changeSelector) {
         foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
             var change = changeSelector(identifier);
-            if (change == null) continue;
+            if (change is null) continue;
 
             lock (_lockObject) {
                 foreach (var subscription in subscriptions) {

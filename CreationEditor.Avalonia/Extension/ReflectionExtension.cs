@@ -7,13 +7,13 @@ public static class ReflectionExtension {
         var current = obj;
         foreach (var variable in variables) {
             var property = current.GetType().GetProperty(variable);
-            if (property == null) {
+            if (property is null) {
                 outValue = default;
                 return false;
             }
 
             current = property.GetValue(current);
-            if (current == null) {
+            if (current is null) {
                 outValue = default;
                 return false;
             }
@@ -35,16 +35,16 @@ public static class ReflectionExtension {
         PropertyInfo? property;
         while (i < names.Length - 1) {
             property = current.GetType().GetProperty(names[i]);
-            if (property == null) return false;
+            if (property is null) return false;
 
             current = property.GetValue(obj);
-            if (current == null) return false;
+            if (current is null) return false;
 
             i++;
         }
 
         property = current.GetType().GetProperty(names[^1]);
-        if (property == null) return false;
+        if (property is null) return false;
 
         if (property.PropertyType.IsAssignableFrom(typeof(T))) {
             property.SetValue(current, value);

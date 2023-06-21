@@ -45,7 +45,7 @@ public sealed class ExteriorCellsVM : ViewModel {
         SelectGridCell = ReactiveCommand.Create(() => {
             if (exteriorCellsProvider.RecordBrowserSettingsVM.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) {
                 foreach (var cell in worldspace.EnumerateCells()) {
-                    if (cell.Grid == null) continue;
+                    if (cell.Grid is null) continue;
 
                     var gridPoint = cell.Grid.Point;
                     if (gridPoint.X != GridXValue || gridPoint.Y != GridYValue) continue;

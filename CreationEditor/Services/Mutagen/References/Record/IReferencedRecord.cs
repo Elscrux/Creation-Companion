@@ -33,6 +33,6 @@ public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord, IEqu
     string IReferencedRecord.RecordTypeName => (this as IReferencedRecord).Record.Registration.Name;
 
     bool IEquatable<IReferencedRecord<TMajorRecordGetter>>.Equals(IReferencedRecord<TMajorRecordGetter>? other) {
-        return other != null && other.Record.FormKey.Equals(Record.FormKey);
+        return other is not null && other.Record.FormKey.Equals(Record.FormKey);
     }
 }

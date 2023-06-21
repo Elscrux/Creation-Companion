@@ -11,7 +11,7 @@ public static class TreeExtension {
             var current = stack.Pop();
 
             var childEnumerable = childSelector(current);
-            if (childEnumerable == null) continue;
+            if (childEnumerable is null) continue;
 
             foreach (var child in childEnumerable) {
                 stack.Push(child);
@@ -34,7 +34,7 @@ public static class TreeExtension {
             var current = stack.Pop();
 
             var childEnumerable = childSelector(current);
-            if (childEnumerable == null) continue;
+            if (childEnumerable is null) continue;
 
             foreach (var child in childEnumerable) {
                 if (childPredicate(child)) {

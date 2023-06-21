@@ -14,7 +14,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
     protected override void OnAttached() {
         base.OnAttached();
 
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         _dragHandler.Register(AssociatedObject);
     }
@@ -22,7 +22,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
     protected override void OnDetaching() {
         base.OnDetaching();
 
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         _dragHandler.Unregister(AssociatedObject);
     }

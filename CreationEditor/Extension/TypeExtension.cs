@@ -81,7 +81,7 @@ public static class TypeExtension {
             if (subClassType.ContainsGenericParameters) {
                 foreach (var @interface in subClassType.GetInterfaces()) {
                     var resolveOptional = componentContext.ResolveOptional(@interface);
-                    if (resolveOptional != null) {
+                    if (resolveOptional is not null) {
                         return resolveOptional;
                     }
                 }

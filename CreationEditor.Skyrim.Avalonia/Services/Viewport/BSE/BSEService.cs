@@ -43,7 +43,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
         var origin = cell.Grid?.Point ?? P2Int.Origin;
         var originToLoad = origin;
 
-        if (_worldspaceRuntimeSettings == null
+        if (_worldspaceRuntimeSettings is null
          || _worldspaceRuntimeSettings.Worldspace != worldspaceFormKey) {
             // Worldspace not loaded - unload everything
             UnloadEverything();
@@ -74,7 +74,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
     }
 
     private void UnloadEverything() {
-        if (_worldspaceRuntimeSettings != null) {
+        if (_worldspaceRuntimeSettings is not null) {
             var referenceLists = new List<List<Interop.ReferenceLoad>>();
 
             foreach (var (_, references) in _worldspaceRuntimeSettings.LoadedCells) {
@@ -91,7 +91,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
             }
 
             _worldspaceRuntimeSettings = null;
-        } else if (_interiorCellReferences != null) {
+        } else if (_interiorCellReferences is not null) {
             Unload(_interiorCellReferences);
 
             _interiorCellReferences = null;
@@ -121,7 +121,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
                     break;
                 case IPlacedObjectGetter placedObject:
                     var placement = placedObject.Placement;
-                    if (placement == null) continue;
+                    if (placement is null) continue;
 
                     var relativePosition = placement.Position - origin;
 
@@ -137,7 +137,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
                         _ => throw new ArgumentOutOfRangeException(nameof(baseObject))
                     };
 
-                    if (model == null) continue;
+                    if (model is null) continue;
 
                     var scale = placedObject.Scale ?? 1;
 

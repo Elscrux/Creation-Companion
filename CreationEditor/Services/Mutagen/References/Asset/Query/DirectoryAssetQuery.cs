@@ -11,7 +11,7 @@ public sealed class DirectoryAssetQuery : FileStructureAssetQuery {
     public override IEnumerable<AssetQueryResult<string>> ParseFile(string directory) {
         var type = AssetTypeService.GetAssetType(directory);
 
-        if (type != null) {
+        if (type is not null) {
             yield return new AssetQueryResult<string>(AssetTypeService.GetAssetLink(directory, type), directory);
         } else if (FileSystem.Path.GetExtension(directory).Equals(ArchiveService.GetExtension(), AssetCompare.PathComparison)) {
             //BSAPath

@@ -84,7 +84,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
     public bool Match(object? data) => data is ConditionData;
 
     public Control? Build(object? param) {
-        if (param == null) return new TextBlock { Text = "Data is not available" };
+        if (param is null) return new TextBlock { Text = "Data is not available" };
 
         if (param is not ConditionData data) return new TextBlock { Text = $"Type {param.GetType()} not supported" };
 
@@ -217,7 +217,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         var parameterIsAlwaysPackageData = parameter.Contains("PackageDataIndex", StringComparison.OrdinalIgnoreCase);
 
         var useAliases = parameterIsAlwaysAlias
-         || (QuestContext != null && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.AllAliasTypes));
+         || (QuestContext is not null && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.AllAliasTypes));
         var usePackageData = parameterIsAlwaysPackageData
          || (Context is IPackageGetter && scopedTypes.AnyInheritsFromAny(RecordTypeConstants.PackageDataTypes));
 

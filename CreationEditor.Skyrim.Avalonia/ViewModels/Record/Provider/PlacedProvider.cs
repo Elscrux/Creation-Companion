@@ -68,7 +68,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         });
 
         EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             var newOverride = recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
             recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newOverride);
@@ -78,20 +78,20 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             if (SelectedRecord?.Record is not IPlacedObjectGetter placedObject) return;
 
             var placeable = placedObject.Base.TryResolve(RecordBrowserSettingsVM.LinkCache);
-            if (placeable == null) return;
+            if (placeable is null) return;
 
             var newOverride = recordController.GetOrAddOverride<IPlaceableObject, IPlaceableObjectGetter>(placeable);
             recordEditorController.OpenEditor(newOverride);
         });
 
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DeleteRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);
@@ -104,7 +104,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
                 RecordCache.Clear();
 
-                if (Cell == null) return;
+                if (Cell is null) return;
 
                 RecordCache.Edit(updater => {
                     foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {

@@ -126,7 +126,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     return new Func<IAsset, bool>(ShowAsset);
 
                     bool ShowAsset(IAsset asset) {
-                        if (asset == null) return false;
+                        if (asset is null) return false;
 
                         if (hideBsa && asset.IsVirtual) return false;
                         if (hideEmptyDirectories && asset is { IsDirectory: true, HasChildren: false }) return false;
@@ -157,7 +157,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     new TemplateColumn<AssetTreeItem>(
                         "Name",
                         new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                            if (asset == null) return null;
+                            if (asset is null) return null;
 
                             var textBlock = new TextBlock {
                                 Text = _fileSystem.Path.GetFileName(asset.Path),
@@ -248,7 +248,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             var items = AssetTreeSource.Items.ToArray();
             do {
                 currentNode = items.FirstOrDefault(a => path.StartsWith(_fileSystem.Path.GetRelativePath(_root, a.Path), AssetCompare.PathComparison));
-                if (currentNode == null) break;
+                if (currentNode is null) break;
 
                 pathIndices = pathIndices.Append(items.IndexOf(currentNode));
                 items = currentNode.Children.ToArray();
@@ -289,7 +289,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 if (asset is { Asset: AssetFile, IsVirtual: true }) {
                     // When the asset is virtual, we need to extract it to a temp file first
                     var tempFilePath = archiveService.TryGetFileAsTempFile(asset.Path);
-                    if (tempFilePath != null) {
+                    if (tempFilePath is not null) {
                         openPath = tempFilePath;
                     }
                 } else if (!_fileSystem.Path.Exists(asset.Path)) {
@@ -310,7 +310,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             Control? content = null;
 
             var referenceBrowserVM = GetReferenceBrowserVM(deleteAssets);
-            if (referenceBrowserVM != null) {
+            if (referenceBrowserVM is not null) {
                 var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
                 content = new StackPanel {
                     Children = {
@@ -334,13 +334,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Rename = ReactiveCommand.CreateFromTask<AssetTreeItem>(async asset => {
             var name = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
             var directory = _fileSystem.Path.GetDirectoryName(asset.Path);
-            if (directory == null) return;
+            if (directory is null) return;
 
             var textBox = new TextBox { Text = name };
             var content = new StackPanel { Children = { textBox } };
 
             var referenceBrowserVM = GetReferenceBrowserVM(asset);
-            if (referenceBrowserVM != null) {
+            if (referenceBrowserVM is not null) {
                 var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
                 content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
                 content.Children.Add(referenceBrowser);
@@ -422,10 +422,10 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .ToArray();
 
         var firstDraggedAsset = draggedAssets.FirstOrDefault();
-        if (firstDraggedAsset == null) return;
+        if (firstDraggedAsset is null) return;
 
         var srcDirectory = _fileSystem.Path.GetDirectoryName(firstDraggedAsset.Path);
-        if (srcDirectory == null) return;
+        if (srcDirectory is null) return;
 
         var relativeSrcDirectory = _fileSystem.Path.GetRelativePath(_root, srcDirectory);
         var relativeDstDirectory = _fileSystem.Path.GetRelativePath(_root, directory.Path);
@@ -470,7 +470,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         };
 
         var referenceBrowserVM = GetReferenceBrowserVM(draggedAssets);
-        if (referenceBrowserVM != null) {
+        if (referenceBrowserVM is not null) {
             var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
             content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
             content.Children.Add(referenceBrowser);

@@ -347,7 +347,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
-                    if (x.LinkCache == null) {
+                    if (x.LinkCache is null) {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
                     if (x.FormKey.IsNull) {
@@ -355,13 +355,13 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
 
                     IMajorRecordIdentifier? record = null;
-                    if (x.ScopedRecords != null) {
+                    if (x.ScopedRecords is not null) {
                         record = x.ScopedRecords.FirstOrDefault(ident => ident.FormKey == x.FormKey);
                     } else if (x.LinkCache.TryResolve(x.FormKey, EnabledTypes(x.Types), out var resolvedRecord)) {
                         record = resolvedRecord;
                     }
 
-                    if (record == null) {
+                    if (record is null) {
                         return new State(StatusIndicatorState.Failure, RecordNotResolved, x.FormKey, string.Empty);
                     }
 
@@ -437,7 +437,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
-                    if (x.LinkCache == null) {
+                    if (x.LinkCache is null) {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
                     if (string.IsNullOrWhiteSpace(x.EditorID)) {
@@ -445,7 +445,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
 
                     var formKey = FormKey.Null;
-                    if (x.ScopedRecords != null) {
+                    if (x.ScopedRecords is not null) {
                         formKey = x.ScopedRecords.FirstOrDefault(ident => ident.EditorID == x.EditorID)?.FormKey ?? FormKey.Null;
                     } else if (x.LinkCache.TryResolveIdentifier(x.EditorID, EnabledTypes(x.Types), out var resolvedFormKey)) {
                         formKey = resolvedFormKey;
@@ -455,10 +455,10 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         return new State(StatusIndicatorState.Failure, RecordNotResolved, formKey, x.EditorID);
                     }
 
-                    if (x.Filter != null && !x.Filter(formKey, x.EditorID)) {
+                    if (x.Filter is not null && !x.Filter(formKey, x.EditorID)) {
                         return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, x.EditorID);
                     }
-                    if (x.BlacklistFormKeys != null && x.BlacklistFormKeys.Contains(formKey)) {
+                    if (x.BlacklistFormKeys is not null && x.BlacklistFormKeys.Contains(formKey)) {
                         return new State(StatusIndicatorState.Passive, FormKeyBlacklisted, formKey, x.EditorID);
                     }
 
@@ -545,22 +545,22 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
 
                     if (FormKey.TryFactory(x.Raw, out var formKey)) {
-                        if (x.BlacklistFormKeys != null && x.BlacklistFormKeys.Contains(formKey)) {
+                        if (x.BlacklistFormKeys is not null && x.BlacklistFormKeys.Contains(formKey)) {
                             return new State(StatusIndicatorState.Passive, FormKeyBlacklisted, formKey, string.Empty);
                         }
 
-                        if (x.LinkCache == null) {
+                        if (x.LinkCache is null) {
                             return new State(StatusIndicatorState.Success, "Valid FormKey", formKey, string.Empty);
                         }
 
                         IMajorRecordIdentifier? record = null;
-                        if (x.ScopedRecords != null) {
+                        if (x.ScopedRecords is not null) {
                             record = x.ScopedRecords.FirstOrDefault(ident => ident.FormKey == formKey);
                         } else if (x.LinkCache.TryResolve(formKey, EnabledTypes(x.Types), out var resolvedRecord)) {
                             record = resolvedRecord;
                         }
 
-                        if (record == null) {
+                        if (record is null) {
                             return new State(
                                 x.MissingMeansError ? StatusIndicatorState.Failure : StatusIndicatorState.Success,
                                 RecordNotResolved,
@@ -569,14 +569,14 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         }
 
                         var editorID = record.EditorID ?? string.Empty;
-                        if (x.Filter != null && !x.Filter(formKey, editorID)) {
+                        if (x.Filter is not null && !x.Filter(formKey, editorID)) {
                             return new State(StatusIndicatorState.Passive, RecordFiltered, formKey, editorID);
                         }
 
                         return new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorID);
                     }
 
-                    if (x.LinkCache == null) {
+                    if (x.LinkCache is null) {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
 
@@ -653,11 +653,11 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     var enabledTypes = EnabledTypes(x.Types).ToArray();
                     if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
 
-                    if (x.ScopedRecords != null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
+                    if (x.ScopedRecords is not null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
 
                     return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
                         try {
-                            if (x.LinkCache == null) return Task.CompletedTask;
+                            if (x.LinkCache is null) return Task.CompletedTask;
 
                             foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
                                 if (cancel.IsCancellationRequested) return Task.CompletedTask;
@@ -704,11 +704,11 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                     .ObserveOn(RxApp.TaskpoolScheduler)
                                     .Select(data => {
                                         return new Func<IMajorRecordIdentifier, bool>(ident => {
-                                            if (data.Filter != null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
-                                            if (data.BlacklistFormKeys != null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
+                                            if (data.Filter is not null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
+                                            if (data.BlacklistFormKeys is not null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
                                             if (data.EditorID.IsNullOrWhitespace()) return true;
 
-                                            var editorID = data.NameSelector == null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
+                                            var editorID = data.NameSelector is null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
                                             return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
                                         });
                                     });
@@ -726,10 +726,10 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                     .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
                                         var fk = ident.FormKey;
                                         if (fk == term.FormKey) return true;
-                                        if (term.ID == null) return false;
+                                        if (term.ID is null) return false;
 
                                         if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
-                                        if (modKeyToId == null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
+                                        if (modKeyToId is null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
 
                                         var formID = new FormID(new ModIndex(index), fk.ID);
                                         return formID.Raw == term.ID.Value.Raw;
@@ -805,7 +805,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     }
 
     private void AttachTextBox(TextBox? textBox, FormKeyPickerSearchMode searchMode) {
-        if (textBox == null) return;
+        if (textBox is null) return;
 
         textBox.WhenAnyValue(x => x.Text)
             .Skip(1)

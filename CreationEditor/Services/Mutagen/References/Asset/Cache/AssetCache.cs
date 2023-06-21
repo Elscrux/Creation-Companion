@@ -21,7 +21,7 @@ public sealed class AssetCache<TOrigin, TReference>
 
         var assetReferenceCache = assetQuery.LoadAssets(origin);
         var assetReferenceCaches = new Dictionary<TOrigin, Query.AssetQuery<TOrigin, TReference>.AssetReferenceCache>();
-        if (assetReferenceCache != null) assetReferenceCaches.Add(origin, assetReferenceCache);
+        if (assetReferenceCache is not null) assetReferenceCaches.Add(origin, assetReferenceCache);
         _referenceCaches = assetReferenceCaches;
     }
 
@@ -56,7 +56,7 @@ public sealed class AssetCache<TOrigin, TReference>
         foreach (var (_, cache) in _referenceCaches) {
             // todo replace with TryGetValue when mutagen update is done
             var assetDictionary = cache.Cache.FirstOrDefault(t => t.Key.GetType() == asset.Type.GetType()).Value;
-            if (assetDictionary == null) continue;
+            if (assetDictionary is null) continue;
 
             // if (!cache.Cache.TryGetValue(asset.Type, out var assetDictionary)) continue;
             if (!assetDictionary.TryGetValue(asset, out var usages)) continue;

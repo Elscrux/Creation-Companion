@@ -36,11 +36,11 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
     public void Dispose() => _attachedDisposable?.Dispose();
 
     private void SideDockChanged() {
-        if (SideDock == null || AssociatedObject == null) return;
+        if (SideDock is null || AssociatedObject is null) return;
 
         AssociatedObject.GetObservable(GetSizeProperty())
             .Subscribe(size => {
-                if (UpdateSize && SideDock.ActiveTab != null && size.GridUnitType == GridUnitType.Pixel) {
+                if (UpdateSize && SideDock.ActiveTab is not null && size.GridUnitType == GridUnitType.Pixel) {
                     SideDock.ActiveTab.Size = size.Value;
                 }
             });
@@ -48,9 +48,9 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(x => {
                 var (editMode, activeTab, tabCount) = x;
-                if (SideDock.InEditMode && SideDock.ActiveTab != null) return;
+                if (SideDock.InEditMode && SideDock.ActiveTab is not null) return;
 
-                var activeTabSize = UpdateSize && activeTab?.Size != null ? activeTab.Size.Value : ActiveTabSize;
+                var activeTabSize = UpdateSize && activeTab?.Size is not null ? activeTab.Size.Value : ActiveTabSize;
                 var size = new GridLength(ReturnIf(SideDock, activeTabSize, NoActiveTabSize), GridUnitType.Pixel);
                 AssociatedObject.SetValue(GetSizeProperty(), size);
 
@@ -60,13 +60,13 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
     }
 
     private double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {
-        if (vm == null) return 0;
+        if (vm is null) return 0;
 
         if (!vm.Children.Any()) {
             return vm.InEditMode ? noTabActive : 0;
         }
 
-        return vm.ActiveTab != null ? tabActive : noTabActive;
+        return vm.ActiveTab is not null ? tabActive : noTabActive;
     }
 
     private StyledProperty<GridLength> GetSizeProperty() {

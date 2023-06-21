@@ -17,12 +17,12 @@ public class FuncComparer<TCompare> : IComparer<TCompare>, IComparer {
     }
 
     public virtual int Compare(TCompare? x, TCompare? y) {
-        if (x == null) {
-            if (y == null) return 0;
+        if (x is null) {
+            if (y is null) return 0;
 
             return -1;
         }
-        if (y == null) return 1;
+        if (y is null) return 1;
 
         return _compare(x, y);
     }

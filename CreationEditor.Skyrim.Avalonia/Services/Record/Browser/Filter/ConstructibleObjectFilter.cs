@@ -24,13 +24,13 @@ public sealed class ConstructibleObjectFilter : RecordFilter<IConstructibleObjec
         var finishedFormKeys = new HashSet<FormKey>();
         var byohListing = new RecordFilterListing(Byoh, record => record is IConstructibleObjectGetter constructible
          && constructible.WorkbenchKeyword.TryResolve(_editorEnvironment.LinkCache, out var keyword)
-         && keyword.EditorID != null && keyword.EditorID.StartsWith(Byoh));
+         && keyword.EditorID is not null && keyword.EditorID.StartsWith(Byoh));
 
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IConstructibleObjectGetter>()
             .SelectWhere(constructible => {
                 if (finishedFormKeys.Contains(constructible.WorkbenchKeyword.FormKey)) return TryGet<RecordFilterListing>.Failure;
                 if (!constructible.WorkbenchKeyword.TryResolve(_editorEnvironment.LinkCache, out var keyword)) return TryGet<RecordFilterListing>.Failure;
-                if (keyword.EditorID == null) return TryGet<RecordFilterListing>.Failure;
+                if (keyword.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(keyword.FormKey);
 

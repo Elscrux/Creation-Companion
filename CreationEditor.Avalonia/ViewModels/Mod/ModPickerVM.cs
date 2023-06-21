@@ -33,7 +33,7 @@ public sealed class ModPickerVM : ViewModel {
                 .Select(x => new Func<LoadOrderModItem, bool>(mod =>
                     (x.SearchText.IsNullOrEmpty()
                      || mod.ModKey.FileName.String.Contains(x.SearchText, StringComparison.OrdinalIgnoreCase))
-                    && (x.Filter == null || x.Filter(mod)))))
+                    && (x.Filter is null || x.Filter(mod)))))
             .Sort(new FuncComparer<LoadOrderModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
             .ToObservableCollection(this);
 

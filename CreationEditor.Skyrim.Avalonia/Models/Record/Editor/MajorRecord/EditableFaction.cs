@@ -149,7 +149,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         VendorLocation.Target ??= new LocationFallback { Type = LocationTargetRadius.LocationType.NearSelf };
         VendorBuySellList = parent.VendorBuySellList;
         MerchantContainer = parent.MerchantContainer;
-        Conditions = parent.Conditions != null
+        Conditions = parent.Conditions is not null
             ? new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)))
             : new ObservableCollectionExtended<EditableCondition>();
     }

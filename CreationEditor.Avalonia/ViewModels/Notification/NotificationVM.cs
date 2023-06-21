@@ -19,12 +19,12 @@ public sealed class NotificationVM : ViewModel, INotificationVM {
 
     public NotificationVM(INotificationService notificationService) {
         LatestNotification = notificationService.Notifications
-            .Where(x => x.LoadText != null)
+            .Where(x => x.LoadText is not null)
             .Sample(UpdateInterval);
 
         _loadingItems = notificationService.Notifications
             .ToObservableChangeSet(x => x.ID)
-            .Filter(x => x.LoadText != null)
+            .Filter(x => x.LoadText is not null)
             .Buffer(UpdateInterval)
             .FlattenBufferResult()
             .ToObservableCollection(this);

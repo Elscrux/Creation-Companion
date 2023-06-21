@@ -43,7 +43,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         var nameColumn = new TemplateColumn<IReference>(
             "Name",
             new FuncDataTemplate<IReference>((r, _) => {
-                if (r == null) return null;
+                if (r is null) return null;
 
                 return new TextBlock { Text = r.Name };
             }),
@@ -59,7 +59,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         var identifierColumn = new TemplateColumn<IReference>(
             "Identifier",
             new FuncDataTemplate<IReference>((r, _) => {
-                if (r == null) return null;
+                if (r is null) return null;
 
                 return new TextBlock { Text = r.Identifier };
             }),
@@ -73,7 +73,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         var typeColumn = new TemplateColumn<IReference>(
             "Type",
             new FuncDataTemplate<IReference>((r, _) => {
-                if (r == null) return null;
+                if (r is null) return null;
 
                 return new TextBlock { Text = r.Type };
             }),

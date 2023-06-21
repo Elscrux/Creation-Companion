@@ -32,13 +32,13 @@ public abstract class TabbedDockVM : DockContainerVM {
 
     public override bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock) {
         outDock = Tabs.FirstOrDefault(tab => ReferenceEquals(tab.Control, control));
-        return outDock != null;
+        return outDock is not null;
     }
 
     public override bool Focus(IDockedItem dockedItem) {
         if (!Tabs.Contains(dockedItem)) return false;
 
-        if (ActiveTab != null) ActiveTab.IsSelected = false;
+        if (ActiveTab is not null) ActiveTab.IsSelected = false;
 
         ActiveTab = dockedItem;
         dockedItem.IsSelected = true;
@@ -49,7 +49,7 @@ public abstract class TabbedDockVM : DockContainerVM {
     protected virtual void Unfocus() {}
 
     public override void Add(IDockedItem dockedItem, DockConfig config) {
-        if (config.DockMode != null && config.DockMode != DockMode) return;
+        if (config.DockMode is not null && config.DockMode != DockMode) return;
 
         using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             dockedItem.DockParent = this;
@@ -71,7 +71,7 @@ public abstract class TabbedDockVM : DockContainerVM {
                 if (dockedItem.Equals(ActiveTab)) {
                     Unfocus();
                     var newActiveTab = Tabs.FirstOrDefault(tab => !tab.Equals(dockedItem));
-                    if (newActiveTab != null) newActiveTab.IsSelected = true;
+                    if (newActiveTab is not null) newActiveTab.IsSelected = true;
                     ActiveTab = newActiveTab;
                 }
 

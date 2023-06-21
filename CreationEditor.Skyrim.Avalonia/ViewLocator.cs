@@ -13,7 +13,7 @@ public sealed class ViewLocator : IDataTemplate {
             .Replace("VM", "View");
         var type = name is null ? null : Type.GetType(name) ?? Assembly.GetAssembly(typeof(MainVM))?.GetType(name);
 
-        return type != null ? (Control) Activator.CreateInstance(type)! : new TextBlock { Text = "Not Found: " + name };
+        return type is not null ? (Control) Activator.CreateInstance(type)! : new TextBlock { Text = "Not Found: " + name };
     }
 
     public bool Match(object? data) {

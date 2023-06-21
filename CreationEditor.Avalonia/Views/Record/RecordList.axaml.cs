@@ -36,7 +36,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         if (change.Property == ColumnsProperty) {
             RecordGrid.Columns.Clear();
 
-            if (Columns != null) {
+            if (Columns is not null) {
                 RecordGrid.Columns.AddRange(Columns);
                 Sort();
             }
@@ -44,7 +44,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
     }
 
     private void ScrollToItem(IReferencedRecord? referencedRecord) {
-        if (RecordGrid == null || referencedRecord == null) return;
+        if (RecordGrid is null || referencedRecord is null) return;
 
         RecordGrid.SelectedItem = referencedRecord;
         RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, RecordGrid.Columns.First());

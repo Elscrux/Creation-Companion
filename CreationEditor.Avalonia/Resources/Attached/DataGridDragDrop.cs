@@ -80,7 +80,7 @@ public sealed class DragDropExtended : AvaloniaObject {
 
                 void DataGridLoadedHandler(object? sender, RoutedEventArgs e) {
                     var border = dataGrid.FindDescendantOfType<Border>();
-                    if (border == null) return;
+                    if (border is null) return;
 
                     border.RemoveHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
                     border.AddHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
@@ -127,7 +127,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not Border { Parent: DataGrid dataGrid }) return;
 
         var row = GetLastRow(dataGrid);
-        if (row == null) return;
+        if (row is null) return;
 
         // Get old data
         if (!GetData(row, e,
@@ -148,7 +148,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not Border { Parent: DataGrid dataGrid }) return;
 
         var row = GetLastRow(dataGrid);
-        if (row == null) return;
+        if (row is null) return;
 
         AdornerLayer.SetAdorner(row, null);
     }
@@ -157,7 +157,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not Border { Parent: DataGrid dataGrid }) return;
 
         var row = GetLastRow(dataGrid);
-        if (row == null || !GetData(row, e,
+        if (row is null || !GetData(row, e,
             out var oldDataGrid, out var oldList,
             out var newDataGrid, out var newList)) return;
 
@@ -190,7 +190,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle" and not "InvalidVisualElement") return;
 
         var dataGrid = row.FindAncestorOfType<DataGrid>();
-        if (dataGrid == null) return;
+        if (dataGrid is null) return;
 
         // Only start dragging when the row was previously selected
         if (!dataGrid.SelectedItems.Contains(item)) return;

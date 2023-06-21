@@ -111,7 +111,7 @@ public sealed class LayoutDockVM : DockContainerVM {
 
         //Try to add to existing document dock, otherwise add new document dock
         using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
-            if (documentDockVM != null) {
+            if (documentDockVM is not null) {
                 documentDockVM.Add(dockedItem, DockConfig.Default);
             } else {
                 var documentControl = DocumentDockVM.CreateControl(dockedItem, this);

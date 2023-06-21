@@ -66,7 +66,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
                 .ConfigureAwait(true);
 
             var directory = pickedDirectories.Count > 0 ? pickedDirectories[0] : null;
-            if (directory == null) return;
+            if (directory is null) return;
 
             var localPath = directory.Path.LocalPath;
             if (localPath == _dataDirectoryProvider.Path) {

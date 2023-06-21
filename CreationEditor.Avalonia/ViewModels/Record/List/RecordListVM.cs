@@ -43,7 +43,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
         RecordProvider = recordProvider;
 
         OpenReferences = ReactiveCommand.Create(() => {
-                if (RecordProvider.SelectedRecord == null) return;
+                if (RecordProvider.SelectedRecord is null) return;
 
                 var newScope = lifetimeScope.BeginLifetimeScope();
                 var editorEnvironment = newScope.Resolve<IEditorEnvironment>();

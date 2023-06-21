@@ -18,7 +18,7 @@ public sealed class RelationshipFilter : RecordFilter<IRelationshipGetter> {
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IAssociationTypeGetter>()
-            .Where(associationType => associationType.EditorID != null)
+            .Where(associationType => associationType.EditorID is not null)
             .Select(associationType => new RecordFilterListing(associationType.EditorID!, record => record is IRelationshipGetter relationship && relationship.AssociationType.FormKey == associationType.FormKey));
     }
 }

@@ -125,14 +125,14 @@ public sealed class BsaArchiveService : IArchiveService {
         filePath = _fileSystem.Path.GetRelativePath(_dataDirectory, filePath);
 
         var directoryPath = _fileSystem.Path.GetDirectoryName(filePath);
-        if (directoryPath == null) return null;
+        if (directoryPath is null) return null;
 
         // Search for file in archives
         foreach (var reader in _archives.Values) {
             if (!reader.TryGetFolder(directoryPath, out var archiveFolder)) continue;
 
             var archiveFile = archiveFolder.Files.FirstOrDefault(f => f.Path == filePath);
-            if (archiveFile == null) continue;
+            if (archiveFile is null) continue;
 
             // Copy file to temp file
             var tempFilePath = _fileSystem.Path.GetTempFileName() + _fileSystem.Path.GetExtension(filePath);
@@ -169,7 +169,7 @@ public sealed class BsaArchiveService : IArchiveService {
 
                 foreach (var file in reader.Files) {
                     var dirName = _fileSystem.Path.GetDirectoryName(file.Path);
-                    if (dirName == null) continue;
+                    if (dirName is null) continue;
 
                     var directoryNames = dirName.Split(_fileSystem.Path.DirectorySeparatorChar);
                     if (directoryNames.Length == 0) continue;
@@ -177,7 +177,7 @@ public sealed class BsaArchiveService : IArchiveService {
                     IList<ArchiveDirectory> subDirectories = directories;
                     foreach (var dir in directoryNames) {
                         var currentDir = subDirectories.FirstOrDefault(d => d.Name == dir);
-                        if (currentDir == null) {
+                        if (currentDir is null) {
                             currentDir = new ArchiveDirectory(dir, new List<ArchiveDirectory>());
                             subDirectories.Add(currentDir);
                         }
@@ -194,7 +194,7 @@ public sealed class BsaArchiveService : IArchiveService {
                 var relativePathNames = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar);
                 foreach (var pathName in relativePathNames) {
                     var dir = currentDirectories.FirstOrDefault(d => string.Equals(d.Name, pathName, AssetCompare.PathComparison));
-                    if (dir == null) {
+                    if (dir is null) {
                         invalid = true;
                         break;
                     }

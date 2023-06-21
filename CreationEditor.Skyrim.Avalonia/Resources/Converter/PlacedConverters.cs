@@ -5,7 +5,7 @@ namespace CreationEditor.Skyrim.Avalonia.Resources.Converter;
 
 public static class PlacedConverters {
     public static readonly ExtendedFuncValueConverter<IPlacedGetter, string?, ILinkCache> ToName = new((record, linkCache) => {
-        if (record == null || linkCache == null) return null;
+        if (record is null || linkCache is null) return null;
 
         return record.GetSelfOrBaseEditorID(linkCache);
     });

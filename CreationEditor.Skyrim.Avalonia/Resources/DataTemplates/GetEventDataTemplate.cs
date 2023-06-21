@@ -55,7 +55,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
 
         questContext
             .Subscribe(quest => {
-                if (quest?.Event == null) return;
+                if (quest?.Event is null) return;
 
                 // Get the event definition
                 var storyManagerEvent = SkyrimDefinitions.StoryManagerEvents.FirstOrDefault(e => e.Type == quest.Event.Value.TypeInt);
@@ -70,7 +70,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                 var enumToEventMember = new Func<Enum?, GetEventDataConditionData.EventMember>(
                     e => (GetEventDataConditionData.EventMember) Enum.ToObject(
                         typeof(GetEventDataConditionData.EventMember),
-                        e == null
+                        e is null
                             ? -1
                             : Convert.ToUInt16(e)));
 

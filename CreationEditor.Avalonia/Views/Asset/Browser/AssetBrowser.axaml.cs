@@ -56,7 +56,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {
-        if (AssetTree.RowSelection == null || ViewModel == null) return;
+        if (AssetTree.RowSelection is null || ViewModel is null) return;
 
         switch (e.Key) {
             // Focus search box
@@ -83,13 +83,13 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnDoubleTapped(object? sender, TappedEventArgs e) {
-        if (AssetTree.RowSelection == null || ViewModel == null) return;
+        if (AssetTree.RowSelection is null || ViewModel is null) return;
 
         if (AssetTree.RowSelection.SelectedItem is AssetTreeItem { IsDirectory: true }) {
             if (e.Source is not Visual visual) return;
 
             var expanderCell = visual.FindAncestorOfType<TreeDataGridExpanderCell>();
-            if (expanderCell != null) {
+            if (expanderCell is not null) {
                 expanderCell.IsExpanded = !expanderCell.IsExpanded;
             }
         } else {

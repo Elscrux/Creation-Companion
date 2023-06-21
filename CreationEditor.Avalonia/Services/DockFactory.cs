@@ -122,8 +122,8 @@ public sealed class DockFactory : IDockFactory {
                 throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null);
         }
 
-        if (dockMode != null) dockConfig = dockConfig with { DockMode = dockMode.Value };
-        if (dock != null) dockConfig = dockConfig with { Dock = dock.Value };
+        if (dockMode is not null) dockConfig = dockConfig with { DockMode = dockMode.Value };
+        if (dock is not null) dockConfig = dockConfig with { Dock = dock.Value };
 
         _dockingManagerService.AddControl(control, dockConfig);
     }

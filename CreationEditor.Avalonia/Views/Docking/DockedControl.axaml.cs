@@ -73,8 +73,8 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
 
     private void CheckRemoved() {
         if (RemovalLock.IsLocked()
-         || GetValue(VisualParentProperty) != null
-         || Control.GetValue(VisualParentProperty) != null
+         || GetValue(VisualParentProperty) is not null
+         || Control.GetValue(VisualParentProperty) is not null
          || DockParent.TryGetDock(Control, out _)) return;
 
         (this as IDockObject).DockRoot.OnDockRemoved(this);

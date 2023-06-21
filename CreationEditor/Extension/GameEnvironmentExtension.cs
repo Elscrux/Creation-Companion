@@ -8,11 +8,11 @@ public static class GameEnvironmentExtension {
     public static TModGetter? ResolveMod<TModSetter, TModGetter>(this IGameEnvironment<TModSetter, TModGetter> environment, ModKey? modKey)
         where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
         where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
-        return modKey == null ? null : environment.LoadOrder.FirstOrDefault(mod => mod.Key == modKey)?.Value.Mod;
+        return modKey is null ? null : environment.LoadOrder.FirstOrDefault(mod => mod.Key == modKey)?.Value.Mod;
     }
 
     public static IModGetter? ResolveMod(this IGameEnvironment environment, ModKey? modKey) {
-        return modKey == null ? null : environment.LoadOrder.FirstOrDefault(mod => mod.Key == modKey)?.Value.Mod;
+        return modKey is null ? null : environment.LoadOrder.FirstOrDefault(mod => mod.Key == modKey)?.Value.Mod;
     }
 
     public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(this IGameEnvironment<TModSetter, TModGetter> environment, IEnumerable<ModKey> modKeys)

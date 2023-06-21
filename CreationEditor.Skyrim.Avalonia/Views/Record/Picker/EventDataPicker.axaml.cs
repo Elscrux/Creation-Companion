@@ -44,7 +44,7 @@ public partial class EventDataPicker : ActivatableUserControl {
     protected override void WhenActivated() {
         var eventObservable = this.WhenAnyValue(x => x.Quest)
             .Select(quest => {
-                if (quest?.Event == null) return null;
+                if (quest?.Event is null) return null;
 
                 var eventType = quest.Event.Value.TypeInt;
                 return SkyrimDefinitions.StoryManagerEvents.FirstOrDefault(@event => @event.Type == eventType);
@@ -52,7 +52,7 @@ public partial class EventDataPicker : ActivatableUserControl {
 
         // Populate the list of event members with the members of the currently selected event in the context
         EventMembers = eventObservable
-            .Select(storyManagerEvent => storyManagerEvent == null ? Array.Empty<Enum>() : storyManagerEvent.ReferenceEnums)
+            .Select(storyManagerEvent => storyManagerEvent is null ? Array.Empty<Enum>() : storyManagerEvent.ReferenceEnums)
             .ToObservableCollection(ActivatedDisposable);
 
         // Force the event member to be the right type when the list of event members changes
@@ -61,7 +61,7 @@ public partial class EventDataPicker : ActivatableUserControl {
             .CombineLatest(EventMembers.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (x, _) => x)
             .Subscribe(eventMembers => {
                 // Force convert the event member to the right enum type
-                if (EventMember == null) {
+                if (EventMember is null) {
                     // Use the first value in the list in case the event member is null
                     EventMember = eventMembers.FirstOrDefault();
                 } else if (eventMembers.Any()) {

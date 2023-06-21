@@ -129,13 +129,13 @@ public static class ObservableExtension {
             .ObserveOnGui()
             .Pairwise()
             .Select(x => {
-                if (x.Previous == null) {
-                    if (x.Current == null) {
+                if (x.Previous is null) {
+                    if (x.Current is null) {
                         return new ChangeSet<T>();
                     }
                     return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
                 }
-                if (x.Current == null) {
+                if (x.Current is null) {
                     return new ChangeSet<T>();
                 }
 
@@ -161,13 +161,13 @@ public static class ObservableExtension {
             .ObserveOnGui()
             .Pairwise()
             .Select(x => {
-                if (x.Previous == null) {
-                    if (x.Current == null) {
+                if (x.Previous is null) {
+                    if (x.Current is null) {
                         return new ChangeSet<T>();
                     }
                     return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
                 }
-                if (x.Current == null) {
+                if (x.Current is null) {
                     return new ChangeSet<T>();
                 }
 

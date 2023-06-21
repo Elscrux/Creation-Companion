@@ -87,24 +87,24 @@ public static class ObservableCollectionExtension {
 
         switch (change.Action) {
             case NotifyCollectionChangedAction.Add:
-                if (change.NewItems == null) break;
+                if (change.NewItems is null) break;
 
                 source.AddOrInsertRange(change.NewItems.OfType<T>(), change.NewStartingIndex);
                 break;
             case NotifyCollectionChangedAction.Remove:
-                if (change.OldItems == null) break;
+                if (change.OldItems is null) break;
                 var removeItems = change.OldItems.OfType<T>();
 
                 source.RemoveMany(removeItems);
                 break;
             case NotifyCollectionChangedAction.Replace:
-                if (change.OldItems == null || change.NewItems == null) break;
+                if (change.OldItems is null || change.NewItems is null) break;
 
                 source.RemoveMany(change.OldItems.OfType<T>());
                 source.AddOrInsertRange(change.NewItems.OfType<T>(), change.NewStartingIndex);
                 break;
             case NotifyCollectionChangedAction.Move:
-                if (change.NewItems == null) break;
+                if (change.NewItems is null) break;
 
                 var moveItems = change.NewItems.OfType<T>().ToArray();
                 if (moveItems.Length == 0) break;
@@ -123,7 +123,7 @@ public static class ObservableCollectionExtension {
                 break;
             case NotifyCollectionChangedAction.Reset:
                 source.Clear();
-                if (change.NewItems == null) break;
+                if (change.NewItems is null) break;
 
                 source.AddRange(change.NewItems.OfType<T>());
                 break;
@@ -148,13 +148,13 @@ public static class ObservableCollectionExtension {
             var index = internalList.IndexOf(item);
             if (index == -1) continue;
 
-            if (index < smallestIndex || smallestIndex == null) {
+            if (index < smallestIndex || smallestIndex is null) {
                 smallestIndex = index;
             }
 
             internalList.RemoveAt(index);
         }
-        if (smallestIndex == null) return;
+        if (smallestIndex is null) return;
 
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(NotifyCollectionChangedEventArgs) })!;

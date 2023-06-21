@@ -18,7 +18,7 @@ public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeD
                 .NotNull()
                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
                 .Subscribe(selected => {
-                    if (AssociatedObject.RowsPresenter?.Items == null) return;
+                    if (AssociatedObject.RowsPresenter?.Items is null) return;
 
                     var indexOf = AssociatedObject.RowsPresenter.Items.FindIndex<IRow, string>(row => ReferenceEquals(row.Model, selected));
                     if (indexOf == -1) return;

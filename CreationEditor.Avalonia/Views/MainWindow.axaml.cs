@@ -35,7 +35,7 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
     private void OnDataContextChanged(object? value) => ViewModel = value as MainVM;
 
     private void OnViewModelChanged(object? value) {
-        if (value == null) {
+        if (value is null) {
             ClearValue(DataContextProperty);
         } else if (DataContext != value) {
             DataContext = value;

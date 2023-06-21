@@ -15,7 +15,7 @@ public sealed class TabReorderBehavior : DockDropBehavior {
         dragData.Preview?.HidePreview();
 
         // Move tab
-        if (tab.DockContainer == null) return;
+        if (tab.DockContainer is null) return;
 
         var movingTabIndex = tab.DockContainer.Tabs.IndexOf(dragData.Item);
         if (movingTabIndex == -1) return;

@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 
 public sealed class AutoExpandSingleChildren<T> : Behavior<global::Avalonia.Controls.TreeDataGrid> where T : class {
     protected override void OnAttachedToVisualTree() {
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.CellPrepared += AutoExpand;
     }
@@ -21,7 +21,7 @@ public sealed class AutoExpandSingleChildren<T> : Behavior<global::Avalonia.Cont
 
             // Parent must have the same model as the expander cell
             var parentRow = row.Children?.FirstOrDefault(c => ReferenceEquals(c.Model, expanderCell.Value));
-            if (parentRow == null) continue;
+            if (parentRow is null) continue;
 
             expanderCell.Row.IsExpanded = true;
             return;
@@ -29,7 +29,7 @@ public sealed class AutoExpandSingleChildren<T> : Behavior<global::Avalonia.Cont
     }
 
     protected override void OnDetachedFromVisualTree() {
-        if (AssociatedObject == null) return;
+        if (AssociatedObject is null) return;
 
         AssociatedObject.CellPrepared -= AutoExpand;
     }

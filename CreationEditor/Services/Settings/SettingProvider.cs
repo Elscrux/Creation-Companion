@@ -20,11 +20,11 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
         // From a static parent by type structure, compile all children for runtime use
         var missingSetting = 0;
         foreach (var setting in settings) {
-            if (setting.Parent == null) continue;
+            if (setting.Parent is null) continue;
 
             // Find parent setting and yourself as child
             var parent = settings.FirstOrDefault(p => p.GetType() == setting.Parent);
-            if (parent != null) {
+            if (parent is not null) {
                 parent.Children.Add(setting);
             } else {
                 missingSetting++;
@@ -36,7 +36,7 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
 
         // Return root settings
         Settings = settings
-            .Where(setting => setting.Parent == null)
+            .Where(setting => setting.Parent is null)
             .ToList();
     }
 

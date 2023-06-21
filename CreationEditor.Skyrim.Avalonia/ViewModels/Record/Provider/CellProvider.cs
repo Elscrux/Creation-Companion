@@ -64,7 +64,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         RecordBrowserSettingsVM = newScope.Resolve<IRecordBrowserSettingsVM>();
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             dockFactory.Open(DockElement.Viewport);
 
@@ -79,20 +79,20 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         });
 
         EditSelectedCell = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             var newOverride = recordController.GetOrAddOverride<Cell, ICellGetter>(SelectedRecord.Record);
             recordEditorController.OpenEditor<Cell, ICellGetter>(newOverride);
         });
 
         DuplicateSelectedCell = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DuplicateRecord<Cell, ICellGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedCell = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DeleteRecord<Cell, ICellGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);

@@ -97,7 +97,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     }
 
     public Action<IMajorRecordGetter> RegisterUpdate(IMajorRecordGetter record) {
-        if (_referenceCache == null) return _ => {};
+        if (_referenceCache is null) return _ => {};
 
         // Collect the references before the update
         var before = record.EnumerateFormLinks().ToHashSet();
@@ -120,7 +120,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     }
 
     public void RegisterCreation(IMajorRecordGetter record) {
-        if (_referenceCache == null) {
+        if (_referenceCache is null) {
             _recordCreations.Enqueue(record);
             return;
         }
@@ -131,7 +131,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     }
 
     public void RegisterDeletion(IMajorRecordGetter record) {
-        if (_referenceCache == null) {
+        if (_referenceCache is null) {
             _recordDeletions.Enqueue(record);
             return;
         }

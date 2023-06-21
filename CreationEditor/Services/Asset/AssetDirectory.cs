@@ -63,7 +63,7 @@ public sealed class AssetDirectory : IAsset {
             var directoryInfo = fileSystem.DirectoryInfo.New(path);
             if ((directoryInfo.Attributes & FileAttributes.Directory) == 0) {
                 var asset = FileToAsset(path);
-                if (asset == null) return;
+                if (asset is null) return;
 
                 asset.DisposeWith(_disposables);
 
@@ -83,7 +83,7 @@ public sealed class AssetDirectory : IAsset {
         try {
             var fileName = _fileSystem.Path.GetFileName(path);
             var asset = Assets.Items.FirstOrDefault(asset => string.Equals(_fileSystem.Path.GetFileName(asset.Path), fileName, AssetCompare.PathComparison));
-            if (asset == null) return;
+            if (asset is null) return;
 
             Assets.Remove(asset);
             if (asset is AssetFile file) {
@@ -227,7 +227,7 @@ public sealed class AssetDirectory : IAsset {
 
     private AssetFile? FileToAsset(string file, bool isVirtual = false) {
         var assetLink = _assetTypeService.GetAssetLink(file);
-        if (assetLink == null) return null;
+        if (assetLink is null) return null;
 
         _assetReferenceController.GetReferencedAsset(assetLink, out var referencedAsset).DisposeWith(_disposables);
         var fileName = _fileSystem.Path.Combine(Path, _fileSystem.Path.GetFileName(assetLink.RawPath));

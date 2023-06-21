@@ -89,7 +89,7 @@ public partial class PlacedPickerButton : ActivatableUserControl {
         pickerUpdated
             .ObserveOnTaskpool()
             .Select(x => {
-                if (x.Placed.IsNull || !x.Cell.IsNull || x.LinkCache == null) return FormKey.Null;
+                if (x.Placed.IsNull || !x.Cell.IsNull || x.LinkCache is null) return FormKey.Null;
                 if (!x.LinkCache.TryResolveSimpleContext<IPlacedGetter>(x.Placed, out var placed)) return FormKey.Null;
                 if (placed.Parent?.Record is ICellGetter cell) return cell.FormKey;
 
@@ -113,12 +113,12 @@ public partial class PlacedPickerButton : ActivatableUserControl {
                 if (!x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var cell)) return null;
 
                 var placed = cell.Temporary.Concat(cell.Persistent).FirstOrDefault(placed => placed.FormKey == x.Placed);
-                if (placed == null) return defaultText;
+                if (placed is null) return defaultText;
 
                 var placedEditorID = PlacedConverters.ToName.Convert(placed, x.LinkCache) as string;
 
                 var cellEditorID = cell.EditorID;
-                return cellEditorID == null
+                return cellEditorID is null
                     ? placedEditorID
                     : $"{cellEditorID}: {placedEditorID}";
             });

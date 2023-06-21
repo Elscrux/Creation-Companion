@@ -26,7 +26,7 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
 
         var registration = LoquiRegistration.GetRegisterByFullName(BaseNamespace + name);
 
-        if (registration == null) {
+        if (registration is null) {
             type = null;
             return false;
         }

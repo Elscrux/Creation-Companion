@@ -44,7 +44,7 @@ public sealed class AssetTypeService : IAssetTypeService {
 
     public IAssetLink? GetAssetLink(string file) {
         var assetType = GetAssetType(file);
-        if (assetType == null) return null;
+        if (assetType is null) return null;
 
         return GetAssetLink(file, assetType);
     }

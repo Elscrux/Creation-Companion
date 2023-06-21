@@ -64,20 +64,20 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         });
 
         DoubleTapCommand = EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             var newOverride = recordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
         });
 
         DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
         });
 
         DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord == null) return;
+            if (SelectedRecord is null) return;
 
             recordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
             RecordCache.Remove(SelectedRecord);

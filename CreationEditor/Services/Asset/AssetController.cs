@@ -111,7 +111,7 @@ public sealed class AssetController : IAssetController {
         var destinationDirectory = _fileSystem.Path.GetDirectoryName(destination);
 
         try {
-            if (destinationDirectory != null) _fileSystem.Directory.CreateDirectory(destinationDirectory);
+            if (destinationDirectory is not null) _fileSystem.Directory.CreateDirectory(destinationDirectory);
 
             if (_fileSystem.File.Exists(path)) {
                 _fileSystem.File.Move(path, destination);
