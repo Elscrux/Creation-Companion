@@ -6,7 +6,6 @@ using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Environment;

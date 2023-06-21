@@ -4,8 +4,11 @@ namespace CreationEditor.Avalonia.Comparer;
 
 public static class AssetComparers {
     public static readonly FuncComparer<IAsset> PathComparer = new((a1, a2) => {
-        if (a1 is null && a2 is null) return 0;
-        if (a1 is null) return -1;
+        if (a1 is null) {
+            if (a2 is null) return 0;
+
+            return -1;
+        }
         if (a2 is null) return 1;
 
         if (a1.IsDirectory == a2.IsDirectory) {
@@ -15,5 +18,21 @@ public static class AssetComparers {
         if (a1.IsDirectory) return -1;
 
         return 1;
+    });
+
+    public static readonly FuncComparer<IAsset> ReferenceCountComparer = new((a1, a2) => {
+        if (a1 is null) {
+            if (a2 is null) return 0;
+
+            return -1;
+        }
+        if (a2 is null) return 1;
+
+        return a1.GetReferencedAssets()
+            .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+            .Sum()
+            .CompareTo(a2.GetReferencedAssets()
+                .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+                .Sum());
     });
 }

@@ -16,6 +16,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Asset;
@@ -28,6 +29,7 @@ using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
+using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -199,26 +201,42 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             CanUserSortColumn = true,
                             IsTextSearchEnabled = true,
                             TextSearchValueSelector = asset => _fileSystem.Path.GetFileName(asset.Path),
+                            CompareAscending = (x, y) => {
+                                var checkNull = ObjectComparers.CheckNull(x, y);
+                                return -(checkNull ?? AssetComparers.PathComparer.Compare(x?.Asset, y?.Asset));
+                            },
+                            CompareDescending = (x, y) => {
+                                var checkNull = ObjectComparers.CheckNull(x, y);
+                                return checkNull ?? AssetComparers.PathComparer.Compare(x?.Asset, y?.Asset);
+                            },
                         }),
                     directory => directory.Children,
                     directory => directory.HasChildren),
                 new TemplateColumn<AssetTreeItem>(
-                        "Count",
-                        new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                            if (asset is null || asset.Asset is AssetDirectory) return null;
+                    "Count",
+                    new FuncDataTemplate<AssetTreeItem>((asset, _) => {
+                        if (asset is null || asset.Asset is AssetDirectory) return null;
 
-                            return new TextBlock {
-                                Text = asset.GetReferencedAssets()
-                                    .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
-                                    .Sum()
-                                    .ToString()
-                            };
-                        }),
-                        new GridLength(),
-                        new TemplateColumnOptions<AssetTreeItem> {
-                            CanUserResizeColumn = true,
-                            CanUserSortColumn = true,
-                        }),
+                        return new TextBlock {
+                            Text = asset.GetReferencedAssets()
+                                .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+                                .Sum()
+                                .ToString()
+                        };
+                    }),
+                    new GridLength(),
+                    new TemplateColumnOptions<AssetTreeItem> {
+                        CanUserResizeColumn = true,
+                        CanUserSortColumn = true,
+                        CompareAscending = (x, y) => {
+                            var checkNull = ObjectComparers.CheckNull(x, y);
+                            return checkNull ?? AssetComparers.ReferenceCountComparer.Compare(x?.Asset, y?.Asset);
+                        },
+                        CompareDescending = (x, y) => {
+                            var checkNull = ObjectComparers.CheckNull(x, y);
+                            return -(checkNull ?? AssetComparers.ReferenceCountComparer.Compare(x?.Asset, y?.Asset));
+                        },
+                    }),
             },
         };
 
