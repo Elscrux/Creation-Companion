@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Avalonia.Comparer;
+﻿namespace CreationEditor.Resources.Comparer;
 
 public sealed class FuncSelectorComparer<TSelector, TCompare> : FuncComparer<TCompare>, IComparer<TSelector> {
     private readonly Func<TSelector, TCompare?> _selector;

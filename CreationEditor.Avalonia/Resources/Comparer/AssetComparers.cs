@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Asset;
+﻿using CreationEditor.Resources.Comparer;
+using CreationEditor.Services.Asset;
 namespace CreationEditor.Avalonia.Comparer;
 
 public static class AssetComparers {

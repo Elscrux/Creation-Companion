@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Plugins.Aspects;
+﻿using CreationEditor.Resources.Comparer;
+using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Comparer;
 
 public class NamedComparers {

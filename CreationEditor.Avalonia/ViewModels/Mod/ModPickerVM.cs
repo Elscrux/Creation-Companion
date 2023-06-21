@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
+using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;

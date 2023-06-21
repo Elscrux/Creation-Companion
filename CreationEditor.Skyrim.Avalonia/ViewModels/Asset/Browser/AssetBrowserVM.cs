@@ -28,6 +28,7 @@ using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
+using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
@@ -76,6 +77,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public AssetBrowserVM(
         IFileSystem fileSystem,
+        IArchiveService archiveService,
         IMenuItemProvider menuItemProvider,
         IAssetReferenceController assetReferenceController,
         IAssetController assetController,
@@ -265,7 +267,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         Open = ReactiveCommand.Create<IReadOnlyList<AssetTreeItem?>>(assets => {
             foreach (var asset in assets.NotNull()) {
-                if (!_fileSystem.Path.Exists(asset.Path)) return;
+                if (asset.IsVirtual) {
+                    archiveService.GetExtension()
+                } else if (!_fileSystem.Path.Exists(asset.Path)) {
+                    return;
+                }
 
                 Process.Start(new ProcessStartInfo {
                     FileName = asset.Path,

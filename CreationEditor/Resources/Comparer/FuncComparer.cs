@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-namespace CreationEditor.Avalonia.Comparer;
+namespace CreationEditor.Resources.Comparer;
 
 public class FuncComparer<TCompare> : IComparer<TCompare>, IComparer {
     private readonly Func<TCompare, TCompare, int> _compare;
