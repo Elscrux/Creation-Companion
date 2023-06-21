@@ -76,9 +76,12 @@ public sealed class ModSaveService : IModSaveService {
     private void LimitBackups(int limit, IModGetter mod) {
         if (limit <= 0) return;
 
+        var backupSaveLocation = _modSaveLocationProvider.GetBackupSaveLocation();
+        if (!_fileSystem.Directory.Exists(backupSaveLocation)) return;
+
         var backupNameStart = $"{mod.ModKey.FileName}.*.bak";
         var backupFiles = _fileSystem.Directory
-            .EnumerateFiles(_modSaveLocationProvider.GetBackupSaveLocation(), backupNameStart)
+            .EnumerateFiles(backupSaveLocation, backupNameStart)
             .ToList();
 
         if (backupFiles.Count > limit) {
