@@ -267,14 +267,20 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         Open = ReactiveCommand.Create<IReadOnlyList<AssetTreeItem?>>(assets => {
             foreach (var asset in assets.NotNull()) {
-                if (asset.IsVirtual) {
-                    archiveService.GetExtension()
+                var openPath = asset.Path;
+                if (asset is { Asset: AssetFile, IsVirtual: true }) {
+                    // When the asset is virtual, we need to extract it to a temp file first
+                    var tempFilePath = archiveService.TryGetFileAsTempFile(asset.Path);
+                    if (tempFilePath != null) {
+                        openPath = tempFilePath;
+                    }
                 } else if (!_fileSystem.Path.Exists(asset.Path)) {
                     return;
                 }
 
+                // Open the file via the standard program
                 Process.Start(new ProcessStartInfo {
-                    FileName = asset.Path,
+                    FileName = openPath,
                     UseShellExecute = true,
                     Verb = "open"
                 });
@@ -284,10 +290,6 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<AssetTreeItem?>>(async assets => {
             var deleteAssets = assets.NotNull().ToArray();
             Control? content = null;
-
-            // var recordReferenceBrowser = GetRecordReferenceBrowser(deleteAssets);
-            // var assetReferenceBrowser = GetAssetReferenceBrowser(deleteAssets);
-            // if (recordReferenceBrowser != null || assetReferenceBrowser != null) {
 
             var referenceBrowserVM = GetReferenceBrowserVM(deleteAssets);
             if (referenceBrowserVM != null) {
