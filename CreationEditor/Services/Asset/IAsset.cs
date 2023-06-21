@@ -8,5 +8,6 @@ public interface IAsset : IDisposable {
     bool HasChildren { get; }
     bool IsVirtual { get; }
 
+    /// <returns>IReferencedAsset versions of this asset and all its children</returns>
     IEnumerable<IReferencedAsset> GetReferencedAssets();
 }

@@ -194,12 +194,29 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         new GridLength(),
                         new TemplateColumnOptions<AssetTreeItem> {
                             CanUserResizeColumn = true,
-                            CanUserSortColumn = false,
+                            CanUserSortColumn = true,
                             IsTextSearchEnabled = true,
                             TextSearchValueSelector = asset => _fileSystem.Path.GetFileName(asset.Path),
                         }),
                     directory => directory.Children,
                     directory => directory.HasChildren),
+                new TemplateColumn<AssetTreeItem>(
+                        "Count",
+                        new FuncDataTemplate<AssetTreeItem>((asset, _) => {
+                            if (asset is null || asset.Asset is AssetDirectory) return null;
+
+                            return new TextBlock {
+                                Text = asset.GetReferencedAssets()
+                                    .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+                                    .Sum()
+                                    .ToString()
+                            };
+                        }),
+                        new GridLength(),
+                        new TemplateColumnOptions<AssetTreeItem> {
+                            CanUserResizeColumn = true,
+                            CanUserSortColumn = true,
+                        }),
             },
         };
 
