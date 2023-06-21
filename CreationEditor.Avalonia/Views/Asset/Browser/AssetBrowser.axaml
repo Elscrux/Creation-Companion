@@ -90,7 +90,8 @@
                 </TreeDataGrid.KeyBindings>
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
-                    <treeDataGrid:AutoExpandChildren x:TypeArguments="asset:AssetTreeItem"/>
+                    <treeDataGrid:ExpandAllChildren x:TypeArguments="asset:AssetTreeItem"/>
+                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="asset:AssetTreeItem"/>
                 </Interaction.Behaviors>
             </TreeDataGrid>
 

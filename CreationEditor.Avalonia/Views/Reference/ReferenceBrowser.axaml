@@ -9,7 +9,8 @@
              x:CompileBindings="True" x:DataType="reference:ReferenceBrowserVM">
     <Grid RowDefinitions="Auto,5,*">
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Command="{Binding ToggleTree}">
+            <Button Command="{Binding ToggleTree}"
+                    ToolTip.Tip="Toggle Tree View">
                 <StackPanel>
                     <controls:SymbolIcon
                         Symbol="List"

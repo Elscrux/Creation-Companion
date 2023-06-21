@@ -1,9 +1,7 @@
 ﻿using System.Reactive.Linq;
-using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
 using Avalonia.Xaml.Interactivity;
-using CreationEditor.Avalonia.Models.Asset;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
