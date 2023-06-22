@@ -1,5 +1,5 @@
 ﻿using Avalonia.ReactiveUI;
-namespace DLCMapper;
+namespace VanillaDuplicateCleaner;
 
 public partial class VanillaDuplicateCleanerView : ReactiveUserControl<VanillaDuplicateCleanerVM> {
     public VanillaDuplicateCleanerView() {

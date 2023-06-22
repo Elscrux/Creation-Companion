@@ -2,14 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:dlcMapper="clr-namespace:DLCMapper"
+             xmlns:vanillaDuplicateCleaner="clr-namespace:VanillaDuplicateCleaner"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior;assembly=CreationEditor.Avalonia"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="DLCMapper.VanillaDuplicateCleanerView"
+             x:Class="VanillaDuplicateCleaner.VanillaDuplicateCleanerView"
              x:Name="Control"
-             x:DataType="dlcMapper:VanillaDuplicateCleanerVM" x:CompileBindings="True">
+             x:DataType="vanillaDuplicateCleaner:VanillaDuplicateCleanerVM" x:CompileBindings="True">
     <Grid>
         <ScrollViewer IsEnabled="{Binding !IsBusy}">
             <StackPanel Spacing="5">
@@ -45,7 +45,7 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
-                                x:DataType="dlcMapper:RecordReplacement"
+                                x:DataType="vanillaDuplicateCleaner:RecordReplacement"
                                 Header="Mod EditorID"
                                 Binding="{Binding Modified.EditorID}"/>
 
@@ -70,12 +70,12 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
-                                x:DataType="dlcMapper:RecordReplacement"
+                                x:DataType="vanillaDuplicateCleaner:RecordReplacement"
                                 Header="Vanilla EditorID"
                                 Binding="{Binding VanillaReplacement.EditorID}"/>
 
                             <DataGridTextColumn
-                                x:DataType="dlcMapper:RecordReplacement"
+                                x:DataType="vanillaDuplicateCleaner:RecordReplacement"
                                 Header="Type"
                                 Binding="{Binding Type}"/>
                         </DataGrid.Columns>

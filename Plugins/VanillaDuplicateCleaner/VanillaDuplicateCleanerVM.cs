@@ -17,7 +17,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace DLCMapper;
+namespace VanillaDuplicateCleaner;
 
 public sealed class RecordReplacement : ReactiveObject, IReactiveSelectable {
     public RecordReplacement(IMajorRecordGetter modified, IMajorRecordGetter vanillaReplacement, string type) {

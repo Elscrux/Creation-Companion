@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Skyrim;
-namespace DLCMapper;
+namespace VanillaDuplicateCleaner;
 
 public class VanillaDuplicateCleanerPlugin : IMenuPlugin<ISkyrimMod, ISkyrimModGetter> {
     public string Name => "Vanilla Duplicate Cleaner";
