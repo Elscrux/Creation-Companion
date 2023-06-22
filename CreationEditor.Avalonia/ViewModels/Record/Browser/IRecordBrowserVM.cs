@@ -1,11 +1,9 @@
 ﻿using System.Reactive;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Avalonia.Views.Record;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public interface IRecordBrowserVM : IDisposableDropoff {

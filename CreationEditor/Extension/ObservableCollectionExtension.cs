@@ -93,6 +93,7 @@ public static class ObservableCollectionExtension {
                 break;
             case NotifyCollectionChangedAction.Remove:
                 if (change.OldItems is null) break;
+
                 var removeItems = change.OldItems.OfType<T>();
 
                 source.RemoveMany(removeItems);

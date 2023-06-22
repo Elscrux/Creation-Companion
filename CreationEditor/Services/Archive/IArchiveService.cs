@@ -11,7 +11,7 @@ public interface IArchiveService : IDisposable {
     IArchiveReader GetReader(string path);
     IEnumerable<string> GetFilesInFolder(string path);
     IEnumerable<string> GetSubdirectories(string path);
-    
+
     /// <summary>
     /// Tries to copy the content of a file in an archive to a temporary file.
     /// </summary>

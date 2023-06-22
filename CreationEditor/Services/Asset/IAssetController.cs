@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Services.Asset; 
+﻿namespace CreationEditor.Services.Asset;
 
 public interface IAssetController {
     void Move(string path, string destination);

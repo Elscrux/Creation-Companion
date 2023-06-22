@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Mod;
-namespace CreationEditor.Avalonia.Views.Mod; 
+namespace CreationEditor.Avalonia.Views.Mod;
 
 public partial class ModPicker : UserControl {
     public ModPicker() {
@@ -11,4 +11,3 @@ public partial class ModPicker : UserControl {
         DataContext = vm;
     }
 }
-

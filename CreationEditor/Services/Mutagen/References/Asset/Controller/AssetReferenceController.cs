@@ -40,16 +40,16 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkGetter> _modAssetReferenceManager
         = new((asset, change) => asset.RecordReferences.Apply(change),
-            (asset => asset.AssetLink),
+            asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifDirectoryAssetReferenceManager
-        = new(((asset, change) => asset.NifDirectoryReferences.Apply(change)),
+        = new((asset, change) => asset.NifDirectoryReferences.Apply(change),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifArchiveAssetReferenceManager
-        = new(((asset, change) => asset.NifArchiveReferences.Apply(change)),
+        = new((asset, change) => asset.NifArchiveReferences.Apply(change),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 

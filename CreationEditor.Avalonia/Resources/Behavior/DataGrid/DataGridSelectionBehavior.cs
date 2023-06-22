@@ -61,7 +61,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     protected override void OnAttached() {
         base.OnAttached();
-        
+
         if (_attached) return;
 
         _attached = true;

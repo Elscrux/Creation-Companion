@@ -1,8 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-
-namespace DLCMapper; 
+namespace DLCMapper;
 
 internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
     public bool Equals(RecordEqualsMask? other) {
@@ -49,7 +48,7 @@ internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
         }
 
         // todo check files by content
-		
+
         // Check scripted
         if (Record is IHaveVirtualMachineAdapterGetter { VirtualMachineAdapter: not null } scripted) {
             hashCode = HashCode.Combine(

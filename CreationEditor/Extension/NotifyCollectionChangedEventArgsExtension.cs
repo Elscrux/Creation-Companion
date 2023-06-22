@@ -5,7 +5,7 @@ public static class NotifyCollectionChangedEventArgsExtension {
     public static NotifyCollectionChangedEventArgs Transform<TSource, TTarget>(
         this NotifyCollectionChangedEventArgs e,
         Func<TSource, TTarget?> selector) {
-        return (e.Action) switch {
+        return e.Action switch {
             NotifyCollectionChangedAction.Add =>
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Add,

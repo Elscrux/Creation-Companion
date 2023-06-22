@@ -16,7 +16,7 @@
     <Border Classes="Tab"
             Classes.AccentSelected="{Binding #Control.DockedItem.IsSelected}"
             PointerReleased="OnTabPointerReleased">
-        
+
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="{Binding #Control.DockedItem.Header}">
                 <Interaction.Behaviors>

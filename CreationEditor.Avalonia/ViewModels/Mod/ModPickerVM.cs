@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Environment;
@@ -33,7 +32,7 @@ public sealed class ModPickerVM : ViewModel {
                 .Select(x => new Func<LoadOrderModItem, bool>(mod =>
                     (x.SearchText.IsNullOrEmpty()
                      || mod.ModKey.FileName.String.Contains(x.SearchText, StringComparison.OrdinalIgnoreCase))
-                    && (x.Filter is null || x.Filter(mod)))))
+                 && (x.Filter is null || x.Filter(mod)))))
             .Sort(new FuncComparer<LoadOrderModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
             .ToObservableCollection(this);
 

@@ -50,7 +50,7 @@ public sealed class ExteriorCellsVM : ViewModel {
                     var gridPoint = cell.Grid.Point;
                     if (gridPoint.X != GridXValue || gridPoint.Y != GridYValue) continue;
 
-                    ExteriorCellsProvider.TrySelect(cell); 
+                    ExteriorCellsProvider.TrySelect(cell);
                     // ExteriorList.ScrollToItem(cell);
                     break;
                 }

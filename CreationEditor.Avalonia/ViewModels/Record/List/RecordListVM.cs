@@ -17,7 +17,6 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReferenceWindow = CreationEditor.Avalonia.Views.Reference.ReferenceWindow;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed class RecordListVM : ViewModel, IRecordListVM {

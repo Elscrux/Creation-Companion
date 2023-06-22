@@ -159,7 +159,7 @@ public sealed class ModSelectionVM : ViewModel {
             .DisposeWith(this);
 
         CanLoad = NewModValid.CombineLatest(AnyModsLoaded, AnyModsActive,
-                (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
+            (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
     /// <summary>

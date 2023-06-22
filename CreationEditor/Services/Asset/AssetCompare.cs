@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Services.Asset; 
+﻿namespace CreationEditor.Services.Asset;
 
 public static class AssetCompare {
     public const StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;

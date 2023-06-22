@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using CreationEditor.Services.Cache;
-using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
@@ -69,7 +68,7 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
         _logger = logger;
 
         var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-        _cacheLocationProvider = newScope.Resolve<ICacheLocationProvider>(TypedParameter.From(new [] { "References", "Record" }));
+        _cacheLocationProvider = newScope.Resolve<ICacheLocationProvider>(TypedParameter.From(new[] { "References", "Record" }));
     }
 
     public void Dispose() => _disposables.Dispose();

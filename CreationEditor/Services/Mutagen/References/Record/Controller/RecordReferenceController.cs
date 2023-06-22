@@ -31,7 +31,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
     private readonly ReferenceSubscriptionManager<FormKey, IReferencedRecord, IFormLinkIdentifier> _referenceSubscriptionManager
         = new((record, change) => record.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
-            (record => record.FormKey));
+            record => record.FormKey);
 
     public RecordReferenceController(
         IRecordController recordController,

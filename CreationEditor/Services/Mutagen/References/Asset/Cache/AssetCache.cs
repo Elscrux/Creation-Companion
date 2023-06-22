@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -12,15 +13,15 @@ public sealed class AssetCache<TOrigin, TReference>
     /// <summary>
     /// Asset for all asset types mapped to a list of their usages
     /// </summary>
-    private readonly IReadOnlyDictionary<TOrigin, Query.AssetQuery<TOrigin, TReference>.AssetReferenceCache> _referenceCaches;
+    private readonly IReadOnlyDictionary<TOrigin, AssetQuery<TOrigin, TReference>.AssetReferenceCache> _referenceCaches;
 
     public AssetCache(
-        Query.AssetQuery<TOrigin, TReference> assetQuery,
+        AssetQuery<TOrigin, TReference> assetQuery,
         TOrigin origin) {
         Origin = origin;
 
         var assetReferenceCache = assetQuery.LoadAssets(origin);
-        var assetReferenceCaches = new Dictionary<TOrigin, Query.AssetQuery<TOrigin, TReference>.AssetReferenceCache>();
+        var assetReferenceCaches = new Dictionary<TOrigin, AssetQuery<TOrigin, TReference>.AssetReferenceCache>();
         if (assetReferenceCache is not null) assetReferenceCaches.Add(origin, assetReferenceCache);
         _referenceCaches = assetReferenceCaches;
     }
@@ -33,7 +34,7 @@ public sealed class AssetCache<TOrigin, TReference>
                 }
             }
         }
-        
+
     }
 
     public bool HasAsset(IAssetLinkGetter asset) {

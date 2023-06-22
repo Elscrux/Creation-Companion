@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;

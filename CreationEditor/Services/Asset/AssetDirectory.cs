@@ -31,7 +31,7 @@ public sealed class AssetDirectory : IAsset {
     public IEnumerable<IAsset> Children {
         get {
             if (!_loadedAssets) LoadAssets();
-    
+
             return Assets.Items;
         }
     }

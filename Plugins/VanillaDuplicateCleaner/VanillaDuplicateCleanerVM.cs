@@ -5,8 +5,6 @@ using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Plugin;
@@ -36,7 +34,7 @@ public sealed class RecordReplacement : ReactiveObject, IReactiveSelectable {
 
 public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;
-    
+
     public IRecordReferenceController RecordReferenceController { get; }
     public ModPickerVM ModPickerVM { get; }
     public ObservableCollection<RecordReplacement> Records { get; } = new();
