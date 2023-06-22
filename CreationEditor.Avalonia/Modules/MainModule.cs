@@ -17,6 +17,7 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
@@ -35,6 +36,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>()
+            .SingleInstance();
+
+        builder.RegisterType<WildcardSearchFilter>()
+            .As<ISearchFilter>()
             .SingleInstance();
 
         builder.RegisterType<BusyService>()

@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Filter;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
@@ -15,9 +16,8 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsVM {
-    private const char SplitChar = '*';
-
     private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ISearchFilter _searchFilter;
 
     public IObservable<Unit> SettingsChanged { get; }
     [Reactive] public Func<IMajorRecordGetter, bool>? RecordFilter { get; set; }
@@ -31,8 +31,10 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
     private readonly IObservableCache<ModKey, ModKey> _selectedMods;
 
     public RecordBrowserSettingsVM(
-        IEditorEnvironment editorEnvironment) {
+        IEditorEnvironment editorEnvironment,
+        ISearchFilter searchFilter) {
         _editorEnvironment = editorEnvironment;
+        _searchFilter = searchFilter;
         LinkCache = _editorEnvironment.LinkCache;
 
         Mods = this.WhenAnyValue(x => x.LinkCache)
@@ -87,10 +89,6 @@ public sealed class RecordBrowserSettingsVM : ViewModel, IRecordBrowserSettingsV
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;
-
-        return !editorID.IsNullOrEmpty()
-         && SearchTerm
-                .Split(SplitChar)
-                .All(term => editorID.Contains(term, StringComparison.OrdinalIgnoreCase));
+        return !editorID.IsNullOrEmpty() && _searchFilter.Filter(editorID, SearchTerm);
     }
 }

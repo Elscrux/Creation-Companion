@@ -25,6 +25,7 @@
             </Button>
 
             <Button Command="{Binding RemapReferences}"
+                    IsVisible="{Binding ReferenceRemapperVM.ContextCanBeRemapped, FallbackValue=False}"
                     ToolTip.Tip="Remap References">
                 <controls:SymbolIcon
                     Symbol="Edit"/>

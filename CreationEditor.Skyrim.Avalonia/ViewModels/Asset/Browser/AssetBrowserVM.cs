@@ -33,6 +33,7 @@ using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -90,6 +91,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IDockFactory dockFactory,
         MainWindow mainWindow,
         IAssetProvider assetProvider,
+        ISearchFilter searchFilter,
         ILifetimeScope lifetimeScope,
         string root) {
         _fileSystem = fileSystem;
@@ -143,7 +145,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             if (asset.IsDirectory) {
                                 if (!asset.Children.ToList().Any(ShowAsset)) return false;
                             } else {
-                                if (!asset.Path.Contains(x.SearchText, AssetCompare.PathComparison)) return false;
+                                if (!searchFilter.Filter(asset.Path, x.SearchText)) return false;
                             }
                         }
 

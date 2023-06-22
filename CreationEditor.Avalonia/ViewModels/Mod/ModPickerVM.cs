@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Filter;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
@@ -19,7 +20,8 @@ public sealed class ModPickerVM : ViewModel {
     public IObservable<IReadOnlyCollection<LoadOrderModItem>> SelectedMods { get; }
 
     public ModPickerVM(
-        IEditorEnvironment editorEnvironment) {
+        IEditorEnvironment editorEnvironment,
+        ISearchFilter searchFilter) {
 
         Mods = editorEnvironment.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
@@ -31,7 +33,7 @@ public sealed class ModPickerVM : ViewModel {
                     (searchText, filter) => (SearchText: searchText, Filter: filter))
                 .Select(x => new Func<LoadOrderModItem, bool>(mod =>
                     (x.SearchText.IsNullOrEmpty()
-                     || mod.ModKey.FileName.String.Contains(x.SearchText, StringComparison.OrdinalIgnoreCase))
+                     || searchFilter.Filter(mod.ModKey.FileName.String, x.SearchText))
                  && (x.Filter is null || x.Filter(mod)))))
             .Sort(new FuncComparer<LoadOrderModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
             .ToObservableCollection(this);
