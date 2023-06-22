@@ -13,6 +13,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -72,6 +73,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public ReactiveCommand<IReadOnlyList<AssetTreeItem?>, Unit> Open { get; }
     public ReactiveCommand<IReadOnlyList<AssetTreeItem?>, Unit> Delete { get; }
     public ReactiveCommand<AssetTreeItem, Unit> Rename { get; }
+    public ReactiveCommand<AssetTreeItem, Unit> CopyPath { get; }
     public ReactiveCommand<AssetTreeItem, Unit> OpenReferences { get; }
     public ReactiveCommand<AssetDirectory, Unit> AddFolder { get; }
     public ReactiveCommand<AssetDirectory, Unit> OpenAssetBrowser { get; }
@@ -163,7 +165,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                             var textBlock = new TextBlock {
                                 Text = _fileSystem.Path.GetFileName(asset.Path),
-                                [ToolTip.TipProperty] = _fileSystem.Path.GetRelativePath(_root, asset.Path),
+                                [ToolTip.TipProperty] = GetRootRelativePath(asset.Path),
                                 VerticalAlignment = VerticalAlignment.Center
                             };
 
@@ -249,7 +251,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             AssetTreeItem? currentNode;
             var items = AssetTreeSource.Items.ToArray();
             do {
-                currentNode = items.FirstOrDefault(a => path.StartsWith(_fileSystem.Path.GetRelativePath(_root, a.Path), AssetCompare.PathComparison));
+                currentNode = items.FirstOrDefault(a => path.StartsWith(GetRootRelativePath(a.Path), AssetCompare.PathComparison));
                 if (currentNode is null) break;
 
                 pathIndices = pathIndices.Append(items.IndexOf(currentNode));
@@ -323,7 +325,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
 
             var deleteDialog = assets.Count == 1
-                ? CreateAssetDialog(deleteAssets, $"Delete {_fileSystem.Path.GetRelativePath(_root, deleteAssets[0].Path)}", content)
+                ? CreateAssetDialog(deleteAssets, $"Delete {GetRootRelativePath(deleteAssets[0].Path)}", content)
                 : CreateAssetDialog(deleteAssets, $"Delete {assets.Count}", content);
 
             if (await deleteDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
@@ -357,9 +359,15 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
         });
 
+        CopyPath = ReactiveCommand.Create<AssetTreeItem>(asset => {
+            var clipboard = AvaloniaLocator.Current.GetService<IClipboard>();
+            var relativePath = GetRootRelativePath(asset.Path);
+            clipboard?.SetTextAsync(relativePath);
+        });
+
         OpenReferences = ReactiveCommand.Create<AssetTreeItem>(asset => {
                 var referenceBrowserVM = GetReferenceBrowserVM(asset);
-                var relativePath = _fileSystem.Path.GetRelativePath(_root, asset.Path);
+                var relativePath = GetRootRelativePath(asset.Path);
 
                 var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
                 referenceWindow.Show(mainWindow);
@@ -370,7 +378,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         AddFolder = ReactiveCommand.CreateFromTask<AssetDirectory>(async dir => {
             var textBox = new TextBox { Text = "New Folder" };
-            var relativePath = _fileSystem.Path.GetRelativePath(_root, dir.Path);
+            var relativePath = GetRootRelativePath(dir.Path);
             var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
             if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
@@ -431,8 +439,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var srcDirectory = _fileSystem.Path.GetDirectoryName(firstDraggedAsset.Path);
         if (srcDirectory is null) return;
 
-        var relativeSrcDirectory = _fileSystem.Path.GetRelativePath(_root, srcDirectory);
-        var relativeDstDirectory = _fileSystem.Path.GetRelativePath(_root, directory.Path);
+        var relativeSrcDirectory = GetRootRelativePath(srcDirectory);
+        var relativeDstDirectory = GetRootRelativePath(directory.Path);
 
         // No need to move if the source and destination are the same
         if (string.Equals(relativeSrcDirectory, relativeDstDirectory, AssetCompare.PathComparison)) return;
@@ -460,7 +468,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     : new TextBlock {
                         Inlines = new InlineCollection {
                             new Run("Move "),
-                            new Run(_fileSystem.Path.GetRelativePath(_root, firstDraggedAsset.Path)) {
+                            new Run(GetRootRelativePath(firstDraggedAsset.Path)) {
                                 Foreground = StandardBrushes.ValidBrush
                             },
                             new Run(" to "),
@@ -497,6 +505,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 _menuItemProvider.File(Open, AssetTreeSource.RowSelection!.SelectedItems),
                 _menuItemProvider.Rename(Rename, asset),
                 _menuItemProvider.Delete(Delete, AssetTreeSource.RowSelection!.SelectedItems),
+                new Separator(),
+                new MenuItem {
+                    Icon = new SymbolIcon { Symbol = Symbol.Copy },
+                    Header = "Copy Path",
+                    Command = CopyPath,
+                    CommandParameter = asset
+                }
             }
         };
 
@@ -551,10 +566,14 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
             dialog.Footer = new ItemsRepeater {
                 ItemsSource = assetTreeItems,
-                ItemTemplate = new FuncDataTemplate<AssetTreeItem>((asset, _) => new TextBlock { Text = _fileSystem.Path.GetRelativePath(_root, asset.Path) }),
+                ItemTemplate = new FuncDataTemplate<AssetTreeItem>((asset, _) => new TextBlock { Text = GetRootRelativePath(asset.Path) }),
             };
         }
 
         return dialog;
+    }
+
+    private string GetRootRelativePath(string assetPath) {
+        return _fileSystem.Path.GetRelativePath(_root, assetPath);
     }
 }
