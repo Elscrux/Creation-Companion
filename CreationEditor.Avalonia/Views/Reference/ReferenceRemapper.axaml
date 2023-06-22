@@ -2,5 +2,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:reference="clr-namespace:CreationEditor.Avalonia.ViewModels.Reference"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="CreationEditor.Avalonia.Views.Reference.ReferenceRemapper"/>
+             x:Class="CreationEditor.Avalonia.Views.Reference.ReferenceRemapper"
+             x:CompileBindings="True" x:DataType="reference:ReferenceRemapperVM">
+    <Grid
+        IsVisible="{Binding IsRemapping}"
+        Background="{DynamicResource SmokeFillColorDefaultBrush}"
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <avaloniaProgressRing:ProgressRing
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            Width="100" Height="100"/>
+    </Grid>
+</UserControl>

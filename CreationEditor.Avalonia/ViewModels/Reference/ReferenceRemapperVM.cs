@@ -1,11 +1,13 @@
 ﻿using System.Reactive;
 using System.Reactive.Subjects;
+using Avalonia.Threading;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed class ReferenceRemapperVM : ViewModel {
@@ -17,6 +19,7 @@ public sealed class ReferenceRemapperVM : ViewModel {
     public Type? ContextType { get; }
     public IList<Type>? ScopedTypes { get; }
 
+    [Reactive] public bool IsRemapping { get; set; }
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
     public ReactiveCommand<FormKey, Unit> RemapReferences { get; }
@@ -39,7 +42,11 @@ public sealed class ReferenceRemapperVM : ViewModel {
             if (ReferencedRecordContext is null || ContextType is null) return;
             if (!editorEnvironment.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
 
-            recordController.ReplaceReferences(ReferencedRecordContext, record);
+            IsRemapping = true;
+            Task.Run(() => {
+                recordController.ReplaceReferences(ReferencedRecordContext, record);
+                Dispatcher.UIThread.Post(() => IsRemapping = false);
+            });
         });
     }
 
