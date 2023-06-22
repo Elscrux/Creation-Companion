@@ -25,27 +25,8 @@ public sealed class MutableReferenceCache : IReferenceCache {
         if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableReferenceCache(immutableReferenceCache);
     }
 
-    public bool AddRecord(IMajorRecordGetter record, IEnumerable<IFormLinkGetter> links) {
-        // var anyNew = false;
-
+    public bool AddRecord(IMajorRecordGetter record) {
         return _mutableModReferenceCache.FormKeys.Add(record.FormKey);
-        
-        // foreach (var link in links) {
-        //     var references = _mutableModReferenceCache.Cache.GetOrAdd(link.FormKey);
-        //     if (references.Add(record)) anyNew = true;
-        // }
-        //
-        // return anyNew;
-        // var anyNew = false;
-        //
-        // _mutableModReferenceCache.FormKeys.Add(record.FormKey);
-        //
-        // foreach (var link in links) {
-        //     var references = _mutableModReferenceCache.Cache.GetOrAdd(link.FormKey);
-        //     if (references.Add(record)) anyNew = true;
-        // }
-        //
-        // return anyNew;
     }
 
     public bool RemoveReference(FormKey formKey, IFormLinkIdentifier oldReference) {

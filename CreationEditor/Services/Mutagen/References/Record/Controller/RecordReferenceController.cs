@@ -100,10 +100,10 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         if (_referenceCache is null) return _ => {};
 
         // Collect the references before the update
-        var before = record.EnumerateFormLinks().ToHashSet();
+        var before = record.EnumerateFormLinks().Select(x => x.FormKey).ToHashSet();
 
         return newRecord => {
-            var after = newRecord.EnumerateFormLinks().ToHashSet();
+            var after = newRecord.EnumerateFormLinks().Select(x => x.FormKey).ToHashSet();
 
             // Calculate the diff
             var removedReferences = before.Except(after);
@@ -114,7 +114,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
             // Add the record to its new references
             // Add to the active mod's mutable reference cache if wasn't present before
-            var recordIsNew = _referenceCache.AddRecord(newRecord, after);
+            var recordIsNew = _referenceCache.AddRecord(newRecord);
             AddRecordReferences(_referenceCache, newRecord, addedReferences);
         };
     }
@@ -125,9 +125,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             return;
         }
 
-        var enumerateFormLinks = record.EnumerateFormLinks();
-        _referenceCache.AddRecord(record, enumerateFormLinks);
-        AddRecordReferences(_referenceCache, record, enumerateFormLinks);
+        _referenceCache.AddRecord(record);
+        AddRecordReferences(_referenceCache, record, record.EnumerateFormLinks().Select(x => x.FormKey));
     }
 
     public void RegisterDeletion(IMajorRecordGetter record) {
@@ -136,26 +135,24 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             return;
         }
 
-        RemoveRecordReferences(_referenceCache, record, record.EnumerateFormLinks());
+        RemoveRecordReferences(_referenceCache, record, record.EnumerateFormLinks().Select(x => x.FormKey));
     }
 
-    private void AddRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<IFormLinkGetter> references) {
+    private void AddRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
         foreach (var reference in references) {
-            var addedFormKey = reference.FormKey;
-            if (!cache.AddReference(addedFormKey, record)) continue;
+            if (!cache.AddReference(reference, record)) continue;
 
             var change = new Change<IFormLinkIdentifier>(ListChangeReason.Add, record);
-            _referenceSubscriptionManager.Change(addedFormKey, change);
+            _referenceSubscriptionManager.Change(reference, change);
         }
     }
 
-    private void RemoveRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<IFormLinkGetter> references) {
+    private void RemoveRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
         foreach (var reference in references) {
-            var removedFormKey = reference.FormKey;
-            if (cache.RemoveReference(removedFormKey, record)) continue;
+            if (cache.RemoveReference(reference, record)) continue;
 
             var change = new Change<IFormLinkIdentifier>(ListChangeReason.Remove, record);
-            _referenceSubscriptionManager.Change(removedFormKey, change);
+            _referenceSubscriptionManager.Change(reference, change);
         }
     }
 }
