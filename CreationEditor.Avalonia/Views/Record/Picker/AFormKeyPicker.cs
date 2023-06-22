@@ -762,10 +762,16 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     private static readonly ConcurrentDictionary<Type, IEnumerable<Type>> InterfaceCache = new();
 
     protected IEnumerable<Type> GetMajorTypes(IEnumerable? types) {
-        var majorRecordType = typeof(IMajorRecordGetter);
+        IList<Type> GetGetterTypes(IEnumerable<Type> x) {
+            return x.Select(type => LoquiRegistration.TryGetRegister(type, out var registration) ? registration.GetterType : null)
+                .NotNull()
+                .Distinct()
+                .OrderBy(type => type.Name)
+                .ToList();
+        }
 
         if (types is not IEnumerable<Type> scopedTypes || !scopedTypes.Any()) {
-            return majorRecordType.AsEnumerable();
+            return GetGetterTypes(IMajorRecordGetter.StaticRegistration.GetterType.GetSubclassesOf());
         }
 
         var list = scopedTypes
@@ -773,13 +779,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 if (LoquiRegistration.TryGetRegister(type, out _)) return type.AsEnumerable();
                 if (InterfaceCache.TryGetValue(type, out var implementingTypes)) return implementingTypes;
 
-                var list = IMajorRecordGetter.StaticRegistration.GetterType
+                var list = GetGetterTypes(IMajorRecordGetter.StaticRegistration.GetterType
                     .GetSubclassesOf()
-                    .Where(x => x.InheritsFrom(type))
-                    .Select(t => LoquiRegistration.TryGetRegister(t, out var registration) ? registration.GetterType : null)
-                    .NotNull()
-                    .Distinct()
-                    .ToList();
+                    .Where(x => x.InheritsFrom(type)));
 
                 InterfaceCache.TryAdd(type, list);
                 return list;
