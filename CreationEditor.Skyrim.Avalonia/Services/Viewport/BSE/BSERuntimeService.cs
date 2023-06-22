@@ -9,11 +9,6 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 
-public interface IViewportRuntimeService {
-    public void LoadInteriorCell(ICellGetter cell);
-    public void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell);
-}
-
 public sealed class BSERuntimeService : IViewportRuntimeService {
     private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
 

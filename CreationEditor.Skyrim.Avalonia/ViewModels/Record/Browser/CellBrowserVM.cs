@@ -9,21 +9,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
-public interface ICellBrowserVM : IDisposableDropoff {
-    public InteriorCellsVM InteriorCellsVM { get; }
-    public ExteriorCellsVM ExteriorCellsVM { get; }
-    public PlacedListVM PlacedListVM { get; }
-
-    public InteriorCells InteriorCells { get; }
-    public ExteriorCells ExteriorCells { get; }
-    public PlacedList PlacedList { get; }
-
-    public int SelectedTab { get; set; }
-
-    public bool OpenReferences { get; set; }
-    public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
-}
-
 public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
     public InteriorCellsVM InteriorCellsVM { get; }
     public ExteriorCellsVM ExteriorCellsVM { get; }

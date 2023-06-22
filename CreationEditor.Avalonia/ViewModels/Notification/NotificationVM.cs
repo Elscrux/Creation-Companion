@@ -4,11 +4,6 @@ using DynamicData;
 using DynamicData.Binding;
 namespace CreationEditor.Avalonia.ViewModels.Notification;
 
-public interface INotificationVM {
-    public IList<NotificationItem> LoadingItems { get; }
-    public IObservable<NotificationItem> LatestNotification { get; }
-}
-
 public sealed class NotificationVM : ViewModel, INotificationVM {
     private readonly IObservableCollection<NotificationItem> _loadingItems;
     public IList<NotificationItem> LoadingItems => _loadingItems;

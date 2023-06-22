@@ -10,11 +10,6 @@ using Mutagen.Bethesda.Environments.DI;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Save;
 
-public enum SaveLocation {
-    DataFolder,
-    Custom
-}
-
 public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;

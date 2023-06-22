@@ -26,14 +26,6 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record.Picker;
 
-public sealed record RecordNamePair(IMajorRecordIdentifier Record, string? Name);
-
-public enum StatusIndicatorState {
-    Passive,
-    Success,
-    Failure,
-}
-
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
 public class AFormKeyPicker : ActivatableTemplatedControl {

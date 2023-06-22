@@ -4,17 +4,6 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace SearchPlugin.Models;
 
-public interface ITextSearcherDefinition {
-    public string SearcherName { get; }
-}
-
-public interface ITextSearcher<TMod, TModGetter> : ITextSearcherDefinition
-    where TModGetter : class, IModGetter
-    where TMod : class, TModGetter, IMod {
-    public IEnumerable<RecordReferences<TMod, TModGetter>> GetTextReference(IMajorRecordGetterEnumerable mod, string reference, StringComparison comparison);
-    public void ReplaceTextReference(IMajorRecordQueryableGetter record, ILinkCache<TMod, TModGetter> linkCache, TMod mod, string oldText, string newText, StringComparison comparison);
-}
-
 public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITextSearcher<TMod, TModGetter>
     where TMajor : class, TMajorGetter, IMajorRecordQueryable
     where TMajorGetter : class, IMajorRecordQueryableGetter

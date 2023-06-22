@@ -2,8 +2,6 @@
 using System.Reactive.Subjects;
 namespace CreationEditor.Services.Mutagen.Record;
 
-public sealed record UpdateAction<T>(T Item, Action UpdateItem);
-
 public sealed class JoinedObservable<T> {
     public Subject<UpdateAction<T>> Subject { get; }
 

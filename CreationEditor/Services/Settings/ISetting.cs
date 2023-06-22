@@ -20,5 +20,3 @@ public interface ISetting {
 
     public void Apply();
 }
-
-public interface ISettingModel {}

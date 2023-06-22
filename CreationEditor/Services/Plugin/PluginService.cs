@@ -8,17 +8,6 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public sealed record PluginContext<TMod, TModGetter>(
-    Version EditorVersion,
-    IEditorEnvironment<TMod, TModGetter> EditorEnvironment,
-    ILifetimeScope LifetimeScope)
-    where TModGetter : class, IContextGetterMod<TMod, TModGetter>
-    where TMod : class, TModGetter, IContextMod<TMod, TModGetter>;
-
-public interface IPluginService {
-    public IReadOnlyList<IPluginDefinition> Plugins { get; }
-}
-
 public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycleTask
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter> {

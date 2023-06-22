@@ -2,7 +2,6 @@
 using System.Reactive;
 using Autofac;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Mutagen.Mod.Save;
@@ -18,19 +17,6 @@ using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace VanillaDuplicateCleaner;
-
-public sealed class RecordReplacement : ReactiveObject, IReactiveSelectable {
-    public RecordReplacement(IMajorRecordGetter modified, IMajorRecordGetter vanillaReplacement, string type) {
-        Modified = modified;
-        VanillaReplacement = vanillaReplacement;
-        Type = type;
-    }
-
-    [Reactive] public bool IsSelected { get; set; }
-    public IMajorRecordGetter Modified { get; }
-    public IMajorRecordGetter VanillaReplacement { get; }
-    public string Type { get; }
-}
 
 public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;

@@ -2,10 +2,6 @@
 using nifly;
 namespace CreationEditor.Services.Asset;
 
-public interface IModelModificationService {
-    void RemapReferences(string file, Func<string, bool> shouldReplace, string newReference);
-}
-
 public sealed class NifModificationService : IModelModificationService {
     private readonly IFileSystem _fileSystem;
 

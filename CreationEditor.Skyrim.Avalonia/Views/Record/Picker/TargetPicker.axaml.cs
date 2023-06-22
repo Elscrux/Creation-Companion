@@ -11,20 +11,6 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Picker;
 
-public enum TargetPickerType {
-    Self = 1,
-    PackageStart,
-    PackageLocation,
-    EditorLocation,
-    Reference,
-    LinkedRef,
-    Cell,
-    Object,
-    ObjectType,
-    ReferenceAlias,
-    LocationAlias,
-}
-
 public partial class TargetPicker : ActivatableUserControl {
     public static readonly StyledProperty<IObservable<string>> ButtonTextProperty
         = AvaloniaProperty.Register<TargetPicker, IObservable<string>>(nameof(ButtonText));
