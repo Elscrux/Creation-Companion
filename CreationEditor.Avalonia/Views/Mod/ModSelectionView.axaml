@@ -87,7 +87,7 @@
                         IsVisible="{Binding !AnyModsActive^}">
                 <TextBlock Padding="5" VerticalAlignment="Center"
                            Foreground="IndianRed"
-                           Text="No Active Mod Selected. Create New Plugin:"/>
+                           Text="No Active Mod Selected. Create New Mod:"/>
 
                 <TextBlock Padding="5" VerticalAlignment="Center"
                            Foreground="IndianRed"
