@@ -405,7 +405,9 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         if (references.Length == 0) return null;
 
-        return _lifetimeScope.Resolve<ReferenceBrowserVM>(TypedParameter.From(references));
+        var referencesParameter = TypedParameter.From(references);
+        var contextParam = TypedParameter.From<object?>(assets.Length == 1 ? assets[0] : assets);
+        return _lifetimeScope.Resolve<ReferenceBrowserVM>(contextParam, referencesParameter);
     }
 
     public async Task Drop(TreeDataGridRowDragEventArgs e) {

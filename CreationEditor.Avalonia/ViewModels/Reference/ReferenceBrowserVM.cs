@@ -21,6 +21,9 @@ namespace CreationEditor.Avalonia.ViewModels.Reference;
 public sealed class ReferenceBrowserVM : ViewModel {
     private readonly IMenuItemProvider _menuItemProvider;
 
+    public object? Context { get; }
+    public ReferenceRemapperVM? ReferenceRemapperVM { get; }
+
     [Reactive] public bool ShowTree { get; set; }
     [Reactive] public ITreeDataGridSource<IReference> ReferenceSource { get; set; }
 
@@ -30,6 +33,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
     public ReactiveCommand<IReferencedRecord, Unit> OpenReferences { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleTree { get; }
+    public ReactiveCommand<Unit, Unit> RemapReferences { get; }
 
     public ReferenceBrowserVM(
         ILifetimeScope lifetimeScope,
@@ -37,8 +41,17 @@ public sealed class ReferenceBrowserVM : ViewModel {
         IRecordController recordController,
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
+        object? context = null,
         params IReference[] references) {
         _menuItemProvider = menuItemProvider;
+        Context = context;
+
+        if (Context is not null) {
+            var newScope = lifetimeScope.BeginLifetimeScope();
+            var contextParam = TypedParameter.From(context);
+            ReferenceRemapperVM = newScope.Resolve<ReferenceRemapperVM>(contextParam);
+            newScope.DisposeWith(ReferenceRemapperVM);
+        }
 
         var nameColumn = new TemplateColumn<IReference>(
             "Name",
@@ -127,7 +140,8 @@ public sealed class ReferenceBrowserVM : ViewModel {
                 .ToArray();
 
             var identifiersParam = TypedParameter.From(references);
-            var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(identifiersParam);
+            var contextParam = TypedParameter.From<object?>(referencedRecord);
+            var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(contextParam, identifiersParam);
             newScope.DisposeWith(referenceBrowserVM);
 
             var referenceWindow = new ReferenceWindow(referencedRecord.Record) {
@@ -141,6 +155,8 @@ public sealed class ReferenceBrowserVM : ViewModel {
             ShowTree = !ShowTree;
             ReferenceSource = ShowTree ? treeReferenceSource : flatReferenceSource;
         });
+
+        RemapReferences = ReactiveCommand.Create(() => ReferenceRemapperVM?.Remap());
     }
 
     public void ContextMenu(object? sender, ContextRequestedEventArgs e) {

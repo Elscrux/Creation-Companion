@@ -164,8 +164,8 @@ public sealed class MainModule : Module {
         builder.RegisterType<ReferenceBrowserVM>()
             .As<ReferenceBrowserVM>();
 
-        builder.RegisterType<ReferenceBrowserVM>()
-            .As<ReferenceBrowserVM>();
+        builder.RegisterType<ReferenceRemapperVM>()
+            .As<ReferenceRemapperVM>();
 
         builder.RegisterType<RecordBrowserSettingsVM>()
             .As<IRecordBrowserSettingsVM>();

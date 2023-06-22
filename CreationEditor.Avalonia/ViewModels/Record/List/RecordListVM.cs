@@ -55,7 +55,8 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
                     .ToArray();
 
                 var identifiersParam = TypedParameter.From(references);
-                var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(identifiersParam);
+                var contextParam = TypedParameter.From<object?>(RecordProvider.SelectedRecord);
+                var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(contextParam, identifiersParam);
                 newScope.DisposeWith(referenceBrowserVM);
 
                 var referenceWindow = new ReferenceWindow(RecordProvider.SelectedRecord.Record) {

@@ -1,6 +1,8 @@
 ﻿using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Record;
@@ -125,6 +127,17 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         }
 
         return newOverride;
+    }
+
+    public void ReplaceReferences(IReferencedRecord record, IMajorRecordGetter replacingRecord) {
+        var remap = new Dictionary<FormKey, FormKey> { { record.FormKey, replacingRecord.FormKey } };
+
+        foreach (var reference in record.References.ToList()) {
+            if (!_editorEnvironment.LinkCache.TryResolve(reference, out var referenceRecord)) continue;
+
+            var overrideRecord = GetOrAddOverride(referenceRecord);
+            RegisterUpdate(overrideRecord, () => overrideRecord.RemapLinks(remap));
+        }
     }
 
     public void RegisterUpdate(IMajorRecordGetter record, Action updateAction) {
