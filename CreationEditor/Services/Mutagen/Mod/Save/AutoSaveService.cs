@@ -55,7 +55,7 @@ public sealed class AutoSaveService : IAutoSaveService, IDisposable {
 
     public void PerformAutoSave() {
         _modSaveService.BackupMod(_editorEnvironment.ActiveMod, _maxBackups);
-        _modSaveService.SaveMod(_editorEnvironment.LinkCache, _editorEnvironment.ActiveMod);
+        _modSaveService.SaveMod(_editorEnvironment.ActiveMod);
     }
 
     public void Dispose() {

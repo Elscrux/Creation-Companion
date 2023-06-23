@@ -1,29 +1,32 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveService : IModSaveService {
+    private readonly IEditorEnvironment _editorEnvironment;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
     private readonly ILogger _logger;
 
     public ModSaveService(
+        IEditorEnvironment editorEnvironment,
         IModSaveLocationProvider modSaveLocationProvider,
         IFileSystem fileSystem,
         ISavePipeline savePipeline,
         ILogger logger) {
+        _editorEnvironment = editorEnvironment;
         _modSaveLocationProvider = modSaveLocationProvider;
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
         _logger = logger;
     }
 
-    public void SaveMod(ILinkCache linkCache, IMod mod) {
+    public void SaveMod(IMod mod) {
         if (mod.ModKey == ModKey.Null) return;
 
         var filePath = _modSaveLocationProvider.GetSaveLocation(mod);
@@ -35,7 +38,7 @@ public sealed class ModSaveService : IModSaveService {
             Encodings = null
         };
 
-        _savePipeline.Execute(linkCache, mod);
+        _savePipeline.Execute(_editorEnvironment.LinkCache, mod);
 
         _logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {

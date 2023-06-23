@@ -106,7 +106,7 @@ public sealed class MainVM : ViewModel {
         });
 
         Save = ReactiveCommand.CreateFromTask(async () => {
-            await Task.Run(() => modSaveService.SaveMod(editorEnvironment.LinkCache, editorEnvironment.ActiveMod));
+            await Task.Run(() => modSaveService.SaveMod(editorEnvironment.ActiveMod));
         });
 
         OpenDockElement = ReactiveCommand.Create<DockElement>(element => dockFactory.Open(element));
