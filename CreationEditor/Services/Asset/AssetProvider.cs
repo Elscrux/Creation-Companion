@@ -25,12 +25,12 @@ public sealed class AssetProvider : IAssetProvider {
         _archiveService = archiveService;
     }
 
-    public IAsset GetAssetContainer(string directory) {
+    public AssetDirectory GetAssetContainer(string directory) {
         foreach (var (path, asset) in _assetDirectories) {
             if (!directory.StartsWith(path, AssetCompare.PathComparison)) continue;
 
-            // Retrieve child or self from the children 
-            foreach (var child in asset.GetChildren(
+            // Retrieve child or self from the children
+            foreach (var child in asset.GetChildren<IAsset, AssetDirectory>(
                 a => directory.StartsWith(a.Path, AssetCompare.PathComparison),
                 a => a.Children,
                 true)) {

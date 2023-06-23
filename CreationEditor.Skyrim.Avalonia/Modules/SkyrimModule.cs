@@ -17,6 +17,7 @@ using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
+using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;

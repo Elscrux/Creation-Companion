@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Views.Viewport;
 using Mutagen.Bethesda.Environments.DI;
 using Serilog;
-namespace CreationEditor.Avalonia.Services.Viewport;
+namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 
 public sealed class BSEViewportFactory : IViewportFactory {
     private readonly ILogger _logger;

@@ -9,16 +9,24 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public interface IRecordProvider : IDisposable {
-    public SourceCache<IReferencedRecord, FormKey> RecordCache { get; }
-    public IReferencedRecord? SelectedRecord { get; set; }
-    public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
+    /// <summary>
+    /// Cache of all records
+    /// </summary>
+    SourceCache<IReferencedRecord, FormKey> RecordCache { get; }
 
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    IReferencedRecord? SelectedRecord { get; set; }
 
-    public IObservable<bool> IsBusy { get; }
+    IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
-    public IList<IMenuItem> ContextMenuItems { get; }
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
+    IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+
+    /// <summary>
+    /// Emits true when records are being loaded and false when loading has finished
+    /// </summary>
+    IObservable<bool> IsBusy { get; }
+
+    IList<IMenuItem> ContextMenuItems { get; }
+    ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 }
 
 public interface IRecordProvider<TReferenced> : IRecordProvider

@@ -2,6 +2,11 @@
 using System.Reactive.Subjects;
 namespace CreationEditor.Services.Mutagen.Record;
 
+/// <summary>
+/// An observable that takes a subject with an update action.
+/// All subscribing objects will be called before and after the update action is executed whenever the subject emits an update. 
+/// </summary>
+/// <typeparam name="T">Type of the object that is observed</typeparam>
 public sealed class JoinedObservable<T> {
     public Subject<UpdateAction<T>> Subject { get; }
 
@@ -23,9 +28,15 @@ public sealed class JoinedObservable<T> {
         });
     }
 
-    public IDisposable Subscribe(Func<T, Action<T>> action) {
-        _actions.Add(action);
+    /// <summary>
+    /// Register an update function that will be called before and after every update to the underlying observable.
+    /// </summary>
+    /// <param name="function">Function that takes the object pre-update
+    /// and returns an action that should be called when the update is performed.</param>
+    /// <returns>Disposable to unregister the update function</returns>
+    public IDisposable Subscribe(Func<T, Action<T>> function) {
+        _actions.Add(function);
 
-        return Disposable.Create(() => _actions.Remove(action));
+        return Disposable.Create(() => _actions.Remove(function));
     }
 }

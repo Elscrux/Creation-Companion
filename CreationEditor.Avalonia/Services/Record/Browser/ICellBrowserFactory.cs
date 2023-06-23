@@ -2,5 +2,9 @@
 namespace CreationEditor.Avalonia.Services.Record.Browser;
 
 public interface ICellBrowserFactory {
-    public Control GetBrowser();
+    /// <summary>
+    /// Create a cell browser
+    /// </summary>
+    /// <returns>Created cells browser</returns>
+    Control GetBrowser();
 }

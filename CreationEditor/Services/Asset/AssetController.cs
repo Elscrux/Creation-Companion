@@ -47,7 +47,14 @@ public sealed class AssetController : IAssetController {
 
     public void Move(string path, string destination) => MoveInternal(path, destination, false);
 
-    public void Rename(string path, string destination) => MoveInternal(path, destination, true);
+    public void Rename(string path, string newName) {
+        var directoryPath = _fileSystem.Path.GetDirectoryName(path);
+        if (directoryPath != null) {
+            MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true);
+        } else {
+            _logger.Here().Warning("Couldn't find path to base directory of {Path}", path);
+        }
+    }
 
     private void MoveInternal(string path, string destination, bool rename) {
         var assetContainer = _assetProvider.GetAssetContainer(path);
@@ -56,9 +63,7 @@ public sealed class AssetController : IAssetController {
         var baseIsFile = _fileSystem.Path.HasExtension(basePath);
         var destinationIsFile = _fileSystem.Path.HasExtension(destination);
 
-        foreach (var file in assetContainer.GetAllChildren(a => a.Children, true)) {
-            if (file is not AssetFile assetFile) continue;
-
+        foreach (var assetFile in assetContainer.GetAllChildren<IAsset, AssetFile>(a => a.Children, true)) {
             // Calculate the full path of that the file should be moved to
             var fullNewPath = destinationIsFile
                 // If the destination is a file, we already have the full path
@@ -78,9 +83,9 @@ public sealed class AssetController : IAssetController {
                         // destination:       meshes\clutter-new\
                         // fullNewPath:       meshes\clutter-new\clutter\test.nif
                         : _fileSystem.Path.Combine(destination, _fileSystem.Path.GetFileName(basePath)),
-                    string.Equals(basePath, file.Path, AssetCompare.PathComparison)
+                    string.Equals(basePath, assetFile.Path, AssetCompare.PathComparison)
                         ? _fileSystem.Path.GetFileName(basePath)
-                        : _fileSystem.Path.GetRelativePath(basePath, file.Path));
+                        : _fileSystem.Path.GetRelativePath(basePath, assetFile.Path));
 
             var dataRelativePath = _fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, fullNewPath);
 
@@ -89,7 +94,7 @@ public sealed class AssetController : IAssetController {
             var shortenedPath = _fileSystem.Path.GetRelativePath(assetFile.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
 
             // Move the asset
-            if (!FileSystemMove(file.Path, fullNewPath)) continue;
+            if (!FileSystemMove(assetFile.Path, fullNewPath)) continue;
 
             // Remap references in records
             foreach (var formLink in assetFile.ReferencedAsset.RecordReferences) {
@@ -102,7 +107,7 @@ public sealed class AssetController : IAssetController {
             // Remap references in NIFs
             foreach (var reference in assetFile.ReferencedAsset.NifReferences) {
                 var fullPath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, reference);
-                _modelModificationService.RemapReferences(fullPath, path => !path.IsNullOrWhitespace() && file.Path.EndsWith(path, AssetCompare.PathComparison), dataRelativePath);
+                _modelModificationService.RemapLinks(fullPath, path => !path.IsNullOrWhitespace() && assetFile.Path.EndsWith(path, AssetCompare.PathComparison), dataRelativePath);
             }
         }
     }

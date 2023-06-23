@@ -146,8 +146,8 @@ public sealed class BsaArchiveService : IArchiveService {
         return null;
     }
 
-    public IEnumerable<string> GetFilesInFolder(string path) {
-        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, path);
+    public IEnumerable<string> GetFilesInDirectory(string directoryPath) {
+        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, directoryPath);
 
         foreach (var reader in _archives.Values) {
             if (!reader.TryGetFolder(relativePath, out var archiveFolder)) continue;
@@ -158,9 +158,9 @@ public sealed class BsaArchiveService : IArchiveService {
         }
     }
 
-    public IEnumerable<string> GetSubdirectories(string path) {
-        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, path);
-        var isRoot = string.Equals(path, _dataDirectory, AssetCompare.PathComparison);
+    public IEnumerable<string> GetSubdirectories(string directoryPath) {
+        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, directoryPath);
+        var isRoot = string.Equals(directoryPath, _dataDirectory, AssetCompare.PathComparison);
 
         foreach (var (archivePath, reader) in _archives) {
             // Compile directories in archive
@@ -205,7 +205,7 @@ public sealed class BsaArchiveService : IArchiveService {
 
             if (isRoot || !invalid) {
                 foreach (var currentDirectory in currentDirectories) {
-                    yield return _fileSystem.Path.Combine(path, currentDirectory.Name);
+                    yield return _fileSystem.Path.Combine(directoryPath, currentDirectory.Name);
                 }
             }
         }

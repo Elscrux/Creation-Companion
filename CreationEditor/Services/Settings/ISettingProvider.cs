@@ -1,5 +1,8 @@
 ﻿namespace CreationEditor.Services.Settings;
 
 public interface ISettingProvider {
-    public IEnumerable<ISetting> Settings { get; }
+    /// <summary>
+    /// Enumerable of all settings
+    /// </summary>
+    IEnumerable<ISetting> Settings { get; }
 }

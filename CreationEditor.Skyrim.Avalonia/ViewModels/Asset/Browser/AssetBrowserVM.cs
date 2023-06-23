@@ -352,10 +352,10 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
             var renameDialog = CreateAssetDialog($"Rename {name}", content);
             if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-                var newName = _fileSystem.Path.Combine(directory, textBox.Text);
-                if (string.Equals(newName, name, AssetCompare.PathComparison)) return;
+                var oldName = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
+                if (string.Equals(oldName, textBox.Text, AssetCompare.PathComparison)) return;
 
-                _assetController.Rename(asset.Path, newName + _fileSystem.Path.GetExtension(asset.Path));
+                _assetController.Rename(asset.Path, textBox.Text + _fileSystem.Path.GetExtension(asset.Path));
             }
         });
 

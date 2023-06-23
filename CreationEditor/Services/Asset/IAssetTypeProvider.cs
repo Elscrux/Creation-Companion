@@ -3,9 +3,20 @@ using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Services.Asset;
 
 public interface IAssetTypeProvider {
-    public IReadOnlyList<IAssetType> AllAssetTypes { get; }
-    public IDictionary<IAssetType, Func<string, IAssetLink>> AssetTypeConstructor { get; }
-    public IDictionary<IAssetType, string> AssetTypeIdentifiers { get; }
+    /// <summary>
+    /// List of all asset types
+    /// </summary>
+    IReadOnlyList<IAssetType> AllAssetTypes { get; }
+
+    /// <summary>
+    /// Map for constructors of asset links for each asset type
+    /// </summary>
+    IDictionary<IAssetType, Func<string, IAssetLink>> AssetTypeConstructor { get; }
+
+    /// <summary>
+    /// Map for identifiers of asset types. Each identifier is a three character string.
+    /// </summary>
+    IDictionary<IAssetType, string> AssetTypeIdentifiers { get; }
 
     IAssetType Texture { get; }
     IAssetType Model { get; }

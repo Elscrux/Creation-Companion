@@ -241,12 +241,12 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         return new CompositeDisposable(pluginDisposable, nifDisposable, nifArchiveDisposable);
     }
 
-    public Action<AssetFile> RegisterUpdate(AssetFile assetFileFile) {
+    public Action<AssetFile> RegisterUpdate(AssetFile assetFile) {
         if (_nifDirectoryAssetCache is null) return _ => {};
 
-        ValidateAsset(assetFileFile);
+        ValidateAsset(assetFile);
 
-        var before = _nifDirectoryAssetCache.FindLinksToReference(assetFileFile.ReferencedAsset.AssetLink.DataRelativePath).ToArray();
+        var before = _nifDirectoryAssetCache.FindLinksToReference(assetFile.ReferencedAsset.AssetLink.DataRelativePath).ToArray();
 
         return newAsset => {
             var after = _nifDirectoryAssetQuery.ParseFile(newAsset.Path).Select(result => result.AssetLink).ToArray();

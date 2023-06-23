@@ -4,17 +4,36 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Services.Docking;
 
 public interface IDockingManagerService {
-    public DockingManagerVM Root { get; }
+    DockingManagerVM Root { get; }
 
-    public void AddControl(Control control, DockConfig config);
+    /// <summary>
+    /// Dock a control in the docking manager
+    /// </summary>
+    /// <param name="control">Control to dock</param>
+    /// <param name="config">Config for the new dock</param>
+    void AddControl(Control control, DockConfig config);
 
-    public void RemoveControl(Control control);
+    /// <summary>
+    /// Remove a control from the docking manager
+    /// </summary>
+    /// <param name="control">Control to remove</param>
+    void RemoveControl(Control control);
 
-    public void Focus(Control control);
+    /// <summary>
+    /// Focus a control in the docking manager
+    /// </summary>
+    /// <param name="control">Control to focus</param>
+    void Focus(Control control);
 
-    public IObservable<IDockedItem> Opened { get; }
-    public IObservable<IDockedItem> Closed { get; }
+    /// <summary>
+    /// Emits when a new dock is opened
+    /// </summary>
+    IObservable<IDockedItem> Opened { get; }
+    /// <summary>
+    /// Emits when a dock was closed
+    /// </summary>
+    IObservable<IDockedItem> Closed { get; }
 
-    public void SaveLayout();
-    public void LoadLayout();
+    void SaveLayout();
+    void LoadLayout();
 }

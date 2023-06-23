@@ -158,7 +158,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         void FinalizeMod(IMod mod) {
             mod.RemapLinks(remapData);
-            saveService.SaveMod(_pluginContext.EditorEnvironment.LinkCache, mod);
+            saveService.SaveMod(mod);
         }
     }
 }

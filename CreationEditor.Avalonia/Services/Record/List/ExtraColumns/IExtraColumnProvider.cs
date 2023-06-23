@@ -2,5 +2,8 @@
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public interface IExtraColumnProvider {
+    /// <summary>
+    /// Extra columns per type
+    /// </summary>
     public Dictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
 }

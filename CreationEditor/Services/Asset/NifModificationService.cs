@@ -9,7 +9,7 @@ public sealed class NifModificationService : IModelModificationService {
         _fileSystem = fileSystem;
     }
 
-    public void RemapReferences(string file, Func<string, bool> shouldReplace, string newReference) {
+    public void RemapLinks(string file, Func<string, bool> shouldReplace, string newLink) {
         if (!_fileSystem.File.Exists(file)) return;
 
         using var nif = new NifFile();
@@ -40,7 +40,7 @@ public sealed class NifModificationService : IModelModificationService {
                 if (occurenceIndices.Count <= 0) continue;
 
                 // Replace all occurrences with the new path
-                var newPathNiString = new NiString(newReference);
+                var newPathNiString = new NiString(newLink);
                 foreach (var occurenceIndex in occurenceIndices) {
                     items[occurenceIndex] = newPathNiString;
                 }
@@ -59,35 +59,35 @@ public sealed class NifModificationService : IModelModificationService {
                     var modifiedEffectShader = false;
 
                     if (shouldReplace(effectShader.greyscaleTexture.get())) {
-                        effectShader.greyscaleTexture = new NiString(newReference);
+                        effectShader.greyscaleTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.lightingTexture.get())) {
-                        effectShader.lightingTexture = new NiString(newReference);
+                        effectShader.lightingTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.normalTexture.get())) {
-                        effectShader.normalTexture = new NiString(newReference);
+                        effectShader.normalTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.reflectanceTexture.get())) {
-                        effectShader.reflectanceTexture = new NiString(newReference);
+                        effectShader.reflectanceTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.sourceTexture.get())) {
-                        effectShader.sourceTexture = new NiString(newReference);
+                        effectShader.sourceTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.emitGradientTexture.get())) {
-                        effectShader.emitGradientTexture = new NiString(newReference);
+                        effectShader.emitGradientTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.envMapTexture.get())) {
-                        effectShader.envMapTexture = new NiString(newReference);
+                        effectShader.envMapTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
                     if (shouldReplace(effectShader.envMaskTexture.get())) {
-                        effectShader.envMaskTexture = new NiString(newReference);
+                        effectShader.envMaskTexture = new NiString(newLink);
                         modifiedEffectShader = true;
                     }
 
@@ -99,7 +99,7 @@ public sealed class NifModificationService : IModelModificationService {
                     // Remap BS Shader No  Lighting Property
                     var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
                     if (shaderNoLighting is not null && shouldReplace(shaderNoLighting.baseTexture.get())) {
-                        shaderNoLighting.baseTexture = new NiString(newReference);
+                        shaderNoLighting.baseTexture = new NiString(newLink);
                         niHeader.ReplaceBlock(blockId, shaderNoLighting);
 
                         modifiedNif = true;

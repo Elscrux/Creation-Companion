@@ -4,19 +4,25 @@ public interface ISetting {
     /// <summary>
     /// Name of the setting
     /// </summary>
-    public string Name { get; }
+    string Name { get; }
 
     /// <summary>
     /// Parent setting class type
     /// </summary>
-    public Type? Parent { get; }
+    Type? Parent { get; }
 
     /// <summary>
     /// Is automatically filled by settings provider
     /// </summary>
-    public List<ISetting> Children { get; }
+    List<ISetting> Children { get; }
 
-    public ISettingModel Model { get; }
+    /// <summary>
+    /// Setting data
+    /// </summary>
+    ISettingModel Model { get; }
 
-    public void Apply();
+    /// <summary>
+    /// Applies the setting to the editor
+    /// </summary>
+    void Apply();
 }

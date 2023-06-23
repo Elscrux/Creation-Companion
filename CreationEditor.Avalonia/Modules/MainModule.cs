@@ -9,6 +9,7 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Viewport;
+using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;

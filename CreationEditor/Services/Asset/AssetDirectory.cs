@@ -210,7 +210,7 @@ public sealed class AssetDirectory : IAsset {
                 .NotNull());
         }
 
-        assets = assets.Concat(_archiveService.GetFilesInFolder(Directory.FullName)
+        assets = assets.Concat(_archiveService.GetFilesInDirectory(Directory.FullName)
             .Where(IsFileRelevant)
             .Select(file => {
                 var asset = FileToAsset(file, true);

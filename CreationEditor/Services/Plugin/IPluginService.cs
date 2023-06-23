@@ -1,5 +1,8 @@
 ﻿namespace CreationEditor.Services.Plugin;
 
 public interface IPluginService {
-    public IReadOnlyList<IPluginDefinition> Plugins { get; }
+    /// <summary>
+    /// Plugins that are currently loaded.
+    /// </summary>
+    IReadOnlyList<IPluginDefinition> Plugins { get; }
 }

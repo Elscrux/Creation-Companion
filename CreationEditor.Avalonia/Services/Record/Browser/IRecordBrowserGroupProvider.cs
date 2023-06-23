@@ -2,5 +2,9 @@
 namespace CreationEditor.Avalonia.Services.Record.Browser;
 
 public interface IRecordBrowserGroupProvider {
-    public List<RecordTypeGroup> GetRecordGroups();
+    /// <summary>
+    /// Get a list of record groups
+    /// </summary>
+    /// <returns>List of record groups</returns>
+    List<RecordTypeGroup> GetRecordGroups();
 }

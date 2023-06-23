@@ -4,15 +4,15 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record;
 
 public interface IReferencedRecord : IReferencedRecordIdentifier {
-    public new IMajorRecordGetter Record { get; set; }
+    new IMajorRecordGetter Record { get; set; }
 
-    public string RecordTypeName { get; }
+    string RecordTypeName { get; }
 }
 
 public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord, IEquatable<IReferencedRecord<TMajorRecordGetter>>
     where TMajorRecordGetter : IMajorRecordIdentifier {
 
-    public new TMajorRecordGetter Record { get; set; }
+    new TMajorRecordGetter Record { get; set; }
 
     IMajorRecordGetter IReferencedRecord.Record {
         get => (IMajorRecordGetter) Record;

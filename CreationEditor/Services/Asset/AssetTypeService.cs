@@ -33,8 +33,8 @@ public sealed class AssetTypeService : IAssetTypeService {
         }
     }
 
-    public IAssetType? GetAssetType(string file) {
-        var extension = _fileSystem.Path.GetExtension(file);
+    public IAssetType? GetAssetType(string filePath) {
+        var extension = _fileSystem.Path.GetExtension(filePath);
         if (extension.Length == 0) return null;
 
         _assetTypesExtensions.TryGetValue(extension[1..], out var assetType);
@@ -42,16 +42,16 @@ public sealed class AssetTypeService : IAssetTypeService {
         return assetType;
     }
 
-    public IAssetLink? GetAssetLink(string file) {
-        var assetType = GetAssetType(file);
+    public IAssetLink? GetAssetLink(string filePath) {
+        var assetType = GetAssetType(filePath);
         if (assetType is null) return null;
 
-        return GetAssetLink(file, assetType);
+        return GetAssetLink(filePath, assetType);
     }
 
-    public IAssetLink GetAssetLink(string file, IAssetType assetType) {
+    public IAssetLink GetAssetLink(string filePath, IAssetType assetType) {
         var constructor = Provider.AssetTypeConstructor[assetType];
-        return constructor(file);
+        return constructor(filePath);
     }
 
     // todo replace with direct directory access when everything uses the same instance

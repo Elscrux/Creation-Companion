@@ -5,6 +5,7 @@ using Autofac;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda;

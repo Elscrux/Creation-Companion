@@ -1,5 +1,8 @@
 ﻿namespace CreationEditor.Services.Asset;
 
 public interface IDeleteDirectoryProvider {
-    public string DeleteDirectory { get; }
+    /// <summary>
+    /// Directory where deleted assets are moved to
+    /// </summary>
+    string DeleteDirectory { get; }
 }
