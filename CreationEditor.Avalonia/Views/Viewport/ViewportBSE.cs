@@ -36,13 +36,23 @@ public sealed class ViewportBSE : ContentPresenter {
 
         Interop.waitFinishedInit();
 
-        // Give it a little more time to finish
-        Thread.Sleep(250);
+        Process? process = null;
+        for (var i = 0; i < ViewportEmbeddingAttempts; i++) {
+            process = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName)
+                .NotNull()
+                .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);
 
-        var process = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName)
-            .NotNull()
-            .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);
+            if (process is null) {
+                Thread.Sleep(100);
+            } else {
+                break;
+            }
+        }
 
-        if (process is not null) Content = new ViewportHost(process);
+        if (process is null) {
+            logger.Here().Warning("Failed to embed viewport after {Count} attempts", ViewportEmbeddingAttempts);
+        } else {
+            // Content = new ViewportHost(process);
+        }
     }
 }

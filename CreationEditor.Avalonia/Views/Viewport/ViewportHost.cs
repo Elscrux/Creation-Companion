@@ -19,10 +19,11 @@ public class ViewportHost : NativeControlHost {
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
         if (e.Root is not Window window) return;
 
+        _rootWindow = window;
+
         var handle = _rootWindow?.TryGetPlatformHandle();
         if (handle is null) return;
 
-        _rootWindow = window;
         WinHelper.SetParent(_process.MainWindowHandle, handle.Handle);
 
         long style = WinHelper.GetWindowLongPtr(_process.MainWindowHandle, WinHelper.StyleIndex);
