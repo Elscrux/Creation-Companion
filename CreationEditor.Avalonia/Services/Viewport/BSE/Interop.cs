@@ -76,7 +76,7 @@ public static class Interop {
     public static extern bool deleteReferences(ulong count, string[] formKeys);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern bool initTGEditor(InitConfig config, string[] formKeys, ulong count);
+    public static extern int initTGEditor(InitConfig config, string[] formKeys, ulong count);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool isFinished();

@@ -39,6 +39,7 @@ public sealed class BSEViewportFactory : IViewportFactory {
         }
 
         return new ViewportBSE(
+            _logger,
             assetDirectory,
             bsaFileNames
         );
