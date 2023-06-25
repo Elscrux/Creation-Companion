@@ -66,7 +66,7 @@ public sealed class MainVM : ViewModel {
         PluginService = pluginService;
         MenuBarPlugins = PluginService?.Plugins.OfType<IMenuPluginDefinition>().ToList();
 
-        OpenSelectMods = ReactiveCommand.Create(ShowModSelection);
+        OpenSelectMods = ReactiveCommand.Create(() => ShowModSelection());
 
         OpenPlugin = ReactiveCommand.Create<IMenuPluginDefinition>(plugin => {
             DockingManagerService.AddControl(
@@ -116,7 +116,7 @@ public sealed class MainVM : ViewModel {
             .StartWith(BaseWindowTitle);
     }
 
-    public void ShowModSelection() {
-        ModSelectionView.ShowAsContentDialog(_modSelectionVM);
+    public void ShowModSelection(bool allowLoading = true) {
+        ModSelectionView.ShowAsContentDialog(_modSelectionVM, allowLoading);
     }
 }

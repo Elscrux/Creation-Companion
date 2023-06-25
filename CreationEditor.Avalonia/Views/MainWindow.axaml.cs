@@ -29,7 +29,7 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         base.OnLoaded();
 
         // Show mod selection on startup
-        ViewModel?.ShowModSelection();
+        ViewModel?.ShowModSelection(false);
     }
 
     private void OnDataContextChanged(object? value) => ViewModel = value as MainVM;
