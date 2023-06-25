@@ -40,6 +40,12 @@ public sealed class ModSaveService : IModSaveService {
 
         _savePipeline.Execute(_editorEnvironment.LinkCache, mod);
 
+        // Don't save empty mods
+        if (!mod.EnumerateMajorRecords().Any()) {
+            _logger.Here().Information("Skipping saving empty mod {ModName}", mod.ModKey.FileName);
+            return;
+        }
+
         _logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {
             // Try to save mod
