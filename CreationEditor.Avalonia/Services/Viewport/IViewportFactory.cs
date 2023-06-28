@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System.Reactive;
+using Avalonia.Controls;
 namespace CreationEditor.Avalonia.Services.Viewport;
 
 public interface IViewportFactory {
@@ -12,4 +13,9 @@ public interface IViewportFactory {
     /// </summary>
     /// <returns>Created viewport</returns>
     Control CreateViewport();
+
+    /// <summary>
+    /// Emits an event when a viewport is fully initialized
+    /// </summary>
+    IObservable<Unit> ViewportInitialized { get; }
 }

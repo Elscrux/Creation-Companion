@@ -30,10 +30,6 @@ public sealed class ViewportBSE : ContentPresenter {
             }
         });
 
-        Interop.addLoadCallback((callbackCount, callbackLoads) => {
-            // logger.Here().Verbose("Loaded {Count} references: {Refs}", callbackCount, string.Join(", ", callbackLoads));
-        });
-
         Interop.waitFinishedInit();
 
         Process? process = null;
@@ -43,8 +39,10 @@ public sealed class ViewportBSE : ContentPresenter {
                 .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);
 
             if (process is null) {
+                logger.Here().Verbose("Waiting for viewport to start...");
                 Thread.Sleep(100);
             } else {
+                logger.Here().Verbose("Viewport started, now embed it into the application");
                 break;
             }
         }

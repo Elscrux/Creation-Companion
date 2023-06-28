@@ -137,7 +137,8 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<BSEViewportFactory>()
-            .As<IViewportFactory>();
+            .As<IViewportFactory>()
+            .SingleInstance();
 
         // Query
         builder.RegisterType<ReferenceQuery>()

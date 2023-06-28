@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
+using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using Serilog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 
-public sealed class BSERuntimeService : IViewportRuntimeService {
+public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
 
+    private Interop.SelectCallback _selectCallback;
+    private readonly IDisposableDropoff _disposableDropoff = new DisposableBucket();
+    private readonly ILogger _logger;
     private readonly IEditorEnvironment _editorEnvironment;
 
     private const double UnloadCellGridDistance = 10;
@@ -21,9 +27,42 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
 
     private WorldspaceRuntimeSettings? _worldspaceRuntimeSettings;
 
+    private readonly Subject<IList<FormKey>> _selectedReferences = new();
+    public IObservable<IList<FormKey>> SelectedReferences => _selectedReferences;
+
     public BSERuntimeService(
-        IEditorEnvironment editorEnvironment) {
+        ILogger logger,
+        IEditorEnvironment editorEnvironment,
+        IViewportFactory viewportFactory) {
+        _logger = logger;
         _editorEnvironment = editorEnvironment;
+
+        viewportFactory.ViewportInitialized
+            .Subscribe(_ => {
+                SetupSelectionCallback();
+            });
+    }
+
+    private void SetupSelectionCallback() {
+        // Needs to be saved in variable to avoid garbage collection
+        _selectCallback = (count, formKeyStrings) => {
+            var convertedFormKeys = new List<FormKey>();
+
+            foreach (var formKeyString in formKeyStrings.ToStringArray((int) count)) {
+                var formKey = FormKey.TryFactory(formKeyString);
+                if (formKey.HasValue) {
+                    convertedFormKeys.Add(formKey.Value);
+                } else {
+                    _logger.Here().Error("Couldn't convert select {FormKey}", formKeyString);
+                }
+            }
+
+            _logger.Here().Verbose("Selected {Count} references: {Refs}", count, string.Join(", ", convertedFormKeys));
+
+            _selectedReferences.OnNext(convertedFormKeys);
+        };
+
+        Interop.addSelectCallback(_selectCallback);
     }
 
     public void LoadInteriorCell(ICellGetter cell) {
@@ -155,4 +194,6 @@ public sealed class BSERuntimeService : IViewportRuntimeService {
 
         return refs;
     }
+
+    public void Dispose() => _disposableDropoff.Dispose();
 }

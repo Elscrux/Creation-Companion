@@ -49,7 +49,10 @@ public static class Interop {
     public delegate void HideCallback(ulong count, string[] keys, bool hide);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void DeleteCallback(ulong count, string[] keys, bool hide);
+    public delegate void DeleteCallback(ulong count, string[] keys);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void SelectCallback(ulong count, IntPtr keys);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addLoadCallback(LoadCallback callback);
@@ -62,6 +65,9 @@ public static class Interop {
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addDeleteCallback(DeleteCallback callback);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public static extern bool addSelectCallback(SelectCallback callback);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void loadReferences(ulong count, ReferenceLoad[] load);

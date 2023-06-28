@@ -1,4 +1,6 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using System;
+using System.Collections.Generic;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport;
 
@@ -15,4 +17,9 @@ public interface IViewportRuntimeService {
     /// <param name="worldspaceFormKey">Worldspace the cell is in</param>
     /// <param name="cell">Cell to load</param>
     void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell);
+
+    /// <summary>
+    /// Emits the up to date list of selected references in the viewport
+    /// </summary>
+    IObservable<IList<FormKey>> SelectedReferences { get; }
 }
