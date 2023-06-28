@@ -24,7 +24,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
     public IRecordProvider RecordProvider { get; }
 
     public IList<DataGridColumn> Columns { get; } = new List<DataGridColumn>();
-    public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
+    public IList<MenuItem> ContextMenuItems { get; } = new List<MenuItem>();
 
     public IEnumerable? Records { get; }
 

@@ -26,7 +26,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
     public IObservable<bool> IsBusy { get; set; }
 
-    public IList<IMenuItem> ContextMenuItems { get; } = new List<IMenuItem>();
+    public IList<MenuItem> ContextMenuItems { get; } = new List<MenuItem>();
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
 
     public RecordTypeProvider(

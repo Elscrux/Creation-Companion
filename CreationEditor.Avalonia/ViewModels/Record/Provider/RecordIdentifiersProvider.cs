@@ -28,7 +28,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
     public IObservable<bool> IsBusy { get; }
 
-    public IList<IMenuItem> ContextMenuItems { get; }
+    public IList<MenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; set; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; set; }
@@ -112,7 +112,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
-        ContextMenuItems = new List<IMenuItem> {
+        ContextMenuItems = new List<MenuItem> {
             menuItemProvider.Edit(EditSelectedRecord),
             menuItemProvider.Duplicate(DuplicateSelectedRecord),
             menuItemProvider.Delete(DeleteSelectedRecord),

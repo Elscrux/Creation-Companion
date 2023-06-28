@@ -40,7 +40,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
     public IObservable<bool> IsBusy { get; set; }
 
-    public IList<IMenuItem> ContextMenuItems { get; }
+    public IList<MenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
     public ReactiveCommand<Unit, Unit> NewRecord { get; }
@@ -125,7 +125,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
-        ContextMenuItems = new List<IMenuItem> {
+        ContextMenuItems = new List<MenuItem> {
             menuItemProvider.New(NewRecord),
             menuItemProvider.Edit(EditSelectedRecord),
             menuItemProvider.Duplicate(DuplicateSelectedRecord),

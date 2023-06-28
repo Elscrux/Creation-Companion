@@ -44,7 +44,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
 
     public abstract IObservable<bool> IsBusy { get; set; }
 
-    public IList<IMenuItem> ContextMenuItems { get; }
+    public IList<MenuItem> ContextMenuItems { get; }
     public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewSelectedCell { get; }
@@ -121,7 +121,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
 
-        ContextMenuItems = new List<IMenuItem> {
+        ContextMenuItems = new List<MenuItem> {
             menuItemProvider.View(ViewSelectedCell),
             menuItemProvider.New(NewCell),
             menuItemProvider.Edit(EditSelectedCell),

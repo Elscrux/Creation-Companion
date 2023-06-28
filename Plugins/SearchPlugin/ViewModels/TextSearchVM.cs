@@ -132,6 +132,7 @@ public sealed class TextSearchVM : ViewModel {
                             },
                             _ => null
                         }),
+                        null,
                         new GridLength(500, GridUnitType.Pixel), new TemplateColumnOptions<object> {
                             IsTextSearchEnabled = true,
                             TextSearchValueSelector = obj => obj is RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences ? recordReferences.Diff.New : null

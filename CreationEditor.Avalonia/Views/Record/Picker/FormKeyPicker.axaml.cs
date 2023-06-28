@@ -86,9 +86,8 @@ public class FormKeyPicker : AFormKeyPicker {
 
         FormKey = identifierCustomName.Record.FormKey;
 
-        // Unfocus twice to ensure the text box doesn't get focus again
-        FocusManager.Instance?.Focus(null);
-        FocusManager.Instance?.Focus(null);
+        var focusManager = TopLevel.GetTopLevel(this)?.FocusManager;
+        focusManager?.ClearFocus();
 
         InSearchMode = false;
     }

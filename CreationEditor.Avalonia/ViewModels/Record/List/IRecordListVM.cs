@@ -12,7 +12,7 @@ public interface IRecordListVM : IDisposableDropoff {
     public IRecordProvider RecordProvider { get; }
 
     public IList<DataGridColumn> Columns { get; }
-    public IList<IMenuItem> ContextMenuItems { get; }
+    public IList<MenuItem> ContextMenuItems { get; }
 
     public IObservable<bool> IsBusy { get; }
     public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }

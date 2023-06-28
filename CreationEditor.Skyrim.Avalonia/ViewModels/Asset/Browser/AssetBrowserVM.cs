@@ -199,6 +199,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 },
                             };
                         }),
+                        null,
                         new GridLength(),
                         new TemplateColumnOptions<AssetTreeItem> {
                             CanUserResizeColumn = true,
@@ -228,6 +229,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 .ToString()
                         };
                     }),
+                    null,
                     new GridLength(),
                     new TemplateColumnOptions<AssetTreeItem> {
                         CanUserResizeColumn = true,
@@ -360,9 +362,9 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         });
 
         CopyPath = ReactiveCommand.Create<AssetTreeItem>(asset => {
-            var clipboard = AvaloniaLocator.Current.GetService<IClipboard>();
-            var relativePath = GetRootRelativePath(asset.Path);
-            clipboard?.SetTextAsync(relativePath);
+            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+
+            clipboard?.SetTextAsync(GetRootRelativePath(asset.Path));
         });
 
         OpenReferences = ReactiveCommand.Create<AssetTreeItem>(asset => {

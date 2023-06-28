@@ -25,7 +25,7 @@ public interface IRecordProvider : IDisposable {
     /// </summary>
     IObservable<bool> IsBusy { get; }
 
-    IList<IMenuItem> ContextMenuItems { get; }
+    IList<MenuItem> ContextMenuItems { get; }
     ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
 }
 
