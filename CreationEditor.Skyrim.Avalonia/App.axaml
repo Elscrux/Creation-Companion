@@ -15,7 +15,9 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- TreeDataGrid Resources -->
-            <Color x:Key="SystemBaseMediumLowColor">DarkGray</Color>
+            <Color x:Key="SystemBaseMediumLowColor">Transparent</Color>
+            <Color x:Key="SystemBaseHighColor">WhiteSmoke</Color>
+            <Color x:Key="SystemListLowColor">DimGray</Color>
             <ControlTheme x:Key="FluentTreeViewExpandCollapseChevron" TargetType="ToggleButton">
                 <Setter Property="Margin" Value="0"/>
                 <Setter Property="Width" Value="{StaticResource TreeViewItemExpandCollapseChevronSize}"/>
