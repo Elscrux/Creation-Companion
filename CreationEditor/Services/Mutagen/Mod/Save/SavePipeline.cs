@@ -7,6 +7,7 @@ public sealed class SavePipeline : ISavePipeline {
 
     public SavePipeline() {
         AddStep(new IdenticalToMasterRemoveStep());
+        AddStep(new DeletedNewRecordRemoveStep());
     }
 
     public void AddStep(ISaveStep step) {

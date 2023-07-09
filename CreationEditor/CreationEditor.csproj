@@ -74,9 +74,6 @@
         <Compile Update="Services\Mutagen\Mod\Save\SavePipeline.cs">
           <DependentUpon>ISavePipeline.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\Mod\Save\IdenticalToMasterRemoveStep.cs">
-          <DependentUpon>ISaveStep.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Mutagen\Mod\Save\ModSaveLocationProvider.cs">
           <DependentUpon>IModSaveLocationProvider.cs</DependentUpon>
         </Compile>
@@ -127,6 +124,12 @@
         </Compile>
         <Compile Update="Services\Asset\DeleteDirectoryProvider.cs">
           <DependentUpon>IDeleteDirectoryProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\Mod\Save\DeletedNewRecordRemoveStep.cs">
+          <DependentUpon>ISaveStep.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\Mod\Save\IdenticalToMasterRemoveStep.cs">
+          <DependentUpon>ISaveStep.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 </Project>
