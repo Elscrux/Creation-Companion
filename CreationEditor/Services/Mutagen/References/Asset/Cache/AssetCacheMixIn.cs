@@ -15,7 +15,7 @@ public static class AssetCacheMixIn {
         var otherAssetCachesList = otherAssetCaches.ToList();
         var assetTypeList = assetTypes.ToList();
 
-        foreach (var assetCache in assetCaches) {
+        foreach (var assetCache in assetCaches.ToArray()) {
             foreach (var assetType in assetTypeList) {
                 foreach (var requiredAsset in assetCache.GetAssets(assetType)) {
                     if (!otherAssetCachesList.HasAssets(requiredAsset)) {
@@ -30,7 +30,7 @@ public static class AssetCacheMixIn {
         where TOrigin : notnull
         where TReference : notnull {
         var assetTypeList = assetTypes.ToList();
-        foreach (var assetCache in assetCaches) {
+        foreach (var assetCache in assetCaches.ToArray()) {
             foreach (var assetType in assetTypeList) {
                 foreach (var requiredAsset in assetCache.GetAssets(assetType)) {
                     yield return requiredAsset;
@@ -42,7 +42,7 @@ public static class AssetCacheMixIn {
     public static IEnumerable<TReference> GetReferences<TOrigin, TReference>(this IEnumerable<AssetCache<TOrigin, TReference>> assetCaches, IAssetLinkGetter assetLink)
         where TOrigin : notnull
         where TReference : notnull {
-        foreach (var assetCache in assetCaches) {
+        foreach (var assetCache in assetCaches.ToArray()) {
             foreach (var usage in assetCache.GetReferences(assetLink)) {
                 yield return usage;
             }

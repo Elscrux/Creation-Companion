@@ -93,6 +93,11 @@ public sealed class AssetCache<TOrigin, TReference>
 
         // todo replace with TryGetValue when mutagen update is done
         var assetDictionary = cache.Cache.FirstOrDefault(t => t.Key.GetType() == asset.Type.GetType()).Value;
+        if (assetDictionary is null) {
+            references = null;
+            return false;
+        }
+
         references = assetDictionary.GetOrAdd(asset);
 
         return true;
