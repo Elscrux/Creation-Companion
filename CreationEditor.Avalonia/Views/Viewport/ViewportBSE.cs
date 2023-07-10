@@ -8,7 +8,7 @@ namespace CreationEditor.Avalonia.Views.Viewport;
 
 public sealed class ViewportBSE : ContentPresenter {
     private const string ViewportProcessName = "BSE";
-    private const int ViewportEmbeddingAttempts = 10;
+    private const int ViewportEmbeddingAttempts = 50;
 
     public ViewportBSE(ILogger logger, string assetDirectory, string[] bsaFileNames) {
         Task.Run(() => {
@@ -50,7 +50,7 @@ public sealed class ViewportBSE : ContentPresenter {
         if (process is null) {
             logger.Here().Warning("Failed to embed viewport after {Count} attempts", ViewportEmbeddingAttempts);
         } else {
-            // Content = new ViewportHost(process);
+            Content = new ViewportHost(process);
         }
     }
 }

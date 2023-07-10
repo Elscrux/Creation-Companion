@@ -15,7 +15,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
 
-    private Interop.SelectCallback _selectCallback;
+    private Interop.SelectCallback? _selectCallback;
     private readonly IDisposableDropoff _disposableDropoff = new DisposableBucket();
     private readonly ILogger _logger;
     private readonly IEditorEnvironment _editorEnvironment;
@@ -68,7 +68,8 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     public void LoadInteriorCell(ICellGetter cell) {
         if (_interiorCell != cell.FormKey) UnloadEverything();
 
-        _interiorCellReferences = Load(cell.Temporary.Concat(cell.Persistent), P2Int.Origin);
+        var placedObjects = cell.GetAllPlacedObjects(_editorEnvironment.LinkCache);
+        _interiorCellReferences = Load(placedObjects, P2Int.Origin);
 
         _worldspaceRuntimeSettings = null;
     }
@@ -101,7 +102,8 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             originToLoad -= _worldspaceRuntimeSettings.Origin;
         }
 
-        var loadedReferences = Load(cell.Temporary.Concat(cell.Persistent), originToLoad);
+        var placedObjects = cell.GetAllPlacedObjects(_editorEnvironment.LinkCache);
+        var loadedReferences = Load(placedObjects, originToLoad);
         _worldspaceRuntimeSettings.LoadedCells.Add(origin, loadedReferences);
 
         _interiorCell = FormKey.Null;
