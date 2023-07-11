@@ -33,4 +33,19 @@ public partial class ReferenceWindow : AppWindow {
 
         ReferenceBrowserVM = referenceBrowserVM;
     }
+
+    public ReferenceWindow(
+        IEnumerable<IMajorRecordIdentifier> records,
+        ReferenceBrowserVM? referenceBrowserVM = null) : this() {
+        var recordsIdentifiers = string.Join(
+            ", ",
+            records.Select(record => {
+                var editorId = record.EditorID;
+                return $"{record.FormKey}" + (editorId is null ? string.Empty : $" - {editorId}");
+            }));
+
+        Title = $"References of {recordsIdentifiers}";
+
+        ReferenceBrowserVM = referenceBrowserVM;
+    }
 }

@@ -2,7 +2,9 @@
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using Avalonia.Controls.Selection;
 using Avalonia.Controls.Templates;
+using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -24,13 +26,13 @@ public sealed class ReferenceBrowserVM : ViewModel {
     public object? Context { get; }
     public ReferenceRemapperVM? ReferenceRemapperVM { get; }
 
-    [Reactive] public bool ShowTree { get; set; }
+    [Reactive] public bool ShowTree { get; set; } = true;
     [Reactive] public ITreeDataGridSource<IReference> ReferenceSource { get; set; }
 
-    public ReactiveCommand<IMajorRecordGetter, Unit> EditRecord { get; }
-    public ReactiveCommand<IMajorRecordGetter, Unit> DuplicateRecord { get; }
-    public ReactiveCommand<IMajorRecordGetter, Unit> DeleteRecord { get; }
-    public ReactiveCommand<IReferencedRecord, Unit> OpenReferences { get; }
+    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> EditRecord { get; }
+    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DuplicateRecord { get; }
+    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DeleteRecord { get; }
+    public ReactiveCommand<IEnumerable<IReferencedRecord>, Unit> OpenReferences { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleTree { get; }
     public ReactiveCommand<Unit, Unit> RemapReferences { get; }
@@ -98,7 +100,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
             }
         );
 
-        var treeReferenceSource = new HierarchicalTreeDataGridSource<IReference>(references) {
+        var treeReferenceSource = ReferenceSource = new HierarchicalTreeDataGridSource<IReference>(references) {
             Columns = {
                 new HierarchicalExpanderColumn<IReference>(
                     nameColumn,
@@ -109,42 +111,55 @@ public sealed class ReferenceBrowserVM : ViewModel {
                 typeColumn
             }
         };
+        if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> treeRowSelection) treeRowSelection.SingleSelect = false;
 
-        var flatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReference>(references) {
+        var flatReferenceSource = new FlatTreeDataGridSource<IReference>(references) {
             Columns = {
                 nameColumn,
                 identifierColumn,
                 typeColumn
             }
         };
+        if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> flatRowSelection) flatRowSelection.SingleSelect = false;
 
-        EditRecord = ReactiveCommand.Create<IMajorRecordGetter>(record => {
-            var newOverride = recordController.GetOrAddOverride(record);
-            recordEditorController.OpenEditor(newOverride);
+        EditRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
+            foreach (var record in records) {
+                var newOverride = recordController.GetOrAddOverride(record);
+                recordEditorController.OpenEditor(newOverride);
+            }
         });
 
-        DuplicateRecord = ReactiveCommand.Create<IMajorRecordGetter>(record => {
-            recordController.DuplicateRecord(record);
+        DuplicateRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
+            foreach (var record in records) {
+                recordController.DuplicateRecord(record);
+            }
         });
 
-        DeleteRecord = ReactiveCommand.Create<IMajorRecordGetter>(recordController.DeleteRecord);
+        DeleteRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
+            foreach (var record in records) { 
+                recordController.DeleteRecord(record);
+            }
+        });
 
-        OpenReferences = ReactiveCommand.Create<IReferencedRecord>(referencedRecord => {
+        OpenReferences = ReactiveCommand.Create<IEnumerable<IReferencedRecord>>(referencedRecords => {
             var newScope = lifetimeScope.BeginLifetimeScope();
             var editorEnvironment = newScope.Resolve<IEditorEnvironment>();
             var recordReferenceController = newScope.Resolve<IRecordReferenceController>();
 
-            var references = referencedRecord.References
+            var records = referencedRecords.ToArray();
+
+            var references = records
+                .SelectMany(record => record.References)
                 .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
 
             var identifiersParam = TypedParameter.From(references);
-            var contextParam = TypedParameter.From<object?>(referencedRecord);
+            var contextParam = TypedParameter.From<object?>(referencedRecords);
             var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(contextParam, identifiersParam);
             newScope.DisposeWith(referenceBrowserVM);
 
-            var referenceWindow = new ReferenceWindow(referencedRecord.Record) {
+            var referenceWindow = new ReferenceWindow(records.Select(record => record.Record)) {
                 Content = new ReferenceBrowser(referenceBrowserVM)
             };
 
@@ -160,26 +175,38 @@ public sealed class ReferenceBrowserVM : ViewModel {
     }
 
     public void ContextMenu(object? sender, ContextRequestedEventArgs e) {
-        if (e.Source is not Control { DataContext: IReference reference } control) return;
+        if (e.Source is not Control control) return;
 
-        if (reference is RecordReference recordReference) {
+        var treeDataGrid = control.FindAncestorOfType<TreeDataGrid>();
+        if (treeDataGrid?.RowSelection is null) return;
+
+        var selectedAssetReferences = treeDataGrid.RowSelection.SelectedItems
+            .OfType<AssetReference>()
+            .ToArray();
+
+        var selectedRecordReferences = treeDataGrid.RowSelection.SelectedItems
+            .OfType<RecordReference>()
+            .ToArray();
+
+        if (selectedRecordReferences.Length > 0) {
+            var records = selectedRecordReferences.Select(reference => reference.Record);
             var contextFlyout = new MenuFlyout {
                 Items = {
-                    _menuItemProvider.Edit(EditRecord, recordReference.Record),
-                    _menuItemProvider.Duplicate(DuplicateRecord, recordReference.Record),
-                    _menuItemProvider.Delete(DeleteRecord, recordReference.Record),
+                    _menuItemProvider.Edit(EditRecord, records),
+                    _menuItemProvider.Duplicate(DuplicateRecord, records),
+                    _menuItemProvider.Delete(DeleteRecord, records),
                 }
             };
 
-            if (recordReference.ReferencedRecord.References.Count > 0) {
-                var references = _menuItemProvider.References(OpenReferences, recordReference.ReferencedRecord);
+            if (selectedRecordReferences.Any(reference => reference.ReferencedRecord.References.Count > 0)) {
+                var references = _menuItemProvider.References(OpenReferences, selectedRecordReferences.Select(record => record.ReferencedRecord));
                 contextFlyout.Items.Add(references);
             }
 
             contextFlyout.ShowAt(control, true);
-        } else if (reference is AssetReference assetReference) {
-            
         }
+
+        if (selectedAssetReferences.Length > 0) {}
 
         e.Handled = true;
     }

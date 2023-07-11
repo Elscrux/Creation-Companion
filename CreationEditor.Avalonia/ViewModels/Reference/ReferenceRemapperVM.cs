@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Collections;
+using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Threading;
 using CreationEditor.Services.Environment;
@@ -31,7 +32,8 @@ public sealed class ReferenceRemapperVM : ViewModel {
         EditorEnvironment = editorEnvironment;
         Context = context;
 
-        if (context is IReferencedRecord referencedRecord) {
+        var referencedRecord = ParseContext(context);
+        if (referencedRecord is not null) {
             ReferencedRecordContext = referencedRecord;
             ContextCanBeRemapped = true;
             ContextType = referencedRecord.Record.Registration.GetterType;
@@ -48,6 +50,14 @@ public sealed class ReferenceRemapperVM : ViewModel {
                 Dispatcher.UIThread.Post(() => IsRemapping = false);
             });
         });
+    }
+
+    private IReferencedRecord? ParseContext(object? context) {
+        return context switch {
+            IReferencedRecord referencedRecord => referencedRecord,
+            IEnumerable enumerable => enumerable.OfType<IReferencedRecord>().FirstOrDefault(),
+            _ => null
+        };
     }
 
     public void Remap() {
