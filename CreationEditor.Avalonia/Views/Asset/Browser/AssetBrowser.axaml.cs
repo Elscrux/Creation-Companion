@@ -66,13 +66,19 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             // Open references
             case Key.R when (e.KeyModifiers & KeyModifiers.Control) != 0:
                 if (AssetTree.RowSelection.SelectedItem is AssetTreeItem item) {
-                    (ViewModel.OpenReferences as ICommand).Execute(item);
+                    var command = ViewModel.OpenReferences as ICommand;
+                    if (command.CanExecute(null)) {
+                        command.Execute(item);
+                    }
                 }
                 break;
             // Rename
             case Key.F2:
                 if (AssetTree.RowSelection.SelectedItem is AssetTreeItem assetTreeItem) {
-                    (ViewModel.Rename as ICommand).Execute(assetTreeItem);
+                    var command = ViewModel.Rename as ICommand;
+                    if (command.CanExecute(null)) {
+                        command.Execute(assetTreeItem);
+                    }
                 }
                 break;
             // Delete
