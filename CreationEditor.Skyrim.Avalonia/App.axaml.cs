@@ -6,12 +6,13 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Avalonia.Services.Docking;
+using CreationEditor.Avalonia.Services.Exceptions;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
-using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Installs.DI;
+using ReactiveUI;
+using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public partial class App : Application {
@@ -42,9 +43,6 @@ public partial class App : Application {
             builder.RegisterModule<MutagenModule>();
             builder.RegisterModule<SkyrimModule>();
 
-            // Remove
-            builder.RegisterType<GameLocator>().As<IGameDirectoryLookup>();
-
             var window = new MainWindow();
             builder.RegisterInstance(window).As<MainWindow>();
 
@@ -53,6 +51,10 @@ public partial class App : Application {
 
             var container = builder.Build();
 
+            // Init ReactiveUI
+            RxApp.DefaultExceptionHandler = new ObservableExceptionHandler(container.Resolve<ILogger>());
+
+            // Handle lifecycle
             var lifecycle = container.Resolve<ILifecycle>();
             lifecycle.Start();
 
