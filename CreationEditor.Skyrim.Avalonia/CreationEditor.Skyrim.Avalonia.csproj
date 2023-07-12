@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.1-pr001" />
+        <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.41.1.1-nightly-20230712-102825" />
         <PackageReference Include="ReactiveUI" Version="18.4.44" />
         <PackageReference Include="ReactiveUI.Fody" Version="18.4.44" />
     </ItemGroup>

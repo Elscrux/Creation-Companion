@@ -23,7 +23,6 @@ public sealed class AssetTypeService : IAssetTypeService {
 
         FileExtensions = Provider.AllAssetTypes
             .SelectMany(a => a.FileExtensions)
-            .Select(extension => $".{extension}")
             .ToArray();
 
         foreach (var assetType in Provider.AllAssetTypes) {
@@ -37,7 +36,7 @@ public sealed class AssetTypeService : IAssetTypeService {
         var extension = _fileSystem.Path.GetExtension(filePath);
         if (extension.Length == 0) return null;
 
-        _assetTypesExtensions.TryGetValue(extension[1..], out var assetType);
+        _assetTypesExtensions.TryGetValue(extension, out var assetType);
 
         return assetType;
     }
