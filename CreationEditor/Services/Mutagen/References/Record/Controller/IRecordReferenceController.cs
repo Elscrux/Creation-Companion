@@ -10,7 +10,7 @@ public interface IRecordReferenceController : IReferenceController<IMajorRecordG
     /// </summary>
     /// <param name="formKey">Form key to get references for</param>
     /// <returns>Enumerable of form links that reference the given form key</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey);
+    IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey);
 
     /// <summary>
     /// Get a decorated record that always contains the latest information about references to this record. 
@@ -19,6 +19,6 @@ public interface IRecordReferenceController : IReferenceController<IMajorRecordG
     /// <param name="outReferencedRecord">Out variable that contains the referenced record</param>
     /// <typeparam name="TMajorRecordGetter">Getter record type</typeparam>
     /// <returns>Disposable that can be disposed to stop updates to the referenced record</returns>
-    public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
+    IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter;
 }
