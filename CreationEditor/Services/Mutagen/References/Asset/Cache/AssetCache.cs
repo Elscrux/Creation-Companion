@@ -55,9 +55,7 @@ public sealed class AssetCache<TOrigin, TReference>
     /// <returns>String representation of the entity referencing asset</returns>
     public IEnumerable<TReference> GetReferences(IAssetLinkGetter asset) {
         foreach (var (_, cache) in _referenceCaches) {
-            // todo replace with TryGetValue when mutagen update is done
-            var assetDictionary = cache.Cache.FirstOrDefault(t => t.Key.GetType() == asset.Type.GetType()).Value;
-            if (assetDictionary is null) continue;
+            if (!cache.Cache.TryGetValue(asset.Type, out var assetDictionary)) continue;
 
             // if (!cache.Cache.TryGetValue(asset.Type, out var assetDictionary)) continue;
             if (!assetDictionary.TryGetValue(asset, out var usages)) continue;
@@ -91,9 +89,7 @@ public sealed class AssetCache<TOrigin, TReference>
             return false;
         }
 
-        // todo replace with TryGetValue when mutagen update is done
-        var assetDictionary = cache.Cache.FirstOrDefault(t => t.Key.GetType() == asset.Type.GetType()).Value;
-        if (assetDictionary is null) {
+        if (!cache.Cache.TryGetValue(asset.Type, out var assetDictionary)) {
             references = null;
             return false;
         }
