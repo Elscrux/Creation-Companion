@@ -171,7 +171,7 @@ public sealed class BsaArchiveService : IArchiveService {
                     var dirName = _fileSystem.Path.GetDirectoryName(file.Path);
                     if (dirName is null) continue;
 
-                    var directoryNames = dirName.Split(_fileSystem.Path.DirectorySeparatorChar);
+                    var directoryNames = dirName.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
                     if (directoryNames.Length == 0) continue;
 
                     IList<ArchiveDirectory> subDirectories = directories;
@@ -191,7 +191,7 @@ public sealed class BsaArchiveService : IArchiveService {
             var invalid = false;
             IList<ArchiveDirectory> currentDirectories = directories;
             if (!isRoot) {
-                var relativePathNames = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar);
+                var relativePathNames = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
                 foreach (var pathName in relativePathNames) {
                     var dir = currentDirectories.FirstOrDefault(d => string.Equals(d.Name, pathName, AssetCompare.PathComparison));
                     if (dir is null) {

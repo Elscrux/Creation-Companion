@@ -260,7 +260,7 @@ public sealed class AssetDirectory : IAsset {
         if (relativePath.IsNullOrWhitespace()) return null;
 
         var currentDirectory = this;
-        var directories = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar).ToArray();
+        var directories = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar).ToArray();
 
         foreach (var directory in directories.SkipLast(1)) {
             currentDirectory = currentDirectory.Children
