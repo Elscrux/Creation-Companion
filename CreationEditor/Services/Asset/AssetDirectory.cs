@@ -240,4 +240,44 @@ public sealed class AssetDirectory : IAsset {
             .OfType<AssetFile>()
             .Select(file => file.ReferencedAsset);
     }
+
+    /// <summary>
+    /// Checks if the given asset exists in this directory or any of its subdirectories.
+    /// </summary>
+    /// <param name="absolutePath">absolute path of the asset to check for</param>
+    /// <returns>true if the asset exists under this directory</returns>
+    public bool Contains(string absolutePath) {
+        return GetAssetFile(absolutePath) is not null;
+    }
+
+    /// <summary>
+    /// Returns the asset file with the given file path.
+    /// </summary>
+    /// <param name="filePath">file path of the asset file</param>
+    /// <returns>asset file with the given file path</returns>
+    public AssetFile? GetAssetFile(string filePath) {
+        var relativePath = _fileSystem.Path.GetRelativePath(Path, filePath);
+        if (relativePath.IsNullOrWhitespace()) return null;
+
+        var currentDirectory = this;
+        var directories = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar).ToArray();
+
+        foreach (var directory in directories.SkipLast(1)) {
+            currentDirectory = currentDirectory.Children
+                .OfType<AssetDirectory>()
+                .FirstOrDefault(dir => string.Equals(_fileSystem.Path.GetFileName(dir.Path), directory, AssetCompare.PathComparison));
+
+            if (currentDirectory is null) break;
+        }
+
+        return currentDirectory?.Children
+            .OfType<AssetFile>()
+            .FirstOrDefault(file => string.Equals(_fileSystem.Path.GetFileName(file.Path), directories[^1], AssetCompare.PathComparison));
+    }
+
+    /// <summary>
+    /// Returns the asset file with the given file path.
+    /// </summary>
+    /// <param name="filePath">file path of the asset file</param>
+    public AssetFile? this[string filePath] => GetAssetFile(filePath);
 }
