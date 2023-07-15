@@ -4,8 +4,8 @@ namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
 public static class RecordFilterExtension {
     public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(this IEnumerable<T> elements,
-        char separator,
-        Func<T, IEnumerable<string>> stringSelector) {
+        Func<T, IEnumerable<string>> stringSelector,
+        params char[] separator) {
 
         var root = new RecordFilterListing(string.Empty, _ => true);
 
@@ -53,12 +53,13 @@ public static class RecordFilterExtension {
     }
 
     public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(this IEnumerable<T> elements,
-        char separator,
-        Func<T, string?> stringSelector) {
-        return elements.GetRecursiveListings(separator,
+        Func<T, string?> stringSelector,
+        params char[] separator) {
+        return elements.GetRecursiveListings(
             t => {
                 var selector = stringSelector(t);
                 return selector is not null ? selector.AsEnumerable() : Enumerable.Empty<string>();
-            });
+            },
+            separator);
     }
 }

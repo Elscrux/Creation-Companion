@@ -19,6 +19,6 @@ public sealed class QuestFilter : RecordFilter<IQuestGetter> {
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
-            .GetRecursiveListings(QuestFilterSeparator, quest => quest.Filter);
+            .GetRecursiveListings(quest => quest.Filter, QuestFilterSeparator);
     }
 }

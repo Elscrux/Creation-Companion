@@ -20,7 +20,7 @@ public sealed class LocationFilter : RecordFilter<ILocationGetter> {
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
-            .GetRecursiveListings(Separator, GetParentLocationString);
+            .GetRecursiveListings(GetParentLocationString, Separator);
     }
 
     private string GetParentLocationString(ILocationGetter location) {

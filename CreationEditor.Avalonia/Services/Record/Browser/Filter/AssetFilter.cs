@@ -21,7 +21,7 @@ public abstract class AssetFilter<T> : IRecordFilter {
     public IEnumerable<RecordFilterListing> GetListings(Type type) {
         var recordFilterListings = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(type)
             .OfType<T>()
-            .GetRecursiveListings(_fileSystem.Path.DirectorySeparatorChar, GetPaths)
+            .GetRecursiveListings(GetPaths, _fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar)
             .ToList();
 
         // Trim standalone folders
