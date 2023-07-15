@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
+using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -11,6 +12,7 @@ public sealed class AssetController : IAssetController {
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
+    private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetProvider _assetProvider;
     private readonly IModelModificationService _modelModificationService;
     private readonly IEditorEnvironment _editorEnvironment;
@@ -21,6 +23,7 @@ public sealed class AssetController : IAssetController {
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         IDeleteDirectoryProvider deleteDirectoryProvider,
+        IAssetReferenceController assetReferenceController,
         IAssetProvider assetProvider,
         IModelModificationService modelModificationService,
         IEditorEnvironment editorEnvironment,
@@ -31,6 +34,7 @@ public sealed class AssetController : IAssetController {
         _editorEnvironment = editorEnvironment;
         _dataDirectoryProvider = dataDirectoryProvider;
         _deleteDirectoryProvider = deleteDirectoryProvider;
+        _assetReferenceController = assetReferenceController;
         _modelModificationService = modelModificationService;
         _recordController = recordController;
         _logger = logger;
@@ -57,13 +61,30 @@ public sealed class AssetController : IAssetController {
     }
 
     private void MoveInternal(string path, string destination, bool rename) {
-        var assetContainer = _assetProvider.GetAssetContainer(path);
+        var isFile = _fileSystem.Path.HasExtension(path);
+
+        // Get the parent directory for a file path or self for a directory path
+        var baseDirectory = isFile ? _fileSystem.Path.GetDirectoryName(path) : path;
+        if (baseDirectory is null) return;
+
+        var assetContainer = _assetProvider.GetAssetContainer(baseDirectory);
 
         var basePath = assetContainer.Path;
-        var baseIsFile = _fileSystem.Path.HasExtension(basePath);
+        var baseIsFile = isFile || _fileSystem.Path.HasExtension(basePath);
         var destinationIsFile = _fileSystem.Path.HasExtension(destination);
 
-        foreach (var assetFile in assetContainer.GetAllChildren<IAsset, AssetFile>(a => a.Children, true)) {
+        if (isFile) {
+            var assetFile = assetContainer.GetAssetFile(path);
+            if (assetFile is null) return;
+
+            MoveInt(assetFile);
+        } else {
+            foreach (var assetFile in assetContainer.GetAllChildren<IAsset, AssetFile>(a => a.Children, true)) {
+                MoveInt(assetFile);
+            }
+        }
+
+        void MoveInt(AssetFile assetFile) {
             // Calculate the full path of that the file should be moved to
             var fullNewPath = destinationIsFile
                 // If the destination is a file, we already have the full path
@@ -73,13 +94,13 @@ public sealed class AssetController : IAssetController {
                     rename || baseIsFile
                         // Example Renaming meshes\clutter to meshes\clutter-new
                         // basePath:          meshes\clutter
-                        // childOrSelf.Path:  meshes\clutter\test.nif
+                        // assetFile.Path:    meshes\clutter\test.nif
                         // destination:       meshes\clutter-new\
                         // fullNewPath:       meshes\clutter-new\test.nif
                         ? destination
                         // Example Moving meshes\clutter to meshes\clutter-new
                         // basePath:          meshes\clutter
-                        // childOrSelf.Path:  meshes\clutter\test.nif
+                        // assetFile.Path:    meshes\clutter\test.nif
                         // destination:       meshes\clutter-new\
                         // fullNewPath:       meshes\clutter-new\clutter\test.nif
                         : _fileSystem.Path.Combine(destination, _fileSystem.Path.GetFileName(basePath)),
@@ -94,7 +115,7 @@ public sealed class AssetController : IAssetController {
             var shortenedPath = _fileSystem.Path.GetRelativePath(assetFile.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
 
             // Move the asset
-            if (!FileSystemMove(assetFile.Path, fullNewPath)) continue;
+            if (!FileSystemMove(assetFile.Path, fullNewPath)) return;
 
             // Remap references in records
             foreach (var formLink in assetFile.ReferencedAsset.RecordReferences) {
