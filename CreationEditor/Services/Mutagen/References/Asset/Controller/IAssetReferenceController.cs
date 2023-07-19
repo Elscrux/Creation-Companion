@@ -15,5 +15,5 @@ public interface IAssetReferenceController : IReferenceController<IMajorRecordGe
     /// <param name="asset">Asset to get referenced asset version of</param>
     /// <param name="referencedAsset">Out variable that contains the referenced asset</param>
     /// <returns>Disposable that can be disposed to stop updates to the referenced asset</returns>
-    IDisposable GetReferencedAsset(IAssetLink asset, out IReferencedAsset referencedAsset);
+    IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset);
 }

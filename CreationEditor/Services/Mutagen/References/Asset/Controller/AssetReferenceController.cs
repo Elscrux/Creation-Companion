@@ -228,7 +228,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         }
     }
 
-    public IDisposable GetReferencedAsset(IAssetLink asset, out IReferencedAsset referencedAsset) {
+    public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
         var modReferences = _modAssetCaches?.GetReferences(asset);
         var nifDirectoryReferences = _nifDirectoryAssetCache?.GetReferences(asset);
         var nifArchiveReferences = _nifArchiveAssetCaches?.GetReferences(asset);
