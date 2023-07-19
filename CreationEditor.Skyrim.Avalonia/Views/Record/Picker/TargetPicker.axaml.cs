@@ -196,6 +196,11 @@ public partial class TargetPicker : ActivatableUserControl {
                 LocationTargetRadius.LocationType.NearEditorLocation => TargetPickerType.EditorLocation,
                 LocationTargetRadius.LocationType.NearPackageStart => TargetPickerType.PackageStart,
                 LocationTargetRadius.LocationType.NearSelf => TargetPickerType.Self,
+                LocationTargetRadius.LocationType.NearReference => TargetPickerType.Reference,
+                LocationTargetRadius.LocationType.InCell => TargetPickerType.Cell,
+                LocationTargetRadius.LocationType.ObjectID => TargetPickerType.Object,
+                LocationTargetRadius.LocationType.ObjectType => TargetPickerType.ObjectType,
+                LocationTargetRadius.LocationType.LinkedReference => TargetPickerType.LinkedRef,
                 _ => throw new ArgumentOutOfRangeException()
             },
             _ => throw new ArgumentOutOfRangeException(nameof(target))
