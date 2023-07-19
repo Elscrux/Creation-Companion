@@ -23,8 +23,8 @@
 
     <ItemGroup>
       <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.41.1.1-nightly-20230712-102825" />
-      <PackageReference Include="ReactiveUI" Version="18.4.44" />
-      <PackageReference Include="ReactiveUI.Fody" Version="18.4.44" />
+      <PackageReference Include="ReactiveUI" Version="19.4.1" />
+      <PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />
     </ItemGroup>
 
     <Target Name="CopyPlugin" AfterTargets="Build">

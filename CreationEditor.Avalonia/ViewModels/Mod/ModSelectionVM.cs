@@ -6,7 +6,7 @@ using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
-using MessageBox.Avalonia;
+using MsBox.Avalonia;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
@@ -79,7 +79,7 @@ public sealed class ModSelectionVM : ViewModel {
             .Select(x => _modInfos.All(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
 
         var filePath = pluginListingsProvider.Get(gameReleaseContext.Release);
-        if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandardWindow("Warning", $"Make sure {filePath} exists.");
+        if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandard("Warning", $"Make sure {filePath} exists.");
 
         UpdateMasterInfos();
 

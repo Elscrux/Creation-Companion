@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -50,8 +51,8 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, RecordGrid.Columns.First());
     }
 
-    protected override void OnLoaded() {
-        base.OnLoaded();
+    protected override void OnLoaded(RoutedEventArgs e) {
+        base.OnLoaded(e);
 
         Sort();
     }
