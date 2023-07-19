@@ -36,9 +36,12 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References.Asset.Query;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -46,6 +49,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IFileSystem _fileSystem;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
@@ -53,8 +57,12 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IRecordReferenceController _recordReferenceController;
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
+    private readonly IAssetProvider _assetProvider;
     private readonly ILifetimeScope _lifetimeScope;
     private readonly string _root;
+
+    private AssetDirectory? _dataDirectory;
+    public AssetDirectory DataDirectory => _dataDirectory ??= _assetProvider.GetAssetContainer(_dataDirectoryProvider.Path);
 
     [Reactive] public string SearchText { get; set; } = string.Empty;
     [Reactive] public bool ShowBsaAssets { get; set; }
@@ -81,6 +89,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public AssetBrowserVM(
         IFileSystem fileSystem,
+        IDataDirectoryProvider dataDirectoryProvider,
+        ModelAssetQuery modelAssetQuery,
         IArchiveService archiveService,
         IMenuItemProvider menuItemProvider,
         IAssetReferenceController assetReferenceController,
@@ -96,6 +106,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         ILifetimeScope lifetimeScope,
         string root) {
         _fileSystem = fileSystem;
+        _dataDirectoryProvider = dataDirectoryProvider;
         _menuItemProvider = menuItemProvider;
         _assetReferenceController = assetReferenceController;
         _assetController = assetController;
@@ -103,6 +114,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _editorEnvironment = editorEnvironment;
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
+        _assetProvider = assetProvider;
         _lifetimeScope = lifetimeScope;
         _root = root;
 
@@ -162,6 +174,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         new FuncDataTemplate<AssetTreeItem>((asset, _) => {
                             if (asset is null) return null;
 
+                            // Name
                             var textBlock = new TextBlock {
                                 Text = _fileSystem.Path.GetFileName(asset.Path),
                                 [ToolTip.TipProperty] = GetRootRelativePath(asset.Path),
@@ -172,6 +185,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 textBlock.Foreground = Brushes.Gray;
                             }
 
+                            // Symbol
                             var symbolIcon = new SymbolIcon {
                                 Symbol = asset.Asset is AssetFile file ? assetSymbolService.GetSymbol(file.ReferencedAsset.AssetLink.Extension) : Symbol.Folder,
                                 VerticalAlignment = VerticalAlignment.Center
@@ -242,6 +256,28 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             return -(checkNull ?? AssetComparers.ReferenceCountComparer.Compare(x?.Asset, y?.Asset));
                         },
                     }),
+                new TemplateColumn<AssetTreeItem>(
+                    "Flags",
+                    new FuncDataTemplate<AssetTreeItem>((asset, _) => {
+                        if (asset?.Asset is AssetFile assetFile && assetFile.ReferencedAsset.AssetLink.Type == SkyrimModelAssetType.Instance) {
+                            // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
+                            var assetLinks = modelAssetQuery
+                                .ParseAssets(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetFile.ReferencedAsset.AssetLink.DataRelativePath))
+                                .Select(r => r.AssetLink)
+                                .Where(assetLink => !DataDirectory.Contains(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetLink.DataRelativePath)))
+                                .ToArray();
+
+                            if (assetLinks.Length > 0) {
+                                return new SymbolIcon {
+                                    Symbol = Symbol.ImportantFilled,
+                                    Foreground = StandardBrushes.InvalidBrush,
+                                    [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath))
+                                };
+                            }
+                        }
+
+                        return null;
+                    }))
             },
         };
 
