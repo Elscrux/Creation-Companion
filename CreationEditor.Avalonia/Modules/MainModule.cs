@@ -116,6 +116,7 @@ public sealed class MainModule : Module {
             .As<ICacheLocationProvider>();
 
         builder.RegisterType<AssetProvider>()
+            .AsSelf()
             .As<IAssetProvider>()
             .SingleInstance();
 

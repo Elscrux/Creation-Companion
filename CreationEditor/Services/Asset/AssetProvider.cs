@@ -1,14 +1,17 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
+using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Services.Asset;
 
-public sealed class AssetProvider : IAssetProvider {
+public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
     private readonly IFileSystem _fileSystem;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
 
     private readonly Dictionary<string, IAsset> _assetDirectories = new();
 
@@ -17,13 +20,25 @@ public sealed class AssetProvider : IAssetProvider {
         IAssetReferenceController assetReferenceController,
         IDeleteDirectoryProvider deleteDirectoryProvider,
         IAssetTypeService assetTypeService,
-        IArchiveService archiveService) {
+        IArchiveService archiveService,
+        IDataDirectoryProvider dataDirectoryProvider) {
         _fileSystem = fileSystem;
         _assetReferenceController = assetReferenceController;
         _deleteDirectoryProvider = deleteDirectoryProvider;
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
+        _dataDirectoryProvider = dataDirectoryProvider;
     }
+
+    public void OnStartup() {
+        Task.Run(() => {
+            // Force load all directories up front
+            var dataDirectory = GetAssetContainer(_dataDirectoryProvider.Path);
+            foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {}
+        });
+    }
+
+    public void OnExit() {}
 
     public AssetDirectory GetAssetContainer(string directory) {
         foreach (var (path, asset) in _assetDirectories) {
