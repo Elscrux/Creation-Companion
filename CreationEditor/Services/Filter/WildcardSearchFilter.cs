@@ -7,7 +7,7 @@ public sealed class WildcardSearchFilter : ISearchFilter {
         if (string.IsNullOrWhiteSpace(searchTerm)) return true;
 
         var index = 0;
-        foreach (var term in searchTerm.Split(SplitChar)) {
+        foreach (var term in searchTerm.Trim().Split(SplitChar)) {
             var indexOf = searchWord[index..].IndexOf(term, StringComparison.OrdinalIgnoreCase);
             if (indexOf == -1) return false;
 
