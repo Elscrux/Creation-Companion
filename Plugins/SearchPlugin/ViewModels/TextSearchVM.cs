@@ -52,7 +52,7 @@ public sealed class TextSearchVM : ViewModel {
 
         Searchers = new ObservableCollectionExtended<SelectableSearcher>(
             typeof(ITextSearcher<ISkyrimMod, ISkyrimModGetter>)
-                .GetAllSubClass<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
+                .GetAllSubClasses<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
                 .Select(searcher => new SelectableSearcher(searcher)));
 
         Mods = this.WhenAnyValue(x => x._pluginContext.EditorEnvironment.LinkCacheChanged)

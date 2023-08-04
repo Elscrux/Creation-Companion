@@ -24,7 +24,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
         Setting = settingsImporter.Import(this) ?? new ViewSetting();
 
         _viewModeTemplates = typeof(IViewModeTemplate)
-            .GetAllSubClass<IViewModeTemplate>()
+            .GetAllSubClasses<IViewModeTemplate>()
             .ToDictionary(template => template.ViewMode, template => template);
     }
 

@@ -69,15 +69,15 @@ public static class TypeExtension {
         return types.Any(type => inheritedTypes.Any(inheritedType => type.InheritsFrom(inheritedType)));
     }
 
-    public static IEnumerable<T> GetAllSubClass<T>(this Type type, Func<Type, object?> creator) {
+    public static IEnumerable<T> GetAllSubClasses<T>(this Type type, Func<Type, object?> creator) {
         return type
             .GetSubclassesOf()
             .Select(creator)
             .OfType<T>();
     }
 
-    public static IEnumerable<T> ResolveAllSubClassAndGenericByInterface<T>(this Type type, IComponentContext componentContext) {
-        return type.GetAllSubClass<T>(subClassType => {
+    public static IEnumerable<T> ResolveAllSubClassesAndGenericByInterface<T>(this Type type, IComponentContext componentContext) {
+        return type.GetAllSubClasses<T>(subClassType => {
             if (subClassType.ContainsGenericParameters) {
                 foreach (var @interface in subClassType.GetInterfaces()) {
                     var resolveOptional = componentContext.ResolveOptional(@interface);
@@ -90,11 +90,11 @@ public static class TypeExtension {
         });
     }
 
-    public static IEnumerable<T> GetAllSubClass<T>(this Type type) {
-        return type.GetAllSubClass<T>(Activator.CreateInstance);
+    public static IEnumerable<T> GetAllSubClasses<T>(this Type type) {
+        return type.GetAllSubClasses<T>(Activator.CreateInstance);
     }
 
-    public static IEnumerable<T> GetAllSubClass<T>() {
-        return GetAllSubClass<T>(typeof(T));
+    public static IEnumerable<T> GetAllSubClasses<T>() {
+        return GetAllSubClasses<T>(typeof(T));
     }
 }

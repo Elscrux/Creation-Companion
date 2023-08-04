@@ -22,7 +22,7 @@ public sealed class Lifecycle : ILifecycle {
         _mainVm = mainVm;
 
         _lifecycleTasks = typeof(ILifecycleTask)
-            .ResolveAllSubClassAndGenericByInterface<ILifecycleTask>(componentContext)
+            .ResolveAllSubClassesAndGenericByInterface<ILifecycleTask>(componentContext)
             .ToList();
     }
 

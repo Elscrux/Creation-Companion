@@ -14,7 +14,7 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
 
         // Get setting classes via reflection
         var settings = typeof(ISetting)
-            .GetAllSubClass<ISetting>(newScope.Resolve)
+            .GetAllSubClasses<ISetting>(newScope.Resolve)
             .ToList();
 
         // From a static parent by type structure, compile all children for runtime use

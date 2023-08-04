@@ -64,7 +64,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
 
     public ConditionDataTemplate() {
         _conditionTemplateCache = typeof(ICustomConditionDataTemplate)
-            .GetAllSubClass<ICustomConditionDataTemplate>()
+            .GetAllSubClasses<ICustomConditionDataTemplate>()
             .ToDictionary(template => template.Type, template => template);
 
         foreach (var (_, template) in _conditionTemplateCache) {

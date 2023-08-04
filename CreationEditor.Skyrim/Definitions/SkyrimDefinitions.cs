@@ -15,11 +15,11 @@ public static class SkyrimDefinitions {
 
     public static readonly IList<AStoryManagerEvent> StoryManagerEvents
         = typeof(AStoryManagerEvent)
-            .GetAllSubClass<AStoryManagerEvent>()
+            .GetAllSubClasses<AStoryManagerEvent>()
             .ToList();
 
     public static readonly IList<IConditionValueEnums> ConditionValueEnums
         = typeof(IConditionValueEnums)
-            .GetAllSubClass<IConditionValueEnums>()
+            .GetAllSubClasses<IConditionValueEnums>()
             .ToList();
 }

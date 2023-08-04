@@ -7,7 +7,7 @@ public sealed class RecordFilterProvider : IRecordFilterProvider {
     public RecordFilterProvider(
         IComponentContext componentContext) {
         RecordFilterCache = typeof(IRecordFilter)
-            .GetAllSubClass<IRecordFilter>(componentContext.Resolve)
+            .GetAllSubClasses<IRecordFilter>(componentContext.Resolve)
             .ToDictionary(subRecordListing => subRecordListing.Type, subRecordListing => subRecordListing);
     }
 }

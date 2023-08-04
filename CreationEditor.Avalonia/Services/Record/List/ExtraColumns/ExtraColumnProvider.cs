@@ -6,7 +6,7 @@ public sealed class ExtraColumnProvider : IExtraColumnProvider {
 
     public ExtraColumnProvider() {
         ExtraColumnsCache = typeof(IExtraColumns)
-            .GetAllSubClass<IExtraColumns>()
+            .GetAllSubClasses<IExtraColumns>()
             .ToDictionary(extraColumns => extraColumns.Type, extraColumns => extraColumns);
     }
 }
