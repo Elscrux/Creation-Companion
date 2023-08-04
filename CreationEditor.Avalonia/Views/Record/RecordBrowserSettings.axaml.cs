@@ -32,7 +32,7 @@ public partial class RecordBrowserSettingsView : ActivatableUserControl {
         this.WhenAnyValue(x => x.OnlyActive)
             .ObserveOnGui()
             .Subscribe(_ => {
-                if (Settings == null) return;
+                if (Settings is null) return;
 
                 Settings.ModScopeProvider.Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment;
             })
