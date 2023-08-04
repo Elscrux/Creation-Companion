@@ -50,9 +50,14 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
             PrimaryButtonText = "Load",
             PrimaryButtonCommand = ReactiveCommand.Create(modSelectionVM.LoadMods),
             SecondaryButtonText = "Cancel",
-            KeyBindings = { new KeyBinding { Command = ReactiveCommand.Create(() => {
-                if (allowLoading) modSelectionVM.LoadMods();
-            }), Gesture = new KeyGesture(Key.Enter) } },
+            KeyBindings = {
+                new KeyBinding {
+                    Command = ReactiveCommand.Create(() => {
+                        if (allowLoading) modSelectionVM.LoadMods();
+                    }),
+                    Gesture = new KeyGesture(Key.Enter)
+                }
+            },
             DefaultButton = ContentDialogButton.Primary,
         };
         contentDialog.SecondaryButtonCommandParameter = ReactiveCommand.Create(() => contentDialog.Hide());

@@ -1,6 +1,6 @@
 ﻿using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
-namespace CreationEditor.Skyrim; 
+namespace CreationEditor.Skyrim;
 
 public static class CellExtension {
     public static IEnumerable<IPlacedGetter> GetAllPlacedObjects(this ICellGetter cell, ILinkCache linkCache) {

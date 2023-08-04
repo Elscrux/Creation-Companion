@@ -136,7 +136,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         });
 
         DeleteRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
-            foreach (var record in records) { 
+            foreach (var record in records) {
                 recordController.DeleteRecord(record);
             }
         });

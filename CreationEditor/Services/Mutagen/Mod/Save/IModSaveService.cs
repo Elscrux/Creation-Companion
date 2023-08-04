@@ -7,7 +7,7 @@ public interface IModSaveService {
     /// </summary>
     /// <param name="mod">Mod to save</param>
     void SaveMod(IMod mod);
-    
+
     /// <summary>
     /// Backup the currently saved mod. If limit is set, delete older backups.
     /// </summary>

@@ -9,7 +9,7 @@ public interface IConditionCopyPasteController {
     /// </summary>
     /// <param name="conditions">Conditions to copy</param>
     void Copy(IEnumerable<ICondition> conditions);
-    
+
     /// <summary>
     /// Pastes the conditions from the conditions clipboard into the given conditions.
     /// </summary>

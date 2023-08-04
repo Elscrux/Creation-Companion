@@ -28,7 +28,7 @@ public partial class RecordBrowserSettingsView : ActivatableUserControl {
 
     protected override void WhenActivated() {
         base.WhenActivated();
-        
+
         this.WhenAnyValue(x => x.OnlyActive)
             .ObserveOnGui()
             .Subscribe(_ => {
