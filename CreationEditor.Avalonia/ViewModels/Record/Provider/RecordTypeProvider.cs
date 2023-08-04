@@ -2,7 +2,7 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -18,7 +18,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IList<Type> Types { get; }
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
@@ -31,15 +31,15 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
     public RecordTypeProvider(
         IEnumerable<Type> types,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM,
+        IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController) {
         Types = types.ToList();
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+        RecordBrowserSettings = recordBrowserSettings;
 
-        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
+        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
-        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
+        RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
                 _referencesDisposable.Clear();

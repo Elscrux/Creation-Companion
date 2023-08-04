@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Services.Filter;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
@@ -14,5 +15,5 @@ public interface IRecordBrowserVM : IDisposableDropoff {
     public ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
 
     public IRecordListVM? RecordListVM { get; set; }
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 }

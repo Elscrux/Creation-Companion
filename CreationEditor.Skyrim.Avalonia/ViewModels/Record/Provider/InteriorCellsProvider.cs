@@ -27,9 +27,9 @@ public sealed class InteriorCellsProvider : CellProvider {
         : base(lifetimeScope) {
         _viewportRuntimeService = viewportRuntimeService;
 
-        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
+        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
-        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
+        RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
                 ReferencesDisposable.Clear();

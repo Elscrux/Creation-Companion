@@ -5,6 +5,7 @@ using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Services.Filter;
 using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -14,7 +15,7 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IRecordListFactory _recordListFactory;
 
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
     [Reactive] public IRecordListVM? RecordListVM { get; set; }
 
     public IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
@@ -29,17 +30,17 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         ILifetimeScope lifetimeScope,
         IRecordBrowserGroupProvider recordBrowserGroupProvider,
         IRecordListFactory recordListFactory,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM) {
+        IRecordBrowserSettings recordBrowserSettingsVM) {
         _lifetimeScope = lifetimeScope;
         _recordListFactory = recordListFactory;
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+        RecordBrowserSettings = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
 
         SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => group.Activate());
 
         SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;
-            RecordBrowserSettingsVM.RecordFilter = null;
+            RecordBrowserSettings.CustomFilter = null;
 
             if (_recordListType == recordType) return;
 
@@ -54,14 +55,14 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
 
             if (parent is RecordTypeListing recordTypeListing) {
                 if (recordTypeListing.Registration.GetterType != _recordListType) SetRecordList(recordTypeListing.Registration.GetterType);
-                RecordBrowserSettingsVM.RecordFilter = recordFilterListing.Filter;
+                RecordBrowserSettings.CustomFilter = recordFilterListing.Filter;
             }
         });
     }
 
     private void SetRecordList(Type recordType) {
         RecordListVM?.Dispose();
-        var recordListVM = _recordListFactory.FromType(recordType, RecordBrowserSettingsVM);
+        var recordListVM = _recordListFactory.FromType(recordType, RecordBrowserSettings);
 
         var newScope = _lifetimeScope.BeginLifetimeScope();
         var extraColumnsBuilder = newScope.Resolve<IExtraColumnsBuilder>();

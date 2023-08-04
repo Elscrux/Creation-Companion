@@ -11,8 +11,8 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -26,7 +26,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
     protected readonly CompositeDisposable ReferencesDisposable = new();
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
@@ -61,7 +61,7 @@ public abstract class CellProvider : ViewModel, IRecordProvider<IReferencedRecor
         var recordEditorController = newScope.Resolve<IRecordEditorController>();
         var recordReferenceController = newScope.Resolve<IRecordReferenceController>();
 
-        RecordBrowserSettingsVM = newScope.Resolve<IRecordBrowserSettingsVM>();
+        RecordBrowserSettings = newScope.Resolve<IRecordBrowserSettings>();
 
         DoubleTapCommand = ViewSelectedCell = ReactiveCommand.Create(() => {
             if (SelectedRecord is null) return;

@@ -43,6 +43,10 @@ public sealed class MainModule : Module {
             .As<ISearchFilter>()
             .SingleInstance();
 
+        builder.RegisterType<RecordBrowserSettings>()
+            .As<IRecordBrowserSettings>();
+
+        // Services
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
             .SingleInstance();
@@ -120,6 +124,10 @@ public sealed class MainModule : Module {
             .As<IAssetProvider>()
             .SingleInstance();
 
+        builder.RegisterType<ModScopeProvider>()
+            .AsSelf()
+            .As<IModScopeProvider>();
+
         // Pipeline
         builder.RegisterType<SavePipeline>()
             .As<ISavePipeline>()
@@ -174,9 +182,6 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ReferenceRemapperVM>()
             .As<ReferenceRemapperVM>();
-
-        builder.RegisterType<RecordBrowserSettingsVM>()
-            .As<IRecordBrowserSettingsVM>();
 
         builder.RegisterType<ModPickerVM>()
             .As<ModPickerVM>();

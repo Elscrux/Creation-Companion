@@ -1,4 +1,4 @@
-﻿namespace CreationEditor.Avalonia.Models.Record.Browser;
+﻿namespace CreationEditor.Services.Filter;
 
 public enum BrowserScope {
     Environment,

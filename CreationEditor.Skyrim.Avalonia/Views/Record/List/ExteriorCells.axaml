@@ -22,7 +22,7 @@
             <picker:FormKeyPicker
                 FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
                 ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
-                LinkCache="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM.LinkCache}"
+                LinkCache="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache}"
                 MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
         </HeaderedContentControl>
 
@@ -50,9 +50,9 @@
                   Content="Show Wilderness Cells"
                   IsChecked="{Binding ExteriorCellsProvider.ShowWildernessCells}"/>
 
-        <record:RecordBrowserSettings
+        <record:RecordBrowserSettingsView
             Grid.Row="6"
-            DataContext="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettingsVM}"/>
+            Settings="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettings}"/>
 
         <record:RecordList
             Grid.Row="8"

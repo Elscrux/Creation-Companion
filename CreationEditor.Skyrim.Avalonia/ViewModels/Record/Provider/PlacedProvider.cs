@@ -8,8 +8,8 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -25,7 +25,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
     [Reactive] public ICellGetter? Cell { get; set; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
@@ -57,10 +57,10 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         IRecordEditorController recordEditorController,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM) {
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+        IRecordBrowserSettings recordBrowserSettings) {
+        RecordBrowserSettings = recordBrowserSettings;
 
-        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
+        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<IPlaced, IPlacedGetter>();
@@ -77,7 +77,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         EditSelectedRecordBase = ReactiveCommand.Create(() => {
             if (SelectedRecord?.Record is not IPlacedObjectGetter placedObject) return;
 
-            var placeable = placedObject.Base.TryResolve(RecordBrowserSettingsVM.LinkCache);
+            var placeable = placedObject.Base.TryResolve(RecordBrowserSettings.ModScopeProvider.LinkCache);
             if (placeable is null) return;
 
             var newOverride = recordController.GetOrAddOverride<IPlaceableObject, IPlaceableObjectGetter>(placeable);
@@ -109,7 +109,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                 RecordCache.Edit(updater => {
                     foreach (var record in Cell.Temporary.Concat(Cell.Persistent)) {
                         recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
-                        var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettingsVM.LinkCache);
+                        var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettings.ModScopeProvider.LinkCache);
 
                         updater.AddOrUpdate(referencedPlacedRecord);
                     }
@@ -146,7 +146,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         ContextMenuItems = new List<MenuItem> {
             menuItemProvider.New(NewRecord),
             menuItemProvider.Edit(EditSelectedRecord),
-            new MenuItem { Header = "Edit Base", Command = EditSelectedRecordBase },
+            new() { Header = "Edit Base", Command = EditSelectedRecordBase },
             menuItemProvider.Duplicate(DuplicateSelectedRecord),
             menuItemProvider.Delete(DeleteSelectedRecord),
         };

@@ -19,9 +19,9 @@
         </Grid.ColumnDefinitions>
 
         <Grid RowDefinitions="Auto,*">
-            <record:RecordBrowserSettings
+            <record:RecordBrowserSettingsView
                 Grid.Row="0"
-                DataContext="{Binding RecordBrowserSettingsVM}"
+                Settings="{Binding RecordBrowserSettings}"
                 Margin="5"/>
 
             <TreeView Grid.Row="1"

@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -22,7 +22,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     where TMajorRecordGetter : class, IMajorRecordGetter {
     private readonly CompositeDisposable _referencesDisposable = new();
 
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
@@ -52,11 +52,11 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         IMenuItemProvider menuItemProvider,
         IRecordEditorController recordEditorController,
         IRecordController recordController,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM,
+        IRecordBrowserSettings recordBrowserSettings,
         IRecordReferenceController recordReferenceController) {
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+        RecordBrowserSettings = recordBrowserSettings;
 
-        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
+        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
         NewRecord = ReactiveCommand.Create(() => {
             var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
@@ -83,7 +83,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             RecordCache.Remove(SelectedRecord);
         });
 
-        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache)
+        RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
                 _referencesDisposable.Clear();

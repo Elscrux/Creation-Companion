@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using Autofac;
 using CreationEditor.Avalonia.Services.Record.List;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Services.Filter;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -13,17 +13,17 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
 
 public sealed class SkyrimRecordListFactory : IRecordListFactory {
     private readonly ILifetimeScope _lifetimeScope;
-    private readonly IRecordBrowserSettingsVM _defaultRecordBrowserSettingsVM;
+    private readonly IRecordBrowserSettings _defaultRecordBrowserSettings;
 
     public SkyrimRecordListFactory(
         ILifetimeScope lifetimeScope,
-        IRecordBrowserSettingsVM defaultRecordBrowserSettingsVM) {
+        IRecordBrowserSettings defaultRecordBrowserSettings) {
         _lifetimeScope = lifetimeScope;
-        _defaultRecordBrowserSettingsVM = defaultRecordBrowserSettingsVM;
+        _defaultRecordBrowserSettings = defaultRecordBrowserSettings;
     }
 
-    public IRecordListVM FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettingsVM? browserSettings = null) {
-        browserSettings ??= _defaultRecordBrowserSettingsVM;
+    public IRecordListVM FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettings? browserSettings = null) {
+        browserSettings ??= _defaultRecordBrowserSettings;
         var browserSettingsParam = TypedParameter.From(browserSettings);
         var identifiersParam = TypedParameter.From(identifiers);
 
@@ -37,8 +37,8 @@ public sealed class SkyrimRecordListFactory : IRecordListFactory {
         return recordListVM;
     }
 
-    public IRecordListVM FromType(Type type, IRecordBrowserSettingsVM? browserSettings = null) {
-        browserSettings ??= _defaultRecordBrowserSettingsVM;
+    public IRecordListVM FromType(Type type, IRecordBrowserSettings? browserSettings = null) {
+        browserSettings ??= _defaultRecordBrowserSettings;
         var browserSettingsParam = TypedParameter.From(browserSettings);
 
         var newScope = _lifetimeScope.BeginLifetimeScope();

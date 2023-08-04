@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -20,7 +20,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
-    public IRecordBrowserSettingsVM RecordBrowserSettingsVM { get; }
+    public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
@@ -37,15 +37,15 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     public RecordIdentifiersProvider(
         IEnumerable<IFormLinkIdentifier> identifiers,
         IMenuItemProvider menuItemProvider,
-        IRecordBrowserSettingsVM recordBrowserSettingsVM,
+        IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
         IRecordEditorController recordEditorController,
         ILogger logger) {
         Identifiers = identifiers;
-        RecordBrowserSettingsVM = recordBrowserSettingsVM;
+        RecordBrowserSettings = recordBrowserSettings;
 
-        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettingsVM);
+        Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
         EditSelectedRecord = ReactiveCommand.Create(() => {
             if (SelectedRecord?.Record is not {} record) return;
@@ -67,9 +67,8 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
             RecordCache.Remove(SelectedRecord);
         });
 
-        this.WhenAnyValue(
-                x => x.RecordBrowserSettingsVM.LinkCache,
-                x => x.Identifiers,
+        RecordBrowserSettings.ModScopeProvider.LinkCacheChanged.CombineLatest(
+                this.WhenAnyValue(x => x.Identifiers),
                 (linkCache, idents) => (LinkCache: linkCache, Identifiers: idents))
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(w => w.Do(x => {

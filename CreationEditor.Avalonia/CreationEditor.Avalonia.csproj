@@ -43,9 +43,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Update="ViewModels\Record\Browser\RecordBrowserSettingsVM.cs">
-            <DependentUpon>IRecordBrowserSettingsVM.cs</DependentUpon>
-        </Compile>
         <Compile Update="ViewModels\Record\List\RecordListVM.cs">
             <DependentUpon>IRecordListVM.cs</DependentUpon>
         </Compile>

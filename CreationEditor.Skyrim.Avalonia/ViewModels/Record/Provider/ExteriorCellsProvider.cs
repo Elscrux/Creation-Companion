@@ -5,7 +5,6 @@ using Autofac;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
-using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -30,20 +29,23 @@ public sealed class ExteriorCellsProvider : CellProvider {
         : base(lifetimeScope) {
         _viewportRuntimeService = viewportRuntimeService;
 
-        Filter = RecordBrowserSettingsVM.SettingsChanged
+        Filter = RecordBrowserSettings.SettingsChanged
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(
-                record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettingsVM.Filter(record.Record)));
+                record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettings.Filter(record.Record)));
 
-        this.WhenAnyValue(x => x.RecordBrowserSettingsVM.LinkCache, x => x.WorldspaceFormKey)
+        RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
+            .CombineLatest(
+                this.WhenAnyValue(x => x.WorldspaceFormKey),
+                (linkCache, worldspaceFormKey) => (LinkCache: linkCache, WorldspaceFormKey: worldspaceFormKey))
             .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(_ => {
+            .WrapInInProgressMarker(x => x.Do(y => {
                 ReferencesDisposable.Clear();
 
                 RecordCache.Clear();
                 RecordCache.Edit(updater => {
-                    foreach (var cell in RecordBrowserSettingsVM.LinkCache.EnumerateAllCells(WorldspaceFormKey)) {
+                    foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
                         recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(ReferencesDisposable);
 
                         updater.AddOrUpdate(referencedRecord);
