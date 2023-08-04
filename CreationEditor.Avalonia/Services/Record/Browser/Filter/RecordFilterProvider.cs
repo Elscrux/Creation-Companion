@@ -2,7 +2,7 @@
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class RecordFilterProvider : IRecordFilterProvider {
-    public Dictionary<Type, IRecordFilter> RecordFilterCache { get; }
+    public IReadOnlyDictionary<Type, IRecordFilter> RecordFilterCache { get; }
 
     public RecordFilterProvider(
         IComponentContext componentContext) {

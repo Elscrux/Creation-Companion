@@ -4,5 +4,5 @@ public interface IRecordFilterProvider {
     /// <summary>
     /// Record filter per type
     /// </summary>
-    Dictionary<Type, IRecordFilter> RecordFilterCache { get; }
+    IReadOnlyDictionary<Type, IRecordFilter> RecordFilterCache { get; }
 }
