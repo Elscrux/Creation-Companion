@@ -8,6 +8,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -21,8 +22,9 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
 
     private ReadOnlyObservableCollection<ModItem> Mods { get; }
 
-    private readonly IObservableCache<ModKey, ModKey> _selectedMods;
-    public IEnumerable<ModKey> SelectedMods => _selectedMods.Keys;
+    private readonly IObservableCache<IModGetter, ModKey> _selectedMods;
+    public IEnumerable<ModKey> SelectedModKeys => _selectedMods.Keys;
+    public IEnumerable<IModGetter> SelectedMods => _selectedMods.Items;
 
     public IObservable<Unit> ScopeChanged { get; }
     public IObservable<ILinkCache> LinkCacheChanged { get; }
@@ -41,8 +43,10 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
             .ToObservableChangeSet()
             .AutoRefresh(mod => mod.IsSelected)
             .Filter(mod => mod.IsSelected)
-            .Transform(x => x.ModKey)
-            .AddKey(x => x)
+            .Transform(x => {
+                return LinkCache.ListedOrder.First(mod => mod.ModKey == x.ModKey);
+            })
+            .AddKey(x => x.ModKey)
             .AsObservableCache();
 
         this.WhenAnyValue(x => x.Scope)

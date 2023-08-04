@@ -36,7 +36,7 @@ public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     }
 
     public bool Filter(IMajorRecordIdentifier record) {
-        if (!ModScopeProvider.SelectedMods.Contains(record.FormKey.ModKey)) return false;
+        if (!ModScopeProvider.SelectedModKeys.Contains(record.FormKey.ModKey)) return false;
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;
