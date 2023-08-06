@@ -113,6 +113,12 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     }
     public static readonly StyledProperty<FormKey> FormKeyProperty = AvaloniaProperty.Register<AFormKeyPicker, FormKey>(nameof(FormKey), defaultBindingMode: BindingMode.TwoWay);
 
+    public FormLinkInformation FormLink {
+        get => GetValue(FormLinkProperty);
+        set => SetValue(FormLinkProperty, value);
+    }
+    public static readonly StyledProperty<FormLinkInformation> FormLinkProperty = AvaloniaProperty.Register<AFormKeyPicker, FormLinkInformation>(nameof(FormLink), defaultBindingMode: BindingMode.TwoWay);
+
     public string FormKeyStr {
         get => GetValue(FormKeyStrProperty);
         set => SetValue(FormKeyStrProperty, value);
@@ -329,7 +335,8 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         Types: types,
                         ScopedRecords: scopedRecords))
             .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormKey)
-            .Do(_ => {
+            .Do(x => {
+                UpdateFormLink(x.FormKey, x.LinkCache, x.Types);
                 _updating = UpdatingEnum.FormKey;
                 if (!Processing) {
                     Processing = true;
@@ -749,6 +756,21 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .ObserveOnGui()
             .Subscribe(_ => ViewingAllowedTypes = false)
             .DisposeWith(ActivatedDisposable);
+    }
+
+    private void UpdateFormLink(FormKey formKey, ILinkCache? linkCache, ReadOnlyObservableCollection<TypeItem> types) {
+        // Try to find a scoped type that can resolve the form key
+        if (types is not null && linkCache is not null) {
+            foreach (var selectedType in types.Where(x => x.IsSelected).Select(x => x.Type)) {
+                if (linkCache.TryResolve(formKey, selectedType, out var resolvedRecord)) {
+                    FormLink = new FormLinkInformation(formKey, resolvedRecord.Registration.GetterType);
+                    return;
+                }
+            }
+        }
+
+        // If no scoped type can resolve the form key, use major record type as fallback
+        FormLink = new FormLinkInformation(formKey, typeof(IMajorRecordGetter));
     }
 
     private static readonly ConcurrentDictionary<Type, IEnumerable<Type>> InterfaceCache = new();
