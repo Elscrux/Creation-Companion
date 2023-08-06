@@ -9,4 +9,16 @@
     <Style Selector="TreeDataGrid.Select TreeDataGridRow:selected">
         <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
     </Style>
+    
+    <Style Selector="TreeDataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource DataGridColumnHeaderBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DataGridColumnHeaderForegroundBrush}"/>
+        
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource DataGridColumnHeaderHoveredBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:pressed">
+            <Setter Property="Background" Value="{DynamicResource DataGridColumnHeaderPressedBackgroundBrush}" />
+        </Style>
+    </Style>
 </Styles>
