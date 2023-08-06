@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Loqui;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -55,5 +56,27 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
 
         // Cutting of the "Getter" part of the type name
         return fullName[startIndex..^6];
+    }
+
+    public IEnumerable<System.Type> GetRecordTypes(GameRelease gameRelease) {
+        var gameCategory = gameRelease.ToCategory();
+        var gameNamespace = $"{BaseNamespace}{gameCategory}.{gameCategory}Mod";
+        var registration = LoquiRegistration.GetRegisterByFullName(gameNamespace);
+        if (registration is null) yield break;
+
+        foreach (var type in registration.ClassType
+            .GetProperties()
+            .Select(x => x.PropertyType.InheritsFrom(typeof(IGroupCommonGetter)) ? x.PropertyType.GetGenericArguments()[0] : null)
+            .NotNull()) {
+            yield return type;
+        }
+    }
+
+    public System.Type GetRecordGetterType(System.Type type) {
+        var lastIndexOfDot = type.FullName!.LastIndexOf('.') + 1;
+        var getterTypeName = type.FullName[..lastIndexOfDot] + "I" + type.FullName[lastIndexOfDot..] + "Getter";
+
+        var registration = LoquiRegistration.GetRegisterByFullName(getterTypeName);
+        return registration!.GetterType;
     }
 }

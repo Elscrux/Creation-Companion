@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Type;
@@ -40,4 +41,18 @@ public interface IMutagenTypeProvider {
     /// <param name="formLinkIdentifier">Form link to retrieve the type name for</param>
     /// <returns>Type name of a form link</returns>
     string GetTypeName(IFormLinkIdentifier formLinkIdentifier);
+
+    /// <summary>
+    /// Returns all record types of a game release 
+    /// </summary>
+    /// <param name="gameRelease">Game release to get types for</param>
+    /// <returns>Record types of the game</returns>
+    IEnumerable<System.Type> GetRecordTypes(GameRelease gameRelease);
+
+    /// <summary>
+    /// Returns the getter type of record class type
+    /// </summary>
+    /// <param name="type">Record class type</param>
+    /// <returns>Getter type of the record</returns>
+    System.Type GetRecordGetterType(System.Type type);
 }
