@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-namespace CreationEditor.Avalonia;
+namespace CreationEditor;
 
 public static class ReflectionExtension {
-    public static bool TryGetProperty<T>(this object obj, string name, out T? outValue) {
+    public static bool TryGetProperty(this object obj, string name, out object? outValue) {
         var variables = name.Split('.');
         var current = obj;
         foreach (var variable in variables) {
@@ -12,16 +12,23 @@ public static class ReflectionExtension {
                 return false;
             }
 
-            current = property.GetValue(current);
+            current = property.GetValue(current, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty, binder: null, index: null, culture: null);
             if (current is null) {
                 outValue = default;
                 return false;
             }
         }
 
-        if (current is T t) {
-            outValue = t;
-            return true;
+        outValue = current;
+        return true;
+    }
+
+    public static bool TryGetProperty<T>(this object obj, string name, out T? outValue) {
+        if (obj.TryGetProperty(name, out var value)) {
+            if (value is T tValue) {
+                outValue = tValue;
+                return true;
+            }
         }
 
         outValue = default;
