@@ -1,5 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -20,5 +21,50 @@
         <Style Selector="^:pressed">
             <Setter Property="Background" Value="{DynamicResource DataGridColumnHeaderPressedBackgroundBrush}" />
         </Style>
+    </Style>
+
+    <Style Selector="TreeDataGrid.Mutable">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="RootBorder"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Top"
+                                x:Name="PART_AddNew"
+                                IsVisible="False"
+                                Classes="Transparent"
+                                Foreground="ForestGreen">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <controls:SymbolIcon Symbol="Add"/>
+                                    <TextBlock Text="Add"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                        <ScrollViewer Name="PART_HeaderScrollViewer"
+                                      DockPanel.Dock="Top"
+                                      IsVisible="{TemplateBinding ShowColumnHeaders}"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <Border x:Name="ColumnHeadersPresenterBorder">
+                                <TreeDataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter"
+                                                                    ElementFactory="{TemplateBinding ElementFactory}"
+                                                                    Items="{TemplateBinding Columns}"/>
+                            </Border>
+                        </ScrollViewer>
+                        <ScrollViewer Name="PART_ScrollViewer"
+                                      HorizontalScrollBarVisibility="Auto">
+                            <TreeDataGridRowsPresenter Name="PART_RowsPresenter"
+                                                       Columns="{TemplateBinding Columns}"
+                                                       ElementFactory="{TemplateBinding ElementFactory}"
+                                                       Items="{TemplateBinding Rows}"/>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
     </Style>
 </Styles>

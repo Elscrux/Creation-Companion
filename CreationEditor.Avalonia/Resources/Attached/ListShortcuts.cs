@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using System.Reflection;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
@@ -12,9 +14,12 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using FluentAvalonia.UI.Controls;
 using Noggog;
+using ReactiveUI;
 namespace CreationEditor.Avalonia.Attached;
 
 public sealed class ListShortcuts : AvaloniaObject {
+    private static readonly MethodInfo TreeDataGridAddRemoveButtonMethodInfo = typeof(ListShortcuts).GetMethod(nameof(TreeDataGrid_AddRemoveButton), BindingFlags.Static | BindingFlags.NonPublic)!;
+
     public static readonly AttachedProperty<ICommand> AddProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
     public static readonly AttachedProperty<ICommand> RemoveProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Remove");
 
@@ -37,8 +42,10 @@ public sealed class ListShortcuts : AvaloniaObject {
         AddProperty.Changed.Subscribe(args => {
             HandleGesture(args, null, AddGesture, AddHeader, AddSymbol);
 
-            if (args.Sender is DataGrid dg) {
-                ToggleAddButton(dg, args);
+            switch (args.Sender) {
+                case Control c:
+                    ToggleAddButton(c, args);
+                    break;
             }
         });
 
@@ -51,18 +58,36 @@ public sealed class ListShortcuts : AvaloniaObject {
 
             HandleGesture(args, selectedItems, RemoveGesture, RemoveHeader, RemoveSymbol);
 
-            if (args.Sender is DataGrid dg) {
-                AddRemoveButton(dg, args.NewValue.GetValueOrDefault());
+            switch (args.Sender) {
+                case DataGrid dg:
+                    DataGrid_AddRemoveButton(dg, args.NewValue.GetValueOrDefault());
+                    break;
+                case TreeDataGrid treeDataGrid:
+                    var disposable = treeDataGrid.WhenAnyValue(x => x.Source)
+                        .NotNull()
+                        .Subscribe(source => {
+                            var t = source.GetType().GetGenericArguments().First();
+
+                            var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
+                            genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { treeDataGrid, args.NewValue.GetValueOrDefault() });
+                        });
+
+                    treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
+                    void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {
+                        disposable.Dispose();
+                        treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
+                    }
+                    break;
             }
         });
     }
 
-    private static void ToggleAddButton(DataGrid dg, AvaloniaPropertyChangedEventArgs<ICommand> args) {
-        dg.Loaded -= Function;
-        dg.Loaded += Function;
+    private static void ToggleAddButton(Control c, AvaloniaPropertyChangedEventArgs<ICommand> args) {
+        c.Loaded -= Function;
+        c.Loaded += Function;
 
         void Function(object? sender, RoutedEventArgs routedEventArgs) {
-            var addButton = dg.FindDescendantOfType<Button>();
+            var addButton = c.FindDescendantOfType<Button>();
             if (addButton is null) return;
 
             addButton.IsVisible = true;
@@ -70,7 +95,7 @@ public sealed class ListShortcuts : AvaloniaObject {
         }
     }
 
-    private static void AddRemoveButton(DataGrid dg, ICommand? command) {
+    private static void DataGrid_AddRemoveButton(DataGrid dg, ICommand? command) {
         var removeButtonTemplate = new FuncDataTemplate<object>((o, _) => new Button {
             [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
                 RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
@@ -103,6 +128,37 @@ public sealed class ListShortcuts : AvaloniaObject {
              && templateColumn.CellTemplate == removeButtonTemplate)) return;
 
             dg.Columns.Add(removeColumn);
+        }
+    }
+
+    private static void TreeDataGrid_AddRemoveButton<T>(TreeDataGrid treeDataGrid, ICommand? command) {
+        var templateColumn = new TemplateColumn<T>(string.Empty, new FuncDataTemplate<T>((t, _) => new Button {
+            [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
+                    AncestorType = typeof(DataGridRow),
+                }
+            },
+            Content = new SymbolIcon { Symbol = Symbol.Delete },
+            Foreground = Brushes.Red,
+            Classes = { "Transparent" },
+            Command = command,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalContentAlignment = HorizontalAlignment.Left,
+            CommandParameter = new ArrayList { t },
+        }), options: new TemplateColumnOptions<T> {
+            CanUserResizeColumn = false,
+            CanUserSortColumn = false,
+        });
+
+        treeDataGrid.Loaded -= Function;
+        treeDataGrid.Loaded += Function;
+
+        void Function(object? sender, RoutedEventArgs routedEventArgs) {
+            if (treeDataGrid.Columns != null && treeDataGrid.Columns.Contains(templateColumn)) return;
+
+            if (treeDataGrid.Columns is ColumnList<T> t) {
+                t.Add(templateColumn);
+            }
         }
     }
 
