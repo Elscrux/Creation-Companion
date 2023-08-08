@@ -22,6 +22,8 @@ public abstract class TabbedDockVM : DockContainerVM {
         DockParent = dockParent;
 
         Activate = ReactiveCommand.Create<IDockedItem>(tab => {
+            if (tab is null) return;
+
             if (tab.Equals(ActiveTab)) {
                 Unfocus();
             } else {
