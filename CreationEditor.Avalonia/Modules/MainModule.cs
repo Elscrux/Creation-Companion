@@ -12,6 +12,7 @@ using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.ViewModels.Query;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
@@ -26,6 +27,7 @@ using CreationEditor.Services.Mutagen.References.Asset.Query;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Query;
 using CreationEditor.Services.Mutagen.Type;
+using CreationEditor.Services.Query;
 using Noggog.Autofac;
 namespace CreationEditor.Avalonia.Modules;
 
@@ -119,6 +121,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<CacheLocationProvider>()
             .As<ICacheLocationProvider>();
 
+        builder.RegisterType<QueryConditionProvider>()
+            .As<IQueryConditionProvider>();
+
         builder.RegisterType<AssetProvider>()
             .AsSelf()
             .As<IAssetProvider>()
@@ -163,6 +168,22 @@ public sealed class MainModule : Module {
             .AsSelf();
 
         builder.RegisterType<NifDirectoryAssetQuery>()
+            .AsSelf();
+
+        // Query System
+        builder.RegisterType<QueryRunner>()
+            .As<IQueryRunner>();
+
+        builder.RegisterType<QueryFromRecordType>()
+            .AsSelf();
+
+        builder.RegisterType<QueryConditionEntry>()
+            .As<IQueryConditionEntry>();
+
+        builder.RegisterType<RecordFieldSelector>()
+            .As<IRecordFieldSelector>();
+
+        builder.RegisterType<QueryVM>()
             .AsSelf();
 
         // View Model
