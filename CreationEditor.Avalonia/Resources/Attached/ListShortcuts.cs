@@ -18,6 +18,8 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Attached;
 
 public sealed class ListShortcuts : AvaloniaObject {
+    private const string RemoveColumnTag = "ListShortcuts_RemoveColumn";
+
     private static readonly MethodInfo TreeDataGridAddRemoveButtonMethodInfo = typeof(ListShortcuts).GetMethod(nameof(TreeDataGrid_AddRemoveButton), BindingFlags.Static | BindingFlags.NonPublic)!;
 
     public static readonly AttachedProperty<ICommand> AddProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
@@ -63,19 +65,26 @@ public sealed class ListShortcuts : AvaloniaObject {
                     DataGrid_AddRemoveButton(dg, args.NewValue.GetValueOrDefault());
                     break;
                 case TreeDataGrid treeDataGrid:
-                    var disposable = treeDataGrid.WhenAnyValue(x => x.Source)
-                        .NotNull()
-                        .Subscribe(source => {
-                            var t = source.GetType().GetGenericArguments().First();
-
-                            var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
-                            genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { treeDataGrid, args.NewValue.GetValueOrDefault() });
-                        });
+                    IDisposable? disposable = null;
 
                     treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
+                    treeDataGrid.Unloaded += OnTreeDataGridUnloaded;
+                    treeDataGrid.Loaded -= OnTreeDataGridLoaded;
+                    treeDataGrid.Loaded += OnTreeDataGridLoaded;
                     void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {
-                        disposable.Dispose();
+                        disposable?.Dispose();
                         treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
+                    }
+                    void OnTreeDataGridLoaded(object? sender, RoutedEventArgs e) {
+                        disposable?.Dispose();
+                        disposable = treeDataGrid.WhenAnyValue(x => x.Source)
+                            .NotNull()
+                            .Subscribe(source => {
+                                var t = source.GetType().GetGenericArguments().First();
+                    
+                                var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
+                                genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { source, args.NewValue.GetValueOrDefault() });
+                            });
                     }
                     break;
             }
@@ -95,11 +104,11 @@ public sealed class ListShortcuts : AvaloniaObject {
         }
     }
 
-    private static void DataGrid_AddRemoveButton(DataGrid dg, ICommand? command) {
-        var removeButtonTemplate = new FuncDataTemplate<object>((o, _) => new Button {
+    private static FuncDataTemplate<object> RemoveButtonTemplate<TRowType>(ICommand? command) {
+        return new FuncDataTemplate<object>((o, _) => new Button {
             [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
                 RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
-                    AncestorType = typeof(DataGridRow),
+                    AncestorType = typeof(TRowType),
                 }
             },
             Content = new SymbolIcon { Symbol = Symbol.Delete },
@@ -110,9 +119,12 @@ public sealed class ListShortcuts : AvaloniaObject {
             HorizontalContentAlignment = HorizontalAlignment.Left,
             CommandParameter = new ArrayList { o },
         });
+    }
 
+    private static void DataGrid_AddRemoveButton(DataGrid dg, ICommand? command) {
         var removeColumn = new DataGridTemplateColumn {
-            CellTemplate = removeButtonTemplate,
+            Tag = RemoveColumnTag,
+            CellTemplate = RemoveButtonTemplate<DataGridRow>(command),
             CanUserResize = false,
             CanUserSort = false,
             CanUserReorder = false,
@@ -123,42 +135,25 @@ public sealed class ListShortcuts : AvaloniaObject {
         dg.Loaded += Function;
 
         void Function(object? sender, RoutedEventArgs routedEventArgs) {
-            if (dg.Columns.Any(c =>
-                c is DataGridTemplateColumn templateColumn
-             && templateColumn.CellTemplate == removeButtonTemplate)) return;
+            if (dg.Columns.Any(c => ReferenceEquals(c.Tag, RemoveColumnTag))) return;
 
             dg.Columns.Add(removeColumn);
         }
     }
 
-    private static void TreeDataGrid_AddRemoveButton<T>(TreeDataGrid treeDataGrid, ICommand? command) {
-        var templateColumn = new TemplateColumn<T>(string.Empty, new FuncDataTemplate<T>((t, _) => new Button {
-            [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
-                    AncestorType = typeof(DataGridRow),
-                }
-            },
-            Content = new SymbolIcon { Symbol = Symbol.Delete },
-            Foreground = Brushes.Red,
-            Classes = { "Transparent" },
-            Command = command,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            HorizontalContentAlignment = HorizontalAlignment.Left,
-            CommandParameter = new ArrayList { t },
-        }), options: new TemplateColumnOptions<T> {
-            CanUserResizeColumn = false,
-            CanUserSortColumn = false,
-        });
+    private static void TreeDataGrid_AddRemoveButton<T>(ITreeDataGridSource treeDataGridSource, ICommand? command) {
+        var templateColumn = new TemplateColumn<T>(
+            string.Empty,
+            RemoveButtonTemplate<TreeDataGridRow>(command),
+            options: new TemplateColumnOptions<T> {
+                CanUserResizeColumn = false,
+                CanUserSortColumn = false,
+            });
 
-        treeDataGrid.Loaded -= Function;
-        treeDataGrid.Loaded += Function;
+        if (treeDataGridSource.Columns.Any(c => ReferenceEquals(c.Tag, RemoveColumnTag))) return;
 
-        void Function(object? sender, RoutedEventArgs routedEventArgs) {
-            if (treeDataGrid.Columns != null && treeDataGrid.Columns.Contains(templateColumn)) return;
-
-            if (treeDataGrid.Columns is ColumnList<T> t) {
-                t.Add(templateColumn);
-            }
+        if (treeDataGridSource.Columns is ColumnList<T> column) {
+            column.Add(templateColumn);
         }
     }
 
