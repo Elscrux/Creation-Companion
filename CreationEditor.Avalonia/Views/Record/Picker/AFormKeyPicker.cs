@@ -746,6 +746,14 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .Subscribe(x => CollectingRecords = x)
             .DisposeWith(ActivatedDisposable);
 
+        this.WhenAnyValue(x => x.FormLink)
+            .Subscribe(x => {
+                if (!FormLink.FormKey.Equals(FormKey)) {
+                    FormKey = FormLink.FormKey;
+                }
+            })
+            .DisposeWith(ActivatedDisposable);
+
         this.WhenAnyValue(x => x.AllowsSearchMode)
             .Where(x => !x)
             .Subscribe(_ => InSearchMode = false)
