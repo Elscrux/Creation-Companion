@@ -12,7 +12,7 @@ public static class ReflectionExtension {
                 return false;
             }
 
-            current = property.GetValue(current, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty, binder: null, index: null, culture: null);
+            current = property.GetValue(current);
             if (current is null) {
                 outValue = default;
                 return false;
