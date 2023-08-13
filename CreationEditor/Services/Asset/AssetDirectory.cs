@@ -5,6 +5,7 @@ using CreationEditor.Services.Mutagen.References.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using DynamicData;
 using Noggog;
+using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetDirectory : IAsset {
@@ -141,41 +142,29 @@ public sealed class AssetDirectory : IAsset {
             _watcher.IncludeSubdirectories = false;
             _watcher.EnableRaisingEvents = true;
 
-            Observable
-                .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    h => _watcher.Created += h,
-                    h => _watcher.Created -= h)
-                .Where(e => !_fileSystem.Path.HasExtension(e.EventArgs.FullPath) || IsFileRelevant(e.EventArgs.FullPath))
+            _watcher.Events().Created
+                .Where(e => !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath))
                 .ObserveOnGui()
-                .Subscribe(e => Add(_fileSystem, e.EventArgs.FullPath))
+                .Subscribe(e => Add(_fileSystem, e.FullPath))
                 .DisposeWith(_disposables);
 
-            Observable
-                .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    h => _watcher.Deleted += h,
-                    h => _watcher.Deleted -= h)
-                .Where(e => !_fileSystem.Path.HasExtension(e.EventArgs.FullPath) || IsFileRelevant(e.EventArgs.FullPath))
+            _watcher.Events().Deleted
+                .Where(e => !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath))
                 .ObserveOnGui()
-                .Subscribe(e => Remove(e.EventArgs.FullPath))
+                .Subscribe(e => Remove(e.FullPath))
                 .DisposeWith(_disposables);
 
-            Observable
-                .FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                    h => _watcher.Renamed += h,
-                    h => _watcher.Renamed -= h)
+            _watcher.Events().Renamed
                 .ObserveOnGui()
                 .Subscribe(e => {
-                    Remove(e.EventArgs.OldFullPath);
-                    Add(_fileSystem, e.EventArgs.FullPath);
+                    Remove(e.OldFullPath);
+                    Add(_fileSystem, e.FullPath);
                 })
                 .DisposeWith(_disposables);
 
-            Observable
-                .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    h => _watcher.Changed += h,
-                    h => _watcher.Changed -= h)
+            _watcher.Events().Changed
                 .ObserveOnGui()
-                .Subscribe(e => Change(e.EventArgs.FullPath))
+                .Subscribe(e => Change(e.FullPath))
                 .DisposeWith(_disposables);
         }
     }

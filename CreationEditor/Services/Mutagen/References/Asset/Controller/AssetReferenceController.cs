@@ -18,6 +18,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
 public sealed class AssetReferenceController : IAssetReferenceController {
@@ -174,27 +175,18 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             linearNotifier.Stop();
         }
 
-        Observable
-            .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                h => archiveWatcher.Created += h,
-                h => archiveWatcher.Created -= h)
-            .Subscribe(e => Add(e.EventArgs.FullPath))
+        archiveWatcher.Events().Created
+            .Subscribe(e => Add(e.FullPath))
             .DisposeWith(_disposables);
 
-        Observable
-            .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                h => archiveWatcher.Deleted += h,
-                h => archiveWatcher.Deleted -= h)
-            .Subscribe(e => Remove(e.EventArgs.FullPath))
+        archiveWatcher.Events().Deleted
+            .Subscribe(e => Remove(e.FullPath))
             .DisposeWith(_disposables);
 
-        Observable
-            .FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                h => archiveWatcher.Renamed += h,
-                h => archiveWatcher.Renamed -= h)
+        archiveWatcher.Events().Renamed
             .Subscribe(e => {
-                Remove(e.EventArgs.OldFullPath);
-                Add(e.EventArgs.FullPath);
+                Remove(e.OldFullPath);
+                Add(e.FullPath);
             })
             .DisposeWith(_disposables);
 

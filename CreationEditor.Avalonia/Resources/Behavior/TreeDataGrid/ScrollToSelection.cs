@@ -3,6 +3,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
 using Avalonia.Xaml.Interactivity;
 using Noggog;
+using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 
@@ -11,9 +12,7 @@ public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeD
 
     protected override void OnAttachedToVisualTree() {
         if (AssociatedObject is { RowSelection: {} selection }) {
-            Observable.FromEventPattern<EventHandler<TreeSelectionModelSelectionChangedEventArgs>, TreeSelectionModelSelectionChangedEventArgs>(
-                    h => selection.SelectionChanged += h,
-                    h => selection.SelectionChanged -= h)
+            (selection as ITreeSelectionModel).Events().SelectionChanged
                 .Select(_ => selection.SelectedItem)
                 .NotNull()
                 .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)

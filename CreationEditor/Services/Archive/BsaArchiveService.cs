@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Reactive.Linq;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -8,6 +7,7 @@ using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Order;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Archive;
 
 public sealed class BsaArchiveService : IArchiveService {
@@ -79,37 +79,25 @@ public sealed class BsaArchiveService : IArchiveService {
         _watcher.EnableRaisingEvents = true;
         _watcher.IncludeSubdirectories = false;
 
-        Observable
-            .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                h => _watcher.Changed += h,
-                h => _watcher.Changed -= h)
+        _watcher.Events().Changed
             .Subscribe(e => {
-                Remove(e.EventArgs.FullPath);
-                Add(e.EventArgs.FullPath);
+                Remove(e.FullPath);
+                Add(e.FullPath);
             })
             .DisposeWith(_disposables);
 
-        Observable
-            .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                h => _watcher.Created += h,
-                h => _watcher.Created -= h)
-            .Subscribe(e => Add(e.EventArgs.FullPath))
+        _watcher.Events().Created
+            .Subscribe(e => Add(e.FullPath))
             .DisposeWith(_disposables);
 
-        Observable
-            .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                h => _watcher.Deleted += h,
-                h => _watcher.Deleted -= h)
-            .Subscribe(e => Remove(e.EventArgs.FullPath))
+        _watcher.Events().Deleted
+            .Subscribe(e => Remove(e.FullPath))
             .DisposeWith(_disposables);
 
-        Observable
-            .FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                h => _watcher.Renamed += h,
-                h => _watcher.Renamed -= h)
+        _watcher.Events().Renamed
             .Subscribe(e => {
-                Remove(e.EventArgs.OldFullPath);
-                Add(e.EventArgs.FullPath);
+                Remove(e.OldFullPath);
+                Add(e.FullPath);
             })
             .DisposeWith(_disposables);
     }
