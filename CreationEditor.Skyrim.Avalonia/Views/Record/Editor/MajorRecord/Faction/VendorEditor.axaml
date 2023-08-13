@@ -91,7 +91,7 @@
                                     LinkCache="{Binding LinkCache}"/>
                             </HeaderedContentControl>
 
-                            <CheckBox Content="Buy/Sell Everything not in List"
+                            <CheckBox Content="Treat as Blacklist"
                                       ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword(s) in the selected list."
                                       IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                       Margin="5"/>
