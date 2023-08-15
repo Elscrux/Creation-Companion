@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Services.Asset;
 
 public interface IAssetTypeService {
-    IReadOnlyList<string> FileExtensions { get; }
+    IReadOnlyCollection<string> FileExtensions { get; }
 
     IAssetTypeProvider Provider { get; }
 

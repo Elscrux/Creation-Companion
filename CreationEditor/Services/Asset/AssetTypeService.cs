@@ -6,7 +6,7 @@ namespace CreationEditor.Services.Asset;
 public sealed class AssetTypeService : IAssetTypeService {
     private readonly IFileSystem _fileSystem;
 
-    public IReadOnlyList<string> FileExtensions { get; }
+    public IReadOnlyCollection<string> FileExtensions { get; }
     public IAssetTypeProvider Provider { get; }
 
     private readonly Dictionary<string, IAssetType> _assetTypesExtensions = new(AssetCompare.PathComparer);
@@ -23,7 +23,7 @@ public sealed class AssetTypeService : IAssetTypeService {
 
         FileExtensions = Provider.AllAssetTypes
             .SelectMany(a => a.FileExtensions)
-            .ToArray();
+            .ToHashSet(AssetCompare.PathComparer);
 
         foreach (var assetType in Provider.AllAssetTypes) {
             foreach (var extension in assetType.FileExtensions) {
