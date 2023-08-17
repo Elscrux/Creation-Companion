@@ -28,11 +28,9 @@ public sealed class InteriorCellsVM : ViewModel {
             .Build()
             .ToList();
 
-        var newScope = lifetimeScope.BeginLifetimeScope();
+        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
         RecordListVM = newScope
             .Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider))
             .DisposeWith(this);
-
-        newScope.DisposeWith(this);
     }
 }

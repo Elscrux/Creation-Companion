@@ -26,7 +26,7 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
         IDockingManagerService dockingManagerService,
         IRecordEditorFactory recordEditorFactory) {
         _logger = logger;
-        _lifetimeScope = lifetimeScope;
+        _lifetimeScope = lifetimeScope.DisposeWith(_disposable);
         _dockingManagerService = dockingManagerService;
         _recordEditorFactory = recordEditorFactory;
 
