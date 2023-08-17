@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Plugin;
+using CreationEditor.Services.Query;
 using Mutagen.Bethesda.Skyrim;
 using QueryPlugin.Views;
 using ReactiveUI;
@@ -17,6 +18,7 @@ public sealed class QueryPluginVM : ViewModel {
     private readonly Control _paddingRight = new StackPanel();
 
     private readonly IMenuItemProvider _menuItemProvider;
+    private readonly IQueryState _queryState;
 
     public Grid ColumnsGrid { get; } = new() {
         ColumnDefinitions = new ColumnDefinitions {
@@ -31,36 +33,94 @@ public sealed class QueryPluginVM : ViewModel {
     public QueryPluginVM(PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
         _pluginContext = pluginContext;
         _menuItemProvider = _pluginContext.LifetimeScope.Resolve<IMenuItemProvider>();
+        _queryState = _pluginContext.LifetimeScope.Resolve<IQueryState>();
         ColumnsGrid.Children.Add(_paddingRight);
 
         AddColumn = ReactiveCommand.Create(() => {
             InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
         });
+
+        DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
+            if (!GetColumnIndex(vm, out var columnIndex)) return;
+
+            var insertedColumn = InsertColumn(columnIndex + 2);
+            if (insertedColumn.ViewModel is null) return;
+
+            insertedColumn.ViewModel.Name = vm.Name;
+            insertedColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(vm.QueryVM.QueryRunner.CreateMemento());
+        });
+
+        DeleteColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
+            if (GetColumnIndex(vm, out var columnIndex)) {
+                RemoveColumn(columnIndex);
+            }
+        });
     }
 
-    private QueryColumn InsertColumn(int index) {
+    private QueryColumn InsertColumn(int column) {
+        // Move all other columns to the right
+        foreach (var child in ColumnsGrid.Children) {
+            var childColumn = Grid.GetColumn(child);
+            if (childColumn >= column) {
+                Grid.SetColumn(child, childColumn + 2);
+            }
+        }
+
         // Add the new query column
-        ColumnsGrid.ColumnDefinitions.Insert(index, new ColumnDefinition(new GridLength(200)));
+        ColumnsGrid.ColumnDefinitions.Insert(column, new ColumnDefinition(new GridLength(200)));
 
         var queryColumnVM = new QueryColumnVM(_pluginContext);
         queryColumnVM.MenuItems = GetColumnMenuItems(queryColumnVM);
 
         var queryColumn = new QueryColumn(queryColumnVM) {
-            [Grid.ColumnProperty] = index,
+            [Grid.ColumnProperty] = column,
         };
         ColumnsGrid.Children.Add(queryColumn);
 
         // Add a splitter
-        index++;
-        ColumnsGrid.ColumnDefinitions.Insert(index, new ColumnDefinition(new GridLength(2.5)));
+        column++;
+        ColumnsGrid.ColumnDefinitions.Insert(column, new ColumnDefinition(new GridLength(2.5)));
         ColumnsGrid.Children.Add(new GridSplitter {
-            [Grid.ColumnProperty] = index,
+            [Grid.ColumnProperty] = column,
             MinWidth = 2.5,
         });
 
-        _paddingRight[Grid.ColumnProperty] = index + 1;
+        _paddingRight[Grid.ColumnProperty] = column + 1;
 
         return queryColumn;
+    }
+
+    private void RemoveColumn(int column) {
+        // Remove column
+        ColumnsGrid.ColumnDefinitions.RemoveAt(column);
+        
+        // Remove splitter
+        ColumnsGrid.ColumnDefinitions.RemoveAt(column);
+
+        // Move all other columns to the left
+        var removeChildren = new List<Control>();
+        foreach (var child in ColumnsGrid.Children) {
+            var childColumn = Grid.GetColumn(child);
+
+            if (childColumn == column || childColumn == column + 1) {
+                removeChildren.Add(child);
+            } else if (childColumn >= column) {
+                Grid.SetColumn(child, childColumn - 2);
+            }
+        }
+
+        ColumnsGrid.Children.RemoveAll(removeChildren);
+    }
+
+    private bool GetColumnIndex(QueryColumnVM queryColumnVM, out int index) {
+        var control = ColumnsGrid.Children.FirstOrDefault(control => control.DataContext == queryColumnVM);
+        if (control is null) {
+            index = -1;
+            return false;
+        }
+
+        index = Grid.GetColumn(control);
+        return true;
     }
 
     private IList<MenuItem> GetColumnMenuItems(QueryColumnVM queryColumnVM) {

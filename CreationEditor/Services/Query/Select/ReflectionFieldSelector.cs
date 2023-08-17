@@ -2,16 +2,9 @@
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Services.Query;
+namespace CreationEditor.Services.Query.Select;
 
-public interface IRecordFieldSelector {
-    IQueryField? SelectedField { get; set; }
-    IObservableCollection<IQueryField> Fields { get; }
-
-    Type? RecordType { get; set; }
-}
-
-public sealed class RecordFieldSelector : ReactiveObject, IRecordFieldSelector, IDisposable {
+public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, IDisposable {
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
     [Reactive] public Type? RecordType { get; set; }
@@ -30,9 +23,9 @@ public sealed class RecordFieldSelector : ReactiveObject, IRecordFieldSelector, 
     public IObservableCollection<IQueryField> Fields { get; } = new ObservableCollectionExtended<IQueryField>();
     [Reactive] public IQueryField? SelectedField { get; set; }
 
-    public RecordFieldSelector() {
+    public ReflectionFieldSelector() {
         this.WhenAnyValue(x => x.RecordType)
-            .Subscribe(x => {
+            .Subscribe(_ => {
                 Fields.Clear();
                 Fields.AddRange(GetFields());
                 SelectedField = Fields.FirstOrDefault(field => field.Name == "EditorID") ?? Fields.FirstOrDefault();
@@ -66,7 +59,7 @@ public sealed class RecordFieldSelector : ReactiveObject, IRecordFieldSelector, 
         return dictionary.Values
             .OrderBy(field => field.Name);
 
-        IEnumerable<QueryField> GetQueryFields(Type type) {
+        IEnumerable<ReflectionQueryField> GetQueryFields(Type type) {
             return type.GetProperties()
                 .Where(p => !BlacklistedNames.Contains(p.Name) && !BlacklistedTypes.Contains(p.PropertyType))
                 .Select(field => {
@@ -74,8 +67,22 @@ public sealed class RecordFieldSelector : ReactiveObject, IRecordFieldSelector, 
                         ? field.PropertyType.GetGenericArguments()[0]
                         : field.PropertyType;
 
-                    return new QueryField(fieldType, field.Name);
+                    return new ReflectionQueryField(fieldType, field.Name);
                 });
+        }
+    }
+
+    public FieldSelectorMemento CreateMemento() {
+        return new FieldSelectorMemento(
+            SelectedField is null ? null : new QueryFieldMemento(SelectedField.Name),
+            RecordType?.AssemblyQualifiedName ?? string.Empty);
+    }
+
+    public void RestoreMemento(FieldSelectorMemento memento) {
+        RecordType = Type.GetType(memento.RecordTypeName);
+
+        if (memento.SelectedField is not null) {
+            SelectedField = Fields.FirstOrDefault(field => field.Name == memento.SelectedField.Name);
         }
     }
 

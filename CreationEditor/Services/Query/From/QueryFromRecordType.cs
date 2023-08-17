@@ -1,19 +1,11 @@
 ﻿using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Type;
+using CreationEditor.Services.Query.Select;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Services.Query;
-
-public interface IQueryFrom {
-    QueryFromItem? SelectedItem { get; set; }
-    IList<QueryFromItem> Items { get; }
-
-    IEnumerable<IMajorRecordGetter> GetRecords();
-}
-
-public sealed record QueryFromItem(string Name, Type Type);
+namespace CreationEditor.Services.Query.From;
 
 public sealed class QueryFromRecordType : ReactiveObject, IQueryFrom {
     private readonly IModScopeProvider _modScopeProvider;
@@ -36,5 +28,15 @@ public sealed class QueryFromRecordType : ReactiveObject, IQueryFrom {
         return SelectedItem is null
             ? Array.Empty<IMajorRecordGetter>()
             : _modScopeProvider.SelectedMods.WinningOverrides(SelectedItem.Type);
+    }
+
+    public QueryFromMemento CreateMemento() {
+        return new QueryFromMemento(SelectedItem is null ? null : new QueryFieldMemento(SelectedItem.Name));
+    }
+
+    public void RestoreMemento(QueryFromMemento memento) {
+        SelectedItem = memento.SelectedItem is null
+            ? null
+            : Items.FirstOrDefault(fromItem => fromItem.Name == memento.SelectedItem.Name);
     }
 }

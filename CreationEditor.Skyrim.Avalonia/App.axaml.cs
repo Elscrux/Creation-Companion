@@ -37,7 +37,7 @@ public partial class App : Application {
 
             builder.RegisterModule<MainModule>();
             builder.RegisterModule<NotificationModule>();
-            builder.RegisterModule<NotificationModule>();
+            builder.RegisterModule<QueryModule>();
             builder.RegisterModule<NewtonsoftJsonModule>();
             builder.RegisterModule<LoggingModule>();
             builder.RegisterModule<SettingsModule>();

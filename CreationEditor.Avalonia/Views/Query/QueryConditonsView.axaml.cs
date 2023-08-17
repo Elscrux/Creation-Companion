@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
-using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -10,7 +9,8 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using CreationEditor.Avalonia.DataTemplates;
-using CreationEditor.Services.Query;
+using CreationEditor.Services.Query.Select;
+using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Cache;
 using Noggog;
@@ -42,12 +42,12 @@ public partial class QueryConditionsView : ActivatableUserControl {
         set => SetValue(ConditionSourceProperty, value);
     }
 
-    public static readonly StyledProperty<ILifetimeScope> LifetimeScopeProperty
-        = AvaloniaProperty.Register<QueryConditionsView, ILifetimeScope>(nameof(LifetimeScope));
+    public static readonly StyledProperty<IQueryConditionEntryFactory> ConditionEntryFactoryProperty
+        = AvaloniaProperty.Register<QueryConditionsView, IQueryConditionEntryFactory>(nameof(ConditionEntryFactory));
 
-    public ILifetimeScope LifetimeScope {
-        get => GetValue(LifetimeScopeProperty);
-        set => SetValue(LifetimeScopeProperty, value);
+    public IQueryConditionEntryFactory ConditionEntryFactory {
+        get => GetValue(ConditionEntryFactoryProperty);
+        set => SetValue(ConditionEntryFactoryProperty, value);
     }
 
     public static readonly StyledProperty<Type> ContextTypeProperty
@@ -78,8 +78,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
         InitializeComponent();
 
         AddCondition = ReactiveCommand.Create(() => {
-            var recordType = TypedParameter.From(ContextType);
-            QueryConditions.Add(LifetimeScope.Resolve<IQueryConditionEntry>(recordType));
+            QueryConditions.Add(ConditionEntryFactory.Create(ContextType));
         });
 
         RemoveCondition = ReactiveCommand.Create<IList>(conditions => {
@@ -111,8 +110,8 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = conditionEntry.RecordFieldSelector.Fields,
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryConditionEntry.RecordFieldSelector)}.{nameof(IQueryConditionEntry.RecordFieldSelector.SelectedField)}"),
+                            ItemsSource = conditionEntry.FieldSelector.Fields,
+                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryConditionEntry.FieldSelector)}.{nameof(IQueryConditionEntry.FieldSelector.SelectedField)}"),
                         };
                     })),
                 new TemplateColumn<IQueryConditionEntry>(
@@ -162,7 +161,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                         var valueEditorTemplate = new ConditionValueEditorTemplate {
                             [!ConditionValueEditorTemplate.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding(),
-                            [!ConditionValueEditorTemplate.LifetimeScopeProperty] = this.GetObservable(LifetimeScopeProperty).ToBinding(),
+                            [!ConditionValueEditorTemplate.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
                         };
 
                         return new ContentControl {

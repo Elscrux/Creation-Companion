@@ -5,6 +5,7 @@
              xmlns:services="clr-namespace:CreationEditor.Services.Query;assembly=CreationEditor"
              xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Query"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Query"
+             xmlns:select="clr-namespace:CreationEditor.Services.Query.Select;assembly=CreationEditor"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Query.QueryView"
              x:CompileBindings="True" x:DataType="vm:QueryVM">
@@ -33,18 +34,18 @@
                 Grid.Column="1"
                 QueryConditions="{Binding QueryRunner.QueryConditions}"
                 LinkCache="{Binding LinkCacheChanged^}"
-                LifetimeScope="{Binding LifetimeScope}"
-                ContextType="{Binding QueryRunner.RecordFieldSelector.RecordType}"/>
+                ConditionEntryFactory="{Binding ConditionEntryFactory}"
+                ContextType="{Binding QueryRunner.FieldSelector.RecordType}"/>
         </Grid>
 
         <!-- SELECT -->
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal">
             <TextBlock Text="select "/>
-            <ComboBox ItemsSource="{Binding QueryRunner.RecordFieldSelector.Fields}"
-                      SelectedItem="{Binding QueryRunner.RecordFieldSelector.SelectedField}">
+            <ComboBox ItemsSource="{Binding QueryRunner.FieldSelector.Fields}"
+                      SelectedItem="{Binding QueryRunner.FieldSelector.SelectedField}">
                 <ComboBox.ItemTemplate>
-                    <DataTemplate DataType="services:QueryField">
+                    <DataTemplate DataType="select:ReflectionQueryField">
                         <TextBlock Text="{Binding Name}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
@@ -58,7 +59,7 @@
             <ComboBox ItemsSource="{Binding QueryRunner.OrderBySelector.Fields}"
                       SelectedItem="{Binding QueryRunner.OrderBySelector.SelectedField}">
                 <ComboBox.ItemTemplate>
-                    <DataTemplate DataType="services:QueryField">
+                    <DataTemplate DataType="select:ReflectionQueryField">
                         <TextBlock Text="{Binding Name}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>

@@ -1,29 +1,17 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using CreationEditor.Services.Query.Select;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace CreationEditor.Services.Query;
-
-public interface IQueryConditionEntry {
-    IRecordFieldSelector RecordFieldSelector { get; }
-    IQueryCondition Condition { get; }
-
-    bool IsOr { get; set; }
-    bool Negate { get; set; }
-
-    IObservable<Unit> ConditionEntryChanged { get; }
-    IObservable<string> Summary { get; }
-
-    bool Evaluate(object? obj);
-}
+namespace CreationEditor.Services.Query.Where;
 
 public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, IDisposable {
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
-    public IRecordFieldSelector RecordFieldSelector { get; }
-    [Reactive] public IQueryCondition Condition { get; private set; } = new NullCondition();
+    public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();
+    [Reactive] public IQueryCondition Condition { get; private set; } = new NullValueCondition();
     [Reactive] public bool IsOr { get; set; }
     [Reactive] public bool Negate { get; set; }
 
@@ -31,14 +19,12 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, 
     public IObservable<string> Summary { get; }
 
     public QueryConditionEntry(
-        IQueryConditionProvider queryConditionProvider,
-        IRecordFieldSelector recordFieldSelector,
+        IQueryConditionFactory queryConditionFactory,
         Type? recordType = null) {
-        RecordFieldSelector = recordFieldSelector;
-        RecordFieldSelector.RecordType = recordType;
+        FieldSelector.RecordType = recordType;
 
         Summary = this.WhenAnyValue(
-                x => x.RecordFieldSelector.SelectedField,
+                x => x.FieldSelector.SelectedField,
                 x => x.Negate,
                 x => x.IsOr,
                 (field, negate, or) => (Field: field, Negate: negate, Or: or))
@@ -71,56 +57,47 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, 
                 x => x.Condition.SelectedFunction,
                 x => x.Negate,
                 x => x.IsOr,
-                x => x.RecordFieldSelector.SelectedField)
+                x => x.FieldSelector.SelectedField)
             .Unit()
             .Merge(conditionChanged);
 
-        this.WhenAnyValue(x => x.RecordFieldSelector.SelectedField)
+        this.WhenAnyValue(x => x.FieldSelector.SelectedField)
             .NotNull()
-            .Subscribe(field => Condition = queryConditionProvider.GetCondition(field.Type))
+            .Subscribe(field => Condition = queryConditionFactory.Create(field.Type))
             .DisposeWith(_disposables);
+
+        // if (dto is not null) {
+        //     FieldSelector.SelectedField = dto.FieldSelector.SelectedField;
+        //     Condition = queryConditionProvider.GetCondition(dto.Condition);
+        //     Condition.SelectedFunction = dto.Condition.SelectedFunctionOperator;
+        //     IsOr = dto.IsOr;
+        //     Negate = dto.Negate;
+        // }
     }
 
     public bool Evaluate(object? obj) {
-        if (Condition is null || RecordFieldSelector.SelectedField is null) return false;
+        if (Condition is null || FieldSelector.SelectedField is null) return false;
 
-        var fieldValue = RecordFieldSelector.SelectedField.GetValue(obj);
+        var fieldValue = FieldSelector.SelectedField.GetValue(obj);
         if (fieldValue is null) return false;
 
         return Condition.Evaluate(fieldValue);
     }
 
-    public void Dispose() => _disposables.Dispose();
-}
-
-public static class QueryConditionExtensions {
-    public static bool EvaluateConditions(this IEnumerable<IQueryConditionEntry> conditions, object? obj) {
-        if (obj is null) return false;
-
-        var andStack = new Stack<bool>();
-
-        foreach (var condition in conditions) {
-            // Evaluate condition result
-            var result = condition.Evaluate(obj);
-            if (condition.Negate) result = !result;
-
-            // Push current condition result to stack
-            andStack.Push(result);
-
-            // If condition is an OR, check if all conditions in the stack are true
-            if (condition.IsOr && ValidateAndStack()) return true;
-        }
-
-        return andStack.Count > 0 && ValidateAndStack();
-
-        bool ValidateAndStack() {
-            // Check if all conditions in the stack are true
-            // If so, we have a valid and block in our or block, so return true
-            if (andStack.All(x => x)) return true;
-
-            // Otherwise, clear the AND stack and continue
-            andStack.Clear();
-            return false;
-        }
+    public QueryConditionEntryMemento CreateMemento() {
+        return new QueryConditionEntryMemento(
+            FieldSelector.CreateMemento(),
+            Condition.CreateMemento(),
+            IsOr,
+            Negate);
     }
+
+    public void RestoreMemento(QueryConditionEntryMemento memento) {
+        FieldSelector.RestoreMemento(memento.FieldSelector);
+        Condition.RestoreMemento(memento.QueryCondition);
+        IsOr = memento.IsOr;
+        Negate = memento.Negate;
+    }
+
+    public void Dispose() => _disposables.Dispose();
 }

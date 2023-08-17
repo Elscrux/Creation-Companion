@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -8,7 +7,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using CreationEditor.Avalonia.Views.Query;
 using CreationEditor.Avalonia.Views.Record.Picker;
-using CreationEditor.Services.Query;
+using CreationEditor.Services.Query.Where;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Noggog;
@@ -23,12 +22,12 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         set => SetValue(LinkCacheProperty, value);
     }
 
-    public static readonly StyledProperty<ILifetimeScope> LifetimeScopeProperty
-        = AvaloniaProperty.Register<ConditionValueEditorTemplate, ILifetimeScope>(nameof(LifetimeScope));
+    public static readonly StyledProperty<IQueryConditionEntryFactory> ConditionEntryFactoryProperty
+        = AvaloniaProperty.Register<ConditionValueEditorTemplate, IQueryConditionEntryFactory>(nameof(ConditionEntryFactory));
 
-    public ILifetimeScope LifetimeScope {
-        get => GetValue(LifetimeScopeProperty);
-        set => SetValue(LifetimeScopeProperty, value);
+    public IQueryConditionEntryFactory ConditionEntryFactory {
+        get => GetValue(ConditionEntryFactoryProperty);
+        set => SetValue(ConditionEntryFactoryProperty, value);
     }
 
     public bool Match(object? data) => data is IQueryCondition;
@@ -38,20 +37,20 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
 
         var binding = new Binding(nameof(IQueryValueCondition.CompareValue));
 
-        var compareValueType = condition is SimpleListCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.CompareValueType;
-        var actualFieldType = condition is SimpleListCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.ActualFieldType;
+        var compareValueType = condition is SimpleListValueCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.CompareValueType;
+        var actualFieldType = condition is SimpleListValueCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.ActualFieldType;
 
         Control? control;
         if (condition is IQueryListCondition listCondition) {
             var listType = actualFieldType.GetGenericArguments().FirstOrDefault() ?? actualFieldType;
             if (listCondition.SubConditions.Count == 0) {
-                listCondition.SubConditions.Add(LifetimeScope.Resolve<IQueryConditionEntry>(TypedParameter.From(listType)));
+                listCondition.SubConditions.Add(ConditionEntryFactory.Create(listType));
             }
 
             var queryConditionsView = new QueryConditionsView {
                 ContextType = listType,
                 QueryConditions = listCondition.SubConditions,
-                [!QueryConditionsView.LifetimeScopeProperty] = this.GetObservable(LifetimeScopeProperty).ToBinding(),
+                [!QueryConditionsView.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
                 [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
             };
 
@@ -180,7 +179,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 ScopedTypes = scopedTypes,
             };
 
-            if (param is FormLinkCondition linkCondition) {
+            if (param is FormLinkValueCondition linkCondition) {
                 if (linkCondition.CompareValue is IFormLinkGetter formLink) {
                     formKeyPicker[AFormKeyPicker.FormKeyProperty] = formLink.FormKey;
                 }

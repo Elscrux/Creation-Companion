@@ -1,24 +1,22 @@
-﻿using Autofac;
-using CreationEditor.Services.Environment;
+﻿using CreationEditor.Services.Environment;
 using CreationEditor.Services.Query;
+using CreationEditor.Services.Query.Where;
 using Mutagen.Bethesda.Plugins.Cache;
 namespace CreationEditor.Avalonia.ViewModels.Query;
 
 public sealed class QueryVM : ViewModel {
     private readonly IEditorEnvironment _editorEnvironment;
 
-    public ILifetimeScope LifetimeScope { get; }
-    public IQueryRunner QueryRunner { get; set; }
+    public IQueryRunner QueryRunner { get; }
+    public IQueryConditionEntryFactory ConditionEntryFactory { get; }
     public IObservable<ILinkCache> LinkCacheChanged => _editorEnvironment.LinkCacheChanged;
 
     public QueryVM(
         IEditorEnvironment editorEnvironment,
-        ILifetimeScope lifetimeScope) {
+        IQueryRunner queryRunner,
+        IQueryConditionEntryFactory conditionEntryFactory) {
         _editorEnvironment = editorEnvironment;
-        LifetimeScope = lifetimeScope;
-
-        var newScope = lifetimeScope.BeginLifetimeScope();
-        var queryFrom = newScope.Resolve<QueryFromRecordType>();
-        QueryRunner = newScope.Resolve<IQueryRunner>(TypedParameter.From<IQueryFrom>(queryFrom));
+        QueryRunner = queryRunner;
+        ConditionEntryFactory = conditionEntryFactory;
     }
 }

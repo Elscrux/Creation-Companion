@@ -22,7 +22,17 @@
                 <Button Grid.Column="2"
                         VerticalAlignment="Stretch">
                     <Button.Content>
-                        <controls:SymbolIcon Symbol="Settings"/>
+                        <controls:SymbolIcon Symbol="ChevronDown"/>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <MenuFlyout ItemsSource="{Binding MenuItems}"/>
+                    </Button.Flyout>
+                </Button>
+
+                <Button Grid.Column="4"
+                        VerticalAlignment="Stretch">
+                    <Button.Content>
+                        <controls:SymbolIcon Symbol="SettingsFilled"/>
                     </Button.Content>
                     <Button.Flyout>
                         <Flyout>

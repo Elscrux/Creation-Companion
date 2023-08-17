@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Query;
-using CreationEditor.Services.Query;
+using CreationEditor.Services.Query.From;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Query;
 
