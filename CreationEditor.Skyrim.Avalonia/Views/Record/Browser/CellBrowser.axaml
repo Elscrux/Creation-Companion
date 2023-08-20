@@ -33,7 +33,7 @@
             <RowDefinition Height="5"/>
             <RowDefinition
                 Height="{Binding ShowPlaced, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
-                MinHeight="{Binding ShowPlaced, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=200}"/>
+                MinHeight="{Binding ShowPlaced, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=100}"/>
         </Grid.RowDefinitions>
 
         <TabControl Grid.Row="0"
