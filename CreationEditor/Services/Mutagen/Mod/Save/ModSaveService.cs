@@ -70,9 +70,12 @@ public sealed class ModSaveService : IModSaveService {
         if (!filePath.Exists) return;
 
         try {
+            var backupLocation = _modSaveLocationProvider.GetBackupSaveLocation();
+            var backupFilePath = GetBackupFilePath(backupLocation, filePath.Name, filePath.LastWriteTime);
+            _fileSystem.Directory.CreateDirectory(backupLocation);
             _fileSystem.File.Copy(
                 filePath.FullName,
-                GetBackupFilePath(filePath.Name, filePath.LastWriteTime),
+                backupFilePath,
                 true);
         } catch (Exception e) {
             _logger.Here().Warning(
@@ -105,6 +108,6 @@ public sealed class ModSaveService : IModSaveService {
         }
     }
 
-    private string GetBackupFilePath(string fileName, DateTime writeTime) => _fileSystem.Path.Combine(_modSaveLocationProvider.GetBackupSaveLocation(), $"{fileName}.{GetTimeFileName(writeTime)}.bak");
+    private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) => _fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
     public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }
