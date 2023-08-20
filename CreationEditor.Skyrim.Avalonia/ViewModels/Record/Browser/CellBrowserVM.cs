@@ -19,9 +19,9 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
     public PlacedList PlacedList { get; } = new();
 
     [Reactive] public int SelectedTab { get; set; }
-    [Reactive] public bool OpenReferences { get; set; }
+    [Reactive] public bool ShowPlaced { get; set; }
 
-    public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
+    public ReactiveCommand<Unit, Unit> TogglePlaced { get; }
 
     public CellBrowserVM(
         InteriorCellsVM interiorCellsVM,
@@ -31,12 +31,12 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
         ExteriorCells.DataContext = ExteriorCellsVM = exteriorCellsVM;
         PlacedList.DataContext = PlacedListVM = placedListVM;
 
-        ToggleReferences = ReactiveCommand.Create(() => { OpenReferences = !OpenReferences; });
+        TogglePlaced = ReactiveCommand.Create(() => { ShowPlaced = !ShowPlaced; });
 
         this.WhenAnyValue(x => x.PlacedListVM.PlacedProvider.Cell)
             .NotNull()
             .Take(1)
-            .Subscribe(_ => OpenReferences = true)
+            .Subscribe(_ => ShowPlaced = true)
             .DisposeWith(this);
 
         this.WhenAnyValue(

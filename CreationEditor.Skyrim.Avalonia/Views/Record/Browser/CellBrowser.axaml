@@ -32,8 +32,8 @@
             <RowDefinition MinHeight="200"/>
             <RowDefinition Height="5"/>
             <RowDefinition
-                Height="{Binding OpenReferences, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
-                MinHeight="{Binding OpenReferences, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=200}"/>
+                Height="{Binding ShowPlaced, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
+                MinHeight="{Binding ShowPlaced, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=200}"/>
         </Grid.RowDefinitions>
 
         <TabControl Grid.Row="0"
@@ -50,7 +50,7 @@
 
         <GridSplitter Grid.Row="1"
                       IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      IsEnabled="{Binding OpenReferences}"/>
+                      IsEnabled="{Binding ShowPlaced}"/>
 
         <Button Grid.Row="1"
                 Height="15" Width="15"
@@ -58,13 +58,13 @@
                 Classes="DockClose"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Command="{Binding ToggleReferences}"
+                Command="{Binding TogglePlaced}"
                 IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}">
             <Grid>
                 <controls:SymbolIcon Symbol="ChevronDown"
-                                     IsVisible="{Binding OpenReferences}"/>
+                                     IsVisible="{Binding ShowPlaced}"/>
                 <controls:SymbolIcon Symbol="ChevronUp"
-                                     IsVisible="{Binding !OpenReferences}"/>
+                                     IsVisible="{Binding !ShowPlaced}"/>
             </Grid>
         </Button>
 

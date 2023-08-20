@@ -16,6 +16,6 @@ public interface ICellBrowserVM : IDisposableDropoff {
 
     public int SelectedTab { get; set; }
 
-    public bool OpenReferences { get; set; }
-    public ReactiveCommand<Unit, Unit> ToggleReferences { get; }
+    public bool ShowPlaced { get; set; }
+    public ReactiveCommand<Unit, Unit> TogglePlaced { get; }
 }
