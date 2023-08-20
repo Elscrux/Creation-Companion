@@ -53,6 +53,7 @@
                                    FontSize="12">
                             <Interaction.Behaviors>
                                 <ToggleIsExpandedOnDoubleTappedBehavior/>
+                                <ToggleIsExpandedOnDoubleTappedBehavior/>
                                 <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsSelected}">
                                     <DataTriggerBehavior.Value>
                                         <system:Boolean>true</system:Boolean>
@@ -71,6 +72,7 @@
                                    Padding="0"
                                    FontSize="12">
                             <Interaction.Behaviors>
+                                <ToggleIsExpandedOnDoubleTappedBehavior/>
                                 <ToggleIsExpandedOnDoubleTappedBehavior/>
                                 <DataTriggerBehavior Binding="{Binding $parent[TreeViewItem].IsSelected}">
                                     <DataTriggerBehavior.Value>
