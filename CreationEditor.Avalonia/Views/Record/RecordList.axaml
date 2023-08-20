@@ -5,6 +5,8 @@
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:avalonia="clr-namespace:CreationEditor.Avalonia"
              mc:Ignorable="d"
              x:CompileBindings="True" x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
@@ -19,18 +21,19 @@
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
                   attached:FormLinkDragDrop.AllowDragDataGrid="True"
-                  attached:FormLinkDragDrop.GetFormLink="{Binding GetFormLink}"
+                  attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
                   attached:DragDropExtended.AllowDrag="True"
-                  attached:DoubleTappedProperty.Command="{Binding RecordProvider.DoubleTapCommand}"
+                  attached:DoubleTappedProperty.Command="{Binding RecordProvider.RecordContextMenuProvider.PrimaryCommand}"
+                  attached:DoubleTappedProperty.CommandParameter="{Binding RecordProvider.SelectedRecord, Converter={x:Static avalonia:ReferencedRecordConverter.ToRecord}}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
                 <KeyBinding Gesture="Delete"
-                            Command="{ReflectionBinding RecordProvider.DeleteSelectedRecord}"/>
+                            Command="{Binding RecordProvider.RecordContextMenuProvider.RecordActionsProvider.Delete}"/>
                 <KeyBinding Gesture="Ctrl+D"
-                            Command="{ReflectionBinding RecordProvider.DuplicateSelectedRecord}"/>
+                            Command="{Binding RecordProvider.RecordContextMenuProvider.RecordActionsProvider.Duplicate}"/>
             </DataGrid.KeyBindings>
             <DataGrid.ContextFlyout>
-                <MenuFlyout ItemsSource="{Binding ContextMenuItems}"/>
+                <MenuFlyout ItemsSource="{Binding RecordProvider.RecordContextMenuProvider.MenuItems}"/>
             </DataGrid.ContextFlyout>
         </DataGrid>
 

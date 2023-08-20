@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Filter;
@@ -14,6 +10,7 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -39,63 +36,22 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             }
         }
     }
+
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
-
     public IObservable<bool> IsBusy { get; set; }
-
-    public IList<MenuItem> ContextMenuItems { get; }
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
-
-    public ReactiveCommand<Unit, Unit> NewRecord { get; }
-    public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
-    public ReactiveCommand<Unit, Unit> EditSelectedRecordBase { get; }
-    public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
-    public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
+    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public PlacedProvider(
-        IMenuItemProvider menuItemProvider,
-        IRecordEditorController recordEditorController,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        IRecordBrowserSettings recordBrowserSettings) {
+        IRecordBrowserSettings recordBrowserSettings,
+        Func<IObservable<IPlacedGetter?>, PlacedContextMenuProvider> placedContextMenuProviderFactory) {
         RecordBrowserSettings = recordBrowserSettings;
+        var selectedPlacedObservable = this.WhenAnyValue(x => x.SelectedRecord)
+            .Select(x => x?.Record);
+        RecordContextMenuProvider = placedContextMenuProviderFactory(selectedPlacedObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
-
-        NewRecord = ReactiveCommand.Create(() => {
-            var newRecord = recordController.CreateRecord<IPlaced, IPlacedGetter>();
-            recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newRecord);
-        });
-
-        EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            var newOverride = recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
-            recordEditorController.OpenEditor<IPlaced, IPlacedGetter>(newOverride);
-        });
-
-        EditSelectedRecordBase = ReactiveCommand.Create(() => {
-            if (SelectedRecord?.Record is not IPlacedObjectGetter placedObject) return;
-
-            var placeable = placedObject.Base.TryResolve(RecordBrowserSettings.ModScopeProvider.LinkCache);
-            if (placeable is null) return;
-
-            var newOverride = recordController.GetOrAddOverride<IPlaceableObject, IPlaceableObjectGetter>(placeable);
-            recordEditorController.OpenEditor(newOverride);
-        });
-
-        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            recordController.DuplicateRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
-        });
-
-        DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            recordController.DeleteRecord<IPlaced, IPlacedGetter>(SelectedRecord.Record);
-            RecordCache.Remove(SelectedRecord);
-        });
 
         this.WhenAnyValue(x => x.Cell)
             .ObserveOnTaskpool()
@@ -142,14 +98,6 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
         recordController.RecordDeleted
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
-
-        ContextMenuItems = new List<MenuItem> {
-            menuItemProvider.New(NewRecord),
-            menuItemProvider.Edit(EditSelectedRecord),
-            new() { Header = "Edit Base", Command = EditSelectedRecordBase },
-            menuItemProvider.Duplicate(DuplicateSelectedRecord),
-            menuItemProvider.Delete(DeleteSelectedRecord),
-        };
     }
 
     public override void Dispose() {

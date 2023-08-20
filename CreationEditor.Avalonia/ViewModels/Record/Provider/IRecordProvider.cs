@@ -1,6 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using Avalonia.Controls;
+using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
@@ -25,8 +25,7 @@ public interface IRecordProvider : IDisposable {
     /// </summary>
     IObservable<bool> IsBusy { get; }
 
-    IList<MenuItem> ContextMenuItems { get; }
-    ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
+    IRecordContextMenuProvider RecordContextMenuProvider { get; }
 }
 
 public interface IRecordProvider<TReferenced> : IRecordProvider

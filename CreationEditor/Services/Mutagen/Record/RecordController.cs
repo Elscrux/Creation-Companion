@@ -33,6 +33,18 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         RecordChangedDiff = new JoinedObservable<IMajorRecordGetter>(_recordChangedDiff);
     }
 
+    public IMajorRecord CreateRecord(System.Type type) {
+        var group = _editorEnvironment.ActiveMod.GetTopLevelGroup(type);
+        var record = group.AddNew(_editorEnvironment.ActiveMod.GetNextFormKey());
+
+        _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
+            record, type, _editorEnvironment.ActiveMod.ModKey);
+
+        _recordCreated.OnNext(record);
+
+        return record;
+    }
+
     public TMajorRecord CreateRecord<TMajorRecord, TMajorRecordGetter>()
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {

@@ -4,6 +4,13 @@ namespace CreationEditor.Services.Mutagen.Record;
 
 public interface IRecordController {
     /// <summary>
+    /// Create a record of the given type in the active mod.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns>Created record</returns>
+    IMajorRecord CreateRecord(System.Type type);
+
+    /// <summary>
     /// Create a record of type <typeparamref name="TMajorRecord"/> in the active mod.
     /// </summary>
     /// <typeparam name="TMajorRecord">Setter record type</typeparam>

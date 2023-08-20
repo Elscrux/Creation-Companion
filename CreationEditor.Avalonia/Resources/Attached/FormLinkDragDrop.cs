@@ -13,13 +13,18 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
     private static readonly DragHandler DragHandler = new(DragStart);
 
-    public static readonly AttachedProperty<bool> AllowDragDataGridProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDragDataGrid");
-    public static readonly AttachedProperty<bool> AllowDropDataGridProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDropDataGrid");
+    public static readonly AttachedProperty<bool> AllowDragDataGridProperty
+        = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDragDataGrid");
+    public static readonly AttachedProperty<bool> AllowDropDataGridProperty
+        = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, bool>("AllowDropDataGrid");
 
-    public static readonly AttachedProperty<Func<StyledElement, IFormLinkIdentifier>> GetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<StyledElement, IFormLinkIdentifier>>("GetFormLink");
-    public static readonly AttachedProperty<Action<IFormLinkIdentifier>> SetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Action<IFormLinkIdentifier>>("SetFormLink");
+    public static readonly AttachedProperty<Func<object?, IFormLinkIdentifier>> GetFormLinkProperty
+        = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<object?, IFormLinkIdentifier>>("GetFormLink");
+    public static readonly AttachedProperty<Action<IFormLinkIdentifier>> SetFormLinkProperty
+        = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Action<IFormLinkIdentifier>>("SetFormLink");
 
-    public static readonly AttachedProperty<Func<IFormLinkIdentifier, bool>> CanSetFormLinkProperty = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<IFormLinkIdentifier, bool>>("CanSetFormLink");
+    public static readonly AttachedProperty<Func<IFormLinkIdentifier, bool>> CanSetFormLinkProperty
+        = AvaloniaProperty.RegisterAttached<FormLinkDragDrop, InputElement, Func<IFormLinkIdentifier, bool>>("CanSetFormLink");
 
     public static bool GetAllowDragDataGrid(AvaloniaObject obj) => obj.GetValue(AllowDragDataGridProperty);
     public static void SetAllowDragDataGrid(AvaloniaObject obj, bool value) => obj.SetValue(AllowDragDataGridProperty, value);
@@ -27,8 +32,8 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
     public static bool GetAllowDropDataGrid(AvaloniaObject obj) => obj.GetValue(AllowDropDataGridProperty);
     public static void SetAllowDropDataGrid(AvaloniaObject obj, bool value) => obj.SetValue(AllowDropDataGridProperty, value);
 
-    public static Func<StyledElement, IFormLinkIdentifier> GetGetFormLink(AvaloniaObject obj) => obj.GetValue(GetFormLinkProperty);
-    public static void SetGetFormLink(AvaloniaObject obj, Func<StyledElement, IFormLinkIdentifier> value) => obj.SetValue(GetFormLinkProperty, value);
+    public static Func<object?, IFormLinkIdentifier> GetGetFormLink(AvaloniaObject obj) => obj.GetValue(GetFormLinkProperty);
+    public static void SetGetFormLink(AvaloniaObject obj, Func<object?, IFormLinkIdentifier> value) => obj.SetValue(GetFormLinkProperty, value);
 
     public static Action<IFormLinkIdentifier> GetSetFormLink(AvaloniaObject obj) => obj.GetValue(SetFormLinkProperty);
     public static void SetSetFormLink(AvaloniaObject obj, Action<IFormLinkIdentifier> value) => obj.SetValue(SetFormLinkProperty, value);
@@ -153,7 +158,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         if (!e.GetCurrentPoint(pressed).Properties.IsLeftButtonPressed) return;
 
         var formLinkGetter = GetGetFormLink(obj);
-        var formLink = formLinkGetter(pressed);
+        var formLink = formLinkGetter(pressed.DataContext);
 
         var dataObject = new DataObject();
         dataObject.Set(FormLink, formLink);

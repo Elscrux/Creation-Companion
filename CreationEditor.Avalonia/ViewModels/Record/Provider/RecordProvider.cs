@@ -1,9 +1,6 @@
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -37,51 +34,20 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     }
 
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
-
-    public IObservable<bool> IsBusy { get; set; }
-
-    public IList<MenuItem> ContextMenuItems { get; }
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> NewRecord { get; }
-    public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; }
-    public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; }
-    public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; }
+    public IObservable<bool> IsBusy { get; }
+    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public RecordProvider(
-        IMenuItemProvider menuItemProvider,
-        IRecordEditorController recordEditorController,
         IRecordController recordController,
+        IRecordReferenceController recordReferenceController,
         IRecordBrowserSettings recordBrowserSettings,
-        IRecordReferenceController recordReferenceController) {
+        Func<IObservable<TMajorRecordGetter?>, RecordContextMenuProvider<TMajorRecord, TMajorRecordGetter>> recordContextMenuProviderFactory) {
         RecordBrowserSettings = recordBrowserSettings;
+        var selectedRecordObservable = this.WhenAnyValue(x => x.SelectedRecord)
+            .Select(x => x?.Record);
+        RecordContextMenuProvider = recordContextMenuProviderFactory(selectedRecordObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
-
-        NewRecord = ReactiveCommand.Create(() => {
-            var newRecord = recordController.CreateRecord<TMajorRecord, TMajorRecordGetter>();
-            recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newRecord);
-        });
-
-        DoubleTapCommand = EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            var newOverride = recordController.GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            recordEditorController.OpenEditor<TMajorRecord, TMajorRecordGetter>(newOverride);
-        });
-
-        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            recordController.DuplicateRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-        });
-
-        DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord is null) return;
-
-            recordController.DeleteRecord<TMajorRecord, TMajorRecordGetter>(SelectedRecord.Record);
-            RecordCache.Remove(SelectedRecord);
-        });
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
@@ -124,13 +90,6 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         recordController.RecordDeleted
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
-
-        ContextMenuItems = new List<MenuItem> {
-            menuItemProvider.New(NewRecord),
-            menuItemProvider.Edit(EditSelectedRecord),
-            menuItemProvider.Duplicate(DuplicateSelectedRecord),
-            menuItemProvider.Delete(DeleteSelectedRecord),
-        };
     }
 
     public override void Dispose() {

@@ -12,7 +12,7 @@ public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     public IModScopeProvider ModScopeProvider { get; }
 
     [Reactive] public string SearchTerm { get; set; } = string.Empty;
-    public Func<IMajorRecordGetter, bool>? CustomFilter { get; set; }
+    [Reactive] public Func<IMajorRecordGetter, bool>? CustomFilter { get; set; }
 
     public IObservable<Unit> SettingsChanged { get; }
 

@@ -1,7 +1,6 @@
-﻿using System.Reactive;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls;
+using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -9,6 +8,7 @@ using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -22,20 +22,22 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
+
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
-
-    public IObservable<bool> IsBusy { get; set; }
-
-    public IList<MenuItem> ContextMenuItems { get; } = new List<MenuItem>();
-    public ReactiveCommand<Unit, Unit>? DoubleTapCommand => null;
+    public IObservable<bool> IsBusy { get; }
+    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public RecordTypeProvider(
         IEnumerable<Type> types,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController) {
+        IRecordReferenceController recordReferenceController,
+        Func<IObservable<IMajorRecordGetter?>, UntypedRecordContextMenuProvider> untypedRecordContextMenuProviderFactory) {
         Types = types.ToList();
         RecordBrowserSettings = recordBrowserSettings;
+        var selectedRecordObservable = this.WhenAnyValue(x => x.SelectedRecord)
+                .Select(x => x?.Record);
+        RecordContextMenuProvider = untypedRecordContextMenuProviderFactory(selectedRecordObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 

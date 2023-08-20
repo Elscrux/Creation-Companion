@@ -51,7 +51,6 @@ public sealed class ExteriorCellsVM : ViewModel {
                     if (gridPoint.X != GridXValue || gridPoint.Y != GridYValue) continue;
 
                     ExteriorCellsProvider.TrySelect(cell);
-                    // ExteriorList.ScrollToItem(cell);
                     break;
                 }
             }

@@ -1,15 +1,13 @@
-﻿using System.Reactive;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Editor;
+using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -19,53 +17,30 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
-    public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
+    [Reactive] public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
     [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
+
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
-
     public IObservable<bool> IsBusy { get; }
-
-    public IList<MenuItem> ContextMenuItems { get; }
-    public ReactiveCommand<Unit, Unit> EditSelectedRecord { get; set; }
-    public ReactiveCommand<Unit, Unit> DuplicateSelectedRecord { get; set; }
-    public ReactiveCommand<Unit, Unit> DeleteSelectedRecord { get; set; }
-    public ReactiveCommand<Unit, Unit> DoubleTapCommand => EditSelectedRecord;
+    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public RecordIdentifiersProvider(
         IEnumerable<IFormLinkIdentifier> identifiers,
-        IMenuItemProvider menuItemProvider,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        IRecordEditorController recordEditorController,
-        ILogger logger) {
+        ILogger logger,
+        Func<IObservable<IMajorRecordGetter?>, UntypedRecordContextMenuProvider> untypedRecordContextMenuProviderFactory) {
         Identifiers = identifiers;
         RecordBrowserSettings = recordBrowserSettings;
+        var selectedRecordObservable = this.WhenAnyValue(x => x.SelectedRecord)
+            .Select(x => x?.Record);
+        RecordContextMenuProvider = untypedRecordContextMenuProviderFactory(selectedRecordObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
-
-        EditSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord?.Record is not {} record) return;
-
-            var newOverride = recordController.GetOrAddOverride(record);
-            recordEditorController.OpenEditor(newOverride);
-        });
-
-        DuplicateSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord?.Record is not {} record) return;
-
-            recordController.DuplicateRecord(record);
-        });
-
-        DeleteSelectedRecord = ReactiveCommand.Create(() => {
-            if (SelectedRecord?.Record is not {} record) return;
-
-            recordController.DeleteRecord(record);
-            RecordCache.Remove(SelectedRecord);
-        });
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged.CombineLatest(
                 this.WhenAnyValue(x => x.Identifiers),
@@ -110,12 +85,6 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
         recordController.RecordDeleted
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
-
-        ContextMenuItems = new List<MenuItem> {
-            menuItemProvider.Edit(EditSelectedRecord),
-            menuItemProvider.Duplicate(DuplicateSelectedRecord),
-            menuItemProvider.Delete(DeleteSelectedRecord),
-        };
     }
 
     public override void Dispose() {

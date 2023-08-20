@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using Avalonia;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using Mutagen.Bethesda.Plugins;
 using Noggog;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
@@ -12,8 +10,6 @@ public interface IRecordListVM : IDisposableDropoff {
     public IRecordProvider RecordProvider { get; }
 
     public IList<DataGridColumn> Columns { get; }
-    public IList<MenuItem> ContextMenuItems { get; }
 
     public IObservable<bool> IsBusy { get; }
-    public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }
 }

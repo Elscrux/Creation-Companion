@@ -13,6 +13,7 @@ using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
@@ -98,6 +99,9 @@ public sealed class SkyrimModule : Module {
         builder.RegisterType<BsaArchiveService>()
             .As<IArchiveService>();
 
+        builder.RegisterType<CellActionsProvider>()
+            .AsSelf();
+
         // View Model
         builder.RegisterType<SkyrimModGetterVM>()
             .As<IModGetterVM>();
@@ -122,7 +126,7 @@ public sealed class SkyrimModule : Module {
 
         // Other
         builder.RegisterAssemblyTypes(typeof(QuestFilter).Assembly)
-            .InNamespacesOf(typeof(QuestFilter))
+            .InNamespaceOf<QuestFilter>()
             .Where(type => type.Name.EndsWith("Filter", StringComparison.Ordinal))
             .AsSelf()
             .SingleInstance();

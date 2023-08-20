@@ -16,8 +16,6 @@ public sealed class RecordSelectionVM : ViewModel {
 
     public IObservable<bool> IsBusy { get; }
 
-    public Func<StyledElement, IFormLinkIdentifier> GetFormLink { get; }
-
     public RecordSelectionVM(
         IRecordProvider recordProvider) {
         RecordProvider = recordProvider.DisposeWith(this);
@@ -36,11 +34,5 @@ public sealed class RecordSelectionVM : ViewModel {
                 (filtering, busy) => (Filtering: filtering, Busy: busy))
             .ObserveOnGui()
             .Select(list => list.Filtering || list.Busy);
-
-        GetFormLink = element => {
-            if (element.DataContext is not IReferencedRecord referencedRecord) return FormLinkInformation.Null;
-
-            return FormLinkInformation.Factory(referencedRecord.Record);
-        };
     }
 }
