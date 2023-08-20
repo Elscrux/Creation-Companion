@@ -1,5 +1,4 @@
-﻿using Autofac;
-using Noggog;
+﻿using Noggog;
 namespace CreationEditor;
 
 public static class TypeExtension {
@@ -74,20 +73,6 @@ public static class TypeExtension {
             .GetSubclassesOf()
             .Select(creator)
             .OfType<T>();
-    }
-
-    public static IEnumerable<T> ResolveAllSubClassesAndGenericByInterface<T>(this Type type, IComponentContext componentContext) {
-        return type.GetAllSubClasses<T>(subClassType => {
-            if (subClassType.ContainsGenericParameters) {
-                foreach (var @interface in subClassType.GetInterfaces()) {
-                    var resolveOptional = componentContext.ResolveOptional(@interface);
-                    if (resolveOptional is not null) {
-                        return resolveOptional;
-                    }
-                }
-            }
-            return componentContext.Resolve(subClassType);
-        });
     }
 
     public static IEnumerable<T> GetAllSubClasses<T>(this Type type) {
