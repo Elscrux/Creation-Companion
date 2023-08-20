@@ -4,6 +4,9 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Filter;
 
+/// <summary>
+/// Used to define a subset scope of mods in the current editor environment.
+/// </summary>
 public interface IModScopeProvider {
     /// <summary>
     /// Scope of the mods to search in
