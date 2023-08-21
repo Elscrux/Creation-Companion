@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
@@ -10,7 +10,6 @@ using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
@@ -27,7 +26,7 @@ public sealed class ExteriorCellsVM : ViewModel {
     public ReactiveCommand<Unit, Unit> SelectGridCell { get; }
 
     public ExteriorCellsVM(
-        ILifetimeScope lifetimeScope,
+        Func<IRecordProvider, IRecordListVM> recordListVMFactory,
         IExtraColumnsBuilder extraColumnsBuilder,
         ExteriorCellsProvider exteriorCellsProvider) {
         ExteriorCellsProvider = exteriorCellsProvider;
@@ -38,9 +37,7 @@ public sealed class ExteriorCellsVM : ViewModel {
             .Build()
             .ToList();
 
-        var newScope = lifetimeScope.BeginLifetimeScope();
-        RecordListVM = newScope.Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(ExteriorCellsProvider));
-        newScope.DisposeWith(RecordListVM);
+        RecordListVM = recordListVMFactory(ExteriorCellsProvider);
 
         SelectGridCell = ReactiveCommand.Create(() => {
             if (exteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) {

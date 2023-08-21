@@ -18,6 +18,7 @@ using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
+using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 namespace CreationEditor.Avalonia.Modules;
 
@@ -26,6 +27,15 @@ public sealed class MainModule : Module {
         // General
         builder.RegisterType<Lifecycle>()
             .As<ILifecycle>();
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        builder.RegisterAssemblyTypes(assemblies)
+            .AssignableTo<ILifecycleTask>()
+            .As<ILifecycleTask>();
+
+        builder.RegisterAssemblyTypes(assemblies)
+            .AssignableTo<ISetting>()
+            .As<ISetting>();
 
         builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>()

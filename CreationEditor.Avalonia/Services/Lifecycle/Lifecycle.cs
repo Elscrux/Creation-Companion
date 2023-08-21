@@ -1,5 +1,4 @@
-﻿using Autofac;
-using CreationEditor.Avalonia.ViewModels;
+﻿using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using Serilog;
@@ -13,7 +12,7 @@ public sealed class Lifecycle : ILifecycle {
     private readonly List<ILifecycleTask> _lifecycleTasks;
 
     public Lifecycle(
-        IComponentContext componentContext,
+        IEnumerable<ILifecycleTask> tasks,
         ILogger logger,
         MainWindow mainWindow,
         Lazy<MainVM> mainVm) {
@@ -21,9 +20,7 @@ public sealed class Lifecycle : ILifecycle {
         _mainWindow = mainWindow;
         _mainVm = mainVm;
 
-        _lifecycleTasks = typeof(ILifecycleTask)
-            .ResolveAllSubClassesAndGenericByInterface<ILifecycleTask>(componentContext)
-            .ToList();
+        _lifecycleTasks = tasks.ToList();
     }
 
     public void Start() {

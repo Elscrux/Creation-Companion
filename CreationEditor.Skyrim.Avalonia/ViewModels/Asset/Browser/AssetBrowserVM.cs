@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
@@ -48,6 +47,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
+    private readonly Func<object?, IReference[], ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IMenuItemProvider _menuItemProvider;
@@ -58,7 +58,6 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
     private readonly IAssetProvider _assetProvider;
-    private readonly ILifetimeScope _lifetimeScope;
     private readonly string _root;
 
     private AssetDirectory? _dataDirectory;
@@ -88,6 +87,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public HierarchicalTreeDataGridSource<AssetTreeItem> AssetTreeSource { get; }
 
     public AssetBrowserVM(
+        Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserVMFactory,
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         ModelAssetQuery modelAssetQuery,
@@ -103,8 +103,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         MainWindow mainWindow,
         IAssetProvider assetProvider,
         ISearchFilter searchFilter,
-        ILifetimeScope lifetimeScope,
         string root) {
+        _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _fileSystem = fileSystem;
         _dataDirectoryProvider = dataDirectoryProvider;
         _menuItemProvider = menuItemProvider;
@@ -115,7 +115,6 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
         _assetProvider = assetProvider;
-        _lifetimeScope = lifetimeScope;
         _root = root;
 
         _assetReferenceController.IsLoading
@@ -452,9 +451,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         if (references.Length == 0) return null;
 
-        var referencesParameter = TypedParameter.From(references);
-        var contextParam = TypedParameter.From<object?>(assets.Length == 1 ? assets[0] : assets);
-        return _lifetimeScope.Resolve<ReferenceBrowserVM>(contextParam, referencesParameter);
+        return _referenceBrowserVMFactory(assets.Length == 1 ? assets[0] : assets, references);
     }
 
     public async Task Drop(TreeDataGridRowDragEventArgs e) {

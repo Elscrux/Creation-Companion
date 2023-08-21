@@ -1,5 +1,4 @@
 ﻿using System.Reactive;
-using Autofac;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
@@ -15,7 +14,6 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
@@ -38,9 +36,12 @@ public sealed class ReferenceBrowserVM : ViewModel {
     public ReactiveCommand<Unit, Unit> RemapReferences { get; }
 
     public ReferenceBrowserVM(
-        ILifetimeScope lifetimeScope,
+        Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
+        Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
+        IEditorEnvironment editorEnvironment,
         IMenuItemProvider menuItemProvider,
         IRecordController recordController,
+        IRecordReferenceController recordReferenceController,
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
         object? context = null,
@@ -49,10 +50,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         Context = context;
 
         if (Context is not null) {
-            var newScope = lifetimeScope.BeginLifetimeScope();
-            var contextParam = TypedParameter.From(context);
-            ReferenceRemapperVM = newScope.Resolve<ReferenceRemapperVM>(contextParam);
-            newScope.DisposeWith(ReferenceRemapperVM);
+            ReferenceRemapperVM = referenceRemapperVMFactory(context);
         }
 
         var nameColumn = new TemplateColumn<IReference>(
@@ -142,23 +140,15 @@ public sealed class ReferenceBrowserVM : ViewModel {
         });
 
         OpenReferences = ReactiveCommand.Create<IEnumerable<IReferencedRecord>>(referencedRecords => {
-            var newScope = lifetimeScope.BeginLifetimeScope();
-            var editorEnvironment = newScope.Resolve<IEditorEnvironment>();
-            var recordReferenceController = newScope.Resolve<IRecordReferenceController>();
-
             var records = referencedRecords.ToArray();
 
-            var references = records
+            var recordReferences = records
                 .SelectMany(record => record.References)
                 .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
 
-            var identifiersParam = TypedParameter.From(references);
-            var contextParam = TypedParameter.From<object?>(referencedRecords);
-            var referenceBrowserVM = newScope.Resolve<ReferenceBrowserVM>(contextParam, identifiersParam);
-            newScope.DisposeWith(referenceBrowserVM);
-
+            var referenceBrowserVM = referenceBrowserFactory(referencedRecords, recordReferences);
             var referenceWindow = new ReferenceWindow(records.Select(record => record.Record)) {
                 Content = new ReferenceBrowser(referenceBrowserVM)
             };

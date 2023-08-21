@@ -1,15 +1,15 @@
-using Autofac;
 using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
 public sealed class QueryConditionFactory : IQueryConditionFactory {
-    private readonly IComponentContext _componentContext;
+    private readonly Func<Type, IQueryCondition?> _queryConditionFactory;
     private readonly IQueryCondition[] _conditionCache;
 
-    public QueryConditionFactory(IComponentContext componentContext) {
-        _componentContext = componentContext;
-        _conditionCache = typeof(IQueryCondition)
-            .GetAllSubClasses<IQueryCondition>(_componentContext.Resolve)
+    public QueryConditionFactory(
+        IEnumerable<IQueryCondition> queryConditions,
+        Func<Type, IQueryCondition?> queryConditionFactory) {
+        _queryConditionFactory = queryConditionFactory;
+        _conditionCache = queryConditions
             .Where(function => function is not NullValueCondition)
             .ToArray();
     }
@@ -26,7 +26,7 @@ public sealed class QueryConditionFactory : IQueryConditionFactory {
             .MaxBy(x => x.Priority)?
             .GetType();
 
-        if (conditionType is not null && _componentContext.Resolve(conditionType) is IQueryCondition condition) {
+        if (conditionType is not null && _queryConditionFactory(conditionType) is {} condition) {
             condition.ActualFieldType = type;
             return condition;
         }

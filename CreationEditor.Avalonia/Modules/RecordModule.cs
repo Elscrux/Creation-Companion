@@ -23,7 +23,7 @@ public sealed class RecordModule : Module {
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         builder.RegisterAssemblyTypes(assemblies)
-            .Where(x => x.IsAssignableTo(typeof(IRecordActionsProvider)))
+            .AssignableTo<IRecordActionsProvider>()
             .AsSelf();
 
         builder.RegisterGeneric(typeof(RecordActionsProvider<,>))

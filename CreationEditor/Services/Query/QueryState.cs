@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Autofac;
 using CreationEditor.Services.State;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -14,19 +13,16 @@ public interface IQueryState {
 }
 
 public sealed class JsonQueryState : IQueryState {
-    private readonly IComponentContext _componentContext;
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IStatePathProvider _statePathProvider;
     private readonly JsonSerializerSettings _serializerSettings;
 
     public JsonQueryState(
-        IComponentContext componentContext,
         IContractResolver contractResolver,
         ILogger logger,
         IFileSystem fileSystem,
         IStatePathProvider statePathProvider) {
-        _componentContext = componentContext;
         _logger = logger;
         _fileSystem = fileSystem;
         _statePathProvider = statePathProvider;

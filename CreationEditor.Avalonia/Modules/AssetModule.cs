@@ -9,7 +9,7 @@ public sealed class AssetModule : Module {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterAssemblyTypes(typeof(AssetQuery).Assembly)
             .InNamespaceOf<AssetQuery>()
-            .Where(x => x.IsAssignableTo(typeof(AssetQuery)))
+            .AssignableTo<AssetQuery>()
             .AsSelf();
 
         builder.RegisterType<DirectoryAssetQuery>()

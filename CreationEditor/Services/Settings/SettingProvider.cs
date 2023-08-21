@@ -1,5 +1,4 @@
-﻿using Autofac;
-using Noggog;
+﻿using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Settings;
 
@@ -8,22 +7,18 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
     public IEnumerable<ISetting> Settings { get; }
 
     public SettingProvider(
-        ILifetimeScope lifetimeScope,
+        IEnumerable<ISetting> settings,
         ILogger logger) {
-        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-
         // Get setting classes via reflection
-        var settings = typeof(ISetting)
-            .GetAllSubClasses<ISetting>(newScope.Resolve)
-            .ToList();
+        var settingsList = settings.ToList();
 
         // From a static parent by type structure, compile all children for runtime use
         var missingSetting = 0;
-        foreach (var setting in settings) {
+        foreach (var setting in settingsList) {
             if (setting.Parent is null) continue;
 
             // Find parent setting and yourself as child
-            var parent = settings.FirstOrDefault(p => p.GetType() == setting.Parent);
+            var parent = settingsList.FirstOrDefault(p => p.GetType() == setting.Parent);
             if (parent is not null) {
                 parent.Children.Add(setting);
             } else {
@@ -32,10 +27,10 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
             }
         }
 
-        logger.Here().Debug("Finished loading {Count} setting(s)", settings.Count - missingSetting);
+        logger.Here().Debug("Finished loading {Count} setting(s)", settingsList.Count - missingSetting);
 
         // Return root settings
-        Settings = settings
+        Settings = settingsList
             .Where(setting => setting.Parent is null)
             .ToList();
     }

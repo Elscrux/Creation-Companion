@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
@@ -18,7 +18,7 @@ public sealed class InteriorCellsVM : ViewModel {
     public IList<DataGridColumn> InteriorListColumns { get; }
 
     public InteriorCellsVM(
-        ILifetimeScope lifetimeScope,
+        Func<IRecordProvider, IRecordListVM> recordListVMFactory,
         IExtraColumnsBuilder extraColumnsBuilder,
         InteriorCellsProvider interiorCellsProvider) {
         InteriorCellsProvider = interiorCellsProvider.DisposeWith(this);
@@ -28,9 +28,7 @@ public sealed class InteriorCellsVM : ViewModel {
             .Build()
             .ToList();
 
-        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-        RecordListVM = newScope
-            .Resolve<IRecordListVM>(TypedParameter.From<IRecordProvider>(InteriorCellsProvider))
+        RecordListVM = recordListVMFactory(InteriorCellsProvider)
             .DisposeWith(this);
     }
 }

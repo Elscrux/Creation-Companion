@@ -10,7 +10,6 @@ namespace CreationEditor.Services.Query;
 
 public sealed class QueryRunner : IQueryRunner, IDisposable {
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
-    private readonly IQueryFromFactory _queryFromFactory;
     private readonly IQueryConditionEntryFactory _queryConditionEntryFactory;
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -26,7 +25,6 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
     public QueryRunner(
         IQueryFromFactory queryFromFactory,
         IQueryConditionEntryFactory queryConditionEntryFactory) {
-        _queryFromFactory = queryFromFactory;
         _queryConditionEntryFactory = queryConditionEntryFactory;
 
         QueryFrom = queryFromFactory.CreateFromRecordType();

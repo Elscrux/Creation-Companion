@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
@@ -13,13 +12,14 @@ using CreationEditor.Avalonia.Views.Asset.Browser;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
 using Mutagen.Bethesda.Environments.DI;
-using Noggog;
 namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory : IDockFactory {
     private bool _viewportCreated;
 
-    private readonly ILifetimeScope _lifetimeScope;
+    private readonly Func<ILogVM> _logVMFactory;
+    private readonly Func<IRecordBrowserVM> _recordBrowserVMFactory;
+    private readonly Func<string, IAssetBrowserVM> _assetBrowserVMFactory;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IViewportFactory _viewportFactory;
@@ -27,13 +27,17 @@ public sealed class DockFactory : IDockFactory {
     private readonly ICellBrowserFactory _cellBrowserFactory;
 
     public DockFactory(
-        ILifetimeScope lifetimeScope,
+        Func<ILogVM> logVMFactory,
+        Func<IRecordBrowserVM> recordBrowserVMFactory,
+        Func<string, IAssetBrowserVM> assetBrowserVMFactory,
         IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
         ICellBrowserFactory cellBrowserFactory) {
-        _lifetimeScope = lifetimeScope;
+        _logVMFactory = logVMFactory;
+        _recordBrowserVMFactory = recordBrowserVMFactory;
+        _assetBrowserVMFactory = assetBrowserVMFactory;
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _viewportFactory = viewportFactory;
@@ -45,11 +49,9 @@ public sealed class DockFactory : IDockFactory {
         Control control;
         DockConfig dockConfig;
 
-        var newScope = _lifetimeScope.BeginLifetimeScope();
         switch (dockElement) {
             case DockElement.Log:
-                var logVM = newScope.Resolve<ILogVM>();
-                newScope.DisposeWith(logVM);
+                var logVM = _logVMFactory();
                 control = new LogView(logVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
@@ -61,8 +63,7 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.RecordBrowser:
-                var recordBrowserVM = newScope.Resolve<IRecordBrowserVM>();
-                newScope.DisposeWith(recordBrowserVM);
+                var recordBrowserVM = _recordBrowserVMFactory();
                 control = new RecordBrowser(recordBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
@@ -86,12 +87,8 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.AssetBrowser:
-                var folder = parameter is string path
-                    ? TypedParameter.From(path)
-                    : TypedParameter.From<string>(_dataDirectoryProvider.Path);
-
-                var assetBrowserVM = newScope.Resolve<IAssetBrowserVM>(folder);
-                newScope.DisposeWith(assetBrowserVM);
+                var folder = parameter as string ?? _dataDirectoryProvider.Path;
+                var assetBrowserVM = _assetBrowserVMFactory(folder);
                 control = new AssetBrowser(assetBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {

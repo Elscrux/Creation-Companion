@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;

@@ -12,28 +12,26 @@ using Activator = Mutagen.Bethesda.Skyrim.Activator;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.List;
 
 public sealed class SkyrimRecordListFactory : IRecordListFactory {
-    private readonly ILifetimeScope _lifetimeScope;
+    private readonly Func<IRecordProvider, IRecordListVM> _recordListVMFactory;
+    private readonly Func<IEnumerable<IFormLinkIdentifier>, IRecordBrowserSettings?, RecordIdentifiersProvider> _recordIdentifiersProviderFactory;
     private readonly IRecordBrowserSettings _defaultRecordBrowserSettings;
+    private readonly ILifetimeScope _lifetimeScope;
 
     public SkyrimRecordListFactory(
         ILifetimeScope lifetimeScope,
+        Func<IRecordProvider, IRecordListVM> recordListVMFactory,
+        Func<IEnumerable<IFormLinkIdentifier>, IRecordBrowserSettings?, RecordIdentifiersProvider> recordIdentifiersProviderFactory,
         IRecordBrowserSettings defaultRecordBrowserSettings) {
         _lifetimeScope = lifetimeScope;
+        _recordListVMFactory = recordListVMFactory;
+        _recordIdentifiersProviderFactory = recordIdentifiersProviderFactory;
         _defaultRecordBrowserSettings = defaultRecordBrowserSettings;
     }
 
     public IRecordListVM FromIdentifiers(IEnumerable<IFormLinkIdentifier> identifiers, IRecordBrowserSettings? browserSettings = null) {
         browserSettings ??= _defaultRecordBrowserSettings;
-        var browserSettingsParam = TypedParameter.From(browserSettings);
-        var identifiersParam = TypedParameter.From(identifiers);
-
-        var newScope = _lifetimeScope.BeginLifetimeScope();
-        var recordProvider = newScope.Resolve<RecordIdentifiersProvider>(identifiersParam, browserSettingsParam);
-
-        var providerParam = TypedParameter.From<IRecordProvider>(recordProvider);
-        var recordListVM = newScope.Resolve<IRecordListVM>(providerParam);
-        newScope.DisposeWith(recordListVM);
-
+        var recordProvider = _recordIdentifiersProviderFactory(identifiers, browserSettings);
+        var recordListVM = _recordListVMFactory(recordProvider);
         return recordListVM;
     }
 

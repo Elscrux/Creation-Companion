@@ -2,13 +2,12 @@
 using System.Reflection;
 using Autofac;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Lifecycle;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycleTask
+public sealed class PluginService<TMod, TModGetter> : IPluginService
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter> {
     private const string PluginsFolderName = "Plugins";
@@ -31,11 +30,7 @@ public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycle
         PluginContext = new PluginContext<TMod, TModGetter>(new Version(1, 0), editorEnvironment, lifetimeScope);
     }
 
-    public void OnStartup() {
-        LoadPlugins();
-    }
-
-    private void LoadPlugins() {
+    public void ReloadPlugins() {
         // Get application directory
         var applicationDirectory = Path.GetDirectoryName(typeof(PluginService<TMod, TModGetter>).Assembly.Location);
         if (applicationDirectory is null) {
@@ -75,8 +70,6 @@ public sealed class PluginService<TMod, TModGetter> : IPluginService, ILifecycle
             plugin.OnRegistered(PluginContext);
         }
     }
-
-    public void OnExit() {}
 
     private static IEnumerable<IPlugin<TMod, TModGetter>> CreatePlugins(Assembly assembly) {
         foreach (var type in assembly.GetTypes()) {

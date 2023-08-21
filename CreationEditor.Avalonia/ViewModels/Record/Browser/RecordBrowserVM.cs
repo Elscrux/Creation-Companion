@@ -1,5 +1,4 @@
 ﻿using System.Reactive;
-using Autofac;
 using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
@@ -7,12 +6,13 @@ using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Filter;
 using DynamicData.Binding;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
-    private readonly ILifetimeScope _lifetimeScope;
+    private readonly Func<IExtraColumnsBuilder> _extraColumnsBuilderFactory;
     private readonly IRecordListFactory _recordListFactory;
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
@@ -27,11 +27,11 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     private Type? _recordListType;
 
     public RecordBrowserVM(
-        ILifetimeScope lifetimeScope,
+        Func<IExtraColumnsBuilder> extraColumnsBuilderFactory,
         IRecordBrowserGroupProvider recordBrowserGroupProvider,
         IRecordListFactory recordListFactory,
         IRecordBrowserSettings recordBrowserSettingsVM) {
-        _lifetimeScope = lifetimeScope;
+        _extraColumnsBuilderFactory = extraColumnsBuilderFactory;
         _recordListFactory = recordListFactory;
         RecordBrowserSettings = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
@@ -61,24 +61,22 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     }
 
     private void SetRecordList(Type recordType) {
+        // Cleanup
         RecordListVM?.Dispose();
-        var recordListVM = _recordListFactory.FromType(recordType, RecordBrowserSettings);
 
-        var newScope = _lifetimeScope.BeginLifetimeScope();
-        var extraColumnsBuilder = newScope.Resolve<IExtraColumnsBuilder>();
+        // Create new record list
+        var recordListVM = _recordListFactory
+            .FromType(recordType, RecordBrowserSettings)
+            .DisposeWith(this);
 
+        // Add extra columns
+        var extraColumnsBuilder = _extraColumnsBuilderFactory();
         recordListVM.Columns.AddRange(extraColumnsBuilder
             .AddRecordType(recordType)
             .Build());
 
-        RecordListVM = recordListVM;
-
+        // Complete setup
         _recordListType = recordType;
-    }
-
-    public override void Dispose() {
-        base.Dispose();
-
-        RecordListVM?.Dispose();
+        RecordListVM = recordListVM;
     }
 }

@@ -19,7 +19,11 @@ public sealed class QueryModule : Module {
             .As<IQueryConditionEntry>();
 
         builder.RegisterAssemblyTypes(typeof(IQueryCondition).Assembly)
-            .InNamespaceOf<IQueryCondition>()
+            .AssignableTo<IQueryCondition>()
+            .AsSelf()
+            .As<IQueryCondition>();
+
+        builder.Register(x => new Func<Type, IQueryCondition?>(type => x.Resolve(type) as IQueryCondition))
             .AsSelf();
 
         builder.RegisterType<ReflectionFieldSelector>()
