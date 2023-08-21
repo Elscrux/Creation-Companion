@@ -13,26 +13,27 @@ using CreationEditor;
 using CreationEditor.Avalonia.Models.GroupCollection;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Services.Plugin;
+using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SearchPlugin.Models;
 namespace SearchPlugin.ViewModels;
 
-public sealed class TextSearchVM : ViewModel {
-    private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;
-    public ObservableCollectionExtended<RecordReferences<ISkyrimMod, ISkyrimModGetter>> References { get; } = new();
+public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
+    where TModGetter : class, IContextGetterMod<TMod, TModGetter>
+    where TMod : class, TModGetter, IContextMod<TMod, TModGetter> {
+    private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
 
     public IList<SelectableSearcher> Searchers { get; }
+    public ObservableCollectionExtended<TextReference> References { get; } = new();
 
-    public GroupCollection<RecordReferences<ISkyrimMod, ISkyrimModGetter>> GroupCollection { get; }
-    public Group<RecordReferences<ISkyrimMod, ISkyrimModGetter>> TypeGroup { get; }
-    public Group<RecordReferences<ISkyrimMod, ISkyrimModGetter>> RecordGroup { get; }
+    public GroupCollection<TextReference> GroupCollection { get; }
+    public Group<TextReference> TypeGroup { get; }
+    public Group<TextReference> RecordGroup { get; }
     public HierarchicalTreeDataGridSource<object> TreeStructureSource { get; }
 
     public ReadOnlyObservableCollection<ModItem> Mods { get; }
@@ -47,24 +48,24 @@ public sealed class TextSearchVM : ViewModel {
 
     public StringComparison ComparisonType => CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
-    public TextSearchVM(PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
-        _pluginContext = pluginContext;
+    public TextSearchVM(
+        IEditorEnvironment<TMod, TModGetter> editorEnvironment) {
+        _editorEnvironment = editorEnvironment;
 
         Searchers = new ObservableCollectionExtended<SelectableSearcher>(
-            typeof(ITextSearcher<ISkyrimMod, ISkyrimModGetter>)
-                .GetAllSubClasses<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
+            typeof(ITextSearcher<TMod, TModGetter>)
+                .GetAllSubClasses<ITextSearcher<TMod, TModGetter>>()
                 .Select(searcher => new SelectableSearcher(searcher)));
 
-        Mods = this.WhenAnyValue(x => x._pluginContext.EditorEnvironment.LinkCacheChanged)
-            .Switch()
+        Mods = _editorEnvironment.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
             .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true })
             .ToObservableCollection(this);
 
-        TypeGroup = new Group<RecordReferences<ISkyrimMod, ISkyrimModGetter>>(references => references.TextSearcher, true);
-        RecordGroup = new Group<RecordReferences<ISkyrimMod, ISkyrimModGetter>>(references => references.Record, true);
-        GroupCollection = new GroupCollection<RecordReferences<ISkyrimMod, ISkyrimModGetter>>(References, TypeGroup, RecordGroup);
+        TypeGroup = new Group<TextReference>(references => references.TextSearcher, true);
+        RecordGroup = new Group<TextReference>(references => references.Record, true);
+        GroupCollection = new GroupCollection<TextReference>(References, TypeGroup, RecordGroup);
 
         SearchCommand = ReactiveCommand.CreateFromTask(async () => {
                 if (SearchText.IsNullOrWhitespace()) return;
@@ -77,7 +78,7 @@ public sealed class TextSearchVM : ViewModel {
                     .Where(mod => mod.IsSelected)
                     .Select(mod => mod.ModKey);
 
-                var selectedMods = _pluginContext.EditorEnvironment.LinkCache.PriorityOrder
+                var selectedMods = _editorEnvironment.LinkCache.PriorityOrder
                     .Where(mod => selectedModKeys.Contains(mod.ModKey))
                     .ToList();
 
@@ -85,7 +86,7 @@ public sealed class TextSearchVM : ViewModel {
                     Searchers
                         .Where(searcher => searcher.IsSelected)
                         .Select(searcher => searcher.Searcher)
-                        .OfType<ITextSearcher<ISkyrimMod, ISkyrimModGetter>>()
+                        .OfType<ITextSearcher<TMod, TModGetter>>()
                         .Select(searcher => Task.Run(() => {
                             // Collect all references of a text searcher from all mods
                             var refs = selectedMods
@@ -117,7 +118,7 @@ public sealed class TextSearchVM : ViewModel {
                     new TemplateColumn<object>(
                         "Text",
                         new FuncDataTemplate<object>((obj, _) => obj switch {
-                            RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences => new TextBox {
+                            TextReference recordReferences => new TextBox {
                                 DataContext = recordReferences.Diff,
                                 [!TextBox.TextProperty] = new Binding(nameof(TextDiff.New)),
                                 [ScrollViewer.HorizontalScrollBarVisibilityProperty] = ScrollBarVisibility.Auto,
@@ -135,7 +136,7 @@ public sealed class TextSearchVM : ViewModel {
                         null,
                         new GridLength(500, GridUnitType.Pixel), new TemplateColumnOptions<object> {
                             IsTextSearchEnabled = true,
-                            TextSearchValueSelector = obj => obj is RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences ? recordReferences.Diff.New : null
+                            TextSearchValueSelector = obj => obj is TextReference recordReferences ? recordReferences.Diff.New : null
                         }
                     ),
                     x => x switch {
@@ -145,7 +146,7 @@ public sealed class TextSearchVM : ViewModel {
                     x => x is GroupInstance),
                 new TemplateColumn<object>("EditorID", new FuncDataTemplate<object>((obj, _) => {
                     return obj switch {
-                        RecordReferences<ISkyrimMod, ISkyrimModGetter> { Record: IMajorRecordGetter record } => new TextBlock {
+                        TextReference { Record: IMajorRecordGetter record } => new TextBlock {
                             Text = record.EditorID,
                             VerticalAlignment = VerticalAlignment.Center,
                         },
@@ -154,7 +155,7 @@ public sealed class TextSearchVM : ViewModel {
                 })),
                 new TemplateColumn<object>("FormKey", new FuncDataTemplate<object>((obj, _) => {
                     return obj switch {
-                        RecordReferences<ISkyrimMod, ISkyrimModGetter> { Record: IFormKeyGetter formKeyGetter } => new TextBlock {
+                        TextReference { Record: IFormKeyGetter formKeyGetter } => new TextBlock {
                             Text = formKeyGetter.FormKey.ToString(),
                             VerticalAlignment = VerticalAlignment.Center,
                         },
@@ -162,7 +163,7 @@ public sealed class TextSearchVM : ViewModel {
                     };
                 })),
                 new TemplateColumn<object>(null, new FuncDataTemplate<object>((obj, _) => obj switch {
-                    RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences => new Button {
+                    TextReference recordReferences => new Button {
                         DataContext = recordReferences,
                         [!Visual.IsVisibleProperty] = recordReferences.Diff.IsDifferent.ToBinding(),
                         Content = "Replace",
@@ -185,9 +186,9 @@ public sealed class TextSearchVM : ViewModel {
                                         .ObserveCollectionChanges().Unit()
                                         .StartWith(Unit.Default);
 
-                                    if (objects.FirstOrDefault() is RecordReferences<ISkyrimMod, ISkyrimModGetter>) {
+                                    if (objects.FirstOrDefault() is TextReference) {
                                         return collectionChanges
-                                            .Select(_ => objects.OfType<RecordReferences<ISkyrimMod, ISkyrimModGetter>>().Select(x => x.Diff.IsDifferent))
+                                            .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
                                             .Select(x => x.CombineLatest().Select(i => i.Any(b => b)))
                                             .Switch();
                                     }
@@ -217,9 +218,9 @@ public sealed class TextSearchVM : ViewModel {
                                         .ObserveCollectionChanges().Unit()
                                         .StartWith(Unit.Default);
 
-                                    if (objects.FirstOrDefault() is RecordReferences<ISkyrimMod, ISkyrimModGetter>) {
+                                    if (objects.FirstOrDefault() is TextReference) {
                                         return collectionChanges
-                                            .Select(_ => objects.OfType<RecordReferences<ISkyrimMod, ISkyrimModGetter>>().Select(x => x.Diff.IsDifferent))
+                                            .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
                                             .Select(x => x.CombineLatest().Select(i => i.Count(b => b)))
                                             .Switch();
                                     }
@@ -239,7 +240,7 @@ public sealed class TextSearchVM : ViewModel {
                             .Select(count => $"Replace {count}")
                             .ToBinding(),
                         Command = ReactiveCommand.CreateFromTask(async () => {
-                            var recordReferencesList = groupInstance.GetItems<RecordReferences<ISkyrimMod, ISkyrimModGetter>>().ToList();
+                            var recordReferencesList = groupInstance.GetItems<TextReference>().ToList();
 
                             foreach (var recordReferences in recordReferencesList) {
                                 await ReplaceRecordReferences(recordReferences);
@@ -254,15 +255,15 @@ public sealed class TextSearchVM : ViewModel {
         };
     }
 
-    private async Task ReplaceRecordReferences(RecordReferences<ISkyrimMod, ISkyrimModGetter> recordReferences) {
-        var diff = recordReferences.Diff;
+    private async Task ReplaceRecordReferences(TextReference textReference) {
+        var diff = textReference.Diff;
         if (diff.Old == diff.New) return;
 
         await Task.Run(() =>
-            recordReferences.TextSearcher.ReplaceTextReference(
-                recordReferences.Record,
-                _pluginContext.EditorEnvironment.LinkCache,
-                _pluginContext.EditorEnvironment.ActiveMod,
+            textReference.TextSearcher.ReplaceTextReference(
+                textReference.Record,
+                _editorEnvironment.LinkCache,
+                _editorEnvironment.ActiveMod,
                 diff.Old,
                 diff.New,
                 ComparisonType));

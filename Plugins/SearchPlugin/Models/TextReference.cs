@@ -2,12 +2,10 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace SearchPlugin.Models;
 
-public sealed record RecordReferences<TMod, TModGetter>(
-    ITextSearcher<TMod, TModGetter> TextSearcher,
+public sealed record TextReference(
+    ITextSearcher TextSearcher,
     IMajorRecordQueryableGetter Record,
-    TextDiff Diff)
-    where TModGetter : class, IModGetter
-    where TMod : class, TModGetter, IMod {
+    TextDiff Diff) {
 
     public override string? ToString() {
         return Record.GetName();

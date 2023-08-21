@@ -1,10 +1,7 @@
-﻿using Autofac;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Query;
-using CreationEditor.Services.Plugin;
 using DynamicData.Binding;
-using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI.Fody.Helpers;
 namespace QueryPlugin.ViewModels;
@@ -16,8 +13,9 @@ public sealed class QueryColumnVM : ViewModel {
     public IObservableCollection<object?> QueriedFields { get; } = new ObservableCollectionExtended<object?>();
     public QueryVM QueryVM { get; }
 
-    public QueryColumnVM(PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
-        QueryVM = pluginContext.LifetimeScope.Resolve<QueryVM>();
+    public QueryColumnVM(
+        QueryVM queryVM) {
+        QueryVM = queryVM;
 
         CancellationTokenSource? lastCancellationTokenSource = null;
         QueryVM.QueryRunner.SettingsChanged

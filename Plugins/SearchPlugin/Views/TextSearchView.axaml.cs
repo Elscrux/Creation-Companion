@@ -1,13 +1,12 @@
-﻿using Avalonia.ReactiveUI;
-using SearchPlugin.ViewModels;
+﻿using Avalonia.Controls;
 namespace SearchPlugin.Views;
 
-public partial class TextSearchView : ReactiveUserControl<TextSearchVM> {
+public partial class TextSearchView : UserControl {
     public TextSearchView() {
         InitializeComponent();
     }
 
-    public TextSearchView(TextSearchVM textSearchVM) : this() {
-        ViewModel = textSearchVM;
+    public TextSearchView(object? vm) : this() {
+        DataContext = vm;
     }
 }

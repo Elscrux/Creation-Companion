@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace VanillaDuplicateCleaner;
+namespace VanillaDuplicateCleaner.Models;
 
 public sealed class RecordReplacement : ReactiveObject, IReactiveSelectable {
     public RecordReplacement(IMajorRecordGetter modified, IMajorRecordGetter vanillaReplacement, string type) {

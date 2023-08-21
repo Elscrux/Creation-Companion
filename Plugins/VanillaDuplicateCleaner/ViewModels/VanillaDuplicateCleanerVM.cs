@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
-using Autofac;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
-using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Definitions;
 using DynamicData;
 using Mutagen.Bethesda;
@@ -16,11 +15,12 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-namespace VanillaDuplicateCleaner;
+using VanillaDuplicateCleaner.Models;
+namespace VanillaDuplicateCleaner.ViewModels;
 
 public sealed class VanillaDuplicateCleanerVM : ViewModel {
-    private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;
-
+    private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
+    private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
     public ModPickerVM ModPickerVM { get; }
     public ObservableCollection<RecordReplacement> Records { get; } = new();
@@ -31,12 +31,15 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     public ReactiveCommand<Unit, Unit> Run { get; }
 
     public VanillaDuplicateCleanerVM(
-        PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
-        _pluginContext = pluginContext;
-        RecordReferenceController = _pluginContext.LifetimeScope.Resolve<IRecordReferenceController>();
-
-        ModPickerVM = pluginContext.LifetimeScope.Resolve<ModPickerVM>();
-        ModPickerVM.Filter = mod => !Enumerable.Contains(SkyrimDefinitions.SkyrimModKeys, mod.ModKey);
+        IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
+        IRecordReferenceController recordReferenceController,
+        IModSaveService modSaveService,
+        ModPickerVM modPickerVM) {
+        _editorEnvironment = editorEnvironment;
+        _modSaveService = modSaveService;
+        RecordReferenceController = recordReferenceController;
+        ModPickerVM = modPickerVM;
+        ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
         ModPickerVM.MultiSelect = false;
 
         ModPickerVM.SelectedMods
@@ -69,7 +72,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         // Collect records from mods that may be replaced
         var recordEqualsMasks = new HashSet<RecordEqualsMask>();
-        var testingMod = _pluginContext.EditorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == testingModKey);
+        var testingMod = _editorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == testingModKey);
         foreach (var record in GetRecords(testingMod.AsEnumerable())) {
             if (record.EditorID is null) continue;
 
@@ -79,7 +82,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         // Find matching records in vanilla mods
         var mappedRecords = new List<RecordReplacement>();
-        var vanillaMods = _pluginContext.EditorEnvironment.LinkCache.ListedOrder
+        var vanillaMods = _editorEnvironment.LinkCache.ListedOrder
             .Where(x => Enumerable.Contains(SkyrimDefinitions.SkyrimModKeys, x.ModKey))
             .ToArray();
 
@@ -98,8 +101,6 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private void Save(ModKey modKey) {
         if (modKey.IsNull) return;
 
-        var recordReferenceController = _pluginContext.LifetimeScope.Resolve<IRecordReferenceController>();
-        var saveService = _pluginContext.LifetimeScope.Resolve<IModSaveService>();
         var cleanedBaseMod = new SkyrimMod(ModKey.FromName("Cleaned" + modKey.Name, ModType.Plugin), SkyrimRelease.SkyrimSE);
         var cleanedOtherMods = new List<SkyrimMod>();
 
@@ -109,11 +110,11 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         // Replace mod references of records to be replaced with vanilla records
         foreach (var recordReplacement in recordReplacements) {
-            var references = recordReferenceController.GetReferences(recordReplacement.Modified.FormKey).ToArray();
+            var references = RecordReferenceController.GetReferences(recordReplacement.Modified.FormKey).ToArray();
 
             // Clean references
             foreach (var usageFormLink in references) {
-                if (!_pluginContext.EditorEnvironment.LinkCache.TryResolveContext(usageFormLink, out var context)) continue;
+                if (!_editorEnvironment.LinkCache.TryResolveContext(usageFormLink, out var context)) continue;
 
                 // Add references to the relevant cleaned mod
                 if (context.ModKey == modKey) {
@@ -131,7 +132,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
             }
 
             // Clean record
-            if (_pluginContext.EditorEnvironment.LinkCache.TryResolveContext(recordReplacement.Modified.ToLinkFromRuntimeType(), out var recordContext)) {
+            if (_editorEnvironment.LinkCache.TryResolveContext(recordReplacement.Modified.ToLinkFromRuntimeType(), out var recordContext)) {
                 var overrideRecord = recordContext.GetOrAddAsOverride(cleanedBaseMod);
 
                 if (references.Length == 0) {
@@ -158,7 +159,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         void FinalizeMod(IMod mod) {
             mod.RemapLinks(remapData);
-            saveService.SaveMod(mod);
+            _modSaveService.SaveMod(mod);
         }
     }
 }

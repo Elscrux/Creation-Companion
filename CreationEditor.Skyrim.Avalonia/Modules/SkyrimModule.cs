@@ -92,10 +92,6 @@ public sealed class SkyrimModule : Module {
             .As<IViewportRuntimeService>()
             .SingleInstance();
 
-        builder.RegisterType<PluginService<ISkyrimMod, ISkyrimModGetter>>()
-            .As<IPluginService>()
-            .SingleInstance();
-
         builder.RegisterType<BsaArchiveService>()
             .As<IArchiveService>();
 

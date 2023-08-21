@@ -1,5 +1,6 @@
 ﻿using Avalonia.ReactiveUI;
-namespace VanillaDuplicateCleaner;
+using VanillaDuplicateCleaner.ViewModels;
+namespace VanillaDuplicateCleaner.Views;
 
 public partial class VanillaDuplicateCleanerView : ReactiveUserControl<VanillaDuplicateCleanerVM> {
     public VanillaDuplicateCleanerView() {

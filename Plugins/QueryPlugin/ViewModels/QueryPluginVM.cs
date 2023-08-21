@@ -1,22 +1,19 @@
 ﻿using System.Reactive;
-using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Services.Plugin;
 using CreationEditor.Services.Query;
-using Mutagen.Bethesda.Skyrim;
 using QueryPlugin.Views;
 using ReactiveUI;
 namespace QueryPlugin.ViewModels;
 
 public sealed class QueryPluginVM : ViewModel {
-    private readonly PluginContext<ISkyrimMod, ISkyrimModGetter> _pluginContext;
     /// <summary>
     /// Used to pad the right side of the grid so that the splitter can be dragged at the most right column.
     /// </summary>
     private readonly Control _paddingRight = new StackPanel();
 
+    private readonly Func<QueryColumnVM> _queryColumnVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IQueryState _queryState;
 
@@ -30,10 +27,13 @@ public sealed class QueryPluginVM : ViewModel {
     public ReactiveCommand<QueryColumnVM, Unit> DuplicateColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
 
-    public QueryPluginVM(PluginContext<ISkyrimMod, ISkyrimModGetter> pluginContext) {
-        _pluginContext = pluginContext;
-        _menuItemProvider = _pluginContext.LifetimeScope.Resolve<IMenuItemProvider>();
-        _queryState = _pluginContext.LifetimeScope.Resolve<IQueryState>();
+    public QueryPluginVM(
+        Func<QueryColumnVM> queryColumnVMFactory,
+        IMenuItemProvider menuItemProvider,
+        IQueryState queryState) {
+        _queryColumnVMFactory = queryColumnVMFactory;
+        _menuItemProvider = menuItemProvider;
+        _queryState = queryState;
         ColumnsGrid.Children.Add(_paddingRight);
 
         AddColumn = ReactiveCommand.Create(() => {
@@ -69,7 +69,7 @@ public sealed class QueryPluginVM : ViewModel {
         // Add the new query column
         ColumnsGrid.ColumnDefinitions.Insert(column, new ColumnDefinition(new GridLength(200)));
 
-        var queryColumnVM = new QueryColumnVM(_pluginContext);
+        var queryColumnVM = _queryColumnVMFactory();
         queryColumnVM.MenuItems = GetColumnMenuItems(queryColumnVM);
 
         var queryColumn = new QueryColumn(queryColumnVM) {

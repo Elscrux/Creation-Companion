@@ -11,7 +11,7 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
     where TMod : class, TModGetter, IMod {
     public abstract string SearcherName { get; }
 
-    public IEnumerable<RecordReferences<TMod, TModGetter>> GetTextReference(IMajorRecordGetterEnumerable mod, string reference, StringComparison comparison) {
+    public IEnumerable<TextReference> GetTextReference(IMajorRecordGetterEnumerable mod, string reference, StringComparison comparison) {
         foreach (var record in mod.EnumerateMajorRecords<TMajorGetter>()) {
             var references = GetText(record)
                 .NotNull()
@@ -22,9 +22,16 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
             if (references.Length == 0) continue;
 
             foreach (var textDiff in references) {
-                yield return new RecordReferences<TMod, TModGetter>(this, record, textDiff);
+                yield return new TextReference(this, record, textDiff);
             }
         }
+    }
+
+    public void ReplaceTextReference(IMajorRecordQueryableGetter record, ILinkCache linkCache, IMod mod, string oldText, string newText, StringComparison comparison) {
+        if (linkCache is not ILinkCache<TMod, TModGetter> typedLinkCache) return;
+        if (mod is not TMod typedMod) return;
+
+        ReplaceTextReference(record, typedLinkCache, typedMod, oldText, newText, comparison);
     }
 
     public void ReplaceTextReference(IMajorRecordQueryableGetter record, ILinkCache<TMod, TModGetter> linkCache, TMod mod, string oldText, string newText, StringComparison comparison) {
@@ -33,6 +40,8 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
 
         var overrideRecord = context.GetOrAddAsOverride(mod);
         if (record is IDialogTopicGetter topic) {
+            // TEMP FIX - Make sure response count is sustained as Mutagen currently just counts
+            // the number of responses in the current mod and not the overwritten mods.
             foreach (var response in topic.Responses) {
                 var responseContext = linkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
                 responseContext.GetOrAddAsOverride(mod);

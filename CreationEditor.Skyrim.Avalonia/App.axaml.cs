@@ -11,6 +11,7 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
+using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
@@ -35,15 +36,9 @@ public partial class App : Application {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             var builder = new ContainerBuilder();
 
-            builder.RegisterModule<MainModule>();
-            builder.RegisterModule<NotificationModule>();
-            builder.RegisterModule<QueryModule>();
-            builder.RegisterModule<AssetModule>();
-            builder.RegisterModule<RecordModule>();
-            builder.RegisterModule<NewtonsoftJsonModule>();
-            builder.RegisterModule<LoggingModule>();
-            builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<MutagenModule>();
+            builder.RegisterModule<EditorModule>();
+            builder.RegisterModule<GameSpecificModule<ISkyrimMod, ISkyrimModGetter>>();
             builder.RegisterModule<SkyrimModule>();
 
             var window = new MainWindow();

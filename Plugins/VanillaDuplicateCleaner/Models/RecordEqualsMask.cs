@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace VanillaDuplicateCleaner;
+namespace VanillaDuplicateCleaner.Models;
 
 internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
     public bool Equals(RecordEqualsMask? other) {

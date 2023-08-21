@@ -3,7 +3,7 @@ using Avalonia.Input;
 namespace CreationEditor.Avalonia.Services.Plugin;
 
 public interface IMenuPluginDefinition : IVisualPluginDefinition {
-    public KeyGesture? KeyGesture { get; }
+    public KeyGesture? KeyGesture => null;
     public object? GetIcon();
 
     public static readonly FuncValueConverter<IMenuPluginDefinition, object?> ToIcon
