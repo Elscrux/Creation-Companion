@@ -23,7 +23,10 @@ public sealed class QueryModule : Module {
             .AsSelf()
             .As<IQueryCondition>();
 
-        builder.Register(x => new Func<Type, IQueryCondition?>(type => x.Resolve(type) as IQueryCondition))
+        builder.Register(x => {
+                var context = x.Resolve<IComponentContext>();
+                return new Func<Type, IQueryCondition?>(type => context.Resolve(type) as IQueryCondition);
+            })
             .AsSelf();
 
         builder.RegisterType<ReflectionFieldSelector>()
