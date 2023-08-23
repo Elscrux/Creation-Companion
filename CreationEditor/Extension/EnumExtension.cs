@@ -8,8 +8,8 @@ public static class EnumExtension {
             case TEnum directLevel:
                 outEnum = directLevel;
                 return true;
-            case string levelString when Enum.TryParse<TEnum>(levelString, out var parsedLevel):
-                outEnum = parsedLevel;
+            case string enumString when Enum.TryParse<TEnum>(enumString, out var parsedEnum):
+                outEnum = parsedEnum;
                 return true;
             default:
                 outEnum = default;
