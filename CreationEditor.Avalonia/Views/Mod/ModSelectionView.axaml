@@ -33,7 +33,7 @@
 
             <DataGrid Grid.Row="1"
                       Margin="5"
-                      VerticalAlignment="Top"
+                      VerticalAlignment="Stretch"
                       Background="{DynamicResource SystemControlTransparentBrush}"
                       ItemsSource="{Binding DisplayedMods}"
                       SelectedItem="{Binding SelectedMod}"
