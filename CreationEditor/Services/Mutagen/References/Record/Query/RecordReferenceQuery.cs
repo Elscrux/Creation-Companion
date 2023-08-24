@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
 using ICSharpCode.SharpZipLib.GZip;
@@ -13,9 +14,9 @@ using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Record.Query;
 
 /// <summary>
-/// ReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
+/// RecordReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
-public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
+public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDropoff {
     private readonly Version _version = new(1, 0);
 
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
@@ -29,30 +30,10 @@ public sealed class ReferenceQuery : IReferenceQuery, IDisposableDropoff {
 
     private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_dataDirectoryProvider.Path, mod.FileName);
 
-    public sealed record ModReferenceCache(Dictionary<FormKey, HashSet<IFormLinkIdentifier>> Cache, HashSet<FormKey> FormKeys) {
-        public static ModReferenceCache operator +(ModReferenceCache a, ModReferenceCache b) {
-            var newRefCache = new ModReferenceCache(a.Cache, a.FormKeys);
-
-            foreach (var formKey in b.FormKeys) {
-                newRefCache.FormKeys.Add(formKey);
-            }
-
-            foreach (var (formKey, references) in b.Cache) {
-                var existingReferences = newRefCache.Cache.GetOrAdd(formKey);
-
-                foreach (var reference in references) {
-                    existingReferences.Add(reference);
-                }
-            }
-
-            return newRefCache;
-        }
-    }
-
     public IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches => _modCaches;
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
 
-    public ReferenceQuery(
+    public RecordReferenceQuery(
         IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IMutagenTypeProvider mutagenTypeProvider,

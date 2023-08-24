@@ -7,20 +7,20 @@ namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 public sealed class MutableReferenceCache : IReferenceCache {
     private readonly IModGetter _mutableMod;
     private readonly ImmutableReferenceCache? _immutableReferenceCache;
-    private readonly ReferenceQuery.ModReferenceCache _mutableModReferenceCache;
+    private readonly ModReferenceCache _mutableModReferenceCache;
 
-    public MutableReferenceCache(IReferenceQuery referenceQuery, IModGetter mutableMod, IReadOnlyList<IModGetter> mods) {
+    public MutableReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, IReadOnlyList<IModGetter> mods) {
         _mutableMod = mutableMod;
-        referenceQuery.LoadModReferences(mutableMod);
+        recordReferenceQuery.LoadModReferences(mutableMod);
 
-        _mutableModReferenceCache = referenceQuery.ModCaches[mutableMod.ModKey];
-        _immutableReferenceCache = new ImmutableReferenceCache(referenceQuery, mods);
+        _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
+        _immutableReferenceCache = new ImmutableReferenceCache(recordReferenceQuery, mods);
     }
 
-    public MutableReferenceCache(IReferenceQuery referenceQuery, IModGetter mutableMod, ImmutableReferenceCache? immutableReferenceCache = null) {
+    public MutableReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, ImmutableReferenceCache? immutableReferenceCache = null) {
         _mutableMod = mutableMod;
-        referenceQuery.LoadModReferences(mutableMod);
-        _mutableModReferenceCache = referenceQuery.ModCaches[mutableMod.ModKey];
+        recordReferenceQuery.LoadModReferences(mutableMod);
+        _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
 
         if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableReferenceCache(immutableReferenceCache);
     }

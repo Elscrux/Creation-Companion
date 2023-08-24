@@ -17,7 +17,7 @@ namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 public sealed class RecordReferenceController : IRecordReferenceController, IDisposable {
     private readonly CompositeDisposable _disposable = new();
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IReferenceQuery _referenceQuery;
+    private readonly IRecordReferenceQuery _recordReferenceQuery;
     private readonly INotificationService _notificationService;
 
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordCreations = new();
@@ -36,10 +36,10 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     public RecordReferenceController(
         IRecordController recordController,
         IEditorEnvironment editorEnvironment,
-        IReferenceQuery referenceQuery,
+        IRecordReferenceQuery recordReferenceQuery,
         INotificationService notificationService) {
         _editorEnvironment = editorEnvironment;
-        _referenceQuery = referenceQuery;
+        _recordReferenceQuery = recordReferenceQuery;
         _notificationService = notificationService;
 
         _editorEnvironment.LoadOrderChanged
@@ -60,8 +60,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Record References");
 
-        var immutableReferenceCache = new ImmutableReferenceCache(_referenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
-        _referenceCache = new MutableReferenceCache(_referenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
+        var immutableReferenceCache = new ImmutableReferenceCache(_recordReferenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
+        _referenceCache = new MutableReferenceCache(_recordReferenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
 
         linearNotifier.Stop();
 

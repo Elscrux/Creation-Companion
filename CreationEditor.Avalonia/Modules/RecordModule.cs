@@ -11,8 +11,8 @@ namespace CreationEditor.Avalonia.Modules;
 
 public sealed class RecordModule : Module {
     protected override void Load(ContainerBuilder builder) {
-        builder.RegisterType<ReferenceQuery>() // todo rename to RecordReferenceQuery
-            .As<IReferenceQuery>()
+        builder.RegisterType<RecordReferenceQuery>()
+            .As<IRecordReferenceQuery>()
             .SingleInstance();
 
         builder.RegisterType<RecordFilterBuilder>()
