@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using Autofac;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
@@ -34,12 +33,12 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
 
     public RecordReferenceQuery(
+        Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
         IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IMutagenTypeProvider mutagenTypeProvider,
         INotificationService notificationService,
         IModInfoProvider<IModGetter> modInfoProvider,
-        ILifetimeScope lifetimeScope,
         ILogger logger) {
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
@@ -47,9 +46,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         _notificationService = notificationService;
         _modInfoProvider = modInfoProvider;
         _logger = logger;
-
-        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-        _cacheLocationProvider = newScope.Resolve<ICacheLocationProvider>(TypedParameter.From(new[] { "References", "Record" }));
+        _cacheLocationProvider = cacheLocationProviderFactory(new[] { "References", "Record" });
     }
 
     public void Dispose() => _disposables.Dispose();
