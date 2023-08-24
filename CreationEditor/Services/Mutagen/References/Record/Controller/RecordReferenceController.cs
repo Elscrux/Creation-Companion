@@ -23,8 +23,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordCreations = new();
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordDeletions = new();
 
-    private MutableReferenceCache? _referenceCache;
-    public IReferenceCache? ReferenceCache => _referenceCache;
+    private MutableRecordReferenceCache? _referenceCache;
+    public IRecordReferenceCache? ReferenceCache => _referenceCache;
 
     private readonly BehaviorSubject<bool> _isLoading = new(true);
     public IObservable<bool> IsLoading => _isLoading;
@@ -60,8 +60,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Record References");
 
-        var immutableReferenceCache = new ImmutableReferenceCache(_recordReferenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
-        _referenceCache = new MutableReferenceCache(_recordReferenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
+        var immutableReferenceCache = new ImmutableRecordReferenceCache(_recordReferenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
+        _referenceCache = new MutableRecordReferenceCache(_recordReferenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
 
         linearNotifier.Stop();
 
@@ -138,7 +138,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         RemoveRecordReferences(_referenceCache, record, record.EnumerateFormLinks().Select(x => x.FormKey));
     }
 
-    private void AddRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
+    private void AddRecordReferences(MutableRecordReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
         foreach (var reference in references) {
             if (!cache.AddReference(reference, record)) continue;
 
@@ -147,7 +147,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         }
     }
 
-    private void RemoveRecordReferences(MutableReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
+    private void RemoveRecordReferences(MutableRecordReferenceCache cache, IMajorRecordGetter record, IEnumerable<FormKey> references) {
         foreach (var reference in references) {
             if (cache.RemoveReference(reference, record)) continue;
 

@@ -2,6 +2,6 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
-public interface IReferenceCache {
+public interface IRecordReferenceCache {
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder);
 }

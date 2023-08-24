@@ -4,25 +4,25 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
-public sealed class MutableReferenceCache : IReferenceCache {
+public sealed class MutableRecordReferenceCache : IRecordReferenceCache {
     private readonly IModGetter _mutableMod;
-    private readonly ImmutableReferenceCache? _immutableReferenceCache;
+    private readonly ImmutableRecordReferenceCache? _immutableReferenceCache;
     private readonly ModReferenceCache _mutableModReferenceCache;
 
-    public MutableReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, IReadOnlyList<IModGetter> mods) {
+    public MutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, IReadOnlyList<IModGetter> mods) {
         _mutableMod = mutableMod;
         recordReferenceQuery.LoadModReferences(mutableMod);
 
         _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
-        _immutableReferenceCache = new ImmutableReferenceCache(recordReferenceQuery, mods);
+        _immutableReferenceCache = new ImmutableRecordReferenceCache(recordReferenceQuery, mods);
     }
 
-    public MutableReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, ImmutableReferenceCache? immutableReferenceCache = null) {
+    public MutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, ImmutableRecordReferenceCache? immutableReferenceCache = null) {
         _mutableMod = mutableMod;
         recordReferenceQuery.LoadModReferences(mutableMod);
         _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
 
-        if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableReferenceCache(immutableReferenceCache);
+        if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableRecordReferenceCache(immutableReferenceCache);
     }
 
     public bool AddRecord(IMajorRecordGetter record) {
