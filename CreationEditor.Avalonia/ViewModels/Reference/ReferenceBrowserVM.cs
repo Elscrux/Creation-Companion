@@ -24,7 +24,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
     public object? Context { get; }
     public ReferenceRemapperVM? ReferenceRemapperVM { get; }
 
-    [Reactive] public bool ShowTree { get; set; } = true;
+    [Reactive] public bool ShowTree { get; set; }
     [Reactive] public ITreeDataGridSource<IReference> ReferenceSource { get; set; }
 
     public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> EditRecord { get; }
@@ -98,7 +98,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
             }
         );
 
-        var treeReferenceSource = ReferenceSource = new HierarchicalTreeDataGridSource<IReference>(references) {
+        var treeReferenceSource = new HierarchicalTreeDataGridSource<IReference>(references) {
             Columns = {
                 new HierarchicalExpanderColumn<IReference>(
                     nameColumn,
@@ -111,7 +111,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
         };
         if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> treeRowSelection) treeRowSelection.SingleSelect = false;
 
-        var flatReferenceSource = new FlatTreeDataGridSource<IReference>(references) {
+        var flatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReference>(references) {
             Columns = {
                 nameColumn,
                 identifierColumn,
