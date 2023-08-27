@@ -99,15 +99,6 @@
         <Compile Update="Services\Cache\CacheLocationProvider.cs">
           <DependentUpon>ICacheLocationProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\DirectoryAssetQuery.cs">
-          <DependentUpon>FileStructureAssetQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\NifDirectoryAssetQuery.cs">
-          <DependentUpon>FileStructureAssetQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\NifArchiveAssetQuery.cs">
-          <DependentUpon>ArchiveAssetQuery.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Asset\AssetDirectory.cs">
           <DependentUpon>IAsset.cs</DependentUpon>
         </Compile>

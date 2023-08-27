@@ -8,7 +8,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
-using CreationEditor.Services.Mutagen.References.Asset.Query;
+using CreationEditor.Services.Mutagen.References.Asset.Parser;
 using CreationEditor.Services.Notification;
 using DynamicData;
 using Mutagen.Bethesda;
@@ -28,9 +28,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly INotificationService _notificationService;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
-    private readonly ModAssetQuery _modAssetQuery;
-    private readonly NifDirectoryAssetQuery _nifDirectoryAssetQuery;
-    private readonly NifArchiveAssetQuery _nifArchiveAssetQuery;
+    private readonly NifFileAssetParser _nifFileAssetParser;
+    private readonly IAssetReferenceCacheFactory _assetReferenceCacheFactory;
 
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordCreations = new();
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordDeletions = new();
@@ -53,9 +52,9 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
-    private readonly List<AssetCache<IModGetter, IFormLinkGetter>> _modAssetCaches = new();
-    private AssetCache<string, string> _nifDirectoryAssetCache = null!;
-    private readonly List<AssetCache<string, string>> _nifArchiveAssetCaches = new();
+    private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = new();
+    private AssetReferenceCache<string, string> _nifDirectoryAssetReferenceCache = null!;
+    private readonly List<AssetReferenceCache<string, string>> _nifArchiveAssetCaches = new();
 
     private int _loadingProcesses;
     private readonly BehaviorSubject<bool> _isLoading = new(true);
@@ -68,17 +67,15 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         IEditorEnvironment editorEnvironment,
         IDataDirectoryProvider dataDirectoryProvider,
         IRecordController recordController,
-        ModAssetQuery modAssetQuery,
-        NifDirectoryAssetQuery nifDirectoryAssetQuery,
-        NifArchiveAssetQuery nifArchiveAssetQuery) {
+        NifFileAssetParser nifFileAssetParser,
+        IAssetReferenceCacheFactory assetReferenceCacheFactory) {
         _fileSystem = fileSystem;
         _archiveService = archiveService;
         _notificationService = notificationService;
         _editorEnvironment = editorEnvironment;
         _dataDirectoryProvider = dataDirectoryProvider;
-        _modAssetQuery = modAssetQuery;
-        _nifDirectoryAssetQuery = nifDirectoryAssetQuery;
-        _nifArchiveAssetQuery = nifArchiveAssetQuery;
+        _nifFileAssetParser = nifFileAssetParser;
+        _assetReferenceCacheFactory = assetReferenceCacheFactory;
 
         Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences));
         Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences));
@@ -88,36 +85,37 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
             .DisposeWith(_disposables);
 
-        void UpdateLoadingProcess(Action action) {
-            Interlocked.Increment(ref _loadingProcesses);
-            action();
-            Interlocked.Decrement(ref _loadingProcesses);
-            _isLoading.OnNext(_loadingProcesses > 0);
-        }
-
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate);
         recordController.RecordCreated.Subscribe(RegisterCreation);
         recordController.RecordDeleted.Subscribe(RegisterDeletion);
+        return;
+
+        async Task UpdateLoadingProcess(Func<Task> action) {
+            Interlocked.Increment(ref _loadingProcesses);
+            await action();
+            Interlocked.Decrement(ref _loadingProcesses);
+            _isLoading.OnNext(_loadingProcesses > 0);
+        }
     }
 
     public void Dispose() => _disposables.Dispose();
 
-    private void InitLoadOrderReferences() {
+    private async Task InitLoadOrderReferences() {
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Asset References");
 
         var modKeys = _editorEnvironment.LinkCache.PriorityOrder.Select(mod => mod.ModKey).ToList();
 
         // Remove references from unloaded mods
-        _modAssetCaches.RemoveWhere(c => !modKeys.Contains(c.Origin.ModKey));
+        _modAssetCaches.RemoveWhere(c => !modKeys.Contains(c.Source.ModKey));
         _modAssetReferenceManager.UnregisterWhere(asset => asset.ModKey != ModKey.Null && !modKeys.Contains(asset.ModKey));
 
         // Add references for new mods
-        foreach (var mod in _editorEnvironment.LinkCache.PriorityOrder) {
-            if (_modAssetCaches.Any(c => c.Origin.ModKey == mod.ModKey)) continue;
+        var tasks = _editorEnvironment.LinkCache.PriorityOrder
+            .Where(mod => _modAssetCaches.All(c => c.Source.ModKey != mod.ModKey))
+            .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetModCache(mod)));
 
-            var newModCache = new AssetCache<IModGetter, IFormLinkGetter>(_modAssetQuery, mod);
-
-            _modAssetCaches.Add(newModCache);
+        foreach (var assetCache in await Task.WhenAll(tasks)) {
+            _modAssetCaches.Add(assetCache);
         }
 
         // Update existing subscriptions
@@ -130,22 +128,22 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         linearNotifier.Stop();
     }
 
-    private void InitNifDirectoryReferences() {
+    private async Task InitNifDirectoryReferences() {
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Nif References");
 
-        _nifDirectoryAssetCache = new AssetCache<string, string>(_nifDirectoryAssetQuery, _dataDirectoryProvider.Path);
+        _nifDirectoryAssetReferenceCache = await _assetReferenceCacheFactory.GetNifCache(_dataDirectoryProvider.Path);
 
         linearNotifier.Stop();
 
         // Change existing subscriptions
         _nifDirectoryAssetReferenceManager.Change(asset => {
-            var references = _nifDirectoryAssetCache.GetReferences(asset);
+            var references = _nifDirectoryAssetReferenceCache.GetReferences(asset);
 
             return new Change<string>(ListChangeReason.AddRange, references);
         });
     }
 
-    private void InitNifArchiveReferences() {
+    private async Task InitNifArchiveReferences() {
         var extension = _archiveService.GetExtension();
         var dataDirectory = _dataDirectoryProvider.Path;
 
@@ -159,7 +157,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
             var elapsedTime = Stopwatch.GetTimestamp();
 
-            var assetCaches = archives.Select(a => new AssetCache<string, string>(_nifArchiveAssetQuery, a)).ToArray();
+            var assetCaches = await Task.WhenAll(archives
+                .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetNifArchiveCache(mod))));
             Console.WriteLine($"NIF ASSET: {Stopwatch.GetElapsedTime(elapsedTime, Stopwatch.GetTimestamp())}");
 
             _nifArchiveAssetCaches.AddRange(assetCaches);
@@ -183,17 +182,18 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             .DisposeWith(_disposables);
 
         archiveWatcher.Events().Renamed
-            .Subscribe(e => {
+            .Subscribe(async e => {
                 Remove(e.OldFullPath);
-                Add(e.FullPath);
+                await Add(e.FullPath);
             })
             .DisposeWith(_disposables);
+        return;
 
-        void Add(string archive) {
+        async Task Add(string archive) {
             var relativePath = _fileSystem.Path.GetRelativePath(dataDirectory, archive);
             using var notifier = new ChainedNotifier(_notificationService, $"Loading Archive Nif References in {relativePath}");
 
-            var newCache = new AssetCache<string, string>(_nifArchiveAssetQuery, archive);
+            var newCache = await _assetReferenceCacheFactory.GetNifArchiveCache(archive);
             _nifArchiveAssetCaches.Add(newCache);
 
             // Change existing subscriptions
@@ -207,7 +207,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         }
 
         void Remove(string archive) {
-            var cache = _nifArchiveAssetCaches.FirstOrDefault(c => string.Equals(c.Origin, archive, AssetCompare.PathComparison));
+            var cache = _nifArchiveAssetCaches.FirstOrDefault(c => string.Equals(c.Source, archive, AssetCompare.PathComparison));
             if (cache is null) return;
 
             // Change existing subscriptions
@@ -221,7 +221,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
         var modReferences = _modAssetCaches?.GetReferences(asset);
-        var nifDirectoryReferences = _nifDirectoryAssetCache?.GetReferences(asset);
+        var nifDirectoryReferences = _nifDirectoryAssetReferenceCache?.GetReferences(asset);
         var nifArchiveReferences = _nifArchiveAssetCaches?.GetReferences(asset);
         referencedAsset = new ReferencedAsset(asset, modReferences, nifDirectoryReferences, nifArchiveReferences);
 
@@ -233,14 +233,14 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public Action<AssetFile> RegisterUpdate(AssetFile assetFile) {
-        if (_nifDirectoryAssetCache is null) return _ => {};
+        if (_nifDirectoryAssetReferenceCache is null) return _ => {};
 
         ValidateAsset(assetFile);
 
-        var before = _nifDirectoryAssetCache.FindLinksToReference(assetFile.ReferencedAsset.AssetLink.DataRelativePath).ToArray();
+        var before = _nifDirectoryAssetReferenceCache.FindLinksToReference(assetFile.ReferencedAsset.AssetLink.DataRelativePath).ToArray();
 
         return newAsset => {
-            var after = _nifDirectoryAssetQuery.ParseFile(newAsset.Path).Select(result => result.AssetLink).ToArray();
+            var after = _nifFileAssetParser.ParseFile(newAsset.Path).Select(result => result.AssetLink).ToArray();
 
             // Calculate the diff
             var removedReferences = before.Except(after);
@@ -255,25 +255,25 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterCreation(AssetFile file) {
-        if (_nifDirectoryAssetCache is null) {
+        if (_nifDirectoryAssetReferenceCache is null) {
             _assetCreations.Enqueue(file);
             return;
         }
 
         ValidateAsset(file);
 
-        AddAssetReferences(file, _nifDirectoryAssetQuery.ParseFile(file.Path).Select(r => r.AssetLink));
+        AddAssetReferences(file, _nifFileAssetParser.ParseFile(file.Path).Select(r => r.AssetLink));
     }
 
     public void RegisterDeletion(AssetFile file) {
-        if (_nifDirectoryAssetCache is null) {
+        if (_nifDirectoryAssetReferenceCache is null) {
             _assetDeletions.Enqueue(file);
             return;
         }
 
         ValidateAsset(file);
 
-        RemoveAssetReferences(file, _nifDirectoryAssetQuery.ParseFile(file.Path).Select(r => r.AssetLink));
+        RemoveAssetReferences(file, _nifFileAssetParser.ParseFile(file.Path).Select(r => r.AssetLink));
     }
 
     private static void ValidateAsset(AssetFile assetFileFile) {
@@ -283,7 +283,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private void AddAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
         foreach (var added in references) {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetCache.AddReference(_nifDirectoryAssetCache.Origin, added, dataRelativePath);
+            _nifDirectoryAssetReferenceCache.AddReference(added, dataRelativePath);
 
             var change = new Change<string>(ListChangeReason.Add, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Change(added, change);
@@ -293,7 +293,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private void RemoveAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
         foreach (var removed in references) {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetCache.RemoveReference(_nifDirectoryAssetCache.Origin, removed, dataRelativePath);
+            _nifDirectoryAssetReferenceCache.RemoveReference(removed, dataRelativePath);
 
             var change = new Change<string>(ListChangeReason.Remove, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Change(removed, change);
@@ -301,7 +301,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public Action<IMajorRecordGetter> RegisterUpdate(IMajorRecordGetter record) {
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return _ => {};
 
         // Collect the references before and after the update
@@ -330,12 +330,12 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterCreation(IMajorRecordGetter record) {
-        if (_nifDirectoryAssetCache is null) {
+        if (_nifDirectoryAssetReferenceCache is null) {
             _recordCreations.Enqueue(record);
             return;
         }
 
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
@@ -343,30 +343,30 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterDeletion(IMajorRecordGetter record) {
-        if (_nifDirectoryAssetCache is null) {
+        if (_nifDirectoryAssetReferenceCache is null) {
             _recordDeletions.Enqueue(record);
             return;
         }
 
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Origin.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
         RemoveRecordReferences(modCache, record.ToLinkFromRuntimeType(), record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
-    private void AddRecordReferences(AssetCache<IModGetter, IFormLinkGetter> modCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
+    private void AddRecordReferences(AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
-            if (!modCache.AddReference(modCache.Origin, reference, newRecordLink)) continue;
+            if (!modReferenceCache.AddReference(reference, newRecordLink)) continue;
 
             var change = new Change<IFormLinkGetter>(ListChangeReason.Add, newRecordLink);
             _modAssetReferenceManager.Change(reference, change);
         }
     }
 
-    private void RemoveRecordReferences(AssetCache<IModGetter, IFormLinkGetter> modCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
+    private void RemoveRecordReferences(AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
-            if (!modCache.RemoveReference(modCache.Origin, reference, newRecordLink)) continue;
+            if (!modReferenceCache.RemoveReference(reference, newRecordLink)) continue;
 
             var change = new Change<IFormLinkGetter>(ListChangeReason.Remove, newRecordLink);
             _modAssetReferenceManager.Change(reference, change);

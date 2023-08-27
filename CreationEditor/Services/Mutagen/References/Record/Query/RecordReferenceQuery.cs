@@ -102,11 +102,11 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         if (!Version.TryParse(reader.ReadString(), out var version)
          || !version.Equals(_version)) return false;
 
-        // Read checksum in cache
-        var checksum = reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
+        // Read hash in cache
+        var hash = reader.ReadBytes(_fileSystem.GetHashBytesLength());
 
-        // Validate checksum
-        return _fileSystem.IsFileChecksumValid(modFilePath, checksum);
+        // Validate hash
+        return _fileSystem.IsFileHashValid(modFilePath, hash);
     }
 
     /// <summary>
@@ -142,12 +142,12 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         // Write version
         writer.Write(_version.ToString());
 
-        // Write checksum
+        // Write hash
         var modFilePath = ModFilePath(mod.ModKey);
         if (!_fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
 
-        var checksum = _fileSystem.GetFileChecksum(modFilePath);
-        writer.Write(checksum);
+        var hash = _fileSystem.GetFileHash(modFilePath);
+        writer.Write(hash);
 
         // Write game
         writer.Write(_mutagenTypeProvider.GetGameName(mod));
@@ -193,9 +193,9 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         var fileStream = _fileSystem.File.OpenRead(cacheFile);
         var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
-            // Skip version and checksum
+            // Skip version and hash
             reader.ReadString();
-            reader.ReadBytes(_fileSystem.GetChecksumBytesLength());
+            reader.ReadBytes(_fileSystem.GetHashBytesLength());
 
             // Read game string
             var game = reader.ReadString();

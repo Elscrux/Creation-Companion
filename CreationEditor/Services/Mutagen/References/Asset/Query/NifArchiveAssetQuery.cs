@@ -1,65 +1,29 @@
-﻿using Autofac;
-using CreationEditor.Services.Asset;
-using Mutagen.Bethesda.Archives;
-using Noggog;
+﻿using CreationEditor.Services.Mutagen.References.Asset.Cache;
+using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
+using CreationEditor.Services.Mutagen.References.Asset.Parser;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class NifArchiveAssetQuery : ArchiveAssetQuery {
-    private readonly ModelAssetQuery _modelAssetQuery;
+public sealed class NifArchiveAssetQuery : IAssetReferenceCacheableQuery<string, string> {
+    private readonly ArchiveAssetQuery _archiveAssetQuery;
 
-    protected override string QueryName => "NifArchive";
-    protected override bool CacheAssets => true;
+    public Version CacheVersion => _archiveAssetQuery.CacheVersion;
+    public IAssetReferenceSerialization<string, string> Serialization { get; }
+    public string QueryName => _archiveAssetQuery.QueryName;
+    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches => _archiveAssetQuery.AssetCaches;
 
     public NifArchiveAssetQuery(
-        ILifetimeScope lifetimeScope) : base(lifetimeScope) {
-        var newScope = lifetimeScope.BeginLifetimeScope().DisposeWith(this);
-        _modelAssetQuery = newScope.Resolve<ModelAssetQuery>();
+        Func<IArchiveAssetParser, ArchiveAssetQuery> archiveAssetQuery,
+        NifArchiveAssetParser nifArchiveAssetParser,
+        IAssetReferenceSerialization<string, string> serialization) {
+        Serialization = serialization;
+        _archiveAssetQuery = archiveAssetQuery(nifArchiveAssetParser);
     }
 
-    public override IEnumerable<AssetQueryResult<string>> ParseAssets(string archive) {
-        var archiveReader = ArchiveService.GetReader(archive);
-
-        foreach (var archiveFile in archiveReader.Files) {
-            foreach (var result in ParseArchiveFile(archiveFile)) {
-                yield return result;
-            }
-        }
-    }
-
-    public IEnumerable<AssetQueryResult<string>> ParseFile(string archive, string filePath) {
-        var archiveReader = ArchiveService.GetReader(archive);
-
-        var directory = FileSystem.Path.GetDirectoryName(filePath);
-        if (directory is null) yield break;
-        if (!archiveReader.TryGetFolder(directory, out var archiveDirectory)) yield break;
-
-        var archiveFile = archiveDirectory.Files.FirstOrDefault(file => file.Path.Equals(filePath, AssetCompare.PathComparison));
-        if (archiveFile is null) yield break;
-
-        foreach (var result in ParseArchiveFile(archiveFile)) {
-            yield return result;
-        }
-    }
-
-    private IEnumerable<AssetQueryResult<string>> ParseArchiveFile(IArchiveFile archiveFile) {
-        var filePath = archiveFile.Path;
-
-        var assetType = AssetTypeService.GetAssetType(filePath);
-        if (assetType != AssetTypeService.Provider.Model) yield break;
-
-        var tempPath = FileSystem.Path.GetTempFileName();
-        try {
-            //Create temp file and copy file from bsa to it
-            using var bsaStream = FileSystem.File.Create(tempPath);
-            archiveFile.AsStream().CopyTo(bsaStream);
-            bsaStream.Close();
-
-            //Parse temp file as nif and delete it afterwards
-            foreach (var result in _modelAssetQuery.ParseAssets(tempPath)) {
-                yield return result with { Reference = filePath };
-            }
-        } finally {
-            FileSystem.File.Delete(tempPath);
-        }
-    }
+    public IEnumerable<AssetQueryResult<string>> ParseAssets(string source) => _archiveAssetQuery.ParseAssets(source);
+    public bool IsCacheUpToDate(BinaryReader reader, string source) => _archiveAssetQuery.IsCacheUpToDate(reader, source);
+    public string ReadContextString(BinaryReader reader) => _archiveAssetQuery.ReadContextString(reader);
+    public IEnumerable<string> ReadUsages(BinaryReader reader, string contextString, int assetUsageCount) => _archiveAssetQuery.ReadUsages(reader, contextString, assetUsageCount);
+    public void WriteCacheCheck(BinaryWriter writer, string source) => _archiveAssetQuery.WriteCacheCheck(writer, source);
+    public void WriteContext(BinaryWriter writer, string source) => _archiveAssetQuery.WriteContext(writer, source);
+    public void WriteUsages(BinaryWriter writer, IEnumerable<string> usages) => _archiveAssetQuery.WriteUsages(writer, usages);
 }

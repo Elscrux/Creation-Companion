@@ -50,7 +50,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate);
         recordController.RecordCreated.Subscribe(RegisterCreation);
         recordController.RecordDeleted.Subscribe(RegisterDeletion);
-        // todo write back the current state of the mutable ref cache state - make sure to write new checksum of the SAVED file - entry point after plugin saved
+        // todo write back the current state of the mutable ref cache state - make sure to write new hash of the SAVED file - entry point after plugin saved
     }
 
     public void Dispose() => _disposable.Dispose();

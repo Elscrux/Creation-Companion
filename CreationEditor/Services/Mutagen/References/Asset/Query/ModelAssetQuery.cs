@@ -1,17 +1,27 @@
-﻿using Autofac;
+﻿using System.IO.Abstractions;
+using CreationEditor.Services.Asset;
+using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using nifly;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class ModelAssetQuery : AssetQuery<string, string> {
-    protected override bool CacheAssets => false;
-    protected override string QueryName => "Model";
+public sealed class ModelAssetQuery : IAssetReferenceQuery<string, string> {
+    private readonly IFileSystem _fileSystem;
+    private readonly IAssetTypeService _assetTypeService;
 
-    public ModelAssetQuery(ILifetimeScope lifetimeScope) : base(lifetimeScope) {}
+    public string QueryName => "Model";
+    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; } = new();
 
-    public override IEnumerable<AssetQueryResult<string>> ParseAssets(string directory) => ParseAssetsInternal(directory).Distinct();
+    public ModelAssetQuery(
+        IFileSystem fileSystem,
+        IAssetTypeService assetTypeService) {
+        _fileSystem = fileSystem;
+        _assetTypeService = assetTypeService;
+    }
+
+    public IEnumerable<AssetQueryResult<string>> ParseAssets(string source) => ParseAssetsInternal(source).Distinct();
 
     private IEnumerable<AssetQueryResult<string>> ParseAssetsInternal(string path) {
-        if (!FileSystem.File.Exists(path)) yield break;
+        if (!_fileSystem.File.Exists(path)) yield break;
 
         using var nif = new NifFile();
         nif.Load(path);
@@ -52,31 +62,11 @@ public sealed class ModelAssetQuery : AssetQuery<string, string> {
 
             var assetString = asset.get();
             if (!string.IsNullOrEmpty(assetString)) {
-                var assetLink = AssetTypeService.GetAssetLink(assetString);
+                var assetLink = _assetTypeService.GetAssetLink(assetString);
                 if (assetLink is not null) {
                     yield return new AssetQueryResult<string>(assetLink, path);
                 }
             }
-        }
-    }
-
-    protected override void WriteCacheCheck(BinaryWriter writer, string origin) => writer.Write(origin);
-
-    protected override void WriteContext(BinaryWriter writer, string origin) => writer.Write(origin);
-
-    protected override void WriteUsages(BinaryWriter writer, IEnumerable<string> usages) {
-        foreach (var usage in usages) {
-            writer.Write(usage);
-        }
-    }
-
-    protected override bool IsCacheUpToDate(BinaryReader reader, string origin) => true;
-
-    protected override string ReadContextString(BinaryReader reader) => reader.ReadString();
-
-    protected override IEnumerable<string> ReadUsages(BinaryReader reader, string context, int count) {
-        for (var i = 0; i < count; i++) {
-            yield return reader.ReadString();
         }
     }
 }

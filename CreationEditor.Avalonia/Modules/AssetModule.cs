@@ -1,21 +1,47 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Services.Asset;
+using CreationEditor.Services.FileSystem.Validation;
+using CreationEditor.Services.Mutagen.References.Asset.Cache;
+using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References.Asset.Parser;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class AssetModule : Module {
     protected override void Load(ContainerBuilder builder) {
-        builder.RegisterAssemblyTypes(typeof(AssetQuery).Assembly)
-            .InNamespaceOf<AssetQuery>()
-            .AssignableTo<AssetQuery>()
+        var assetReferenceQueryType = typeof(IAssetReferenceQuery<,>);
+        builder.RegisterAssemblyTypes(assetReferenceQueryType.Assembly)
+            .Where(x => !x.IsInterface && x.GetInterfaces().Any(i =>
+                i.IsGenericType &&
+                i.GetGenericTypeDefinition() == assetReferenceQueryType))
             .AsSelf();
 
-        builder.RegisterType<DirectoryAssetQuery>()
+        builder.RegisterAssemblyTypes(typeof(IArchiveAssetParser).Assembly)
+            .AssignableTo<IArchiveAssetParser>()
             .AsSelf();
 
-        builder.RegisterType<NifDirectoryAssetQuery>()
+        builder.RegisterAssemblyTypes(typeof(IFileAssetParser).Assembly)
+            .AssignableTo<IFileAssetParser>()
+            .AsSelf();
+
+        builder.RegisterGeneric(typeof(BinaryAssetReferenceSerialization<,>))
+            .As(typeof(IAssetReferenceSerialization<,>));
+
+        builder.RegisterType<HashFileSystemValidation>()
+            .As<IFileSystemValidation>();
+
+        builder.RegisterType<BinaryFileSystemValidationSerialization>()
+            .As<IHashFileSystemValidationSerialization>();
+
+        builder.RegisterType<AssetReferenceCacheBuilder>()
+            .AsSelf();
+
+        builder.RegisterType<AssetReferenceCacheFactory>()
+            .As<IAssetReferenceCacheFactory>();
+
+        builder.RegisterType<NifFileAssetParser>()
             .AsSelf();
 
         builder.RegisterType<AssetSymbolService>()

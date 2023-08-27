@@ -37,7 +37,7 @@ public sealed class MainModule : Module {
             .AssignableTo<ISetting>()
             .As<ISetting>();
 
-        builder.RegisterInstance(new FileSystem())
+        builder.RegisterInstance(new System.IO.Abstractions.FileSystem())
             .As<IFileSystem>()
             .SingleInstance();
 
