@@ -12,7 +12,7 @@ public partial class QueryView : ReactiveUserControl<QueryVM> {
         this.WhenActivated(disposables => {
             this.WhenAnyValue(x => x.FromAutoCompleteBox.SelectedItem)
                 .Subscribe(x => {
-                    if (ViewModel == null) return;
+                    if (ViewModel is null) return;
                     if (x is not QueryFromItem queryFromItem) return;
 
                     ViewModel.QueryRunner.QueryFrom.SelectedItem = queryFromItem;
