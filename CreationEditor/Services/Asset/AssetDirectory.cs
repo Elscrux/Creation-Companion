@@ -83,7 +83,7 @@ public sealed class AssetDirectory : IAsset {
     private void Remove(string path) {
         try {
             var fileName = _fileSystem.Path.GetFileName(path);
-            var asset = Assets.Items.FirstOrDefault(asset => string.Equals(_fileSystem.Path.GetFileName(asset.Path), fileName, AssetCompare.PathComparison));
+            using var asset = Assets.Items.FirstOrDefault(asset => string.Equals(_fileSystem.Path.GetFileName(asset.Path), fileName, AssetCompare.PathComparison));
             if (asset is null) return;
 
             Assets.Remove(asset);
@@ -98,7 +98,6 @@ public sealed class AssetDirectory : IAsset {
                     _assetReferenceController.RegisterDeletion(childFile);
                 }
             }
-            asset.Dispose();
         } catch (Exception) {
             Refresh();
         }
