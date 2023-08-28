@@ -12,5 +12,5 @@ public class FlyingStateEnum : IConditionValueEnums {
 
     public IList<Enum> Enums { get; } = Enum.GetValues<FlyingState>().Cast<Enum>().ToList();
 
-    public bool Match(Condition.Function function) => function is Condition.Function.GetCurrentCastingType;
+    public bool Match(Condition.Function function) => function is Condition.Function.GetFlyingState;
 }

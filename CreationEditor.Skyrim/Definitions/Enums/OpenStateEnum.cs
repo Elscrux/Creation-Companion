@@ -12,5 +12,5 @@ public class OpenStateEnum : IConditionValueEnums {
 
     public IList<Enum> Enums { get; } = Enum.GetValues<OpenState>().Cast<Enum>().ToList();
 
-    public bool Match(Condition.Function function) => function is Condition.Function.GetLockLevel;
+    public bool Match(Condition.Function function) => function is Condition.Function.GetOpenState;
 }
