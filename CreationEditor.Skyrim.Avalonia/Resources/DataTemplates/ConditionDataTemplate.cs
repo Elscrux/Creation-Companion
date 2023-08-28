@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -11,7 +12,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
-using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
@@ -40,6 +40,9 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
     public static readonly StyledProperty<EditableCondition> ConditionProperty
         = AvaloniaProperty.Register<ConditionDataTemplate, EditableCondition>(nameof(Condition));
 
+    public static readonly StyledProperty<IObservable<Unit>?> ValueChangedProperty
+        = AvaloniaProperty.Register<ConditionDataTemplate, IObservable<Unit>?>(nameof(ValueChanged));
+
     public ILinkCache LinkCache {
         get => GetValue(LinkCacheProperty);
         set => SetValue(LinkCacheProperty, value);
@@ -58,6 +61,11 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
     public EditableCondition Condition {
         get => GetValue(ConditionProperty);
         set => SetValue(ConditionProperty, value);
+    }
+
+    public IObservable<Unit>? ValueChanged {
+        get => GetValue(ValueChangedProperty);
+        set => SetValue(ValueChangedProperty, value);
     }
 
     private readonly Dictionary<Type, ICustomConditionDataTemplate> _conditionTemplateCache;
@@ -95,7 +103,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
             .Select(parameter => GetControl(parameter, data, substituteUsageContext))
             .ToList();
 
-        // Apply a condition template if it there is matching one
+        // Apply a condition template if it there is a matching one
         var dataType = data.GetType();
         var contextObservable = this.GetObservable(ContextProperty);
         var questContextObservable = this.GetObservable(QuestContextProperty);
@@ -126,6 +134,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 [ToolTip.TipProperty] = parameter.Name,
             };
+            ValueChanged = control.GetObservable(SelectingItemsControl.SelectedItemProperty).Unit();
         } else if (parameter.PropertyType == typeof(string)) {
             control = new TextBox {
                 DataContext = data,
@@ -133,6 +142,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 [ToolTip.TipProperty] = parameter.Name,
             };
+            ValueChanged = control.GetObservable(TextBlock.TextProperty).Unit();
         } else if (parameter.PropertyType == typeof(int)) {
             control = new NumericUpDown {
                 DataContext = data,
@@ -143,6 +153,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 [ToolTip.TipProperty] = parameter.Name,
             };
+            ValueChanged = control.GetObservable(NumericUpDown.ValueProperty).Unit();
         } else if (parameter.PropertyType == typeof(float)) {
             control = new NumericUpDown {
                 DataContext = data,
@@ -153,6 +164,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 [ToolTip.TipProperty] = parameter.Name,
             };
+            ValueChanged = control.GetObservable(NumericUpDown.ValueProperty).Unit();
         } else if (parameter.PropertyType.GetInterfaces().Contains(typeof(IFormLinkContainerGetter))) {
             control = GetFormKeyPicker(
                 data,
@@ -183,16 +195,18 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         var scopedTypes = types.ToArray();
 
         if (scopedTypes.AllInheritFromAny(RecordTypeConstants.AllPlacedInterfaceTypes)) {
-            return new PlacedPickerButton {
+            var placedPickerButton = new PlacedPickerButton {
                 DataContext = data,
                 [PlacedPickerButton.ScopedTypesProperty] = types,
                 [!PlacedPickerButton.PlacedProperty] = new Binding($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Link)}"),
                 [!PlacedPickerButton.LinkCacheProperty] = this[!LinkCacheProperty],
                 [ToolTip.TipProperty] = parameter,
             };
+            ValueChanged = placedPickerButton.GetObservable(PlacedPickerButton.PlacedProperty).Unit();
+            return placedPickerButton;
         }
 
-        return new FormKeyPicker {
+        var formKeyPicker = new FormKeyPicker {
             [!AFormKeyPicker.LinkCacheProperty] = this[!LinkCacheProperty],
             ShowFormKeyBox = false,
             DataContext = data,
@@ -201,6 +215,8 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
             [ToolTip.TipProperty] = parameter,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+        ValueChanged = formKeyPicker.GetObservable(AFormKeyPicker.FormKeyProperty).Unit();
+        return formKeyPicker;
     }
 
     private Control DecorateWithSubstitutePickers(Control control, ConditionData data, string parameter, SubstituteUsageContext substituteUsageContext, IEnumerable<Type> types) {

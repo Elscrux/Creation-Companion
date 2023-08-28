@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
-using CreationEditor.Skyrim.Definitions;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
@@ -31,16 +31,13 @@ public sealed class EditableCondition : ReactiveObject {
 
     [Reactive] public Condition.Function Function { get; set; }
     [Reactive] public ConditionData Data { get; set; }
+    [Reactive] public IObservable<Unit>? DataChanged { get; set; }
 
     [Reactive] public CompareOperator CompareOperator { get; set; }
 
     [Reactive] public FormKey GlobalValue { get; set; }
     [Reactive] public float FloatValue { get; set; }
-    [Reactive] public Enum? EnumValue { get; set; }
 
-    [Reactive] public IList<Enum>? CustomEnumsValues { get; set; }
-
-    [Reactive] public bool UseCustomValue { get; set; }
     [Reactive] public bool UseGlobal { get; set; }
 
     [Reactive] public bool Or { get; set; }
@@ -85,17 +82,7 @@ public sealed class EditableCondition : ReactiveObject {
         // Update condition data when the function changes
         this.WhenAnyValue(x => x.Function)
             .DistinctUntilChanged()
-            .Subscribe(function => {
-                Data = function.ToCondition();
-                var customConditionValueEnums = SkyrimDefinitions.ConditionValueEnums.FirstOrDefault(condition => condition.Match(function));
-                if (customConditionValueEnums is not null) {
-                    UseCustomValue = true;
-                    CustomEnumsValues = customConditionValueEnums.Enums;
-                    EnumValue = customConditionValueEnums.Enums.First();
-                } else {
-                    UseCustomValue = false;
-                }
-            })
+            .Subscribe(function => Data = function.ToCondition())
             .DisposeWith(_disposable);
 
         // Set the reference to the player when RunOnType is player
@@ -119,10 +106,6 @@ public sealed class EditableCondition : ReactiveObject {
             case IConditionFloat conditionFloat:
                 UseGlobal = false;
                 FloatValue = conditionFloat.ComparisonValue;
-                if (CustomEnumsValues is not null) {
-                    var enumType = CustomEnumsValues.First().GetType();
-                    EnumValue = (Enum?) Enum.ToObject(enumType, (int) conditionFloat.ComparisonValue);
-                }
                 break;
             case IConditionGlobal conditionGlobal:
                 UseGlobal = true;
@@ -161,7 +144,7 @@ public sealed class EditableCondition : ReactiveObject {
     public Condition ToCondition() {
         Condition condition = UseGlobal
             ? new ConditionGlobal { ComparisonValue = new FormLink<IGlobalGetter>(GlobalValue) }
-            : new ConditionFloat { ComparisonValue = UseCustomValue ? Convert.ToSingle(EnumValue) : FloatValue };
+            : new ConditionFloat { ComparisonValue = FloatValue };
 
         condition.Data = Data;
         condition.Data.RunOnType = RunOnType == ExtendedRunOnType.Player

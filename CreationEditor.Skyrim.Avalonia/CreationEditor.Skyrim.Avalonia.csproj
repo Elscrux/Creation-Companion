@@ -41,6 +41,12 @@
       <Compile Update="Services\Record\Editor\ConditionCopyController.cs">
         <DependentUpon>IConditionCopyPasteController.cs</DependentUpon>
       </Compile>
+      <Compile Update="Resources\DataTemplates\GetFactionRankDataTemplate.cs">
+        <DependentUpon>ICustomConditionValueDataTemplate.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Resources\DataTemplates\EnumDataTemplate.cs">
+        <DependentUpon>ICustomConditionValueDataTemplate.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <PropertyGroup>
