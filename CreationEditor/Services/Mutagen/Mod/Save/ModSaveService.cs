@@ -42,7 +42,7 @@ public sealed class ModSaveService : IModSaveService {
 
         // Don't save empty mods
         if (!mod.EnumerateMajorRecords().Any()) {
-            _logger.Here().Information("Skipping saving empty mod {ModName}", mod.ModKey.FileName);
+            _logger.Here().Verbose("Skipping saving empty mod {ModName}", mod.ModKey.FileName);
             return;
         }
 
