@@ -32,6 +32,37 @@ public static class Interop {
         public string Path;
     }
 
+    public struct SETextureSet {
+        public string Diffuse;
+        public string Normal;
+        public string Specular;
+        public string EnvironmentMask;
+        public string Height;
+        public string Environment;
+        public string Multilayer;
+        public string Emissive;
+    }
+
+    public struct SECornerSets {
+        public SETextureSet TopRight;
+        public SETextureSet BottomRight;
+        public SETextureSet TopLeft;
+        public SETextureSet BottomLeft;
+    }
+
+    public struct TerrainInfo {
+        public float X; // Local editor space offset
+        public float Y; // Local editor space offset
+        public ulong PointSize; // Length of one cell = 33
+
+        public ulong PositionBegin; // first index of the positional data in buffer of this cell
+        // normal data and color data is passed as 3 floats per point to build the corresponding vec
+        public ulong NormalBegin; // first index of the normal data in buffer of this cell
+        public ulong ColorBegin; // first index of the color data in buffer of this cell
+
+        public SECornerSets CornerSets;
+    }
+
     public struct InitConfig {
         public uint Version;
         public string AssetDirectory;
@@ -54,6 +85,9 @@ public static class Interop {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void SelectCallback(ulong count, IntPtr keys);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void TerrainAddCallback(uint count, TerrainInfo[] info, float[] buffer);
+
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addLoadCallback(LoadCallback callback);
 
@@ -70,6 +104,9 @@ public static class Interop {
     public static extern bool addSelectCallback(SelectCallback callback);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public static extern bool addTerrainCallback(TerrainAddCallback callback);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void loadReferences(ulong count, ReferenceLoad[] load);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -80,6 +117,9 @@ public static class Interop {
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool deleteReferences(ulong count, string[] formKeys);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public static extern bool loadTerrain(uint count, TerrainInfo[] info, float[] buffer);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int initTGEditor(InitConfig config, string[] formKeys, ulong count);

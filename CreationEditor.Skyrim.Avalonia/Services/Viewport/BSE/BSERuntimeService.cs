@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reactive.Subjects;
 using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 
 public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
-    private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
+    private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, ExteriorCellRuntimeSettings> LoadedCells);
+    private sealed record InteriorCellRuntimeSettings(List<Interop.ReferenceLoad> References);
+    private sealed record ExteriorCellRuntimeSettings(List<Interop.ReferenceLoad> References, Vector2 LocalOffset);
 
     private Interop.SelectCallback? _selectCallback;
     private readonly DisposableBucket _disposableDropoff = new();
@@ -22,8 +26,8 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     private const double UnloadCellGridDistance = 10;
 
-    private FormKey _interiorCell = FormKey.Null;
-    private List<Interop.ReferenceLoad>? _interiorCellReferences;
+    private FormKey _interiorCellKey = FormKey.Null;
+    private InteriorCellRuntimeSettings? _interiorCell;
 
     private WorldspaceRuntimeSettings? _worldspaceRuntimeSettings;
 
@@ -66,24 +70,25 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     }
 
     public void LoadInteriorCell(ICellGetter cell) {
-        if (_interiorCell != cell.FormKey) UnloadEverything();
+        if (_interiorCellKey != cell.FormKey) UnloadEverything();
 
         var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
-        _interiorCellReferences = Load(placedObjects, P2Int.Origin);
+        var cellReferences = LoadCellReferences(placedObjects, P2Int.Origin);
+        _interiorCell = new InteriorCellRuntimeSettings(cellReferences);
 
         _worldspaceRuntimeSettings = null;
     }
 
     public void LoadExteriorCell(FormKey worldspaceFormKey, ICellGetter cell) {
         var origin = cell.Grid?.Point ?? P2Int.Origin;
-        var originToLoad = origin;
+        var editorCellOrigin = origin;
 
         if (_worldspaceRuntimeSettings is null
          || _worldspaceRuntimeSettings.Worldspace != worldspaceFormKey) {
             // Worldspace not loaded - unload everything
             UnloadEverything();
 
-            _worldspaceRuntimeSettings = new WorldspaceRuntimeSettings(worldspaceFormKey, origin, new Dictionary<P2Int, List<Interop.ReferenceLoad>>());
+            _worldspaceRuntimeSettings = new WorldspaceRuntimeSettings(worldspaceFormKey, origin, new Dictionary<P2Int, ExteriorCellRuntimeSettings>());
         } else {
             // Worldspace loaded
 
@@ -94,27 +99,29 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             foreach (var (grid, references) in _worldspaceRuntimeSettings.LoadedCells) {
                 if (UnloadCellGridDistance < grid.Distance(origin)) continue;
 
-                Unload(references);
+                UnloadCell(references);
                 _worldspaceRuntimeSettings.LoadedCells.Remove(grid);
             }
 
-            // Transform origin
-            originToLoad -= _worldspaceRuntimeSettings.Origin;
+            // Transform to actual editor cell origin
+            editorCellOrigin -= _worldspaceRuntimeSettings.Origin;
         }
 
         var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
-        var loadedReferences = Load(placedObjects, originToLoad);
-        _worldspaceRuntimeSettings.LoadedCells.Add(origin, loadedReferences);
+        var loadedReferences = LoadCellReferences(placedObjects, editorCellOrigin);
+        if (cell.Landscape is not null) LoadLandscape(cell.Landscape, editorCellOrigin);
+        var localOffset = new Vector2(editorCellOrigin.X, editorCellOrigin.Y);
+        _worldspaceRuntimeSettings.LoadedCells.Add(origin, new ExteriorCellRuntimeSettings(loadedReferences, localOffset));
 
-        _interiorCell = FormKey.Null;
+        _interiorCellKey = FormKey.Null;
     }
 
     private void UnloadEverything() {
         if (_worldspaceRuntimeSettings is not null) {
             var referenceLists = new List<List<Interop.ReferenceLoad>>();
 
-            foreach (var (_, references) in _worldspaceRuntimeSettings.LoadedCells) {
-                referenceLists.Add(references);
+            foreach (var (_, cell) in _worldspaceRuntimeSettings.LoadedCells) {
+                referenceLists.Add(cell.References);
             }
 
             if (referenceLists.Count > 0) {
@@ -127,18 +134,167 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             }
 
             _worldspaceRuntimeSettings = null;
-        } else if (_interiorCellReferences is not null) {
-            Unload(_interiorCellReferences);
+        } else if (_interiorCell is not null) {
+            UnloadCell(_interiorCell);
 
-            _interiorCellReferences = null;
+            _interiorCell = null;
         }
     }
 
-    private static void Unload(IReadOnlyCollection<Interop.ReferenceLoad> references) {
-        Interop.deleteReferences(Convert.ToUInt32(references.Count), references.Select(x => x.FormKey).ToArray());
+    private void UnloadCell(ExteriorCellRuntimeSettings cell) {
+        Interop.deleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
     }
 
-    private List<Interop.ReferenceLoad> Load(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
+    private void UnloadCell(InteriorCellRuntimeSettings cell) {
+        Interop.deleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
+    }
+
+    private void LoadLandscape(ILandscapeGetter landscape, P2Int originToLoad) {
+        const int cellPointSize = 33;
+        const int normalsOffset = cellPointSize * cellPointSize;
+        const int vertexColorOffset = normalsOffset * 4;
+        const int landscapeBufferSize = normalsOffset * 7;
+
+        if (landscape.VertexHeightMap is null) throw new ArgumentException(nameof(landscape.VertexHeightMap));
+        if (landscape.VertexNormals is null) throw new ArgumentException(nameof(landscape.VertexNormals));
+        if (landscape.VertexColors is null) throw new ArgumentException(nameof(landscape.VertexColors));
+
+        var floatBuffer = new float[landscapeBufferSize];
+
+        var counter = 0;
+        foreach (var x in landscape.VertexHeightMap.HeightMap) {
+            var height = (sbyte) x.Value;
+            floatBuffer[counter] = height * 8 + landscape.VertexHeightMap.Offset;
+            counter++;
+        }
+
+        foreach (var x in landscape.VertexNormals) {
+            var xValue = (sbyte) x.Value.X;
+            var yValue = (sbyte) x.Value.Y;
+            var zValue = (sbyte) x.Value.Z;
+
+            floatBuffer[counter] = xValue / 127f;
+            counter++;
+            floatBuffer[counter] = yValue / 127f;
+            counter++;
+            floatBuffer[counter] = zValue / 127f;
+            counter++;
+        }
+
+        foreach (var x in landscape.VertexColors) {
+            floatBuffer[counter] = x.Value.X / 255f;
+            counter++;
+            floatBuffer[counter] = x.Value.Y / 255f;
+            counter++;
+            floatBuffer[counter] = x.Value.Z / 255f;
+            counter++;
+        }
+
+        var cornerSets = new Interop.CornerSets();
+        var unmanagedMemory = new DisposableBucket();
+
+        foreach (var grouping in landscape.Layers.GroupBy(x => x.Header?.Quadrant)) {
+            ref var quadrant = ref cornerSets.BottomLeft;
+            switch (grouping.Key) {
+                case Quadrant.BottomLeft:
+                    quadrant = ref cornerSets.BottomLeft;
+                    break;
+                case Quadrant.BottomRight:
+                    quadrant = ref cornerSets.BottomRight;
+                    break;
+                case Quadrant.TopLeft:
+                    quadrant = ref cornerSets.TopLeft;
+                    break;
+                case Quadrant.TopRight:
+                    quadrant = ref cornerSets.TopRight;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            var layers = grouping.ToArray();
+            var alphaLayersCount = (byte) layers.Count(x => x is IAlphaLayerGetter);
+            var alphaLayers = new Interop.AlphaLayer[alphaLayersCount];
+
+            var alphaLayerCounter = 0;
+            foreach (var layerRecord in layers) {
+                if (layerRecord.Header is null) continue;
+
+                var landscapeTextureRecord = layerRecord.Header.Texture.TryResolve(_linkCacheProvider.LinkCache);
+                var textureSetRecord = landscapeTextureRecord?.TextureSet.TryResolve(_linkCacheProvider.LinkCache);
+
+                if (layerRecord is IAlphaLayerGetter alphaLayerRecord) {
+                    var alphaLayer = new Interop.AlphaLayer();
+                    if (textureSetRecord is not null) {
+                        alphaLayer.TextureSet = GetTextureSet(textureSetRecord);
+                    }
+
+                    if (alphaLayerRecord.AlphaLayerData.HasValue) {
+                        var memoryData = alphaLayerRecord.AlphaLayerData.Value;
+                        const int dataSize = sizeof(ushort) * 2 + sizeof(float);
+
+                        var alphaDataLength = Convert.ToUInt16(memoryData.Length / dataSize);
+                        var alphaData = new Interop.AlphaData[alphaDataLength];
+
+                        for (var i = 0; i < alphaDataLength; i++) {
+                            alphaData[i].Position = BitConverter.ToUInt16(memoryData[..sizeof(ushort)]);
+                            alphaData[i].Opacity = BitConverter.ToSingle(memoryData.Slice(sizeof(ushort) * 2, sizeof(float)));
+
+                            // Move the span to the next data set
+                            memoryData = memoryData[dataSize..];
+                        }
+
+                        unmanagedMemory.Add(alphaData.ToUnmanagedMemory(out var pointer));
+                        alphaLayer.Data = pointer;
+                        alphaLayer.DataLength = alphaDataLength;
+                    }
+
+                    alphaLayers[alphaLayerCounter] = alphaLayer;
+                    alphaLayerCounter++;
+                } else {
+                    if (textureSetRecord is not null) {
+                        quadrant.BaseLayer = new Interop.BaseLayer {
+                            TextureSet = GetTextureSet(textureSetRecord)
+                        };
+                    }
+                }
+            }
+
+            unmanagedMemory.Add(alphaLayers.ToUnmanagedMemory(out var alphaLayersPointer));
+            quadrant.AlphaLayers = alphaLayersPointer;
+            quadrant.AlphaLayersLength = alphaLayersCount;
+        }
+
+        var landscapeInfo = new Interop.TerrainInfo {
+            X = originToLoad.X,
+            Y = originToLoad.Y,
+            PointSize = cellPointSize,
+            PositionBegin = 0,
+            NormalBegin = normalsOffset,
+            ColorBegin = vertexColorOffset,
+            CornerSets = cornerSets,
+        };
+
+        // todo: pass multiple terrains, WARNING normal begin and color begin will be dynamic in that case!
+        Interop.loadTerrain(1, new[] { landscapeInfo }, floatBuffer);
+
+        unmanagedMemory.Dispose();
+    }
+
+    public static Interop.TextureSet GetTextureSet(ITextureSetGetter textureSet) {
+        return new Interop.TextureSet {
+            Diffuse = textureSet.Diffuse?.DataRelativePath,
+            Normal = textureSet.NormalOrGloss?.DataRelativePath,
+            Specular = textureSet.BacklightMaskOrSpecular?.DataRelativePath,
+            EnvironmentMask = textureSet.Environment?.DataRelativePath,
+            Height = textureSet.Height?.DataRelativePath,
+            Environment = textureSet.Environment?.DataRelativePath,
+            Multilayer = textureSet.Multilayer?.DataRelativePath,
+            Emissive = textureSet.GlowOrDetailMap?.DataRelativePath,
+        };
+    }
+
+    private List<Interop.ReferenceLoad> LoadCellReferences(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
         var origin = new P3Float(gridPoint.X, gridPoint.Y, 0);
         var refs = new List<Interop.ReferenceLoad>();
 
