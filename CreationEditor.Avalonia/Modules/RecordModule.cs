@@ -5,22 +5,36 @@ using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Mutagen.Record;
+using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Query;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class RecordModule : Module {
     protected override void Load(ContainerBuilder builder) {
+        // Record References
         builder.RegisterType<RecordReferenceQuery>()
             .As<IRecordReferenceQuery>()
             .SingleInstance();
 
+        builder.RegisterType<RecordReferenceCacheFactory>()
+            .As<IRecordReferenceCacheFactory>()
+            .SingleInstance();
+
+        builder.RegisterType<RecordReferenceController>()
+            .As<IRecordReferenceController>()
+            .SingleInstance();
+
+        // Record Browser
         builder.RegisterType<RecordFilterBuilder>()
             .As<IRecordFilterBuilder>();
 
+        builder.RegisterType<RecordFilterProvider>()
+            .As<IRecordFilterProvider>()
+            .SingleInstance();
+
         builder.RegisterType<RecordTypeListing>()
             .AsSelf();
-
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         builder.RegisterAssemblyTypes(assemblies)
             .AssignableTo<IRecordActionsProvider>()
@@ -36,24 +50,16 @@ public sealed class RecordModule : Module {
         builder.RegisterGeneric(typeof(RecordContextMenuProvider<,>))
             .AsSelf();
 
-        // Controller
-        builder.RegisterType<RecordReferenceController>()
-            .As<IRecordReferenceController>()
-            .SingleInstance();
-
+        // Record Editor
         builder.RegisterType<RecordEditorController>()
             .As<IRecordEditorController>()
             .SingleInstance();
 
-        // Provider
+        // Record Provider
         builder.RegisterType<RecordTypeProvider>()
             .AsSelf();
 
         builder.RegisterType<RecordIdentifiersProvider>()
             .AsSelf();
-
-        builder.RegisterType<RecordFilterProvider>()
-            .As<IRecordFilterProvider>()
-            .SingleInstance();
     }
 }

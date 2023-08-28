@@ -5,7 +5,6 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
-using CreationEditor.Services.Mutagen.References.Record.Query;
 using CreationEditor.Services.Notification;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -13,11 +12,10 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 
-// todo rename to record reference controller
 public sealed class RecordReferenceController : IRecordReferenceController, IDisposable {
     private readonly CompositeDisposable _disposable = new();
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IRecordReferenceQuery _recordReferenceQuery;
+    private readonly IRecordReferenceCacheFactory _recordReferenceCacheFactory;
     private readonly INotificationService _notificationService;
 
     private readonly ConcurrentQueue<IMajorRecordGetter> _recordCreations = new();
@@ -36,10 +34,10 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     public RecordReferenceController(
         IRecordController recordController,
         IEditorEnvironment editorEnvironment,
-        IRecordReferenceQuery recordReferenceQuery,
+        IRecordReferenceCacheFactory recordReferenceCacheFactory,
         INotificationService notificationService) {
         _editorEnvironment = editorEnvironment;
-        _recordReferenceQuery = recordReferenceQuery;
+        _recordReferenceCacheFactory = recordReferenceCacheFactory;
         _notificationService = notificationService;
 
         _editorEnvironment.LoadOrderChanged
@@ -55,13 +53,12 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
     public void Dispose() => _disposable.Dispose();
 
-    private Task Init() {
+    private async Task Init() {
         _isLoading.OnNext(true);
 
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Record References");
 
-        var immutableReferenceCache = new ImmutableRecordReferenceCache(_recordReferenceQuery, _editorEnvironment.LinkCache.PriorityOrder);
-        _referenceCache = new MutableRecordReferenceCache(_recordReferenceQuery, _editorEnvironment.ActiveMod, immutableReferenceCache);
+        _referenceCache = await _recordReferenceCacheFactory.GetMutableRecordReferenceCache(_editorEnvironment.ActiveMod, _editorEnvironment.LinkCache.PriorityOrder);
 
         linearNotifier.Stop();
 
@@ -81,7 +78,6 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         _isLoading.OnNext(false);
-        return Task.CompletedTask;
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {

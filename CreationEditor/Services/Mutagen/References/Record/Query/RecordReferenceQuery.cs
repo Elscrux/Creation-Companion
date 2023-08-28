@@ -69,10 +69,13 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
     /// Loads all references of a mod
     /// </summary>
     /// <param name="mods">enumerable of mods to load references for</param>
-    public void LoadModReferences(IReadOnlyList<IModGetter> mods) {
+    public async Task LoadModReferences(IReadOnlyList<IModGetter> mods) {
         if (mods.All(mod => _modCaches.ContainsKey(mod.ModKey))) return;
 
         var notify = new LinearNotifier(_notificationService, mods.Count);
+
+        await Task.WhenAll(mods.Select(m => Task.Run(() => LoadModReferences(m))));
+        
         foreach (var mod in mods) {
             notify.Next($"Loading Record References in {mod.ModKey}");
             LoadModReferences(mod);

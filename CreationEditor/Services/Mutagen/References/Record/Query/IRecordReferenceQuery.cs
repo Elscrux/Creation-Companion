@@ -7,5 +7,5 @@ public interface IRecordReferenceQuery {
     IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches { get; }
 
     void LoadModReferences(IModGetter mod);
-    void LoadModReferences(IReadOnlyList<IModGetter> mods);
+    Task LoadModReferences(IReadOnlyList<IModGetter> mods);
 }

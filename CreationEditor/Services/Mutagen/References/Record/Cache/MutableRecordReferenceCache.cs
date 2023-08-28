@@ -1,5 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References.Record.Query;
-using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
@@ -9,20 +8,10 @@ public sealed class MutableRecordReferenceCache : IRecordReferenceCache {
     private readonly ImmutableRecordReferenceCache? _immutableReferenceCache;
     private readonly ModReferenceCache _mutableModReferenceCache;
 
-    public MutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, IReadOnlyList<IModGetter> mods) {
+    internal MutableRecordReferenceCache(IModGetter mutableMod, ModReferenceCache mutableModReferenceCache, ImmutableRecordReferenceCache? immutableReferenceCache = null) {
         _mutableMod = mutableMod;
-        recordReferenceQuery.LoadModReferences(mutableMod);
-
-        _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
-        _immutableReferenceCache = new ImmutableRecordReferenceCache(recordReferenceQuery, mods);
-    }
-
-    public MutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery, IModGetter mutableMod, ImmutableRecordReferenceCache? immutableReferenceCache = null) {
-        _mutableMod = mutableMod;
-        recordReferenceQuery.LoadModReferences(mutableMod);
-        _mutableModReferenceCache = recordReferenceQuery.ModCaches[mutableMod.ModKey];
-
-        if (immutableReferenceCache is not null) _immutableReferenceCache = new ImmutableRecordReferenceCache(immutableReferenceCache);
+        _mutableModReferenceCache = mutableModReferenceCache;
+        _immutableReferenceCache = immutableReferenceCache;
     }
 
     public bool AddRecord(IMajorRecordGetter record) {
