@@ -14,6 +14,7 @@ public sealed class CountingNotifier : ANotifier, IDisposable {
         var countFloat = (float) count;
 
         _timerSubscription = Observable.Interval(timeSpan)
+            .TakeWhile(_ => _currentStep < count)
             .Subscribe(_ => NotificationService.Notify(ID, message, _currentStep / countFloat));
     }
 
