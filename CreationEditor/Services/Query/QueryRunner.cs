@@ -33,10 +33,12 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             .ObserveCollectionChanges()
             .Unit();
 
-        var conditionChanges = QueryConditions
+        var conditionEntryChanges = QueryConditions
             .ObserveCollectionChanges()
             .Select(_ => QueryConditions.Select(x => x.ConditionEntryChanged).Merge())
             .Switch();
+
+        var conditionChanges = conditionEntryChanges.Merge(conditionCountChanges);
 
         var selectionChanged = this.WhenAnyValue(
             x => x.QueryFrom.SelectedItem,
@@ -44,7 +46,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             x => x.FieldSelector.SelectedField,
             (from, orderBy, select) => (From: from, OrderBy: orderBy, Select: select));
 
-        SettingsChanged = Observable.Merge(conditionChanges, conditionCountChanges, selectionChanged.Unit());
+        SettingsChanged = conditionChanges.Merge(selectionChanged.Unit());
 
         Summary = conditionChanges
             .Select(_ => QueryConditions.Select(c => c.Summary).CombineLatest())
