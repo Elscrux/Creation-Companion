@@ -29,6 +29,10 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
         QueryFrom = queryFromFactory.CreateFromRecordType();
 
+        var conditionCountChanges = QueryConditions
+            .ObserveCollectionChanges()
+            .Unit();
+
         var conditionChanges = QueryConditions
             .ObserveCollectionChanges()
             .Select(_ => QueryConditions.Select(x => x.ConditionEntryChanged).Merge())
@@ -40,8 +44,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             x => x.FieldSelector.SelectedField,
             (from, orderBy, select) => (From: from, OrderBy: orderBy, Select: select));
 
-        SettingsChanged = conditionChanges.Merge(selectionChanged.Unit());
-        SettingsChanged.Subscribe(_ => Console.WriteLine("Settings changed: " + Id));
+        SettingsChanged = Observable.Merge(conditionChanges, conditionCountChanges, selectionChanged.Unit());
 
         Summary = conditionChanges
             .Select(_ => QueryConditions.Select(c => c.Summary).CombineLatest())
