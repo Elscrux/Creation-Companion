@@ -33,7 +33,9 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
         _editorEnvironment = editorEnvironment;
         LinkCache = _editorEnvironment.LinkCache;
 
-        Mods = this.WhenAnyValue(x => x.LinkCache)
+        LinkCacheChanged = this.WhenAnyValue(x => x.LinkCache);
+
+        Mods = LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
             .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true })
@@ -56,7 +58,6 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
             .DisposeWith(this);
 
         ScopeChanged = _selectedMods.Connect().Unit();
-        LinkCacheChanged = this.WhenAnyValue(x => x.LinkCache);
     }
 
     private void UpdateScope() {
