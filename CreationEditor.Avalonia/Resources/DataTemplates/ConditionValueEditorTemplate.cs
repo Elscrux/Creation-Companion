@@ -1,13 +1,16 @@
-﻿using System.Reactive.Linq;
+﻿using System.Drawing;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.Views.Query;
 using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Services.Query.Where;
+using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Noggog;
@@ -151,6 +154,16 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 Maximum = byte.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
+            };
+        } else if (compareValueType == typeof(Color)) {
+            control = new ColorPickerButton {
+                [!ColorPickerButton.ColorProperty] = new Binding(nameof(IQueryValueCondition.CompareValue)) {
+                    Converter = new ExtendedFuncValueConverter<Color, global::Avalonia.Media.Color?, object?>(
+                        (color, _) => global::Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B),
+                        (color, _) => color.HasValue
+                            ? Color.FromArgb(color.Value.A, color.Value.R, color.Value.G, color.Value.B)
+                            : Color.White)
+                },
             };
         } else {
             control = new TextBlock {

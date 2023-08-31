@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -132,6 +133,12 @@ public sealed class FormLinkValueCondition : QueryValueCondition<IFormLinkGetter
 public sealed class FormKeyValueCondition : QueryValueCondition<FormKey> {
     public FormKeyValueCondition() : base(new[] {
         new CompareFunction<FormKey, FormKey>("Equals", (x, y) => x == y),
+    }) {}
+}
+
+public sealed class ColorValueCondition : QueryValueCondition<Color> {
+    public ColorValueCondition() : base(new[] {
+        new CompareFunction<Color, Color>("Equals", (x, y) => x == y),
     }) {}
 }
 
