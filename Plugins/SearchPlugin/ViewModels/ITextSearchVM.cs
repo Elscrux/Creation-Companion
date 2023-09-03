@@ -20,8 +20,8 @@ public interface ITextSearchVM {
 
     ReactiveCommand<Unit, Unit> SearchCommand { get; }
 
-    string SearchText { get; set; }
-    string ReplaceText { get; set; }
+    string? SearchText { get; set; }
+    string? ReplaceText { get; set; }
     bool Replace { get; set; }
     bool CaseSensitive { get; set; }
     bool IsBusy { get; set; }

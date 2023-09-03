@@ -40,8 +40,8 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
 
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
 
-    [Reactive] public string SearchText { get; set; } = string.Empty;
-    [Reactive] public string ReplaceText { get; set; } = string.Empty;
+    [Reactive] public string? SearchText { get; set; }
+    [Reactive] public string? ReplaceText { get; set; }
     [Reactive] public bool Replace { get; set; }
     [Reactive] public bool CaseSensitive { get; set; }
     [Reactive] public bool IsBusy { get; set; }
