@@ -11,7 +11,6 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
@@ -32,7 +31,6 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using Noggog.Autofac;
 namespace CreationEditor.Skyrim.Avalonia.Modules;
 
 public sealed class SkyrimModule : Module {
