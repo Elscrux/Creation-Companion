@@ -16,7 +16,7 @@ jobs:
     
     strategy:
       matrix: 
-        dotnet-version: [ '8.0' ]
+        dotnet-version: [ '7.0' ]
         os: [ubuntu-latest, windows-latest]
         renderer: ["MrTroble/Project-BSE"]
         include:
