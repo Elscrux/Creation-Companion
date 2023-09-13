@@ -20,12 +20,11 @@ public sealed class LoggingModule : Module {
             .Enrich.FromLogContext()
             .WriteTo.Sink(logSink)
             .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
-            .WriteTo.File("log.txt", LogEventLevel.Verbose, outputTemplate)
+            .WriteTo.File("log.txt", LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         builder.RegisterInstance(logger)
             .As<ILogger>()
             .SingleInstance();
-
     }
 }
