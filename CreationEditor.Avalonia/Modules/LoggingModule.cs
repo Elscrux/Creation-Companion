@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels.Logging;
+using CreationEditor.Services.Logging;
 using Serilog;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.Modules;
@@ -15,15 +16,16 @@ public sealed class LoggingModule : Module {
         builder.RegisterType<LogVM>()
             .As<ILogVM>();
 
-        var logger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .Enrich.FromLogContext()
-            .WriteTo.Sink(logSink)
-            .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
-            .WriteTo.File("log.txt", LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
-            .CreateLogger();
+        builder.RegisterType<LogPathProvider>()
+            .As<ILogPathProvider>();
 
-        builder.RegisterInstance(logger)
+        builder.Register(context => new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .Enrich.FromLogContext()
+                .WriteTo.Sink(logSink)
+                .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
+                .WriteTo.File(context.Resolve<ILogPathProvider>().RelativeLogFilePath("log.txt"), LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
+                .CreateLogger())
             .As<ILogger>()
             .SingleInstance();
     }
