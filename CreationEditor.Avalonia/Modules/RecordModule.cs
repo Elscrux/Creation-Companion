@@ -12,6 +12,8 @@ namespace CreationEditor.Avalonia.Modules;
 
 public sealed class RecordModule : Module {
     protected override void Load(ContainerBuilder builder) {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
         // Record References
         builder.RegisterType<RecordReferenceQuery>()
             .As<IRecordReferenceQuery>()
@@ -33,9 +35,15 @@ public sealed class RecordModule : Module {
             .As<IRecordFilterProvider>()
             .SingleInstance();
 
+        builder.RegisterAssemblyTypes(assemblies)
+            .AssignableTo<IRecordFilter>()
+            .As<IRecordFilter>()
+            .AsSelf()
+            .SingleInstance();
+
         builder.RegisterType<RecordTypeListing>()
             .AsSelf();
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
         builder.RegisterAssemblyTypes(assemblies)
             .AssignableTo<IRecordActionsProvider>()
             .AsSelf();

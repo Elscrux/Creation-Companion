@@ -117,12 +117,5 @@ public sealed class SkyrimModule : Module {
             .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
-
-        // Add Skyrim Record Filters
-        builder.RegisterAssemblyTypes(typeof(QuestFilter).Assembly)
-            .AssignableTo<IRecordFilter>()
-            .As<IRecordFilter>()
-            .AsSelf()
-            .SingleInstance();
     }
 }
