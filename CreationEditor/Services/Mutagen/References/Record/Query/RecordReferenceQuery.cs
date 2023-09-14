@@ -61,7 +61,19 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         if (_modCaches.ContainsKey(mod.ModKey)) return;
 
         _logger.Here().Debug("Starting to load Record References of {ModKey}", mod.ModKey);
-        _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
+        try {
+            _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
+        } catch (Exception e) {
+            // Catch any issues while loading references
+            _logger.Here().Warning("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
+            _logger.Here().Warning("Try to generate record references for {ModKey} again", mod.ModKey);
+
+            // Delete broken cache
+            TryDeleteCache(mod.ModKey);
+
+            // Try again
+            _modCaches.Add(mod.ModKey, BuildReferenceCache(mod));
+        }
         _logger.Here().Debug("Finished loading Record References of {ModKey}", mod.ModKey);
     }
 
@@ -81,6 +93,17 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
             LoadModReferences(mod);
         }
         notify.Stop();
+    }
+
+    private void TryDeleteCache(ModKey modKey) {
+        var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
+        if (_fileSystem.File.Exists(cacheFile)) {
+            try {
+                _fileSystem.File.Delete(cacheFile);
+            } catch (Exception e) {
+                _logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFile, e.Message);
+            }
+        }
     }
 
     /// <summary>
