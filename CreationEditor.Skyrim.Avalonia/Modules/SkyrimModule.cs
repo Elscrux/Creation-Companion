@@ -1,6 +1,6 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser;
+using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
@@ -118,10 +118,10 @@ public sealed class SkyrimModule : Module {
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
 
-        // Other
+        // Add Skyrim Record Filters
         builder.RegisterAssemblyTypes(typeof(QuestFilter).Assembly)
-            .InNamespaceOf<QuestFilter>()
-            .Where(type => type.Name.EndsWith("Filter", StringComparison.Ordinal))
+            .AssignableTo<IRecordFilter>()
+            .As<IRecordFilter>()
             .AsSelf()
             .SingleInstance();
     }
