@@ -23,14 +23,14 @@ public sealed class NullValueCondition : QueryValueCondition<object> {
 }
 
 public sealed class SimpleListValueCondition : QueryValueCondition<IEnumerable, object> {
+    public override int Priority => -5;
+
     public SimpleListValueCondition() : base(new CompareFunction<IEnumerable, object>[] {
         new("One Matches", (list, listElement) =>
             list.Cast<object?>().Any(item => Equals(item, listElement))),
         new("All Match", (list, listElement) =>
             list.Cast<object?>().All(item => Equals(item, listElement))),
-    }) {
-        Priority = -5;
-    }
+    }) {}
 
     public override bool Accepts(Type type) {
         if (!base.Accepts(type) || !type.IsGenericType) return false;
@@ -56,14 +56,13 @@ public sealed class ListCondition : QueryListCondition<IEnumerable, object> {
     private const string AllMatch = "All Match";
     private static bool False(IEnumerable enumerable, object o) => false;
 
+    public override int Priority => -10; // Ensure that this condition is not used for something like strings, as they would also match this condition
+
     public ListCondition(IQueryConditionEntryFactory queryConditionEntryFactory)
         : base(queryConditionEntryFactory, new CompareFunction<IEnumerable, object>[] {
             new(OneMatches, False),
             new(AllMatch, False),
-        }) {
-        Priority = -10; // Ensure that this condition is not used for something like strings, as they would also match this condition
-    }
-
+        }) {}
 
     public override bool Evaluate(object? fieldValue) {
         if (fieldValue is not IEnumerable list) return false;
@@ -78,13 +77,13 @@ public sealed class ListCondition : QueryListCondition<IEnumerable, object> {
 }
 
 public sealed class ObjectCondition : QueryListCondition<object, object> {
+    public override int Priority => int.MinValue;
+
     private static bool False(object o1, object o2) => false;
     public ObjectCondition(IQueryConditionEntryFactory queryConditionEntryFactory)
         : base(queryConditionEntryFactory, new CompareFunction<object, object>[] {
             new("Matching", False),
-        }) {
-        Priority = int.MinValue;
-    }
+        }) {}
 
     public override bool Evaluate(object? fieldValue) {
         return SubConditions.EvaluateConditions(fieldValue);
@@ -92,9 +91,9 @@ public sealed class ObjectCondition : QueryListCondition<object, object> {
 }
 
 public sealed class TranslatedStringValueCondition : QueryValueCondition<ITranslatedStringGetter, string> {
-    public TranslatedStringValueCondition() : base(QueryConditionHelper.GetStringFunctions<ITranslatedStringGetter>(TranslationFunction)) {
-        Priority = 10;
-    }
+    public override int Priority => 10;
+
+    public TranslatedStringValueCondition() : base(QueryConditionHelper.GetStringFunctions<ITranslatedStringGetter>(TranslationFunction)) {}
 
     private static bool TranslationFunction(
         Func<string, string, bool> stringFunction,
@@ -112,9 +111,9 @@ public sealed class TranslatedStringValueCondition : QueryValueCondition<ITransl
 }
 
 public sealed class AssetLinkValueCondition : QueryValueCondition<IAssetLinkGetter, string> {
-    public AssetLinkValueCondition() : base(QueryConditionHelper.GetStringFunctions<IAssetLinkGetter>(TranslationFunction)) {
-        Priority = 10;
-    }
+    public override int Priority => 10;
+
+    public AssetLinkValueCondition() : base(QueryConditionHelper.GetStringFunctions<IAssetLinkGetter>(TranslationFunction)) {}
 
     private static bool TranslationFunction(
         Func<string, string, bool> stringFunction,
@@ -147,13 +146,13 @@ public sealed class StringValueCondition : QueryValueCondition<string> {
 }
 
 public sealed class EnumFlagValueCondition : QueryValueCondition<Enum> {
+    public override int Priority => 10;
+
     public override bool Accepts(Type type) => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() != null;
 
     public EnumFlagValueCondition() : base(new CompareFunction<Enum, Enum>[] {
         new("Equals", (x, y) => x.HasFlag(y)),
-    }) {
-        Priority = 10;
-    }
+    }) {}
 }
 
 public sealed class EnumValueCondition : QueryValueCondition<Enum> {

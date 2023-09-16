@@ -5,7 +5,7 @@ namespace CreationEditor.Services.Query.Where;
 
 public abstract class QueryValueCondition<TField, TCompareValue> : ReactiveObject, IQueryValueCondition, IMementoProvider<QueryConditionValueMemento>
     where TField : notnull {
-    public int Priority { get; protected init; }
+    public virtual int Priority => 0;
     public virtual Type FieldTypeClass => typeof(TField);
     public Type ActualFieldType { get; set; } = typeof(TField);
     public virtual Type CompareValueType => typeof(TCompareValue);
