@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using Serilog;
@@ -34,7 +35,6 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
             if (!Version.TryParse(versionString, out var version)) return false;
             if (!_version.Equals(version)) return false;
         } catch (Exception e) {
-
             _logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
             return false;
         }
@@ -42,11 +42,18 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
         return true;
     }
 
-    public HashFileSystemCacheData Deserialize(string rootDirectoryPath) {
+    public bool TryDeserialize(string rootDirectoryPath, [MaybeNullWhen(false)] out HashFileSystemCacheData hashFileSystemCacheData) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
 
         using var fileSystemStream = _fileSystem.File.OpenRead(cacheFile);
-        return Deserialize(new BinaryReader(fileSystemStream));
+        try {
+            hashFileSystemCacheData = Deserialize(new BinaryReader(fileSystemStream));
+            return true;
+        } catch (Exception e) {
+            _logger.Here().Error("Failed to deserialize cache file {File}: {Exception}", cacheFile, e.Message);
+            hashFileSystemCacheData = null;
+            return false;
+        }
     }
 
     public HashFileSystemCacheData Deserialize(BinaryReader reader) {

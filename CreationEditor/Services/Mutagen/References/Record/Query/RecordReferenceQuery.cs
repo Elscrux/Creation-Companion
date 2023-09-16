@@ -65,8 +65,8 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
             _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
         } catch (Exception e) {
             // Catch any issues while loading references
-            _logger.Here().Warning("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
-            _logger.Here().Warning("Try to generate record references for {ModKey} again", mod.ModKey);
+            _logger.Here().Error("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
+            _logger.Here().Debug("Try to generate record references for {ModKey} again", mod.ModKey);
 
             // Delete broken cache
             TryDeleteCache(mod.ModKey);

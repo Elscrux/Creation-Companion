@@ -64,7 +64,7 @@ public sealed class AssetReferenceCacheBuilder {
 
             // Cache is invalid, parse assets and serialize them
             if (cacheable is IAssetReferenceCacheableValidatableQuery<TSource, TReference> validatableQuery) {
-                // Build validation cache
+                // Build validation cache to use for validation next time
                 await validatableQuery.CacheValidation.GetInvalidatedContent(source);
             }
 

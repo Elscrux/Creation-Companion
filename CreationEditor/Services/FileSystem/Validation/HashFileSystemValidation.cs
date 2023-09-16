@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
@@ -24,21 +23,18 @@ public sealed class HashFileSystemValidation : IFileSystemValidation {
 
     public async Task<CacheValidationResult<string>> GetInvalidatedContent(string source) {
         var validate = _fileSystemValidationSerialization.Validate(source);
-        if (!validate) {
+        if (!validate || !_fileSystemValidationSerialization.TryDeserialize(source, out var fileSystemCacheData)) { 
             var buildCache = await BuildCache(source);
             _fileSystemValidationSerialization.Serialize(buildCache, source);
 
             return CacheValidationResult<string>.FullyInvalid();
         }
 
-        var fileSystemCacheData = _fileSystemValidationSerialization.Deserialize(source);
-
         var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source, 1).ToArrayAsync();
         if (invalidatedFiles.Length == 0) return CacheValidationResult<string>.Valid();
 
         // Do cache update process in the background
         Task.Run(() => {
-            var x = Stopwatch.GetTimestamp();
             UpdateCache(fileSystemCacheData, invalidatedFiles, source);
             _fileSystemValidationSerialization.Serialize(fileSystemCacheData, source);
         });
