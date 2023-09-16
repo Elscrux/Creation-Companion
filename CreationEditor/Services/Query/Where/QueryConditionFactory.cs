@@ -11,6 +11,7 @@ public sealed class QueryConditionFactory : IQueryConditionFactory {
         _queryConditionFactory = queryConditionFactory;
         _conditionCache = queryConditions
             .Where(function => function is not NullValueCondition)
+            .OrderByDescending(x => x.Priority)
             .ToArray();
     }
 
@@ -22,8 +23,7 @@ public sealed class QueryConditionFactory : IQueryConditionFactory {
             : type;
 
         var conditionType = _conditionCache
-            .Where(x => x.Accepts(type))
-            .MaxBy(x => x.Priority)?
+            .FirstOrDefault(x => x.Accepts(type))?
             .GetType();
 
         if (conditionType is not null && _queryConditionFactory(conditionType) is {} condition) {
