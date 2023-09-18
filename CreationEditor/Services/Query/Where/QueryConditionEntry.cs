@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Services.Query.Select;
-using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -38,18 +37,7 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, 
                   + (x.Or ? " Or " : " And "));
 
         var conditionChanged = this.WhenAnyValue(x => x.Condition)
-            .Select(condition => {
-                return condition switch {
-                    IQueryListCondition queryListCondition => queryListCondition.SubConditions
-                        .ObserveCollectionChanges()
-                        .Select(_ => queryListCondition.SubConditions
-                            .Select(x => x.ConditionEntryChanged)
-                            .Merge())
-                        .Switch(),
-                    IQueryValueCondition queryValueCondition => queryValueCondition.WhenAnyValue(x => x.CompareValue).Unit(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(condition))
-                };
-            })
+            .Select(condition => condition.ConditionChanged)
             .Switch();
 
         ConditionEntryChanged = this.WhenAnyValue(

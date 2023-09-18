@@ -1,14 +1,13 @@
+using System.Reactive;
 using CreationEditor.Core;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Services.Query.Where;
 
-public abstract class QueryValueCondition<TField, TCompareValue> : ReactiveObject, IQueryValueCondition, IMementoProvider<QueryConditionValueMemento>
+public abstract class QueryValueCondition<TField, TCompareValue> : ReactiveObject, IQueryValueCondition, IMementoProvider<QueryValueConditionMemento>
     where TField : notnull {
     public virtual int Priority => 0;
-    public virtual Type FieldTypeClass => typeof(TField);
-    public Type ActualFieldType { get; set; } = typeof(TField);
-    public virtual Type CompareValueType => typeof(TCompareValue);
+    public Type UnderlyingType { get; set; } = typeof(TField);
 
     private readonly IList<CompareFunction<TField, TCompareValue>> _functions;
     IList<ICompareFunction> IQueryCondition.Functions => _functions.Cast<ICompareFunction>().ToArray();
@@ -38,6 +37,7 @@ public abstract class QueryValueCondition<TField, TCompareValue> : ReactiveObjec
     }
 
     public IObservable<string> Summary { get; }
+    public IObservable<Unit> ConditionChanged { get; }
 
     protected QueryValueCondition(IList<CompareFunction<TField, TCompareValue>> functions) {
         _functions = functions;
@@ -47,34 +47,41 @@ public abstract class QueryValueCondition<TField, TCompareValue> : ReactiveObjec
             x => x.SelectedFunction,
             x => x.CompareValue,
             (function, value) => function.Operator + " " + value);
+
+        ConditionChanged = this.WhenAnyValue(x => x.CompareValue).Unit();
     }
 
     public override string ToString() {
         return SelectedFunction.Operator + " " + CompareValue;
     }
 
-    public virtual bool Accepts(Type type) => type.InheritsFrom(FieldTypeClass);
+    public virtual bool Accepts(Type type) => type.InheritsFrom(typeof(TField));
     public bool Evaluate(object? fieldValue) {
         if (CompareValue is null || fieldValue is not TField field) return false;
 
         return SelectedFunction.Evaluate(field, CompareValue);
     }
 
-    public QueryConditionValueMemento CreateMemento() {
-        return new QueryConditionValueMemento(
-            ActualFieldType.AssemblyQualifiedName ?? string.Empty,
+    public virtual List<FieldType> GetFields() {
+        const string compareValueName = nameof(CompareValue);
+        return new List<FieldType> { new(typeof(TField), UnderlyingType, compareValueName) };
+    }
+
+    public QueryValueConditionMemento CreateMemento() {
+        return new QueryValueConditionMemento(
+            UnderlyingType.AssemblyQualifiedName ?? string.Empty,
             SelectedFunction.Operator,
             CompareValue);
     }
-    public void RestoreMemento(QueryConditionValueMemento memento) {
-        ActualFieldType = Type.GetType(memento.FullTypeName) ?? typeof(TField);
+    public void RestoreMemento(QueryValueConditionMemento memento) {
+        UnderlyingType = Type.GetType(memento.FullTypeName) ?? typeof(TField);
         SelectedFunction = _functions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? _functions.First();
         CompareValue = memento.CompareValue;
     }
 
     IQueryConditionMemento IMementoProvider<IQueryConditionMemento>.CreateMemento() => CreateMemento();
     public void RestoreMemento(IQueryConditionMemento memento) {
-        if (memento is QueryConditionValueMemento valueDto) {
+        if (memento is QueryValueConditionMemento valueDto) {
             RestoreMemento(valueDto);
         }
     }

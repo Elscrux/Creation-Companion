@@ -33,21 +33,22 @@ public sealed class SimpleListValueCondition : QueryValueCondition<IEnumerable, 
     }) {}
 
     public override bool Accepts(Type type) {
-        if (!base.Accepts(type) || !type.IsGenericType) return false;
+        if (!base.Accepts(type) || !type.IsGenericType || !type.InheritsFrom(typeof(IEnumerable))) return false;
 
-        var genericArgument = type.GetGenericArguments()[0];
-        return genericArgument == typeof(FormKey)
-         || genericArgument.InheritsFrom(typeof(IFormLinkGetter))
-         || genericArgument == typeof(int)
-         || genericArgument == typeof(uint)
-         || genericArgument == typeof(long)
-         || genericArgument == typeof(ulong)
-         || genericArgument == typeof(short)
-         || genericArgument == typeof(ushort)
-         || genericArgument == typeof(float)
-         || genericArgument == typeof(double)
-         || genericArgument == typeof(sbyte)
-         || genericArgument == typeof(byte);
+        var genericArguments = type.GetGenericArguments();
+        if (genericArguments.Length > 1) return false;
+
+        var genericArgument = genericArguments[0];
+        return IQueryCondition.IsPrimitiveType(genericArgument);
+    }
+
+    public override List<FieldType> GetFields() {
+        var listType = UnderlyingType.GetGenericArguments()[0];
+
+        const string compareValueName = nameof(CompareValue);
+        return new List<FieldType> {
+            new(listType, listType, compareValueName)
+        };
     }
 }
 
@@ -65,7 +66,7 @@ public sealed class ListCondition : QueryListCondition<IEnumerable, object> {
         }) {}
 
     public override bool Evaluate(object? fieldValue) {
-        if (fieldValue is not IEnumerable list) return false;
+        if (fieldValue is not IList list) return false;
 
         bool CheckSubConditions(object? item) => SubConditions.EvaluateConditions(item);
         return SelectedFunction.Operator switch {

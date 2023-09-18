@@ -1,7 +1,7 @@
 using DynamicData.Binding;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed record QueryConditionListMemento(
+public sealed record QueryListConditionMemento(
     string FullTypeName,
     string SelectedFunctionOperator,
     List<QueryConditionEntryMemento> SubConditions) : IQueryConditionMemento;

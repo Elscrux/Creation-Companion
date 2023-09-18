@@ -27,7 +27,7 @@ public sealed class QueryConditionFactory : IQueryConditionFactory {
             .GetType();
 
         if (conditionType is not null && _queryConditionFactory(conditionType) is {} condition) {
-            condition.ActualFieldType = type;
+            condition.UnderlyingType = type;
             return condition;
         }
 

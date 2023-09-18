@@ -10,6 +10,7 @@ using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.Views.Query;
 using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Services.Query.Where;
+using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -38,51 +39,111 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
     public Control Build(object? param) {
         if (param is not IQueryCondition condition) return new TextBlock { Text = $"No Condition is available for {param}" };
 
-        var binding = new Binding(nameof(IQueryValueCondition.CompareValue));
-
-        var compareValueType = condition is SimpleListValueCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.CompareValueType;
-        var actualFieldType = condition is SimpleListValueCondition ? condition.ActualFieldType.GetGenericArguments().First() : condition.ActualFieldType;
-
-        Control? control;
-        if (condition is IQueryListCondition listCondition) {
-            var listType = actualFieldType.GetGenericArguments().FirstOrDefault() ?? actualFieldType;
-            if (listCondition.SubConditions.Count == 0) {
-                listCondition.SubConditions.Add(ConditionEntryFactory.Create(listType));
-            }
-
-            var queryConditionsView = new QueryConditionsView {
-                ContextType = listType,
-                QueryConditions = listCondition.SubConditions,
-                [!QueryConditionsView.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
-                [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
-            };
-
-            control = new Button {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                [!ContentControl.ContentProperty] = listCondition.SubConditions
-                    .Select(x => x.Summary)
-                    .CombineLatest()
-                    .Select(list => string.Join(' ', list))
-                    .ToBinding(),
-                Flyout = new Flyout {
-                    Content = new StackPanel {
-                        Children = {
-                            new TextBlock { Text = condition.ActualFieldType.Name },
-                            queryConditionsView
-                        }
-                    }
+        // Convert fields to controls
+        var fields = condition.GetFields();
+        var controls = fields
+            .Select<FieldType, Control?>(field => {
+                Control? primitiveControl = null;
+                Control? complexControl = null;
+                if (IQueryCondition.IsPrimitiveType(field.TypeClass)) {
+                    primitiveControl = GetPrimitiveControl(field, new Binding(field.CompareValue), condition);
                 }
-            };
-        } else if (compareValueType == typeof(bool)) {
+
+                if (condition.TryGetProperty<IObservableCollection<IQueryConditionEntry>>(field.CompareValue, out var collection)) {
+                    if (collection.Count == 0) {
+                        collection.Add(ConditionEntryFactory.Create(field.ActualType));
+                    }
+
+                    var queryConditionsView = new QueryConditionsView {
+                        ContextType = field.ActualType,
+                        QueryConditions = collection,
+                        [!QueryConditionsView.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
+                        [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
+                    };
+
+                    complexControl = new Button {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        [!ContentControl.ContentProperty] = collection
+                            .Select(x => x.Summary)
+                            .CombineLatest()
+                            .Select(list => string.Join(' ', list))
+                            .ToBinding(),
+                        Flyout = new Flyout { Content = WrapWithName(queryConditionsView) }
+                    };
+                }
+
+                if (complexControl is null) {
+                    return primitiveControl is not null
+                        ? fields.Count > 1
+                            ? WrapWithName(primitiveControl)
+                            : primitiveControl
+                        : new TextBlock { Text = $"No Condition is available for {condition}" };
+                }
+
+                if (primitiveControl is null) return complexControl;
+
+                // If both primitive and complex controls are available
+                // return a stack panel with both controls
+                var checkBox = new CheckBox { [ToolTip.TipProperty] = "Advanced" };
+                var checkedObservable = checkBox.GetObservable(ToggleButton.IsCheckedProperty);
+                primitiveControl[!Visual.IsVisibleProperty] = checkedObservable.Negate().ToBinding();
+                complexControl[!Visual.IsVisibleProperty] = checkedObservable.ToBinding();
+                var stackPanel = new StackPanel {
+                    Orientation = Orientation.Horizontal,
+                    Children = {
+                        checkBox,
+                        new StackPanel { 
+                            Orientation = Orientation.Horizontal,
+                            Children = { primitiveControl, complexControl } }
+                    }
+                };
+                return fields.Count > 1
+                    ? WrapWithName(stackPanel)
+                    : stackPanel;
+                
+                Control WrapWithName(Control c) {
+                    return fields.Count > 1
+                        ? new StackPanel {
+                            Children = {
+                                new TextBlock { Text = field.ActualType.Name },
+                                c
+                            }
+                        }
+                        : c;
+                }
+
+            })
+            .NotNull()
+            .Select(c => {
+                c.DataContext = condition;
+                c.HorizontalAlignment = HorizontalAlignment.Stretch;
+                return c;
+            })
+            .ToList();
+
+        // For single controls, return the control
+        if (controls is [var control]) return control;
+
+        // For multiple controls, return a stack panel
+        var stackPanel = new StackPanel();
+        foreach (var c in controls) {
+            stackPanel.Children.Add(c);
+        }
+        return stackPanel;
+    }
+
+    private Control? GetPrimitiveControl(FieldType fieldType, IBinding binding, IQueryCondition? condition = null) {
+        Control? control = null;
+        if (fieldType.TypeClass == typeof(bool)) {
             control = new CheckBox {
                 [!ToggleButton.IsCheckedProperty] = binding
             };
-        } else if (compareValueType == typeof(string)) {
+        } else if (fieldType.TypeClass == typeof(string)) {
             control = new TextBox {
                 [!TextBox.TextProperty] = binding
             };
-        } else if (compareValueType == typeof(float) || compareValueType == typeof(double)) {
+        } else if (fieldType.TypeClass == typeof(float) || fieldType.TypeClass == typeof(double)) {
             control = new NumericUpDown {
                 Minimum = decimal.MinValue,
                 Maximum = decimal.MaxValue,
@@ -90,72 +151,72 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 FormatString = "N4",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(Enum)) {
+        } else if (fieldType.TypeClass == typeof(Enum)) {
             control = new ComboBox {
-                ItemsSource = Enum.GetValues(actualFieldType).Cast<Enum>().OrderBy(x => x.ToString()).ToArray(),
+                ItemsSource = Enum.GetValues(fieldType.ActualType).Cast<Enum>().OrderBy(x => x.ToString()).ToArray(),
                 [!SelectingItemsControl.SelectedItemProperty] = binding,
             };
-        } else if (compareValueType == typeof(FormKey)) {
-            control = GetFormKeyPicker(actualFieldType.GetGenericArguments());
-        } else if (compareValueType.InheritsFrom(typeof(IFormLinkGetter))) {
-            control = GetFormKeyPicker(actualFieldType.GetGenericArguments());
-        } else if (compareValueType == typeof(long)) {
+        } else if (fieldType.TypeClass == typeof(FormKey)) {
+            control = GetFormKeyPicker(fieldType.ActualType.GetGenericArguments());
+        } else if (fieldType.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
+            control = GetFormKeyPicker(fieldType.ActualType.GetGenericArguments());
+        } else if (fieldType.TypeClass == typeof(long)) {
             control = new NumericUpDown {
                 Minimum = long.MinValue,
                 Maximum = long.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(ulong)) {
+        } else if (fieldType.TypeClass == typeof(ulong)) {
             control = new NumericUpDown {
                 Minimum = ulong.MinValue,
                 Maximum = ulong.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(int)) {
+        } else if (fieldType.TypeClass == typeof(int)) {
             control = new NumericUpDown {
                 Minimum = int.MinValue,
                 Maximum = int.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(uint)) {
+        } else if (fieldType.TypeClass == typeof(uint)) {
             control = new NumericUpDown {
                 Minimum = uint.MinValue,
                 Maximum = uint.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(short)) {
+        } else if (fieldType.TypeClass == typeof(short)) {
             control = new NumericUpDown {
                 Minimum = short.MinValue,
                 Maximum = short.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(ushort)) {
+        } else if (fieldType.TypeClass == typeof(ushort)) {
             control = new NumericUpDown {
                 Minimum = ushort.MinValue,
                 Maximum = ushort.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(sbyte)) {
+        } else if (fieldType.TypeClass == typeof(sbyte)) {
             control = new NumericUpDown {
                 Minimum = sbyte.MinValue,
                 Maximum = sbyte.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(byte)) {
+        } else if (fieldType.TypeClass == typeof(byte)) {
             control = new NumericUpDown {
                 Minimum = byte.MinValue,
                 Maximum = byte.MaxValue,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (compareValueType == typeof(Color)) {
+        } else if (fieldType.TypeClass == typeof(Color)) {
             control = new ColorPickerButton {
                 [!ColorPickerButton.ColorProperty] = new Binding(nameof(IQueryValueCondition.CompareValue)) {
                     Converter = new ExtendedFuncValueConverter<Color, global::Avalonia.Media.Color?, object?>(
@@ -165,15 +226,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                             : Color.White)
                 },
             };
-        } else {
-            control = new TextBlock {
-                Text = $"No Condition is available for {param}"
-            };
         }
-
-        control.DataContext = param;
-        control.HorizontalAlignment = HorizontalAlignment.Stretch;
-
         return control;
 
         Control GetFormKeyPicker(IEnumerable<Type> scopedTypes) {
@@ -192,8 +245,8 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 ScopedTypes = scopedTypes,
             };
 
-            if (param is FormLinkValueCondition linkCondition) {
-                if (linkCondition.CompareValue is IFormLinkGetter formLink) {
+            if (fieldType.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) { 
+                if (condition != null && condition.TryGetProperty<IFormLinkGetter>(fieldType.CompareValue, out var formLink)) { 
                     formKeyPicker[AFormKeyPicker.FormKeyProperty] = formLink.FormKey;
                 }
                 formKeyPicker[!AFormKeyPicker.FormLinkProperty] = binding;

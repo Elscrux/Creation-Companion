@@ -1,6 +1,6 @@
 namespace CreationEditor.Services.Query.Where;
 
-public sealed record QueryConditionValueMemento(
+public sealed record QueryValueConditionMemento(
     string FullTypeName,
     string SelectedFunctionOperator,
     object? CompareValue) : IQueryConditionMemento;

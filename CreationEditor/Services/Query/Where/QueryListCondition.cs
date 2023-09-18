@@ -1,3 +1,4 @@
+using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Core;
 using DynamicData.Binding;
@@ -5,11 +6,11 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Services.Query.Where;
 
-public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQueryListCondition, IMementoProvider<QueryConditionListMemento>
+public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQueryListCondition, IMementoProvider<QueryListConditionMemento>
     where TField : notnull {
     public virtual int Priority => 0;
     public Type FieldTypeClass => typeof(TField);
-    public Type ActualFieldType { get; set; } = typeof(TField);
+    public Type UnderlyingType { get; set; } = typeof(TField);
     public Type CompareValueType => typeof(TValue);
 
     private readonly IQueryConditionEntryFactory _queryConditionEntryFactory;
@@ -28,6 +29,7 @@ public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQuer
 
     public IObservableCollection<IQueryConditionEntry> SubConditions { get; } = new ObservableCollectionExtended<IQueryConditionEntry>();
     public IObservable<string> Summary { get; }
+    public IObservable<Unit> ConditionChanged { get; }
 
     protected QueryListCondition(
         IQueryConditionEntryFactory queryConditionEntryFactory,
@@ -39,6 +41,13 @@ public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQuer
         Summary = SubConditions.Select(x => x.Summary).CombineLatest()
             .CombineLatest(this.WhenAnyValue(x => x.SelectedFunction),
                 (list, function) => function.Operator + " " + string.Join(' ', list));
+
+        ConditionChanged = SubConditions
+            .ObserveCollectionChanges()
+            .Select(_ => SubConditions
+                .Select(x => x.ConditionEntryChanged)
+                .Merge())
+            .Switch();
     }
 
     public override string ToString() {
@@ -49,18 +58,24 @@ public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQuer
     public virtual bool Accepts(Type type) => type.InheritsFrom(FieldTypeClass);
     public abstract bool Evaluate(object? fieldValue);
 
-    public QueryConditionListMemento CreateMemento() {
-        return new QueryConditionListMemento(
-            ActualFieldType.AssemblyQualifiedName ?? string.Empty,
+    public virtual List<FieldType> GetFields() {
+        var listType = UnderlyingType.GetGenericArguments().FirstOrDefault() ?? UnderlyingType;
+        const string subConditionsName = nameof(SubConditions);
+        return new List<FieldType> { new(listType, listType, subConditionsName) };
+    }
+
+    public QueryListConditionMemento CreateMemento() {
+        return new QueryListConditionMemento(
+            UnderlyingType.AssemblyQualifiedName ?? string.Empty,
             SelectedFunction.Operator,
             SubConditions.Select(x => x.CreateMemento()).ToList());
     }
-    public void RestoreMemento(QueryConditionListMemento memento) {
-        ActualFieldType = Type.GetType(memento.FullTypeName) ?? typeof(TField);
+    public void RestoreMemento(QueryListConditionMemento memento) {
+        UnderlyingType = Type.GetType(memento.FullTypeName) ?? typeof(TField);
         SelectedFunction = _functions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? _functions.First();
         SubConditions.Clear();
         SubConditions.AddRange(memento.SubConditions.Select(x => {
-            var queryConditionEntry = _queryConditionEntryFactory.Create(ActualFieldType);
+            var queryConditionEntry = _queryConditionEntryFactory.Create(UnderlyingType);
             queryConditionEntry.RestoreMemento(x);
             return queryConditionEntry;
         }));
@@ -68,7 +83,7 @@ public abstract class QueryListCondition<TField, TValue> : ReactiveObject, IQuer
 
     IQueryConditionMemento IMementoProvider<IQueryConditionMemento>.CreateMemento() => CreateMemento();
     public void RestoreMemento(IQueryConditionMemento memento) {
-        if (memento is QueryConditionListMemento listDto) {
+        if (memento is QueryListConditionMemento listDto) {
             RestoreMemento(listDto);
         }
     }
