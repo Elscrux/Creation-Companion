@@ -1,8 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 namespace CreationEditor;
 
 public static class ReflectionExtension {
-    public static bool TryGetProperty(this object obj, string name, out object? outValue) {
+    public static bool TryGetProperty(this object obj, string name, [MaybeNullWhen(false)] out object outValue) {
         var variables = name.Split('.');
         var current = obj;
         foreach (var variable in variables) {
@@ -23,7 +24,7 @@ public static class ReflectionExtension {
         return true;
     }
 
-    public static bool TryGetProperty<T>(this object obj, string name, out T? outValue) {
+    public static bool TryGetProperty<T>(this object obj, string name, [MaybeNullWhen(false)] out T outValue) {
         if (obj.TryGetProperty(name, out var value)) {
             if (value is T tValue) {
                 outValue = tValue;
