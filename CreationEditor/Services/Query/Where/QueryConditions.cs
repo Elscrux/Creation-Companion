@@ -77,6 +77,42 @@ public sealed class ListCondition : QueryListCondition<IEnumerable, object> {
     }
 }
 
+public sealed class DictionaryCondition : QueryListCondition<IEnumerable, object> {
+    private const string OneMatches = "One Matches";
+    private const string AllMatch = "All Match";
+    private static bool False(IEnumerable enumerable, object o) => false;
+
+    public DictionaryCondition(IQueryConditionEntryFactory queryConditionEntryFactory)
+        : base(queryConditionEntryFactory, new CompareFunction<IEnumerable, object>[] {
+            new(OneMatches, False),
+            new(AllMatch, False),
+        }) {}
+
+    public override bool Accepts(Type type) {
+        var genericArguments = type.GetGenericArguments();
+        if (genericArguments.Length != 2) return false;
+
+        return type.InheritsFrom(typeof(IEnumerable));
+    }
+
+    public override List<FieldType> GetFields() {
+        var keyValueType = typeof(IKeyValue<,>).MakeGenericType(UnderlyingType.GetGenericArguments());
+        const string subConditionsName = nameof(SubConditions);
+        return new List<FieldType> { new(typeof(IEnumerable), keyValueType, subConditionsName) };
+    }
+
+    public override bool Evaluate(object? fieldValue) {
+        if (fieldValue is not IEnumerable enumerable) return false;
+
+        bool CheckSubConditions(object? item) => SubConditions.EvaluateConditions(item);
+        return SelectedFunction.Operator switch {
+            OneMatches => enumerable.Cast<object?>().Any(CheckSubConditions),
+            AllMatch => enumerable.Any() && enumerable.Cast<object?>().All(CheckSubConditions),
+            _ => false
+        };
+    }
+}
+
 public sealed class ObjectCondition : QueryListCondition<object, object> {
     public override int Priority => int.MinValue;
 
