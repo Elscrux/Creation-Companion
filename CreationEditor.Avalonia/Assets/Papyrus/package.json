@@ -1,0 +1,29 @@
+{
+    "name": "papyrus",
+    "displayName": "%displayName%",
+    "description": "%description%",
+    "version": "1.0.0",
+    "license": "MIT",
+    "contributes": {
+        "languages": [
+            {
+                "id": "papyrus",
+                "aliases": [
+                    "Papyrus",
+                    "papyrus"
+                ],
+                "extensions": [
+                    ".psc"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "papyrus",
+                "scopeName": "source.papyrus.skyrim",
+                "path": "./syntaxes/skyrim.papyrus.tmLanguage.json"
+            }
+        ]
+    }
+}

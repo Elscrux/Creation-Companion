@@ -6,6 +6,7 @@ using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -43,6 +44,9 @@ public sealed class SkyrimModule : Module {
 
         builder.RegisterInstance(new GameReleaseInjection(GameRelease.SkyrimSE))
             .AsImplementedInterfaces();
+
+        builder.RegisterType<PapyrusScriptVM>()
+            .As<IScriptVM>();
 
         // Controller
         builder.RegisterType<RecordController<ISkyrimMod, ISkyrimModGetter>>()

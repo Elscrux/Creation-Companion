@@ -8,9 +8,11 @@ using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Logging;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
+using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Avalonia.Views.Asset.Browser;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
+using CreationEditor.Avalonia.Views.Scripting;
 using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Avalonia.Services;
 
@@ -20,6 +22,7 @@ public sealed class DockFactory : IDockFactory {
     private readonly Func<ILogVM> _logVMFactory;
     private readonly Func<IRecordBrowserVM> _recordBrowserVMFactory;
     private readonly Func<string, IAssetBrowserVM> _assetBrowserVMFactory;
+    private readonly Func<IScriptVM> _scriptVMFactory;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IViewportFactory _viewportFactory;
@@ -30,6 +33,7 @@ public sealed class DockFactory : IDockFactory {
         Func<ILogVM> logVMFactory,
         Func<IRecordBrowserVM> recordBrowserVMFactory,
         Func<string, IAssetBrowserVM> assetBrowserVMFactory,
+        Func<IScriptVM> scriptVMFactory,
         IDataDirectoryProvider dataDirectoryProvider,
         IFileSystem fileSystem,
         IViewportFactory viewportFactory,
@@ -38,6 +42,7 @@ public sealed class DockFactory : IDockFactory {
         _logVMFactory = logVMFactory;
         _recordBrowserVMFactory = recordBrowserVMFactory;
         _assetBrowserVMFactory = assetBrowserVMFactory;
+        _scriptVMFactory = scriptVMFactory;
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _viewportFactory = viewportFactory;
@@ -97,6 +102,18 @@ public sealed class DockFactory : IDockFactory {
                     },
                     Dock = Dock.Left,
                     DockMode = DockMode.Side,
+                };
+                break;
+            case DockElement.ScriptEditor:
+                var vm = _scriptVMFactory();
+                control = new ScriptEditor(vm);
+                dockConfig = new DockConfig {
+                    DockInfo = new DockInfo {
+                        Header = "Script Editor",
+                        Size = 300,
+                    },
+                    Dock = Dock.Left,
+                    DockMode = DockMode.Document,
                 };
                 break;
             case DockElement.Viewport:

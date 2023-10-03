@@ -56,6 +56,9 @@
         <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
         <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
 
+        <!-- Avalonia Edit -->
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+
         <!-- Custom Style -->
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/CheckBoxStyles.axaml"/>

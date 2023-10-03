@@ -113,6 +113,14 @@
                     </MenuItem.Icon>
                 </MenuItem>
 
+                <MenuItem Header="Script Editor"
+                          Command="{Binding OpenDockElement}"
+                          CommandParameter="{x:Static models:DockElement.ScriptEditor}">
+                    <MenuItem.Icon>
+                        <controls:SymbolIcon Symbol="Code"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+
                 <MenuItem Header="Viewport"
                           Command="{Binding OpenDockElement}"
                           CommandParameter="{x:Static models:DockElement.Viewport}">

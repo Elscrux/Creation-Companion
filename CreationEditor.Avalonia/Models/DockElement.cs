@@ -22,6 +22,11 @@ public enum DockElement {
     /// </summary>
     AssetBrowser,
     /// <summary>
+    /// Edit scripts.
+    /// No parameter required.
+    /// </summary>
+    ScriptEditor,
+    /// <summary>
     /// Viewing and modifying the content of cells.
     /// </summary>
     Viewport
