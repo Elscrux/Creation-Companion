@@ -32,7 +32,7 @@ public static class Interop {
         public string Path;
     }
 
-    public struct SETextureSet {
+    public struct TextureSet {
         public string Diffuse;
         public string Normal;
         public string Specular;
@@ -43,11 +43,32 @@ public static class Interop {
         public string Emissive;
     }
 
-    public struct SECornerSets {
-        public SETextureSet TopRight;
-        public SETextureSet BottomRight;
-        public SETextureSet TopLeft;
-        public SETextureSet BottomLeft;
+    public struct CornerSets {
+        public Quadrant TopRight;
+        public Quadrant BottomRight;
+        public Quadrant TopLeft;
+        public Quadrant BottomLeft;
+    }
+
+    public struct BaseLayer {
+        public TextureSet TextureSet;
+    }
+
+    public struct AlphaData {
+        public float Opacity;
+        public ushort Position;
+    }
+
+    public struct AlphaLayer {
+        public TextureSet TextureSet;
+        public AlphaData[] Data; // max 289 (pass by pointer) 
+        public ushort DataLength;
+    }
+
+    public struct Quadrant {
+        public BaseLayer BaseLayer;
+        public AlphaLayer[] AlphaLayers; // max 8 layers (pass by pointer)
+        public byte AlphaLayersLength;
     }
 
     public struct TerrainInfo {
@@ -60,7 +81,7 @@ public static class Interop {
         public ulong NormalBegin; // first index of the normal data in buffer of this cell
         public ulong ColorBegin; // first index of the color data in buffer of this cell
 
-        public SECornerSets CornerSets;
+        public CornerSets CornerSets;
     }
 
     public struct InitConfig {
