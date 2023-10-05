@@ -33,14 +33,14 @@ public static class Interop {
     }
 
     public struct TextureSet {
-        public string Diffuse;
-        public string Normal;
-        public string Specular;
-        public string EnvironmentMask;
-        public string Height;
-        public string Environment;
-        public string Multilayer;
-        public string Emissive;
+        public string? Diffuse;
+        public string? Normal;
+        public string? Specular;
+        public string? EnvironmentMask;
+        public string? Height;
+        public string? Environment;
+        public string? Multilayer;
+        public string? Emissive;
     }
 
     public struct CornerSets {
@@ -61,13 +61,13 @@ public static class Interop {
 
     public struct AlphaLayer {
         public TextureSet TextureSet;
-        public AlphaData[] Data; // max 289 (pass by pointer) 
+        public IntPtr Data; // max 289 (pass by pointer) 
         public ushort DataLength;
     }
 
     public struct Quadrant {
         public BaseLayer BaseLayer;
-        public AlphaLayer[] AlphaLayers; // max 8 layers (pass by pointer)
+        public IntPtr AlphaLayers; // max 8 layers (pass by pointer)
         public byte AlphaLayersLength;
     }
 
