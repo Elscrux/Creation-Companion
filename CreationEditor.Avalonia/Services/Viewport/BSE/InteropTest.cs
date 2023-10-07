@@ -1,24 +1,35 @@
-﻿using Noggog;
+﻿using System.Runtime.InteropServices;
+using Noggog;
 using Xunit;
+using static CreationEditor.Avalonia.Services.Viewport.BSE.Interop;
 namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 
 //Must be run in debug mode to include dll
 public sealed class InteropTest {
-    private readonly Interop.ReferenceLoad _testReference = new() {
+    private static readonly InitConfig InitConfig = new() {
+        Version = 2,
+        AssetDirectory = "test",
+        SizeOfWindowHandles = 0,
+        WindowHandles = Array.Empty<nint>(),
+    };
+    private static readonly ReferenceLoad TestReference = new() {
         FormKey = "123456:Skyrim.esm",
         Path = "test.nif",
-        Transform = new Interop.ReferenceTransform {
+        Transform = new ReferenceTransform {
             Translation = new P3Float(1, 2, 3),
             Scale = new P3Float(2, 3, 3),
             Rotations = new P3Float()
         }
     };
 
-    [Fact]
-    public void TestInit() {
+    public InteropTest() {
+        TestInit();
+    }
+
+    private static void TestInit() {
         var task = Xunit.Record.ExceptionAsync(() => Task.Run(() => {
-            Interop.initTGEditor(
-                new Interop.InitConfig {
+            initTGEditor(
+                new InitConfig {
                     Version = 1,
                     AssetDirectory = "test",
                     SizeOfWindowHandles = 0,
@@ -28,25 +39,42 @@ public sealed class InteropTest {
                 0);
         }));
 
-        Interop.waitFinishedInit();
+        waitFinishedInit();
 
         Assert.Null(task.Exception);
     }
 
     [Fact]
+    public void TestSize() {
+        var sizeInformation = getSizeInfo();
+
+        Assert.Equal(sizeInformation.SizeInformationStruct, Marshal.SizeOf<SizeInformation>());
+        Assert.Equal(sizeInformation.InitConfigStruct, Marshal.SizeOf<InitConfig>());
+        Assert.Equal(sizeInformation.ReferenceTransformStruct, Marshal.SizeOf<ReferenceTransform>());
+        Assert.Equal(sizeInformation.ReferenceLoadStruct, Marshal.SizeOf<ReferenceLoad>());
+        Assert.Equal(sizeInformation.ReferenceUpdateStruct, Marshal.SizeOf<ReferenceUpdate>());
+        Assert.Equal(sizeInformation.TextureSetStruct, Marshal.SizeOf<TextureSet>());
+        Assert.Equal(sizeInformation.AlphaDataStruct, Marshal.SizeOf<AlphaData>());
+        Assert.Equal(sizeInformation.AlphaLayerStruct, Marshal.SizeOf<AlphaLayer>());
+        Assert.Equal(sizeInformation.QuadrantStruct, Marshal.SizeOf<Quadrant>());
+        Assert.Equal(sizeInformation.CornerSetsStruct, Marshal.SizeOf<CornerSets>());
+        Assert.Equal(sizeInformation.TerrainInfoStruct, Marshal.SizeOf<TerrainInfo>());
+    }
+
+    [Fact]
     public void TestLoadRefs() {
-        var referenceLoads = new[] { _testReference };
+        var referenceLoads = new[] { TestReference };
         var count = Convert.ToUInt32(referenceLoads.Length);
 
-        Assert.True(Interop.addLoadCallback((callbackCount, callbackLoads) => {
+        Assert.True(addLoadCallback((callbackCount, callbackLoads) => {
             Assert.Equal(count, callbackCount);
             for (var i = 0; i < callbackLoads.Length; i++) {
                 Assert.Equal(callbackLoads[i].FormKey, referenceLoads[i].FormKey);
             }
         }));
 
-        Interop.waitFinishedInit();
+        waitFinishedInit();
 
-        Interop.loadReferences(count, referenceLoads);
+        loadReferences(count, referenceLoads);
     }
 }

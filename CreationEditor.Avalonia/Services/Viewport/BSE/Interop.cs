@@ -29,6 +29,7 @@ public static class Interop {
     public struct ReferenceUpdate {
         public string FormKey;
         public UpdateType Update;
+        public ReferenceTransform Transform;
         public string Path;
     }
 
@@ -91,6 +92,20 @@ public static class Interop {
         public IntPtr[] WindowHandles;
     }
 
+    public struct SizeInformation {
+        public long SizeInformationStruct;
+        public long InitConfigStruct;
+        public long ReferenceTransformStruct;
+        public long ReferenceLoadStruct;
+        public long ReferenceUpdateStruct;
+        public long TextureSetStruct;
+        public long AlphaDataStruct;
+        public long AlphaLayerStruct;
+        public long QuadrantStruct;
+        public long CornerSetsStruct;
+        public long TerrainInfoStruct;
+    }
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void LoadCallback(ulong count, ReferenceLoad[] load);
 
@@ -108,6 +123,9 @@ public static class Interop {
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void TerrainAddCallback(uint count, TerrainInfo[] info, float[] buffer);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public static extern SizeInformation getSizeInfo();
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern bool addLoadCallback(LoadCallback callback);
