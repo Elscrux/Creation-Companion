@@ -37,7 +37,7 @@ public sealed class MainModule : Module {
             .AssignableTo<ISetting>()
             .As<ISetting>();
 
-        builder.RegisterInstance(new System.IO.Abstractions.FileSystem())
+        builder.RegisterInstance(new FileSystem())
             .As<IFileSystem>()
             .SingleInstance();
 
@@ -83,11 +83,11 @@ public sealed class MainModule : Module {
         builder.RegisterType<ModScopeProvider>()
             .AsSelf()
             .As<IModScopeProvider>();
-        
+
         builder.RegisterType<MenuItemProvider>()
             .As<IMenuItemProvider>()
             .SingleInstance();
-        
+
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
             .SingleInstance();
@@ -96,7 +96,7 @@ public sealed class MainModule : Module {
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
             .SingleInstance();
-        
+
         // Pipeline
         builder.RegisterType<SavePipeline>()
             .As<ISavePipeline>()
