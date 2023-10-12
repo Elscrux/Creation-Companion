@@ -768,9 +768,16 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
     private void UpdateFormLink(FormKey formKey, ILinkCache? linkCache, ReadOnlyObservableCollection<TypeItem> types) {
         // Try to find a scoped type that can resolve the form key
-        if (types is not null && linkCache is not null) {
-            foreach (var selectedType in types.Where(x => x.IsSelected).Select(x => x.Type)) {
-                if (linkCache.TryResolve(formKey, selectedType, out var resolvedRecord)) {
+        if (types is not null) {
+            if (types is [{} firstType]) {
+                FormLink = new FormLinkInformation(formKey, firstType.Type);
+                return;
+            }
+
+            if (linkCache is not null) {
+                foreach (var selectedType in types.Where(x => x.IsSelected).Select(x => x.Type)) {
+                    if (!linkCache.TryResolve(formKey, selectedType, out var resolvedRecord)) continue;
+
                     FormLink = new FormLinkInformation(formKey, resolvedRecord.Registration.GetterType);
                     return;
                 }
