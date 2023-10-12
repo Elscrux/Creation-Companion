@@ -4,6 +4,7 @@ namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 
 public static class Interop {
     private const string DllName = "TGInterOp.dll";
+    public const int CurrentVersion = 3;
 
     public struct ReferenceTransform {
         public P3Float Translation;

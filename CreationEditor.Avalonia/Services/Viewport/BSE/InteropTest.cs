@@ -7,7 +7,7 @@ namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 //Must be run in debug mode to include dll
 public sealed class InteropTest {
     private static readonly InitConfig InitConfig = new() {
-        Version = 2,
+        Version = CurrentVersion,
         AssetDirectory = "test",
         SizeOfWindowHandles = 0,
         WindowHandles = Array.Empty<nint>(),
@@ -28,15 +28,8 @@ public sealed class InteropTest {
 
     private static void TestInit() {
         var task = Xunit.Record.ExceptionAsync(() => Task.Run(() => {
-            initTGEditor(
-                new InitConfig {
-                    Version = 1,
-                    AssetDirectory = "test",
-                    SizeOfWindowHandles = 0,
-                    WindowHandles = Array.Empty<nint>(),
-                },
-                Array.Empty<string>(),
-                0);
+            var initTgEditor = initTGEditor(InitConfig, Array.Empty<string>(), 0);
+            // Assert.NotEqual(-1, initTgEditor);
         }));
 
         waitFinishedInit();

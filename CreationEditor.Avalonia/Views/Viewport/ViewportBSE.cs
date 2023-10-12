@@ -13,7 +13,7 @@ public sealed class ViewportBSE : ContentPresenter {
     public ViewportBSE(ILogger logger, string assetDirectory, string[] bsaFileNames) {
         Task.Run(() => {
             var initConfig = new Interop.InitConfig {
-                Version = 2,
+                Version = Interop.CurrentVersion,
                 AssetDirectory = assetDirectory,
                 SizeOfWindowHandles = 0,
                 WindowHandles = Array.Empty<nint>(),
