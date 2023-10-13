@@ -1,10 +1,7 @@
 ﻿using System.Collections;
 using System.Reactive.Linq;
-using Avalonia;
 using CreationEditor.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
-using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;

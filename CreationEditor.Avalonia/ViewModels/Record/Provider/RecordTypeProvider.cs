@@ -36,7 +36,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         Types = types.ToList();
         RecordBrowserSettings = recordBrowserSettings;
         var selectedRecordObservable = this.WhenAnyValue(x => x.SelectedRecord)
-                .Select(x => x?.Record);
+            .Select(x => x?.Record);
         RecordContextMenuProvider = untypedRecordContextMenuProviderFactory(selectedRecordObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);

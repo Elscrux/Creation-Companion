@@ -18,7 +18,7 @@
                       VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
         </StackPanel>
         <StackPanel Name="StatusBar" Background="Purple" Height="25" DockPanel.Dock="Bottom" Orientation="Horizontal">
-            <TextBlock x:Name="StatusText" 
+            <TextBlock x:Name="StatusText"
                        Foreground="White"
                        Text="Ready"
                        Margin="5 0 0 0"

@@ -87,7 +87,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         var notify = new LinearNotifier(_notificationService, mods.Count);
 
         await Task.WhenAll(mods.Select(m => Task.Run(() => LoadModReferences(m))));
-        
+
         foreach (var mod in mods) {
             notify.Next($"Loading Record References in {mod.ModKey}");
             LoadModReferences(mod);

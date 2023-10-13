@@ -26,8 +26,8 @@ public sealed class JsonQueryState : IQueryState {
         _logger = logger;
         _fileSystem = fileSystem;
         _statePathProvider = statePathProvider;
-        
-        _serializerSettings = new() {
+
+        _serializerSettings = new JsonSerializerSettings {
             Formatting = Formatting.Indented,
             TypeNameHandling = TypeNameHandling.Auto,
             ContractResolver = contractResolver

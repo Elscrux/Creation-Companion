@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using CreationEditor.Services.Plugin;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Avalonia.Modules; 
+namespace CreationEditor.Avalonia.Modules;
 
 public sealed class GameSpecificModule<TMod, TModGetter> : Module
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter

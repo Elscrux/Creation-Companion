@@ -18,7 +18,7 @@ public sealed class StatePathProvider : IStatePathProvider {
     }
 
     public string GetFullPath(string state) {
-        return  _fileSystem.Path.Combine(
+        return _fileSystem.Path.Combine(
             GetDirectoryPath(),
             $"{state.Replace(" ", "-")}.json");
     }

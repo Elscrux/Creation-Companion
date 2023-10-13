@@ -93,15 +93,16 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                     Orientation = Orientation.Horizontal,
                     Children = {
                         checkBox,
-                        new StackPanel { 
+                        new StackPanel {
                             Orientation = Orientation.Horizontal,
-                            Children = { primitiveControl, complexControl } }
+                            Children = { primitiveControl, complexControl }
+                        }
                     }
                 };
                 return fields.Count > 1
                     ? WrapWithName(stackPanel)
                     : stackPanel;
-                
+
                 Control WrapWithName(Control c) {
                     return fields.Count > 1
                         ? new StackPanel {
@@ -245,8 +246,8 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 ScopedTypes = scopedTypes,
             };
 
-            if (fieldType.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) { 
-                if (condition != null && condition.TryGetProperty<IFormLinkGetter>(fieldType.CompareValue, out var formLink)) { 
+            if (fieldType.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
+                if (condition != null && condition.TryGetProperty<IFormLinkGetter>(fieldType.CompareValue, out var formLink)) {
                     formKeyPicker[AFormKeyPicker.FormKeyProperty] = formLink.FormKey;
                 }
                 formKeyPicker[!AFormKeyPicker.FormLinkProperty] = binding;

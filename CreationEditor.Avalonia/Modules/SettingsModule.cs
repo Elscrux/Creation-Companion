@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Services.Settings;
-using Noggog.Autofac;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class SettingsModule : Module {

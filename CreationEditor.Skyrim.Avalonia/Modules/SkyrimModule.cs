@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Services.Record.Browser;
-using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
@@ -15,7 +14,6 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
-using CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;

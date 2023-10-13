@@ -1,5 +1,5 @@
 ﻿using Autofac;
-namespace CreationEditor.Avalonia.Modules; 
+namespace CreationEditor.Avalonia.Modules;
 
 public sealed class EditorModule : Module {
     protected override void Load(ContainerBuilder builder) {

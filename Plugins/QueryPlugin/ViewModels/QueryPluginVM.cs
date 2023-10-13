@@ -93,7 +93,7 @@ public sealed class QueryPluginVM : ViewModel {
     private void RemoveColumn(int column) {
         // Remove column
         ColumnsGrid.ColumnDefinitions.RemoveAt(column);
-        
+
         // Remove splitter
         ColumnsGrid.ColumnDefinitions.RemoveAt(column);
 

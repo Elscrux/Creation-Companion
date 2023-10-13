@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive;
-using System.Windows.Input;
 using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Services.Environment;

@@ -1,9 +1,6 @@
 ﻿using System.Reactive;
-using System.Reactive.Linq;
-using System.Windows.Input;
 using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
@@ -11,7 +8,6 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Services.Record.Actions;
 

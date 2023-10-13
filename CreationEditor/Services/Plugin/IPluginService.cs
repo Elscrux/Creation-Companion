@@ -5,7 +5,7 @@ public interface IPluginService {
     /// Plugins that are currently loaded.
     /// </summary>
     IReadOnlyList<IPluginDefinition> Plugins { get; }
-    
+
     /// <summary>
     /// Reloads all plugins.
     /// </summary>

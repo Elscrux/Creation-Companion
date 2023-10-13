@@ -11,7 +11,7 @@ public static class GenderedItemExtension {
             if (femaleString.IsNullOrWhitespace()) {
                 return string.Empty;
             }
-            
+
             return femaleString;
         }
 

@@ -57,7 +57,7 @@
         <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
 
         <!-- Avalonia Edit -->
-        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml"/>
 
         <!-- Custom Style -->
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml"/>

@@ -23,7 +23,7 @@ public sealed class HashFileSystemValidation : IFileSystemValidation {
 
     public async Task<CacheValidationResult<string>> GetInvalidatedContent(string source) {
         var validate = _fileSystemValidationSerialization.Validate(source);
-        if (!validate || !_fileSystemValidationSerialization.TryDeserialize(source, out var fileSystemCacheData)) { 
+        if (!validate || !_fileSystemValidationSerialization.TryDeserialize(source, out var fileSystemCacheData)) {
             var buildCache = await BuildCache(source);
             _fileSystemValidationSerialization.Serialize(buildCache, source);
 

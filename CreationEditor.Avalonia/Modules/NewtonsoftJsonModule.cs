@@ -2,7 +2,7 @@ using Autofac;
 using CreationEditor.Services.Json;
 using Newtonsoft.Json.Serialization;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.Modules; 
+namespace CreationEditor.Avalonia.Modules;
 
 public sealed class NewtonsoftJsonModule : Module {
     protected override void Load(ContainerBuilder builder) {

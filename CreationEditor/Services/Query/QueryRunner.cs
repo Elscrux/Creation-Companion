@@ -52,7 +52,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             .Select(_ => QueryConditions.Select(c => c.Summary).CombineLatest())
             .Switch()
             .StartWith(Array.Empty<string>())
-            .CombineLatest(selectionChanged, ((list, x) => list.Any()
+            .CombineLatest(selectionChanged, (list, x) => list.Any()
                 ? $"""
                    From {x.From?.Name ?? "None"}
                    Where
@@ -64,7 +64,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
                    From {x.From?.Name ?? "None"}
                    Order By {x.OrderBy?.Name ?? "None"}
                    Select {x.Select?.Name ?? "None"}
-                   """));
+                   """);
 
         this.WhenAnyValue(x => x.QueryFrom.SelectedItem)
             .NotNull()

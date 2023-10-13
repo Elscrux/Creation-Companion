@@ -1,7 +1,7 @@
 ﻿using Avalonia.Data.Converters;
 using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins;
-namespace CreationEditor.Avalonia.Converter; 
+namespace CreationEditor.Avalonia.Converter;
 
 public static class FormLinkConverter {
     public static readonly Func<object?, IFormLinkIdentifier> ToFormLinkFunc
