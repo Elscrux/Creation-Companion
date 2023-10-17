@@ -10,7 +10,6 @@ using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.Views.Query;
 using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Services.Query.Where;
-using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -34,29 +33,29 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         set => SetValue(ConditionEntryFactoryProperty, value);
     }
 
-    public bool Match(object? data) => data is IQueryCondition;
+    public bool Match(object? data) => data is ConditionState;
 
     public Control Build(object? param) {
-        if (param is not IQueryCondition condition) return new TextBlock { Text = $"No Condition is available for {param}" };
+        if (param is not ConditionState state) return new TextBlock { Text = $"No Condition is available for {param}" };
 
         // Convert fields to controls
-        var fields = condition.GetFields();
+        var fields = state.GetFields().ToArray();
         var controls = fields
             .Select<FieldType, Control?>(field => {
                 Control? primitiveControl = null;
                 Control? complexControl = null;
-                if (IQueryCondition.IsPrimitiveType(field.TypeClass)) {
-                    primitiveControl = GetPrimitiveControl(field, new Binding(field.CompareValue), condition);
+                if (field.FieldCategory == FieldCategory.Value) {
+                    primitiveControl = GetPrimitiveControl(field, new Binding(ConditionState.FieldCategoryToName(field.FieldCategory)), state);
                 }
 
-                if (condition.TryGetProperty<IObservableCollection<IQueryConditionEntry>>(field.CompareValue, out var collection)) {
-                    if (collection.Count == 0) {
-                        collection.Add(ConditionEntryFactory.Create(field.ActualType));
+                if (field.FieldCategory == FieldCategory.Collection) {
+                    if (state.SubConditions.Count == 0) {
+                        state.SubConditions.Add(ConditionEntryFactory.Create(field.ActualType));
                     }
 
                     var queryConditionsView = new QueryConditionsView {
                         ContextType = field.ActualType,
-                        QueryConditions = collection,
+                        QueryConditions = state.SubConditions,
                         [!QueryConditionsView.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
                         [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
                     };
@@ -64,7 +63,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                     complexControl = new Button {
                         HorizontalAlignment = HorizontalAlignment.Stretch,
                         VerticalAlignment = VerticalAlignment.Stretch,
-                        [!ContentControl.ContentProperty] = collection
+                        [!ContentControl.ContentProperty] = state.SubConditions
                             .Select(x => x.Summary)
                             .CombineLatest()
                             .Select(list => string.Join(' ', list))
@@ -75,10 +74,10 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
 
                 if (complexControl is null) {
                     return primitiveControl is not null
-                        ? fields.Count > 1
+                        ? fields.Length > 1
                             ? WrapWithName(primitiveControl)
                             : primitiveControl
-                        : new TextBlock { Text = $"No Condition is available for {condition}" };
+                        : new TextBlock { Text = $"No Condition is available for {state}" };
                 }
 
                 if (primitiveControl is null) return complexControl;
@@ -99,12 +98,12 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                         }
                     }
                 };
-                return fields.Count > 1
+                return fields.Length > 1
                     ? WrapWithName(stackPanel)
                     : stackPanel;
 
                 Control WrapWithName(Control c) {
-                    return fields.Count > 1
+                    return fields.Length > 1
                         ? new StackPanel {
                             Children = {
                                 new TextBlock { Text = field.ActualType.Name },
@@ -117,7 +116,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             })
             .NotNull()
             .Select(c => {
-                c.DataContext = condition;
+                c.DataContext = state;
                 c.HorizontalAlignment = HorizontalAlignment.Stretch;
                 return c;
             })
@@ -134,7 +133,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         return stackPanel;
     }
 
-    private Control? GetPrimitiveControl(FieldType fieldType, IBinding binding, IQueryCondition? condition = null) {
+    private Control? GetPrimitiveControl(FieldType fieldType, IBinding binding, ConditionState? state = null) {
         Control? control = null;
         if (fieldType.TypeClass == typeof(bool)) {
             control = new CheckBox {
@@ -219,7 +218,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             };
         } else if (fieldType.TypeClass == typeof(Color)) {
             control = new ColorPickerButton {
-                [!ColorPickerButton.ColorProperty] = new Binding(nameof(IQueryValueCondition.CompareValue)) {
+                [!ColorPickerButton.ColorProperty] = new Binding(ConditionState.FieldCategoryToName(fieldType.FieldCategory)) {
                     Converter = new ExtendedFuncValueConverter<Color, global::Avalonia.Media.Color?, object?>(
                         (color, _) => global::Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B),
                         (color, _) => color.HasValue
@@ -247,13 +246,20 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             };
 
             if (fieldType.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
-                if (condition != null && condition.TryGetProperty<IFormLinkGetter>(fieldType.CompareValue, out var formLink)) {
+                if (state is { CompareValue: FormLinkInformation formLink }) {
                     formKeyPicker[AFormKeyPicker.FormKeyProperty] = formLink.FormKey;
+                } else {
+                    formKeyPicker[AFormKeyPicker.FormKeyProperty] = FormKey.Null;
                 }
+
                 formKeyPicker[!AFormKeyPicker.FormLinkProperty] = binding;
             } else {
-                formKeyPicker[!AFormKeyPicker.FormKeyProperty] = binding;
+                if (state is { CompareValue: not FormKey }) {
+                    formKeyPicker[AFormKeyPicker.FormKeyProperty] = FormKey.Null;
+                    state.CompareValue = FormKey.Null;
+                }
 
+                formKeyPicker[!AFormKeyPicker.FormKeyProperty] = binding;
             }
             return formKeyPicker;
         }

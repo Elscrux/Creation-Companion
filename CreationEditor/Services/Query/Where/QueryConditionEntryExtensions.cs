@@ -1,6 +1,6 @@
 namespace CreationEditor.Services.Query.Where;
 
-public static class QueryConditionExtensions {
+public static class QueryConditionEntryExtensions {
     public static bool EvaluateConditions(this IEnumerable<IQueryConditionEntry> conditions, object? obj) {
         if (obj is null) return false;
 

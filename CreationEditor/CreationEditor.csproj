@@ -127,8 +127,8 @@
         <Compile Update="Services\Mutagen\Mod\Save\IdenticalToMasterRemoveStep.cs">
           <DependentUpon>ISaveStep.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\QueryConditionFactory.cs">
-          <DependentUpon>IQueryConditionFactory.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\QueryCompareFunctionFactory.cs">
+          <DependentUpon>IQueryCompareFunctionFactory.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\From\QueryFromFactory.cs">
           <DependentUpon>IQueryFromFactory.cs</DependentUpon>
@@ -141,12 +141,6 @@
         </Compile>
         <Compile Update="Services\Query\Where\QueryConditionEntry.cs">
           <DependentUpon>IQueryConditionEntry.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Query\Where\QueryListCondition.cs">
-          <DependentUpon>IQueryListCondition.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Query\Where\QueryValueCondition.cs">
-          <DependentUpon>IQueryValueCondition.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\Select\ReflectionQueryField.cs">
           <DependentUpon>IQueryField.cs</DependentUpon>

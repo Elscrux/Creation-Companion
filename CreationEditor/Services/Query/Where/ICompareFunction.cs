@@ -1,7 +1,8 @@
-namespace CreationEditor.Services.Query.Where;
+﻿namespace CreationEditor.Services.Query.Where;
 
 public interface ICompareFunction {
     string Operator { get; }
+    IEnumerable<FieldType> GetFields(Type actualType);
 
-    bool Evaluate(object field, object value);
+    bool Evaluate(ConditionState conditionState, object fieldValue);
 }

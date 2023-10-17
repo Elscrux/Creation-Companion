@@ -1,16 +1,28 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Services.Query.Select;
+using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, IDisposable {
+public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry {
+    private readonly IQueryConditionEntryFactory _queryConditionEntryFactory;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
+    [Reactive] public ConditionState ConditionState { get; set; }
     public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();
-    [Reactive] public IQueryCondition Condition { get; private set; } = new NullValueCondition();
+
+    public IObservableCollection<ICompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<ICompareFunction>();
+    [Reactive] public ICompareFunction? SelectedCompareFunction { get; set; }
+
+    public IObservableCollection<IQueryConditionEntry> SubConditions => ConditionState.SubConditions;
+    public object? CompareValue {
+        get => ConditionState.CompareValue;
+        set => ConditionState.CompareValue = value;
+    }
+
     [Reactive] public bool IsOr { get; set; }
     [Reactive] public bool Negate { get; set; }
 
@@ -18,31 +30,29 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, 
     public IObservable<string> Summary { get; }
 
     public QueryConditionEntry(
-        IQueryConditionFactory queryConditionFactory,
+        IQueryConditionEntryFactory queryConditionEntryFactory,
+        IQueryCompareFunctionFactory queryCompareFunctionFactory,
         Type? recordType = null) {
+        _queryConditionEntryFactory = queryConditionEntryFactory;
         FieldSelector.RecordType = recordType;
+        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
 
-        Summary = this.WhenAnyValue(
-                x => x.FieldSelector.SelectedField,
-                x => x.Negate,
-                x => x.IsOr,
-                (field, negate, or) => (Field: field, Negate: negate, Or: or))
-            .CombineLatest(this.WhenAnyValue(x => x.Condition)
-                    .Select(c => c.Summary)
-                    .Switch(),
-                (x, condition) =>
-                    x.Field?.Name
-                  + (x.Negate ? " Not " : " ")
-                  + condition
-                  + (x.Or ? " Or " : " And "));
-
-        var conditionChanged = this.WhenAnyValue(x => x.Condition)
-            .Select(condition => condition.ConditionChanged)
+        var subConditionsChanged = this.WhenAnyValue(x => x.ConditionState)
+            .Select(x => x.SubConditions.ObserveCollectionChanges())
+            .Switch()
+            .Select(_ => ConditionState.SubConditions
+                .Select(x => x.ConditionEntryChanged)
+                .Merge())
             .Switch();
 
+        var functionChanged = this.WhenAnyValue(x => x.SelectedCompareFunction);
+
+        var conditionChanged = this.WhenAnyValue(x => x.ConditionState.CompareValue).Unit()
+            .Merge(functionChanged.Unit())
+            .Merge(subConditionsChanged);
+
         ConditionEntryChanged = this.WhenAnyValue(
-                x => x.Condition,
-                x => x.Condition.SelectedFunction,
+                x => x.SelectedCompareFunction,
                 x => x.Negate,
                 x => x.IsOr,
                 x => x.FieldSelector.SelectedField)
@@ -51,41 +61,96 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry, 
 
         this.WhenAnyValue(x => x.FieldSelector.SelectedField)
             .NotNull()
-            .Subscribe(field => Condition = queryConditionFactory.Create(field.Type))
+            .Subscribe(field => {
+                CompareFunctions.Clear();
+                CompareFunctions.AddRange(queryCompareFunctionFactory.Get(field.Type));
+                SelectedCompareFunction = CompareFunctions.FirstOrDefault();
+                ConditionState = new ConditionState(SelectedCompareFunction, field.Type);
+            })
             .DisposeWith(_disposables);
 
-        // if (dto is not null) {
-        //     FieldSelector.SelectedField = dto.FieldSelector.SelectedField;
-        //     Condition = queryConditionProvider.GetCondition(dto.Condition);
-        //     Condition.SelectedFunction = dto.Condition.SelectedFunctionOperator;
-        //     IsOr = dto.IsOr;
-        //     Negate = dto.Negate;
-        // }
+        functionChanged
+            .Pairwise()
+            .Subscribe(function => {
+                if (FieldSelector.SelectedField is null) return;
+
+                // Don't update if the fields are the same
+                if (function.Previous is not null && function.Current is not null) {
+                    var old = function.Previous.GetFields(FieldSelector.SelectedField.Type);
+                    var updated = function.Current.GetFields(FieldSelector.SelectedField.Type);
+                    if (old.SequenceEqual(updated)) return;
+                }
+
+                ConditionState = new ConditionState(function.Current, FieldSelector.SelectedField?.Type);
+            })
+            .DisposeWith(this);
+
+        Summary = this.WhenAnyValue(
+                x => x.FieldSelector.SelectedField,
+                x => x.Negate,
+                x => x.IsOr,
+                x => x.SelectedCompareFunction,
+                x => x.ConditionState.CompareValue,
+                (field, negate, or, function, compareValue) => (Field: field, Negate: negate, Or: or, Function: function, CompareValue: compareValue))
+            .CombineLatest(this.WhenAnyValue(x => x.ConditionState)
+                    .Select(x => x.SubConditions.ObserveCollectionChanges())
+                    .Switch()
+                    .Select(_ => ConditionState.SubConditions
+                        .Select(x => x.Summary)
+                        .Merge())
+                    .Switch(),
+                (x, condition) =>
+                    x.Field?.Name
+                  + (x.Negate ? " Not " : " ")
+                  + (x.Function is null
+                        ? string.Empty
+                        : x.CompareValue is null
+                            // Sub Conditions
+                            ? condition
+                            // Compare Value
+                            : x.Function?.Operator + " " + x.CompareValue)
+                  + (x.Or ? " Or " : " And "));
     }
 
     public bool Evaluate(object? obj) {
-        if (Condition is null || FieldSelector.SelectedField is null) return false;
+        if (SelectedCompareFunction is null
+         || FieldSelector.SelectedField is null) return false;
 
         var fieldValue = FieldSelector.SelectedField.GetValue(obj);
         if (fieldValue is null) return false;
 
-        return Condition.Evaluate(fieldValue);
+        return SelectedCompareFunction.Evaluate(ConditionState, fieldValue);
     }
 
     public QueryConditionEntryMemento CreateMemento() {
         return new QueryConditionEntryMemento(
+            CompareValue,
+            SubConditions.Select(c => c.CreateMemento()).ToArray(),
             FieldSelector.CreateMemento(),
-            Condition.CreateMemento(),
+            SelectedCompareFunction?.Operator ?? string.Empty,
             IsOr,
             Negate);
     }
 
     public void RestoreMemento(QueryConditionEntryMemento memento) {
+        // Field
         FieldSelector.RestoreMemento(memento.FieldSelector);
-        Condition.RestoreMemento(memento.QueryCondition);
+        SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
+
+        // Function and Compare Value
+        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
+        CompareValue = memento.CompareValue;
+        SubConditions.AddRange(memento.SubConditions.Select(x => {
+            var queryConditionEntry = _queryConditionEntryFactory.Create();
+            queryConditionEntry.RestoreMemento(x);
+            return queryConditionEntry;
+        }));
+
+        // Flags
         IsOr = memento.IsOr;
         Negate = memento.Negate;
     }
 
     public void Dispose() => _disposables.Dispose();
+    public void Add(IDisposable disposable) => _disposables.Add(disposable);
 }

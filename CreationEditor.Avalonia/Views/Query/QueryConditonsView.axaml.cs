@@ -144,13 +144,9 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = function.Operator };
                             }),
-                            [!ItemsControl.ItemsSourceProperty] = conditionEntry.WhenAnyValue(x => x.Condition).Select(x => x.Functions).ToBinding(),
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryConditionEntry.Condition)}.{nameof(IQueryConditionEntry.Condition.SelectedFunction)}"),
+                            ItemsSource = conditionEntry.CompareFunctions,
+                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(conditionEntry.SelectedCompareFunction)}"),
                         };
-                        conditionEntry.WhenAnyValue(x => x.Condition)
-                            .Subscribe(_ => {
-                                comboBox[!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryConditionEntry.Condition)}.{nameof(IQueryConditionEntry.Condition.SelectedFunction)}");
-                            });
 
                         return comboBox;
                     })),
@@ -164,10 +160,12 @@ public partial class QueryConditionsView : ActivatableUserControl {
                             [!ConditionValueEditorTemplate.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
                         };
 
-                        return new ContentControl {
-                            [!ContentProperty] = conditionEntry.WhenAnyValue(x => x.Condition).ToBinding(),
+                        var contentControl = new ContentControl {
+                            [!ContentProperty] = conditionEntry.WhenAnyValue(x => x.ConditionState).ToBinding(),
                             DataTemplates = { valueEditorTemplate },
                         };
+
+                        return contentControl;
                     })),
                 new TemplateColumn<IQueryConditionEntry>(
                     string.Empty,
