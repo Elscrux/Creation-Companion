@@ -107,4 +107,30 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             },
             parameter);
     }
+
+    public MenuItem Copy(ICommand command, object? parameter = null) {
+        return AddParameter(
+            new MenuItem {
+                Icon = new SymbolIcon { Symbol = Symbol.Copy },
+                Header = "Copy",
+                InputGesture = new KeyGesture(Key.C, KeyModifiers.Control),
+                HotKey = new KeyGesture(Key.C, KeyModifiers.Control),
+                Command = command,
+                CommandParameter = parameter,
+            },
+            parameter);
+    }
+
+    public MenuItem Paste(ICommand command, object? parameter = null) {
+        return AddParameter(
+            new MenuItem {
+                Icon = new SymbolIcon { Symbol = Symbol.Paste },
+                Header = "Paste",
+                InputGesture = new KeyGesture(Key.V, KeyModifiers.Control),
+                HotKey = new KeyGesture(Key.V, KeyModifiers.Control),
+                Command = command,
+                CommandParameter = parameter,
+            },
+            parameter);
+    }
 }

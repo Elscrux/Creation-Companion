@@ -11,4 +11,6 @@ public interface IMenuItemProvider {
     MenuItem Delete(ICommand command, object? parameter = null);
     MenuItem File(ICommand command, object? parameter = null);
     MenuItem References(ICommand command, object? parameter = null);
+    MenuItem Copy(ICommand command, object? parameter = null);
+    MenuItem Paste(ICommand command, object? parameter = null);
 }
