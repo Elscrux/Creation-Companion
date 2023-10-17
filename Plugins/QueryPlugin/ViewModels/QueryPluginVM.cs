@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
 using QueryPlugin.Views;
 using ReactiveUI;
@@ -26,11 +27,13 @@ public sealed class QueryPluginVM : ViewModel {
     public ReactiveCommand<Unit, Unit> AddColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DuplicateColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
+    public ReactiveCommand<QueryColumnVM, Unit> CopyColumnText { get; }
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
         IMenuItemProvider menuItemProvider,
-        IQueryState queryState) {
+        IQueryState queryState,
+        MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
         _queryState = queryState;
@@ -54,6 +57,13 @@ public sealed class QueryPluginVM : ViewModel {
             if (GetColumnIndex(vm, out var columnIndex)) {
                 RemoveColumn(columnIndex);
             }
+        });
+
+        CopyColumnText = ReactiveCommand.Create<QueryColumnVM>(vm => {
+            var clipboard = TopLevel.GetTopLevel(window)?.Clipboard;
+
+            var text = string.Join(Environment.NewLine, vm.QueriedFields);
+            clipboard?.SetTextAsync(text);
         });
     }
 
@@ -127,6 +137,7 @@ public sealed class QueryPluginVM : ViewModel {
         return new List<MenuItem> {
             _menuItemProvider.Duplicate(DuplicateColumn, queryColumnVM),
             _menuItemProvider.Delete(DeleteColumn, queryColumnVM),
+            _menuItemProvider.Copy(CopyColumnText, queryColumnVM).Name("Copy Entries Text"),
         };
     }
 }
