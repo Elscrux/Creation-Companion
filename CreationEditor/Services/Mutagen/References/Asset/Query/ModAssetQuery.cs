@@ -30,17 +30,17 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
     public ModAssetQuery(
         IFileSystem fileSystem,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IDataDirectoryProvider dataDirectoryProvider,
         IMutagenTypeProvider mutagenTypeProvider,
         IAssetReferenceSerialization<IModGetter, IFormLinkGetter> serialization) {
         _fileSystem = fileSystem;
         _dataDirectoryProvider = dataDirectoryProvider;
         _mutagenTypeProvider = mutagenTypeProvider;
-        _assetLinkCache = editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
+        _assetLinkCache = linkCacheProvider.LinkCache.CreateImmutableAssetLinkCache();
         Serialization = serialization;
 
-        editorEnvironment.LinkCacheChanged
+        linkCacheProvider.LinkCacheChanged
             .Subscribe(linkCache => {
                 _assetLinkCache?.Dispose();
                 _assetLinkCache = linkCache.CreateImmutableAssetLinkCache();

@@ -4,15 +4,11 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
-public interface IEditorEnvironment {
+public interface IEditorEnvironment : ILinkCacheProvider {
     /// <summary>
     /// Game environment for the editor
     /// </summary>
     IGameEnvironment GameEnvironment { get; }
-    /// <summary>
-    /// Shortcut to the LinkCache of the game environment
-    /// </summary>
-    ILinkCache LinkCache => GameEnvironment.LinkCache;
     /// <summary>
     /// A list of all loaded mods in the current game environment
     /// </summary>
@@ -49,8 +45,4 @@ public interface IEditorEnvironment {
     /// Emits when the load order changes
     /// </summary>
     IObservable<List<ModKey>> LoadOrderChanged { get; }
-    /// <summary>
-    /// Emits when the link cache changes
-    /// </summary>
-    IObservable<ILinkCache> LinkCacheChanged { get; }
 }

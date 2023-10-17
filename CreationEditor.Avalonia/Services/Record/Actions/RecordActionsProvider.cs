@@ -22,7 +22,7 @@ public sealed class RecordActionsProvider<TRecord, TRecordGetter> : IRecordActio
 
     public RecordActionsProvider(
         Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
         IRecordEditorController recordEditorController,
@@ -56,7 +56,7 @@ public sealed class RecordActionsProvider<TRecord, TRecordGetter> : IRecordActio
             if (obj is not TRecordGetter record) return;
 
             var references = recordReferenceController.GetReferences(record.FormKey)
-                .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
+                .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
 

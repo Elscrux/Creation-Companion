@@ -10,15 +10,15 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 public sealed class QuestFilter : RecordFilter<IQuestGetter> {
     private const char QuestFilterSeparator = '\\';
 
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public QuestFilter(
-        IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+        ILinkCacheProvider linkCacheProvider) {
+        _linkCacheProvider = linkCacheProvider;
     }
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
-        return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
+        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
             .GetRecursiveListings(quest => quest.Filter, QuestFilterSeparator);
     }
 }

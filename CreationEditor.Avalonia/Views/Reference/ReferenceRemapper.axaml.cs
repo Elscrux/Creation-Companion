@@ -17,7 +17,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                     vm?.ShowReferenceRemapDialog
                         .Subscribe(_ => {
                             var formKeyPicker = new FormKeyPicker {
-                                [!AFormKeyPicker.LinkCacheProperty] = vm.EditorEnvironment.LinkCacheChanged.ToBinding(),
+                                [!AFormKeyPicker.LinkCacheProperty] = vm.LinkCacheProvider.LinkCacheChanged.ToBinding(),
                                 [!AFormKeyPicker.ScopedTypesProperty] = vm.WhenAnyValue(x => x.ScopedTypes).ToBinding(),
                             };
 

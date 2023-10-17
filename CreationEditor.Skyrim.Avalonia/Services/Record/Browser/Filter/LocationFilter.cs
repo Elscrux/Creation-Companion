@@ -11,22 +11,22 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 public sealed class LocationFilter : RecordFilter<ILocationGetter> {
     private const char Separator = '\\';
 
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public LocationFilter(
-        IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+        ILinkCacheProvider linkCacheProvider) {
+        _linkCacheProvider = linkCacheProvider;
     }
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
-        return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
+        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
             .GetRecursiveListings(GetParentLocationString, Separator);
     }
 
     private string GetParentLocationString(ILocationGetter location) {
         return string.Join(Separator,
             location
-                .GetAllParentLocations(_editorEnvironment.LinkCache)
+                .GetAllParentLocations(_linkCacheProvider.LinkCache)
                 .Reverse()
                 .Select(l => l.EditorID));
     }

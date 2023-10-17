@@ -38,7 +38,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
     public ReferenceBrowserVM(
         Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
@@ -144,7 +144,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
 
             var recordReferences = records
                 .SelectMany(record => record.References)
-                .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
+                .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
 

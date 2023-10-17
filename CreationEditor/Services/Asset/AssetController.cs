@@ -15,7 +15,7 @@ public sealed class AssetController : IAssetController {
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetProvider _assetProvider;
     private readonly IModelModificationService _modelModificationService;
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IRecordController _recordController;
     private readonly ILogger _logger;
 
@@ -26,12 +26,12 @@ public sealed class AssetController : IAssetController {
         IAssetReferenceController assetReferenceController,
         IAssetProvider assetProvider,
         IModelModificationService modelModificationService,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         ILogger logger) {
         _fileSystem = fileSystem;
         _assetProvider = assetProvider;
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _dataDirectoryProvider = dataDirectoryProvider;
         _deleteDirectoryProvider = deleteDirectoryProvider;
         _assetReferenceController = assetReferenceController;
@@ -119,7 +119,7 @@ public sealed class AssetController : IAssetController {
 
             // Remap references in records
             foreach (var formLink in assetFile.ReferencedAsset.RecordReferences) {
-                if (!_editorEnvironment.LinkCache.TryResolve(formLink, out var record)) continue;
+                if (!_linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
 
                 var recordOverride = _recordController.GetOrAddOverride(record);
                 recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) { { assetFile.ReferencedAsset.AssetLink, shortenedPath } });

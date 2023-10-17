@@ -7,19 +7,19 @@ using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveService : IModSaveService {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
     private readonly ILogger _logger;
 
     public ModSaveService(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IModSaveLocationProvider modSaveLocationProvider,
         IFileSystem fileSystem,
         ISavePipeline savePipeline,
         ILogger logger) {
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _modSaveLocationProvider = modSaveLocationProvider;
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
@@ -38,7 +38,7 @@ public sealed class ModSaveService : IModSaveService {
             Encodings = null
         };
 
-        _savePipeline.Execute(_editorEnvironment.LinkCache, mod);
+        _savePipeline.Execute(_linkCacheProvider.LinkCache, mod);
 
         // Don't save empty mods
         if (!mod.EnumerateMajorRecords().Any()) {

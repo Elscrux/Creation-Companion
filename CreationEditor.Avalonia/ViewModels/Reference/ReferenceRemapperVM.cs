@@ -12,7 +12,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed class ReferenceRemapperVM : ViewModel {
-    public IEditorEnvironment EditorEnvironment { get; }
+    public ILinkCacheProvider LinkCacheProvider { get; }
     public object? Context { get; }
     public IReferencedRecord? ReferencedRecordContext { get; }
 
@@ -26,10 +26,10 @@ public sealed class ReferenceRemapperVM : ViewModel {
     public ReactiveCommand<FormKey, Unit> RemapReferences { get; }
 
     public ReferenceRemapperVM(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         object? context = null) {
-        EditorEnvironment = editorEnvironment;
+        LinkCacheProvider = linkCacheProvider;
         Context = context;
 
         var referencedRecord = ParseContext(context);
@@ -42,7 +42,7 @@ public sealed class ReferenceRemapperVM : ViewModel {
 
         RemapReferences = ReactiveCommand.Create<FormKey>(formKey => {
             if (ReferencedRecordContext is null || ContextType is null) return;
-            if (!editorEnvironment.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
+            if (!linkCacheProvider.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
 
             IsRemapping = true;
             Task.Run(() => {

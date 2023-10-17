@@ -20,7 +20,7 @@ public sealed class UntypedRecordActionsProvider : IRecordActionsProvider {
 
     public UntypedRecordActionsProvider(
         Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
         IRecordEditorController recordEditorController,
@@ -56,7 +56,7 @@ public sealed class UntypedRecordActionsProvider : IRecordActionsProvider {
             if (obj is not IMajorRecordGetter record) return;
 
             var references = recordReferenceController.GetReferences(record.FormKey)
-                .Select(identifier => new RecordReference(identifier, editorEnvironment, recordReferenceController))
+                .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
 

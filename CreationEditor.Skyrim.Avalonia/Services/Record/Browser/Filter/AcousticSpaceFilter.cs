@@ -10,20 +10,20 @@ using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class AcousticSpaceFilter : RecordFilter<IAcousticSpaceGetter> {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public AcousticSpaceFilter(
-        IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+        ILinkCacheProvider linkCacheProvider) {
+        _linkCacheProvider = linkCacheProvider;
     }
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         var finishedFormKeys = new HashSet<FormKey>();
 
-        return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IAcousticSpaceGetter>()
+        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IAcousticSpaceGetter>()
             .SelectWhere(acousticSpace => {
                 if (finishedFormKeys.Contains(acousticSpace.EnvironmentType.FormKey)) return TryGet<RecordFilterListing>.Failure;
-                if (!acousticSpace.EnvironmentType.TryResolve(_editorEnvironment.LinkCache, out var reverbParameters)) return TryGet<RecordFilterListing>.Failure;
+                if (!acousticSpace.EnvironmentType.TryResolve(_linkCacheProvider.LinkCache, out var reverbParameters)) return TryGet<RecordFilterListing>.Failure;
                 if (reverbParameters.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(reverbParameters.FormKey);

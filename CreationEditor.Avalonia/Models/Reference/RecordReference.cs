@@ -11,7 +11,7 @@ public sealed class RecordReference : IReference, IDisposable {
     private readonly IDisposableBucket _disposables = new DisposableBucket();
 
     private IMajorRecordGetter? _record;
-    public IMajorRecordGetter Record => _record ??= _editorEnvironment.LinkCache.TryResolve(_formLinkIdentifier, out var record) ? record : throw new ArgumentException();
+    public IMajorRecordGetter Record => _record ??= _linkCacheProvider.LinkCache.TryResolve(_formLinkIdentifier, out var record) ? record : throw new ArgumentException();
 
     private IReferencedRecord? _referencedRecord;
     public IReferencedRecord ReferencedRecord {
@@ -28,7 +28,7 @@ public sealed class RecordReference : IReference, IDisposable {
     }
 
     private readonly IFormLinkIdentifier _formLinkIdentifier;
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IRecordReferenceController _recordReferenceController;
 
     public string Name => Record.EditorID ?? string.Empty;
@@ -40,7 +40,7 @@ public sealed class RecordReference : IReference, IDisposable {
     private ReadOnlyObservableCollection<IReference> LoadChildren() {
         return ReferencedRecord.References
             .SelectObservableCollectionSync(
-                identifier => new RecordReference(identifier, _editorEnvironment, _recordReferenceController) as IReference,
+                identifier => new RecordReference(identifier, _linkCacheProvider, _recordReferenceController) as IReference,
                 _disposables);
     }
 
@@ -48,10 +48,10 @@ public sealed class RecordReference : IReference, IDisposable {
 
     public RecordReference(
         IFormLinkIdentifier formLinkIdentifier,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordReferenceController recordReferenceController) {
         _formLinkIdentifier = formLinkIdentifier;
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _recordReferenceController = recordReferenceController;
     }
 

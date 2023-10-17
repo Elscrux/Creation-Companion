@@ -20,7 +20,7 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
 
     public PlacedActionsProvider(
         RecordActionsProvider<IPlaced, IPlacedGetter> placedActionsProvider,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordEditorController recordEditorController,
         IRecordController recordController) {
         _placedActionsProvider = placedActionsProvider;
@@ -28,7 +28,7 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
         EditBase = ReactiveCommand.Create<object?>(obj => {
             if (obj is not IPlacedObjectGetter placedObject) return;
 
-            var placeable = placedObject.Base.TryResolve(editorEnvironment.LinkCache);
+            var placeable = placedObject.Base.TryResolve(linkCacheProvider.LinkCache);
             if (placeable is null) return;
 
             var newOverride = recordController.GetOrAddOverride<IPlaceableObject, IPlaceableObjectGetter>(placeable);

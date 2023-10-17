@@ -18,7 +18,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private Interop.SelectCallback? _selectCallback;
     private readonly IDisposableDropoff _disposableDropoff = new DisposableBucket();
     private readonly ILogger _logger;
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     private const double UnloadCellGridDistance = 10;
 
@@ -32,10 +32,10 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     public BSERuntimeService(
         ILogger logger,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IViewportFactory viewportFactory) {
         _logger = logger;
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
 
         viewportFactory.ViewportInitialized
             .Subscribe(_ => {
@@ -68,7 +68,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     public void LoadInteriorCell(ICellGetter cell) {
         if (_interiorCell != cell.FormKey) UnloadEverything();
 
-        var placedObjects = cell.GetAllPlacedObjects(_editorEnvironment.LinkCache);
+        var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
         _interiorCellReferences = Load(placedObjects, P2Int.Origin);
 
         _worldspaceRuntimeSettings = null;
@@ -102,7 +102,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             originToLoad -= _worldspaceRuntimeSettings.Origin;
         }
 
-        var placedObjects = cell.GetAllPlacedObjects(_editorEnvironment.LinkCache);
+        var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
         var loadedReferences = Load(placedObjects, originToLoad);
         _worldspaceRuntimeSettings.LoadedCells.Add(origin, loadedReferences);
 
@@ -161,7 +161,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
                     var relativePosition = placement.Position - origin;
 
-                    var baseObject = placedObject.Base.Resolve(_editorEnvironment.LinkCache);
+                    var baseObject = placedObject.Base.Resolve(_linkCacheProvider.LinkCache);
 
                     var model = baseObject switch {
                         IModeledGetter modeled => modeled.Model?.File.DataRelativePath,

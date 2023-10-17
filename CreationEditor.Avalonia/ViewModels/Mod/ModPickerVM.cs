@@ -20,10 +20,10 @@ public sealed class ModPickerVM : ViewModel {
     public IObservable<IReadOnlyCollection<LoadOrderModItem>> SelectedMods { get; }
 
     public ModPickerVM(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         ISearchFilter searchFilter) {
 
-        Mods = editorEnvironment.LinkCacheChanged
+        Mods = linkCacheProvider.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
             .Transform((mod, i) => new LoadOrderModItem(mod.ModKey, true, (uint) i))

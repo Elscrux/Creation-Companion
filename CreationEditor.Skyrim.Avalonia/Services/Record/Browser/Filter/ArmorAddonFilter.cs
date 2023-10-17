@@ -6,7 +6,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class ArmorAddonFilter : AssetFilter<IArmorAddonGetter> {
     public ArmorAddonFilter(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IFileSystem fileSystem)
-        : base(editorEnvironment, fileSystem) {}
+        : base(linkCacheProvider, fileSystem) {}
 }

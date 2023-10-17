@@ -10,20 +10,20 @@ using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class LandscapeTextureFilter : RecordFilter<ILandscapeTextureGetter> {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public LandscapeTextureFilter(
-        IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+        ILinkCacheProvider linkCacheProvider) {
+        _linkCacheProvider = linkCacheProvider;
     }
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         var finishedFormKeys = new HashSet<FormKey>();
 
-        return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<ILandscapeTextureGetter>()
+        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<ILandscapeTextureGetter>()
             .SelectWhere(landscapeTexture => {
                 if (finishedFormKeys.Contains(landscapeTexture.MaterialType.FormKey)) return TryGet<RecordFilterListing>.Failure;
-                if (!landscapeTexture.MaterialType.TryResolve(_editorEnvironment.LinkCache, out var materialType)) return TryGet<RecordFilterListing>.Failure;
+                if (!landscapeTexture.MaterialType.TryResolve(_linkCacheProvider.LinkCache, out var materialType)) return TryGet<RecordFilterListing>.Failure;
                 if (materialType.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(materialType.FormKey);

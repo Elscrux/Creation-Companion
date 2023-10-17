@@ -16,7 +16,7 @@ public sealed class AssetReference : IReference, IDisposable {
 
     public IAssetLink Asset { get; }
 
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IAssetTypeService _assetTypeService;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IRecordReferenceController _recordReferenceController;
@@ -28,18 +28,18 @@ public sealed class AssetReference : IReference, IDisposable {
     private ReadOnlyObservableCollection<IReference>? _children;
     public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
     private ReadOnlyObservableCollection<IReference> LoadChildren() {
-        RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _editorEnvironment, _recordReferenceController);
+        RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
         AssetReference? GetAssetReference(string path) {
             var assetLink = _assetTypeService.GetAssetLink(path);
             if (assetLink is null) return null;
 
-            return new AssetReference(assetLink, _editorEnvironment, _assetTypeService, _assetReferenceController, _recordReferenceController);
+            return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
         }
 
         var references = ReferencedAsset.NifReferences
-            .Select(path => new AssetReference(path, _editorEnvironment, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
             .Cast<IReference>()
-            .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReference(x, _editorEnvironment, _recordReferenceController)));
+            .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReference(x, _linkCacheProvider, _recordReferenceController)));
 
         var collection = new ObservableCollectionExtended<IReference>(references);
 
@@ -126,12 +126,12 @@ public sealed class AssetReference : IReference, IDisposable {
 
     public AssetReference(
         IAssetLink asset,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IAssetTypeService assetTypeService,
         IAssetReferenceController assetReferenceController,
         IRecordReferenceController recordReferenceController) {
         Asset = asset;
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _assetTypeService = assetTypeService;
         _assetReferenceController = assetReferenceController;
         _recordReferenceController = recordReferenceController;
@@ -139,11 +139,11 @@ public sealed class AssetReference : IReference, IDisposable {
 
     public AssetReference(
         string path,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IAssetTypeService assetTypeService,
         IAssetReferenceController assetReferenceController,
         IRecordReferenceController recordReferenceController) {
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _assetTypeService = assetTypeService;
         _assetReferenceController = assetReferenceController;
         _recordReferenceController = recordReferenceController;

@@ -7,9 +7,9 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class ModeledFilter : AssetFilter<IModeledGetter> {
     public ModeledFilter(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IFileSystem fileSystem)
-        : base(editorEnvironment, fileSystem) {}
+        : base(linkCacheProvider, fileSystem) {}
 
     protected override IEnumerable<string> GetPaths(IModeledGetter record) {
         if (record.Model is not null) yield return record.Model.File.DataRelativePath;

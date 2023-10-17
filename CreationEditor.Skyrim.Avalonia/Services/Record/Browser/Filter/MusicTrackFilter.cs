@@ -6,7 +6,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class MusicTrackFilter : AssetFilter<IMusicTrackGetter> {
     public MusicTrackFilter(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IFileSystem fileSystem)
-        : base(editorEnvironment, fileSystem) {}
+        : base(linkCacheProvider, fileSystem) {}
 }

@@ -44,7 +44,7 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
     public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public ExteriorCellsProvider(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IViewportRuntimeService viewportRuntimeService,
         IRecordReferenceController recordReferenceController,
         IRecordController recordController,
@@ -97,7 +97,7 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                 } else {
                     // Check if cell exists in current scope
                     if ((cell.Flags & Cell.Flag.IsInteriorCell) != 0) return;
-                    if (!editorEnvironment.LinkCache.TryResolveSimpleContext<ICellGetter>(cell.FormKey, out var cellContext)) return;
+                    if (!linkCacheProvider.LinkCache.TryResolveSimpleContext<ICellGetter>(cell.FormKey, out var cellContext)) return;
                     if (cellContext.Parent?.Record is not IWorldspaceGetter worldspace) return;
                     if (worldspace.FormKey != WorldspaceFormKey) return;
 

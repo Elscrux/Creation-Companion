@@ -25,6 +25,8 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         set => _gameEnvironment = value;
     }
 
+    public ILinkCache LinkCache => _gameEnvironment.LinkCache;
+
     private ISkyrimMod _activeMod;
     IMod IEditorEnvironment.ActiveMod => _activeMod;
     ISkyrimMod IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.ActiveMod {

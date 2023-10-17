@@ -5,17 +5,17 @@ using Mutagen.Bethesda.Plugins.Cache;
 namespace CreationEditor.Avalonia.ViewModels.Query;
 
 public sealed class QueryVM : ViewModel {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public IQueryRunner QueryRunner { get; }
     public IQueryConditionEntryFactory ConditionEntryFactory { get; }
-    public IObservable<ILinkCache> LinkCacheChanged => _editorEnvironment.LinkCacheChanged;
+    public IObservable<ILinkCache> LinkCacheChanged => _linkCacheProvider.LinkCacheChanged;
 
     public QueryVM(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IQueryRunner queryRunner,
         IQueryConditionEntryFactory conditionEntryFactory) {
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         QueryRunner = queryRunner;
         ConditionEntryFactory = conditionEntryFactory;
     }

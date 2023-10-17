@@ -34,11 +34,11 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
     public FactionEditorVM(
         IRecordEditorController recordEditorController,
         IRecordController recordController,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IConditionCopyPasteController conditionsCopyPasteController) {
         ConditionsCopyPasteController = conditionsCopyPasteController;
 
-        LinkCache = editorEnvironment.LinkCache;
+        LinkCache = linkCacheProvider.LinkCache;
 
         ChestFilter = placed => {
             if (placed is not IPlacedObjectGetter placedObject) return false;
@@ -47,7 +47,7 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
             return placeableObjectGetter is IContainerGetter;
         };
 
-        editorEnvironment.LinkCacheChanged
+        linkCacheProvider.LinkCacheChanged
             .Subscribe(newLinkCache => LinkCache = newLinkCache)
             .DisposeWith(this);
 

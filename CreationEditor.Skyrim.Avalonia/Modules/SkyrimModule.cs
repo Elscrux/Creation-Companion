@@ -36,6 +36,7 @@ public sealed class SkyrimModule : Module {
     protected override void Load(ContainerBuilder builder) {
         // General
         builder.RegisterType<SkyrimEditorEnvironment>()
+            .As<ILinkCacheProvider>()
             .As<IEditorEnvironment>()
             .As<IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>>()
             .SingleInstance();

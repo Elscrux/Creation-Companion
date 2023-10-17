@@ -6,7 +6,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class SoundDescriptorFilter : AssetFilter<ISoundDescriptorGetter> {
     public SoundDescriptorFilter(
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IFileSystem fileSystem)
-        : base(editorEnvironment, fileSystem) {}
+        : base(linkCacheProvider, fileSystem) {}
 }

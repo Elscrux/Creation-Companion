@@ -53,7 +53,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IRecordReferenceController _recordReferenceController;
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
@@ -97,7 +97,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetController assetController,
         IAssetTypeService assetTypeService,
         IAssetSymbolService assetSymbolService,
-        IEditorEnvironment editorEnvironment,
+        ILinkCacheProvider linkCacheProvider,
         IRecordReferenceController recordReferenceController,
         IDockFactory dockFactory,
         MainWindow mainWindow,
@@ -111,7 +111,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _assetReferenceController = assetReferenceController;
         _assetController = assetController;
         _assetTypeService = assetTypeService;
-        _editorEnvironment = editorEnvironment;
+        _linkCacheProvider = linkCacheProvider;
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
         _assetProvider = assetProvider;
@@ -444,9 +444,9 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var references = assetReferences
-            .Select(path => new AssetReference(path, _editorEnvironment, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
             .Cast<IReference>()
-            .Combine(recordReferences.Select(x => new RecordReference(x, _editorEnvironment, _recordReferenceController)))
+            .Combine(recordReferences.Select(x => new RecordReference(x, _linkCacheProvider, _recordReferenceController)))
             .ToArray();
 
         if (references.Length == 0) return null;

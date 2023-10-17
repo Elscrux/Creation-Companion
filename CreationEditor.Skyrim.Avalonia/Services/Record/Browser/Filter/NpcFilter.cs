@@ -11,15 +11,15 @@ using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class NpcFilter : RecordFilter<INpcGetter> {
-    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ILinkCacheProvider _linkCacheProvider;
 
     public NpcFilter(
-        IEditorEnvironment editorEnvironment) {
-        _editorEnvironment = editorEnvironment;
+        ILinkCacheProvider linkCacheProvider) {
+        _linkCacheProvider = linkCacheProvider;
     }
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
-        return _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides<IRaceGetter>()
+        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IRaceGetter>()
             .NotNull()
             .Where(race => race.EditorID is not null)
             .Select(race => {
