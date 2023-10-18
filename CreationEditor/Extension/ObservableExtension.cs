@@ -29,7 +29,8 @@ public static class ObservableExtension {
         this IObservable<ISortedChangeSet<TObj, TKey>> observable,
         IEnumerable<TObj> initial,
         IDisposableDropoff disposable)
-        where TKey : notnull {
+        where TKey : notnull
+        where TObj : notnull {
         var collection = new ObservableCollectionExtended<TObj>(initial);
         var adaptor = new SortedObservableCollectionAdaptor<TObj, TKey>();
 
@@ -44,7 +45,8 @@ public static class ObservableExtension {
         this IObservable<IChangeSet<TObj, TKey>> observable,
         IEnumerable<TObj> initial,
         IDisposableDropoff disposable)
-        where TKey : notnull {
+        where TKey : notnull
+        where TObj : notnull {
         var collection = new ObservableCollectionExtended<TObj>(initial);
         var adaptor = new ObservableCollectionAdaptor<TObj, TKey>();
 
@@ -58,7 +60,8 @@ public static class ObservableExtension {
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<IChangeSet<TObj, TKey>> changeSet,
         IDisposableDropoff disposable)
-        where TKey : notnull {
+        where TKey : notnull
+        where TObj : notnull {
         var destination = new ObservableCollectionExtended<TObj>();
 
         changeSet
@@ -73,7 +76,8 @@ public static class ObservableExtension {
     public static IObservableCollection<TObj> ToObservableCollection<TObj, TKey>(
         this IObservable<ISortedChangeSet<TObj, TKey>> changeSet,
         IDisposableDropoff disposable)
-        where TKey : notnull {
+        where TKey : notnull
+        where TObj : notnull {
         var destination = new ObservableCollectionExtended<TObj>();
         changeSet
             .ObserveOnGui()
@@ -87,7 +91,10 @@ public static class ObservableExtension {
     public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<TObj, TKey, TTarget>(
         this IObservable<ISortedChangeSet<TObj, TKey>> changeSet,
         Func<TObj, TKey, TTarget> selector,
-        IDisposableDropoff disposable) where TKey : notnull {
+        IDisposableDropoff disposable)
+        where TKey : notnull
+        where TObj : notnull
+        where TTarget : notnull {
         changeSet
             .ObserveOnGui()
             .Bind(selector, out var readOnlyObservableCollection)
@@ -99,7 +106,8 @@ public static class ObservableExtension {
 
     public static ReadOnlyObservableCollection<TObj> ToObservableCollection<TObj>(
         this IObservable<IChangeSet<TObj>> changeSet,
-        IDisposableDropoff disposable) {
+        IDisposableDropoff disposable)
+        where TObj : notnull {
         changeSet
             .ObserveOnGui()
             .Bind(out var readOnlyObservableCollection)
@@ -112,7 +120,9 @@ public static class ObservableExtension {
     public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<TObj, TTarget>(
         this IObservable<IChangeSet<TObj>> changeSet,
         Func<TObj, TTarget> selector,
-        IDisposableDropoff disposable) {
+        IDisposableDropoff disposable)
+        where TObj : notnull
+        where TTarget : notnull {
         changeSet
             .ObserveOnGui()
             .Bind(selector, out var readOnlyObservableCollection)
@@ -124,7 +134,8 @@ public static class ObservableExtension {
 
     public static ReadOnlyObservableCollection<T> ToObservableCollection<T>(
         this IObservable<IEnumerable<T>> listObservable,
-        IDisposableDropoff disposable) {
+        IDisposableDropoff disposable)
+        where T : notnull {
         return listObservable
             .ObserveOnGui()
             .Pairwise()
@@ -156,7 +167,8 @@ public static class ObservableExtension {
     public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<T, TTarget>(
         this IObservable<IEnumerable<T>> listObservable,
         Func<T, TTarget> selector,
-        IDisposableDropoff disposable) {
+        IDisposableDropoff disposable)
+        where T : notnull where TTarget : notnull {
         return listObservable
             .ObserveOnGui()
             .Pairwise()
@@ -211,7 +223,9 @@ public static class ObservableExtension {
         this IObservable<IChangeSet<T>> source,
         Func<T, TTarget> selector,
         out ReadOnlyObservableCollection<TTarget> readOnlyObservableCollection,
-        int resetThreshold = 25) {
+        int resetThreshold = 25)
+        where TTarget : notnull
+        where T : notnull {
         ArgumentNullException.ThrowIfNull(source);
 
         var target = new ObservableCollectionExtended<TTarget>();
@@ -236,7 +250,10 @@ public static class ObservableExtension {
         this IObservable<IChangeSet<TObj, TKey>> source,
         Func<TObj, TKey, TTarget> selector,
         out ReadOnlyObservableCollection<TTarget> readOnlyObservableCollection,
-        int resetThreshold = 25) where TKey : notnull {
+        int resetThreshold = 25)
+        where TKey : notnull
+        where TTarget : notnull
+        where TObj : notnull {
         ArgumentNullException.ThrowIfNull(source);
 
         var target = new ObservableCollectionExtended<TTarget>();
@@ -261,7 +278,9 @@ public static class ObservableExtension {
     /// </exception>
     public static IObservable<IChangeSet<TTarget>> Adapt<T, TTarget>(
         this IObservable<IChangeSet<T>> source,
-        ObservableCollectionSelectorAdaptor<T, TTarget> adaptor) {
+        ObservableCollectionSelectorAdaptor<T, TTarget> adaptor)
+        where TTarget : notnull
+        where T : notnull {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(adaptor);
 
@@ -290,7 +309,10 @@ public static class ObservableExtension {
     /// </exception>
     public static IObservable<IChangeSet<TTarget>> Adapt<TObj, TKey, TTarget>(
         this IObservable<IChangeSet<TObj, TKey>> source,
-        ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget> adaptor) where TKey : notnull {
+        ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget> adaptor)
+        where TKey : notnull
+        where TTarget : notnull
+        where TObj : notnull {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(adaptor);
 

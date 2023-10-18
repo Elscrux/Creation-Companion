@@ -14,7 +14,8 @@ public static class ObservableCollectionExtension {
         this IObservableCollection<TSource> source,
         Expression<Func<TSource, TTarget>> selector,
         IDisposableDropoff disposable)
-        where TSource : INotifyPropertyChanged {
+        where TSource : INotifyPropertyChanged
+        where TTarget : notnull {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(selector);
 
@@ -133,7 +134,8 @@ public static class ObservableCollectionExtension {
         }
     }
 
-    public static void Apply<T>(this IList<T> source, Change<T> item, IEqualityComparer<T>? equalityComparer = null) {
+    public static void Apply<T>(this IList<T> source, Change<T> item, IEqualityComparer<T>? equalityComparer = null)
+        where T : notnull {
         source.Clone(item.AsEnumerable(), equalityComparer);
     }
 
@@ -179,7 +181,8 @@ public static class ObservableCollectionExtension {
         }
     }
 
-    public static void AddSorted<T>(this IList<T> list, T item) where T : IComparable {
+    public static void AddSorted<T>(this IList<T> list, T item)
+        where T : IComparable {
         var i = 0;
         while (i < list.Count && list[i].CompareTo(item) < 0) i++;
 

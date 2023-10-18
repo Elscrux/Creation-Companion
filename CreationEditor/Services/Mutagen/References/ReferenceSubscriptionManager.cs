@@ -3,7 +3,9 @@ using DynamicData;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References;
 
-public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference> where TIdentifier : notnull {
+public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference>
+    where TIdentifier : notnull
+    where TReference : notnull {
     private readonly object _lockObject = new();
     private readonly Func<TSubscriber, TIdentifier> _identifierSelector;
     private readonly Action<TSubscriber, Change<TReference>> _changeAction;

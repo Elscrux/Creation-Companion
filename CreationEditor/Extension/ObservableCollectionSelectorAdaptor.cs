@@ -3,7 +3,9 @@ using DynamicData.Binding;
 using DynamicData.Kernel;
 namespace CreationEditor;
 
-public sealed class ObservableCollectionSelectorAdaptor<T, TTarget> {
+public sealed class ObservableCollectionSelectorAdaptor<T, TTarget>
+    where TTarget : notnull
+    where T : notnull {
     private readonly Func<T, TTarget> _selector;
     private readonly IObservableCollection<TTarget> _collection;
 
@@ -66,7 +68,10 @@ public sealed class ObservableCollectionSelectorAdaptor<T, TTarget> {
     }
 }
 
-public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget> where TKey : notnull {
+public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget>
+    where TKey : notnull
+    where TTarget : notnull
+    where TObj : notnull {
     private readonly Func<TObj, TKey, TTarget> _selector;
     private readonly IObservableCollection<TTarget> _collection;
 
@@ -94,16 +99,8 @@ public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget> whe
     public IChangeSet<TTarget> Adapt(IChangeSet<TObj, TKey> changes) {
         ArgumentNullException.ThrowIfNull(changes);
 
-        var newChanges = new ChangeSet<TTarget>();
-        foreach (var change in changes) {
-            var previous = change.Previous.HasValue
-                ? Optional<TTarget>.Create(_selector(change.Previous.Value, change.Key))
-                : Optional<TTarget>.None;
-
-            var current = _selector(change.Current, change.Key);
-
-            newChanges.Add(new Change<TTarget>(
-                change.Reason switch {
+        var newChanges = new ChangeSet<TTarget>(
+            changes.Select(change => new Change<TTarget>(change.Reason switch {
                     ChangeReason.Add => ListChangeReason.Add,
                     ChangeReason.Update => ListChangeReason.Replace,
                     ChangeReason.Remove => ListChangeReason.Remove,
@@ -111,11 +108,12 @@ public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget> whe
                     ChangeReason.Moved => ListChangeReason.Moved,
                     _ => throw new ArgumentOutOfRangeException()
                 },
-                current,
-                previous,
+                _selector(change.Current, change.Key),
+                change.Previous.HasValue
+                    ? Optional<TTarget>.Create(_selector(change.Previous.Value, change.Key)
+                    ) : Optional<TTarget>.None,
                 change.CurrentIndex,
-                change.PreviousIndex));
-        }
+                change.PreviousIndex)));
 
         if (newChanges.TotalChanges - newChanges.Refreshes > _refreshThreshold || !_loaded) {
             using (_collection.SuspendNotifications()) {
