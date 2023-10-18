@@ -35,8 +35,9 @@
                         <controls:SymbolIcon Symbol="SettingsFilled"/>
                     </Button.Content>
                     <Button.Flyout>
-                        <Flyout>
-                            <query:QueryView DataContext="{Binding QueryVM}"/>
+                        <Flyout FlyoutPresenterClasses="Flyout750x250">
+                            <query:QueryView
+                                DataContext="{Binding QueryVM}"/>
                         </Flyout>
                     </Button.Flyout>
                 </Button>

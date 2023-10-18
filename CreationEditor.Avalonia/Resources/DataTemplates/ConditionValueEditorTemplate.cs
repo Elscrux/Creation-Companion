@@ -68,7 +68,10 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                             .CombineLatest()
                             .Select(list => string.Join(' ', list))
                             .ToBinding(),
-                        Flyout = new Flyout { Content = WrapWithName(queryConditionsView) }
+                        Flyout = new Flyout {
+                            FlyoutPresenterClasses = { "Flyout750x250" },
+                            Content = WrapWithName(queryConditionsView)
+                        }
                     };
                 }
 
@@ -148,6 +151,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                 Minimum = decimal.MinValue,
                 Maximum = decimal.MaxValue,
                 Increment = 0.1m,
+                MinWidth = 128,
                 FormatString = "N4",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -164,6 +168,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = long.MinValue,
                 Maximum = long.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -171,6 +176,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = ulong.MinValue,
                 Maximum = ulong.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -178,6 +184,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = int.MinValue,
                 Maximum = int.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -185,6 +192,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = uint.MinValue,
                 Maximum = uint.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -192,6 +200,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = short.MinValue,
                 Maximum = short.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -199,6 +208,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = ushort.MinValue,
                 Maximum = ushort.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -206,6 +216,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = sbyte.MinValue,
                 Maximum = sbyte.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
@@ -213,6 +224,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
             control = new NumericUpDown {
                 Minimum = byte.MinValue,
                 Maximum = byte.MaxValue,
+                MinWidth = 128,
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };

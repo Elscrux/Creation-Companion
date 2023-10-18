@@ -68,6 +68,7 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/TreeViewStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ListBoxStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/HeaderedContentControlStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/FlyoutStyles.axaml"/>
 
         <!-- Custom Controls -->
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/SelectList.axaml"/>

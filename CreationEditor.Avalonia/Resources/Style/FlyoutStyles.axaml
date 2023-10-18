@@ -1,0 +1,23 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="FlyoutPresenter.Flyout500x250">
+        <Setter Property="MinWidth" Value="500"/>
+        <Setter Property="MinHeight" Value="250"/>
+    </Style>
+
+    <Style Selector="FlyoutPresenter.Flyout750x250">
+        <Setter Property="MinWidth" Value="750"/>
+        <Setter Property="MinHeight" Value="250"/>
+    </Style>
+
+    <Style Selector="FlyoutPresenter.Flyout1000x250">
+        <Setter Property="MinWidth" Value="1000"/>
+        <Setter Property="MinHeight" Value="250"/>
+    </Style>
+</Styles>
