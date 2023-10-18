@@ -136,7 +136,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     new FuncDataTemplate<IQueryConditionEntry>((conditionEntry, _) => {
                         if (conditionEntry is null) return null;
 
-                        var comboBox = new ComboBox {
+                        return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             DataContext = conditionEntry,
                             ItemTemplate = new FuncDataTemplate<ICompareFunction>((function, _) => {
@@ -147,8 +147,6 @@ public partial class QueryConditionsView : ActivatableUserControl {
                             ItemsSource = conditionEntry.CompareFunctions,
                             [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(conditionEntry.SelectedCompareFunction)}"),
                         };
-
-                        return comboBox;
                     })),
                 new TemplateColumn<IQueryConditionEntry>(
                     "Value",

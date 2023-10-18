@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using SearchPlugin.ViewModels;
-namespace SearchPlugin; 
+namespace SearchPlugin;
 
 public class SearchPluginModule : Module {
     protected override void Load(ContainerBuilder builder) {

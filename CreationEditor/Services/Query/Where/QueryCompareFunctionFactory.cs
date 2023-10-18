@@ -36,12 +36,12 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         ILinkCacheProvider linkCacheProvider) {
 
         // Simple List
-        Func<Type, IEnumerable<FieldType>> simpleListFieldOverride = (type => {
+        Func<Type, IEnumerable<FieldType>> simpleListFieldOverride = type => {
             var listType = type.GetGenericArguments()[0];
             return new FieldType[] {
                 new(listType, listType, FieldCategory.Value)
             };
-        });
+        };
 
         RegisterCompareFunction(
             new ICompareFunction[] {
@@ -58,10 +58,10 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
             -50);
 
         // Dictionary
-        Func<Type, IEnumerable<FieldType>> dictionaryFieldOverride = (type => {
+        Func<Type, IEnumerable<FieldType>> dictionaryFieldOverride = type => {
             var keyValueType = typeof(IKeyValue<,>).MakeGenericType(type.GetGenericArguments());
             return new FieldType[] { new(typeof(IEnumerable), keyValueType, FieldCategory.Collection) };
-        });
+        };
         RegisterCompareFunction(new ICompareFunction[] {
                 new CompareFunction<IEnumerable, object>(
                     "One Matches",
@@ -146,7 +146,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction(new[] {
             new CompareFunction<Enum, Enum>(
                 "Equals",
-                    (context, e) => context.CompareValue is Enum other && e.Equals(other))
+                (context, e) => context.CompareValue is Enum other && e.Equals(other))
         });
 
         // Bool

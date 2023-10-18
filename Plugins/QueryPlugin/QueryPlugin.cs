@@ -5,7 +5,6 @@ using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
 using QueryPlugin.ViewModels;
 using QueryPlugin.Views;
-using Key = Avalonia.Input.Key;
 namespace QueryPlugin;
 
 public sealed class QueryPlugin : IMenuPlugin {

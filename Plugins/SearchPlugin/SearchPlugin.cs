@@ -6,7 +6,6 @@ using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 using SearchPlugin.ViewModels;
 using SearchPlugin.Views;
-using Key = Avalonia.Input.Key;
 namespace SearchPlugin;
 
 public sealed class SearchPlugin<TMod, TModGetter> : IMenuPlugin<TMod, TModGetter>
