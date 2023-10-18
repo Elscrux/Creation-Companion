@@ -9,12 +9,12 @@ public static class ModTypeConverter {
     public static readonly ExtendedFuncValueConverter<ModType, string, object> ToFileExtension
         = new((modType, _) => modType switch {
             ModType.Master => MasterFileExtension,
-            ModType.LightMaster => LightPluginFileExtension,
+            ModType.Light => LightPluginFileExtension,
             ModType.Plugin => PluginFileExtension,
             _ => throw new ArgumentOutOfRangeException(nameof(modType), modType, null)
         }, (name, _) => name switch {
             MasterFileExtension => ModType.Master,
-            LightPluginFileExtension => ModType.LightMaster,
+            LightPluginFileExtension => ModType.Light,
             PluginFileExtension => ModType.Plugin,
             _ => throw new ArgumentOutOfRangeException(nameof(name), name, null)
         });
