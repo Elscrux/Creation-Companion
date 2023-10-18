@@ -1,7 +1,7 @@
 namespace CreationEditor.Services.Query.Where;
 
-public static class QueryConditionEntryExtensions {
-    public static bool EvaluateConditions(this IEnumerable<IQueryConditionEntry> conditions, object? obj) {
+public static class QueryConditionExtensions {
+    public static bool EvaluateConditions(this IEnumerable<IQueryCondition> conditions, object? obj) {
         if (obj is null) return false;
 
         var andStack = new Stack<bool>();

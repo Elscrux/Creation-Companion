@@ -7,8 +7,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry {
-    private readonly IQueryConditionEntryFactory _queryConditionEntryFactory;
+public sealed class QueryCondition : ReactiveObject, IQueryCondition {
+    private readonly IQueryConditionFactory _queryConditionFactory;
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
     [Reactive] public ConditionState ConditionState { get; set; }
@@ -17,7 +17,7 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry {
     public IObservableCollection<ICompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<ICompareFunction>();
     [Reactive] public ICompareFunction? SelectedCompareFunction { get; set; }
 
-    public IObservableCollection<IQueryConditionEntry> SubConditions => ConditionState.SubConditions;
+    public IObservableCollection<IQueryCondition> SubConditions => ConditionState.SubConditions;
     public object? CompareValue {
         get => ConditionState.CompareValue;
         set => ConditionState.CompareValue = value;
@@ -29,11 +29,11 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry {
     public IObservable<Unit> ConditionEntryChanged { get; }
     public IObservable<string> Summary { get; }
 
-    public QueryConditionEntry(
-        IQueryConditionEntryFactory queryConditionEntryFactory,
+    public QueryCondition(
+        IQueryConditionFactory queryConditionFactory,
         IQueryCompareFunctionFactory queryCompareFunctionFactory,
         Type? recordType = null) {
-        _queryConditionEntryFactory = queryConditionEntryFactory;
+        _queryConditionFactory = queryConditionFactory;
         FieldSelector.RecordType = recordType;
         ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
 
@@ -141,7 +141,7 @@ public sealed class QueryConditionEntry : ReactiveObject, IQueryConditionEntry {
         ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
         CompareValue = memento.CompareValue;
         SubConditions.AddRange(memento.SubConditions.Select(x => {
-            var queryConditionEntry = _queryConditionEntryFactory.Create();
+            var queryConditionEntry = _queryConditionFactory.Create();
             queryConditionEntry.RestoreMemento(x);
             return queryConditionEntry;
         }));

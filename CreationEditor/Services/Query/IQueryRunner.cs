@@ -15,7 +15,7 @@ public sealed record QueryRunnerMemento(
 public interface IQueryRunner : IMementoProvider<QueryRunnerMemento> {
     public Guid Id { get; }
     IQueryFrom QueryFrom { get; }
-    IObservableCollection<IQueryConditionEntry> QueryConditions { get; }
+    IObservableCollection<IQueryCondition> QueryConditions { get; }
     IFieldSelector FieldSelector { get; }
     public IFieldSelector OrderBySelector { get; }
 

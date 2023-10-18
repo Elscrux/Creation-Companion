@@ -15,8 +15,8 @@ public sealed class QueryModule : Module {
             .AsSelf()
             .As<IQueryFrom>();
 
-        builder.RegisterType<QueryConditionEntry>()
-            .As<IQueryConditionEntry>();
+        builder.RegisterType<QueryCondition>()
+            .As<IQueryCondition>();
 
         builder.RegisterType<ReflectionFieldSelector>()
             .As<IFieldSelector>();
@@ -36,8 +36,8 @@ public sealed class QueryModule : Module {
             .As<IQueryCompareFunctionFactory>()
             .SingleInstance();
 
-        builder.RegisterType<QueryConditionEntryFactory>()
-            .As<IQueryConditionEntryFactory>()
+        builder.RegisterType<QueryConditionFactory>()
+            .As<IQueryConditionFactory>()
             .SingleInstance();
     }
 }

@@ -10,12 +10,12 @@ namespace CreationEditor.Services.Query;
 
 public sealed class QueryRunner : IQueryRunner, IDisposable {
     private readonly IDisposableDropoff _disposables = new DisposableBucket();
-    private readonly IQueryConditionEntryFactory _queryConditionEntryFactory;
+    private readonly IQueryConditionFactory _queryConditionFactory;
 
     public Guid Id { get; } = Guid.NewGuid();
 
     public IQueryFrom QueryFrom { get; }
-    public IObservableCollection<IQueryConditionEntry> QueryConditions { get; } = new ObservableCollectionExtended<IQueryConditionEntry>();
+    public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
     public IFieldSelector OrderBySelector { get; } = new ReflectionFieldSelector();
     public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();
 
@@ -24,8 +24,8 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
     public QueryRunner(
         IQueryFromFactory queryFromFactory,
-        IQueryConditionEntryFactory queryConditionEntryFactory) {
-        _queryConditionEntryFactory = queryConditionEntryFactory;
+        IQueryConditionFactory queryConditionFactory) {
+        _queryConditionFactory = queryConditionFactory;
 
         QueryFrom = queryFromFactory.CreateFromRecordType();
 
@@ -108,7 +108,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         QueryFrom.RestoreMemento(memento.QueryFrom);
         QueryConditions.Clear();
         QueryConditions.AddRange(memento.QueryConditions.Select(entryMemento => {
-            var queryConditionEntry = _queryConditionEntryFactory.Create();
+            var queryConditionEntry = _queryConditionFactory.Create();
             queryConditionEntry.RestoreMemento(entryMemento);
             return queryConditionEntry;
         }));

@@ -8,15 +8,15 @@ public sealed class QueryVM : ViewModel {
     private readonly ILinkCacheProvider _linkCacheProvider;
 
     public IQueryRunner QueryRunner { get; }
-    public IQueryConditionEntryFactory ConditionEntryFactory { get; }
+    public IQueryConditionFactory ConditionFactory { get; }
     public IObservable<ILinkCache> LinkCacheChanged => _linkCacheProvider.LinkCacheChanged;
 
     public QueryVM(
         ILinkCacheProvider linkCacheProvider,
         IQueryRunner queryRunner,
-        IQueryConditionEntryFactory conditionEntryFactory) {
+        IQueryConditionFactory conditionFactory) {
         _linkCacheProvider = linkCacheProvider;
         QueryRunner = queryRunner;
-        ConditionEntryFactory = conditionEntryFactory;
+        ConditionFactory = conditionFactory;
     }
 }

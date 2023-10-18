@@ -11,7 +11,7 @@ public sealed class ConditionState : ReactiveObject {
     private readonly Type? _underlyingType;
 
     [Reactive] public object? CompareValue { get; set; }
-    public IObservableCollection<IQueryConditionEntry> SubConditions { get; } = new ObservableCollectionExtended<IQueryConditionEntry>();
+    public IObservableCollection<IQueryCondition> SubConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
 
     public ConditionState(ICompareFunction? selectedCompareFunction, Type? underlyingType) {
         _selectedCompareFunction = selectedCompareFunction;

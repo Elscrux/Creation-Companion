@@ -25,10 +25,10 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         set => SetValue(LinkCacheProperty, value);
     }
 
-    public static readonly StyledProperty<IQueryConditionEntryFactory> ConditionEntryFactoryProperty
-        = AvaloniaProperty.Register<ConditionValueEditorTemplate, IQueryConditionEntryFactory>(nameof(ConditionEntryFactory));
+    public static readonly StyledProperty<IQueryConditionFactory> ConditionEntryFactoryProperty
+        = AvaloniaProperty.Register<ConditionValueEditorTemplate, IQueryConditionFactory>(nameof(ConditionFactory));
 
-    public IQueryConditionEntryFactory ConditionEntryFactory {
+    public IQueryConditionFactory ConditionFactory {
         get => GetValue(ConditionEntryFactoryProperty);
         set => SetValue(ConditionEntryFactoryProperty, value);
     }
@@ -50,7 +50,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
 
                 if (field.FieldCategory == FieldCategory.Collection) {
                     if (state.SubConditions.Count == 0) {
-                        state.SubConditions.Add(ConditionEntryFactory.Create(field.ActualType));
+                        state.SubConditions.Add(ConditionFactory.Create(field.ActualType));
                     }
 
                     var queryConditionsView = new QueryConditionsView {

@@ -133,14 +133,14 @@
         <Compile Update="Services\Query\From\QueryFromFactory.cs">
           <DependentUpon>IQueryFromFactory.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\QueryConditionEntryFactory.cs">
-          <DependentUpon>IQueryConditionEntryFactory.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\QueryConditionFactory.cs">
+          <DependentUpon>IQueryConditionFactory.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\Where\CompareFunction.cs">
           <DependentUpon>ICompareFunction.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\QueryConditionEntry.cs">
-          <DependentUpon>IQueryConditionEntry.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\QueryCondition.cs">
+          <DependentUpon>IQueryCondition.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\Select\ReflectionQueryField.cs">
           <DependentUpon>IQueryField.cs</DependentUpon>

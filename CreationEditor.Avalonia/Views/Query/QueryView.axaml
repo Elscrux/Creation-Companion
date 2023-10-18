@@ -33,7 +33,7 @@
                 Grid.Column="1"
                 QueryConditions="{Binding QueryRunner.QueryConditions}"
                 LinkCache="{Binding LinkCacheChanged^}"
-                ConditionEntryFactory="{Binding ConditionEntryFactory}"
+                ConditionFactory="{Binding ConditionFactory}"
                 ContextType="{Binding QueryRunner.FieldSelector.RecordType}"/>
         </Grid>
 
