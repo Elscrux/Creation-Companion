@@ -29,16 +29,13 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
         QueryFrom = queryFromFactory.CreateFromRecordType();
 
-        var conditionCountChanges = QueryConditions
+        var conditionChanges = QueryConditions
             .ObserveCollectionChanges()
-            .Unit();
-
-        var conditionEntryChanges = QueryConditions
-            .ObserveCollectionChanges()
-            .Select(_ => QueryConditions.Select(x => x.ConditionEntryChanged).Merge())
-            .Switch();
-
-        var conditionChanges = conditionEntryChanges.Merge(conditionCountChanges);
+            .Select(_ => QueryConditions.Select(x => x.ConditionChanged).Merge())
+            .Switch()
+            .Merge(QueryConditions
+                .ObserveCollectionChanges()
+                .Unit());
 
         var selectionChanged = this.WhenAnyValue(
             x => x.QueryFrom.SelectedItem,
@@ -108,9 +105,9 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         QueryFrom.RestoreMemento(memento.QueryFrom);
         QueryConditions.Clear();
         QueryConditions.AddRange(memento.QueryConditions.Select(entryMemento => {
-            var queryConditionEntry = _queryConditionFactory.Create();
-            queryConditionEntry.RestoreMemento(entryMemento);
-            return queryConditionEntry;
+            var queryCondition = _queryConditionFactory.Create();
+            queryCondition.RestoreMemento(entryMemento);
+            return queryCondition;
         }));
         OrderBySelector.RestoreMemento(memento.OrderBySelector);
         FieldSelector.RestoreMemento(memento.FieldSelector);

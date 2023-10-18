@@ -1,14 +1,14 @@
 namespace CreationEditor.Services.Query.Where;
 
 public sealed class QueryConditionFactory : IQueryConditionFactory {
-    private readonly Func<Type?, IQueryCondition> _typeQueryConditionEntryFactory;
+    private readonly Func<Type?, IQueryCondition> _typeQueryConditionFactory;
 
     public QueryConditionFactory(
-        Func<Type?, IQueryCondition> typeQueryConditionEntryFactory) {
-        _typeQueryConditionEntryFactory = typeQueryConditionEntryFactory;
+        Func<Type?, IQueryCondition> typeQueryConditionFactory) {
+        _typeQueryConditionFactory = typeQueryConditionFactory;
     }
 
     public IQueryCondition Create(Type? type = null) {
-        return _typeQueryConditionEntryFactory(type);
+        return _typeQueryConditionFactory(type);
     }
 }

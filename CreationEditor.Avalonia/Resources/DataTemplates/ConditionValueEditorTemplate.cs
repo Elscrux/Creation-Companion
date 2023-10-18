@@ -25,12 +25,12 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         set => SetValue(LinkCacheProperty, value);
     }
 
-    public static readonly StyledProperty<IQueryConditionFactory> ConditionEntryFactoryProperty
+    public static readonly StyledProperty<IQueryConditionFactory> ConditionFactoryProperty
         = AvaloniaProperty.Register<ConditionValueEditorTemplate, IQueryConditionFactory>(nameof(ConditionFactory));
 
     public IQueryConditionFactory ConditionFactory {
-        get => GetValue(ConditionEntryFactoryProperty);
-        set => SetValue(ConditionEntryFactoryProperty, value);
+        get => GetValue(ConditionFactoryProperty);
+        set => SetValue(ConditionFactoryProperty, value);
     }
 
     public bool Match(object? data) => data is ConditionState;
@@ -56,7 +56,7 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
                     var queryConditionsView = new QueryConditionsView {
                         ContextType = field.ActualType,
                         QueryConditions = state.SubConditions,
-                        [!QueryConditionsView.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
+                        [!QueryConditionsView.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
                         [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
                     };
 

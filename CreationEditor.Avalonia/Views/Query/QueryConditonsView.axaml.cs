@@ -42,12 +42,12 @@ public partial class QueryConditionsView : ActivatableUserControl {
         set => SetValue(ConditionSourceProperty, value);
     }
 
-    public static readonly StyledProperty<IQueryConditionFactory> ConditionEntryFactoryProperty
+    public static readonly StyledProperty<IQueryConditionFactory> ConditionFactoryProperty
         = AvaloniaProperty.Register<QueryConditionsView, IQueryConditionFactory>(nameof(ConditionFactory));
 
     public IQueryConditionFactory ConditionFactory {
-        get => GetValue(ConditionEntryFactoryProperty);
-        set => SetValue(ConditionEntryFactoryProperty, value);
+        get => GetValue(ConditionFactoryProperty);
+        set => SetValue(ConditionFactoryProperty, value);
     }
 
     public static readonly StyledProperty<Type> ContextTypeProperty
@@ -99,28 +99,28 @@ public partial class QueryConditionsView : ActivatableUserControl {
             Columns = {
                 new TemplateColumn<IQueryCondition>(
                     "Field",
-                    new FuncDataTemplate<IQueryCondition>((conditionEntry, _) => {
-                        if (conditionEntry is null) return null;
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
+                        if (condition is null) return null;
 
                         return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
-                            DataContext = conditionEntry,
+                            DataContext = condition,
                             ItemTemplate = new FuncDataTemplate<IQueryField>((field, _) => {
                                 if (field is null) return null;
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = conditionEntry.FieldSelector.Fields,
+                            ItemsSource = condition.FieldSelector.Fields,
                             [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };
                     })),
                 new TemplateColumn<IQueryCondition>(
                     "Not",
-                    new FuncDataTemplate<IQueryCondition>((conditionEntry, _) => {
-                        if (conditionEntry is null) return null;
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
+                        if (condition is null) return null;
 
                         return new CheckBox {
-                            DataContext = conditionEntry,
+                            DataContext = condition,
                             Classes = { "CheckmarkOnly" },
                             VerticalAlignment = VerticalAlignment.Top,
                             HorizontalAlignment = HorizontalAlignment.Center,
@@ -133,33 +133,33 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     }),
                 new TemplateColumn<IQueryCondition>(
                     "Function",
-                    new FuncDataTemplate<IQueryCondition>((conditionEntry, _) => {
-                        if (conditionEntry is null) return null;
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
+                        if (condition is null) return null;
 
                         return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
-                            DataContext = conditionEntry,
+                            DataContext = condition,
                             ItemTemplate = new FuncDataTemplate<ICompareFunction>((function, _) => {
                                 if (function is null) return null;
 
                                 return new TextBlock { Text = function.Operator };
                             }),
-                            ItemsSource = conditionEntry.CompareFunctions,
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(conditionEntry.SelectedCompareFunction)}"),
+                            ItemsSource = condition.CompareFunctions,
+                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(condition.SelectedCompareFunction)}"),
                         };
                     })),
                 new TemplateColumn<IQueryCondition>(
                     "Value",
-                    new FuncDataTemplate<IQueryCondition>((conditionEntry, _) => {
-                        if (conditionEntry is null) return null;
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
+                        if (condition is null) return null;
 
                         var valueEditorTemplate = new ConditionValueEditorTemplate {
                             [!ConditionValueEditorTemplate.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding(),
-                            [!ConditionValueEditorTemplate.ConditionEntryFactoryProperty] = this.GetObservable(ConditionEntryFactoryProperty).ToBinding(),
+                            [!ConditionValueEditorTemplate.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
                         };
 
                         var contentControl = new ContentControl {
-                            [!ContentProperty] = conditionEntry.WhenAnyValue(x => x.ConditionState).ToBinding(),
+                            [!ContentProperty] = condition.WhenAnyValue(x => x.ConditionState).ToBinding(),
                             DataTemplates = { valueEditorTemplate },
                         };
 

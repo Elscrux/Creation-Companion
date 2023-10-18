@@ -8,7 +8,7 @@ namespace CreationEditor.Services.Query;
 
 public sealed record QueryRunnerMemento(
     QueryFromMemento QueryFrom,
-    List<QueryConditionEntryMemento> QueryConditions,
+    List<QueryConditionMemento> QueryConditions,
     FieldSelectorMemento OrderBySelector,
     FieldSelectorMemento FieldSelector);
 

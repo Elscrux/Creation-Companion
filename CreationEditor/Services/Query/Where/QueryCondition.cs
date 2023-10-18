@@ -26,7 +26,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
     [Reactive] public bool IsOr { get; set; }
     [Reactive] public bool Negate { get; set; }
 
-    public IObservable<Unit> ConditionEntryChanged { get; }
+    public IObservable<Unit> ConditionChanged { get; }
     public IObservable<string> Summary { get; }
 
     public QueryCondition(
@@ -41,7 +41,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             .Select(x => x.SubConditions.ObserveCollectionChanges())
             .Switch()
             .Select(_ => ConditionState.SubConditions
-                .Select(x => x.ConditionEntryChanged)
+                .Select(x => x.ConditionChanged)
                 .Merge())
             .Switch();
 
@@ -51,7 +51,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             .Merge(functionChanged.Unit())
             .Merge(subConditionsChanged);
 
-        ConditionEntryChanged = this.WhenAnyValue(
+        ConditionChanged = this.WhenAnyValue(
                 x => x.SelectedCompareFunction,
                 x => x.Negate,
                 x => x.IsOr,
@@ -122,8 +122,8 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         return SelectedCompareFunction.Evaluate(ConditionState, fieldValue);
     }
 
-    public QueryConditionEntryMemento CreateMemento() {
-        return new QueryConditionEntryMemento(
+    public QueryConditionMemento CreateMemento() {
+        return new QueryConditionMemento(
             CompareValue,
             SubConditions.Select(c => c.CreateMemento()).ToArray(),
             FieldSelector.CreateMemento(),
@@ -132,7 +132,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             Negate);
     }
 
-    public void RestoreMemento(QueryConditionEntryMemento memento) {
+    public void RestoreMemento(QueryConditionMemento memento) {
         // Field
         FieldSelector.RestoreMemento(memento.FieldSelector);
         SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
@@ -141,9 +141,9 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
         CompareValue = memento.CompareValue;
         SubConditions.AddRange(memento.SubConditions.Select(x => {
-            var queryConditionEntry = _queryConditionFactory.Create();
-            queryConditionEntry.RestoreMemento(x);
-            return queryConditionEntry;
+            var queryCondition = _queryConditionFactory.Create();
+            queryCondition.RestoreMemento(x);
+            return queryCondition;
         }));
 
         // Flags

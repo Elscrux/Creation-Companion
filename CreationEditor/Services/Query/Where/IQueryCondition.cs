@@ -5,15 +5,15 @@ using DynamicData.Binding;
 using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed record QueryConditionEntryMemento(
+public sealed record QueryConditionMemento(
     object? CompareValue,
-    QueryConditionEntryMemento[] SubConditions,
+    QueryConditionMemento[] SubConditions,
     FieldSelectorMemento FieldSelector,
     string SelectedFunctionOperator,
     bool IsOr,
     bool Negate);
 
-public interface IQueryCondition : IMementoProvider<QueryConditionEntryMemento>, IDisposableDropoff {
+public interface IQueryCondition : IMementoProvider<QueryConditionMemento>, IDisposableDropoff {
     IObservableCollection<ICompareFunction> CompareFunctions { get; }
     ICompareFunction? SelectedCompareFunction { get; }
 
@@ -24,7 +24,7 @@ public interface IQueryCondition : IMementoProvider<QueryConditionEntryMemento>,
     bool IsOr { get; set; }
     bool Negate { get; set; }
 
-    IObservable<Unit> ConditionEntryChanged { get; }
+    IObservable<Unit> ConditionChanged { get; }
     IObservable<string> Summary { get; }
 
     bool Evaluate(object? obj);
