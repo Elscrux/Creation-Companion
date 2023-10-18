@@ -119,7 +119,13 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                 "Equals",
                 (context, formLink) =>
                     context.CompareValue is IFormLinkGetter compareFormLink
-                 && FormLinkIdentifierEqualityComparer.Instance.Equals(formLink, compareFormLink))
+                 && FormLinkIdentifierEqualityComparer.Instance.Equals(formLink, compareFormLink)),
+            new CompareFunction<IFormLinkGetter, object>(
+                "Matching",
+                (context, formLink) =>
+                    linkCacheProvider.LinkCache.TryResolve(formLink, out var record)
+                 && context.SubConditions.EvaluateConditions(record),
+                FieldCategory.Collection),
         });
 
         // Form Key
