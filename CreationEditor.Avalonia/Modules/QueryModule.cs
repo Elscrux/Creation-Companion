@@ -32,8 +32,8 @@ public sealed class QueryModule : Module {
             .As<IQueryFromFactory>()
             .SingleInstance();
 
-        builder.RegisterType<QueryCompareFunctionFactory>()
-            .As<IQueryCompareFunctionFactory>()
+        builder.RegisterType<CompareFunctionFactory>()
+            .As<ICompareFunctionFactory>()
             .SingleInstance();
 
         builder.RegisterType<QueryConditionFactory>()

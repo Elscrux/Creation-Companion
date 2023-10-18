@@ -11,7 +11,7 @@ using Mutagen.Bethesda.Strings;
 using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
+public sealed class CompareFunctionFactory : ICompareFunctionFactory {
     private readonly List<FunctionCategory> _compareFunctions = new();
 
     private static bool CheckSubConditions(ConditionState conditionState, object? item) =>
@@ -32,7 +32,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         return genericArguments.Length == 2 && type.InheritsFrom(typeof(IEnumerable));
     }
 
-    public QueryCompareFunctionFactory(
+    public CompareFunctionFactory(
         ILinkCacheProvider linkCacheProvider) {
 
         // Simple List

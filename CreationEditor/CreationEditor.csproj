@@ -127,8 +127,8 @@
         <Compile Update="Services\Mutagen\Mod\Save\IdenticalToMasterRemoveStep.cs">
           <DependentUpon>ISaveStep.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\QueryCompareFunctionFactory.cs">
-          <DependentUpon>IQueryCompareFunctionFactory.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\CompareFunctionFactory.cs">
+          <DependentUpon>ICompareFunctionFactory.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\From\QueryFromFactory.cs">
           <DependentUpon>IQueryFromFactory.cs</DependentUpon>

@@ -31,7 +31,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
 
     public QueryCondition(
         IQueryConditionFactory queryConditionFactory,
-        IQueryCompareFunctionFactory queryCompareFunctionFactory,
+        ICompareFunctionFactory compareFunctionFactory,
         Type? recordType = null) {
         _queryConditionFactory = queryConditionFactory;
         FieldSelector.RecordType = recordType;
@@ -63,7 +63,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             .NotNull()
             .Subscribe(field => {
                 CompareFunctions.Clear();
-                CompareFunctions.AddRange(queryCompareFunctionFactory.Get(field.Type));
+                CompareFunctions.AddRange(compareFunctionFactory.Get(field.Type));
                 SelectedCompareFunction = CompareFunctions.FirstOrDefault();
                 ConditionState = new ConditionState(SelectedCompareFunction, field.Type);
             })
