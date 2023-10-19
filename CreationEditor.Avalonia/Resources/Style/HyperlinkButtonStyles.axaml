@@ -1,0 +1,35 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <StackPanel Spacing="10">
+                <controls:HyperlinkButton Content="Link"/>
+                <controls:HyperlinkButton Content="Disabled"
+                                          IsEnabled="False"/>
+                <TextBlock>
+                    <TextBlock.Inlines>
+                        <Run>Use</Run>
+                        <InlineUIContainer>
+                            <controls:HyperlinkButton
+                                NavigateUri="https://docs.avaloniaui.net"
+                                Content="Avalonia"/>
+                        </InlineUIContainer>
+                        <Run>and enjoy</Run>
+                    </TextBlock.Inlines>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="controls|HyperlinkButton">
+        <Setter Property="Padding" Value="0"/>
+
+        <Style Selector="^:pointerover /template/ ContentPresenter#ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
+        </Style>
+    </Style>
+</Styles>
