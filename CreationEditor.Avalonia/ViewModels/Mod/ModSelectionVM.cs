@@ -96,7 +96,7 @@ public sealed class ModSelectionVM : ViewModel {
 
         DisplayedMods = connectedMods
             .Filter(this.WhenAnyValue(x => x.ModSearchText)
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .ThrottleMedium()
                 .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>
                     searchText.IsNullOrEmpty()
                  || mod.ModKey.FileName.String.Contains(searchText, StringComparison.OrdinalIgnoreCase))))

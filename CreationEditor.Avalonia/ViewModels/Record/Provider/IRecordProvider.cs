@@ -34,7 +34,7 @@ public interface IRecordProvider<TReferenced> : IRecordProvider
 
     public static readonly Func<IRecordBrowserSettings, IObservable<Func<TReferenced, bool>>> DefaultFilter = recordBrowserSettingsVM =>
         recordBrowserSettingsVM.SettingsChanged
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .ThrottleMedium()
             .StartWith(Unit.Default)
             .Select(_ => new Func<TReferenced, bool>(record => recordBrowserSettingsVM.Filter(record.Record)));
 }

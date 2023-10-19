@@ -73,7 +73,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
                 x => x.LinkCache,
                 x => x.ScopedTypes,
                 (package, linkCache, scopedTypes) => (Package: package, LinkCache: linkCache, ScopedTypes: scopedTypes))
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .ThrottleMedium()
             .ObserveOnTaskpool()
             .Select(x => {
                 if (x.Package is null || x.LinkCache is null) return null;

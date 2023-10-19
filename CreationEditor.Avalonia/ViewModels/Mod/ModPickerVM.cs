@@ -28,7 +28,7 @@ public sealed class ModPickerVM : ViewModel {
             .Switch()
             .Transform((mod, i) => new LoadOrderModItem(mod.ModKey, true, (uint) i))
             .Filter(this.WhenAnyValue(x => x.ModSearchText)
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .ThrottleMedium()
                 .CombineLatest(this.WhenAnyValue(x => x.Filter),
                     (searchText, filter) => (SearchText: searchText, Filter: filter))
                 .Select(x => new Func<LoadOrderModItem, bool>(mod =>

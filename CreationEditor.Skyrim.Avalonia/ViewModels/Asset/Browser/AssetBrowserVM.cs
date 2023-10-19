@@ -130,7 +130,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     this.WhenAnyValue(x => x.SearchText),
                     (showBsaAssets, showEmptyDirectories, showOnlyOrphaned, searchText) =>
                         (ShowBsaAssets: showBsaAssets, ShowEmptyDirectories: showEmptyDirectories, ShowOnlyOrphaned: showOnlyOrphaned, SearchText: searchText))
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .ThrottleMedium()
                 .Select(x => {
                     var hideBsa = !x.ShowBsaAssets;
                     var hideEmptyDirectories = !x.ShowEmptyDirectories;

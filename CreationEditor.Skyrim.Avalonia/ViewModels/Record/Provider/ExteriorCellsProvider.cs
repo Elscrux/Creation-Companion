@@ -65,7 +65,7 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
             .CombineLatest(
                 this.WhenAnyValue(x => x.WorldspaceFormKey),
                 (linkCache, worldspaceFormKey) => (LinkCache: linkCache, WorldspaceFormKey: worldspaceFormKey))
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .ThrottleMedium()
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(y => {
                 _referencesDisposable.Clear();

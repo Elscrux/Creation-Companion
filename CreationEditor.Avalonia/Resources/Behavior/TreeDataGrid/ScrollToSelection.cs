@@ -15,7 +15,7 @@ public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeD
             (selection as ITreeSelectionModel).Events().SelectionChanged
                 .Select(_ => selection.SelectedItem)
                 .NotNull()
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .ThrottleMedium()
                 .Subscribe(selected => {
                     if (AssociatedObject.RowsPresenter?.Items is null) return;
 

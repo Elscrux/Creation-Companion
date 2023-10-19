@@ -20,7 +20,7 @@ public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox>, IDisposable {
 
         _attachedDisposable?.Dispose();
         _attachedDisposable = AssociatedObject?.WhenAnyValue(x => x.ItemCount)
-            .Throttle(TimeSpan.FromMicroseconds(250), RxApp.MainThreadScheduler)
+            .ThrottleMedium()
             .Subscribe(_ => {
                 if (!ScrollingEnabled) return;
 

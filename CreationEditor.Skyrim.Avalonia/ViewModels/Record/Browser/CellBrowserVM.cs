@@ -44,7 +44,7 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
                 x => x.ExteriorCellsVM.ExteriorCellsProvider.SelectedRecord,
                 (interiorCell, exteriorCell)
                     => SelectedTab == 0 ? interiorCell : exteriorCell)
-            .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+            .ThrottleMedium()
             .Subscribe(cell => PlacedListVM.PlacedProvider.Cell = cell?.Record)
             .DisposeWith(this);
     }

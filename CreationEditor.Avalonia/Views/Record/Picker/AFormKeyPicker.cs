@@ -342,7 +342,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     Processing = true;
                 }
             })
-            .Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler)
+            .ThrottleShort()
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
@@ -432,7 +432,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     Processing = true;
                 }
             })
-            .Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler)
+            .ThrottleShort()
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
@@ -535,7 +535,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     Processing = true;
                 }
             })
-            .Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler)
+            .ThrottleShort()
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(x => {
                 try {
@@ -637,7 +637,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
             .WrapInInProgressMarker(observable => observable
-                .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                .ThrottleMedium()
                 .CombineLatest(
                     selectedModsChanged,
                     selectedTypesChanged,
@@ -699,7 +699,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                                 BlacklistFormKeys: blacklistFormKeys,
                                                 Filter: filter,
                                                 NameSelector: nameSelector))
-                                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                                    .ThrottleMedium()
                                     .ObserveOn(RxApp.TaskpoolScheduler)
                                     .Select(data => {
                                         return new Func<IMajorRecordIdentifier, bool>(ident => {
@@ -719,7 +719,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                  ?? default;
 
                                 return this.WhenAnyValue(x => x.FormKeyStr)
-                                    .Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler)
+                                    .ThrottleMedium()
                                     .ObserveOn(RxApp.TaskpoolScheduler)
                                     .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
                                     .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
