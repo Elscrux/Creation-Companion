@@ -6,8 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Setting.View.ViewSettingView"
              x:CompileBindings="True" x:DataType="view:ViewSettingVM">
-    <HeaderedContentControl Header="Mode"
-                            Classes="Default">
+    <HeaderedContentControl Header="Mode">
         <ComboBox ItemsSource="{x:Static view:ViewSettingVM.ViewModes}"
                   SelectedItem="{Binding Setting.ViewMode}"/>
     </HeaderedContentControl>

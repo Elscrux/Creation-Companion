@@ -17,8 +17,7 @@
 
     <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
         <HeaderedContentControl Grid.Row="0"
-                                Header="Worldspace"
-                                Classes="Default">
+                                Header="Worldspace">
             <picker:FormKeyPicker
                 FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
                 ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"

@@ -22,16 +22,14 @@
 
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal">
-            <HeaderedContentControl Classes="Default"
-                                    Margin="5"
+            <HeaderedContentControl Margin="5"
                                     Header="EditorID">
                 <TextBox Text="{Binding EditableRecord.EditorID}"
                          Width="400"
                          HorizontalAlignment="Left"/>
             </HeaderedContentControl>
 
-            <HeaderedContentControl Classes="Default"
-                                    Margin="5"
+            <HeaderedContentControl Margin="5"
                                     Header="Name">
                 <TextBox Text="{Binding EditableRecord.NameStr}"
                          Width="400"

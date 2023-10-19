@@ -70,7 +70,6 @@
 
         <HeaderedContentControl
             Grid.Row="2"
-            Classes="Default"
             Header="References"
             IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
             Content="{Binding PlacedList}"/>

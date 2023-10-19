@@ -83,8 +83,7 @@
                 <StackPanel Orientation="Horizontal"
                             IsEnabled="{Binding EditableRecord.TrackCrime}">
                     <StackPanel>
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Exterior Jail Marker"
                                                 ToolTip.Tip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building.">
                             <picker:PlacedPickerButton
@@ -92,8 +91,7 @@
                                 LinkCache="{Binding LinkCache}"/>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Follow Wait Marker"
                                                 ToolTip.Tip="A marker near which followers will wait if the player gets sent to jail.">
                             <picker:PlacedPickerButton
@@ -101,8 +99,7 @@
                                 LinkCache="{Binding LinkCache}"/>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Stolen Goods Container"
                                                 ToolTip.Tip="The player's stolen items are put here in case of an arrest. Should point to an EvidenceChestStolenGoods reference.">
                             <picker:PlacedPickerButton
@@ -111,8 +108,7 @@
                                 LinkCache="{Binding LinkCache}"/>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Player Inventory Container"
                                                 ToolTip.Tip="Holds the player's personal items during their time in prison. Should point to an EvidenceChestPlayerInventory reference.">
                             <picker:PlacedPickerButton
@@ -121,8 +117,7 @@
                                 LinkCache="{Binding LinkCache}"/>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Jail Outfit"
                                                 ToolTip.Tip="The clothes given to the player in prison. Usually BeggarOutfit.">
                             <picker1:FormKeyPicker
@@ -131,8 +126,7 @@
                                 LinkCache="{Binding LinkCache}"/>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Shared Crime Faction List"
                                                 ToolTip.Tip="Usually points to a FormList containing all crime factions in the base game. Is used for the Companions werewolf rampage; other purposes unknown.">
                             <picker1:FormKeyPicker
@@ -158,8 +152,7 @@
                                                 Header="Crime Gold" FontSize="12"
                                                 ToolTip.Tip="Allows you to specify bounty amounts allocated for specific crimes.">
 
-                            <HeaderedContentControl Classes="Default"
-                                                    Margin="5"
+                            <HeaderedContentControl Margin="5"
                                                     Background="{DynamicResource ButtonBackground}">
                                 <HeaderedContentControl.Header>
                                     <CheckBox Content="Use Defaults"
@@ -167,8 +160,7 @@
                                 </HeaderedContentControl.Header>
 
                                 <StackPanel IsEnabled="{Binding !EditableRecord.CrimeGoldUseDefaults}">
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Murder">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Murder}"
@@ -177,8 +169,7 @@
                                             FormatString="N0"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Assault">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Assault}"
@@ -187,8 +178,7 @@
                                             FormatString="N0"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Pickpocket">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Pickpocket}"
@@ -197,8 +187,7 @@
                                             FormatString="N0"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Trespass">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Trespass}"
@@ -207,8 +196,7 @@
                                             FormatString="N0"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="StealMult">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.StealMult}"
@@ -218,8 +206,7 @@
                                             FormatString="N4"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Escape">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Escape}"
@@ -228,8 +215,7 @@
                                             FormatString="N0"/>
                                     </HeaderedContentControl>
 
-                                    <HeaderedContentControl Classes="Default"
-                                                            Margin="5"
+                                    <HeaderedContentControl Margin="5"
                                                             Header="Werewolf">
                                         <NumericUpDown
                                             Value="{Binding EditableRecord.CrimeValues.Werewolf}"

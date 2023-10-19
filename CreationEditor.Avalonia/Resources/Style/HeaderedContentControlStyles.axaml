@@ -1,12 +1,18 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20">
+        <Border Padding="20"
+                Background="PaleGreen">
             <!-- Add Controls for Previewer Here -->
+            <HeaderedContentControl Header="Header">
+                <Rectangle Fill="DeepSkyBlue"
+                           Width="100"
+                           Height="100"/>
+            </HeaderedContentControl>
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="HeaderedContentControl.Default">
+    <Style Selector="HeaderedContentControl">
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,*">

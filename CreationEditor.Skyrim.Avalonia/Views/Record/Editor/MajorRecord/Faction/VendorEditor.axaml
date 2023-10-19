@@ -39,8 +39,7 @@
                                                 Margin="5"
                                                 Header="Vendor Location" FontSize="12">
                             <StackPanel>
-                                <HeaderedContentControl Classes="Default"
-                                                        Margin="5"
+                                <HeaderedContentControl Margin="5"
                                                         Header="Location"
                                                         ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
                                     <picker:TargetPicker
@@ -59,8 +58,7 @@
                                     </picker:TargetPicker>
                                 </HeaderedContentControl>
 
-                                <HeaderedContentControl Classes="Default"
-                                                        Margin="5"
+                                <HeaderedContentControl Margin="5"
                                                         Header="Radius"
                                                         ToolTip.Tip="How close the merchant needs to be to the set location.">
                                     <NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
@@ -82,8 +80,7 @@
                                       IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                       Margin="5"/>
 
-                            <HeaderedContentControl Classes="Default"
-                                                    Margin="5"
+                            <HeaderedContentControl Margin="5"
                                                     Header="List"
                                                     ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
                                 <picker1:FormKeyPicker
@@ -104,8 +101,7 @@
                                         Margin="5"
                                         Header="Limitations" FontSize="12">
                     <StackPanel>
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5"
+                        <HeaderedContentControl Margin="5"
                                                 Header="Vendor Time Window">
                             <StackPanel Orientation="Horizontal">
                                 <controls:RangeSlider
@@ -120,8 +116,7 @@
                             </StackPanel>
                         </HeaderedContentControl>
 
-                        <HeaderedContentControl Classes="Default"
-                                                Margin="5">
+                        <HeaderedContentControl Margin="5">
                             <HeaderedContentControl.Header>
                                 <TextBlock ToolTip.Tip="Further limitations when the vendor offers goods.">
                                     Vendor Conditions

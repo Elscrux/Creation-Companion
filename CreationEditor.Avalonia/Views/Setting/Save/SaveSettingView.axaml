@@ -8,8 +8,7 @@
              x:Class="CreationEditor.Avalonia.Views.Setting.Save.SaveSettingView"
              x:CompileBindings="True" x:DataType="save:SaveSettingVM">
     <StackPanel Spacing="5">
-        <HeaderedContentControl Header="Save Location"
-                                Classes="Default">
+        <HeaderedContentControl Header="Save Location">
             <StackPanel Spacing="2">
                 <ComboBox ItemsSource="{Binding SaveLocations}"
                           SelectedItem="{Binding Settings.SaveLocation}">

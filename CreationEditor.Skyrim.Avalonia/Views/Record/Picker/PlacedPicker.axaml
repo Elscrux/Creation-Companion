@@ -16,8 +16,7 @@
 
         <HeaderedContentControl
             Grid.Row="2"
-            Header="Cell"
-            Classes="Default">
+            Header="Cell">
             <picker:FormKeyPicker
                 LinkCache="{Binding #Picker.LinkCache}"
                 FormKey="{Binding #Picker.Cell}"
@@ -27,8 +26,7 @@
 
         <HeaderedContentControl
             Grid.Row="4"
-            Header="Reference"
-            Classes="Default">
+            Header="Reference">
             <picker:FormKeyPicker
                 x:Name="FormKeyPicker"
                 LinkCache="{Binding #Picker.LinkCache}"
