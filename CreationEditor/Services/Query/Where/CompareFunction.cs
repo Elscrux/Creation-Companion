@@ -1,6 +1,6 @@
 namespace CreationEditor.Services.Query.Where;
 
-public record CompareFunction<TField, TCompareValue> : ICompareFunction {
+public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
     private readonly Func<ConditionState, TField, bool> _evaluate;
     private readonly Func<Type, IEnumerable<FieldType>> _getFields;
 
