@@ -42,68 +42,39 @@ public sealed class ConditionValueEditorTemplate : AvaloniaObject, IDataTemplate
         var fields = state.GetFields().ToArray();
         var controls = fields
             .Select<FieldType, Control?>(field => {
-                Control? primitiveControl = null;
-                Control? complexControl = null;
-                if (field.FieldCategory == FieldCategory.Value) {
-                    primitiveControl = GetPrimitiveControl(field, new Binding(ConditionState.FieldCategoryToName(field.FieldCategory)), state);
-                }
-
-                if (field.FieldCategory == FieldCategory.Collection) {
-                    if (state.SubConditions.Count == 0) {
-                        state.SubConditions.Add(ConditionFactory.Create(field.ActualType));
-                    }
-
-                    var queryConditionsView = new QueryConditionsView {
-                        ContextType = field.ActualType,
-                        QueryConditions = state.SubConditions,
-                        [!QueryConditionsView.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
-                        [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
-                    };
-
-                    complexControl = new Button {
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        VerticalAlignment = VerticalAlignment.Stretch,
-                        [!ContentControl.ContentProperty] = state.SubConditions
-                            .Select(x => x.Summary)
-                            .CombineLatest()
-                            .Select(list => string.Join(' ', list))
-                            .ToBinding(),
-                        Flyout = new Flyout {
-                            FlyoutPresenterClasses = { "Flyout750x250" },
-                            Content = WrapWithName(queryConditionsView)
+                switch (field.FieldCategory) {
+                    case FieldCategory.Value:
+                        return GetPrimitiveControl(field, new Binding(ConditionState.FieldCategoryToName(field.FieldCategory)), state);
+                    case FieldCategory.Collection: {
+                        if (state.SubConditions.Count == 0) {
+                            state.SubConditions.Add(ConditionFactory.Create(field.ActualType));
                         }
-                    };
-                }
 
-                if (complexControl is null) {
-                    return primitiveControl is not null
-                        ? fields.Length > 1
-                            ? WrapWithName(primitiveControl)
-                            : primitiveControl
-                        : new TextBlock { Text = $"No Condition is available for {state}" };
-                }
+                        var queryConditionsView = new QueryConditionsView {
+                            ContextType = field.ActualType,
+                            QueryConditions = state.SubConditions,
+                            [!QueryConditionsView.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
+                            [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
+                        };
 
-                if (primitiveControl is null) return complexControl;
-
-                // If both primitive and complex controls are available
-                // return a stack panel with both controls
-                var checkBox = new CheckBox { [ToolTip.TipProperty] = "Advanced" };
-                var checkedObservable = checkBox.GetObservable(ToggleButton.IsCheckedProperty);
-                primitiveControl[!Visual.IsVisibleProperty] = checkedObservable.Negate().ToBinding();
-                complexControl[!Visual.IsVisibleProperty] = checkedObservable.ToBinding();
-                var stackPanel = new StackPanel {
-                    Orientation = Orientation.Horizontal,
-                    Children = {
-                        checkBox,
-                        new StackPanel {
-                            Orientation = Orientation.Horizontal,
-                            Children = { primitiveControl, complexControl }
-                        }
+                        return new Button {
+                            HorizontalAlignment = HorizontalAlignment.Stretch,
+                            VerticalAlignment = VerticalAlignment.Stretch,
+                            [!ContentControl.ContentProperty] = state.SubConditions
+                                .Select(x => x.Summary)
+                                .CombineLatest()
+                                .ThrottleMedium()
+                                .Select(list => string.Join(' ', list))
+                                .ToBinding(),
+                            Flyout = new Flyout {
+                                FlyoutPresenterClasses = { "Flyout750x250" },
+                                Content = WrapWithName(queryConditionsView)
+                            }
+                        };
                     }
-                };
-                return fields.Length > 1
-                    ? WrapWithName(stackPanel)
-                    : stackPanel;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 Control WrapWithName(Control c) {
                     return fields.Length > 1
