@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Definitions;
-using DynamicData.Binding;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
@@ -58,7 +56,7 @@ public partial class EventDataPicker : ActivatableUserControl {
         // Force the event member to be the right type when the list of event members changes
         this.WhenAnyValue(x => x.EventMembers)
             .DistinctUntilChanged()
-            .CombineLatest(EventMembers.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (x, _) => x)
+            .UpdateWhenCollectionChanges(EventMembers)
             .Subscribe(eventMembers => {
                 // Force convert the event member to the right enum type
                 if (EventMember is null) {

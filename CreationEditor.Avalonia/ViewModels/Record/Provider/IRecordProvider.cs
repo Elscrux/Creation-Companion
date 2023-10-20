@@ -5,7 +5,6 @@ using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
-using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
 
 public interface IRecordProvider : IDisposable {

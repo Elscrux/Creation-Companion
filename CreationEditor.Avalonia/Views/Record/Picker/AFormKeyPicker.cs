@@ -17,7 +17,6 @@ using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
-using DynamicData.Binding;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
@@ -316,7 +315,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .ToObservableCollection(ActivatedDisposable);
 
         var scopedRecordsChanged = this.WhenAnyValue(x => x.ScopedRecords)
-            .CombineLatest(scopedRecordsCollection.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (idents, _) => idents);
+            .UpdateWhenCollectionChanges(scopedRecordsCollection);
 
         this.WhenAnyValue(x => x.FormKey)
             .DistinctUntilChanged()

@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DynamicData;
@@ -14,6 +16,19 @@ public static class ObservableExtension {
 
     public static IObservable<T> ThrottleMedium<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
     public static IObservable<T> ThrottleShort<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler);
+
+    public static IObservable<Unit> WhenCollectionChanges(this INotifyCollectionChanged source) => source.ObserveCollectionChanges().Unit().StartWith(Unit.Default);
+
+    public static IObservable<T> UpdateWhenCollectionChanges<T>(this IObservable<T> observable, INotifyCollectionChanged collection) {
+        return observable.CombineLatest(collection.WhenCollectionChanges(), (t, _) => t);
+    }
+
+    public static IObservable<T> SelectWhenCollectionChanges<T>(this INotifyCollectionChanged source, Func<IObservable<T>> selector) {
+        return source
+            .WhenCollectionChanges()
+            .Select(_ => selector())
+            .Switch();
+    }
 
     public static IObservable<T> DoOnGuiAndSwitchBack<T>(this IObservable<T> obs, Action<T> onNext) {
         return obs

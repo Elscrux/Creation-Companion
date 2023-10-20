@@ -175,16 +175,12 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                     GroupInstance groupInstance => new Button {
                         DataContext = groupInstance,
                         [!Visual.IsVisibleProperty] = groupInstance.Items
-                            .ObserveCollectionChanges().Unit()
-                            .StartWith(Unit.Default)
-                            .Select(_ => {
+                            .SelectWhenCollectionChanges(() => {
                                 return CheckRec(groupInstance.Items);
 
                                 // Check if any children have diffs
                                 IObservable<bool> CheckRec(IObservableCollection<object> objects) {
-                                    var collectionChanges = objects
-                                        .ObserveCollectionChanges().Unit()
-                                        .StartWith(Unit.Default);
+                                    var collectionChanges = objects.WhenCollectionChanges();
 
                                     if (objects.FirstOrDefault() is TextReference) {
                                         return collectionChanges
@@ -204,19 +200,14 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                                         .Switch();
                                 }
                             })
-                            .Switch()
                             .ToBinding(),
                         [!ContentControl.ContentProperty] = groupInstance.Items
-                            .ObserveCollectionChanges().Unit()
-                            .StartWith(Unit.Default)
-                            .Select(_ => {
+                            .SelectWhenCollectionChanges(() => {
                                 return CheckRec(groupInstance.Items);
 
                                 // Sum of children with diffs
                                 IObservable<int> CheckRec(IObservableCollection<object> objects) {
-                                    var collectionChanges = objects
-                                        .ObserveCollectionChanges().Unit()
-                                        .StartWith(Unit.Default);
+                                    var collectionChanges = objects.WhenCollectionChanges();
 
                                     if (objects.FirstOrDefault() is TextReference) {
                                         return collectionChanges
@@ -236,7 +227,6 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                                         .Switch();
                                 }
                             })
-                            .Switch()
                             .Select(count => $"Replace {count}")
                             .ToBinding(),
                         Command = ReactiveCommand.CreateFromTask(async () => {

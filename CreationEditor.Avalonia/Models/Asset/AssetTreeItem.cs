@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO.Abstractions;
-using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Services.Asset;
@@ -55,12 +54,9 @@ public sealed class AssetTreeItem : IAsset {
     public IObservable<bool> AnyOrphaned => _anyOrphaned ?? LoadAnyOrphaned();
     private IObservable<bool> LoadAnyOrphaned() {
         _anyOrphaned = Children
-            .ObserveCollectionChanges().Unit()
-            .StartWith(Unit.Default)
-            .Select(_ => Asset is AssetFile file
+            .SelectWhenCollectionChanges(() => Asset is AssetFile file
                 ? file.ReferencedAsset.ReferenceCount.Select(x => x == 0)
-                : Observable.Return(false))
-            .Switch();
+                : Observable.Return(false));
 
         return _anyOrphaned;
     }
@@ -73,8 +69,7 @@ public sealed class AssetTreeItem : IAsset {
         Asset = asset;
 
         // AnyOrphaned = Children
-        //     .ObserveCollectionChanges().Unit()
-        //     .StartWith(Unit.Default)
+        //     .WhenCollectionChanges()
         //     .Select(_ => Asset is Asset file
         //         ? file.ReferencedAsset.ReferenceCount.Select(x => x == 0)
         //         : Observable.Return(false))

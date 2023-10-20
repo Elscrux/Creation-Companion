@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia;
 using CreationEditor.Avalonia;
@@ -11,7 +10,6 @@ using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
 using CreationEditor.Skyrim.Avalonia.Resources.Converter;
 using DynamicData;
-using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -188,7 +186,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                 x => x.LinkCache,
                 (cell, filter, linkCache) => (Cell: cell, Filter: filter, LinkCache: linkCache))
             .DistinctUntilChanged()
-            .CombineLatest(PlacedRecords.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (idents, _) => idents);
+            .UpdateWhenCollectionChanges(PlacedRecords);
 
         // Update resolved placed when placed or placed records change
         this.WhenAnyValue(
@@ -196,7 +194,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                 x => x.PlacedRecords,
                 (placed, placedRecords) => (Placed: placed, PlacedRecords: placedRecords))
             .DistinctUntilChanged()
-            .CombineLatest(PlacedRecords.ObserveCollectionChanges().Unit().StartWith(Unit.Default), (x, _) => x)
+            .UpdateWhenCollectionChanges(PlacedRecords)
             .ObserveOnTaskpool()
             .Select(x => new List<IMajorRecordGetter>(x.PlacedRecords).FirstOrDefault(y => y.FormKey == x.Placed) as IPlacedGetter)
             .ObserveOnGui()

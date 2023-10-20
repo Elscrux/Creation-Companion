@@ -4,7 +4,6 @@ using Avalonia.Controls.Selection;
 using Avalonia.Xaml.Interactivity;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
-using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 
 public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeDataGrid> {
