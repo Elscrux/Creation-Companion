@@ -50,6 +50,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             .Switch()
             .StartWith(Array.Empty<string>())
             .CombineLatest(selectionChanged, (list, x) => list.Any()
+            .ThrottleMedium()
                 ? $"""
                    From {x.From?.Name ?? "None"}
                    Where

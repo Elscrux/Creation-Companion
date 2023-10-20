@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Query;
 using DynamicData.Binding;
@@ -19,6 +20,7 @@ public sealed class QueryColumnVM : ViewModel {
 
         CancellationTokenSource? lastCancellationTokenSource = null;
         QueryVM.QueryRunner.SettingsChanged
+            .ThrottleMedium()
             .Subscribe(_ => {
                 lastCancellationTokenSource?.Cancel();
                 var cancellationTokenSource = lastCancellationTokenSource = new CancellationTokenSource();
