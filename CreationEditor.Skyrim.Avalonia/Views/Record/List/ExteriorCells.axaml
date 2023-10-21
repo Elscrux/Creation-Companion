@@ -21,7 +21,7 @@
             <picker:FormKeyPicker
                 FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
                 ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
-                LinkCache="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache}"
+                LinkCache="{Binding ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache}"
                 MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
         </HeaderedContentControl>
 
@@ -51,11 +51,11 @@
 
         <record:RecordBrowserSettingsView
             Grid.Row="6"
-            Settings="{ReflectionBinding ExteriorCellsProvider.RecordBrowserSettings}"/>
+            Settings="{Binding ExteriorCellsProvider.RecordBrowserSettings}"/>
 
         <record:RecordList
             Grid.Row="8"
-            DataContext="{ReflectionBinding #Control.ViewModel.RecordListVM}"
+            DataContext="{Binding RecordListVM}"
             Columns="{ReflectionBinding #Control.ViewModel.ExteriorListColumns}"/>
     </Grid>
 </UserControl>

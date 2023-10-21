@@ -138,9 +138,9 @@
                         <Setter Property="Header"
                                 Value="{Binding Name}"/>
                         <Setter Property="HotKey"
-                                Value="{ReflectionBinding KeyGesture}"/>
+                                Value="{Binding KeyGesture}"/>
                         <Setter Property="InputGesture"
-                                Value="{ReflectionBinding KeyGesture}"/>
+                                Value="{Binding KeyGesture}"/>
                         <Setter Property="Icon"
                                 Value="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"/>
                         <Setter Property="Command"

@@ -15,11 +15,11 @@
     <Grid RowDefinitions="Auto,*">
         <record:RecordBrowserSettingsView
             Grid.Row="0"
-            Settings="{ReflectionBinding PlacedProvider.RecordBrowserSettings}"/>
+            Settings="{Binding PlacedProvider.RecordBrowserSettings}"/>
 
         <record:RecordList
             Grid.Row="1"
-            DataContext="{ReflectionBinding #Control.ViewModel.RecordListVM}"
+            DataContext="{Binding RecordListVM}"
             Columns="{ReflectionBinding #Control.ViewModel.PlacedListColumns}"/>
     </Grid>
 </UserControl>

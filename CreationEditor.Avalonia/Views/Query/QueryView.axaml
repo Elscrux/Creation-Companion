@@ -5,6 +5,7 @@
              xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Query"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Query"
              xmlns:select="clr-namespace:CreationEditor.Services.Query.Select;assembly=CreationEditor"
+             xmlns:from="clr-namespace:CreationEditor.Services.Query.From;assembly=CreationEditor"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Query.QueryView"
              x:CompileBindings="True" x:DataType="vm:QueryVM">
@@ -18,7 +19,7 @@
                              IsTextCompletionEnabled="True"
                              FilterMode="ContainsOrdinal"
                              MaxDropDownHeight="750"
-                             ValueMemberBinding="{ReflectionBinding Name}">
+                             ValueMemberBinding="{Binding Name, DataType=from:QueryFromItem}">
             </AutoCompleteBox>
             <TextBlock Text=" records"/>
         </StackPanel>

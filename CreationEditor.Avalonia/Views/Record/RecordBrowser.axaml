@@ -93,7 +93,7 @@
         <GridSplitter Grid.Column="1"/>
 
         <record:RecordList Grid.Column="2"
-                           DataContext="{ReflectionBinding #Browser.ViewModel.RecordListVM}"
-                           Columns="{ReflectionBinding #Browser.ViewModel.RecordListVM.Columns}"/>
+                           DataContext="{Binding RecordListVM}"
+                           Columns="{Binding Columns}"/>
     </Grid>
 </UserControl>
