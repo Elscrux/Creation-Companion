@@ -29,12 +29,15 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
         QueryFrom = queryFromFactory.CreateFromRecordType();
 
-        var conditionChanges = QueryConditions
-            .ObserveCollectionChanges()
-            .Select(_ => QueryConditions.Select(x => x.ConditionChanged).Merge())
+        var observeCollectionChanges = QueryConditions.ObserveCollectionChanges();
+        var conditionChanges = observeCollectionChanges
+            .Select(_ => {
+                return QueryConditions
+                    .Select(x => x.ConditionChanged)
+                    .Merge();
+            })
             .Switch()
-            .Merge(QueryConditions
-                .ObserveCollectionChanges()
+            .Merge(observeCollectionChanges
                 .Unit());
 
         var selectionChanged = this.WhenAnyValue(
@@ -46,22 +49,25 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         SettingsChanged = conditionChanges.Merge(selectionChanged.Unit());
 
         Summary = conditionChanges
-            .Select(_ => QueryConditions.Select(c => c.Summary).CombineLatest())
+            .Select(_ => QueryConditions
+                .Select(c => c.Summary)
+                .CombineLatest()
+                .StartWith(Array.Empty<string>()))
             .Switch()
-            .StartWith(Array.Empty<string>())
-            .CombineLatest(selectionChanged, (list, x) => list.Any()
+            .CombineLatest(selectionChanged, (conditions, query) => (Conditions: conditions, Query: query))
             .ThrottleMedium()
+            .Select(x => x.Conditions.Any()
                 ? $"""
-                   From {x.From?.Name ?? "None"}
+                   From {x.Query.From?.Name ?? "None"}
                    Where
-                   {string.Join('\n', list)}
-                   Order By {x.OrderBy?.Name ?? "None"}
-                   Select {x.Select?.Name ?? "None"}
+                   {string.Join('\n', x.Conditions)}
+                   Order By {x.Query.OrderBy?.Name ?? "None"}
+                   Select {x.Query.Select?.Name ?? "None"}
                    """
                 : $"""
-                   From {x.From?.Name ?? "None"}
-                   Order By {x.OrderBy?.Name ?? "None"}
-                   Select {x.Select?.Name ?? "None"}
+                   From {x.Query.From?.Name ?? "None"}
+                   Order By {x.Query.OrderBy?.Name ?? "None"}
+                   Select {x.Query.Select?.Name ?? "None"}
                    """);
 
         this.WhenAnyValue(x => x.QueryFrom.SelectedItem)

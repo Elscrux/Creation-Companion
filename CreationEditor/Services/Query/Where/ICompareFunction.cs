@@ -2,7 +2,7 @@
 
 public interface ICompareFunction {
     string Operator { get; }
-    IEnumerable<FieldType> GetFields(Type actualType);
+    IFieldInformation? GetField(Type actualType);
 
     bool Evaluate(ConditionState conditionState, object fieldValue);
 }

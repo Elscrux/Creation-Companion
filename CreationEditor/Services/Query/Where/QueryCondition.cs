@@ -35,14 +35,15 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         Type? recordType = null) {
         _queryConditionFactory = queryConditionFactory;
         FieldSelector.RecordType = recordType;
-        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
+        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
 
-        var subConditionsChanged = this.WhenAnyValue(x => x.ConditionState)
-            .Select(x => x.SubConditions.ObserveCollectionChanges())
-            .Switch()
-            .Select(_ => ConditionState.SubConditions
-                .Select(x => x.ConditionChanged)
-                .Merge())
+        var conditionStateChanges = this.WhenAnyValue(x => x.ConditionState);
+
+        var subConditionsChanged = conditionStateChanges
+            .Select(s => s.SubConditions.SelectWhenCollectionChanges(
+                () => s.SubConditions
+                    .Select(x => x.ConditionChanged)
+                    .Merge()))
             .Switch();
 
         var functionChanged = this.WhenAnyValue(x => x.SelectedCompareFunction);
@@ -65,7 +66,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
                 CompareFunctions.Clear();
                 CompareFunctions.AddRange(compareFunctionFactory.Get(field.Type));
                 SelectedCompareFunction = CompareFunctions.FirstOrDefault();
-                ConditionState = new ConditionState(SelectedCompareFunction, field.Type);
+                ConditionState = new ConditionState(SelectedCompareFunction, field.Type, _queryConditionFactory);
             })
             .DisposeWith(_disposables);
 
@@ -76,12 +77,12 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
 
                 // Don't update if the fields are the same
                 if (function.Previous is not null && function.Current is not null) {
-                    var old = function.Previous.GetFields(FieldSelector.SelectedField.Type);
-                    var updated = function.Current.GetFields(FieldSelector.SelectedField.Type);
-                    if (old.SequenceEqual(updated)) return;
+                    var old = function.Previous.GetField(FieldSelector.SelectedField.Type);
+                    var updated = function.Current.GetField(FieldSelector.SelectedField.Type);
+                    if (Equals(old, updated)) return;
                 }
 
-                ConditionState = new ConditionState(function.Current, FieldSelector.SelectedField?.Type);
+                ConditionState = new ConditionState(function.Current, FieldSelector.SelectedField?.Type, _queryConditionFactory);
             })
             .DisposeWith(this);
 
@@ -92,24 +93,18 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
                 x => x.SelectedCompareFunction,
                 x => x.ConditionState.CompareValue,
                 (field, negate, or, function, compareValue) => (Field: field, Negate: negate, Or: or, Function: function, CompareValue: compareValue))
-            .CombineLatest(this.WhenAnyValue(x => x.ConditionState)
-                    .Select(x => x.SubConditions.ObserveCollectionChanges())
-                    .Switch()
-                    .Select(_ => ConditionState.SubConditions
-                        .Select(x => x.Summary)
-                        .Merge())
+            .CombineLatest(conditionStateChanges
+                    .Select(s => s.SubConditions.SelectWhenCollectionChanges(() => s.Summary.Select(x => (Summary: x, State: s))))
                     .Switch(),
-                (x, condition) =>
-                    x.Field?.Name
-                  + (x.Negate ? " Not " : " ")
-                  + (x.Function is null
-                        ? string.Empty
-                        : x.CompareValue is null
-                            // Sub Conditions
-                            ? condition
-                            // Compare Value
-                            : x.Function?.Operator + " " + x.CompareValue)
-                  + (x.Or ? " Or " : " And "));
+                (condition, x) => (Condition: condition, x.Summary, x.State))
+            .Select(x =>
+                x.Condition.Field?.Name
+              + (x.Condition.Negate ? " Not " : " ")
+              + (x.Condition.Function is null
+                    ? string.Empty
+                    : $"{x.Condition.Function.Operator} {(x.Summary.Count > 0
+                        ? $"({x.State.GetFullSummary(x.Summary)})"
+                        : x.Condition.CompareValue)}"));
     }
 
     public bool Evaluate(object? obj) {
@@ -138,7 +133,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
 
         // Function and Compare Value
-        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
+        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
         CompareValue = memento.CompareValue;
         SubConditions.AddRange(memento.SubConditions.Select(x => {
             var queryCondition = _queryConditionFactory.Create();

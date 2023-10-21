@@ -1,7 +1,6 @@
-﻿using System.Drawing;
+﻿using System.Reactive.Linq;
+using System.Text;
 using DynamicData.Binding;
-using Mutagen.Bethesda.Plugins;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Where;
@@ -13,41 +12,36 @@ public sealed class ConditionState : ReactiveObject {
     [Reactive] public object? CompareValue { get; set; }
     public IObservableCollection<IQueryCondition> SubConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
 
-    public ConditionState(ICompareFunction? selectedCompareFunction, Type? underlyingType) {
+    public ConditionState(ICompareFunction? selectedCompareFunction, Type? underlyingType, IQueryConditionFactory queryConditionFactory) {
         _selectedCompareFunction = selectedCompareFunction;
         _underlyingType = underlyingType;
+
+        var fieldInformation = GetField();
+        if (fieldInformation is CollectionFieldInformation collection) {
+            SubConditions.Add(queryConditionFactory.Create(collection.ElementType));
+        }
     }
 
-    public IEnumerable<FieldType> GetFields() {
-        if (_underlyingType is null || _selectedCompareFunction is null) return Array.Empty<FieldType>();
+    public IFieldInformation? GetField() {
+        if (_underlyingType is null || _selectedCompareFunction is null) return null;
 
-        return _selectedCompareFunction.GetFields(_underlyingType);
+        return _selectedCompareFunction.GetField(_underlyingType);
     }
 
-    public static string FieldCategoryToName(FieldCategory category) {
-        return category switch {
-            FieldCategory.Value => nameof(CompareValue),
-            FieldCategory.Collection => nameof(SubConditions),
-            _ => throw new ArgumentOutOfRangeException(nameof(category), category, null)
-        };
-    }
+    public IObservable<IList<string>> Summary => SubConditions
+        .Select(x => x.Summary)
+        .CombineLatest()
+        .StartWith(Array.Empty<string>());
 
-    public static bool IsPrimitiveType(Type type) {
-        return type == typeof(FormKey)
-         || type.InheritsFrom(typeof(IFormLinkGetter))
-         || type.InheritsFrom(typeof(Enum))
-         || type == typeof(Color)
-         || type == typeof(bool)
-         || type == typeof(string)
-         || type == typeof(int)
-         || type == typeof(uint)
-         || type == typeof(long)
-         || type == typeof(ulong)
-         || type == typeof(short)
-         || type == typeof(ushort)
-         || type == typeof(float)
-         || type == typeof(double)
-         || type == typeof(sbyte)
-         || type == typeof(byte);
+    public string GetFullSummary(IList<string> summaries) {
+        if (summaries.Count > SubConditions.Count) return string.Empty;
+
+        var sb = new StringBuilder();
+        for (var i = 0; i < summaries.Count - 1; i++) {
+            sb.Append(summaries[i]);
+            sb.Append(SubConditions[i].IsOr ? " Or " : " And ");
+        }
+        sb.Append(summaries[^1]);
+        return sb.ToString();
     }
 }

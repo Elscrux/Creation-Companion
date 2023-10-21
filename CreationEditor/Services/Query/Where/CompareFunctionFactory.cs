@@ -25,7 +25,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         if (genericArguments.Length > 1) return false;
 
         var genericArgument = genericArguments[0];
-        return ConditionState.IsPrimitiveType(genericArgument);
+        return IFieldInformation.IsValueType(genericArgument);
     }
     private static bool DictionaryAccepts(Type type) {
         var genericArguments = type.GetGenericArguments();
@@ -36,11 +36,9 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         ILinkCacheProvider linkCacheProvider) {
 
         // Simple List
-        Func<Type, IEnumerable<FieldType>> simpleListFieldOverride = type => {
+        Func<Type, IFieldInformation> simpleListFieldOverride = type => {
             var listType = type.GetGenericArguments()[0];
-            return new FieldType[] {
-                new(listType, listType, FieldCategory.Value)
-            };
+            return new ValueFieldInformation(listType, listType);
         };
 
         RegisterCompareFunction(
@@ -58,9 +56,9 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             -50);
 
         // Dictionary
-        Func<Type, IEnumerable<FieldType>> dictionaryFieldOverride = type => {
+        Func<Type, IFieldInformation> dictionaryFieldOverride = type => {
             var keyValueType = typeof(IKeyValue<,>).MakeGenericType(type.GetGenericArguments());
-            return new FieldType[] { new(typeof(IEnumerable), keyValueType, FieldCategory.Collection) };
+            return new CollectionFieldInformation(typeof(IEnumerable), keyValueType);
         };
         RegisterCompareFunction(new ICompareFunction[] {
                 new CompareFunction<IEnumerable, object>(

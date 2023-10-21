@@ -153,9 +153,9 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     new FuncDataTemplate<IQueryCondition>((condition, _) => {
                         if (condition is null) return null;
 
-                        var valueEditorTemplate = new ConditionValueEditorTemplate {
-                            [!ConditionValueEditorTemplate.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding(),
-                            [!ConditionValueEditorTemplate.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
+                        var valueEditorTemplate = new QueryConditionFieldEditorTemplate {
+                            [!QueryConditionFieldEditorTemplate.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding(),
+                            [!QueryConditionFieldEditorTemplate.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
                         };
 
                         var contentControl = new ContentControl {

@@ -2,7 +2,7 @@ namespace CreationEditor.Services.Query.Where;
 
 public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
     private readonly Func<ConditionState, TField, bool> _evaluate;
-    private readonly Func<Type, IEnumerable<FieldType>> _getFields;
+    private readonly Func<Type, IFieldInformation> _getField;
 
     public string Operator { get; }
 
@@ -11,7 +11,7 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
     /// </summary>
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
-    /// <param name="fieldCategory">Determines the fields that should be used by default</param>
+    /// <param name="fieldCategory">Determines the field category which is used to edit the set value</param>
     /// <exception cref="ArgumentOutOfRangeException">Invalid field category</exception>
     public CompareFunction(
         string @operator,
@@ -19,7 +19,7 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
         FieldCategory fieldCategory = FieldCategory.Value) {
         Operator = @operator;
         _evaluate = evaluate;
-        _getFields = fieldCategory switch {
+        _getField = fieldCategory switch {
             FieldCategory.Value => ValueFields,
             FieldCategory.Collection => CollectionFields,
             _ => throw new ArgumentOutOfRangeException(nameof(fieldCategory), fieldCategory, null)
@@ -31,15 +31,15 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
     /// </summary>
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
-    /// <param name="getFields">Custom function to determine which fields should be used</param>
+    /// <param name="getField">Custom function to determine which field should be used</param>
     /// <exception cref="ArgumentOutOfRangeException">Invalid field category</exception>
     public CompareFunction(
         string @operator,
         Func<ConditionState, TField, bool> evaluate,
-        Func<Type, IEnumerable<FieldType>> getFields) {
+        Func<Type, IFieldInformation> getField) {
         Operator = @operator;
         _evaluate = evaluate;
-        _getFields = getFields;
+        _getField = getField;
     }
 
     /// <inheritdoc/>
@@ -63,7 +63,7 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
             }
         }) {}
 
-    public IEnumerable<FieldType> GetFields(Type actualType) => _getFields(actualType);
+    public IFieldInformation GetField(Type actualType) => _getField(actualType);
 
     public bool Evaluate(ConditionState conditionState, object fieldValue) {
         if (fieldValue is TField fieldT) {
@@ -72,11 +72,11 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
         return false;
     }
 
-    private static IEnumerable<FieldType> ValueFields(Type type) {
-        yield return new FieldType(typeof(TCompareValue), type, FieldCategory.Value);
+    private static IFieldInformation ValueFields(Type type) {
+        return new ValueFieldInformation(typeof(TCompareValue), type);
     }
-    private static IEnumerable<FieldType> CollectionFields(Type type) {
+    private static IFieldInformation CollectionFields(Type type) {
         var listType = type.GetGenericArguments().FirstOrDefault() ?? type;
-        yield return new FieldType(listType, listType, FieldCategory.Collection);
+        return new CollectionFieldInformation(listType, listType);
     }
 }
