@@ -12,10 +12,25 @@ public sealed class ConditionState : ReactiveObject {
     [Reactive] public object? CompareValue { get; set; }
     public IObservableCollection<IQueryCondition> SubConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
 
-    public ConditionState(ICompareFunction? selectedCompareFunction, Type? underlyingType, IQueryConditionFactory queryConditionFactory) {
+    /// <summary>
+    /// Create a new condition state.
+    /// </summary>
+    /// <param name="selectedCompareFunction">Condition compare function</param>
+    /// <param name="underlyingType">Type of field</param>
+    public ConditionState(
+        ICompareFunction? selectedCompareFunction,
+        Type? underlyingType) {
         _selectedCompareFunction = selectedCompareFunction;
         _underlyingType = underlyingType;
+    }
 
+    /// <inheritdoc />
+    /// <param name="queryConditionFactory">Factory to initialize a first field</param>
+    public ConditionState(
+        ICompareFunction? selectedCompareFunction,
+        Type? underlyingType,
+        IQueryConditionFactory queryConditionFactory)
+        : this(selectedCompareFunction, underlyingType) {
         var fieldInformation = GetField();
         if (fieldInformation is CollectionFieldInformation collection) {
             SubConditions.Add(queryConditionFactory.Create(collection.ElementType));

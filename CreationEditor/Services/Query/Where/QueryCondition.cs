@@ -133,7 +133,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
 
         // Function and Compare Value
-        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
+        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
         CompareValue = memento.CompareValue;
         SubConditions.AddRange(memento.SubConditions.Select(x => {
             var queryCondition = _queryConditionFactory.Create();
