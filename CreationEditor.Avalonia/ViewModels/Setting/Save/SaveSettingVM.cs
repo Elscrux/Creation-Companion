@@ -77,8 +77,8 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
         });
     }
 
-    public void OnStartup() => Apply();
-
+    public void PreStartup() {}
+    public void PostStartupAsync(CancellationToken token) => Apply();
     public void OnExit() {}
 
     public void Apply() {

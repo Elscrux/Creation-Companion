@@ -7,6 +7,7 @@ public sealed class PluginServiceStartup : ILifecycleTask {
         _pluginService = pluginService;
     }
 
-    public void OnStartup() => _pluginService.ReloadPlugins();
+    public void PreStartup() {}
+    public void PostStartupAsync(CancellationToken token) => _pluginService.ReloadPlugins();
     public void OnExit() {}
 }

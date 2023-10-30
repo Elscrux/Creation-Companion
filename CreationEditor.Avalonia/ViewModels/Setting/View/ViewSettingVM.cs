@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Settings.View;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
@@ -28,12 +29,14 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
             .ToDictionary(template => template.ViewMode, template => template);
     }
 
-    public void OnStartup() {
+    public void PreStartup() {}
+
+    public void PostStartupAsync(CancellationToken token) {
         if (Application.Current is null) throw new AppDomainUnloadedException("Application not started successfully");
 
         Application.Current.Resources.MergedDictionaries.Add(_viewModeResourceDictionary);
 
-        Apply();
+        Dispatcher.UIThread.Post(Apply);
     }
 
     public void OnExit() {}

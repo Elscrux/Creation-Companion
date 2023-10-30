@@ -21,8 +21,8 @@ public sealed class AutoSaveSettingVM : ViewModel, ISetting, ILifecycleTask {
         Settings = settingsImporter.Import(this) ?? new AutoSaveSettings();
     }
 
-    public void OnStartup() => _autoSaveService.SetSettings(Settings);
-
+    public void PreStartup() {}
+    public void PostStartupAsync(CancellationToken token) => _autoSaveService.SetSettings(Settings);
     public void OnExit() {}
 
     public void Apply() => _autoSaveService.SetSettings(Settings);

@@ -5,7 +5,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <ApplicationIcon>CreationEditor.ico</ApplicationIcon>
+        <ApplicationIcon>..\CreationEditor.Avalonia\Assets\Logo.ico</ApplicationIcon>
         <AssemblyName>Creation Companion</AssemblyName>
         <RootNamespace>CreationEditor.Skyrim.Avalonia</RootNamespace>
     </PropertyGroup>
@@ -47,6 +47,12 @@
       <Compile Update="Resources\DataTemplates\EnumDataTemplate.cs">
         <DependentUpon>ICustomConditionValueDataTemplate.cs</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\CreationEditor.Avalonia\Assets\Logo.ico">
+        <Link>Logo.ico</Link>
+      </None>
     </ItemGroup>
 
     <PropertyGroup>

@@ -12,6 +12,7 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Reference;
+using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Filter;
@@ -20,13 +21,14 @@ using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
+using FluentAvalonia.UI.Windowing;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
     protected override void Load(ContainerBuilder builder) {
         // General
-        builder.RegisterType<Lifecycle>()
-            .As<ILifecycle>();
+        builder.RegisterType<LifecycleStartup>()
+            .As<ILifecycleStartup>();
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         builder.RegisterAssemblyTypes(assemblies)
@@ -114,6 +116,10 @@ public sealed class MainModule : Module {
         // View Model
         builder.RegisterType<MainVM>()
             .SingleInstance();
+
+        builder.RegisterType<StartupSplashScreen>()
+            .As<ISplashScreenVM>()
+            .As<IApplicationSplashScreen>();
 
         builder.RegisterType<ModSelectionVM>();
 

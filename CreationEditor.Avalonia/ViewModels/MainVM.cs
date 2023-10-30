@@ -18,6 +18,9 @@ using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Plugin;
+using DynamicData.Binding;
+using FluentAvalonia.UI.Windowing;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
@@ -32,7 +35,32 @@ public sealed class MainVM : ViewModel {
 
     public IDockingManagerService DockingManagerService { get; }
     public IPluginService? PluginService { get; }
-    public IList<IMenuPluginDefinition>? MenuBarPlugins { get; }
+    public IObservableCollection<IMenuPluginDefinition> MenuBarPlugins { get; } = new ObservableCollectionExtended<IMenuPluginDefinition>();
+    public IObservableCollection<string> Actions { get; } = new ObservableCollectionExtended<string>() {
+        "Save",
+        "Save As",
+        "Save All",
+        "Close",
+        "Close All",
+        "Close All But This",
+        "Exit",
+        "Undo",
+        "Redo",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Delete",
+        "Select All",
+        "Find",
+        "Find Next",
+        "Find Previous",
+        "Open Record",
+        "Open Record in New Tab",
+        "Open Record in New Window",
+        "Create Record",
+        "Create Record in New Tab",
+        "Create Record in New Window",
+    };
 
     public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
     public ReactiveCommand<IMenuPluginDefinition, Unit> OpenPlugin { get; }
@@ -56,13 +84,20 @@ public sealed class MainVM : ViewModel {
         MainWindow mainWindow,
         IPluginService? pluginService,
         IModSaveService modSaveService,
+        IApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
         _modSelectionVM = modSelectionVM;
         NotificationVM = notificationVM;
         BusyService = busyService;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
-        MenuBarPlugins = PluginService?.Plugins.OfType<IMenuPluginDefinition>().ToList();
+        mainWindow.SplashScreen = splashScreen;
+
+        PluginService?.PluginsLoaded
+            .Subscribe(newPlugins => {
+                MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>());
+            })
+            .DisposeWith(this);
 
         OpenSelectMods = ReactiveCommand.Create(() => ShowModSelection());
 

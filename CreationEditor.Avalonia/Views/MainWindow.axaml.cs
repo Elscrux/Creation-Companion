@@ -22,6 +22,9 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
     public MainWindow() {
         InitializeComponent();
 
+        TitleBar.ExtendsContentIntoTitleBar = true;
+        TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
+
         this.GetObservable(DataContextProperty).Subscribe(OnDataContextChanged);
         this.GetObservable(ViewModelProperty).Subscribe(OnViewModelChanged);
     }

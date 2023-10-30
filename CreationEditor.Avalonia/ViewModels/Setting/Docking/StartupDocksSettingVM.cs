@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Reactive;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Models.Settings.Docking;
@@ -48,11 +49,13 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
         _dockFactory.Open(startupDock.DockElement, startupDock.DockMode, startupDock.Dock);
     }
 
-    public void OnStartup() {
+    public void PreStartup() {}
+
+    public void PostStartupAsync(CancellationToken token) => Dispatcher.UIThread.Post(() => {
         foreach (var startupDock in Settings.Docks) {
             Start(startupDock);
         }
-    }
+    });
 
     public void OnExit() {}
 

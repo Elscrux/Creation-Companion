@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Reactive.Subjects;
 using System.Reflection;
 using Autofac;
 using Mutagen.Bethesda.Plugins.Records;
@@ -16,8 +17,13 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
     private readonly ILifetimeScope _lifetimeScope;
     private readonly List<ILifetimeScope> _pluginScopes = new();
     private readonly PluginContext _pluginContext = new(new Version(1, 0));
+    private readonly List<IPlugin> _plugins = new();
 
-    public IReadOnlyList<IPluginDefinition> Plugins { get; private set; } = null!;
+    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsLoaded = new();
+    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsLoaded => _pluginsLoaded;
+
+    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsUnloaded = new();
+    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnloaded => _pluginsUnloaded;
 
     public AutofacPluginService(
         IFileSystem fileSystem,
@@ -47,7 +53,7 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
         }
 
         // Collect plugins objects from files
-        Plugins = pluginPaths
+        var newPlugins = pluginPaths
             .SelectMany(pluginPath => {
                 var assembly = Assembly.LoadFrom(pluginPath);
                 var plugins = assembly is null ? Array.Empty<IPlugin>() : CreatePlugins(assembly).ToArray();
@@ -58,11 +64,15 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
                 return plugins;
             })
             .NotNull()
-            .ToList();
+            .ToArray();
 
-        foreach (var plugin in Plugins.OfType<IPlugin>()) {
+        _plugins.AddRange(newPlugins);
+
+        foreach (var plugin in _plugins.OfType<IPlugin>()) {
             plugin.OnRegistered();
         }
+
+        _pluginsLoaded.OnNext(newPlugins);
     }
 
     private IEnumerable<IPlugin> CreatePlugins(Assembly assembly) {
@@ -88,9 +98,13 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
     }
 
     private void UnregisterPlugins() {
-        foreach (var plugin in Plugins.OfType<IPlugin>()) {
+        foreach (var plugin in _plugins.OfType<IPlugin>()) {
             plugin.OnUnregistered();
         }
+
+        _pluginsUnloaded.OnNext(_plugins);
+
+        _plugins.Clear();
     }
 
     public void Dispose() {

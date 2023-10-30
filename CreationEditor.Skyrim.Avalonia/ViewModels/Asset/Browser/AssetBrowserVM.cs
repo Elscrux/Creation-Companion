@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -311,14 +312,16 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             AssetTreeSource.RowSelection.Select(pathIndices);
         });
 
+        var src = new CancellationTokenSource();
+        var cancellationToken = src.Token;
         Task.Run(() => {
-            var assetContainer = assetProvider.GetAssetContainer(_root);
+            var assetContainer = assetProvider.GetAssetContainer(_root, cancellationToken);
             var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter);
             Dispatcher.UIThread.Post(() => {
                 AssetTreeSource.Items = rootTree.Children;
                 IsBusyLoadingAssets = false;
             });
-        });
+        }, cancellationToken);
 
         Undo = ReactiveCommand.Create(() => _assetController.Undo());
         Redo = ReactiveCommand.Create(() => _assetController.Redo());

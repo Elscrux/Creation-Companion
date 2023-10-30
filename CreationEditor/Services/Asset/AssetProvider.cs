@@ -30,18 +30,20 @@ public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
         _dataDirectoryProvider = dataDirectoryProvider;
     }
 
-    public void OnStartup() {
-        Task.Run(() => {
-            // Force load all directories up front
-            var dataDirectory = GetAssetContainer(_dataDirectoryProvider.Path);
-            foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {}
-        });
+    public void PreStartup() {}
+
+    public void PostStartupAsync(CancellationToken token) {
+        // Force load all directories up front
+        var dataDirectory = GetAssetContainer(_dataDirectoryProvider.Path, token);
+        foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {}
     }
 
     public void OnExit() {}
 
-    public AssetDirectory GetAssetContainer(string directory) {
+    public AssetDirectory GetAssetContainer(string directory, CancellationToken token) {
         foreach (var (path, asset) in _assetDirectories) {
+            if (token.IsCancellationRequested) return null!;
+
             if (!directory.StartsWith(path, AssetCompare.PathComparison)) continue;
 
             // Retrieve child or self from the children

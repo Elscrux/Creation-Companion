@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -7,6 +9,7 @@ using Avalonia.Markup.Xaml;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Exceptions;
+using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Skyrim.Avalonia.Modules;
@@ -52,13 +55,19 @@ public partial class App : Application {
             // Init ReactiveUI
             RxApp.DefaultExceptionHandler = new ObservableExceptionHandler(container.Resolve<ILogger>());
 
-            // Handle lifecycle
-            var lifecycle = container.Resolve<ILifecycle>();
-            lifecycle.Start();
+            // Do startup
+            var lifecycleStartup = container.Resolve<ILifecycleStartup>();
+            var logger = container.Resolve<ILogger>();
+            logger.Here().Information("Starting the application");
+            lifecycleStartup.PreStartup();
 
-            desktop.Exit += (_, _) => lifecycle.Exit();
-
+            logger.Here().Information("Initializing the UI");
+            window.ViewModel = container.Resolve<MainVM>();
             desktop.MainWindow = window;
+
+            desktop.Exit += (_, _) => lifecycleStartup.Exit();
+
+            Task.Run(() => lifecycleStartup.PostStartupAsync(new Subject<string>()));
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -47,20 +47,20 @@ public sealed class AssetController : IAssetController {
         return _fileSystem.Path.Combine(_deleteDirectoryProvider.DeleteDirectory, relativePath);
     }
 
-    public void Delete(string path) => MoveInternal(path, CreateDeletePath(path), true);
+    public void Delete(string path, CancellationToken token) => MoveInternal(path, CreateDeletePath(path), true, token);
 
-    public void Move(string path, string destination) => MoveInternal(path, destination, false);
+    public void Move(string path, string destination, CancellationToken token) => MoveInternal(path, destination, false, token);
 
-    public void Rename(string path, string newName) {
+    public void Rename(string path, string newName, CancellationToken token) {
         var directoryPath = _fileSystem.Path.GetDirectoryName(path);
         if (directoryPath != null) {
-            MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true);
+            MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true, token);
         } else {
             _logger.Here().Warning("Couldn't find path to base directory of {Path}", path);
         }
     }
 
-    private void MoveInternal(string path, string destination, bool rename) {
+    private void MoveInternal(string path, string destination, bool rename, CancellationToken token) {
         var isFile = _fileSystem.Path.HasExtension(path);
 
         // Get the parent directory for a file path or self for a directory path
@@ -77,14 +77,14 @@ public sealed class AssetController : IAssetController {
             var assetFile = assetContainer.GetAssetFile(path);
             if (assetFile is null) return;
 
-            MoveInt(assetFile);
+            MoveInt(assetFile, token);
         } else {
             foreach (var assetFile in assetContainer.GetAllChildren<IAsset, AssetFile>(a => a.Children, true)) {
-                MoveInt(assetFile);
+                MoveInt(assetFile, token);
             }
         }
 
-        void MoveInt(AssetFile assetFile) {
+        void MoveInt(AssetFile assetFile, CancellationToken innerToken) {
             // Calculate the full path of that the file should be moved to
             var fullNewPath = destinationIsFile
                 // If the destination is a file, we already have the full path
@@ -114,8 +114,11 @@ public sealed class AssetController : IAssetController {
             // Change meshes\clutter\test\test.nif to clutter\test.nif
             var shortenedPath = _fileSystem.Path.GetRelativePath(assetFile.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
 
+            // Reaching point of no return - after this alterations will be made 
+            if (innerToken.IsCancellationRequested) return;
+
             // Move the asset
-            if (!FileSystemMove(assetFile.Path, fullNewPath)) return;
+            if (!FileSystemMove(assetFile.Path, fullNewPath, innerToken)) return;
 
             // Remap references in records
             foreach (var formLink in assetFile.ReferencedAsset.RecordReferences) {
@@ -128,20 +131,24 @@ public sealed class AssetController : IAssetController {
             // Remap references in NIFs
             foreach (var reference in assetFile.ReferencedAsset.NifReferences) {
                 var fullPath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, reference);
-                _modelModificationService.RemapLinks(fullPath, path => !path.IsNullOrWhitespace() && assetFile.Path.EndsWith(path, AssetCompare.PathComparison), dataRelativePath);
+                _modelModificationService.RemapLinks(fullPath, p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, AssetCompare.PathComparison), dataRelativePath);
             }
         }
     }
 
-    private bool FileSystemMove(string path, string destination) {
+    private bool FileSystemMove(string path, string destination, CancellationToken token) {
         var destinationDirectory = _fileSystem.Path.GetDirectoryName(destination);
 
         try {
             if (destinationDirectory is not null) _fileSystem.Directory.CreateDirectory(destinationDirectory);
 
             if (_fileSystem.File.Exists(path)) {
+                if (token.IsCancellationRequested) return false;
+
                 _fileSystem.File.Move(path, destination);
             } else {
+                if (token.IsCancellationRequested) return false;
+
                 _fileSystem.Directory.Move(path, destination);
             }
         } catch (Exception e) {

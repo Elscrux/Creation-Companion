@@ -2,9 +2,14 @@
 
 public interface IPluginService {
     /// <summary>
-    /// Plugins that are currently loaded.
+    /// Emits new plugins that are loaded. This doesn't emit already loaded ones.
     /// </summary>
-    IReadOnlyList<IPluginDefinition> Plugins { get; }
+    IObservable<IReadOnlyList<IPluginDefinition>> PluginsLoaded { get; }
+
+    /// <summary>
+    /// Emits plugins that were unloaded.
+    /// </summary>
+    IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnloaded { get; }
 
     /// <summary>
     /// Reloads all plugins.
