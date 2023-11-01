@@ -51,6 +51,10 @@ public sealed class MainModule : Module {
             .As<IRecordBrowserSettings>();
 
         // Services
+        builder.RegisterType<DataDirectoryService>()
+            .As<IDataDirectoryService>()
+            .SingleInstance();
+
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
             .SingleInstance();

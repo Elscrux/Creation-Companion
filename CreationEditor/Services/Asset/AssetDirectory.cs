@@ -5,16 +5,16 @@ using CreationEditor.Services.Mutagen.References.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using DynamicData;
 using Noggog;
-using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetDirectory : IAsset {
+    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
     private readonly IFileSystem _fileSystem;
-    private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
+    private readonly IDataDirectoryService _dataDirectoryService;
     private readonly IAssetReferenceController _assetReferenceController;
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
 
     public IDirectoryInfo Directory { get; }
     public string Path => Directory.FullName;
@@ -40,12 +40,10 @@ public sealed class AssetDirectory : IAsset {
     private bool _loadedAssets;
     public SourceCache<IAsset, string> Assets { get; } = new(a => a.Path);
 
-    private IFileSystemWatcher? _watcher;
-
     public AssetDirectory(
         IDirectoryInfo directory,
         IFileSystem fileSystem,
-        IDeleteDirectoryProvider deleteDirectoryProvider,
+        IDataDirectoryService dataDirectoryService,
         IAssetReferenceController assetReferenceController,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService,
@@ -53,15 +51,15 @@ public sealed class AssetDirectory : IAsset {
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
         _fileSystem = fileSystem;
-        _deleteDirectoryProvider = deleteDirectoryProvider;
+        _dataDirectoryService = dataDirectoryService;
         _assetReferenceController = assetReferenceController;
         Directory = directory;
         IsVirtual = isVirtual;
     }
 
-    private void Add(IFileSystem fileSystem, string path) {
+    private void Add(string path) {
         try {
-            var directoryInfo = fileSystem.DirectoryInfo.New(path);
+            var directoryInfo = _fileSystem.DirectoryInfo.New(path);
             if ((directoryInfo.Attributes & FileAttributes.Directory) == 0) {
                 var asset = FileToAsset(path);
                 if (asset is null) return;
@@ -71,7 +69,7 @@ public sealed class AssetDirectory : IAsset {
                 _assetReferenceController.RegisterCreation(asset);
                 Assets.AddOrUpdate(asset);
             } else {
-                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService);
+                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService);
                 assetDirectory.DisposeWith(_disposables);
                 Assets.AddOrUpdate(assetDirectory);
             }
@@ -136,32 +134,29 @@ public sealed class AssetDirectory : IAsset {
         Refresh();
 
         if (!IsVirtual) {
-            _watcher = _fileSystem.FileSystemWatcher.New(Directory.FullName).DisposeWith(_disposables);
-            // _watcher.Filters.AddRange(_assetTypeService.GetFileMasks()); doesn't allow directory changes
-            _watcher.IncludeSubdirectories = false;
-            _watcher.EnableRaisingEvents = true;
-
-            _watcher.Events().Created
-                .Where(e => !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath))
+            _dataDirectoryService.Created
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
                 .ObserveOnGui()
-                .Subscribe(e => Add(_fileSystem, e.FullPath))
+                .Subscribe(e => Add(e.FullPath))
                 .DisposeWith(_disposables);
 
-            _watcher.Events().Deleted
-                .Where(e => !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath))
+            _dataDirectoryService.Deleted
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => Remove(e.FullPath))
                 .DisposeWith(_disposables);
 
-            _watcher.Events().Renamed
+            _dataDirectoryService.Renamed
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => {
                     Remove(e.OldFullPath);
-                    Add(_fileSystem, e.FullPath);
+                    Add(e.FullPath);
                 })
                 .DisposeWith(_disposables);
 
-            _watcher.Events().Changed
+            _dataDirectoryService.Changed
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => Change(e.FullPath))
                 .DisposeWith(_disposables);
@@ -177,14 +172,13 @@ public sealed class AssetDirectory : IAsset {
         IEnumerable<IAsset> assets = Array.Empty<IAsset>();
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
-                .Where(dir => !string.Equals(dir.FullName, _deleteDirectoryProvider.DeleteDirectory, AssetCompare.PathComparison))
-                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService) : null)
+                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService) : null)
                 .NotNull());
         }
 
         assets = assets.Concat(_archiveService.GetSubdirectories(Path)
             .Select(dirPath => _fileSystem.DirectoryInfo.New(dirPath))
-            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
+            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
             .NotNull());
 
         var addedFiles = new HashSet<string>();

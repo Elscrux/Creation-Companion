@@ -2,39 +2,35 @@
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
     private readonly IFileSystem _fileSystem;
     private readonly IAssetReferenceController _assetReferenceController;
-    private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
+    private readonly IDataDirectoryService _dataDirectoryService;
 
     private readonly Dictionary<string, IAsset> _assetDirectories = new();
 
     public AssetProvider(
         IFileSystem fileSystem,
         IAssetReferenceController assetReferenceController,
-        IDeleteDirectoryProvider deleteDirectoryProvider,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService,
-        IDataDirectoryProvider dataDirectoryProvider) {
+        IDataDirectoryService dataDirectoryService) {
         _fileSystem = fileSystem;
         _assetReferenceController = assetReferenceController;
-        _deleteDirectoryProvider = deleteDirectoryProvider;
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
-        _dataDirectoryProvider = dataDirectoryProvider;
+        _dataDirectoryService = dataDirectoryService;
     }
 
     public void PreStartup() {}
 
     public void PostStartupAsync(CancellationToken token) {
         // Force load all directories up front
-        var dataDirectory = GetAssetContainer(_dataDirectoryProvider.Path, token);
+        var dataDirectory = GetAssetContainer(_dataDirectoryService.Path, token);
         foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {}
     }
 
@@ -57,7 +53,7 @@ public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
             }
         }
 
-        var assetDirectory = new AssetDirectory(_fileSystem.DirectoryInfo.New(directory), _fileSystem, _deleteDirectoryProvider, _assetReferenceController, _assetTypeService, _archiveService);
+        var assetDirectory = new AssetDirectory(_fileSystem.DirectoryInfo.New(directory), _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService);
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }
