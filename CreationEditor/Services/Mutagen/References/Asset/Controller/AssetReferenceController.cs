@@ -82,9 +82,9 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
             .DisposeWith(_disposables);
 
-        recordController.RecordChangedDiff.Subscribe(RegisterUpdate);
-        recordController.RecordCreated.Subscribe(RegisterCreation);
-        recordController.RecordDeleted.Subscribe(RegisterDeletion);
+        recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
+        recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
+        recordController.RecordDeleted.Subscribe(RegisterDeletion).DisposeWith(_disposables);
     }
 
     public void PreStartup() {}
