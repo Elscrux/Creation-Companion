@@ -65,7 +65,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
 
         TypeGroup = new Group<TextReference>(references => references.TextSearcher, true);
         RecordGroup = new Group<TextReference>(references => references.Record, true);
-        GroupCollection = new GroupCollection<TextReference>(References, TypeGroup, RecordGroup);
+        GroupCollection = new GroupCollection<TextReference>(References, TypeGroup, RecordGroup).DisposeWith(ActivatedDisposable);
 
         SearchCommand = ReactiveCommand.CreateFromTask(async () => {
                 if (SearchText.IsNullOrWhitespace()) return;

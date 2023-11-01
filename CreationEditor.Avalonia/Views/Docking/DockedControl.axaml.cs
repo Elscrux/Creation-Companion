@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
+using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
@@ -65,8 +67,14 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
 
-        DetachedFromLogicalTree += (_, _) => CheckRemoved();
-        Control.DetachedFromLogicalTree += (_, _) => CheckRemoved();
+        this.WhenActivated(d => {
+            EventHandler<LogicalTreeAttachmentEventArgs> checkRemoved = (_, _) => CheckRemoved();
+            DetachedFromLogicalTree += checkRemoved;
+            Control.DetachedFromLogicalTree += checkRemoved;
+
+            d.Add(Disposable.Create(() => DetachedFromLogicalTree -= checkRemoved));
+            d.Add(Disposable.Create(() => Control.DetachedFromLogicalTree -= checkRemoved));
+        });
 
         InitializeComponent();
     }

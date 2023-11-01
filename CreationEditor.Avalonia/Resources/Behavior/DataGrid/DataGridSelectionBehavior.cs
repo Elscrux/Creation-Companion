@@ -70,7 +70,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         if (AddContextFlyout) AddSelectionMenu();
         if (AddKeyBind) AddKeyBindings();
 
-        if (AssociatedObject is not null) AssociatedObject.LayoutUpdated += (_, _) => UpdateAllChecked();
+        if (AssociatedObject is not null) AssociatedObject.LayoutUpdated += UpdateAllChecked;
+    }
+
+    protected override void OnDetaching() {
+        if (AssociatedObject is not null) AssociatedObject.LayoutUpdated -= UpdateAllChecked;
     }
 
     protected override void OnAttachedToVisualTree() {
@@ -213,6 +217,8 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         action.Invoke();
         _isProcessing = false;
     }
+
+    private void UpdateAllChecked(object? o, EventArgs eventArgs) => UpdateAllChecked();
 
     private void UpdateAllChecked() {
         if (AssociatedObject?.ItemsSource is null) return;

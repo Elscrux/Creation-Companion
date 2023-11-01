@@ -10,7 +10,8 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// Groups items by their properties in a <see cref="ObservableCollection{T}"/>
 /// </summary>
 /// <typeparam name="T">Type of items</typeparam>
-public sealed class GroupCollection<T> {
+public sealed class GroupCollection<T> : IDisposable {
+    private readonly IDisposable _sourceCollectionSubscription;
     private readonly List<Group<T>> _activeGroups = new();
     private readonly IObservableCollection<T> _source;
     private readonly GroupInstance _topLevelGroup;
@@ -40,30 +41,33 @@ public sealed class GroupCollection<T> {
                 .DisposeWith(group);
         }
 
-        _source.CollectionChanged += (_, args) => {
-            switch (args.Action) {
-                case NotifyCollectionChangedAction.Add:
-                    if (args.NewItems is null) break;
+        _sourceCollectionSubscription = _source.ObserveCollectionChanges()
+            .Subscribe(x => {
+                switch (x.EventArgs.Action) {
+                    case NotifyCollectionChangedAction.Add:
+                        if (x.EventArgs.NewItems is null) break;
 
-                    _topLevelGroup.Add(args.NewItems.OfType<T>(), _activeGroups);
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    if (args.OldItems is null) break;
+                        _topLevelGroup.Add(x.EventArgs.NewItems.OfType<T>(), _activeGroups);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        if (x.EventArgs.OldItems is null) break;
 
-                    _topLevelGroup.Remove(args.OldItems.OfType<T>());
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    if (args.OldItems is null || args.NewItems is null) break;
+                        _topLevelGroup.Remove(x.EventArgs.OldItems.OfType<T>());
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        if (x.EventArgs.OldItems is null || x.EventArgs.NewItems is null) break;
 
-                    _topLevelGroup.Remove(args.OldItems.OfType<T>());
-                    _topLevelGroup.Add(args.NewItems.OfType<T>(), _activeGroups);
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    Items.Clear();
-                    break;
-            }
-        };
+                        _topLevelGroup.Remove(x.EventArgs.OldItems.OfType<T>());
+                        _topLevelGroup.Add(x.EventArgs.NewItems.OfType<T>(), _activeGroups);
+                        break;
+                    case NotifyCollectionChangedAction.Move:
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        Items.Clear();
+                        break;
+                }
+            });
     }
+
+    public void Dispose() => _sourceCollectionSubscription.Dispose();
 }

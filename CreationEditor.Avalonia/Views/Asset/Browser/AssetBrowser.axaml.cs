@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Reactive.Disposables;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -9,6 +10,7 @@ using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Models.Asset;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.Asset;
+using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Asset.Browser;
 
 public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
@@ -18,7 +20,10 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
     public AssetBrowser(IAssetBrowserVM assetBrowserVM) : this() {
         ViewModel = assetBrowserVM;
-        AssetTree.ContextRequested += ViewModel.ContextMenu;
+        this.WhenActivated(d => {
+            AssetTree.ContextRequested += ViewModel.ContextMenu;
+            d.Add(Disposable.Create(() => AssetTree.ContextRequested -= ViewModel.ContextMenu));
+        });
     }
 
     private void AssetTree_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {

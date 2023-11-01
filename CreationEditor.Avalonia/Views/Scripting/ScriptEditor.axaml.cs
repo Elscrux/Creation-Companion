@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reactive.Disposables;
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -36,8 +37,10 @@ public partial class ScriptEditor : ActivatableUserControl {
 
         // Configure caret
         Editor.TextArea.RightClickMovesCaret = true;
-        Editor.TextArea.Caret.PositionChanged += (_, _) =>
-            StatusText.Text = $"Line {Editor.TextArea.Caret.Line} Column {Editor.TextArea.Caret.Column}";
+        this.WhenActivated(d => { 
+            Editor.TextArea.Caret.PositionChanged += UpdateCaretPosition;
+            d.Add(Disposable.Create(() => Editor.TextArea.Caret.PositionChanged -= UpdateCaretPosition));
+        });
 
         // Setup syntax highlighting
         _textMateRegistryOptions = new AvaloniaTextMateRegistryOptions(CurrentTheme, "Papyrus");
@@ -164,5 +167,9 @@ public partial class ScriptEditor : ActivatableUserControl {
     protected override void WhenActivated() {
         this.WhenAnyValue(x => x.CurrentTheme)
             .Subscribe(theme => _textMateInstallation.SetTheme(_textMateRegistryOptions.LoadTheme(theme)));
+    }
+
+    private void UpdateCaretPosition(object? o, EventArgs eventArgs) {
+        StatusText.Text = $"Line {Editor.TextArea.Caret.Line} Column {Editor.TextArea.Caret.Column}";
     }
 }
