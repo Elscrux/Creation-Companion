@@ -40,4 +40,24 @@ public interface IArchiveService : IDisposable {
     /// Names of archives ordered by their priority from low to high priority.
     /// </summary>
     public IReadOnlyList<string> Archives { get; }
+
+    /// <summary>
+    /// Emits the name of a newly created archives.
+    /// </summary>
+    IObservable<string> ArchiveCreated { get; }
+
+    /// <summary>
+    /// Emits the name of deleted archives.
+    /// </summary>
+    IObservable<string> ArchiveDeleted { get; }
+
+    /// <summary>
+    /// Emits the name of changed archives.
+    /// </summary>
+    IObservable<string> ArchiveChanged { get; }
+
+    /// <summary>
+    /// Emits the old and new name of renamed archives.
+    /// </summary>
+    IObservable<(string OldName, string NewName)> ArchiveRenamed { get; }
 }

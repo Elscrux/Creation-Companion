@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Reactive.Linq;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -30,6 +31,11 @@ public sealed class BsaArchiveService : IArchiveService {
     private string LoadExtension() => _archiveExtension = global::Mutagen.Bethesda.Archives.Archive.GetExtension(_gameReleaseContext.Release);
 
     public IReadOnlyList<string> Archives { get; }
+
+    public IObservable<string> ArchiveCreated { get; }
+    public IObservable<string> ArchiveDeleted { get; }
+    public IObservable<string> ArchiveChanged { get; }
+    public IObservable<(string OldName, string NewName)> ArchiveRenamed { get; }
 
     public BsaArchiveService(
         IEditorEnvironment editorEnvironment,
@@ -86,20 +92,38 @@ public sealed class BsaArchiveService : IArchiveService {
             })
             .DisposeWith(_disposables);
 
-        _watcher.Events().Created
-            .Subscribe(e => Add(e.FullPath))
+        var created = _watcher.Events().Created;
+        created
+            .Subscribe(e => {
+                Add(e.FullPath);
+            })
             .DisposeWith(_disposables);
+        ArchiveCreated = created
+            .Select(e => e.Name)
+            .NotNull();
 
-        _watcher.Events().Deleted
+        var deleted = _watcher.Events().Deleted;
+        deleted
             .Subscribe(e => Remove(e.FullPath))
             .DisposeWith(_disposables);
+        ArchiveDeleted = deleted
+            .Select(e => e.Name)
+            .NotNull();
 
-        _watcher.Events().Renamed
+        var renamed = _watcher.Events().Renamed;
+        renamed
             .Subscribe(e => {
                 Remove(e.OldFullPath);
                 Add(e.FullPath);
             })
             .DisposeWith(_disposables);
+        ArchiveRenamed = renamed
+            .Where(e => e.OldName is not null && e.Name is not null)
+            .Select(e => (e.OldName, e.Name))!;
+
+        ArchiveChanged = _watcher.Events().Changed
+            .Select(e => e.Name)
+            .NotNull();
     }
 
     public IArchiveReader GetReader(string path) {

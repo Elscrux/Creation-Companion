@@ -147,10 +147,6 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         var extension = _archiveService.GetExtension();
         var dataDirectory = _dataDirectoryProvider.Path;
 
-        var archiveWatcher = _fileSystem.FileSystemWatcher
-            .New(dataDirectory, extension)
-            .DisposeWith(_disposables);
-
         var archives = _fileSystem.Directory.EnumerateFiles(dataDirectory, $"*{extension}").ToArray();
         if (archives.Length > 0) {
             using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Archive Nif References");
@@ -173,18 +169,18 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             linearNotifier.Stop();
         }
 
-        archiveWatcher.Events().Created
-            .Subscribe(e => Add(e.FullPath))
+        _archiveService.ArchiveCreated
+            .Subscribe(Add)
             .DisposeWith(_disposables);
 
-        archiveWatcher.Events().Deleted
-            .Subscribe(e => Remove(e.FullPath))
+        _archiveService.ArchiveDeleted
+            .Subscribe(Remove)
             .DisposeWith(_disposables);
 
-        archiveWatcher.Events().Renamed
+        _archiveService.ArchiveRenamed
             .Subscribe(async e => {
-                Remove(e.OldFullPath);
-                await Add(e.FullPath);
+                Remove(e.OldName);
+                await Add(e.NewName);
             })
             .DisposeWith(_disposables);
         return;
