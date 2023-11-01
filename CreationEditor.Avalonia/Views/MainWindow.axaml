@@ -168,7 +168,8 @@
                 </MenuItem>
             </Menu>
 
-            <Border HorizontalAlignment="Center">
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
                 <AutoCompleteBox Padding="6"
                                  MinWidth="250"
                                  MaxWidth="500"
