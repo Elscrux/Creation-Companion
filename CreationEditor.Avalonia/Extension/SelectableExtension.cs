@@ -11,7 +11,7 @@ public static class SelectableExtension {
         where T : IReactiveSelectable {
         return observable
             .ToObservableChangeSet()
-            .AutoRefresh(x => x.IsSelected)
+            .WhenValueChanged(x => x.IsSelected)
             .Unit();
     }
 
@@ -19,7 +19,7 @@ public static class SelectableExtension {
         where T : IReactiveSelectable {
         return observable
             .ToObservableChangeSet()
-            .AutoRefresh(x => x.IsSelected)
+            .WhenValueChanged(x => x.IsSelected)
             .Unit();
     }
 }
