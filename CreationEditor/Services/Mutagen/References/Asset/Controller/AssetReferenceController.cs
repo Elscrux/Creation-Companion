@@ -6,6 +6,7 @@ using System.Reactive.Subjects;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
@@ -17,10 +18,9 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
-public sealed class AssetReferenceController : IAssetReferenceController {
+public sealed class AssetReferenceController : IAssetReferenceController, ILifecycleTask {
     private readonly CompositeDisposable _disposables = new();
 
     private readonly IFileSystem _fileSystem;
@@ -77,9 +77,6 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         _nifFileAssetParser = nifFileAssetParser;
         _assetReferenceCacheFactory = assetReferenceCacheFactory;
 
-        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences));
-        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences));
-
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
@@ -88,16 +85,14 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate);
         recordController.RecordCreated.Subscribe(RegisterCreation);
         recordController.RecordDeleted.Subscribe(RegisterDeletion);
-        return;
-
-        async Task UpdateLoadingProcess(Func<Task> action) {
-            Interlocked.Increment(ref _loadingProcesses);
-            await action();
-            Interlocked.Decrement(ref _loadingProcesses);
-            _isLoading.OnNext(_loadingProcesses > 0);
-        }
     }
 
+    public void PreStartup() {}
+    public void PostStartupAsync(CancellationToken token) {
+        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences), token);
+        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences), token);
+    }
+    public void OnExit() {}
     public void Dispose() => _disposables.Dispose();
 
     private async Task InitLoadOrderReferences() {
@@ -367,5 +362,12 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             var change = new Change<IFormLinkGetter>(ListChangeReason.Remove, newRecordLink);
             _modAssetReferenceManager.Change(reference, change);
         }
+    }
+
+    private async Task UpdateLoadingProcess(Func<Task> action) {
+        Interlocked.Increment(ref _loadingProcesses);
+        await action();
+        Interlocked.Decrement(ref _loadingProcesses);
+        _isLoading.OnNext(_loadingProcesses > 0);
     }
 }
