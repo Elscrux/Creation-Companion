@@ -19,6 +19,30 @@
         <DependentUpon>TextSearchView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Models\LoadScreen.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Message.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Name.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Quest.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Activator.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Book.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\EditorID.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Topic.cs">
+        <DependentUpon>TextSearcher.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

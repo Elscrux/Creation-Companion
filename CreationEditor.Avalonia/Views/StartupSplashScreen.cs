@@ -28,7 +28,7 @@ public sealed class StartupSplashScreen : ViewModel, IApplicationSplashScreen, I
     }
 
     public async Task RunTasks(CancellationToken token) {
-        await Task.Delay(1000, token);
+        // await Task.Delay(1000, token);
         // using var disposable = new DisposableBucket();
         // var done = new Subject<string>();
         // done.ObserveOnGui()
