@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Reactive.Disposables;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.ViewModels.Docking;
@@ -6,6 +7,8 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposable {
+    private readonly CompositeDisposable _disposables = new();
+
     public static readonly StyledProperty<SideDockVM?> SideDockProperty = AvaloniaProperty.Register<Control, SideDockVM?>(nameof(SideDock));
 
     public double ActiveTabSize { get; set; } = 300;
@@ -19,21 +22,20 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
 
     public bool UpdateSize { get; set; }
 
-    private IDisposable? _attachedDisposable;
-
     protected override void OnAttached() {
-        _attachedDisposable = this.WhenAnyValue(x => x.SideDock,
+        this.WhenAnyValue(x => x.SideDock,
                 x => x.AssociatedObject)
-            .Subscribe(_ => SideDockChanged());
+            .Subscribe(_ => SideDockChanged())
+            .DisposeWith(_disposables);
     }
 
     protected override void OnDetaching() {
         base.OnDetaching();
 
-        _attachedDisposable?.Dispose();
+        _disposables.Clear();
     }
 
-    public void Dispose() => _attachedDisposable?.Dispose();
+    public void Dispose() => _disposables.Dispose();
 
     private void SideDockChanged() {
         if (SideDock is null || AssociatedObject is null) return;
@@ -43,7 +45,8 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
                 if (UpdateSize && SideDock.ActiveTab is not null && size.GridUnitType == GridUnitType.Pixel) {
                     SideDock.ActiveTab.Size = size.Value;
                 }
-            });
+            })
+            .DisposeWith(_disposables);
 
         SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
             .Subscribe(x => {
@@ -56,7 +59,8 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
 
                 var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
                 AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
-            });
+            })
+            .DisposeWith(_disposables);
     }
 
     private double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {

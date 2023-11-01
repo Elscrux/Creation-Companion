@@ -55,9 +55,13 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private readonly CompositeDisposable _attachedDisposable = new();
+    private readonly CompositeDisposable _visualsAttachedDisposable = new();
     private IDisposable? _currentCollectionChanged;
 
-    public void Dispose() => _attachedDisposable?.Dispose();
+    public void Dispose() {
+        _visualsAttachedDisposable.Dispose();
+        _attachedDisposable.Dispose();
+    }
 
     protected override void OnAttached() {
         base.OnAttached();
@@ -75,6 +79,8 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     protected override void OnDetaching() {
         if (AssociatedObject is not null) AssociatedObject.LayoutUpdated -= UpdateAllChecked;
+
+        _attachedDisposable.Clear();
     }
 
     protected override void OnAttachedToVisualTree() {
@@ -96,7 +102,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     .ToObservableChangeSet()
                     .AutoRefresh(selectable => selectable.IsSelected)
                     .Subscribe(OnSelectionToggled)
-                    .DisposeWith(_attachedDisposable);
+                    .DisposeWith(_visualsAttachedDisposable);
             }
         }
     }
@@ -126,7 +132,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     protected override void OnDetachedFromVisualTree() {
         base.OnDetachedFromVisualTree();
 
-        _attachedDisposable?.Clear();
+        _visualsAttachedDisposable?.Clear();
     }
 
     private void AddSelectionColumn() {
@@ -140,11 +146,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     HorizontalAlignment = HorizontalAlignment.Center,
                 };
 
-                checkBox.AddHandler(ToggleButton.IsCheckedChangedEvent, (_, e) => {
-                    if (e.Source is ToggleButton { IsChecked: {} isChecked }) {
-                        SelectAllItems(isChecked);
-                    }
-                });
+                checkBox.WhenAnyValue(x => x.IsChecked)
+                    .Subscribe(isChecked => SelectAllItems(isChecked is true))
+                    .DisposeWith(_attachedDisposable);
 
                 return checkBox;
             }),
@@ -171,7 +175,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                 if (EnabledMapping is not null) {
                     checkBox
                         .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
-                        .DisposeWith(_attachedDisposable);
+                        .DisposeWith(_visualsAttachedDisposable);
                 }
 
                 return checkBox;
