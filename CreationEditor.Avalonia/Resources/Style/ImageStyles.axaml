@@ -1,0 +1,26 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20"
+                Background="Black">
+            <Image Height="350"
+                   Width="350"
+                   Source="/Assets/Logo.ico"
+                   Classes="Turning"/>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Image.Spinning">
+        <Style.Animations>
+            <Animation Duration="0:0:5"
+                       IterationCount="{x:Static IterationCount.Infinite}">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360"/>
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+</Styles>
