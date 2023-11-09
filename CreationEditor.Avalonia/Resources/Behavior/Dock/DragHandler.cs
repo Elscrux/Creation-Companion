@@ -9,12 +9,12 @@ public sealed class DragHandler {
     private bool _isPressingDown;
 
     private readonly double _dragStartDistance;
-    private readonly Action<object?, object?, PointerEventArgs> _dragCallback;
+    private readonly Func<object?, object?, PointerEventArgs, Task> _dragCallback;
 
     private readonly Dictionary<Interactive, object> _elementIdentifiers = new();
     private readonly Dictionary<object, List<Interactive>> _identifierElements = new();
 
-    public DragHandler(Action<object?, object?, PointerEventArgs> dragCallback, double dragStartDistance = 10) {
+    public DragHandler(Func<object?, object?, PointerEventArgs, Task> dragCallback, double dragStartDistance = 10) {
         _dragStartDistance = dragStartDistance;
         _dragCallback = dragCallback;
     }
@@ -59,7 +59,7 @@ public sealed class DragHandler {
         _clickPosition = e.GetPosition(null);
     }
 
-    public void Moved(object? o, PointerEventArgs e) {
+    public async Task Moved(object? o, PointerEventArgs e) {
         if (o is not Interactive interactive) return;
         if (!_isPressingDown) return;
 
@@ -69,7 +69,7 @@ public sealed class DragHandler {
         _isPressingDown = false;
 
         _elementIdentifiers.TryGetValue(interactive, out var identifier);
-        _dragCallback(o, identifier, e);
+        await _dragCallback(o, identifier, e);
     }
 
     public void Released(object? o, PointerReleasedEventArgs e) {

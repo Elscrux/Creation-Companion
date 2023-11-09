@@ -27,7 +27,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
         _dragHandler.Unregister(AssociatedObject);
     }
 
-    private async void Drag(object? sender, object? identifier, PointerEventArgs e) {
+    private static async Task Drag(object? sender, object? identifier, PointerEventArgs e) {
         if (sender is not Control { DataContext: IDockedItem dockedItem }) return;
 
         var dataObject = new DataObject();
