@@ -10,14 +10,10 @@ public static class CellConverters {
         var editorID = record.EditorID;
         if (editorID is not null || linkCache is null) return editorID;
 
-        if ((record.MajorFlags & Cell.MajorFlag.Persistent) != 0) {
-            if (linkCache.TryResolveSimpleContext<ICellGetter>(record.FormKey, out var cellContext)) {
-                if (cellContext.Parent?.Record is IWorldspaceGetter worldspace) {
-                    return $"{worldspace.EditorID} - Persistent";
-                }
-            }
-        }
+        if ((record.MajorFlags & Cell.MajorFlag.Persistent) == 0) return null;
+        if (!linkCache.TryResolveSimpleContext<ICellGetter>(record.FormKey, out var cellContext)) return null;
+        if (cellContext.Parent?.Record is not IWorldspaceGetter worldspace) return null;
 
-        return null;
+        return $"{worldspace.EditorID} - Persistent";
     });
 }

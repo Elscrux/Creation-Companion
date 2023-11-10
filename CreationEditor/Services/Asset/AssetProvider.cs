@@ -31,12 +31,14 @@ public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
     public void PostStartupAsync(CancellationToken token) {
         // Force load all directories up front
         var dataDirectory = GetAssetContainer(_dataDirectoryService.Path, token);
-        foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {}
+        foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {
+            // Do nothing, just loop through all children to load them once
+        }
     }
 
     public void OnExit() {}
 
-    public AssetDirectory GetAssetContainer(string directory, CancellationToken token) {
+    public AssetDirectory GetAssetContainer(string directory, CancellationToken token = default) {
         foreach (var (path, asset) in _assetDirectories) {
             if (token.IsCancellationRequested) return null!;
 

@@ -18,11 +18,13 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel {
+    public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
+
     private const string NewModBaseName = "NewMod";
     private static string ReplacementName(int index) => $"{NewModBaseName} ({index})";
 
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly ModInfo[] _modInfos;
+    private readonly List<ModInfo> _modInfos;
 
     private readonly SourceCache<LoadOrderModItem, ModKey> _mods = new(x => x.ModKey);
     public IObservableCollection<LoadOrderModItem> DisplayedMods { get; }
@@ -47,8 +49,6 @@ public sealed class ModSelectionVM : ViewModel {
     [Reactive] public string NewModName { get; set; } = NewModBaseName;
     [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
 
-    public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
-
     public ModSelectionVM(
         IGameReleaseContext gameReleaseContext,
         IEditorEnvironment editorEnvironment,
@@ -60,13 +60,13 @@ public sealed class ModSelectionVM : ViewModel {
 
         // Collect mod infos
         using (var gameEnvironment = GameEnvironment.Typical.Construct(gameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers())) {
-            _modInfos = SelectedModDetails.GetModInfos(gameEnvironment.LinkCache.ListedOrder).ToArray();
+            _modInfos = SelectedModDetails.GetModInfos(gameEnvironment.LinkCache.ListedOrder).ToList();
         }
 
         // Try use NewModBaseName as new name for the mod, otherwise find a new name
-        if (_modInfos.Any(modInfo => modInfo.ModKey.Name == NewModBaseName)) {
+        if (_modInfos.Exists(modInfo => modInfo.ModKey.Name == NewModBaseName)) {
             var counter = 2;
-            while (_modInfos.Any(modInfo => modInfo.ModKey.Name == ReplacementName(counter))) {
+            while (_modInfos.Exists(modInfo => modInfo.ModKey.Name == ReplacementName(counter))) {
                 counter++;
             }
             NewModName = ReplacementName(counter);
@@ -76,7 +76,7 @@ public sealed class ModSelectionVM : ViewModel {
                 x => x.NewModName,
                 x => x.NewModType,
                 (name, type) => (Name: name, Type: type))
-            .Select(x => _modInfos.All(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
+            .Select(x => _modInfos.TrueForAll(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
 
         var filePath = pluginListingsProvider.Get(gameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandard("Warning", $"Make sure {filePath} exists.");
@@ -85,7 +85,7 @@ public sealed class ModSelectionVM : ViewModel {
 
         // Fill mods with active load order
         _mods.Edit(updater => {
-            for (var i = 0; i < _modInfos.Length; i++) {
+            for (var i = 0; i < _modInfos.Count; i++) {
                 var modKey = _modInfos[i].ModKey;
                 var modItem = new LoadOrderModItem(modKey, _masterInfos[modKey].Valid, (uint) i).DisposeWith(this);
                 updater.AddOrUpdate(modItem);
@@ -123,10 +123,8 @@ public sealed class ModSelectionVM : ViewModel {
                 var loadOrderModItems = x.ChangedMods.Select(change => change.Current).Where(mod => mod.IsActive).ToList();
                 if (loadOrderModItems.Count == 0) return;
 
-                var newActive = loadOrderModItems.First();
-
                 foreach (var item in x.AllMods.Items) {
-                    if (newActive != item) {
+                    if (loadOrderModItems[0] != item) {
                         item.IsActive = false;
                     }
                 }

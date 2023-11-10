@@ -54,7 +54,7 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
     protected abstract IEnumerable<string?> GetText(TMajorGetter record);
     protected abstract void ReplaceText(TMajor record, string oldText, string newText, StringComparison comparison);
 
-    protected bool Equals(TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> other) {
+    protected virtual bool Equals(TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> other) {
         return SearcherName == other.SearcherName;
     }
 

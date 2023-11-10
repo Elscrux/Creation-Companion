@@ -20,7 +20,12 @@ public abstract class ActivatableUserControl : UserControl, IActivatableView, ID
 
     protected virtual void WhenActivated() {}
 
-    public virtual void Dispose() {
+    public void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing) {
         ActivatedDisposable.Dispose();
         _activationDisposable.Dispose();
     }

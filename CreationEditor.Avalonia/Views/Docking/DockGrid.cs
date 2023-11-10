@@ -16,12 +16,12 @@ public sealed class DockGrid : Grid {
         ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } };
     }
 
-    protected override Size ArrangeOverride(Size finalSize) {
+    protected override Size ArrangeOverride(Size arrangeSize) {
         if (DataContext is DockingManagerVM dockingManagerVM) {
             dockingManagerVM.UpdateSize();
         }
 
-        return base.ArrangeOverride(finalSize);
+        return base.ArrangeOverride(arrangeSize);
     }
 
     public void Add(Control control, DockConfig config) {

@@ -71,8 +71,8 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
         return new FactionEditor(this);
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         RelationEditorVM?.Dispose();
         RankEditorVM?.Dispose();

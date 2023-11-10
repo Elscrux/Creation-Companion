@@ -11,14 +11,23 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
 
     private readonly Dictionary<string, System.Type> _typeCache = new();
 
-    /// <summary>
-    /// Tries to retrieve a mutagen type via string
-    /// </summary>
-    /// <param name="gameName">name of a game like "Skyrim"</param>
-    /// <param name="typeName">name of a type like "IArmorGetter"</param>
-    /// <param name="type">type that was be retrieved from the provided string</param>
-    /// <returns>true if the type could be found</returns>
-    public bool GetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type) {
+    public System.Type GetType(string gameName, string typeName) {
+        var name = $"{gameName}.{typeName}";
+        if (_typeCache.TryGetValue(name, out var cachedType)) {
+            return cachedType;
+        }
+
+        var registration = LoquiRegistration.GetRegisterByFullName(BaseNamespace + name);
+
+        if (registration is null) {
+            throw new ArgumentException("Unknown Mutagen type", BaseNamespace + name);
+        }
+
+        _typeCache.UpdateOrAdd(name, _ => registration.GetterType);
+        return registration.GetterType;
+    }
+
+    public bool TryGetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type) {
         var name = $"{gameName}.{typeName}";
         if (_typeCache.TryGetValue(name, out var cachedType)) {
             type = cachedType;
@@ -46,7 +55,7 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public string GetTypeName(IMajorRecordGetter record) {
-        return record.Registration.ClassType.FullName!.Split('.').Last();
+        return record.Registration.ClassType.FullName!.Split('.')[^1];
     }
 
     public string GetTypeName(IFormLinkIdentifier formLinkIdentifier) {

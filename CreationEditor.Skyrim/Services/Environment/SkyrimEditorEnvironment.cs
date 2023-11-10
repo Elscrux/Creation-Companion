@@ -18,28 +18,16 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
 
-    private IGameEnvironment<ISkyrimMod, ISkyrimModGetter> _gameEnvironment;
-    IGameEnvironment IEditorEnvironment.GameEnvironment => _gameEnvironment;
-    IGameEnvironment<ISkyrimMod, ISkyrimModGetter> IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.Environment {
-        get => _gameEnvironment;
-        set => _gameEnvironment = value;
-    }
+    public IGameEnvironment<ISkyrimMod, ISkyrimModGetter> Environment { get; set; }
+    IGameEnvironment IEditorEnvironment.GameEnvironment => Environment;
 
-    public ILinkCache LinkCache => _gameEnvironment.LinkCache;
+    public ILinkCache LinkCache => Environment.LinkCache;
 
-    private ISkyrimMod _activeMod;
-    IMod IEditorEnvironment.ActiveMod => _activeMod;
-    ISkyrimMod IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.ActiveMod {
-        get => _activeMod;
-        set => _activeMod = value;
-    }
+    public ISkyrimMod ActiveMod { get; set; }
+    IMod IEditorEnvironment.ActiveMod => ActiveMod;
 
-    private ILinkCache<ISkyrimMod, ISkyrimModGetter> _activeModLinkCache;
-    public ILinkCache ActiveModLinkCache => _activeModLinkCache;
-    ILinkCache<ISkyrimMod, ISkyrimModGetter> IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>.ActiveModLinkCache {
-        get => _activeModLinkCache;
-        set => _activeModLinkCache = value;
-    }
+    public ILinkCache<ISkyrimMod, ISkyrimModGetter> ActiveModLinkCache { get; set; }
+    ILinkCache IEditorEnvironment.ActiveModLinkCache => ActiveModLinkCache;
 
     private readonly ReplaySubject<ModKey> _activeModChanged = new(1);
     public IObservable<ModKey> ActiveModChanged => _activeModChanged;
@@ -62,12 +50,12 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         _notificationService = notificationService;
         _logger = logger;
 
-        _activeMod = new SkyrimMod(ModKey.Null, _gameReleaseContext.Release.ToSkyrimRelease());
-        _activeModLinkCache = _activeMod.ToMutableLinkCache();
+        ActiveMod = new SkyrimMod(ModKey.Null, _gameReleaseContext.Release.ToSkyrimRelease());
+        ActiveModLinkCache = ActiveMod.ToMutableLinkCache();
 
-        _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
+        Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_gameReleaseContext.Release)
-            .WithLoadOrder(_activeMod.ModKey)
+            .WithLoadOrder(ActiveMod.ModKey)
             .Build();
     }
 
@@ -81,8 +69,8 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
 
         linearNotifier.Next($"Preparing {activeMod.FileName}");
         var activeModPath = new ModPath(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, activeMod.FileName));
-        _activeMod = ModInstantiator<ISkyrimMod>.Importer(activeModPath, _gameReleaseContext.Release, _fileSystem);
-        _activeModLinkCache = _activeMod.ToMutableLinkCache();
+        ActiveMod = ModInstantiator<ISkyrimMod>.Importer(activeModPath, _gameReleaseContext.Release, _fileSystem);
+        ActiveModLinkCache = ActiveMod.ToMutableLinkCache();
 
         linearNotifier.Next("Building GameEnvironment");
 
@@ -97,8 +85,8 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
         var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
         _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
 
-        _activeMod = new SkyrimMod(new ModKey(newModName, modType), _gameReleaseContext.Release.ToSkyrimRelease());
-        _activeModLinkCache = _activeMod.ToMutableLinkCache();
+        ActiveMod = new SkyrimMod(new ModKey(newModName, modType), _gameReleaseContext.Release.ToSkyrimRelease());
+        ActiveModLinkCache = ActiveMod.ToMutableLinkCache();
 
         var linearNotifier = new LinearNotifier(_notificationService);
         linearNotifier.Next("Building GameEnvironment");
@@ -109,14 +97,14 @@ public sealed class SkyrimEditorEnvironment : IEditorEnvironment<ISkyrimMod, ISk
     }
 
     private void BuildEnvironment(ModKey[] modKeys) {
-        _gameEnvironment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
+        Environment = GameEnvironmentBuilder<ISkyrimMod, ISkyrimModGetter>
             .Create(_gameReleaseContext.Release)
             .WithLoadOrder(modKeys)
-            .WithOutputMod(_activeMod, OutputModTrimming.Self)
+            .WithOutputMod(ActiveMod, OutputModTrimming.Self)
             .Build();
 
-        _activeModChanged.OnNext(_activeMod.ModKey);
-        _loadOrderChanged.OnNext(_gameEnvironment.LoadOrder.Select(x => x.Key).ToList());
-        _linkCacheChanged.OnNext(_gameEnvironment.LinkCache);
+        _activeModChanged.OnNext(ActiveMod.ModKey);
+        _loadOrderChanged.OnNext(Environment.LoadOrder.Select(x => x.Key).ToList());
+        _linkCacheChanged.OnNext(Environment.LinkCache);
     }
 }

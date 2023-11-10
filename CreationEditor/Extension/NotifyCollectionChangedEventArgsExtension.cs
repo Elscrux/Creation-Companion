@@ -31,7 +31,7 @@ public static class NotifyCollectionChangedEventArgsExtension {
             NotifyCollectionChangedAction.Reset =>
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Reset),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(e))
         };
     }
 }

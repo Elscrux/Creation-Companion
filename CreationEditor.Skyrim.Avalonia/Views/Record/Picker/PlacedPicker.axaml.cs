@@ -138,9 +138,7 @@ public partial class PlacedPicker : ActivatableUserControl {
             .ObserveOnTaskpool()
             .Select(x => {
                 if (x.LinkCache!.TryResolveSimpleContext<IPlacedGetter>(x.Placed, out var placed)) {
-                    if (placed.Parent?.Record is ICellGetter cell) {
-                        return cell.FormKey;
-                    }
+                    return placed.Parent?.Record is ICellGetter cell ? cell.FormKey : FormKey.Null;
                 }
 
                 return FormKey.Null;
@@ -173,7 +171,6 @@ public partial class PlacedPicker : ActivatableUserControl {
                     .Concat(record.Persistent)
                     .Where(x.Filter)
                     .Select(placed => (IMajorRecordGetter) placed)
-                    .ToList()
                     .AsObservableChangeSet()
                 : new List<IMajorRecordGetter>()
                     .AsObservableChangeSet())
@@ -196,7 +193,7 @@ public partial class PlacedPicker : ActivatableUserControl {
             .DistinctUntilChanged()
             .UpdateWhenCollectionChanges(PlacedRecords)
             .ObserveOnTaskpool()
-            .Select(x => new List<IMajorRecordGetter>(x.PlacedRecords).FirstOrDefault(y => y.FormKey == x.Placed) as IPlacedGetter)
+            .Select(x => new List<IMajorRecordGetter>(x.PlacedRecords).Find(y => y.FormKey == x.Placed) as IPlacedGetter)
             .ObserveOnGui()
             .Subscribe(placed => ResolvedPlaced = placed)
             .DisposeWith(ActivatedDisposable);

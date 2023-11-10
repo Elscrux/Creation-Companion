@@ -27,7 +27,7 @@ public sealed class ReferencedPlacedRecord : ReactiveObject, IReferencedRecord<I
             IPlacedHazardGetter placedHazard => placedHazard.Hazard.TryResolve(linkCache),
             IPlacedMissileGetter placedMissile => placedMissile.Projectile.TryResolve(linkCache),
             IPlacedTrapGetter placedTrap => placedTrap.Projectile.TryResolve(linkCache),
-            _ => throw new ArgumentOutOfRangeException(nameof(_referencedRecord.Record))
+            _ => throw new ArgumentOutOfRangeException(nameof(referencedRecord))
         };
     }
 

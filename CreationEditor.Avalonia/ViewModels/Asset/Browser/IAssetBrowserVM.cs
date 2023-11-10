@@ -27,6 +27,6 @@ public interface IAssetBrowserVM : IDisposableDropoff {
 
     HierarchicalTreeDataGridSource<AssetTreeItem> AssetTreeSource { get; }
 
-    Task Drop(TreeDataGridRowDragEventArgs treeDataGridRowDragEventArgs);
+    Task Drop(TreeDataGridRowDragEventArgs dragArgs);
     void ContextMenu(object? sender, ContextRequestedEventArgs e);
 }

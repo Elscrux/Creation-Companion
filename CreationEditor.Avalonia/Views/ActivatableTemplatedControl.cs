@@ -21,14 +21,19 @@ public class ActivatableTemplatedControl : TemplatedControl, IActivatableView, I
 
     protected virtual void WhenActivated() {}
 
-    public virtual void Dispose() {
-        ActivatedDisposable.Dispose();
-        TemplateDisposable.Dispose();
-        _activationDisposable.Dispose();
-    }
-
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
         TemplateDisposable.Clear();
+    }
+
+    public void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        ActivatedDisposable.Dispose();
+        TemplateDisposable.Dispose();
+        _activationDisposable.Dispose();
     }
 }

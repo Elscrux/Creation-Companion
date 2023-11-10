@@ -44,7 +44,6 @@ public sealed class AssetReferenceCache<TSource, TReference>
     public IEnumerable<TReference> GetReferences(IAssetLinkGetter asset) {
         if (!Cache.TryGetValue(asset.Type, out var assetDictionary)) yield break;
 
-        // if (!cache.Cache.TryGetValue(asset.Type, out var assetDictionary)) continue;
         if (!assetDictionary.TryGetValue(asset, out var usages)) yield break;
 
         foreach (var usage in usages) {

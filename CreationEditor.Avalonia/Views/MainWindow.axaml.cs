@@ -25,8 +25,8 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         TitleBar.ExtendsContentIntoTitleBar = true;
         TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
 
-        this.GetObservable(DataContextProperty).Subscribe(OnDataContextChanged);
-        this.GetObservable(ViewModelProperty).Subscribe(OnViewModelChanged);
+        this.GetObservable(DataContextProperty).Subscribe(OnDataContextUpdated);
+        this.GetObservable(ViewModelProperty).Subscribe(OnViewModelUpdated);
     }
 
     protected override void OnLoaded(RoutedEventArgs e) {
@@ -36,9 +36,9 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         ViewModel?.ShowModSelection(false);
     }
 
-    private void OnDataContextChanged(object? value) => ViewModel = value as MainVM;
+    private void OnDataContextUpdated(object? value) => ViewModel = value as MainVM;
 
-    private void OnViewModelChanged(object? value) {
+    private void OnViewModelUpdated(object? value) {
         if (value is null) {
             ClearValue(DataContextProperty);
         } else if (DataContext != value) {

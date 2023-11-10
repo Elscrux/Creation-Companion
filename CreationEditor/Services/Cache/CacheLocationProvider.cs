@@ -5,7 +5,6 @@ namespace CreationEditor.Services.Cache;
 public sealed partial class CacheLocationProvider : ICacheLocationProvider {
     private const string CacheDirectory = "MutagenCache";
     private const string CacheExtension = "cache";
-    private const string TempCacheExtension = "temp";
 
     [GeneratedRegex("[\\/:*?\"<>|]")]
     private static partial Regex IllegalFileNameRegex();

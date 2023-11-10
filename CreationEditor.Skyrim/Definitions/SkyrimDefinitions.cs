@@ -1,4 +1,5 @@
-﻿using CreationEditor.Skyrim.Definitions.Enums;
+﻿using System.Collections.Immutable;
+using CreationEditor.Skyrim.Definitions.Enums;
 using CreationEditor.Skyrim.Definitions.StoryManagerEvents;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
@@ -13,13 +14,13 @@ public static class SkyrimDefinitions {
         Dragonborn.ModKey,
     };
 
-    public static readonly IList<AStoryManagerEvent> StoryManagerEvents
+    public static readonly ImmutableArray<AStoryManagerEvent> StoryManagerEvents
         = typeof(AStoryManagerEvent)
             .GetAllSubClasses<AStoryManagerEvent>()
-            .ToList();
+            .ToImmutableArray();
 
-    public static readonly IList<IConditionValueEnums> ConditionValueEnums
+    public static readonly ImmutableArray<IConditionValueEnums> ConditionValueEnums
         = typeof(IConditionValueEnums)
             .GetAllSubClasses<IConditionValueEnums>()
-            .ToList();
+            .ToImmutableArray();
 }

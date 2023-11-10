@@ -106,8 +106,8 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
         _viewportRuntimeService.LoadInteriorCell(cell);
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         _referencesDisposable.Dispose();
         RecordCache.Clear();

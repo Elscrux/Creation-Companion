@@ -28,8 +28,8 @@ namespace CreationEditor.Avalonia.Views.Record.Picker;
 [TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
 [TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
 public class AFormKeyPicker : ActivatableTemplatedControl {
-    private enum UpdatingEnum { None, FormKey, EditorID, FormStr }
-    private UpdatingEnum _updating;
+    private enum UpdatingType { None, FormKey, EditorID, FormStr }
+    private UpdatingType _updating;
 
     public enum FormKeyPickerSearchMode {
         None,
@@ -333,10 +333,10 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         LinkCache: linkCache,
                         Types: types,
                         ScopedRecords: scopedRecords))
-            .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormKey)
+            .Where(_ => _updating is UpdatingType.None or UpdatingType.FormKey)
             .Do(x => {
                 UpdateFormLink(x.FormKey, x.LinkCache, x.Types);
-                _updating = UpdatingEnum.FormKey;
+                _updating = UpdatingType.FormKey;
                 if (!Processing) {
                     Processing = true;
                 }
@@ -403,7 +403,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
                 }
             })
-            .Do(_ => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingType.None)
             .Subscribe()
             .DisposeWith(ActivatedDisposable);
 
@@ -424,9 +424,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         Filter: sources.Item3,
                         Types: types,
                         ScopedRecords: scopedRecords))
-            .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.EditorID)
+            .Where(_ => _updating is UpdatingType.None or UpdatingType.EditorID)
             .Do(_ => {
-                _updating = UpdatingEnum.EditorID;
+                _updating = UpdatingType.EditorID;
                 if (!Processing) {
                     Processing = true;
                 }
@@ -501,7 +501,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
                 }
             })
-            .Do(_ => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingType.None)
             .Subscribe()
             .DisposeWith(ActivatedDisposable);
 
@@ -527,9 +527,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         ScopedRecords: scopedRecords,
                         MissingMeansError: sources.Item4,
                         MissingMeansNull: sources.Item5))
-            .Where(_ => _updating is UpdatingEnum.None or UpdatingEnum.FormStr)
+            .Where(_ => _updating is UpdatingType.None or UpdatingType.FormStr)
             .Do(_ => {
-                _updating = UpdatingEnum.FormStr;
+                _updating = UpdatingType.FormStr;
                 if (!Processing) {
                     Processing = true;
                 }
@@ -578,17 +578,16 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
 
-                    if (FormID.TryFactory(x.Raw, out var formID)) {
-                        if (x.LinkCache.ListedOrder.Count >= formID.ModIndex.ID) {
-                            var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
-                            formKey = new FormKey(targetMod.ModKey, formID.ID);
-                            return x.LinkCache.TryResolveIdentifier(formKey, EnabledTypes(x.Types), out var editorId)
-                                ? new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty)
-                                : new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
-                        }
+                    if (!FormID.TryFactory(x.Raw, out var formID) || x.LinkCache.ListedOrder.Count < formID.ModIndex.ID) {
+                        return new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
                     }
 
-                    return new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
+                    var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
+                    formKey = new FormKey(targetMod.ModKey, formID.ID);
+                    return x.LinkCache.TryResolveIdentifier(formKey, EnabledTypes(x.Types), out var editorId)
+                        ? new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty)
+                        : new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
+
                 } catch (Exception ex) {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
@@ -630,7 +629,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     }
                 }
             })
-            .Do(_ => _updating = UpdatingEnum.None)
+            .Do(_ => _updating = UpdatingType.None)
             .Subscribe()
             .DisposeWith(ActivatedDisposable);
 

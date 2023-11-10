@@ -26,7 +26,7 @@ public sealed class RecordReferenceCacheFactory : IRecordReferenceCacheFactory {
         return new MutableRecordReferenceCache(mutableMod, mutableModReferenceCache, immutableRecordReferenceCache);
     }
 
-    public async Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(IMod mutableMod, ImmutableRecordReferenceCache? immutableRecordReferenceCache) {
+    public async Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(IMod mutableMod, ImmutableRecordReferenceCache? immutableRecordReferenceCache = null) {
         _recordReferenceQuery.LoadModReferences(mutableMod);
         var mutableModReferenceCache = _recordReferenceQuery.ModCaches[mutableMod.ModKey];
         var duplicateImmutableRecordReferenceCache =

@@ -64,7 +64,7 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
         LinkCache = Scope switch {
             BrowserScope.Environment => _editorEnvironment.LinkCache,
             BrowserScope.ActiveMod => _editorEnvironment.ActiveModLinkCache,
-            _ => throw new ArgumentOutOfRangeException(nameof(Scope))
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 }

@@ -49,8 +49,8 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
             .DisposeWith(this);
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         InteriorCellsVM.Dispose();
         ExteriorCellsVM.Dispose();

@@ -95,12 +95,12 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
     }
 
     public IRawGrammar? GetGrammar(string scopeName) {
-        return _availableGrammars.FirstOrDefault(availableGrammar => string.Equals(availableGrammar.GetScopeName(), scopeName));
+        return _availableGrammars.Find(availableGrammar => string.Equals(availableGrammar.GetScopeName(), scopeName));
     }
 
 
     public GrammarDefinition? GetGrammarDefinition(string scopeName) {
-        return _availableGrammarDefinitions.FirstOrDefault(availableGrammar => string.Equals(availableGrammar.Name, scopeName));
+        return _availableGrammarDefinitions.Find(availableGrammar => string.Equals(availableGrammar.Name, scopeName));
     }
 
     public ICollection<string> GetInjections(string scopeName) => Array.Empty<string>();

@@ -130,7 +130,7 @@ public static class ObservableCollectionExtension {
                 source.AddRange(change.NewItems.OfType<T>());
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(change));
         }
     }
 

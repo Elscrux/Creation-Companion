@@ -10,9 +10,18 @@ public interface IMutagenTypeProvider {
     /// </summary>
     /// <param name="gameName">Name of the game</param>
     /// <param name="typeName">Name of the type</param>
+    /// <returns>Type of name and game</returns>
+    /// <exception cref="ArgumentException">Thrown when the type could not be found</exception>
+    System.Type GetType(string gameName, string typeName);
+
+    /// <summary>
+    /// Try to retrieve a mutagen type from a game name and type name
+    /// </summary>
+    /// <param name="gameName">Name of the game</param>
+    /// <param name="typeName">Name of the type</param>
     /// <param name="type">Type of name and game</param>
     /// <returns>True if the type could be retrieved, false otherwise</returns>
-    bool GetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type);
+    bool TryGetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type);
 
     /// <summary>
     /// Returns the game name of a mod

@@ -44,8 +44,8 @@ public sealed class ArchiveAssetQuery : IAssetReferenceCacheableQuery<string, st
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
 
-    public IEnumerable<string> ReadUsages(BinaryReader reader, string context, int count) {
-        for (var i = 0; i < count; i++) {
+    public IEnumerable<string> ReadUsages(BinaryReader reader, string contextString, int assetUsageCount) {
+        for (var i = 0; i < assetUsageCount; i++) {
             yield return reader.ReadString();
         }
     }

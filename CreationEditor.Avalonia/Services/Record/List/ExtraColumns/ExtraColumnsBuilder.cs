@@ -13,8 +13,8 @@ public sealed class ExtraColumnsBuilder : IExtraColumnsBuilder {
         _provider = provider;
     }
 
-    public IExtraColumnsBuilder AddRecordType(Type type) {
-        _extraColumns.AddRange(type.AsEnumerable().Concat(type.GetInterfaces())
+    public IExtraColumnsBuilder AddRecordType(Type recordType) {
+        _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
             .SelectWhere(@interface => _provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
                 ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns)
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)

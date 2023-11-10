@@ -181,23 +181,24 @@ public sealed class DragDropExtended : AvaloniaObject {
         SetNewSelection(newDataGrid, oldDataGrid, validItems, invalidItems);
     }
 
-    private static void DragStart(object? sender, object? identifier, PointerEventArgs e) {
-        if (sender is not DataGridRow { DataContext: {} item } row) return;
-        if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
+    private static Task DragStart(object? sender, object? identifier, PointerEventArgs e) {
+        if (sender is not DataGridRow { DataContext: {} item } row) return Task.CompletedTask;
+        if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return Task.CompletedTask;
 
         // Only allow starting to drag when the source is a known background element
-        if (e.Source is not StyledElement styledElement) return;
-        if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle" and not "InvalidVisualElement") return;
+        if (e.Source is not StyledElement styledElement) return Task.CompletedTask;
+        if (styledElement.Name is not "CellBorder" and not "BackgroundRectangle" and not "InvalidVisualElement") return Task.CompletedTask;
 
         var dataGrid = row.FindAncestorOfType<DataGrid>();
-        if (dataGrid is null) return;
+        if (dataGrid is null) return Task.CompletedTask;
 
         // Only start dragging when the row was previously selected
-        if (!dataGrid.SelectedItems.Contains(item)) return;
+        if (!dataGrid.SelectedItems.Contains(item)) return Task.CompletedTask;
 
         var dataObject = new DataObject();
         dataObject.Set(DataGrid, dataGrid);
         DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
+        return Task.CompletedTask;
     }
 
     private static void DragEnter(object? sender, DragEventArgs e) {

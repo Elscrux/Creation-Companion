@@ -51,6 +51,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly Func<object?, IReference[], ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
+    private readonly IArchiveService _archiveService;
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
@@ -59,6 +60,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
     private readonly IAssetProvider _assetProvider;
+    private readonly ISearchFilter _searchFilter;
     private readonly string _root;
 
     private AssetDirectory? _dataDirectory;
@@ -108,6 +110,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _fileSystem = fileSystem;
         _dataDirectoryProvider = dataDirectoryProvider;
+        _archiveService = archiveService;
         _menuItemProvider = menuItemProvider;
         _assetReferenceController = assetReferenceController;
         _assetController = assetController;
@@ -116,6 +119,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
         _assetProvider = assetProvider;
+        _searchFilter = searchFilter;
         _root = root;
 
         _assetReferenceController.IsLoading
@@ -132,39 +136,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     (showBsaAssets, showEmptyDirectories, showOnlyOrphaned, searchText) =>
                         (ShowBsaAssets: showBsaAssets, ShowEmptyDirectories: showEmptyDirectories, ShowOnlyOrphaned: showOnlyOrphaned, SearchText: searchText))
                 .ThrottleMedium()
-                .Select(x => {
-                    var hideBsa = !x.ShowBsaAssets;
-                    var hideEmptyDirectories = !x.ShowEmptyDirectories;
-                    var showOnlyOrphaned = x.ShowOnlyOrphaned;
-                    var filterText = !string.IsNullOrWhiteSpace(x.SearchText);
-
-                    return new Func<IAsset, bool>(ShowAsset);
-
-                    bool ShowAsset(IAsset asset) {
-                        if (asset is null) return false;
-
-                        if (hideBsa && asset.IsVirtual) return false;
-                        if (hideEmptyDirectories && asset is { IsDirectory: true, HasChildren: false }) return false;
-
-                        if (showOnlyOrphaned) {
-                            if (asset is AssetFile file) {
-                                if (file.ReferencedAsset.HasReferences) return false;
-                            } else {
-                                if (!asset.Children.ToList().Any(ShowAsset)) return false;
-                            }
-                        }
-
-                        if (filterText) {
-                            if (asset.IsDirectory) {
-                                if (!asset.Children.ToList().Any(ShowAsset)) return false;
-                            } else {
-                                if (!searchFilter.Filter(asset.Path, x.SearchText)) return false;
-                            }
-                        }
-
-                        return true;
-                    }
-                });
+                .Select(tuple => Selector(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
 
         AssetTreeSource = new HierarchicalTreeDataGridSource<AssetTreeItem>(Array.Empty<AssetTreeItem>()) {
             Columns = {
@@ -283,34 +255,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         AssetTreeSource.RowSelection!.SingleSelect = false;
 
-        MoveTo = ReactiveCommand.Create<string>(path => {
-            var pathIndices = new IndexPath();
-            AssetTreeItem? currentNode;
-            var items = AssetTreeSource.Items.ToArray();
-            do {
-                currentNode = items.FirstOrDefault(a => path.StartsWith(GetRootRelativePath(a.Path), AssetCompare.PathComparison));
-                if (currentNode is null) break;
-
-                pathIndices = pathIndices.Append(items.IndexOf(currentNode));
-                items = currentNode.Children.ToArray();
-            }
-            while (!string.Equals(path, currentNode.Path, AssetCompare.PathComparison));
-
-            var indexPathPart = new IndexPath();
-            foreach (var pathIndex in pathIndices.SkipLast(1)) {
-                indexPathPart = indexPathPart.Append(pathIndex);
-
-                var rowIndex = AssetTreeSource.Rows.ModelIndexToRowIndex(indexPathPart);
-                if (AssetTreeSource.Rows[rowIndex] is HierarchicalRow<AssetTreeItem> hierarchicalRow) {
-                    hierarchicalRow.IsExpanded = true;
-                } else {
-                    break;
-                }
-            }
-
-            AssetTreeSource.RowSelection.Clear();
-            AssetTreeSource.RowSelection.Select(pathIndices);
-        });
+        MoveTo = ReactiveCommand.Create<string>(MoveToPath);
 
         var src = new CancellationTokenSource();
         var cancellationToken = src.Token;
@@ -326,27 +271,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Undo = ReactiveCommand.Create(() => _assetController.Undo());
         Redo = ReactiveCommand.Create(() => _assetController.Redo());
 
-        Open = ReactiveCommand.Create<IReadOnlyList<AssetTreeItem?>>(assets => {
-            foreach (var asset in assets.NotNull()) {
-                var openPath = asset.Path;
-                if (asset is { Asset: AssetFile, IsVirtual: true }) {
-                    // When the asset is virtual, we need to extract it to a temp file first
-                    var tempFilePath = archiveService.TryGetFileAsTempFile(asset.Path);
-                    if (tempFilePath is not null) {
-                        openPath = tempFilePath;
-                    }
-                } else if (!_fileSystem.Path.Exists(asset.Path)) {
-                    return;
-                }
-
-                // Open the file via the standard program
-                Process.Start(new ProcessStartInfo {
-                    FileName = openPath,
-                    UseShellExecute = true,
-                    Verb = "open"
-                });
-            }
-        });
+        Open = ReactiveCommand.Create<IReadOnlyList<AssetTreeItem?>>(OpenAssets);
 
         Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<AssetTreeItem?>>(async assets => {
             var deleteAssets = assets.NotNull().ToArray();
@@ -374,61 +299,79 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
         });
 
-        Rename = ReactiveCommand.CreateFromTask<AssetTreeItem>(async asset => {
-            var name = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
-            var directory = _fileSystem.Path.GetDirectoryName(asset.Path);
-            if (directory is null) return;
+        Rename = ReactiveCommand.CreateFromTask<AssetTreeItem>(RenameAsset);
 
-            var textBox = new TextBox { Text = name };
-            var content = new StackPanel { Children = { textBox } };
+        CopyPath = ReactiveCommand.Create<AssetTreeItem>(CopyAssetPath);
 
-            var referenceBrowserVM = GetReferenceBrowserVM(asset);
-            if (referenceBrowserVM is not null) {
-                var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
-                content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
-                content.Children.Add(referenceBrowser);
-            }
-
-            var renameDialog = CreateAssetDialog($"Rename {name}", content);
-            if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-                var oldName = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
-                if (string.Equals(oldName, textBox.Text, AssetCompare.PathComparison)) return;
-
-                _assetController.Rename(asset.Path, textBox.Text + _fileSystem.Path.GetExtension(asset.Path));
-            }
-        });
-
-        CopyPath = ReactiveCommand.Create<AssetTreeItem>(asset => {
-            var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
-
-            clipboard?.SetTextAsync(GetRootRelativePath(asset.Path));
-        });
-
-        OpenReferences = ReactiveCommand.Create<AssetTreeItem>(asset => {
-                var referenceBrowserVM = GetReferenceBrowserVM(asset);
-                var relativePath = GetRootRelativePath(asset.Path);
-
-                var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
-                referenceWindow.Show(mainWindow);
-            },
+        OpenReferences = ReactiveCommand.Create<AssetTreeItem>(OpenAssetReferences,
             this.WhenAnyValue(x => x.AssetTreeSource.RowSelection!.SelectedItem)
                 .Select(x => x?.AnyOrphaned.Select(o => !o) ?? Observable.Return(false))
                 .Switch());
 
-        AddFolder = ReactiveCommand.CreateFromTask<AssetDirectory>(async dir => {
-            var textBox = new TextBox { Text = "New Folder" };
-            var relativePath = GetRootRelativePath(dir.Path);
-            var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
-
-            if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-                var newFolder = _fileSystem.Path.Combine(dir.Path, textBox.Text);
-                _fileSystem.Directory.CreateDirectory(newFolder);
-            }
-        });
+        AddFolder = ReactiveCommand.CreateFromTask<AssetDirectory>(AddAssetFolder);
 
         OpenAssetBrowser = ReactiveCommand.Create<AssetDirectory>(asset => {
             dockFactory.Open(DockElement.AssetBrowser, parameter: asset.Path);
         });
+    }
+
+    private async Task AddAssetFolder(AssetDirectory dir) {
+        var textBox = new TextBox {
+            Text = "New Folder"
+        };
+        var relativePath = GetRootRelativePath(dir.Path);
+        var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
+
+        if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+            var newFolder = _fileSystem.Path.Combine(dir.Path, textBox.Text);
+            _fileSystem.Directory.CreateDirectory(newFolder);
+        }
+    }
+
+    private void OpenAssetReferences(AssetTreeItem asset) {
+        var referenceBrowserVM = GetReferenceBrowserVM(asset);
+        var relativePath = GetRootRelativePath(asset.Path);
+
+        var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
+        referenceWindow.Show(_mainWindow);
+    }
+
+    private void CopyAssetPath(AssetTreeItem asset) {
+        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+
+        clipboard?.SetTextAsync(GetRootRelativePath(asset.Path));
+    }
+
+    private async Task RenameAsset(AssetTreeItem asset) {
+        var name = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
+        var directory = _fileSystem.Path.GetDirectoryName(asset.Path);
+        if (directory is null) return;
+
+        var textBox = new TextBox {
+            Text = name
+        };
+        var content = new StackPanel {
+            Children = {
+                textBox
+            }
+        };
+
+        var referenceBrowserVM = GetReferenceBrowserVM(asset);
+        if (referenceBrowserVM is not null) {
+            var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
+            content.Children.Add(new TextBlock {
+                Text = "Do you really want to proceed? These references will be modified to point to the new path."
+            });
+            content.Children.Add(referenceBrowser);
+        }
+
+        var renameDialog = CreateAssetDialog($"Rename {name}", content);
+        if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+            var oldName = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
+            if (string.Equals(oldName, textBox.Text, AssetCompare.PathComparison)) return;
+
+            _assetController.Rename(asset.Path, textBox.Text + _fileSystem.Path.GetExtension(asset.Path));
+        }
     }
 
     private ReferenceBrowserVM? GetReferenceBrowserVM(params AssetTreeItem[] assets) {
@@ -457,9 +400,9 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return _referenceBrowserVMFactory(assets.Length == 1 ? assets[0] : assets, references);
     }
 
-    public async Task Drop(TreeDataGridRowDragEventArgs e) {
-        if (e.TargetRow.Model is not AssetTreeItem { Asset: AssetDirectory directory }) return;
-        if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
+    public async Task Drop(TreeDataGridRowDragEventArgs dragArgs) {
+        if (dragArgs.TargetRow.Model is not AssetTreeItem { Asset: AssetDirectory directory }) return;
+        if (dragArgs.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
 
         var draggedAssets = dragInfo.Indexes
             .Select(indexPath => {
@@ -530,7 +473,6 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (await moveDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
             // Move all assets and remap their references
             foreach (var asset in draggedAssets) _assetController.Move(asset.Path, directory.Path);
-
         }
     }
 
@@ -612,5 +554,89 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     private string GetRootRelativePath(string assetPath) {
         return _fileSystem.Path.GetRelativePath(_root, assetPath);
+    }
+
+    private void MoveToPath(string path) {
+        var pathIndices = new IndexPath();
+        AssetTreeItem? currentNode;
+        var items = AssetTreeSource.Items.ToList();
+        do {
+            currentNode = items.Find(a => path.StartsWith(GetRootRelativePath(a.Path), AssetCompare.PathComparison));
+            if (currentNode is null) break;
+
+            pathIndices = pathIndices.Append(items.IndexOf(currentNode));
+            items = currentNode.Children.ToList();
+        }
+        while (!string.Equals(path, currentNode.Path, AssetCompare.PathComparison));
+
+        var indexPathPart = new IndexPath();
+        foreach (var pathIndex in pathIndices.SkipLast(1)) {
+            indexPathPart = indexPathPart.Append(pathIndex);
+
+            var rowIndex = AssetTreeSource.Rows.ModelIndexToRowIndex(indexPathPart);
+            if (AssetTreeSource.Rows[rowIndex] is HierarchicalRow<AssetTreeItem> hierarchicalRow) {
+                hierarchicalRow.IsExpanded = true;
+            } else {
+                break;
+            }
+        }
+
+        AssetTreeSource.RowSelection!.Clear();
+        AssetTreeSource.RowSelection.Select(pathIndices);
+    }
+
+    public void OpenAssets(IReadOnlyList<AssetTreeItem?> assets) {
+        foreach (var asset in assets.NotNull()) {
+            var openPath = asset.Path;
+            if (asset is { Asset: AssetFile, IsVirtual: true }) {
+                // When the asset is virtual, we need to extract it to a temp file first
+                var tempFilePath = _archiveService.TryGetFileAsTempFile(asset.Path);
+                if (tempFilePath is not null) {
+                    openPath = tempFilePath;
+                }
+            } else if (!_fileSystem.Path.Exists(asset.Path)) {
+                return;
+            }
+
+            // Open the file via the standard program
+            Process.Start(new ProcessStartInfo {
+                FileName = openPath,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+        }
+    }
+
+    public Func<IAsset, bool> Selector(bool showBsaAssets, bool showEmptyDirectories, bool showOnlyOrphaned, string searchText) {
+        var hideBsa = !showBsaAssets;
+        var hideEmptyDirectories = !showEmptyDirectories;
+        var filterText = !string.IsNullOrWhiteSpace(searchText);
+
+        return ShowAsset;
+
+        bool ShowAsset(IAsset asset) {
+            if (asset is null) return false;
+
+            if (hideBsa && asset.IsVirtual) return false;
+            if (hideEmptyDirectories && asset is { IsDirectory: true, HasChildren: false }) return false;
+
+            if (showOnlyOrphaned) {
+                if (asset is AssetFile file) {
+                    if (file.ReferencedAsset.HasReferences) return false;
+                } else {
+                    if (!asset.Children.Any(ShowAsset)) return false;
+                }
+            }
+
+            if (filterText) {
+                if (asset.IsDirectory) {
+                    if (!asset.Children.Any(ShowAsset)) return false;
+                } else {
+                    if (!_searchFilter.Filter(asset.Path, searchText)) return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

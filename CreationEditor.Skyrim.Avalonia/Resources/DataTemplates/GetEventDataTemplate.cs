@@ -62,7 +62,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                 if (storyManagerEvent is null || storyManagerEvent.NonReferenceEnums.Count == 0) return;
 
                 // Initialize the member to the first valid value if it's not set
-                var firstValue = storyManagerEvent.NonReferenceEnums.First();
+                var firstValue = storyManagerEvent.NonReferenceEnums[0];
                 if (data.Member == GetEventDataConditionData.EventMember.None) {
                     data.Member = (GetEventDataConditionData.EventMember) firstValue;
                 }

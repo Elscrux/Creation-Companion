@@ -18,7 +18,7 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
             if (setting.Parent is null) continue;
 
             // Find parent setting and yourself as child
-            var parent = settingsList.FirstOrDefault(p => p.GetType() == setting.Parent);
+            var parent = settingsList.Find(p => p.GetType() == setting.Parent);
             if (parent is not null) {
                 parent.Children.Add(setting);
             } else {

@@ -106,7 +106,7 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
 
         // Add references for new mods
         var tasks = _editorEnvironment.LinkCache.PriorityOrder
-            .Where(mod => _modAssetCaches.All(c => c.Source.ModKey != mod.ModKey))
+            .Where(mod => _modAssetCaches.TrueForAll(c => c.Source.ModKey != mod.ModKey))
             .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetModCache(mod)));
 
         foreach (var assetCache in await Task.WhenAll(tasks)) {
@@ -198,7 +198,7 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
         }
 
         void Remove(string archive) {
-            var cache = _nifArchiveAssetCaches.FirstOrDefault(c => string.Equals(c.Source, archive, AssetCompare.PathComparison));
+            var cache = _nifArchiveAssetCaches.Find(c => string.Equals(c.Source, archive, AssetCompare.PathComparison));
             if (cache is null) return;
 
             // Change existing subscriptions
@@ -292,7 +292,7 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
     }
 
     public Action<IMajorRecordGetter> RegisterUpdate(IMajorRecordGetter record) {
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return _ => {};
 
         // Collect the references before and after the update
@@ -326,7 +326,7 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
             return;
         }
 
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
@@ -339,7 +339,7 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
             return;
         }
 
-        var modCache = _modAssetCaches.FirstOrDefault(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();

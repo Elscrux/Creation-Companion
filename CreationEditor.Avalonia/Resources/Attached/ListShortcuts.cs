@@ -80,7 +80,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                         disposable = treeDataGrid.WhenAnyValue(x => x.Source)
                             .NotNull()
                             .Subscribe(source => {
-                                var t = source.GetType().GetGenericArguments().First();
+                                var t = source.GetType().GetGenericArguments()[0];
 
                                 var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
                                 genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { source, args.NewValue.GetValueOrDefault() });

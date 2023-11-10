@@ -96,7 +96,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
 
         AllowDropDataGridProperty.Changed
             .Subscribe(allowDropDataGrid => {
-                var state = allowDropDataGrid.NewValue.GetValueOrDefault<bool>();
+                var allowsDrop = allowDropDataGrid.NewValue.GetValueOrDefault<bool>();
 
                 allowDropDataGrid.Sender.SetValue(DragDrop.AllowDropProperty, allowDropDataGrid.NewValue.Value);
 
@@ -107,7 +107,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                             args.Row.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                             args.Row.RemoveHandler(DragDrop.DropEvent, DropDataGrid);
 
-                            if (state) {
+                            if (allowsDrop) {
                                 args.Row.AddHandler(DragDrop.DragEnterEvent, DragEnter);
                                 args.Row.AddHandler(DragDrop.DragLeaveEvent, DragLeave);
                                 args.Row.AddHandler(DragDrop.DropEvent, DropDataGrid);
@@ -125,14 +125,14 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                         break;
                     case Control control:
                         ToggleControl();
-                        if (state == false) return;
+                        if (allowsDrop == false) return;
 
                         void ToggleControl() {
                             control.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                             control.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);
                             control.RemoveHandler(DragDrop.DropEvent, Drop);
 
-                            if (state) {
+                            if (allowsDrop) {
                                 control.AddHandler(DragDrop.DragEnterEvent, DragEnter);
                                 control.AddHandler(DragDrop.DragLeaveEvent, DragLeave);
                                 control.AddHandler(DragDrop.DropEvent, Drop);
@@ -151,11 +151,11 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
             });
     }
 
-    public static void DragStart(object? sender, object? identifier, PointerEventArgs e) {
+    public static Task DragStart(object? sender, object? identifier, PointerEventArgs e) {
         identifier ??= sender;
-        if (identifier is not AvaloniaObject obj) return;
-        if (sender is not Visual pressed) return;
-        if (!e.GetCurrentPoint(pressed).Properties.IsLeftButtonPressed) return;
+        if (identifier is not AvaloniaObject obj) return Task.CompletedTask;
+        if (sender is not Visual pressed) return Task.CompletedTask;
+        if (!e.GetCurrentPoint(pressed).Properties.IsLeftButtonPressed) return Task.CompletedTask;
 
         var formLinkGetter = GetGetFormLink(obj);
         var formLink = formLinkGetter(pressed.DataContext);
@@ -164,6 +164,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         dataObject.Set(FormLink, formLink);
 
         DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Copy);
+        return Task.CompletedTask;
     }
 
     private static void Drop(object? sender, DragEventArgs e) {

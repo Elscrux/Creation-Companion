@@ -92,8 +92,8 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             .DisposeWith(this);
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         _referencesDisposable.Dispose();
         RecordCache.Clear();

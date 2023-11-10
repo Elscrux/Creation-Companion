@@ -129,8 +129,8 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
         SelectedRecord = referencedCell;
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         _referencesDisposable.Dispose();
         RecordCache.Clear();

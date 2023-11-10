@@ -48,12 +48,15 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
             })
             .DisposeWith(_disposables);
 
-        SideDock.WhenAnyValue(x => x.InEditMode, x => x.ActiveTab, x => x.Tabs.Count)
+        SideDock.WhenAnyValue(
+                x => x.InEditMode,
+                x => x.ActiveTab,
+                x => x.Tabs.Count,
+            (inEditMode, activeTab, tabCount) => (InEditMode: inEditMode, ActiveTab: activeTab, TabCount: tabCount))
             .Subscribe(x => {
-                var (editMode, activeTab, tabCount) = x;
-                if (SideDock.InEditMode && SideDock.ActiveTab is not null) return;
+                if (x is { InEditMode: true, ActiveTab: not null }) return;
 
-                var activeTabSize = UpdateSize && activeTab?.Size is not null ? activeTab.Size.Value : ActiveTabSize;
+                var activeTabSize = UpdateSize && x.ActiveTab?.Size is not null ? x.ActiveTab.Size.Value : ActiveTabSize;
                 var size = new GridLength(ReturnIf(SideDock, activeTabSize, NoActiveTabSize), GridUnitType.Pixel);
                 AssociatedObject.SetValue(GetSizeProperty(), size);
 

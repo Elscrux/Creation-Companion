@@ -86,12 +86,12 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         }
     }
 
-    public bool IsCacheUpToDate(BinaryReader binaryReader, IModGetter source) {
+    public bool IsCacheUpToDate(BinaryReader reader, IModGetter source) {
         var modFilePath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, source.ModKey.FileName);
         if (!_fileSystem.Path.Exists(modFilePath)) return false;
 
         // Read hash in cache
-        var hash = binaryReader.ReadBytes(_fileSystem.GetHashBytesLength());
+        var hash = reader.ReadBytes(_fileSystem.GetHashBytesLength());
 
         // Validate hash
         return _fileSystem.IsFileHashValid(modFilePath, hash);
@@ -103,15 +103,13 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         return game;
     }
 
-    public IEnumerable<IFormLinkGetter> ReadUsages(BinaryReader reader, string context, int count) {
-        for (var i = 0; i < count; i++) {
+    public IEnumerable<IFormLinkGetter> ReadUsages(BinaryReader reader, string contextString, int assetUsageCount) {
+        for (var i = 0; i < assetUsageCount; i++) {
             var referenceFormKey = FormKey.Factory(reader.ReadString());
             var typeString = reader.ReadString();
-            if (_mutagenTypeProvider.GetType(context, typeString, out var type)) {
-                yield return new FormLinkInformation(referenceFormKey, type);
-            } else {
-                throw new ArgumentException();
-            }
+            var type = _mutagenTypeProvider.GetType(contextString, typeString);
+
+            yield return new FormLinkInformation(referenceFormKey, type);
         }
     }
 

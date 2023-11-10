@@ -23,13 +23,6 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
 
     protected virtual void WhenActivated() {}
 
-    public virtual void Dispose() {
-        ActivatedDisposable.Dispose();
-        if (_compositeDisposable.IsValueCreated) {
-            _compositeDisposable.Value.Dispose();
-        }
-    }
-
     protected void RaiseAndSetIfChanged<T>(ref T item, T newItem, [CallerMemberName] string? propertyName = null) {
         if (EqualityComparer<T>.Default.Equals(item, newItem)) return;
 
@@ -88,6 +81,18 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
     }
 
     public override string ToString() => GetType().Name;
+
+    public void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        ActivatedDisposable.Dispose();
+        if (_compositeDisposable.IsValueCreated) {
+            _compositeDisposable.Value.Dispose();
+        }
+    }
 
     public void Add(IDisposable disposable) => _compositeDisposable.Value.Add(disposable);
 }

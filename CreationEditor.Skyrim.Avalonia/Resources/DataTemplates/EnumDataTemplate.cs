@@ -20,7 +20,7 @@ public sealed class EnumDataTemplate : ICustomConditionValueDataTemplate {
         var conditionValueEnum = SkyrimDefinitions.ConditionValueEnums.FirstOrDefault(condition => condition.Match(editableCondition.Function));
         if (conditionValueEnum is null) return Observable.Empty<Control?>();
 
-        var enumType = conditionValueEnum.Enums.First().GetType();
+        var enumType = conditionValueEnum.Enums[0].GetType();
         var comboBox = new ComboBox {
             DataContext = editableCondition,
             ItemsSource = conditionValueEnum.Enums,

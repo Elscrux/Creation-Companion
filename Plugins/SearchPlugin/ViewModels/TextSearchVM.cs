@@ -67,50 +67,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
         RecordGroup = new Group<TextReference>(references => references.Record, true);
         GroupCollection = new GroupCollection<TextReference>(References, TypeGroup, RecordGroup).DisposeWith(ActivatedDisposable);
 
-        SearchCommand = ReactiveCommand.CreateFromTask(async () => {
-                if (SearchText.IsNullOrWhitespace()) return;
-
-                Dispatcher.UIThread.Post(() => IsBusy = true);
-
-                References.Clear();
-
-                var selectedModKeys = Mods
-                    .Where(mod => mod.IsSelected)
-                    .Select(mod => mod.ModKey);
-
-                var selectedMods = _editorEnvironment.LinkCache.PriorityOrder
-                    .Where(mod => selectedModKeys.Contains(mod.ModKey))
-                    .ToList();
-
-                var recordReferencesEnumerable = await Task.WhenAll(
-                    Searchers
-                        .Where(searcher => searcher.IsSelected)
-                        .Select(searcher => searcher.Searcher)
-                        .OfType<ITextSearcher<TMod, TModGetter>>()
-                        .Select(searcher => Task.Run(() => {
-                            // Collect all references of a text searcher from all mods
-                            var refs = selectedMods
-                                .SelectMany(mod => searcher.GetTextReference(mod, SearchText, ComparisonType))
-                                .DistinctBy(x => x.Record is IFormKeyGetter formKeyGetter ? (IComparable) formKeyGetter.FormKey.ToString() : Guid.NewGuid())
-                                .ToList();
-
-                            // Replace text if requested
-                            if (Replace) {
-                                foreach (var recordReferences in refs) {
-                                    recordReferences.Diff.New = recordReferences.Diff.Old.Replace(SearchText, ReplaceText, ComparisonType);
-                                }
-                            }
-
-                            return Task.FromResult(refs);
-                        })));
-
-                var recordRefs = recordReferencesEnumerable.SelectMany(x => x).ToList();
-                Dispatcher.UIThread.Post(() => {
-                    References.AddRange(recordRefs);
-                    IsBusy = false;
-                });
-            }
-        );
+        SearchCommand = ReactiveCommand.CreateFromTask(Search);
 
         TreeStructureSource = new HierarchicalTreeDataGridSource<object>(GroupCollection.Items) {
             Columns = {
@@ -243,6 +200,45 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                 }))
             }
         };
+    }
+
+    private async Task Search() {
+        if (SearchText is null) return;
+
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+
+        References.Clear();
+
+        var selectedModKeys = Mods.Where(mod => mod.IsSelected)
+            .Select(mod => mod.ModKey);
+
+        var selectedMods = _editorEnvironment.LinkCache.PriorityOrder.Where(mod => selectedModKeys.Contains(mod.ModKey))
+            .ToList();
+
+        var recordReferencesEnumerable = await Task.WhenAll(Searchers.Where(searcher => searcher.IsSelected)
+            .Select(searcher => searcher.Searcher)
+            .OfType<ITextSearcher<TMod, TModGetter>>()
+            .Select(searcher => Task.Run(() => {
+                // Collect all references of a text searcher from all mods
+                var refs = selectedMods.SelectMany(mod => searcher.GetTextReference(mod, SearchText, ComparisonType))
+                    .DistinctBy(x => x.Record is IFormKeyGetter formKeyGetter ? (IComparable) formKeyGetter.FormKey.ToString() : Guid.NewGuid())
+                    .ToList();
+
+                // Replace text if requested
+                if (Replace) {
+                    foreach (var recordReferences in refs) {
+                        recordReferences.Diff.New = recordReferences.Diff.Old.Replace(SearchText, ReplaceText, ComparisonType);
+                    }
+                }
+
+                return Task.FromResult(refs);
+            })));
+
+        var recordRefs = recordReferencesEnumerable.SelectMany(x => x).ToList();
+        Dispatcher.UIThread.Post(() => {
+            References.AddRange(recordRefs);
+            IsBusy = false;
+        });
     }
 
     private async Task ReplaceRecordReferences(TextReference textReference) {

@@ -11,7 +11,10 @@ public sealed class RecordReference : IReference, IDisposable {
     private readonly IDisposableBucket _disposables = new DisposableBucket();
 
     private IMajorRecordGetter? _record;
-    public IMajorRecordGetter Record => _record ??= _linkCacheProvider.LinkCache.TryResolve(_formLinkIdentifier, out var record) ? record : throw new ArgumentException();
+    public IMajorRecordGetter Record => _record
+        ??= _linkCacheProvider.LinkCache.TryResolve(_formLinkIdentifier, out var record)
+            ? record
+            : throw new ArgumentException(nameof(_formLinkIdentifier));
 
     private IReferencedRecord? _referencedRecord;
     public IReferencedRecord ReferencedRecord {

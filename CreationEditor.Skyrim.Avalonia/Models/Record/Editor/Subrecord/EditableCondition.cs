@@ -24,6 +24,8 @@ public sealed class EditableCondition : ReactiveObject {
         Player
     }
 
+    private static readonly PropertyInfo? FunctionProperty = typeof(IConditionDataGetter).GetProperty(nameof(IConditionDataGetter.Function));
+
     private readonly CompositeDisposable _disposable = new();
 
     [Reactive] public ExtendedRunOnType RunOnType { get; set; }
@@ -95,8 +97,6 @@ public sealed class EditableCondition : ReactiveObject {
             })
             .DisposeWith(_disposable);
     }
-
-    private static readonly PropertyInfo? FunctionProperty = typeof(IConditionDataGetter).GetProperty(nameof(IConditionDataGetter.Function));
 
     public EditableCondition(ICondition parent) : this() {
         var value = FunctionProperty?.GetValue(parent.Data);

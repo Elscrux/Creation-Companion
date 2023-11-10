@@ -141,7 +141,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
                 if (x.Data is null) {
                     SelectedData = null;
                 } else {
-                    var alias = x.Data.FirstOrDefault(d => d.Index == x.Index);
+                    var alias = x.Data.Find(d => d.Index == x.Index);
                     SelectedData = alias ?? x.Data.FirstOrDefault();
                 }
             })

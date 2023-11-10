@@ -244,16 +244,8 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
                     for (var j = 0; j < referenceCount; j++) {
                         var referenceFormKey = FormKey.Factory(reader.ReadString());
                         var typeString = reader.ReadString();
-                        if (_mutagenTypeProvider.GetType(game, typeString, out var type)) {
-                            references.Add(new FormLinkInformation(referenceFormKey, type));
-                        } else {
-                            _logger.Here().Error(
-                                new ArgumentException($"Unknown object type: {typeString}"),
-                                "Error while reading reference cache of '{Name}, Unknown object type: {TypeString} of {Key}",
-                                modKey.Name,
-                                typeString,
-                                formKey);
-                        }
+                        var type = _mutagenTypeProvider.GetType(game, typeString);
+                        references.Add(new FormLinkInformation(referenceFormKey, type));
                     }
 
                     modCache.Add(formKey, references);

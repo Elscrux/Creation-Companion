@@ -172,13 +172,13 @@ public sealed class ReferenceBrowserVM : ViewModel {
 
         var selectedAssetReferences = treeDataGrid.RowSelection.SelectedItems
             .OfType<AssetReference>()
-            .ToArray();
+            .ToList();
 
         var selectedRecordReferences = treeDataGrid.RowSelection.SelectedItems
             .OfType<RecordReference>()
-            .ToArray();
+            .ToList();
 
-        if (selectedRecordReferences.Length > 0) {
+        if (selectedRecordReferences.Count > 0) {
             var records = selectedRecordReferences.Select(reference => reference.Record);
             var contextFlyout = new MenuFlyout {
                 Items = {
@@ -188,7 +188,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
                 }
             };
 
-            if (selectedRecordReferences.Any(reference => reference.ReferencedRecord.References.Count > 0)) {
+            if (selectedRecordReferences.Exists(reference => reference.ReferencedRecord.References.Count > 0)) {
                 var references = _menuItemProvider.References(OpenReferences, selectedRecordReferences.Select(record => record.ReferencedRecord));
                 contextFlyout.Items.Add(references);
             }
@@ -196,7 +196,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
             contextFlyout.ShowAt(control, true);
         }
 
-        if (selectedAssetReferences.Length > 0) {}
+        if (selectedAssetReferences.Count > 0) {}
 
         e.Handled = true;
     }

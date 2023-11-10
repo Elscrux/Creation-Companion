@@ -26,7 +26,7 @@ public abstract class AssetFilter<T> : IRecordFilter {
 
         // Trim standalone folders
         while (recordFilterListings.Count == 1) {
-            recordFilterListings = recordFilterListings.First().RecordFilters.ToList();
+            recordFilterListings = recordFilterListings[0].RecordFilters.ToList();
         }
 
         return recordFilterListings;

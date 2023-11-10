@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Comparer;
 
-public class NamedComparers {
+public static class NamedComparers {
     public static readonly FuncComparer<INamedRequiredGetter> NamedRequiredComparer
         = new((x, y) => {
             var xName = x.Name;

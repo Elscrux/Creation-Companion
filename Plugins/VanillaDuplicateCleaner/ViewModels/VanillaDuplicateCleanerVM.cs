@@ -121,7 +121,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
                     context.GetOrAddAsOverride(cleanedBaseMod);
                 } else {
                     var modName = $"Cleaned{context.ModKey.Name}From{modKey.Name}";
-                    var cleanedMod = cleanedOtherMods.FirstOrDefault(m => m.ModKey.Name == modName);
+                    var cleanedMod = cleanedOtherMods.Find(m => m.ModKey.Name == modName);
                     if (cleanedMod is null) {
                         cleanedMod = new SkyrimMod(ModKey.FromName(modName, ModType.Plugin), SkyrimRelease.SkyrimSE);
                         cleanedOtherMods.Add(cleanedMod);

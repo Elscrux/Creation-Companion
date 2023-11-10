@@ -19,7 +19,7 @@ public static class RecordFilterExtension {
                     var directory = directories[i];
                     if (directory.IsNullOrEmpty()) break;
 
-                    accumulatedPath += i == directories.Length - 1 ? directory : directory + separator.First();
+                    accumulatedPath += i == directories.Length - 1 ? directory : directory + separator[0];
 
                     var listing = currentRoot.RecordFilters.FirstOrDefault(x => string.Equals(x.DisplayName, directory, StringComparison.OrdinalIgnoreCase));
                     if (listing is null) {
@@ -30,7 +30,7 @@ public static class RecordFilterExtension {
                                 if (record is not T t) return false;
 
                                 return stringSelector(t)
-                                    .Any(selected => selected.StartsWith(path));
+                                    .Any(selected => selected.StartsWith(path, StringComparison.OrdinalIgnoreCase));
                             },
                             currentRoot);
                         currentRoot.RecordFilters.Add(listing);

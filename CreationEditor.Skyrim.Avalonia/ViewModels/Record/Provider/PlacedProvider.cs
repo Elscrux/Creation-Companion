@@ -100,8 +100,8 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
             .DisposeWith(this);
     }
 
-    public override void Dispose() {
-        base.Dispose();
+    protected override void Dispose(bool disposing) {
+        base.Dispose(disposing);
 
         _referencesDisposable.Dispose();
         RecordCache.Clear();

@@ -29,7 +29,7 @@ public sealed class CombatStyleFilter : SimpleRecordFilter<ICombatStyleGetter> {
         foreach (double value in scores) {
             if (score < value) return false;
 
-            if (!(Math.Abs(score - value) < 0.001)) continue;
+            if (Math.Abs(score - value) >= 0.001) continue;
 
             if (!found) {
                 found = true;

@@ -59,16 +59,15 @@ public class DockDropBehavior : Behavior<Control> {
 
         // Check if the dock type changed or if we aren't the currently previewed object
         var dock = GetDockType(e, control);
-        if (dragData.Dock != dock
-         || !ReferenceEquals(dragData.Preview, AssociatedObject)) {
-            // Handle preview
-            if (control is IDockPreview dockPreview) {
-                dragData.Preview?.HidePreview();
+        if (dragData.Dock == dock && ReferenceEquals(dragData.Preview, AssociatedObject)) return;
 
-                dragData.Preview = dockPreview;
-                dragData.Dock = dock;
-                dockPreview.ShowPreview(dock);
-            }
+        // Handle preview
+        if (control is IDockPreview dockPreview) {
+            dragData.Preview?.HidePreview();
+
+            dragData.Preview = dockPreview;
+            dragData.Dock = dock;
+            dockPreview.ShowPreview(dock);
         }
     }
 

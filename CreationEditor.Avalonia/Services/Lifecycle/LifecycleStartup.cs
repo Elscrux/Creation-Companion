@@ -23,7 +23,7 @@ public sealed class LifecycleStartup : ILifecycleStartup {
         }
     }
 
-    public void PostStartupAsync(Subject<string> done, CancellationToken cancellationToken) {
+    public void PostStartupAsync(Subject<string> done, CancellationToken cancellationToken = default) {
         _logger.Here().Debug("Run {Count} Lifecycle Task(s) post startup", LifecycleTasks.Count);
 
         Parallel.ForEach(LifecycleTasks, task => {

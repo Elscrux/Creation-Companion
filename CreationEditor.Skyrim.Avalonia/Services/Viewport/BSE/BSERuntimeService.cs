@@ -144,16 +144,16 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
         foreach (var placed in placedRecords) {
             switch (placed) {
-                case IPlacedArrowGetter placedArrow:
-                case IPlacedBarrierGetter placedBarrier:
-                case IPlacedBeamGetter placedBeam:
-                case IPlacedConeGetter placedCone:
-                case IPlacedFlameGetter placedFlame:
-                case IPlacedHazardGetter placedHazard:
-                case IPlacedMissileGetter placedMissile:
-                case IPlacedTrapGetter placedTrap:
-                case IAPlacedTrapGetter aPlacedTrap:
-                case IPlacedNpcGetter placedNpc:
+                case IPlacedArrowGetter:
+                case IPlacedBarrierGetter:
+                case IPlacedBeamGetter:
+                case IPlacedConeGetter:
+                case IPlacedFlameGetter:
+                case IPlacedHazardGetter:
+                case IPlacedMissileGetter:
+                case IPlacedTrapGetter:
+                case IAPlacedTrapGetter:
+                case IPlacedNpcGetter:
                     break;
                 case IPlacedObjectGetter placedObject:
                     var placement = placedObject.Placement;
@@ -166,11 +166,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     var model = baseObject switch {
                         IModeledGetter modeled => modeled.Model?.File.DataRelativePath,
                         IArmorGetter armor => armor.WorldModel?.Male?.Model?.File.DataRelativePath,
-                        ISoundMarkerGetter soundMarker => null,
-                        ISpellGetter spell => null,
-                        ITextureSetGetter textureSet => null,
-                        IAcousticSpaceGetter acousticSpaceGetter => null,
-                        _ => throw new ArgumentOutOfRangeException(nameof(baseObject))
+                        ISoundMarkerGetter => null,
+                        ISpellGetter => null,
+                        ITextureSetGetter => null,
+                        IAcousticSpaceGetter => null,
+                        _ => throw new ArgumentOutOfRangeException()
                     };
 
                     if (model is null) continue;

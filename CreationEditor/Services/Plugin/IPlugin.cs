@@ -2,10 +2,19 @@
 namespace CreationEditor.Services.Plugin;
 
 public interface IPlugin : IPluginDefinition {
-    // Lifecycle
-    public void OnRegistered() {}
+    /// <summary>
+    /// Called when the plugin is registered. Run startup code here.
+    /// </summary>
+    public void OnRegistered() {
+        // Can be run by plugins
+    }
 
-    public void OnUnregistered() {}
+    /// <summary>
+    /// Called when the plugin is unregistered. Run cleanup code here.
+    /// </summary>
+    public void OnUnregistered() {
+        // Can be run by plugins
+    }
 }
 
 public interface IPlugin<TMod, TModGetter> : IPlugin

@@ -15,7 +15,10 @@ using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord;
 
 public partial class ConditionValue : ActivatableUserControl {
-    private static readonly IList<ICustomConditionValueDataTemplate> ConditionValueTemplates;
+    private static readonly IList<ICustomConditionValueDataTemplate> ConditionValueTemplates
+        = typeof(ICustomConditionValueDataTemplate)
+            .GetAllSubClasses<ICustomConditionValueDataTemplate>()
+            .ToArray();
 
     public static readonly StyledProperty<EditableCondition> ConditionProperty
         = AvaloniaProperty.Register<ConditionValue, EditableCondition>(nameof(Condition));
@@ -38,12 +41,6 @@ public partial class ConditionValue : ActivatableUserControl {
     public IObservable<Unit>? ConditionDataChanged {
         get => GetValue(ConditionDataChangedProperty);
         set => SetValue(ConditionDataChangedProperty, value);
-    }
-
-    static ConditionValue() {
-        ConditionValueTemplates = typeof(ICustomConditionValueDataTemplate)
-            .GetAllSubClasses<ICustomConditionValueDataTemplate>()
-            .ToArray();
     }
 
     private IDisposable? _valueSubscription;
@@ -73,7 +70,6 @@ public partial class ConditionValue : ActivatableUserControl {
                     };
                 } else {
                     _valueSubscription?.Dispose();
-                    ;
                     _valueSubscription = template.Build(x.LinkCache, x.Condition, x.Data, x.ConditionDataChanged)
                         .ObserveOnGui()
                         .BindTo(this, conditionValue => conditionValue.Content)

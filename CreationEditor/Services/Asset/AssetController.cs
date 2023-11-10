@@ -12,7 +12,6 @@ public sealed class AssetController : IAssetController {
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
-    private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetProvider _assetProvider;
     private readonly IModelModificationService _modelModificationService;
     private readonly ILinkCacheProvider _linkCacheProvider;
@@ -23,7 +22,6 @@ public sealed class AssetController : IAssetController {
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         IDeleteDirectoryProvider deleteDirectoryProvider,
-        IAssetReferenceController assetReferenceController,
         IAssetProvider assetProvider,
         IModelModificationService modelModificationService,
         ILinkCacheProvider linkCacheProvider,
@@ -34,7 +32,6 @@ public sealed class AssetController : IAssetController {
         _linkCacheProvider = linkCacheProvider;
         _dataDirectoryProvider = dataDirectoryProvider;
         _deleteDirectoryProvider = deleteDirectoryProvider;
-        _assetReferenceController = assetReferenceController;
         _modelModificationService = modelModificationService;
         _recordController = recordController;
         _logger = logger;
@@ -47,11 +44,11 @@ public sealed class AssetController : IAssetController {
         return _fileSystem.Path.Combine(_deleteDirectoryProvider.DeleteDirectory, relativePath);
     }
 
-    public void Delete(string path, CancellationToken token) => MoveInternal(path, CreateDeletePath(path), true, token);
+    public void Delete(string path, CancellationToken token = default) => MoveInternal(path, CreateDeletePath(path), true, token);
 
-    public void Move(string path, string destination, CancellationToken token) => MoveInternal(path, destination, false, token);
+    public void Move(string path, string destination, CancellationToken token = default) => MoveInternal(path, destination, false, token);
 
-    public void Rename(string path, string newName, CancellationToken token) {
+    public void Rename(string path, string newName, CancellationToken token = default) {
         var directoryPath = _fileSystem.Path.GetDirectoryName(path);
         if (directoryPath != null) {
             MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true, token);
@@ -67,7 +64,7 @@ public sealed class AssetController : IAssetController {
         var baseDirectory = isFile ? _fileSystem.Path.GetDirectoryName(path) : path;
         if (baseDirectory is null) return;
 
-        var assetContainer = _assetProvider.GetAssetContainer(baseDirectory);
+        var assetContainer = _assetProvider.GetAssetContainer(baseDirectory, token);
 
         var basePath = assetContainer.Path;
         var baseIsFile = isFile || _fileSystem.Path.HasExtension(basePath);

@@ -11,7 +11,6 @@ public sealed class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiVal
     /// Initializes a new instance of the <see cref="ExtendedFuncMultiValueConverter{TIn, TOut, TPar}"/> class.
     /// </summary>
     /// <param name="convert">The convert function.</param>
-    /// <param name="convertBack">The convert back function</param>
     public ExtendedFuncMultiValueConverter(Func<IEnumerable<TIn?>, TPar?, TOut> convert) {
         _convert = convert;
     }
