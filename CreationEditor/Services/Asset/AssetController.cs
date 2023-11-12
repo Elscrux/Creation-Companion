@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -44,14 +43,30 @@ public sealed class AssetController : IAssetController {
         return _fileSystem.Path.Combine(_deleteDirectoryProvider.DeleteDirectory, relativePath);
     }
 
-    public void Delete(string path, CancellationToken token = default) => MoveInternal(path, CreateDeletePath(path), true, token);
+    public void Delete(string path, CancellationToken token = default) {
+        try {
+            MoveInternal(path, CreateDeletePath(path), true, token);
+        } catch (Exception e) {
+            _logger.Here().Error("Couldn't delete {Path}: {Exception}", path, e.Message);
+        }
+    }
 
-    public void Move(string path, string destination, CancellationToken token = default) => MoveInternal(path, destination, false, token);
+    public void Move(string path, string destination, CancellationToken token = default) {
+        try {
+            MoveInternal(path, destination, false, token);
+        } catch (Exception e) {
+            _logger.Here().Error("Couldn't move {Path} to {Destination}: {Exception}", path, destination, e.Message);
+        }
+    }
 
     public void Rename(string path, string newName, CancellationToken token = default) {
         var directoryPath = _fileSystem.Path.GetDirectoryName(path);
         if (directoryPath != null) {
-            MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true, token);
+            try {
+                MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true, token);
+            } catch (Exception e) {
+                _logger.Here().Error("Couldn't rename {Path} to {NewName}: {Exception}", path, newName, e.Message);
+            }
         } else {
             _logger.Here().Warning("Couldn't find path to base directory of {Path}", path);
         }
