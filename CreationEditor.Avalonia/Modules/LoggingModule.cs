@@ -22,7 +22,13 @@ public sealed class LoggingModule : Module {
         builder.Register(context => new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .Enrich.FromLogContext()
-                .WriteTo.Sink(logSink)
+                .WriteTo.Sink(logSink,
+#if DEBUG
+                    LogEventLevel.Verbose
+#else
+                    LogEventLevel.Information
+#endif
+                    )
                 .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
                 .WriteTo.File(context.Resolve<ILogPathProvider>().RelativeLogFilePath("log.txt"), LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
                 .CreateLogger())
