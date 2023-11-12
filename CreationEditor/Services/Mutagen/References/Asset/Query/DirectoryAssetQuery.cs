@@ -12,7 +12,7 @@ public sealed class DirectoryAssetQuery : IAssetReferenceCacheableQuery<string, 
     public IAssetReferenceSerialization<string, string> Serialization { get; }
     public IInternalCacheValidation<string, string> CacheValidation => _fileSystemAssetQuery.CacheValidation;
     public string QueryName => _fileSystemAssetQuery.QueryName;
-    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches => _fileSystemAssetQuery.AssetCaches;
+    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches => _fileSystemAssetQuery.AssetCaches;
 
     public DirectoryAssetQuery(
         Func<IFileAssetParser, FileSystemAssetQuery> fileSystemAssetQuery,

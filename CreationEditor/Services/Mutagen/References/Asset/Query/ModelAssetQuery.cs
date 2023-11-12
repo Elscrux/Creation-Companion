@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using nifly;
@@ -9,7 +10,8 @@ public sealed class ModelAssetQuery : IAssetReferenceQuery<string, string> {
     private readonly IAssetTypeService _assetTypeService;
 
     public string QueryName => "Model";
-    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; } = new();
+    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
+        = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
 
     public ModelAssetQuery(
         IFileSystem fileSystem,

@@ -9,7 +9,7 @@ public sealed class NifArchiveAssetQuery : IAssetReferenceCacheableQuery<string,
     public Version CacheVersion => _archiveAssetQuery.CacheVersion;
     public IAssetReferenceSerialization<string, string> Serialization { get; }
     public string QueryName => _archiveAssetQuery.QueryName;
-    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches => _archiveAssetQuery.AssetCaches;
+    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches => _archiveAssetQuery.AssetCaches;
 
     public NifArchiveAssetQuery(
         Func<IArchiveAssetParser, ArchiveAssetQuery> archiveAssetQuery,

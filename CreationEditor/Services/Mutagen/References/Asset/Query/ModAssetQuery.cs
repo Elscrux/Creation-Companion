@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
@@ -24,7 +25,8 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     public IAssetReferenceSerialization<IModGetter, IFormLinkGetter> Serialization { get; }
     public IInternalCacheValidation<IModGetter, IFormLinkGetter>? CacheValidation => null;
     public string QueryName => "Mod";
-    public Dictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>> AssetCaches { get; } = new();
+    public IDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>> AssetCaches { get; }
+        = new ConcurrentDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>>();
 
     public bool SkipResolvedAssets { get; set; } = true; // todo change back to false by default when inferred assets bug is fixed
 

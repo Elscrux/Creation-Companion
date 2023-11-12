@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.FileSystem.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
@@ -18,7 +19,8 @@ public sealed class FileSystemAssetQuery : IAssetReferenceCacheableQuery<string,
     public IAssetReferenceSerialization<string, string> Serialization { get; }
     public IInternalCacheValidation<string, string> CacheValidation { get; }
     public string QueryName => _fileAssetParser.Name;
-    public Dictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; } = new();
+    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
+        = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
 
     public FileSystemAssetQuery(
         Func<string, IFileSystemValidation> fileSystemValidationFactory,
