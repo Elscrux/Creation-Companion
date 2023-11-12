@@ -1,10 +1,11 @@
 ﻿using System.Reactive.Linq;
 using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public sealed class AutoSaveService : IAutoSaveService, IDisposable {
+public sealed class AutoSaveService : IModSaveService, IAutoSaveService, IDisposable {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IModSaveService _modSaveService;
 
@@ -24,14 +25,14 @@ public sealed class AutoSaveService : IAutoSaveService, IDisposable {
         _onIntervalDisposable?.Dispose();
         _onIntervalDisposable = Observable
             .Interval(TimeSpan.FromMinutes(minutes))
-            .Subscribe(_ => PerformAutoSave());
+            .Subscribe(_ => SaveMod(_editorEnvironment.ActiveMod));
     }
 
     private void OnShutdown() {
         _onShutdownDisposable?.Dispose();
         _onShutdownDisposable = AppDomain.CurrentDomain.Events().ProcessExit.Unit()
             .Merge(AppDomain.CurrentDomain.Events().UnhandledException.Unit())
-            .Subscribe(_ => PerformAutoSave());
+            .Subscribe(_ => SaveMod(_editorEnvironment.ActiveMod));
     }
 
     public void SetSettings(AutoSaveSettings settings) {
@@ -50,9 +51,13 @@ public sealed class AutoSaveService : IAutoSaveService, IDisposable {
         }
     }
 
-    public void PerformAutoSave() {
-        _modSaveService.BackupMod(_editorEnvironment.ActiveMod, _maxBackups);
-        _modSaveService.SaveMod(_editorEnvironment.ActiveMod);
+    public void SaveMod(IMod mod) {
+        _modSaveService.BackupMod(mod, _maxBackups);
+        _modSaveService.SaveMod(mod);
+    }
+
+    public void BackupMod(IMod mod, int limit = -1) {
+        _modSaveService.BackupMod(mod, _maxBackups);
     }
 
     public void Dispose() {

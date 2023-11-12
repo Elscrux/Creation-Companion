@@ -63,6 +63,7 @@ public sealed class MainModule : Module {
             .As<IModSaveService>()
             .SingleInstance();
 
+        builder.RegisterDecorator<AutoSaveService, IModSaveService>();
         builder.RegisterType<AutoSaveService>()
             .As<IAutoSaveService>()
             .SingleInstance();
