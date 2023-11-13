@@ -1,12 +1,17 @@
 ﻿using System.IO.Abstractions;
 using nifly;
+using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class NifModificationService : IModelModificationService {
     private readonly IFileSystem _fileSystem;
+    private readonly ILogger _logger;
 
-    public NifModificationService(IFileSystem fileSystem) {
+    public NifModificationService(
+        IFileSystem fileSystem,
+        ILogger logger) {
         _fileSystem = fileSystem;
+        _logger = logger;
     }
 
     public void RemapLinks(string file, Func<string, bool> shouldReplace, string newLink) {
@@ -108,6 +113,12 @@ public sealed class NifModificationService : IModelModificationService {
             }
         }
 
-        if (modifiedNif) nif.Save(file);
+        if (modifiedNif) {
+            try {
+                nif.Save(file);
+            } catch (Exception e) {
+                _logger.Here().Error("Couldn't save modified nif {File}: {Exception}", file, e.Message);
+            }
+        }
     }
 }
