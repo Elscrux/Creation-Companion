@@ -6,7 +6,6 @@ using System.Reactive.Subjects;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
@@ -20,7 +19,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
-public sealed class AssetReferenceController : IAssetReferenceController, ILifecycleTask {
+public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly CompositeDisposable _disposables = new();
 
     private readonly IFileSystem _fileSystem;
@@ -82,17 +81,14 @@ public sealed class AssetReferenceController : IAssetReferenceController, ILifec
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
             .DisposeWith(_disposables);
 
+        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences));
+        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences));
+
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
         recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
         recordController.RecordDeleted.Subscribe(RegisterDeletion).DisposeWith(_disposables);
     }
 
-    public void PreStartup() {}
-    public void PostStartupAsync(CancellationToken token) {
-        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences), token);
-        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences), token);
-    }
-    public void OnExit() {}
     public void Dispose() => _disposables.Dispose();
 
     private async Task InitLoadOrderReferences() {
