@@ -12,7 +12,7 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Avalonia.ViewModels.Reference;
-using CreationEditor.Avalonia.Views;
+using CreationEditor.Avalonia.Views.Startup;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Filter;
@@ -49,6 +49,9 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordBrowserSettings>()
             .As<IRecordBrowserSettings>();
+
+        builder.RegisterType<StartupSplashScreen>()
+            .As<IApplicationSplashScreen>();
 
         // Services
         builder.RegisterType<DataDirectoryService>()
@@ -121,10 +124,6 @@ public sealed class MainModule : Module {
         // View Model
         builder.RegisterType<MainVM>()
             .SingleInstance();
-
-        builder.RegisterType<StartupSplashScreen>()
-            .As<ISplashScreenVM>()
-            .As<IApplicationSplashScreen>();
 
         builder.RegisterType<ModSelectionVM>();
 
