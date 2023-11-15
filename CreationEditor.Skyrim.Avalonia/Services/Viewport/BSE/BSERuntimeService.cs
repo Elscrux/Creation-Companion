@@ -224,32 +224,28 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                 var textureSetRecord = landscapeTextureRecord?.TextureSet.TryResolve(_linkCacheProvider.LinkCache);
 
                 if (layerRecord is IAlphaLayerGetter alphaLayerRecord) {
-                    var alphaLayer = new Interop.AlphaLayer();
-                    if (textureSetRecord is not null) {
-                        alphaLayer.TextureSet = GetTextureSet(textureSetRecord);
-                    }
-
-                    if (alphaLayerRecord.AlphaLayerData.HasValue) {
-                        var memoryData = alphaLayerRecord.AlphaLayerData.Value;
-                        const int dataSize = sizeof(ushort) * 2 + sizeof(float);
-
-                        var alphaDataLength = Convert.ToUInt16(memoryData.Length / dataSize);
-                        var alphaData = new Interop.AlphaData[alphaDataLength];
-
-                        for (var i = 0; i < alphaDataLength; i++) {
-                            alphaData[i].Position = BitConverter.ToUInt16(memoryData[..sizeof(ushort)]);
-                            alphaData[i].Opacity = BitConverter.ToSingle(memoryData.Slice(sizeof(ushort) * 2, sizeof(float)));
-
-                            // Move the span to the next data set
-                            memoryData = memoryData[dataSize..];
-                        }
+                    if (alphaLayerRecord.AlphaLayerData is null) {
+                        alphaLayers[alphaLayerCounter] = new Interop.AlphaLayer();
+                    } else {
+                        var alphaData = alphaLayerRecord.AlphaLayerData
+                            .Select(x => new Interop.AlphaData {
+                                Opacity = x.Opacity,
+                                Position = x.Position
+                            })
+                            .ToList();
 
                         unmanagedMemory.Add(alphaData.ToUnmanagedMemory(out var pointer));
-                        alphaLayer.Data = pointer;
-                        alphaLayer.DataLength = alphaDataLength;
+                        var alphaLayer = new Interop.AlphaLayer {
+                            Data = pointer,
+                            DataLength = (ushort) alphaData.Count
+                        };
+                        if (textureSetRecord is not null) {
+                            alphaLayer.TextureSet = GetTextureSet(textureSetRecord);
+                        }
+
+                        alphaLayers[alphaLayerCounter] = alphaLayer;
                     }
 
-                    alphaLayers[alphaLayerCounter] = alphaLayer;
                     alphaLayerCounter++;
                 } else {
                     if (textureSetRecord is not null) {
