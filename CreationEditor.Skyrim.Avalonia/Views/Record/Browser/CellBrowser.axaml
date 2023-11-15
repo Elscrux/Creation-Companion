@@ -45,7 +45,7 @@
         </TabControl>
 
         <GridSplitter Grid.Row="1"
-                      IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
+                      IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}"
                       IsEnabled="{Binding ShowPlaced}"/>
 
         <Button Grid.Row="1"
@@ -55,7 +55,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Command="{Binding TogglePlaced}"
-                IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}">
+                IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
             <Grid>
                 <controls:SymbolIcon Symbol="ChevronDown"
                                      IsVisible="{Binding ShowPlaced}"/>
@@ -67,7 +67,7 @@
         <HeaderedContentControl
             Grid.Row="2"
             Header="References"
-            IsVisible="{Binding PlacedListVM.PlacedProvider.Cell, Converter={x:Static ObjectConverters.IsNotNull}}"
+            IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}"
             Content="{Binding PlacedList}"/>
     </Grid>
 </UserControl>
