@@ -1,13 +1,8 @@
 ﻿namespace CreationEditor;
 
-public sealed class DisposableCounterLock {
-    private readonly Action _freeAction;
+public sealed class DisposableCounterLock(Action freeAction) {
     private readonly object _lock = new();
     private uint _counter;
-
-    public DisposableCounterLock(Action freeAction) {
-        _freeAction = freeAction;
-    }
 
     /// <summary>
     /// Enters a waiting lock
@@ -26,7 +21,7 @@ public sealed class DisposableCounterLock {
         lock (_lock) {
             _counter--;
 
-            if (_counter == 0) _freeAction();
+            if (_counter == 0) freeAction();
         }
     }
 
@@ -36,13 +31,7 @@ public sealed class DisposableCounterLock {
         }
     }
 
-    private sealed class CounterDisposable : IDisposable {
-        private readonly DisposableCounterLock _counter;
-
-        public CounterDisposable(DisposableCounterLock counter) {
-            _counter = counter;
-        }
-
-        public void Dispose() => _counter.Unlock();
+    private sealed class CounterDisposable(DisposableCounterLock counter) : IDisposable {
+        public void Dispose() => counter.Unlock();
     }
 }

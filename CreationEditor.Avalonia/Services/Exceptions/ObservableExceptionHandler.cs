@@ -4,17 +4,11 @@ using ReactiveUI;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Exceptions;
 
-public sealed class ObservableExceptionHandler : IObserver<Exception> {
-    private readonly ILogger _logger;
-
-    public ObservableExceptionHandler(ILogger logger) {
-        _logger = logger;
-    }
-
+public sealed class ObservableExceptionHandler(ILogger logger) : IObserver<Exception> {
     public void OnNext(Exception value) {
         if (Debugger.IsAttached) Debugger.Break();
 
-        _logger.Error("Error occured: {Message}", value.ToString());
+        logger.Error("Error occured: {Message}", value.ToString());
 
         // RxApp.MainThreadScheduler.Schedule(() => { throw value; });
     }

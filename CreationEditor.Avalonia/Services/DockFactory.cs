@@ -16,20 +16,7 @@ using CreationEditor.Avalonia.Views.Scripting;
 using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Avalonia.Services;
 
-public sealed class DockFactory : IDockFactory {
-    private bool _viewportCreated;
-
-    private readonly Func<ILogVM> _logVMFactory;
-    private readonly Func<IRecordBrowserVM> _recordBrowserVMFactory;
-    private readonly Func<string, IAssetBrowserVM> _assetBrowserVMFactory;
-    private readonly Func<IScriptVM> _scriptVMFactory;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
-    private readonly IFileSystem _fileSystem;
-    private readonly IViewportFactory _viewportFactory;
-    private readonly IDockingManagerService _dockingManagerService;
-    private readonly ICellBrowserFactory _cellBrowserFactory;
-
-    public DockFactory(
+public sealed class DockFactory(
         Func<ILogVM> logVMFactory,
         Func<IRecordBrowserVM> recordBrowserVMFactory,
         Func<string, IAssetBrowserVM> assetBrowserVMFactory,
@@ -38,17 +25,9 @@ public sealed class DockFactory : IDockFactory {
         IFileSystem fileSystem,
         IViewportFactory viewportFactory,
         IDockingManagerService dockingManagerService,
-        ICellBrowserFactory cellBrowserFactory) {
-        _logVMFactory = logVMFactory;
-        _recordBrowserVMFactory = recordBrowserVMFactory;
-        _assetBrowserVMFactory = assetBrowserVMFactory;
-        _scriptVMFactory = scriptVMFactory;
-        _dataDirectoryProvider = dataDirectoryProvider;
-        _fileSystem = fileSystem;
-        _viewportFactory = viewportFactory;
-        _dockingManagerService = dockingManagerService;
-        _cellBrowserFactory = cellBrowserFactory;
-    }
+        ICellBrowserFactory cellBrowserFactory)
+    : IDockFactory {
+    private bool _viewportCreated;
 
     public void Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
         Control control;
@@ -56,7 +35,7 @@ public sealed class DockFactory : IDockFactory {
 
         switch (dockElement) {
             case DockElement.Log:
-                var logVM = _logVMFactory();
+                var logVM = logVMFactory();
                 control = new LogView(logVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
@@ -68,7 +47,7 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.RecordBrowser:
-                var recordBrowserVM = _recordBrowserVMFactory();
+                var recordBrowserVM = recordBrowserVMFactory();
                 control = new RecordBrowser(recordBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
@@ -81,7 +60,7 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.CellBrowser:
-                control = _cellBrowserFactory.GetBrowser();
+                control = cellBrowserFactory.GetBrowser();
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Cell Browser",
@@ -92,12 +71,12 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.AssetBrowser:
-                var folder = parameter as string ?? _dataDirectoryProvider.Path;
-                var assetBrowserVM = _assetBrowserVMFactory(folder);
+                var folder = parameter as string ?? dataDirectoryProvider.Path;
+                var assetBrowserVM = assetBrowserVMFactory(folder);
                 control = new AssetBrowser(assetBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
-                        Header = $"Asset Browser{(parameter is string str ? $" - {_fileSystem.Path.GetFileName(str)}" : string.Empty)}",
+                        Header = $"Asset Browser{(parameter is string str ? $" - {fileSystem.Path.GetFileName(str)}" : string.Empty)}",
                         Size = 400,
                     },
                     Dock = Dock.Left,
@@ -105,7 +84,7 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.ScriptEditor:
-                var vm = _scriptVMFactory();
+                var vm = scriptVMFactory();
                 control = new ScriptEditor(vm);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
@@ -117,15 +96,15 @@ public sealed class DockFactory : IDockFactory {
                 };
                 break;
             case DockElement.Viewport:
-                if (_viewportCreated && !_viewportFactory.IsMultiInstanceCapable) return;
+                if (_viewportCreated && !viewportFactory.IsMultiInstanceCapable) return;
 
-                control = _viewportFactory.CreateViewport();
+                control = viewportFactory.CreateViewport();
                 _viewportCreated = true;
 
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Viewport",
-                        CanClose = _viewportFactory.IsMultiInstanceCapable
+                        CanClose = viewportFactory.IsMultiInstanceCapable
                     },
                     Dock = Dock.Right,
                     DockMode = DockMode.Layout,
@@ -139,6 +118,6 @@ public sealed class DockFactory : IDockFactory {
         if (dockMode is not null) dockConfig = dockConfig with { DockMode = dockMode.Value };
         if (dock is not null) dockConfig = dockConfig with { Dock = dock.Value };
 
-        _dockingManagerService.AddControl(control, dockConfig);
+        dockingManagerService.AddControl(control, dockConfig);
     }
 }

@@ -3,25 +3,18 @@ using DynamicData;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References;
 
-public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference>
+public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference>(
+    Action<TSubscriber, Change<TReference>> changeAction,
+    Func<TSubscriber, TIdentifier> identifierSelector,
+    IEqualityComparer<TIdentifier>? comparer = null)
     where TIdentifier : notnull
     where TReference : notnull {
+
     private readonly object _lockObject = new();
-    private readonly Func<TSubscriber, TIdentifier> _identifierSelector;
-    private readonly Action<TSubscriber, Change<TReference>> _changeAction;
-
-    private readonly ConcurrentDictionary<TIdentifier, List<ReferenceSubscription>> _identifierSubscriptions;
-
-    public ReferenceSubscriptionManager(Action<TSubscriber, Change<TReference>> changeAction,
-        Func<TSubscriber, TIdentifier> identifierSelector,
-        IEqualityComparer<TIdentifier>? comparer = null) {
-        _identifierSelector = identifierSelector;
-        _changeAction = changeAction;
-        _identifierSubscriptions = new ConcurrentDictionary<TIdentifier, List<ReferenceSubscription>>(comparer);
-    }
+    private readonly ConcurrentDictionary<TIdentifier, List<ReferenceSubscription>> _identifierSubscriptions = new(comparer);
 
     public IDisposable Register(TSubscriber subscriber) {
-        var identifier = _identifierSelector(subscriber);
+        var identifier = identifierSelector(subscriber);
         var subscriptions = _identifierSubscriptions.GetOrAdd(identifier);
 
         var newSubscription = new ReferenceSubscription(this, identifier, subscriber);
@@ -61,7 +54,7 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
 
         lock (_lockObject) {
             foreach (var subscription in subscriptions.ToArray()) {
-                _changeAction(subscription.Subscriber, change);
+                changeAction(subscription.Subscriber, change);
             }
         }
 
@@ -75,7 +68,7 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
 
             lock (_lockObject) {
                 foreach (var subscription in subscriptions) {
-                    _changeAction(subscription.Subscriber, change);
+                    changeAction(subscription.Subscriber, change);
                 }
             }
         }

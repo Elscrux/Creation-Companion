@@ -6,10 +6,8 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// <summary>
 /// Documents that are organized in a tab view
 /// </summary>
-public sealed class DocumentDockVM : TabbedDockVM {
+public sealed class DocumentDockVM(DockContainerVM dockParent) : TabbedDockVM(dockParent) {
     public override DockMode DockMode => DockMode.Document;
-
-    public DocumentDockVM(DockContainerVM dockParent) : base(dockParent) {}
 
     public static Control CreateControl(IDockedItem dockedItem, DockContainerVM parent) {
         var documentDockVM = new DocumentDockVM(parent);

@@ -12,35 +12,26 @@ public interface IQueryState {
     bool Save(IQueryRunner queryRunner);
 }
 
-public sealed class JsonQueryState : IQueryState {
-    private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly IStatePathProvider _statePathProvider;
-    private readonly JsonSerializerSettings _serializerSettings;
-
-    public JsonQueryState(
+public sealed class JsonQueryState(
         IContractResolver contractResolver,
         ILogger logger,
         IFileSystem fileSystem,
-        IStatePathProvider statePathProvider) {
-        _logger = logger;
-        _fileSystem = fileSystem;
-        _statePathProvider = statePathProvider;
+        IStatePathProvider statePathProvider)
+    : IQueryState {
 
-        _serializerSettings = new JsonSerializerSettings {
-            Formatting = Formatting.Indented,
-            TypeNameHandling = TypeNameHandling.Auto,
-            ContractResolver = contractResolver
-        };
-    }
+    private readonly JsonSerializerSettings _serializerSettings = new() {
+        Formatting = Formatting.Indented,
+        TypeNameHandling = TypeNameHandling.Auto,
+        ContractResolver = contractResolver
+    };
 
     private string GetFileName(IQueryRunner queryRunner) => "Query-" + queryRunner.Id + ".json";
-    private IFileInfo GetFilePath(IQueryRunner queryRunner) => _fileSystem.FileInfo.New(_statePathProvider.GetFullPath(GetFileName(queryRunner)));
+    private IFileInfo GetFilePath(IQueryRunner queryRunner) => fileSystem.FileInfo.New(statePathProvider.GetFullPath(GetFileName(queryRunner)));
 
     public IEnumerable<IQueryRunner> LoadAllQueries() {
-        return _fileSystem.Directory
-            .EnumerateFiles(_statePathProvider.GetDirectoryPath(), "*.json")
-            .Select(filePath => _fileSystem.File.ReadAllText(filePath))
+        return fileSystem.Directory
+            .EnumerateFiles(statePathProvider.GetDirectoryPath(), "*.json")
+            .Select(filePath => fileSystem.File.ReadAllText(filePath))
             .Select(json => JsonConvert.DeserializeObject<IQueryRunner>(json, _serializerSettings))
             .NotNull();
     }
@@ -51,9 +42,9 @@ public sealed class JsonQueryState : IQueryState {
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
-        _logger.Here().Information("Exporting Query {Id} to {Path}", queryRunner.Id, filePath);
+        logger.Here().Information("Exporting Query {Id} to {Path}", queryRunner.Id, filePath);
         var content = JsonConvert.SerializeObject(queryRunner.CreateMemento(), _serializerSettings);
-        _fileSystem.File.WriteAllText(filePath.FullName, content);
+        fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
     }

@@ -3,20 +3,15 @@ using CreationEditor.Services.Lifecycle;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Lifecycle;
 
-public sealed class LifecycleStartup : ILifecycleStartup {
-    private readonly ILogger _logger;
-
-    public IReadOnlyList<ILifecycleTask> LifecycleTasks { get; }
-
-    public LifecycleStartup(
+public sealed class LifecycleStartup(
         IReadOnlyList<ILifecycleTask> tasks,
-        ILogger logger) {
-        _logger = logger;
-        LifecycleTasks = tasks;
-    }
+        ILogger logger)
+    : ILifecycleStartup {
+
+    public IReadOnlyList<ILifecycleTask> LifecycleTasks { get; } = tasks;
 
     public void PreStartup() {
-        _logger.Here().Debug("Run {Count} Lifecycle Task(s) pre startup", LifecycleTasks.Count);
+        logger.Here().Debug("Run {Count} Lifecycle Task(s) pre startup", LifecycleTasks.Count);
 
         foreach (var task in LifecycleTasks) {
             task.PreStartup();
@@ -24,7 +19,7 @@ public sealed class LifecycleStartup : ILifecycleStartup {
     }
 
     public void PostStartupAsync(Subject<string> done, CancellationToken cancellationToken = default) {
-        _logger.Here().Debug("Run {Count} Lifecycle Task(s) post startup", LifecycleTasks.Count);
+        logger.Here().Debug("Run {Count} Lifecycle Task(s) post startup", LifecycleTasks.Count);
 
         Parallel.ForEach(LifecycleTasks, task => {
             task.PostStartupAsync(cancellationToken);
@@ -33,7 +28,7 @@ public sealed class LifecycleStartup : ILifecycleStartup {
     }
 
     public void Exit() {
-        _logger.Here().Debug("Run {Count} Lifecycle Task(s) on Exit", LifecycleTasks.Count);
+        logger.Here().Debug("Run {Count} Lifecycle Task(s) on Exit", LifecycleTasks.Count);
 
         foreach (var task in LifecycleTasks) {
             task.OnExit();

@@ -6,30 +6,18 @@ using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
-public sealed class ModSaveService : IModSaveService {
-    private readonly ILinkCacheProvider _linkCacheProvider;
-    private readonly IModSaveLocationProvider _modSaveLocationProvider;
-    private readonly IFileSystem _fileSystem;
-    private readonly ISavePipeline _savePipeline;
-    private readonly ILogger _logger;
-
-    public ModSaveService(
+public sealed class ModSaveService(
         ILinkCacheProvider linkCacheProvider,
         IModSaveLocationProvider modSaveLocationProvider,
         IFileSystem fileSystem,
         ISavePipeline savePipeline,
-        ILogger logger) {
-        _linkCacheProvider = linkCacheProvider;
-        _modSaveLocationProvider = modSaveLocationProvider;
-        _fileSystem = fileSystem;
-        _savePipeline = savePipeline;
-        _logger = logger;
-    }
+        ILogger logger)
+    : IModSaveService {
 
     public void SaveMod(IMod mod) {
         if (mod.ModKey == ModKey.Null) return;
 
-        var filePath = _modSaveLocationProvider.GetSaveLocation(mod);
+        var filePath = modSaveLocationProvider.GetSaveLocation(mod);
 
         // todo add options for localization export!
         var binaryWriteParameters = new BinaryWriteParameters {
@@ -38,26 +26,26 @@ public sealed class ModSaveService : IModSaveService {
             Encodings = null
         };
 
-        _savePipeline.Execute(_linkCacheProvider.LinkCache, mod);
+        savePipeline.Execute(linkCacheProvider.LinkCache, mod);
 
         // Don't save empty mods
         if (!mod.EnumerateMajorRecords().Any()) {
-            _logger.Here().Verbose("Skipping saving empty mod {ModName}", mod.ModKey.FileName);
+            logger.Here().Verbose("Skipping saving empty mod {ModName}", mod.ModKey.FileName);
             return;
         }
 
-        _logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
+        logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {
             // Try to save mod
-            mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
+            mod.WriteToBinaryParallel(filePath, binaryWriteParameters, fileSystem);
         } catch (Exception e) {
-            _logger.Here().Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            logger.Here().Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
             try {
                 // Save at backup location if failed once
-                filePath = _modSaveLocationProvider.GetBackupSaveLocation(mod);
-                mod.WriteToBinaryParallel(filePath, binaryWriteParameters, _fileSystem);
+                filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
+                mod.WriteToBinaryParallel(filePath, binaryWriteParameters, fileSystem);
             } catch (Exception e2) {
-                _logger.Here().Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
+                logger.Here().Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
             }
         }
     }
@@ -65,20 +53,20 @@ public sealed class ModSaveService : IModSaveService {
     public void BackupMod(IMod mod, int limit = -1) {
         if (mod.ModKey == ModKey.Null) return;
 
-        var filePath = _fileSystem.FileInfo.New(_modSaveLocationProvider.GetSaveLocation(mod));
+        var filePath = fileSystem.FileInfo.New(modSaveLocationProvider.GetSaveLocation(mod));
 
         if (!filePath.Exists) return;
 
         try {
-            var backupLocation = _modSaveLocationProvider.GetBackupSaveLocation();
+            var backupLocation = modSaveLocationProvider.GetBackupSaveLocation();
             var backupFilePath = GetBackupFilePath(backupLocation, filePath.Name, filePath.LastWriteTime);
-            _fileSystem.Directory.CreateDirectory(backupLocation);
-            _fileSystem.File.Copy(
+            fileSystem.Directory.CreateDirectory(backupLocation);
+            fileSystem.File.Copy(
                 filePath.FullName,
                 backupFilePath,
                 true);
         } catch (Exception e) {
-            _logger.Here().Warning(
+            logger.Here().Warning(
                 "Failed to create backup of mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
         }
 
@@ -88,11 +76,11 @@ public sealed class ModSaveService : IModSaveService {
     private void LimitBackups(int limit, IModGetter mod) {
         if (limit <= 0) return;
 
-        var backupSaveLocation = _modSaveLocationProvider.GetBackupSaveLocation();
-        if (!_fileSystem.Directory.Exists(backupSaveLocation)) return;
+        var backupSaveLocation = modSaveLocationProvider.GetBackupSaveLocation();
+        if (!fileSystem.Directory.Exists(backupSaveLocation)) return;
 
         var backupNameStart = $"{mod.ModKey.FileName}.*.bak";
-        var backupFiles = _fileSystem.Directory
+        var backupFiles = fileSystem.Directory
             .EnumerateFiles(backupSaveLocation, backupNameStart)
             .ToList();
 
@@ -103,11 +91,11 @@ public sealed class ModSaveService : IModSaveService {
                 .ToList();
 
             foreach (var deleteFile in filesToDelete) {
-                _fileSystem.File.Delete(deleteFile);
+                fileSystem.File.Delete(deleteFile);
             }
         }
     }
 
-    private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) => _fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
+    private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) => fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
     public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }

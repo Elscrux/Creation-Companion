@@ -1,13 +1,8 @@
 ﻿using CreationEditor.Services.Lifecycle;
 namespace CreationEditor.Services.Plugin;
 
-public sealed class PluginServiceStartup : ILifecycleTask {
-    private readonly IPluginService _pluginService;
-    public PluginServiceStartup(IPluginService pluginService) {
-        _pluginService = pluginService;
-    }
-
+public sealed class PluginServiceStartup(IPluginService pluginService) : ILifecycleTask {
     public void PreStartup() {}
-    public void PostStartupAsync(CancellationToken token) => _pluginService.ReloadPlugins();
+    public void PostStartupAsync(CancellationToken token) => pluginService.ReloadPlugins();
     public void OnExit() {}
 }

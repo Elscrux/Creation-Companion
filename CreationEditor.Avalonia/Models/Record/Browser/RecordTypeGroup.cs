@@ -1,16 +1,11 @@
 ﻿using DynamicData.Binding;
 namespace CreationEditor.Avalonia.Models.Record.Browser;
 
-public sealed class RecordTypeGroup {
-    public string GroupName { get; }
-    public IObservableCollection<RecordTypeListing> RecordTypes { get; set; }
+public sealed class RecordTypeGroup(string groupName, List<RecordTypeListing> recordTypes) {
+    public string GroupName { get; } = groupName;
+    public IObservableCollection<RecordTypeListing> RecordTypes { get; set; } = new ObservableCollectionExtended<RecordTypeListing>(recordTypes);
 
     private bool _activated;
-
-    public RecordTypeGroup(string groupName, List<RecordTypeListing> recordTypes) {
-        GroupName = groupName;
-        RecordTypes = new ObservableCollectionExtended<RecordTypeListing>(recordTypes);
-    }
 
     public void Activate() {
         if (_activated) return;

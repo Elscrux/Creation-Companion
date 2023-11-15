@@ -4,18 +4,12 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
-public sealed class ExtraColumnsBuilder : IExtraColumnsBuilder {
-    private readonly IExtraColumnProvider _provider;
+public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraColumnsBuilder {
     private readonly HashSet<ExtraColumn> _extraColumns = new();
-
-    public ExtraColumnsBuilder(
-        IExtraColumnProvider provider) {
-        _provider = provider;
-    }
 
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
         _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
-            .SelectWhere(@interface => _provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
+            .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
                 ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns)
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
             .SelectMany(c => c));

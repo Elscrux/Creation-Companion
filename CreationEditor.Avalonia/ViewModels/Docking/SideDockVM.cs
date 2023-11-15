@@ -4,9 +4,8 @@ namespace CreationEditor.Avalonia.ViewModels.Docking;
 /// <summary>
 /// Panels at any side that are organized in a tab view
 /// </summary>
-public sealed class SideDockVM : TabbedDockVM {
+public sealed class SideDockVM(DockContainerVM dockParent) : TabbedDockVM(dockParent) {
     public override DockMode DockMode => DockMode.Side;
-    public SideDockVM(DockContainerVM dockParent) : base(dockParent) {}
 
     protected override void Unfocus() {
         if (ActiveTab is not null) ActiveTab.IsSelected = false;

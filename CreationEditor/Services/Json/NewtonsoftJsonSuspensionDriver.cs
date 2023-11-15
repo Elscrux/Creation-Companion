@@ -6,42 +6,35 @@ using Newtonsoft.Json.Serialization;
 using ReactiveUI;
 namespace CreationEditor.Services.Json;
 
-public sealed class NewtonsoftJsonSuspensionDriver : ISuspensionDriver {
-    private readonly IFileSystem _fileSystem;
-    private readonly string _stateFilePath;
-
-    private readonly JsonSerializerSettings _settings;
-
-    public NewtonsoftJsonSuspensionDriver(
+public sealed class NewtonsoftJsonSuspensionDriver(
         IFileSystem fileSystem,
         IContractResolver contractResolver,
-        string stateFilePath) {
-        _fileSystem = fileSystem;
-        _stateFilePath = stateFilePath;
-        _settings = new JsonSerializerSettings {
-            TypeNameHandling = TypeNameHandling.All,
-            ContractResolver = contractResolver
-        };
-    }
+        string stateFilePath)
+    : ISuspensionDriver {
+
+    private readonly JsonSerializerSettings _settings = new() {
+        TypeNameHandling = TypeNameHandling.All,
+        ContractResolver = contractResolver
+    };
 
     public IObservable<Unit> InvalidateState() {
-        if (_fileSystem.File.Exists(_stateFilePath)) _fileSystem.File.Delete(_stateFilePath);
+        if (fileSystem.File.Exists(stateFilePath)) fileSystem.File.Delete(stateFilePath);
 
         return Observable.Return(Unit.Default);
     }
 
     public IObservable<object> LoadState() {
-        if (!_fileSystem.File.Exists(_stateFilePath)) return Observable.Throw<object>(new FileNotFoundException(_stateFilePath));
+        if (!fileSystem.File.Exists(stateFilePath)) return Observable.Throw<object>(new FileNotFoundException(stateFilePath));
 
-        var lines = _fileSystem.File.ReadAllText(_stateFilePath);
-        var state = JsonConvert.DeserializeObject<object>(lines, _settings) ?? throw new InvalidDataException($"{_stateFilePath} is not in valid format");
+        var lines = fileSystem.File.ReadAllText(stateFilePath);
+        var state = JsonConvert.DeserializeObject<object>(lines, _settings) ?? throw new InvalidDataException($"{stateFilePath} is not in valid format");
         return Observable.Return(state);
 
     }
 
     public IObservable<Unit> SaveState(object state) {
         var lines = JsonConvert.SerializeObject(state, _settings);
-        _fileSystem.File.WriteAllText(_stateFilePath, lines);
+        fileSystem.File.WriteAllText(stateFilePath, lines);
         return Observable.Return(Unit.Default);
     }
 }

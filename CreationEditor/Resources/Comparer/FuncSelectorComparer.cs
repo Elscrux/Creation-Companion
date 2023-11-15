@@ -1,11 +1,9 @@
 ﻿namespace CreationEditor.Resources.Comparer;
 
-public sealed class FuncSelectorComparer<TSelector, TCompare> : FuncComparer<TCompare>, IComparer<TSelector> {
-    private readonly Func<TSelector, TCompare?> _selector;
-
-    public FuncSelectorComparer(Func<TSelector, TCompare?> selector, Func<TCompare, TCompare, int> compare) : base(compare) {
-        _selector = selector;
-    }
+public sealed class FuncSelectorComparer<TSelector, TCompare>(
+        Func<TSelector, TCompare?> selector,
+        Func<TCompare, TCompare, int> compare)
+    : FuncComparer<TCompare>(compare), IComparer<TSelector> {
 
     public override int Compare(object? x, object? y) {
         if (x is TSelector t1 && y is TSelector t2) {
@@ -23,6 +21,6 @@ public sealed class FuncSelectorComparer<TSelector, TCompare> : FuncComparer<TCo
         }
         if (y is null) return 1;
 
-        return base.Compare(_selector(x), _selector(y));
+        return base.Compare(selector(x), selector(y));
     }
 }
