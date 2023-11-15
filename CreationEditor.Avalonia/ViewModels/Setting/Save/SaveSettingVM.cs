@@ -18,7 +18,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public string Name => "Save";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = new();
+    public List<ISetting> Children { get; } = [];
 
     public string AbsoluteCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrAbsoluteCustomSaveLocation)
         ? Settings.DataRelativeOrAbsoluteCustomSaveLocation

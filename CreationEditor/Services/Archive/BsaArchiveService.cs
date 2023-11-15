@@ -16,7 +16,7 @@ public sealed class BsaArchiveService : IArchiveService {
 
     private readonly IGameReleaseContext _gameReleaseContext;
     private readonly IFileSystem _fileSystem;
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
     private readonly IFileSystemWatcher _watcher;
 
     private readonly Dictionary<string, IArchiveReader> _archives = new();
@@ -47,13 +47,6 @@ public sealed class BsaArchiveService : IArchiveService {
         _dataDirectory = dataDirectoryProvider.Path;
 
         // Collect bsa files in the data directory and sort them based on the load order
-        IEnumerable<string> GetModBSAFiles(IModListingGetter<IModGetter> modListing) {
-            var extension = GetExtension();
-
-            yield return modListing.ModKey.Name + extension;
-            yield return modListing.ModKey.Name + " - Textures" + extension;
-        }
-
         var bsaNameOrder = editorEnvironment.GameEnvironment.LoadOrder.ListedOrder
             .SelectMany(GetModBSAFiles)
             .ToArray();
@@ -124,6 +117,12 @@ public sealed class BsaArchiveService : IArchiveService {
         ArchiveChanged = _watcher.Events().Changed
             .Select(e => e.Name)
             .NotNull();
+    }
+    private IEnumerable<string> GetModBSAFiles(IModListingGetter<IModGetter> modListing) {
+        var extension = GetExtension();
+
+        yield return modListing.ModKey.Name + extension;
+        yield return modListing.ModKey.Name + " - Textures" + extension;
     }
 
     public IArchiveReader GetReader(string path) {

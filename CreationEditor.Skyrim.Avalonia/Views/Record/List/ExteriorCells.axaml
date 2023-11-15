@@ -11,10 +11,6 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.ExteriorCells"
              x:CompileBindings="True" x:DataType="list:ExteriorCellsVM"
              x:Name="Control">
-    <Design.DataContext>
-        <list:ExteriorCellsVM/>
-    </Design.DataContext>
-
     <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
         <HeaderedContentControl Grid.Row="0"
                                 Header="Worldspace">

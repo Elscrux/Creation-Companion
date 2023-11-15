@@ -1,33 +1,24 @@
 ﻿using System.Collections.Concurrent;
 using System.IO.Abstractions;
-using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class ArchiveAssetQuery : IAssetReferenceCacheableQuery<string, string> {
-    private readonly IFileSystem _fileSystem;
-    private readonly IArchiveAssetParser _archiveAssetParser;
+public sealed class ArchiveAssetQuery(
+    IFileSystem fileSystem,
+    IArchiveAssetParser archiveAssetParser,
+    IAssetReferenceSerialization<string, string> serialization)
+    : IAssetReferenceCacheableQuery<string, string> {
 
     public Version CacheVersion { get; } = new(1, 0);
-    public IAssetReferenceSerialization<string, string> Serialization { get; }
-    public IInternalCacheValidation<string, string>? CacheValidation => null;
-    public string QueryName => _archiveAssetParser.Name;
+    public IAssetReferenceSerialization<string, string> Serialization { get; } = serialization;
+    public string QueryName => archiveAssetParser.Name;
     public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
         = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
 
-    public ArchiveAssetQuery(
-        IFileSystem fileSystem,
-        IArchiveAssetParser archiveAssetParser,
-        IAssetReferenceSerialization<string, string> serialization) {
-        _fileSystem = fileSystem;
-        _archiveAssetParser = archiveAssetParser;
-        Serialization = serialization;
-    }
-
     public void WriteCacheCheck(BinaryWriter writer, string source) {
-        var hash = _fileSystem.GetFileHash(source);
+        var hash = fileSystem.GetFileHash(source);
         writer.Write(hash);
     }
 
@@ -40,8 +31,8 @@ public sealed class ArchiveAssetQuery : IAssetReferenceCacheableQuery<string, st
     }
 
     public bool IsCacheUpToDate(BinaryReader reader, string source) {
-        var hash = reader.ReadBytes(_fileSystem.GetHashBytesLength());
-        return _fileSystem.IsFileHashValid(source, hash);
+        var hash = reader.ReadBytes(fileSystem.GetHashBytesLength());
+        return fileSystem.IsFileHashValid(source, hash);
     }
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
@@ -52,5 +43,5 @@ public sealed class ArchiveAssetQuery : IAssetReferenceCacheableQuery<string, st
         }
     }
 
-    public IEnumerable<AssetQueryResult<string>> ParseAssets(string archivePath) => _archiveAssetParser.ParseAssets(archivePath);
+    public IEnumerable<AssetQueryResult<string>> ParseAssets(string archivePath) => archiveAssetParser.ParseAssets(archivePath);
 }

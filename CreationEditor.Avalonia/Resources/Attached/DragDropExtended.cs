@@ -47,13 +47,14 @@ public sealed class DragDropExtended : AvaloniaObject {
 
                 dataGrid.Unloaded -= OnDataGridUnloaded;
                 dataGrid.Unloaded += OnDataGridUnloaded;
-                void OnDataGridUnloaded(object? sender, RoutedEventArgs e) {
-                    DragHandler.UnregisterIdentifier(dataGrid);
-                    dataGrid.Unloaded -= OnDataGridUnloaded;
-                }
 
                 dataGrid.LoadingRow -= OnDataGridOnLoadingRow;
                 dataGrid.LoadingRow += OnDataGridOnLoadingRow;
+
+                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
+                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
+                return;
+
                 void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
                         DragHandler.Unregister(args.Row);
@@ -63,10 +64,13 @@ public sealed class DragDropExtended : AvaloniaObject {
                     }
                 }
 
-                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
-                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
                 void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
                     DragHandler.Unregister(args.Row, dataGrid);
+                }
+
+                void OnDataGridUnloaded(object? sender, RoutedEventArgs e) {
+                    DragHandler.UnregisterIdentifier(dataGrid);
+                    dataGrid.Unloaded -= OnDataGridUnloaded;
                 }
             });
 
@@ -78,24 +82,15 @@ public sealed class DragDropExtended : AvaloniaObject {
                 dataGrid.RemoveHandler(Control.LoadedEvent, DataGridLoadedHandler);
                 dataGrid.AddHandler(Control.LoadedEvent, DataGridLoadedHandler);
 
-                void DataGridLoadedHandler(object? sender, RoutedEventArgs e) {
-                    var border = dataGrid.FindDescendantOfType<Border>();
-                    if (border is null) return;
-
-                    border.RemoveHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
-                    border.AddHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
-
-                    border.RemoveHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
-                    border.AddHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
-
-                    border.RemoveHandler(DragDrop.DropEvent, DataGridDrop);
-                    border.AddHandler(DragDrop.DropEvent, DataGridDrop);
-                }
-
                 var state = allowDrop.NewValue.GetValueOrDefault<bool>();
 
                 dataGrid.LoadingRow -= OnDataGridOnLoadingRow;
                 dataGrid.LoadingRow += OnDataGridOnLoadingRow;
+
+                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
+                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
+                return;
+
                 void OnDataGridOnLoadingRow(object? sender, DataGridRowEventArgs args) {
                     if (state) {
                         args.Row.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
@@ -113,8 +108,20 @@ public sealed class DragDropExtended : AvaloniaObject {
                     }
                 }
 
-                dataGrid.UnloadingRow -= OnDataGridOnUnloadingRow;
-                dataGrid.UnloadingRow += OnDataGridOnUnloadingRow;
+                void DataGridLoadedHandler(object? sender, RoutedEventArgs e) {
+                    var border = dataGrid.FindDescendantOfType<Border>();
+                    if (border is null) return;
+
+                    border.RemoveHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
+                    border.AddHandler(DragDrop.DragEnterEvent, DataGridDragEnter);
+
+                    border.RemoveHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
+                    border.AddHandler(DragDrop.DragLeaveEvent, DataGridDragLeave);
+
+                    border.RemoveHandler(DragDrop.DropEvent, DataGridDrop);
+                    border.AddHandler(DragDrop.DropEvent, DataGridDrop);
+                }
+
                 void OnDataGridOnUnloadingRow(object? sender, DataGridRowEventArgs args) {
                     args.Row.RemoveHandler(DragDrop.DragEnterEvent, DragEnter);
                     args.Row.RemoveHandler(DragDrop.DragLeaveEvent, DragLeave);

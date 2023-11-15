@@ -8,7 +8,7 @@ public sealed class AutoSaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public string Name => "Auto Save";
     public Type Parent => typeof(SaveSettingVM);
-    public List<ISetting> Children { get; } = new();
+    public List<ISetting> Children { get; } = [];
 
     public AutoSaveSettings Settings { get; }
     public ISettingModel Model => Settings;

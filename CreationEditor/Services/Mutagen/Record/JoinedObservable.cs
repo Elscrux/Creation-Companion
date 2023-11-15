@@ -10,7 +10,7 @@ namespace CreationEditor.Services.Mutagen.Record;
 public sealed class JoinedObservable<T> {
     public Subject<UpdateAction<T>> Subject { get; }
 
-    private readonly List<Func<T, Action<T>>> _actions = new();
+    private readonly List<Func<T, Action<T>>> _actions = [];
 
     public JoinedObservable(Subject<UpdateAction<T>> subject) {
         Subject = subject;

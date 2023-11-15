@@ -24,7 +24,7 @@ public sealed class SettingsModule : Module {
 
         builder.RegisterAssemblyTypes(typeof(SettingsVM).Assembly)
             .InNamespaceOf<SettingsVM>()
-            .Where(type => type.Name.EndsWith("SettingVM"))
+            .Where(type => type.Name.EndsWith("SettingVM", StringComparison.OrdinalIgnoreCase))
             .AsSelf()
             .SingleInstance();
     }

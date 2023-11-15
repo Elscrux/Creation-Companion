@@ -15,39 +15,26 @@ namespace CreationEditor.Services.Mutagen.References.Record.Query;
 /// <summary>
 /// RecordReferenceQuery caches mod references to achieve quick access times for references instead of iterating through contained form links all the time.
 /// </summary>
-public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDropoff {
+public sealed class RecordReferenceQuery(
+    Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
+    IDataDirectoryProvider dataDirectoryProvider,
+    IFileSystem fileSystem,
+    IMutagenTypeProvider mutagenTypeProvider,
+    INotificationService notificationService,
+    IModInfoProvider<IModGetter> modInfoProvider,
+    ILogger logger)
+    : IRecordReferenceQuery, IDisposableDropoff {
+    private static readonly string[] CacheLocation = ["References", "Record"];
+
     private readonly Version _version = new(1, 0);
 
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
-    private readonly IFileSystem _fileSystem;
-    private readonly INotificationService _notificationService;
-    private readonly IModInfoProvider<IModGetter> _modInfoProvider;
-    private readonly ICacheLocationProvider _cacheLocationProvider;
-    private readonly ILogger _logger;
-    private readonly IMutagenTypeProvider _mutagenTypeProvider;
+    private readonly DisposableBucket _disposables = new();
+    private readonly ICacheLocationProvider _cacheLocationProvider = cacheLocationProviderFactory(CacheLocation);
 
-    private string ModFilePath(ModKey mod) => _fileSystem.Path.Combine(_dataDirectoryProvider.Path, mod.FileName);
+    private string ModFilePath(ModKey mod) => fileSystem.Path.Combine(dataDirectoryProvider.Path, mod.FileName);
 
     public IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches => _modCaches;
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
-
-    public RecordReferenceQuery(
-        Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
-        IDataDirectoryProvider dataDirectoryProvider,
-        IFileSystem fileSystem,
-        IMutagenTypeProvider mutagenTypeProvider,
-        INotificationService notificationService,
-        IModInfoProvider<IModGetter> modInfoProvider,
-        ILogger logger) {
-        _dataDirectoryProvider = dataDirectoryProvider;
-        _fileSystem = fileSystem;
-        _mutagenTypeProvider = mutagenTypeProvider;
-        _notificationService = notificationService;
-        _modInfoProvider = modInfoProvider;
-        _logger = logger;
-        _cacheLocationProvider = cacheLocationProviderFactory(new[] { "References", "Record" });
-    }
 
     public void Dispose() => _disposables.Dispose();
 
@@ -60,13 +47,13 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
     public void LoadModReferences(IModGetter mod) {
         if (_modCaches.ContainsKey(mod.ModKey)) return;
 
-        _logger.Here().Debug("Starting to load Record References of {ModKey}", mod.ModKey);
+        logger.Here().Debug("Starting to load Record References of {ModKey}", mod.ModKey);
         try {
             _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
         } catch (Exception e) {
             // Catch any issues while loading references
-            _logger.Here().Error("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
-            _logger.Here().Debug("Try to generate record references for {ModKey} again", mod.ModKey);
+            logger.Here().Error("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
+            logger.Here().Debug("Try to generate record references for {ModKey} again", mod.ModKey);
 
             // Delete broken cache
             TryDeleteCache(mod.ModKey);
@@ -74,7 +61,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
             // Try again
             _modCaches.Add(mod.ModKey, BuildReferenceCache(mod));
         }
-        _logger.Here().Debug("Finished loading Record References of {ModKey}", mod.ModKey);
+        logger.Here().Debug("Finished loading Record References of {ModKey}", mod.ModKey);
     }
 
     /// <summary>
@@ -84,7 +71,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
     public async Task LoadModReferences(IReadOnlyList<IModGetter> mods) {
         if (mods.All(mod => _modCaches.ContainsKey(mod.ModKey))) return;
 
-        var notify = new LinearNotifier(_notificationService, mods.Count);
+        var notify = new LinearNotifier(notificationService, mods.Count);
 
         await Task.WhenAll(mods.Select(m => Task.Run(() => LoadModReferences(m))));
 
@@ -97,11 +84,11 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
 
     private void TryDeleteCache(ModKey modKey) {
         var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
-        if (_fileSystem.File.Exists(cacheFile)) {
+        if (fileSystem.File.Exists(cacheFile)) {
             try {
-                _fileSystem.File.Delete(cacheFile);
+                fileSystem.File.Delete(cacheFile);
             } catch (Exception e) {
-                _logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFile, e.Message);
+                logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFile, e.Message);
             }
         }
     }
@@ -116,11 +103,11 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         var modFilePath = ModFilePath(modKey);
 
         // Check if mod and cache exist
-        if (!_fileSystem.File.Exists(cacheFile)) return false;
-        if (!_fileSystem.File.Exists(modFilePath)) return false;
+        if (!fileSystem.File.Exists(cacheFile)) return false;
+        if (!fileSystem.File.Exists(modFilePath)) return false;
 
         // Open cache reader
-        using var fileStream = _fileSystem.File.OpenRead(cacheFile);
+        using var fileStream = fileSystem.File.OpenRead(cacheFile);
         using var zip = new GZipInputStream(fileStream);
         using var reader = new BinaryReader(zip);
 
@@ -129,10 +116,10 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
          || !version.Equals(_version)) return false;
 
         // Read hash in cache
-        var hash = reader.ReadBytes(_fileSystem.GetHashBytesLength());
+        var hash = reader.ReadBytes(fileSystem.GetHashBytesLength());
 
         // Validate hash
-        return _fileSystem.IsFileHashValid(modFilePath, hash);
+        return fileSystem.IsFileHashValid(modFilePath, hash);
     }
 
     /// <summary>
@@ -145,7 +132,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();
 
-        using (var counter = new CountingNotifier(_notificationService, "Parsing Records", (int) _modInfoProvider.GetRecordCount(mod))) {
+        using (var counter = new CountingNotifier(notificationService, "Parsing Records", (int) modInfoProvider.GetRecordCount(mod))) {
             foreach (var record in mod.EnumerateMajorRecords()) {
                 records.Add(record.FormKey);
                 counter.NextStep();
@@ -159,9 +146,9 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         }
 
         // Write modCache to file
-        var cacheFile = _fileSystem.FileInfo.New(_cacheLocationProvider.CacheFile(mod.ModKey.FileName));
+        var cacheFile = fileSystem.FileInfo.New(_cacheLocationProvider.CacheFile(mod.ModKey.FileName));
         if (!cacheFile.Exists) cacheFile.Directory?.Create();
-        using var fileStream = _fileSystem.File.OpenWrite(cacheFile.FullName);
+        using var fileStream = fileSystem.File.OpenWrite(cacheFile.FullName);
         using var zip = new GZipOutputStream(fileStream);
         using var writer = new BinaryWriter(zip);
 
@@ -170,13 +157,13 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
 
         // Write hash
         var modFilePath = ModFilePath(mod.ModKey);
-        if (!_fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), new HashSet<FormKey>());
+        if (!fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []);
 
-        var hash = _fileSystem.GetFileHash(modFilePath);
+        var hash = fileSystem.GetFileHash(modFilePath);
         writer.Write(hash);
 
         // Write game
-        writer.Write(_mutagenTypeProvider.GetGameName(mod));
+        writer.Write(mutagenTypeProvider.GetGameName(mod));
 
         writer.Write(records.Count);
         foreach (var formKey in records) {
@@ -187,7 +174,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
         writer.Write(modCache.Count);
 
         // Write references
-        using (var counter = new CountingNotifier(_notificationService, "Saving Cache", modCache.Values.Sum(x => x.Count), TimeSpan.Zero)) {
+        using (var counter = new CountingNotifier(notificationService, "Saving Cache", modCache.Values.Sum(x => x.Count), TimeSpan.Zero)) {
             foreach (var (formKey, references) in modCache) {
                 counter.NextStep();
 
@@ -195,7 +182,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
                 writer.Write(references.Count);
                 foreach (var reference in references) {
                     writer.Write(reference.FormKey.ToString());
-                    writer.Write(_mutagenTypeProvider.GetTypeName(reference));
+                    writer.Write(mutagenTypeProvider.GetTypeName(reference));
                 }
             }
 
@@ -209,19 +196,19 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
     /// <param name="modKey">mod to load cache for</param>
     /// <returns>reference cache of the given mod key</returns>
     private ModReferenceCache LoadReferenceCache(ModKey modKey) {
-        using var linearNotifier = new LinearNotifier(_notificationService);
+        using var linearNotifier = new LinearNotifier(notificationService);
         linearNotifier.Next("Decompressing Cache");
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();
 
         // Read mod cache file
         var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
-        var fileStream = _fileSystem.File.OpenRead(cacheFile);
+        var fileStream = fileSystem.File.OpenRead(cacheFile);
         var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
             // Skip version and hash
             reader.ReadString();
-            reader.ReadBytes(_fileSystem.GetHashBytesLength());
+            reader.ReadBytes(fileSystem.GetHashBytesLength());
 
             // Read game string
             var game = reader.ReadString();
@@ -235,7 +222,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
 
             // Build ref cache
             var formCount = reader.ReadInt32();
-            using (var counter = new CountingNotifier(_notificationService, "Reading Cache", formCount)) {
+            using (var counter = new CountingNotifier(notificationService, "Reading Cache", formCount)) {
                 for (var i = 0; i < formCount; i++) {
                     counter.NextStep();
                     var formKey = FormKey.Factory(reader.ReadString());
@@ -244,7 +231,7 @@ public sealed class RecordReferenceQuery : IRecordReferenceQuery, IDisposableDro
                     for (var j = 0; j < referenceCount; j++) {
                         var referenceFormKey = FormKey.Factory(reader.ReadString());
                         var typeString = reader.ReadString();
-                        var type = _mutagenTypeProvider.GetType(game, typeString);
+                        var type = mutagenTypeProvider.GetType(game, typeString);
                         references.Add(new FormLinkInformation(referenceFormKey, type));
                     }
 

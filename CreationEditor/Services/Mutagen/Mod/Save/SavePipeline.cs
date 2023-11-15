@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class SavePipeline : ISavePipeline {
-    private readonly List<ISaveStep> _steps = new();
+    private readonly List<ISaveStep> _steps = [];
 
     public SavePipeline() {
         AddStep(new IdenticalToMasterRemoveStep());

@@ -12,10 +12,6 @@
     xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
     d:DesignHeight="500" d:DesignWidth="750"
     x:CompileBindings="True" x:DataType="mod:ModSelectionVM">
-    <Design.DataContext>
-        <mod:ModSelectionVM/>
-    </Design.DataContext>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"

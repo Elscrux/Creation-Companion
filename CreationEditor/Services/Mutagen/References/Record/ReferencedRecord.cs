@@ -5,7 +5,10 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Mutagen.References.Record;
 
-public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
+public sealed class ReferencedRecord<TMajorRecordGetter>(
+    TMajorRecordGetter record,
+    IEnumerable<IFormLinkIdentifier>? references = null)
+    : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
     where TMajorRecordGetter : IMajorRecordIdentifier {
 
     public override bool Equals(object? obj) {
@@ -21,14 +24,10 @@ public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IRefe
         return HashCode.Combine(Record.FormKey);
     }
 
-    [Reactive] public TMajorRecordGetter Record { get; set; }
+    [Reactive] public TMajorRecordGetter Record { get; set; } = record;
 
-    public IObservableCollection<IFormLinkIdentifier> References { get; }
+    public IObservableCollection<IFormLinkIdentifier> References { get; } = references is null
+        ? []
+        : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
 
-    public ReferencedRecord(TMajorRecordGetter record, IEnumerable<IFormLinkIdentifier>? references = null) {
-        Record = record;
-        References = references is null
-            ? new ObservableCollectionExtended<IFormLinkIdentifier>()
-            : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
-    }
 }

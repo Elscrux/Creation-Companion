@@ -10,10 +10,6 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Browser.CellBrowser"
              x:CompileBindings="True" x:DataType="vm:ICellBrowserVM"
              x:Name="Browser">
-    <Design.DataContext>
-        <vm:CellBrowserVM/>
-    </Design.DataContext>
-
     <UserControl.Resources>
         <converter:ReturnParameterIfTrueConverter
             x:Key="ReturnGridLengthIfTrue"

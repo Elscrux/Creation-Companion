@@ -14,8 +14,8 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
     private const string BasePath = "avares://CreationEditor.Avalonia/Assets";
 
     private readonly ThemeName _defaultTheme;
-    private readonly List<GrammarDefinition> _availableGrammarDefinitions = new();
-    private readonly List<IRawGrammar> _availableGrammars = new();
+    private readonly List<GrammarDefinition> _availableGrammarDefinitions = [];
+    private readonly List<IRawGrammar> _availableGrammars = [];
 
     public AvaloniaTextMateRegistryOptions(ThemeName defaultTheme, params string[] grammars) {
         _defaultTheme = defaultTheme;

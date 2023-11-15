@@ -1,8 +1,8 @@
 ﻿namespace CreationEditor.Resources.Comparer;
 
 public sealed class FuncSelectorComparer<TSelector, TCompare>(
-        Func<TSelector, TCompare?> selector,
-        Func<TCompare, TCompare, int> compare)
+    Func<TSelector, TCompare?> selector,
+    Func<TCompare, TCompare, int> compare)
     : FuncComparer<TCompare>(compare), IComparer<TSelector> {
 
     public override int Compare(object? x, object? y) {

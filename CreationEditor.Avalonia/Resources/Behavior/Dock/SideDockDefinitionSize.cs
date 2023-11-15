@@ -66,7 +66,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
             .DisposeWith(_disposables);
     }
 
-    private double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {
+    private static double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {
         if (vm is null) return 0;
 
         if (!vm.Children.Any()) {

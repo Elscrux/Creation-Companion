@@ -16,7 +16,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, List<Interop.ReferenceLoad>> LoadedCells);
 
     private Interop.SelectCallback? _selectCallback;
-    private readonly IDisposableDropoff _disposableDropoff = new DisposableBucket();
+    private readonly DisposableBucket _disposableDropoff = new();
     private readonly ILogger _logger;
     private readonly ILinkCacheProvider _linkCacheProvider;
 
@@ -134,7 +134,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
         }
     }
 
-    private void Unload(List<Interop.ReferenceLoad> references) {
+    private static void Unload(IReadOnlyCollection<Interop.ReferenceLoad> references) {
         Interop.deleteReferences(Convert.ToUInt32(references.Count), references.Select(x => x.FormKey).ToArray());
     }
 

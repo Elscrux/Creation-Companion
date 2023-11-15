@@ -17,6 +17,12 @@ public sealed class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiVal
 
     /// <inheritdoc/>
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) {
+        var converted = OfTypeWithDefaultSupport(values).ToList();
+
+        return converted.Count == values.Count && TypeUtilities.CanCast<TPar>(parameter)
+            ? _convert(converted, (TPar?) parameter)
+            : AvaloniaProperty.UnsetValue;
+
         //standard OfType skip null values, even they are valid for the Type
         static IEnumerable<TIn?> OfTypeWithDefaultSupport(IEnumerable<object?> list) {
             foreach (var obj in list) {
@@ -27,11 +33,5 @@ public sealed class ExtendedFuncMultiValueConverter<TIn, TOut, TPar> : IMultiVal
                 }
             }
         }
-
-        var converted = OfTypeWithDefaultSupport(values).ToList();
-
-        return converted.Count == values.Count && TypeUtilities.CanCast<TPar>(parameter)
-            ? _convert(converted, (TPar?) parameter)
-            : AvaloniaProperty.UnsetValue;
     }
 }

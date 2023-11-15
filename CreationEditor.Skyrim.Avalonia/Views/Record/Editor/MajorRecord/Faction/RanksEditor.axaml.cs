@@ -7,6 +7,6 @@ public partial class RanksEditor : ReactiveUserControl<RankEditorVM> {
     public RanksEditor() {
         InitializeComponent();
 
-        RankGrid.SetValue(DragDropExtended.CanDropProperty, o => ViewModel is not null && ViewModel.CanDrop(o));
+        RankGrid.SetValue(DragDropExtended.CanDropProperty, o => ViewModel is not null && RankEditorVM.CanDrop(o));
     }
 }

@@ -7,11 +7,11 @@ using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveService(
-        ILinkCacheProvider linkCacheProvider,
-        IModSaveLocationProvider modSaveLocationProvider,
-        IFileSystem fileSystem,
-        ISavePipeline savePipeline,
-        ILogger logger)
+    ILinkCacheProvider linkCacheProvider,
+    IModSaveLocationProvider modSaveLocationProvider,
+    IFileSystem fileSystem,
+    ISavePipeline savePipeline,
+    ILogger logger)
     : IModSaveService {
 
     public void SaveMod(IMod mod) {
@@ -97,5 +97,5 @@ public sealed class ModSaveService(
     }
 
     private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) => fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
-    public string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
+    private static string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }

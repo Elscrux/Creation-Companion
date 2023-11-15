@@ -12,15 +12,13 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// <typeparam name="T">Type of items</typeparam>
 public sealed class GroupCollection<T> : IDisposable {
     private readonly IDisposable _sourceCollectionSubscription;
-    private readonly List<Group<T>> _activeGroups = new();
-    private readonly IObservableCollection<T> _source;
+    private readonly List<Group<T>> _activeGroups = [];
     private readonly GroupInstance _topLevelGroup;
 
     public IObservableCollection<object> Items => _topLevelGroup.Items;
 
     public GroupCollection(IObservableCollection<T> source, params Group<T>[] groups) {
-        _source = source;
-        _topLevelGroup = new GroupInstance(null!, new ObservableCollectionExtended<object>(_source.OfType<object>()));
+        _topLevelGroup = new GroupInstance(null!, new ObservableCollectionExtended<object>(source.OfType<object>()));
 
         foreach (var group in groups) {
             group.WhenAnyValue(x => x.IsGrouped)
@@ -41,7 +39,7 @@ public sealed class GroupCollection<T> : IDisposable {
                 .DisposeWith(group);
         }
 
-        _sourceCollectionSubscription = _source.ObserveCollectionChanges()
+        _sourceCollectionSubscription = source.ObserveCollectionChanges()
             .Subscribe(x => {
                 switch (x.EventArgs.Action) {
                     case NotifyCollectionChangedAction.Add:

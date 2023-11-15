@@ -149,7 +149,7 @@ public partial class ScriptEditor : ActivatableUserControl {
             """);
 
         // Handle zooming
-        AddHandler(PointerWheelChangedEvent, (o, i) => {
+        AddHandler(PointerWheelChangedEvent, (_, i) => {
             if (i.KeyModifiers != KeyModifiers.Control) return;
 
             if (i.Delta.Y > 0) {

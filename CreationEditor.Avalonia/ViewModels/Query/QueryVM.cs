@@ -5,9 +5,9 @@ using Mutagen.Bethesda.Plugins.Cache;
 namespace CreationEditor.Avalonia.ViewModels.Query;
 
 public sealed class QueryVM(
-        ILinkCacheProvider linkCacheProvider,
-        IQueryRunner queryRunner,
-        IQueryConditionFactory conditionFactory)
+    ILinkCacheProvider linkCacheProvider,
+    IQueryRunner queryRunner,
+    IQueryConditionFactory conditionFactory)
     : ViewModel {
 
     public IQueryRunner QueryRunner { get; } = queryRunner;

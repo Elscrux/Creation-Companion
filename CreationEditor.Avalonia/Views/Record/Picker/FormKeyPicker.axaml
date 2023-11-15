@@ -76,7 +76,7 @@
                                 VerticalAlignment="Center">
                             <Button.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <Binding Path="$parent[Button].IsPointerOver"/>
                                     <TemplateBinding Property="Found"/>
                                 </MultiBinding>
                             </Button.IsVisible>
@@ -95,7 +95,7 @@
                                 VerticalAlignment="Center">
                             <Button.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <Binding Path="$parent[Button].IsPointerOver"/>
                                     <TemplateBinding Property="Found"/>
                                 </MultiBinding>
                             </Button.IsVisible>
@@ -150,7 +150,8 @@
                         <!--                                    IsActive="{TemplateBinding Processing}" -->
                         <!--                                    ToolTip.Tip="{TemplateBinding StatusString}" /> -->
 
-                        <Popup x:Name="PART_Popup"
+                        <Popup Grid.Column="0"
+                               x:Name="PART_Popup"
                                WindowManagerAddShadowHint="False"
                                IsOpen="{Binding InSearchMode, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                Width="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"

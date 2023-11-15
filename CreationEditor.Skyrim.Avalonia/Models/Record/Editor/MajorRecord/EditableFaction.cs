@@ -149,9 +149,9 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         VendorLocation.Target ??= new LocationFallback { Type = LocationTargetRadius.LocationType.NearSelf };
         VendorBuySellList = parent.VendorBuySellList;
         MerchantContainer = parent.MerchantContainer;
-        Conditions = parent.Conditions is not null
-            ? new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)))
-            : new ObservableCollectionExtended<EditableCondition>();
+        Conditions = parent.Conditions is null
+            ? []
+            : new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)));
     }
 
     public void CopyTo(Faction faction) {

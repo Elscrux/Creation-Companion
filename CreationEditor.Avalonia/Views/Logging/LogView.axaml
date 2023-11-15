@@ -12,10 +12,6 @@
              x:CompileBindings="True" x:DataType="vm:ILogVM"
              x:Class="CreationEditor.Avalonia.Views.Logging.LogView"
              x:Name="Log">
-    <Design.DataContext>
-        <vm:LogVM/>
-    </Design.DataContext>
-
     <UserControl.Resources>
         <converter:LogLevelToToBrushConverter
             x:Key="LogLevelToToBrushConverter"

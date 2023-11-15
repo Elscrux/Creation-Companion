@@ -5,7 +5,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Select;
 
 public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, IDisposable {
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     [Reactive] public Type? RecordType { get; set; }
 
@@ -45,7 +45,7 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
         var typeQueue = new Queue<Type>();
         typeQueue.Enqueue(RecordType);
 
-        while (typeQueue.Any()) {
+        while (typeQueue.Count != 0) {
             var type = typeQueue.Dequeue();
             foreach (var queryField in GetQueryFields(type)) {
                 dictionary.TryAdd(queryField.Name, queryField);

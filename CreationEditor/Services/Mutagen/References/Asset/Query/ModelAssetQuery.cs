@@ -5,25 +5,19 @@ using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using nifly;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class ModelAssetQuery : IAssetReferenceQuery<string, string> {
-    private readonly IFileSystem _fileSystem;
-    private readonly IAssetTypeService _assetTypeService;
+public sealed class ModelAssetQuery(
+    IFileSystem fileSystem,
+    IAssetTypeService assetTypeService)
+    : IAssetReferenceQuery<string, string> {
 
     public string QueryName => "Model";
     public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
         = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
 
-    public ModelAssetQuery(
-        IFileSystem fileSystem,
-        IAssetTypeService assetTypeService) {
-        _fileSystem = fileSystem;
-        _assetTypeService = assetTypeService;
-    }
-
     public IEnumerable<AssetQueryResult<string>> ParseAssets(string source) => ParseAssetsInternal(source).Distinct();
 
     private IEnumerable<AssetQueryResult<string>> ParseAssetsInternal(string path) {
-        if (!_fileSystem.File.Exists(path)) yield break;
+        if (!fileSystem.File.Exists(path)) yield break;
 
         using var nif = new NifFile();
         nif.Load(path);
@@ -64,7 +58,7 @@ public sealed class ModelAssetQuery : IAssetReferenceQuery<string, string> {
 
             var assetString = asset.get();
             if (!string.IsNullOrEmpty(assetString)) {
-                var assetLink = _assetTypeService.GetAssetLink(assetString);
+                var assetLink = assetTypeService.GetAssetLink(assetString);
                 if (assetLink is not null) {
                     yield return new AssetQueryResult<string>(assetLink, path);
                 }

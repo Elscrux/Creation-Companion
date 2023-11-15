@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Models.Mod;
 
 public sealed class LoadOrderModItem : ModItem, IDisposableDropoff {
     public uint LoadOrderIndex { get; }
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
     [Reactive] public bool IsActive { get; set; }
     [Reactive] public bool MastersValid { get; set; }
 

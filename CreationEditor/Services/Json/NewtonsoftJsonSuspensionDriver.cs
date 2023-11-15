@@ -7,9 +7,9 @@ using ReactiveUI;
 namespace CreationEditor.Services.Json;
 
 public sealed class NewtonsoftJsonSuspensionDriver(
-        IFileSystem fileSystem,
-        IContractResolver contractResolver,
-        string stateFilePath)
+    IFileSystem fileSystem,
+    IContractResolver contractResolver,
+    string stateFilePath)
     : ISuspensionDriver {
 
     private readonly JsonSerializerSettings _settings = new() {

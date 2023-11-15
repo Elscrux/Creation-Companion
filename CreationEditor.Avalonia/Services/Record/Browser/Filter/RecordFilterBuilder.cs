@@ -5,7 +5,7 @@ namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
 public sealed class RecordFilterBuilder : IRecordFilterBuilder {
     private readonly IRecordFilterProvider _provider;
-    private readonly HashSet<RecordFilterListing> _recordFilters = new();
+    private readonly HashSet<RecordFilterListing> _recordFilters = [];
 
     public RecordFilterBuilder(
         IRecordFilterProvider provider) {

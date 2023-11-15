@@ -21,7 +21,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
 
     public string Name => "Startup Docks";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = new();
+    public List<ISetting> Children { get; } = [];
 
     public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
     public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }

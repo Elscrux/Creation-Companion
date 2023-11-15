@@ -3,7 +3,7 @@ using Serilog;
 namespace CreationEditor.Services.Settings;
 
 public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
     public IEnumerable<ISetting> Settings { get; }
 
     public SettingProvider(

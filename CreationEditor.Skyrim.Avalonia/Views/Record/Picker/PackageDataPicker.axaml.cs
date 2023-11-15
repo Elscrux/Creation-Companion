@@ -136,7 +136,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
                 x => x.PackageDataIndex,
                 x => x.Data,
                 (index, data) => (Index: index, Data: data))
-            .Where(x => x.Data is not null && x.Data.Any())
+            .Where(x => x.Data is not null && x.Data.Count != 0)
             .Subscribe(x => {
                 if (x.Data is null) {
                     SelectedData = null;

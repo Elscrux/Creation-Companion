@@ -71,10 +71,8 @@ public sealed class ListShortcuts : AvaloniaObject {
                     treeDataGrid.Unloaded += OnTreeDataGridUnloaded;
                     treeDataGrid.Loaded -= OnTreeDataGridLoaded;
                     treeDataGrid.Loaded += OnTreeDataGridLoaded;
-                    void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {
-                        disposable?.Dispose();
-                        treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
-                    }
+                    break;
+
                     void OnTreeDataGridLoaded(object? sender, RoutedEventArgs e) {
                         disposable?.Dispose();
                         disposable = treeDataGrid.WhenAnyValue(x => x.Source)
@@ -86,7 +84,10 @@ public sealed class ListShortcuts : AvaloniaObject {
                                 genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { source, args.NewValue.GetValueOrDefault() });
                             });
                     }
-                    break;
+                    void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {
+                        disposable?.Dispose();
+                        treeDataGrid.Unloaded -= OnTreeDataGridUnloaded;
+                    }
             }
         });
     }

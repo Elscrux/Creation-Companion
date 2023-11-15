@@ -9,7 +9,7 @@ namespace CreationEditor.Services.Query.Where;
 
 public sealed class QueryCondition : ReactiveObject, IQueryCondition {
     private readonly IQueryConditionFactory _queryConditionFactory;
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     [Reactive] public ConditionState ConditionState { get; set; }
     public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();

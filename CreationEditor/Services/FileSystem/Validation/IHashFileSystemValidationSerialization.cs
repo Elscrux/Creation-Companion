@@ -9,4 +9,4 @@ public interface IFileSystemValidationSerialization<T> {
     void Serialize(T t, string rootDirectoryPath);
 }
 
-public interface IHashFileSystemValidationSerialization : IFileSystemValidationSerialization<HashFileSystemCacheData> {}
+public interface IHashFileSystemValidationSerialization : IFileSystemValidationSerialization<HashFileSystemCacheData>;

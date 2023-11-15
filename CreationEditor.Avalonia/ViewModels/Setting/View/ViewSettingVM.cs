@@ -11,14 +11,13 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public string Name => "View";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = new();
+    public List<ISetting> Children { get; } = [];
 
     public ISettingModel Model => Setting;
     public ViewSetting Setting { get; }
 
     private readonly ResourceDictionary _viewModeResourceDictionary = new();
-
-    private readonly IDictionary<ViewMode, IViewModeTemplate> _viewModeTemplates;
+    private readonly Dictionary<ViewMode, IViewModeTemplate> _viewModeTemplates;
 
     public ViewSettingVM(
         ISettingImporter<ViewSetting> settingsImporter) {

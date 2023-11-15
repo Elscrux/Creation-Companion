@@ -5,29 +5,24 @@ using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using Serilog;
 namespace CreationEditor.Services.FileSystem.Validation;
 
-public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemValidationSerialization {
-    private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly ICacheLocationProvider _cacheLocationProvider;
-    private readonly Version _version = new(1, 0);
+public sealed class BinaryFileSystemValidationSerialization(
+    ILogger logger,
+    Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
+    IFileSystem fileSystem)
+    : IHashFileSystemValidationSerialization {
 
-    public BinaryFileSystemValidationSerialization(
-        ILogger logger,
-        Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
-        IFileSystem fileSystem) {
-        _logger = logger;
-        _fileSystem = fileSystem;
-        _cacheLocationProvider = cacheLocationProviderFactory(new[] { "Validation", "FileSystem" });
-    }
+    private static readonly string[] CacheLocation = ["Validation", "FileSystem"];
+    private readonly ICacheLocationProvider _cacheLocationProvider = cacheLocationProviderFactory(CacheLocation);
+    private readonly Version _version = new(1, 0);
 
     public bool Validate(string rootDirectoryPath) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
 
         // Check if cache exist
-        if (!_fileSystem.File.Exists(cacheFile)) return false;
+        if (!fileSystem.File.Exists(cacheFile)) return false;
 
         try {
-            using var fileSystemStream = _fileSystem.File.OpenRead(cacheFile);
+            using var fileSystemStream = fileSystem.File.OpenRead(cacheFile);
             using var reader = new BinaryReader(fileSystemStream);
 
             // Read serialization version
@@ -35,7 +30,7 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
             if (!Version.TryParse(versionString, out var version)) return false;
             if (!_version.Equals(version)) return false;
         } catch (Exception e) {
-            _logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
             return false;
         }
 
@@ -45,12 +40,12 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
     public bool TryDeserialize(string rootDirectoryPath, [MaybeNullWhen(false)] out HashFileSystemCacheData hashFileSystemCacheData) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
 
-        using var fileSystemStream = _fileSystem.File.OpenRead(cacheFile);
+        using var fileSystemStream = fileSystem.File.OpenRead(cacheFile);
         try {
             hashFileSystemCacheData = Deserialize(new BinaryReader(fileSystemStream));
             return true;
         } catch (Exception e) {
-            _logger.Here().Error("Failed to deserialize cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Error("Failed to deserialize cache file {File}: {Exception}", cacheFile, e.Message);
             hashFileSystemCacheData = null;
             return false;
         }
@@ -94,10 +89,10 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
 
     public void Serialize(HashFileSystemCacheData fileSystemCacheData, string rootDirectoryPath) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
-        var info = _fileSystem.FileInfo.New(cacheFile);
+        var info = fileSystem.FileInfo.New(cacheFile);
         info.Directory?.Create();
 
-        using var fileSystemStream = _fileSystem.File.OpenWrite(cacheFile);
+        using var fileSystemStream = fileSystem.File.OpenWrite(cacheFile);
         Serialize(fileSystemCacheData, new BinaryWriter(fileSystemStream));
     }
 
@@ -105,7 +100,6 @@ public sealed class BinaryFileSystemValidationSerialization : IHashFileSystemVal
         writer.Write(_version.ToString());
         writer.Write(fileSystemCacheData.HashLength);
         Directory(fileSystemCacheData.RootDirectory);
-        return;
 
         void Directory(HashDirectoryCacheData hashDirectoryCacheData) {
             writer.Write(hashDirectoryCacheData.Name);

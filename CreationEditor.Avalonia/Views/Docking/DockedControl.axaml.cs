@@ -101,19 +101,19 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         };
         switch (dock) {
             case Dock.Top:
-                grid.RowDefinitions = new RowDefinitions { new(), new() };
+                grid.RowDefinitions = [new RowDefinition(), new RowDefinition()];
                 grid.Children[0].SetValue(Grid.RowProperty, 0);
                 break;
             case Dock.Bottom:
-                grid.RowDefinitions = new RowDefinitions { new(), new() };
+                grid.RowDefinitions = [new RowDefinition(), new RowDefinition()];
                 grid.Children[0].SetValue(Grid.RowProperty, 1);
                 break;
             case Dock.Left:
-                grid.ColumnDefinitions = new ColumnDefinitions { new(), new() };
+                grid.ColumnDefinitions = [new ColumnDefinition(), new ColumnDefinition()];
                 grid.Children[0].SetValue(Grid.ColumnProperty, 0);
                 break;
             case Dock.Right:
-                grid.ColumnDefinitions = new ColumnDefinitions { new(), new() };
+                grid.ColumnDefinitions = [new ColumnDefinition(), new ColumnDefinition()];
                 grid.Children[0].SetValue(Grid.ColumnProperty, 1);
                 break;
             default:

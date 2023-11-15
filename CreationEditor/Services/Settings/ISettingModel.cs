@@ -1,3 +1,3 @@
 ﻿namespace CreationEditor.Services.Settings;
 
-public interface ISettingModel {}
+public interface ISettingModel;

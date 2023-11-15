@@ -6,7 +6,7 @@ using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
 
 public sealed class DataDirectoryService : IDataDirectoryService {
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     private readonly IAssetTypeService _assetTypeService;
     private readonly IFileSystem _fileSystem;

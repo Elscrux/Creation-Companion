@@ -11,10 +11,6 @@
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDock"
              x:Name="Dock"
              Background="{DynamicResource SystemControlTransparentBrush}">
-    <Design.DataContext>
-        <vm:SideDockVM/>
-    </Design.DataContext>
-
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>

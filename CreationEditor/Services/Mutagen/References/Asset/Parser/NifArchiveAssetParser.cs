@@ -6,10 +6,10 @@ using Mutagen.Bethesda.Archives;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
 public sealed class NifArchiveAssetParser(
-        IFileSystem fileSystem,
-        IAssetTypeService assetTypeService,
-        ModelAssetQuery modelAssetQuery,
-        IArchiveService archiveService)
+    IFileSystem fileSystem,
+    IAssetTypeService assetTypeService,
+    ModelAssetQuery modelAssetQuery,
+    IArchiveService archiveService)
     : IArchiveAssetParser {
 
     public string Name => "NifArchive";

@@ -4,8 +4,8 @@ using Serilog;
 namespace CreationEditor.Avalonia.Services.Lifecycle;
 
 public sealed class LifecycleStartup(
-        IReadOnlyList<ILifecycleTask> tasks,
-        ILogger logger)
+    IReadOnlyList<ILifecycleTask> tasks,
+    ILogger logger)
     : ILifecycleStartup {
 
     public IReadOnlyList<ILifecycleTask> LifecycleTasks { get; } = tasks;

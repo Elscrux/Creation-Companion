@@ -4,20 +4,15 @@ using Avalonia.Interactivity;
 using Noggog;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class DragHandler {
+public sealed class DragHandler(
+    Func<object?, object?, PointerEventArgs, Task> dragCallback,
+    double dragStartDistance = 10) {
+
     private Point _clickPosition;
     private bool _isPressingDown;
 
-    private readonly double _dragStartDistance;
-    private readonly Func<object?, object?, PointerEventArgs, Task> _dragCallback;
-
     private readonly Dictionary<Interactive, object> _elementIdentifiers = new();
     private readonly Dictionary<object, List<Interactive>> _identifierElements = new();
-
-    public DragHandler(Func<object?, object?, PointerEventArgs, Task> dragCallback, double dragStartDistance = 10) {
-        _dragStartDistance = dragStartDistance;
-        _dragCallback = dragCallback;
-    }
 
     public void Register(Interactive element, object? identifier = null) {
         element.AddHandler(InputElement.PointerPressedEvent, Pressed, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
@@ -46,8 +41,7 @@ public sealed class DragHandler {
     }
 
     public void UnregisterIdentifier(object identifier) {
-        if (_identifierElements.TryGetValue(identifier, out var elements)) {
-            _identifierElements.Remove(identifier);
+        if (_identifierElements.Remove(identifier, out var elements)) {
             foreach (var element in elements) Unregister(element, identifier);
         }
     }
@@ -59,17 +53,17 @@ public sealed class DragHandler {
         _clickPosition = e.GetPosition(null);
     }
 
-    public async Task Moved(object? o, PointerEventArgs e) {
-        if (o is not Interactive interactive) return;
-        if (!_isPressingDown) return;
+    public Task Moved(object? o, PointerEventArgs e) {
+        if (o is not Interactive interactive) return Task.CompletedTask;
+        if (!_isPressingDown) return Task.CompletedTask;
 
         var distance = _clickPosition - e.GetPosition(null);
-        if (Math.Abs(distance.X) < _dragStartDistance && Math.Abs(distance.Y) < _dragStartDistance) return;
+        if (Math.Abs(distance.X) < dragStartDistance && Math.Abs(distance.Y) < dragStartDistance) return Task.CompletedTask;
 
         _isPressingDown = false;
 
         _elementIdentifiers.TryGetValue(interactive, out var identifier);
-        await _dragCallback(o, identifier, e);
+        return dragCallback(o, identifier, e);
     }
 
     public void Released(object? o, PointerReleasedEventArgs e) {

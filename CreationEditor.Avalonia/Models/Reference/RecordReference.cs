@@ -8,12 +8,12 @@ using Noggog;
 namespace CreationEditor.Avalonia.Models.Reference;
 
 public sealed class RecordReference(
-        IFormLinkIdentifier formLinkIdentifier,
-        ILinkCacheProvider linkCacheProvider,
-        IRecordReferenceController recordReferenceController)
+    IFormLinkIdentifier formLinkIdentifier,
+    ILinkCacheProvider linkCacheProvider,
+    IRecordReferenceController recordReferenceController)
     : IReference, IDisposable {
 
-    private readonly IDisposableBucket _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     private IMajorRecordGetter? _record;
     public IMajorRecordGetter Record => _record

@@ -5,10 +5,10 @@ using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
 public sealed class NifFileAssetParser(
-        IFileSystem fileSystem,
-        ModelAssetQuery modelAssetQuery,
-        IAssetTypeService assetTypeService,
-        IDataDirectoryProvider dataDirectoryProvider)
+    IFileSystem fileSystem,
+    ModelAssetQuery modelAssetQuery,
+    IAssetTypeService assetTypeService,
+    IDataDirectoryProvider dataDirectoryProvider)
     : IFileAssetParser {
 
     public string Name => "Nif";

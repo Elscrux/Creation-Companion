@@ -19,4 +19,4 @@ public interface IPlugin : IPluginDefinition {
 
 public interface IPlugin<TMod, TModGetter> : IPlugin
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
-    where TMod : class, TModGetter, IContextMod<TMod, TModGetter> {}
+    where TMod : class, TModGetter, IContextMod<TMod, TModGetter>;

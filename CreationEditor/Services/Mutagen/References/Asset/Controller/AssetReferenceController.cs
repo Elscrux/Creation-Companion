@@ -17,6 +17,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
 public sealed class AssetReferenceController : IAssetReferenceController {
@@ -51,15 +52,16 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
-    private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = new();
+    private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = [];
     private AssetReferenceCache<string, string> _nifDirectoryAssetReferenceCache = null!;
-    private readonly List<AssetReferenceCache<string, string>> _nifArchiveAssetCaches = new();
+    private readonly List<AssetReferenceCache<string, string>> _nifArchiveAssetCaches = [];
 
     private int _loadingProcesses;
     private readonly BehaviorSubject<bool> _isLoading = new(true);
     public IObservable<bool> IsLoading => _isLoading;
 
     public AssetReferenceController(
+        ILogger logger,
         IFileSystem fileSystem,
         IArchiveService archiveService,
         INotificationService notificationService,
@@ -81,8 +83,10 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
             .DisposeWith(_disposables);
 
-        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences));
-        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences));
+        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences))
+            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory References"));
+        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences))
+            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive References"));
 
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
         recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
@@ -169,12 +173,11 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             .DisposeWith(_disposables);
 
         _archiveService.ArchiveRenamed
-            .Subscribe(async e => {
+            .Subscribe(e => {
                 Remove(e.OldName);
-                await Add(e.NewName);
+                return Add(e.NewName);
             })
             .DisposeWith(_disposables);
-        return;
 
         async Task Add(string archive) {
             var relativePath = _fileSystem.Path.GetRelativePath(dataDirectory, archive);

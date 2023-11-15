@@ -5,33 +5,31 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Resources.Constants;
 
 public static class ConditionConstants {
-    public static readonly IEnumerable<Condition.Function> PerkOnlyFunctions
-        = new[] {
-            Condition.Function.EPAlchemyEffectHasKeyword,
-            Condition.Function.EPAlchemyGetMakingPoison,
-            Condition.Function.EPMagic_IsAdvanceSkill,
-            Condition.Function.EPMagic_SpellHasKeyword,
-            Condition.Function.EPMagic_SpellHasSkill,
-            Condition.Function.EPTemperingItemHasKeyword,
-            Condition.Function.EPTemperingItemIsEnchanted,
-            Condition.Function.EPModSkillUsage_IsAdvanceAction,
-            Condition.Function.EPModSkillUsage_AdvanceObjectHasKeyword,
-        };
+    public static readonly IEnumerable<Condition.Function> PerkOnlyFunctions = [
+        Condition.Function.EPAlchemyEffectHasKeyword,
+        Condition.Function.EPAlchemyGetMakingPoison,
+        Condition.Function.EPMagic_IsAdvanceSkill,
+        Condition.Function.EPMagic_SpellHasKeyword,
+        Condition.Function.EPMagic_SpellHasSkill,
+        Condition.Function.EPTemperingItemHasKeyword,
+        Condition.Function.EPTemperingItemIsEnchanted,
+        Condition.Function.EPModSkillUsage_IsAdvanceAction,
+        Condition.Function.EPModSkillUsage_AdvanceObjectHasKeyword,
+    ];
 
-    public static readonly IEnumerable<Condition.Function> CameraPathOnlyFunctions
-        = new[] {
-            Condition.Function.GetVatsTargetHeight,
-            Condition.Function.GetVATSValue,
-            Condition.Function.GetVATSMode,
-            Condition.Function.GetVATSBackAreaFree,
-            Condition.Function.GetVATSBackTargetVisible,
-            Condition.Function.GetVATSFrontAreaFree,
-            Condition.Function.GetVATSFrontTargetVisible,
-            Condition.Function.GetVATSLeftAreaFree,
-            Condition.Function.GetVATSLeftTargetVisible,
-            Condition.Function.GetVATSRightAreaFree,
-            Condition.Function.GetVATSRightTargetVisible,
-        };
+    public static readonly IEnumerable<Condition.Function> CameraPathOnlyFunctions = [
+        Condition.Function.GetVatsTargetHeight,
+        Condition.Function.GetVATSValue,
+        Condition.Function.GetVATSMode,
+        Condition.Function.GetVATSBackAreaFree,
+        Condition.Function.GetVATSBackTargetVisible,
+        Condition.Function.GetVATSFrontAreaFree,
+        Condition.Function.GetVATSFrontTargetVisible,
+        Condition.Function.GetVATSLeftAreaFree,
+        Condition.Function.GetVATSLeftTargetVisible,
+        Condition.Function.GetVATSRightAreaFree,
+        Condition.Function.GetVATSRightTargetVisible,
+    ];
 
     public static readonly IEnumerable<Condition.Function> QuestOnlyFunctions
         = new[] {

@@ -115,7 +115,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         }
 
         // Return an item repeater with the parameters
-        return parameterControls.Any()
+        return parameterControls.Count != 0
             ? new ItemsRepeater { ItemsSource = parameterControls }
             : null;
     }
@@ -186,9 +186,9 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
             data,
             parameter.Name,
             substituteUsageContext,
-            parameter.PropertyType.GenericTypeArguments.Any()
-                ? parameter.PropertyType.GenericTypeArguments
-                : parameter.PropertyType.AsEnumerable());
+            parameter.PropertyType.GenericTypeArguments.Length == 0
+                ? parameter.PropertyType.AsEnumerable()
+                : parameter.PropertyType.GenericTypeArguments);
     }
 
     private Control GetFormKeyPicker(ConditionData data, string parameter, string parameterMember, IEnumerable<Type> types) {

@@ -6,12 +6,13 @@ public sealed class CountingNotifier : ANotifier, IDisposable {
 
     private readonly IDisposable _timerSubscription;
 
+    private float countFloat;
 
     /// <inheritdoc cref="CountingNotifier(CreationEditor.Services.Notification.INotificationService,string,int)"/>
     /// <param name="timeSpan">Time span in which the current step will be reported</param>
     public CountingNotifier(INotificationService notificationService, string message, int count, TimeSpan timeSpan)
         : base(notificationService) {
-        var countFloat = (float) count;
+        countFloat = count;
 
         _timerSubscription = Observable.Interval(timeSpan)
             .TakeWhile(_ => _currentStep < count)

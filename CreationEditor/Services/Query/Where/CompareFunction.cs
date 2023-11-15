@@ -72,10 +72,10 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
         return false;
     }
 
-    private static IFieldInformation ValueFields(Type type) {
+    private static ValueFieldInformation ValueFields(Type type) {
         return new ValueFieldInformation(typeof(TCompareValue), type);
     }
-    private static IFieldInformation CollectionFields(Type type) {
+    private static CollectionFieldInformation CollectionFields(Type type) {
         var listType = type.GetGenericArguments().FirstOrDefault() ?? type;
         return new CollectionFieldInformation(listType, listType);
     }

@@ -9,7 +9,7 @@ using ReactiveUI;
 namespace CreationEditor.Services.Query;
 
 public sealed class QueryRunner : IQueryRunner, IDisposable {
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
     private readonly IQueryConditionFactory _queryConditionFactory;
 
     public Guid Id { get; } = Guid.NewGuid();

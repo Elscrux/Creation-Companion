@@ -19,11 +19,9 @@ public static class WorldspaceExtension {
 
         foreach (var worldspace in linkCache.ResolveAll<IWorldspaceGetter>(worldspaceFormKey)) {
             foreach (var cell in worldspace.EnumerateCells()) {
-                var cellFormKey = cell.FormKey;
-                if (visitedCells.Contains(cellFormKey)) continue;
-
-                visitedCells.Add(cellFormKey);
-                yield return cell;
+                if (visitedCells.Add(cell.FormKey)) {
+                    yield return cell;
+                }
             }
         }
     }

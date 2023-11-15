@@ -40,8 +40,7 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
         if (!newHasBeenSet)
             RaiseAndSetIfChanged(ref hasBeenSet, newHasBeenSet, hasBeenSetName);
         RaiseAndSetIfChanged(ref item, newItem, name);
-        if (!newHasBeenSet)
-            return;
+        if (!newHasBeenSet) return;
 
         RaiseAndSetIfChanged(ref hasBeenSet, newHasBeenSet, hasBeenSetName);
     }
@@ -62,8 +61,7 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
             item = newItem;
             this.RaisePropertyChanged(name);
         }
-        if (hasBeen == newHasBeenSet)
-            return;
+        if (hasBeen == newHasBeenSet) return;
 
         this.RaisePropertyChanged(hasBeenSetName);
     }
@@ -73,8 +71,7 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
         bool newHasBeenSet,
         int index,
         string name) {
-        if (hasBeenSet[index] == newHasBeenSet)
-            return;
+        if (hasBeenSet[index] == newHasBeenSet) return;
 
         hasBeenSet[index] = newHasBeenSet;
         this.RaisePropertyChanged(name);
@@ -88,6 +85,8 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
     }
 
     protected virtual void Dispose(bool disposing) {
+        if (!disposing) return;
+
         ActivatedDisposable.Dispose();
         if (_compositeDisposable.IsValueCreated) {
             _compositeDisposable.Value.Dispose();

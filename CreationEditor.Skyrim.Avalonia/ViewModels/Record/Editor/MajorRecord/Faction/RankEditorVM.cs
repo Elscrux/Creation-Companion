@@ -30,7 +30,5 @@ public sealed class RankEditorVM : ViewModel {
         });
     }
 
-    public bool CanDrop(object? o) {
-        return o is Rank;
-    }
+    public static bool CanDrop(object? o) => o is Rank;
 }

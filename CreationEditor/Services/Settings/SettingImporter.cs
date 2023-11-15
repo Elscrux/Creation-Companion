@@ -4,9 +4,9 @@ using Serilog;
 namespace CreationEditor.Services.Settings;
 
 public sealed class SettingImporter<TSetting>(
-        ILogger logger,
-        IFileSystem fileSystem,
-        ISettingPathProvider settingPathProvider)
+    ILogger logger,
+    IFileSystem fileSystem,
+    ISettingPathProvider settingPathProvider)
     : ISettingImporter<TSetting> {
 
     public TSetting? Import(ISetting setting) {

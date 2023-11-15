@@ -12,7 +12,7 @@ using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
 public sealed class CompareFunctionFactory : ICompareFunctionFactory {
-    private readonly List<FunctionCategory> _compareFunctions = new();
+    private readonly List<FunctionCategory> _compareFunctions = [];
 
     private static bool CheckSubConditions(ConditionState conditionState, object? item) =>
         conditionState.SubConditions.EvaluateConditions(item);
@@ -233,5 +233,5 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         return priorityCategory?.CompareFunctions ?? Array.Empty<ICompareFunction>();
     }
 
-    private sealed record FunctionCategory(IEnumerable<ICompareFunction> CompareFunctions, Func<Type, bool> Accepts, int Priority) {}
+    private sealed record FunctionCategory(IEnumerable<ICompareFunction> CompareFunctions, Func<Type, bool> Accepts, int Priority);
 }

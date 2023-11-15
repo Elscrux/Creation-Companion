@@ -505,7 +505,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .Subscribe()
             .DisposeWith(ActivatedDisposable);
 
-        this.WhenAnyValue(x => x.FormKeyStr)
+        var formKeyStrChanged = this.WhenAnyValue(x => x.FormKeyStr);
+
+        formKeyStrChanged
             .Skip(1)
             .Select(x => x.Trim())
             .DistinctUntilChanged()
@@ -648,7 +650,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 .ObserveOn(RxApp.TaskpoolScheduler)
                 .Select(x => {
                     var enabledTypes = EnabledTypes(x.Types).ToArray();
-                    if (!enabledTypes.Any()) return Observable.Empty<IMajorRecordIdentifier>();
+                    if (enabledTypes is []) return Observable.Empty<IMajorRecordIdentifier>();
 
                     if (x.ScopedRecords is not null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
 
@@ -686,11 +688,11 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                 return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
                             case FormKeyPickerSearchMode.EditorID:
                                 return Observable.CombineLatest(
-                                        this.WhenAnyValue(x => x.LinkCache),
-                                        this.WhenAnyValue(x => x.EditorID),
-                                        this.WhenAnyValue(x => x.BlacklistFormKeys),
-                                        this.WhenAnyValue(x => x.Filter),
-                                        this.WhenAnyValue(x => x.NameSelector),
+                                        this.WhenAnyValue(p => p.LinkCache),
+                                        this.WhenAnyValue(p => p.EditorID),
+                                        this.WhenAnyValue(p => p.BlacklistFormKeys),
+                                        this.WhenAnyValue(p => p.Filter),
+                                        this.WhenAnyValue(p => p.NameSelector),
                                         (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
                                             => (LinkCache: linkCache,
                                                 EditorID: editorId,
@@ -711,12 +713,12 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                     });
                             case FormKeyPickerSearchMode.FormKey:
                                 var modKeyToId = x.Cache?.ListedOrder
-                                        .Select((mod, index) => (mod, index))
+                                        .Select((mod, index) => (Mod: mod, Index: (byte) index))
                                         .Take(ModIndex.MaxIndex)
-                                        .ToDictionary(x => x.mod.ModKey, x => (byte) x.index)
+                                        .ToDictionary(t => t.Mod.ModKey, t => t.Index)
                                  ?? default;
 
-                                return this.WhenAnyValue(x => x.FormKeyStr)
+                                return formKeyStrChanged
                                     .ThrottleMedium()
                                     .ObserveOn(RxApp.TaskpoolScheduler)
                                     .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
@@ -790,15 +792,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
     private static readonly ConcurrentDictionary<Type, IEnumerable<Type>> InterfaceCache = new();
 
-    protected IEnumerable<Type> GetMajorTypes(IEnumerable? types) {
-        IList<Type> GetGetterTypes(IEnumerable<Type> x) {
-            return x.Select(type => LoquiRegistration.TryGetRegister(type, out var registration) ? registration.GetterType : null)
-                .NotNull()
-                .Distinct()
-                .OrderBy(type => type.Name)
-                .ToList();
-        }
-
+    private static IEnumerable<Type> GetMajorTypes(IEnumerable? types) {
         if (types is not IEnumerable<Type> scopedTypes || !scopedTypes.Any()) {
             return GetGetterTypes(IMajorRecordGetter.StaticRegistration.GetterType.GetSubclassesOf());
         }
@@ -820,9 +814,17 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         return list
             .OrderBy(x => x.Name);
+
+        IList<Type> GetGetterTypes(IEnumerable<Type> x) {
+            return x.Select(type => LoquiRegistration.TryGetRegister(type, out var registration) ? registration.GetterType : null)
+                .NotNull()
+                .Distinct()
+                .OrderBy(type => type.Name)
+                .ToList();
+        }
     }
 
-    protected IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) {
+    protected static IEnumerable<Type> EnabledTypes(IEnumerable<TypeItem> types) {
         return types.Where(x => x.IsSelected).Select(x => x.Type);
     }
 
@@ -848,7 +850,6 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         textBox.RemoveHandler(PointerPressedEvent, PressHandler);
         textBox.AddDisposableHandler(PointerPressedEvent, PressHandler, handledEventsToo: true)
             .DisposeWith(TemplateDisposable);
-        void PressHandler(object? o, PointerPressedEventArgs pointerPressedEventArgs) => pressed.OnNext(Unit.Default);
 
         textBox.WhenAnyValue(x => x.IsFocused)
             .DistinctUntilChanged()
@@ -860,5 +861,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .Where(found => !found)
             .Subscribe(_ => SearchMode = searchMode)
             .DisposeWith(TemplateDisposable);
+
+        void PressHandler(object? o, PointerPressedEventArgs pointerPressedEventArgs) => pressed.OnNext(Unit.Default);
     }
 }

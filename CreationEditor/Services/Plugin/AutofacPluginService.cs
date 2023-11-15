@@ -7,17 +7,18 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDisposable
+public sealed class AutofacPluginService<TMod, TModGetter>(
+    IFileSystem fileSystem,
+    ILogger logger,
+    ILifetimeScope lifetimeScope)
+    : IPluginService, IDisposable
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     private const string PluginsFolderName = "Plugins";
 
-    private readonly IFileSystem _fileSystem;
-    private readonly ILogger _logger;
-    private readonly ILifetimeScope _lifetimeScope;
-    private readonly List<ILifetimeScope> _pluginScopes = new();
+    private readonly List<ILifetimeScope> _pluginScopes = [];
     private readonly PluginContext _pluginContext = new(new Version(1, 0));
-    private readonly List<IPlugin> _plugins = new();
+    private readonly List<IPlugin> _plugins = [];
 
     private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsLoaded = new();
     public IObservable<IReadOnlyList<IPluginDefinition>> PluginsLoaded => _pluginsLoaded;
@@ -25,30 +26,21 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
     private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsUnloaded = new();
     public IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnloaded => _pluginsUnloaded;
 
-    public AutofacPluginService(
-        IFileSystem fileSystem,
-        ILogger logger,
-        ILifetimeScope lifetimeScope) {
-        _fileSystem = fileSystem;
-        _logger = logger;
-        _lifetimeScope = lifetimeScope;
-    }
-
     public void ReloadPlugins() {
         // Get application directory
         var applicationDirectory = AppContext.BaseDirectory;
 
         // Get plugins folder
         var pluginsFolder = Path.Combine(applicationDirectory, PluginsFolderName);
-        if (!_fileSystem.Directory.Exists(pluginsFolder)) {
-            _logger.Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
+        if (!fileSystem.Directory.Exists(pluginsFolder)) {
+            logger.Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
             return;
         }
 
         // Get plugin paths
-        var pluginPaths = _fileSystem.Directory.GetFiles(pluginsFolder, "*.dll");
+        var pluginPaths = fileSystem.Directory.GetFiles(pluginsFolder, "*.dll");
         if (pluginPaths.Length == 0) {
-            _logger.Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
+            logger.Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
             return;
         }
 
@@ -59,7 +51,7 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
                 var plugins = assembly is null ? Array.Empty<IPlugin>() : CreatePlugins(assembly).ToArray();
 
                 if (plugins.Length == 0) {
-                    _logger.Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin));
+                    logger.Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin));
                 }
                 return plugins;
             })
@@ -76,7 +68,7 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
     }
 
     private IEnumerable<IPlugin> CreatePlugins(Assembly assembly) {
-        var pluginScope = _lifetimeScope.BeginLifetimeScope(c => {
+        var pluginScope = lifetimeScope.BeginLifetimeScope(c => {
             c.RegisterAssemblyModules(assembly);
             c.RegisterInstance(_pluginContext)
                 .AsSelf();
@@ -110,7 +102,7 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
     public void Dispose() {
         UnregisterPlugins();
 
-        _lifetimeScope.Dispose();
+        lifetimeScope.Dispose();
         foreach (var pluginScope in _pluginScopes) {
             pluginScope.Dispose();
         }

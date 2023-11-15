@@ -26,6 +26,8 @@ public abstract class ActivatableUserControl : UserControl, IActivatableView, ID
     }
 
     protected virtual void Dispose(bool disposing) {
+        if (!disposing) return;
+
         ActivatedDisposable.Dispose();
         _activationDisposable.Dispose();
     }

@@ -32,6 +32,8 @@ public class ActivatableTemplatedControl : TemplatedControl, IActivatableView, I
     }
 
     protected virtual void Dispose(bool disposing) {
+        if (!disposing) return;
+
         ActivatedDisposable.Dispose();
         TemplateDisposable.Dispose();
         _activationDisposable.Dispose();

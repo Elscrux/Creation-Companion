@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Skyrim.Assets;
 namespace CreationEditor.Skyrim.Avalonia.Services.Asset;
 
 public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
-    public IReadOnlyList<IAssetType> AllAssetTypes { get; } = new IAssetType[] {
+    public IReadOnlyList<IAssetType> AllAssetTypes { get; } = new[] {
         SkyrimTextureAssetType.Instance,
         SkyrimModelAssetType.Instance,
         SkyrimScriptSourceAssetType.Instance,

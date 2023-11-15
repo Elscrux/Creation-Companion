@@ -167,14 +167,14 @@ public sealed class EditableCondition : ReactiveObject {
         return condition;
     }
 
-    private static readonly List<string> BannedProperties = new() {
+    private static readonly List<string> BannedProperties = [
         "StaticRegistration",
         "RunOnType",
         "Reference",
         "Unknown3",
         "UseAliases",
-        "UsePackageData",
-    };
+        "UsePackageData"
+    ];
 
     public static IEnumerable<PropertyInfo> GetParameterProperties(ConditionData data) {
         return data

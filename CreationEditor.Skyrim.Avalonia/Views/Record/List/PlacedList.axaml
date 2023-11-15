@@ -8,10 +8,6 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.PlacedList"
              x:CompileBindings="True" x:DataType="list:PlacedListVM"
              x:Name="Control">
-    <Design.DataContext>
-        <list:PlacedListVM/>
-    </Design.DataContext>
-
     <Grid RowDefinitions="Auto,*">
         <record:RecordBrowserSettingsView
             Grid.Row="0"

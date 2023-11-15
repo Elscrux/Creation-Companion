@@ -3,7 +3,7 @@ using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Asset;
 
 public sealed class AssetSymbolService : IAssetSymbolService {
-    private readonly IDictionary<string, Symbol> _fileExtensionSymbols = new Dictionary<string, Symbol>();
+    private readonly Dictionary<string, Symbol> _fileExtensionSymbols = new();
 
     public AssetSymbolService
         (IAssetTypeProvider assetTypeProvider) {
@@ -29,8 +29,6 @@ public sealed class AssetSymbolService : IAssetSymbolService {
     }
 
     public Symbol GetSymbol(string fileExtension) {
-        return _fileExtensionSymbols.TryGetValue(fileExtension, out var symbol)
-            ? symbol
-            : Symbol.OpenFile;
+        return _fileExtensionSymbols.GetValueOrDefault(fileExtension, Symbol.OpenFile);
     }
 }

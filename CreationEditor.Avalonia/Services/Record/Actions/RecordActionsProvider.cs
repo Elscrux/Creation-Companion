@@ -28,7 +28,7 @@ public sealed class RecordActionsProvider<TRecord, TRecordGetter> : IRecordActio
         IRecordEditorController recordEditorController,
         MainWindow mainWindow) {
 
-        New = ReactiveCommand.Create<Type?>(type => {
+        New = ReactiveCommand.Create<Type?>(_ => {
             var newRecord = recordController.CreateRecord<TRecord, TRecordGetter>();
             recordEditorController.OpenEditor<TRecord, TRecordGetter>(newRecord);
         });

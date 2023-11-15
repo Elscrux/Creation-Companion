@@ -7,7 +7,7 @@ using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 
 public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeDataGrid> {
-    private readonly IDisposableDropoff _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     protected override void OnAttachedToVisualTree() {
         if (AssociatedObject is { RowSelection: {} selection }) {

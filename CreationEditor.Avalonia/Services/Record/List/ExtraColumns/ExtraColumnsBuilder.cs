@@ -5,7 +5,7 @@ using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraColumnsBuilder {
-    private readonly HashSet<ExtraColumn> _extraColumns = new();
+    private readonly HashSet<ExtraColumn> _extraColumns = [];
 
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
         _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())

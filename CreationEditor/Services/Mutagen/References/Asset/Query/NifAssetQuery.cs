@@ -4,26 +4,19 @@ using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class NifAssetQuery : IAssetReferenceCacheableQuery<string, string>, IAssetReferenceCacheableValidatableQuery<string, string> {
-    private readonly NifFileAssetParser _nifFileAssetParser;
-    private readonly FileSystemAssetQuery _fileSystemAssetQuery;
+public sealed class NifAssetQuery(
+    Func<IFileAssetParser, FileSystemAssetQuery> fileSystemAssetQuery,
+    NifFileAssetParser nifFileAssetParser,
+    IAssetReferenceSerialization<string, string> serialization) : IAssetReferenceCacheableQuery<string, string>, IAssetReferenceCacheableValidatableQuery<string, string> {
+    private readonly FileSystemAssetQuery _fileSystemAssetQuery = fileSystemAssetQuery(nifFileAssetParser);
 
     public Version CacheVersion => _fileSystemAssetQuery.CacheVersion;
-    public IAssetReferenceSerialization<string, string> Serialization { get; }
+    public IAssetReferenceSerialization<string, string> Serialization { get; } = serialization;
     public IInternalCacheValidation<string, string> CacheValidation => _fileSystemAssetQuery.CacheValidation;
     public string QueryName => _fileSystemAssetQuery.QueryName;
     public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches => _fileSystemAssetQuery.AssetCaches;
 
-    public NifAssetQuery(
-        Func<IFileAssetParser, FileSystemAssetQuery> fileSystemAssetQuery,
-        NifFileAssetParser nifFileAssetParser,
-        IAssetReferenceSerialization<string, string> serialization) {
-        _nifFileAssetParser = nifFileAssetParser;
-        Serialization = serialization;
-        _fileSystemAssetQuery = fileSystemAssetQuery(nifFileAssetParser);
-    }
-
-    public IEnumerable<AssetQueryResult<string>> ParseFile(string source) => _nifFileAssetParser.ParseFile(source);
+    public IEnumerable<AssetQueryResult<string>> ParseFile(string source) => nifFileAssetParser.ParseFile(source);
     public IEnumerable<AssetQueryResult<string>> ParseAssets(string source) => _fileSystemAssetQuery.ParseAssets(source);
     public bool IsCacheUpToDate(BinaryReader reader, string source) => _fileSystemAssetQuery.IsCacheUpToDate(reader, source);
     public string ReadContextString(BinaryReader reader) => _fileSystemAssetQuery.ReadContextString(reader);

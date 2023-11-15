@@ -29,7 +29,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
     private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
 
     public IList<SelectableSearcher> Searchers { get; }
-    public ObservableCollectionExtended<TextReference> References { get; } = new();
+    public ObservableCollectionExtended<TextReference> References { get; } = [];
 
     public GroupCollection<TextReference> GroupCollection { get; }
     public Group<TextReference> TypeGroup { get; }
@@ -241,11 +241,11 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
         });
     }
 
-    private async Task ReplaceRecordReferences(TextReference textReference) {
+    private Task ReplaceRecordReferences(TextReference textReference) {
         var diff = textReference.Diff;
-        if (diff.Old == diff.New) return;
+        if (diff.Old == diff.New) return Task.CompletedTask;
 
-        await Task.Run(() =>
+        return Task.Run(() =>
             textReference.TextSearcher.ReplaceTextReference(
                 textReference.Record,
                 _editorEnvironment.LinkCache,

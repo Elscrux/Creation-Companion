@@ -23,7 +23,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
     public ModPickerVM ModPickerVM { get; }
-    public ObservableCollection<RecordReplacement> Records { get; } = new();
+    public ObservableCollection<RecordReplacement> Records { get; } = [];
 
     [Reactive] public bool IsBusy { get; set; }
     public ModKey ActiveModKey { get; set; } = ModKey.Null;
@@ -49,7 +49,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
                 if (mods.Count == 0) return;
 
                 ActiveModKey = mods.First().ModKey;
-                ListEx.AddRange(Records, Process(ActiveModKey));
+                Records.Add(Process(ActiveModKey));
             });
 
         Run = ReactiveCommand.CreateRunInBackground(() => {
@@ -59,17 +59,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         });
     }
 
-    private IEnumerable<RecordReplacement> Process(ModKey testingModKey) {
-        IEnumerable<IMajorRecordGetter> GetRecords(IEnumerable<IModGetter> mods) {
-            var modList = mods.ToList();
-
-            return modList.WinningOverrides<IActivatorGetter>().Cast<IMajorRecordGetter>()
-                .Concat(modList.WinningOverrides<IContainerGetter>())
-                .Concat(modList.WinningOverrides<IStaticGetter>())
-                .Concat(modList.WinningOverrides<IFloraGetter>())
-                .Concat(modList.WinningOverrides<ITreeGetter>());
-        }
-
+    private List<RecordReplacement> Process(ModKey testingModKey) {
         // Collect records from mods that may be replaced
         var recordEqualsMasks = new HashSet<RecordEqualsMask>();
         var testingMod = _editorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == testingModKey);
@@ -96,6 +86,16 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         }
 
         return mappedRecords;
+
+        IEnumerable<IMajorRecordGetter> GetRecords(IEnumerable<IModGetter> mods) {
+            var modList = mods.ToList();
+
+            return modList.WinningOverrides<IActivatorGetter>().Cast<IMajorRecordGetter>()
+                .Concat(modList.WinningOverrides<IContainerGetter>())
+                .Concat(modList.WinningOverrides<IStaticGetter>())
+                .Concat(modList.WinningOverrides<IFloraGetter>())
+                .Concat(modList.WinningOverrides<ITreeGetter>());
+        }
     }
 
     private void Save(ModKey modKey) {

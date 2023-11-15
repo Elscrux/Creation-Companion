@@ -195,7 +195,7 @@ public sealed class ModSelectionVM : ViewModel {
         var missingMods = new Queue<ModKey>(SelectedMods);
         var modKeys = _modInfos.Select(x => x.ModKey).ToHashSet();
 
-        while (missingMods.Any()) {
+        while (missingMods.Count != 0) {
             var modKey = missingMods.Dequeue();
             loadedMods.Add(modKey);
 

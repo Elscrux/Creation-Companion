@@ -9,28 +9,18 @@ using Mutagen.Bethesda.Plugins.Assets;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 
-public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAssetReferenceSerialization<TSource, TReference>
+public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
+    Func<string[], ICacheLocationProvider> assetReferenceLocationProviderFactory,
+    IAssetTypeService assetTypeService,
+    INotificationService notificationService,
+    ILogger logger,
+    IFileSystem fileSystem)
+    : IAssetReferenceSerialization<TSource, TReference>
     where TSource : notnull
     where TReference : notnull {
-    private readonly IAssetTypeService _assetTypeService;
-    private readonly INotificationService _notificationService;
-    private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly ICacheLocationProvider _cacheLocationProvider;
-    private readonly Version _version = new(2, 0);
 
-    public BinaryAssetReferenceSerialization(
-        Func<string[], ICacheLocationProvider> assetReferenceLocationProviderFactory,
-        IAssetTypeService assetTypeService,
-        INotificationService notificationService,
-        ILogger logger,
-        IFileSystem fileSystem) {
-        _assetTypeService = assetTypeService;
-        _notificationService = notificationService;
-        _logger = logger;
-        _fileSystem = fileSystem;
-        _cacheLocationProvider = assetReferenceLocationProviderFactory(new[] { "References", "Assets" });
-    }
+    private readonly ICacheLocationProvider _cacheLocationProvider = assetReferenceLocationProviderFactory(new[] { "References", "Assets" });
+    private readonly Version _version = new(2, 0);
 
     private string GetCacheFile(TSource source, IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery) {
         return _cacheLocationProvider.CacheFile(cacheableQuery.QueryName, cacheableQuery.GetName(source));
@@ -40,11 +30,11 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
         var cacheFile = GetCacheFile(source, cacheableQuery);
 
         // Check if cache exist
-        if (!_fileSystem.File.Exists(cacheFile)) return false;
+        if (!fileSystem.File.Exists(cacheFile)) return false;
 
         try {
             // Open cache reader
-            using var fileStream = _fileSystem.File.OpenRead(cacheFile);
+            using var fileStream = fileSystem.File.OpenRead(cacheFile);
             using var zip = new GZipInputStream(fileStream);
             using var reader = new BinaryReader(zip);
 
@@ -58,7 +48,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
 
             return cacheableQuery.IsCacheUpToDate(reader, source);
         } catch (Exception e) {
-            _logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
             return false;
         }
     }
@@ -68,7 +58,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
 
         // Read cache file
         var cache = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
-        using var fileStream = _fileSystem.File.OpenRead(cacheFile);
+        using var fileStream = fileSystem.File.OpenRead(cacheFile);
         using var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
             try {
@@ -84,12 +74,12 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
 
                 // Build cache
                 var count = reader.ReadInt32();
-                using var counter = new CountingNotifier(_notificationService, "Reading Cache", count);
+                using var counter = new CountingNotifier(notificationService, "Reading Cache", count);
                 for (var i = 0; i < count; i++) {
                     counter.NextStep();
 
                     var assetTypeString = reader.ReadString();
-                    var assetType = _assetTypeService.GetAssetTypeFromIdentifier(assetTypeString);
+                    var assetType = assetTypeService.GetAssetTypeFromIdentifier(assetTypeString);
 
                     // Parse assets
                     var assets = new Dictionary<IAssetLinkGetter, HashSet<TReference>>(AssetLinkEqualityComparer.Instance);
@@ -97,18 +87,20 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
                     for (var j = 0; j < assetCount; j++) {
                         // Parse asset link
                         var assetPath = reader.ReadString();
-                        var assetLink = _assetTypeService.GetAssetLink(assetPath, assetType);
+                        var assetLink = assetTypeService.GetAssetLink(assetPath, assetType);
 
                         var assetUsageCount = reader.ReadInt32();
-                        var usages = cacheableQuery.ReadUsages(reader, contextString, assetUsageCount);
+                        var usages = cacheableQuery
+                            .ReadUsages(reader, contextString, assetUsageCount)
+                            .ToHashSet();
 
-                        assets.Add(assetLink, new HashSet<TReference>(usages));
+                        assets.Add(assetLink, usages);
                     }
 
                     cache.Add(assetType, assets);
                 }
             } catch (Exception e) {
-                _logger.Here().Warning("Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
+                logger.Here().Warning("Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
             }
         }
 
@@ -118,11 +110,11 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
     public void Serialize(TSource source, IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery, AssetReferenceCache<TSource, TReference> cache) {
         // Prepare file structure
         var cacheFile = GetCacheFile(source, cacheableQuery);
-        var info = _fileSystem.FileInfo.New(cacheFile);
+        var info = fileSystem.FileInfo.New(cacheFile);
         info.Directory?.Create();
 
         // Prepare file stream
-        using var fileStream = _fileSystem.File.OpenWrite(info.FullName);
+        using var fileStream = fileSystem.File.OpenWrite(info.FullName);
         using var zip = new GZipOutputStream(fileStream);
         using var writer = new BinaryWriter(zip);
 
@@ -140,11 +132,11 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference> : IAs
 
         // Write cache
         writer.Write(cache.Cache.Count);
-        using var countingNotifier = new CountingNotifier(_notificationService, "Saving Cache", cache.Cache.Count);
+        using var countingNotifier = new CountingNotifier(notificationService, "Saving Cache", cache.Cache.Count);
         foreach (var (assetType, assets) in cache.Cache) {
             countingNotifier.NextStep();
 
-            writer.Write(_assetTypeService.GetAssetTypeIdentifier(assetType));
+            writer.Write(assetTypeService.GetAssetTypeIdentifier(assetType));
             writer.Write(assets.Count);
             foreach (var (name, usages) in assets) {
                 writer.Write(name.DataRelativePath);

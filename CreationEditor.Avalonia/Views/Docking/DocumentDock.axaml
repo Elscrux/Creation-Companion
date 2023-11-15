@@ -12,10 +12,6 @@
              Classes="AccentSelected BorderedDock"
              Background="{DynamicResource SystemControlTransparentBrush}"
              x:CompileBindings="True" x:DataType="vm:DocumentDockVM">
-    <Design.DataContext>
-        <vm:DocumentDockVM/>
-    </Design.DataContext>
-
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>

@@ -63,12 +63,12 @@ public partial class QuestAliasPicker : ActivatableUserControl {
                 x => x.Quest,
                 (index, quest) => (Index: index, Quest: quest))
             .Subscribe(x => {
-                if (x.Quest is null) {
-                    SelectedAlias = null;
-                } else {
-                    var alias = x.Quest.Aliases.FirstOrDefault(alias => alias.ID == x.Index);
-                    SelectedAlias = alias ?? x.Quest.Aliases.FirstOrDefault();
-                }
+                var (index, quest) = x;
+                SelectedAlias = quest?.Aliases switch {
+                    null => null,
+                    [] => null,
+                    _ => quest.Aliases.FirstOrDefault(alias => alias.ID == index) ?? quest.Aliases[0]
+                };
             })
             .DisposeWith(ActivatedDisposable);
 

@@ -12,7 +12,7 @@ using Noggog;
 namespace CreationEditor.Avalonia.Models.Reference;
 
 public sealed class AssetReference : IReference, IDisposable {
-    private readonly IDisposableBucket _disposables = new DisposableBucket();
+    private readonly DisposableBucket _disposables = new();
 
     public IAssetLink Asset { get; }
 
@@ -28,13 +28,6 @@ public sealed class AssetReference : IReference, IDisposable {
     private ReadOnlyObservableCollection<IReference>? _children;
     public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
     private ReadOnlyObservableCollection<IReference> LoadChildren() {
-        RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
-        AssetReference? GetAssetReference(string path) {
-            var assetLink = _assetTypeService.GetAssetLink(path);
-            if (assetLink is null) return null;
-
-            return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
-        }
 
         var references = ReferencedAsset.NifReferences
             .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
@@ -106,6 +99,14 @@ public sealed class AssetReference : IReference, IDisposable {
             });
 
         return new ReadOnlyObservableCollection<IReference>(collection);
+
+        RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
+        AssetReference? GetAssetReference(string path) {
+            var assetLink = _assetTypeService.GetAssetLink(path);
+            if (assetLink is null) return null;
+
+            return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
+        }
     }
 
     private IReferencedAsset? _referencedAsset;

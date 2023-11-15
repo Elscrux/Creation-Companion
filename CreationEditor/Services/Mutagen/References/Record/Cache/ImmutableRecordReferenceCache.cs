@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
 public sealed class ImmutableRecordReferenceCache : IRecordReferenceCache {
-    private readonly IReadOnlyDictionary<ModKey, ModReferenceCache> _modCaches;
+    private readonly Dictionary<ModKey, ModReferenceCache> _modCaches;
 
     internal ImmutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery) {
         _modCaches = new Dictionary<ModKey, ModReferenceCache>(recordReferenceQuery.ModCaches);

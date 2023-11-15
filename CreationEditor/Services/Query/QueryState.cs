@@ -13,10 +13,10 @@ public interface IQueryState {
 }
 
 public sealed class JsonQueryState(
-        IContractResolver contractResolver,
-        ILogger logger,
-        IFileSystem fileSystem,
-        IStatePathProvider statePathProvider)
+    IContractResolver contractResolver,
+    ILogger logger,
+    IFileSystem fileSystem,
+    IStatePathProvider statePathProvider)
     : IQueryState {
 
     private readonly JsonSerializerSettings _serializerSettings = new() {
@@ -25,7 +25,7 @@ public sealed class JsonQueryState(
         ContractResolver = contractResolver
     };
 
-    private string GetFileName(IQueryRunner queryRunner) => "Query-" + queryRunner.Id + ".json";
+    private static string GetFileName(IQueryRunner queryRunner) => "Query-" + queryRunner.Id + ".json";
     private IFileInfo GetFilePath(IQueryRunner queryRunner) => fileSystem.FileInfo.New(statePathProvider.GetFullPath(GetFileName(queryRunner)));
 
     public IEnumerable<IQueryRunner> LoadAllQueries() {

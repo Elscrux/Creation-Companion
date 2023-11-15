@@ -4,8 +4,8 @@ using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class NifModificationService(
-        IFileSystem fileSystem,
-        ILogger logger)
+    IFileSystem fileSystem,
+    ILogger logger)
     : IModelModificationService {
 
     public void RemapLinks(string file, Func<string, bool> shouldReplace, string newLink) {

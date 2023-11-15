@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.IO.Abstractions;
-using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
@@ -14,7 +13,7 @@ using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IFormLinkGetter>, IDisposable {
-    private readonly IDisposableDropoff _disposableDropoff = new DisposableBucket();
+    private readonly DisposableBucket _disposableDropoff = new();
 
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
@@ -23,7 +22,6 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
     public Version CacheVersion { get; } = new(1, 0);
     public IAssetReferenceSerialization<IModGetter, IFormLinkGetter> Serialization { get; }
-    public IInternalCacheValidation<IModGetter, IFormLinkGetter>? CacheValidation => null;
     public string QueryName => "Mod";
     public IDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>> AssetCaches { get; }
         = new ConcurrentDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>>();

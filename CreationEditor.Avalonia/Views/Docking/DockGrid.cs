@@ -12,8 +12,8 @@ public sealed class DockGrid : Grid {
     public DockGrid(IDockObject dataContext) {
         DataContext = dataContext;
         Name = nameof(DockGrid);
-        RowDefinitions = new RowDefinitions { new(GridLength.Star) { MinHeight = MinLayoutSize } };
-        ColumnDefinitions = new ColumnDefinitions { new(GridLength.Star) { MinWidth = MinLayoutSize } };
+        RowDefinitions = [new RowDefinition(GridLength.Star) { MinHeight = MinLayoutSize }];
+        ColumnDefinitions = [new ColumnDefinition(GridLength.Star) { MinWidth = MinLayoutSize }];
     }
 
     protected override Size ArrangeOverride(Size arrangeSize) {

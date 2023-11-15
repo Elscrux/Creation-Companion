@@ -17,15 +17,15 @@ using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Avalonia.Services;
 
 public sealed class DockFactory(
-        Func<ILogVM> logVMFactory,
-        Func<IRecordBrowserVM> recordBrowserVMFactory,
-        Func<string, IAssetBrowserVM> assetBrowserVMFactory,
-        Func<IScriptVM> scriptVMFactory,
-        IDataDirectoryProvider dataDirectoryProvider,
-        IFileSystem fileSystem,
-        IViewportFactory viewportFactory,
-        IDockingManagerService dockingManagerService,
-        ICellBrowserFactory cellBrowserFactory)
+    Func<ILogVM> logVMFactory,
+    Func<IRecordBrowserVM> recordBrowserVMFactory,
+    Func<string, IAssetBrowserVM> assetBrowserVMFactory,
+    Func<IScriptVM> scriptVMFactory,
+    IDataDirectoryProvider dataDirectoryProvider,
+    IFileSystem fileSystem,
+    IViewportFactory viewportFactory,
+    IDockingManagerService dockingManagerService,
+    ICellBrowserFactory cellBrowserFactory)
     : IDockFactory {
     private bool _viewportCreated;
 

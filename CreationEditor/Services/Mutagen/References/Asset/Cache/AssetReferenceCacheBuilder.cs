@@ -7,13 +7,7 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Cache;
 
-public sealed class AssetReferenceCacheBuilder {
-    private readonly ILogger _logger;
-
-    public AssetReferenceCacheBuilder(ILogger logger) {
-        _logger = logger;
-    }
-
+public sealed class AssetReferenceCacheBuilder(ILogger logger) {
     /// <summary>
     /// Builds an asset reference cache for the given asset query and source.
     /// </summary>
@@ -28,7 +22,7 @@ public sealed class AssetReferenceCacheBuilder {
         if (query.AssetCaches.TryGetValue(source, out var refCache)) return refCache;
 
         var sourceName = query.GetName(source);
-        _logger.Here().Debug("Starting to load {QueryName} Asset References of {Source}", query.QueryName, sourceName);
+        logger.Here().Debug("Starting to load {QueryName} Asset References of {Source}", query.QueryName, sourceName);
 
         AssetReferenceCache<TSource, TReference> cache;
         if (query is IAssetReferenceCacheableQuery<TSource, TReference> cacheable) {
@@ -41,7 +35,7 @@ public sealed class AssetReferenceCacheBuilder {
             cache = new AssetReferenceCache<TSource, TReference>(source, parseDictionary);
         }
 
-        _logger.Here().Debug("Finished loading {QueryName} Asset References of {Source}", query.QueryName, sourceName);
+        logger.Here().Debug("Finished loading {QueryName} Asset References of {Source}", query.QueryName, sourceName);
 
         query.AssetCaches.Add(source, cache);
         return cache;
@@ -79,14 +73,14 @@ public sealed class AssetReferenceCacheBuilder {
             return cache;
         }
 
-        async Task<AssetReferenceCache<TSource, TReference>> ParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
+        Task<AssetReferenceCache<TSource, TReference>> ParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
             if (assetReferenceCacheableQuery is not IAssetReferenceCacheableValidatableQuery<TSource, TReference> { CacheValidation: {} cacheValidation }) {
                 // No internal cache validation, just deserialize
-                return await Task.Run(() => assetReferenceCacheableQuery.Serialization.Deserialize(source, assetReferenceCacheableQuery));
+                return Task.Run(() => assetReferenceCacheableQuery.Serialization.Deserialize(source, assetReferenceCacheableQuery));
             }
 
             // Validate cache and parse invalidated sources
-            return await ParseValidatableCache(assetReferenceCacheableQuery, cacheValidation);
+            return ParseValidatableCache(assetReferenceCacheableQuery, cacheValidation);
         }
 
         async Task<AssetReferenceCache<TSource, TReference>> ParseValidatableCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery, IInternalCacheValidation<TSource, TReference> cacheValidation) {

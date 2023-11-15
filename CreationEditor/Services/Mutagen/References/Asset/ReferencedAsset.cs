@@ -20,15 +20,15 @@ public sealed class ReferencedAsset : IReferencedAsset {
         AssetLink = assetLink;
 
         RecordReferences = recordReferences is null
-            ? new ObservableCollectionExtended<IFormLinkGetter>()
+            ? []
             : new ObservableCollectionExtended<IFormLinkGetter>(recordReferences);
 
         NifDirectoryReferences = nifDirectoryReferences is null
-            ? new ObservableCollectionExtended<string>()
+            ? []
             : new ObservableCollectionExtended<string>(nifDirectoryReferences);
 
         NifArchiveReferences = nifArchiveReferences is null
-            ? new ObservableCollectionExtended<string>()
+            ? []
             : new ObservableCollectionExtended<string>(nifArchiveReferences);
 
         ReferenceCount = new[] {

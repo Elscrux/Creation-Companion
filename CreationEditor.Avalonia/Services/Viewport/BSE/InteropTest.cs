@@ -22,7 +22,7 @@ public sealed class InteropTest {
                     Version = 1,
                     AssetDirectory = "test",
                     SizeOfWindowHandles = 0,
-                    WindowHandles = new IntPtr[] {},
+                    WindowHandles = Array.Empty<nint>(),
                 },
                 Array.Empty<string>(),
                 0);

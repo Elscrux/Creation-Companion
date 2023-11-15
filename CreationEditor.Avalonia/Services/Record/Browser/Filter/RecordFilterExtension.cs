@@ -42,7 +42,7 @@ public static class RecordFilterExtension {
 
         // Sort all record filters
         var queue = new Queue<RecordFilterListing>(root.RecordFilters);
-        while (queue.Any()) {
+        while (queue.Count != 0) {
             var listing = queue.Dequeue();
             queue.Enqueue(listing.RecordFilters);
 

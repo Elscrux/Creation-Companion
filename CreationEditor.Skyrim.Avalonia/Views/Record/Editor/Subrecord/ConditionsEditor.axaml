@@ -56,7 +56,7 @@
                 <MenuItem Header="Copy All"
                           InputGesture="Ctrl+Shift+C"
                           Command="{Binding #Editor.CopyAll}"
-                          CommandParameter="{Binding #ConditionsGrid.Items}">
+                          CommandParameter="{Binding #ConditionsGrid.ItemsSource}">
                     <MenuItem.Icon>
                         <controls:SymbolIcon Symbol="CopyFilled"/>
                     </MenuItem.Icon>

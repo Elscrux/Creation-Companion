@@ -52,7 +52,7 @@ public sealed class ReferenceRemapperVM : ViewModel {
         });
     }
 
-    private IReferencedRecord? ParseContext(object? context) {
+    private static IReferencedRecord? ParseContext(object? context) {
         return context switch {
             IReferencedRecord referencedRecord => referencedRecord,
             IEnumerable enumerable => enumerable.OfType<IReferencedRecord>().FirstOrDefault(),

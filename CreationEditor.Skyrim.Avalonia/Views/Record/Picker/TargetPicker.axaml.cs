@@ -104,7 +104,7 @@ public partial class TargetPicker : ActivatableUserControl {
         InitializeComponent();
     }
 
-    private string GetEditorOrNone<T>(ILinkCache linkCache, FormKey formKey) where T : class, IMajorRecordQueryableGetter, IMajorRecordIdentifier {
+    private static string GetEditorOrNone<T>(ILinkCache linkCache, FormKey formKey) where T : class, IMajorRecordQueryableGetter, IMajorRecordIdentifier {
         return linkCache.TryResolve<T>(formKey, out var record)
             ? record.EditorID ?? "No EditorID"
             : "None";

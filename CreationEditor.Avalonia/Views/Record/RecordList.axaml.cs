@@ -21,12 +21,8 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         InitializeComponent();
 
         this.WhenActivated(x => {
-            this.WhenAnyValue(list => list.ViewModel)
-                .Subscribe(vm => {
-                    vm.WhenAnyValue(vm => vm.RecordProvider.SelectedRecord)
-                        .Subscribe(ScrollToItem)
-                        .DisposeWith(x);
-                })
+            this.WhenAnyValue(list => list.ViewModel!.RecordProvider.SelectedRecord)
+                .Subscribe(ScrollToItem)
                 .DisposeWith(x);
         });
     }
