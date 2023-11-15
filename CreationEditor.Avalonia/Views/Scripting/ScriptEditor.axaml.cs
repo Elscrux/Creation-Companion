@@ -37,7 +37,7 @@ public partial class ScriptEditor : ActivatableUserControl {
 
         // Configure caret
         Editor.TextArea.RightClickMovesCaret = true;
-        this.WhenActivated(d => { 
+        this.WhenActivated(d => {
             Editor.TextArea.Caret.PositionChanged += UpdateCaretPosition;
             d.Add(Disposable.Create(() => Editor.TextArea.Caret.PositionChanged -= UpdateCaretPosition));
         });

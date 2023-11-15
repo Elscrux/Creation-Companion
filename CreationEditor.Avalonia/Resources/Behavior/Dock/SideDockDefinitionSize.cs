@@ -52,7 +52,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
                 x => x.InEditMode,
                 x => x.ActiveTab,
                 x => x.Tabs.Count,
-            (inEditMode, activeTab, tabCount) => (InEditMode: inEditMode, ActiveTab: activeTab, TabCount: tabCount))
+                (inEditMode, activeTab, tabCount) => (InEditMode: inEditMode, ActiveTab: activeTab, TabCount: tabCount))
             .Subscribe(x => {
                 if (x is { InEditMode: true, ActiveTab: not null }) return;
 

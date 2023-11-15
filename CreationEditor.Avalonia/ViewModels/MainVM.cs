@@ -36,7 +36,7 @@ public sealed class MainVM : ViewModel {
     public IDockingManagerService DockingManagerService { get; }
     public IPluginService? PluginService { get; }
     public IObservableCollection<IMenuPluginDefinition> MenuBarPlugins { get; } = new ObservableCollectionExtended<IMenuPluginDefinition>();
-    public IObservableCollection<string> Actions { get; } = new ObservableCollectionExtended<string>() {
+    public IObservableCollection<string> Actions { get; } = new ObservableCollectionExtended<string> {
         "Save",
         "Save As",
         "Save All",

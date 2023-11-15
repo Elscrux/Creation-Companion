@@ -34,23 +34,23 @@ public sealed class DataDirectoryService : IDataDirectoryService {
 
         Created = watcher.Events().Created
             .Where(e =>
-                !string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
-             && !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath));
+                (!string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
+                 && !_fileSystem.Path.HasExtension(e.FullPath)) || IsFileRelevant(e.FullPath));
 
         Deleted = watcher.Events().Deleted
             .Where(e =>
-                !string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
-             && !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath));
+                (!string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
+                 && !_fileSystem.Path.HasExtension(e.FullPath)) || IsFileRelevant(e.FullPath));
 
         Changed = watcher.Events().Changed
             .Where(e =>
-                !string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
-             && !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath));
+                (!string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
+                 && !_fileSystem.Path.HasExtension(e.FullPath)) || IsFileRelevant(e.FullPath));
 
         Renamed = watcher.Events().Renamed
             .Where(e =>
-                !string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
-             && !_fileSystem.Path.HasExtension(e.FullPath) || IsFileRelevant(e.FullPath));
+                (!string.Equals(e.FullPath, deleteDirectoryProvider1.DeleteDirectory, AssetCompare.PathComparison)
+                 && !_fileSystem.Path.HasExtension(e.FullPath)) || IsFileRelevant(e.FullPath));
     }
 
     private bool IsFileRelevant(string file) {

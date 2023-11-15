@@ -28,7 +28,7 @@ public sealed class LoggingModule : Module {
 #else
                     LogEventLevel.Information
 #endif
-                    )
+                )
                 .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
                 .WriteTo.File(context.Resolve<ILogPathProvider>().RelativeLogFilePath("log.txt"), LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
                 .CreateLogger())
