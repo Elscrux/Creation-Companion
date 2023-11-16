@@ -4,22 +4,23 @@ using System.Linq;
 using System.Numerics;
 using System.Reactive.Subjects;
 using CreationEditor.Avalonia.Services.Viewport;
-using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using ProjectBSE.Interop;
 using Serilog;
+using static ProjectBSE.Interop.Interop;
+using Quadrant = Mutagen.Bethesda.Plugins.Records.Quadrant;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 
 public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private sealed record WorldspaceRuntimeSettings(FormKey Worldspace, P2Int Origin, Dictionary<P2Int, ExteriorCellRuntimeSettings> LoadedCells);
-    private sealed record InteriorCellRuntimeSettings(List<Interop.ReferenceLoad> References);
-    private sealed record ExteriorCellRuntimeSettings(List<Interop.ReferenceLoad> References, Vector2 LocalOffset);
+    private sealed record InteriorCellRuntimeSettings(List<ReferenceLoad> References);
+    private sealed record ExteriorCellRuntimeSettings(List<ReferenceLoad> References, Vector2 LocalOffset);
 
-    private Interop.SelectCallback? _selectCallback;
+    private SelectCallback? _selectCallback;
     private readonly DisposableBucket _disposableDropoff = new();
     private readonly ILogger _logger;
     private readonly ILinkCacheProvider _linkCacheProvider;
@@ -66,7 +67,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             _selectedReferences.OnNext(convertedFormKeys);
         };
 
-        Interop.addSelectCallback(_selectCallback);
+        AddSelectCallback(_selectCallback);
     }
 
     public void LoadInteriorCell(ICellGetter cell) {
@@ -118,7 +119,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     private void UnloadEverything() {
         if (_worldspaceRuntimeSettings is not null) {
-            var referenceLists = new List<List<Interop.ReferenceLoad>>();
+            var referenceLists = new List<List<ReferenceLoad>>();
 
             foreach (var (_, cell) in _worldspaceRuntimeSettings.LoadedCells) {
                 referenceLists.Add(cell.References);
@@ -130,7 +131,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     .Select(x => x.FormKey)
                     .ToArray();
 
-                Interop.deleteReferences(Convert.ToUInt32(unloadReferences.Length), unloadReferences);
+                DeleteReferences(Convert.ToUInt32(unloadReferences.Length), unloadReferences);
             }
 
             _worldspaceRuntimeSettings = null;
@@ -142,11 +143,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     }
 
     private void UnloadCell(ExteriorCellRuntimeSettings cell) {
-        Interop.deleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
+        DeleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
     }
 
     private void UnloadCell(InteriorCellRuntimeSettings cell) {
-        Interop.deleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
+        DeleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
     }
 
     private void LoadLandscape(ILandscapeGetter landscape, P2Int originToLoad) {
@@ -190,7 +191,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             counter++;
         }
 
-        var cornerSets = new Interop.CornerSets();
+        var cornerSets = new CornerSets();
         var unmanagedMemory = new DisposableBucket();
 
         foreach (var grouping in landscape.Layers.GroupBy(x => x.Header?.Quadrant)) {
@@ -228,16 +229,15 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         alphaLayers[alphaLayerCounter] = new Interop.AlphaLayer();
                     } else {
                         var alphaData = alphaLayerRecord.AlphaLayerData
-                            .Select(x => new Interop.AlphaData {
+                            .Select(x => new AlphaData {
                                 Opacity = x.Opacity,
                                 Position = x.Position
                             })
-                            .ToList();
+                            .ToArray();
 
-                        unmanagedMemory.Add(alphaData.ToUnmanagedMemory(out var pointer));
                         var alphaLayer = new Interop.AlphaLayer {
-                            Data = pointer,
-                            DataLength = (ushort) alphaData.Count
+                            Data = alphaData,
+                            DataLength = (ushort) alphaData.Length
                         };
                         if (textureSetRecord is not null) {
                             alphaLayer.TextureSet = GetTextureSet(textureSetRecord);
@@ -256,12 +256,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                 }
             }
 
-            unmanagedMemory.Add(alphaLayers.ToUnmanagedMemory(out var alphaLayersPointer));
-            quadrant.AlphaLayers = alphaLayersPointer;
+            quadrant.AlphaLayers = alphaLayers;
             quadrant.AlphaLayersLength = alphaLayersCount;
         }
 
-        var landscapeInfo = new Interop.TerrainInfo {
+        var landscapeInfo = new TerrainInfo {
             X = originToLoad.X,
             Y = originToLoad.Y,
             PointSize = cellPointSize,
@@ -272,7 +271,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
         };
 
         // todo: pass multiple terrains, WARNING normal begin and color begin will be dynamic in that case!
-        Interop.loadTerrain(1, new[] { landscapeInfo }, floatBuffer);
+        LoadTerrain(1, new[] { landscapeInfo }, floatBuffer);
 
         unmanagedMemory.Dispose();
     }
@@ -290,9 +289,9 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
         };
     }
 
-    private List<Interop.ReferenceLoad> LoadCellReferences(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
+    private List<ReferenceLoad> LoadCellReferences(IEnumerable<IPlacedGetter> placedRecords, P2Int gridPoint) {
         var origin = new P3Float(gridPoint.X, gridPoint.Y, 0);
-        var refs = new List<Interop.ReferenceLoad>();
+        var refs = new List<ReferenceLoad>();
 
         foreach (var placed in placedRecords) {
             switch (placed) {
@@ -329,10 +328,10 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
                     var scale = placedObject.Scale ?? 1;
 
-                    refs.Add(new Interop.ReferenceLoad {
+                    refs.Add(new ReferenceLoad {
                         FormKey = placedObject.FormKey.ToString(),
                         Path = model.ToLower(),
-                        Transform = new Interop.ReferenceTransform {
+                        Transform = new ReferenceTransform {
                             Translation = relativePosition,
                             Scale = new P3Float(scale, scale, scale),
                             Rotations = placement.Rotation
@@ -344,7 +343,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             }
         }
 
-        Interop.loadReferences(Convert.ToUInt32(refs.Count), refs.ToArray());
+        LoadReferences(Convert.ToUInt32(refs.Count), refs.ToArray());
 
         return refs;
     }
