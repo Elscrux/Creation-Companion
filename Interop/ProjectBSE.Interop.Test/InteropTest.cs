@@ -1,8 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Noggog;
-using Xunit;
-using static CreationEditor.Avalonia.Services.Viewport.BSE.Interop;
-namespace CreationEditor.Avalonia.Services.Viewport.BSE;
+using static ProjectBSE.Interop.Interop;
+namespace ProjectBSE.Interop.Test;
 
 //Must be run in debug mode to include dll
 public sealed class InteropTest {
@@ -27,19 +26,19 @@ public sealed class InteropTest {
     }
 
     private static void TestInit() {
-        var task = Xunit.Record.ExceptionAsync(() => Task.Run(() => {
-            var initTgEditor = initTGEditor(InitConfig, Array.Empty<string>(), 0);
+        var task = Record.ExceptionAsync(() => Task.Run(() => {
+            var initTgEditor = InitTGEditor(InitConfig, Array.Empty<string>(), 0);
             // Assert.NotEqual(-1, initTgEditor);
         }));
 
-        waitFinishedInit();
+        WaitFinishedInit();
 
         Assert.Null(task.Exception);
     }
 
     [Fact]
     public void TestSize() {
-        var sizeInformation = getSizeInfo();
+        var sizeInformation = GetSizeInfo();
 
         Assert.Equal(sizeInformation.SizeInformationStruct, Marshal.SizeOf<SizeInformation>());
         Assert.Equal(sizeInformation.InitConfigStruct, Marshal.SizeOf<InitConfig>());
@@ -59,15 +58,15 @@ public sealed class InteropTest {
         var referenceLoads = new[] { TestReference };
         var count = Convert.ToUInt32(referenceLoads.Length);
 
-        Assert.True(addLoadCallback((callbackCount, callbackLoads) => {
+        Assert.True(AddLoadCallback((callbackCount, callbackLoads) => {
             Assert.Equal(count, callbackCount);
             for (var i = 0; i < callbackLoads.Length; i++) {
                 Assert.Equal(callbackLoads[i].FormKey, referenceLoads[i].FormKey);
             }
         }));
 
-        waitFinishedInit();
+        WaitFinishedInit();
 
-        loadReferences(count, referenceLoads);
+        LoadReferences(count, referenceLoads);
     }
 }

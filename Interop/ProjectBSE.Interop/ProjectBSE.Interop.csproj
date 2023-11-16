@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <DisableRuntimeMarshalling>True</DisableRuntimeMarshalling>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+</Project>
