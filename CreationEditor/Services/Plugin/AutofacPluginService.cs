@@ -33,14 +33,14 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
         // Get plugins folder
         var pluginsFolder = Path.Combine(applicationDirectory, PluginsFolderName);
         if (!fileSystem.Directory.Exists(pluginsFolder)) {
-            logger.Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
+            logger.Here().Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
             return;
         }
 
         // Get plugin paths
         var pluginPaths = fileSystem.Directory.GetFiles(pluginsFolder, "*.dll");
         if (pluginPaths.Length == 0) {
-            logger.Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
+            logger.Here().Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
             return;
         }
 
@@ -51,7 +51,7 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
                 var plugins = assembly is null ? Array.Empty<IPlugin>() : CreatePlugins(assembly).ToArray();
 
                 if (plugins.Length == 0) {
-                    logger.Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin));
+                    logger.Here().Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin));
                 }
                 return plugins;
             })

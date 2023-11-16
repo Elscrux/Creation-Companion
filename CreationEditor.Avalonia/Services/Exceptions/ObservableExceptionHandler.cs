@@ -8,7 +8,7 @@ public sealed class ObservableExceptionHandler(ILogger logger) : IObserver<Excep
     public void OnNext(Exception value) {
         if (Debugger.IsAttached) Debugger.Break();
 
-        logger.Error("Error occured: {Message}", value.ToString());
+        logger.Here().Error("Error occured: {Message}", value.ToString());
 
         // RxApp.MainThreadScheduler.Schedule(() => { throw value; });
     }

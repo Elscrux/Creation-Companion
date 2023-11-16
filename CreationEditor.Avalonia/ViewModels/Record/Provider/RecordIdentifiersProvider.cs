@@ -58,7 +58,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
                             updater.AddOrUpdate(referencedRecord);
                         } else {
-                            logger.Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
+                            logger.Here().Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
                         }
                     }
                 });

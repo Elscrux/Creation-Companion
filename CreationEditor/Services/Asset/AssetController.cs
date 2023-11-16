@@ -164,7 +164,7 @@ public sealed class AssetController : IAssetController {
                 _fileSystem.Directory.Move(path, destination);
             }
         } catch (Exception e) {
-            _logger.Warning("Couldn't move {File} to {Dir}: {Exception}", path, destination, e.Message);
+            _logger.Here().Warning("Couldn't move {File} to {Dir}: {Exception}", path, destination, e.Message);
             return false;
         }
 
