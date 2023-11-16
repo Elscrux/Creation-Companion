@@ -6,7 +6,6 @@
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
-             xmlns:avalonia="clr-namespace:CreationEditor.Avalonia"
              mc:Ignorable="d"
              x:CompileBindings="True" x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
@@ -24,7 +23,7 @@
                   attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DoubleTappedProperty.Command="{Binding RecordProvider.RecordContextMenuProvider.PrimaryCommand}"
-                  attached:DoubleTappedProperty.CommandParameter="{Binding RecordProvider.SelectedRecord, Converter={x:Static avalonia:ReferencedRecordConverter.ToRecord}}"
+                  attached:DoubleTappedProperty.CommandParameter="{Binding RecordProvider.SelectedRecord, Converter={x:Static converter:ReferencedRecordConverter.ToRecord}}"
                   IsReadOnly="True">
             <DataGrid.KeyBindings>
                 <KeyBinding Gesture="Delete"
