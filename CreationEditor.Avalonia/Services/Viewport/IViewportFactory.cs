@@ -12,7 +12,7 @@ public interface IViewportFactory {
     /// Create a viewport
     /// </summary>
     /// <returns>Created viewport</returns>
-    Control CreateViewport();
+    Task<Func<Control>> CreateViewport();
 
     /// <summary>
     /// Emits an event when a viewport is fully initialized
