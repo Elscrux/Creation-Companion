@@ -1,20 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Windows.Interop;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
-using CreationEditor.Avalonia.Services.Viewport;
 namespace CreationEditor.Avalonia.Views.Viewport;
 
-public class ViewportHost : NativeControlHost {
-    private readonly Process _process;
+public sealed class ProcessHost(Process process, string descriptor) : NativeControlHost {
     private Window? _rootWindow;
 
     private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
-
-    public ViewportHost(Process process) {
-        _process = process;
-    }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
         if (e.Root is not Window window) return;
@@ -24,17 +19,25 @@ public class ViewportHost : NativeControlHost {
         var handle = _rootWindow.TryGetPlatformHandle();
         if (handle is null) return;
 
-        WinHelper.SetParent(_process.MainWindowHandle, handle.Handle);
+        if (OperatingSystem.IsWindows()) {
+            WinHelper.SetParent(process.MainWindowHandle, handle.Handle);
 
-        long style = WinHelper.GetWindowLongPtr(_process.MainWindowHandle, WinHelper.StyleIndex);
-        style &= (long) ~WinHelper.WinStyle.ResizeBar;
-        style &= (long) ~WinHelper.WinStyle.Caption;
+            long style = WinHelper.GetWindowLongPtr(process.MainWindowHandle, WinHelper.StyleIndex);
+            style &= (long) ~WinHelper.WinStyle.ResizeBar;
+            style &= (long) ~WinHelper.WinStyle.Caption;
 
-        WinHelper.SetWindowLongPtr(_process.MainWindowHandle, WinHelper.StyleIndex, (nint) style);
+            WinHelper.SetWindowLongPtr(process.MainWindowHandle, WinHelper.StyleIndex, (nint) style);
+        }
 
         DestroyNativeControl.Invoke(this, null);
 
         base.OnAttachedToVisualTree(e);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnDetachedFromVisualTree(e);
+
+        _rootWindow = null;
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent) {
@@ -43,7 +46,7 @@ public class ViewportHost : NativeControlHost {
             case PlatformID.Win32Windows:
             case PlatformID.Win32NT:
             case PlatformID.WinCE:
-                return new PlatformHandle(_process.MainWindowHandle, "Viewport");
+                return new PlatformHandle(process.MainWindowHandle, descriptor);
             case PlatformID.Unix:
                 break;
             case PlatformID.Xbox:
