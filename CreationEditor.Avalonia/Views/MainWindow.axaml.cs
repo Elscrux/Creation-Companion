@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.Interactivity;
 using CreationEditor.Avalonia.ViewModels;
 using FluentAvalonia.UI.Windowing;
 using ReactiveUI;
@@ -27,13 +26,6 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
 
         this.GetObservable(DataContextProperty).Subscribe(OnDataContextUpdated);
         this.GetObservable(ViewModelProperty).Subscribe(OnViewModelUpdated);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e) {
-        base.OnLoaded(e);
-
-        // Show mod selection on startup
-        ViewModel?.ShowModSelection(false);
     }
 
     private void OnDataContextUpdated(object? value) => ViewModel = value as MainVM;

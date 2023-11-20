@@ -13,7 +13,6 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views;
-using CreationEditor.Avalonia.Views.Mod;
 using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
@@ -25,11 +24,11 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {
-    private readonly ModSelectionVM _modSelectionVM;
     private const string BaseWindowTitle = "Creation Companion";
 
     public INotificationVM NotificationVM { get; }
     public IBusyService BusyService { get; }
+    public ModSelectionVM ModSelectionVM { get; }
 
     public IObservable<string> WindowTitleObs { get; }
 
@@ -62,7 +61,6 @@ public sealed class MainVM : ViewModel {
         "Create Record in New Window",
     };
 
-    public ReactiveCommand<Unit, Unit> OpenSelectMods { get; }
     public ReactiveCommand<IMenuPluginDefinition, Unit> OpenPlugin { get; }
     public ReactiveCommand<Unit, Unit> OpenSettings { get; }
 
@@ -86,9 +84,9 @@ public sealed class MainVM : ViewModel {
         IModSaveService modSaveService,
         IApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
-        _modSelectionVM = modSelectionVM;
         NotificationVM = notificationVM;
         BusyService = busyService;
+        ModSelectionVM = modSelectionVM;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
         mainWindow.SplashScreen = splashScreen;
@@ -98,8 +96,6 @@ public sealed class MainVM : ViewModel {
                 MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>());
             })
             .DisposeWith(this);
-
-        OpenSelectMods = ReactiveCommand.Create(() => ShowModSelection());
 
         OpenPlugin = ReactiveCommand.Create<IMenuPluginDefinition>(plugin => {
             DockingManagerService.AddControl(
@@ -145,9 +141,5 @@ public sealed class MainVM : ViewModel {
         WindowTitleObs = editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
-    }
-
-    public void ShowModSelection(bool allowLoading = true) {
-        ModSelectionView.ShowAsContentDialog(_modSelectionVM, allowLoading);
     }
 }

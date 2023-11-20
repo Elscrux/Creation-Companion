@@ -10,192 +10,217 @@
     xmlns:notification="clr-namespace:CreationEditor.Services.Notification;assembly=CreationEditor"
     xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
     xmlns:plugin="clr-namespace:CreationEditor.Avalonia.Services.Plugin"
+    xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod"
+    xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     Title="{Binding WindowTitleObs^}"
     MinHeight="480" MinWidth="720"
     x:CompileBindings="True" x:DataType="viewModels:MainVM"
     x:Name="Window">
-    <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Panel DockPanel.Dock="Top"
-               VerticalAlignment="Top">
-            <Menu Margin="0,0,150,0">
-                <Menu.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <DockPanel HorizontalAlignment="Stretch"/>
-                    </ItemsPanelTemplate>
-                </Menu.ItemsPanel>
+    <Grid>
+        <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                   IsHitTestVisible="{Binding !#ModSelectionPopup.IsVisible}">
+            <DockPanel.Resources>
+                <converter:ReturnParameterIfTrueConverter
+                    x:Key="IfTrueConverter"
+                    x:TypeArguments="system:Double"
+                    DefaultValue="5"/>
+            </DockPanel.Resources>
 
-                <MenuItem Header="File">
-                    <MenuItem Header="Mods"
-                              HotKey="Ctrl+Alt+M"
-                              InputGesture="Ctrl+Alt+M"
-                              Command="{Binding OpenSelectMods}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Library"/>
-                        </MenuItem.Icon>
+            <DockPanel.Effect>
+                <BlurEffect
+                    Radius="{Binding !#ModSelectionPopup.IsVisible,
+                     Converter={StaticResource IfTrueConverter},
+                     ConverterParameter=0}"/>
+            </DockPanel.Effect>
+
+            <Panel DockPanel.Dock="Top"
+                   VerticalAlignment="Top">
+                <Menu Margin="0,0,150,0">
+                    <Menu.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <DockPanel HorizontalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </Menu.ItemsPanel>
+
+                    <MenuItem Header="File">
+                        <MenuItem Header="Mods"
+                                  HotKey="Ctrl+Alt+M"
+                                  InputGesture="Ctrl+Alt+M"
+                                  Command="{Binding #ModSelectionPopup.Show}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Library"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Open"
+                                  Command="{Binding #ModSelectionPopup.Show}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Open"/>
+                            </MenuItem.Icon>
+
+                            <MenuItem Header="Game Folder"
+                                      Command="{Binding OpenGameFolder}">
+                                <MenuItem.Icon>
+                                    <controls:SymbolIcon Symbol="Message"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+
+                            <MenuItem Header="Data Folder"
+                                      Command="{Binding OpenDataFolder}">
+                                <MenuItem.Icon>
+                                    <controls:SymbolIcon Symbol="Message"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+
+                        <MenuItem Header="Settings"
+                                  HotKey="Ctrl+Alt+S"
+                                  InputGesture="Ctrl+Alt+S"
+                                  Command="{Binding OpenSettings}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Settings"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Save"
+                                  HotKey="Ctrl+S"
+                                  InputGesture="Ctrl+S"
+                                  Command="{Binding Save}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Save"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </MenuItem>
 
-                    <MenuItem Header="Open"
-                              Command="{Binding OpenSelectMods}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Open"/>
-                        </MenuItem.Icon>
-
-                        <MenuItem Header="Game Folder"
-                                  Command="{Binding OpenGameFolder}">
+                    <MenuItem Header="View">
+                        <MenuItem Header="Log"
+                                  HotKey="Ctrl+Alt+L"
+                                  InputGesture="Ctrl+Alt+L"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.Log}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Message"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Data Folder"
-                                  Command="{Binding OpenDataFolder}">
+                        <MenuItem Header="Record Browser"
+                                  HotKey="Ctrl+Alt+R"
+                                  InputGesture="Ctrl+Alt+R"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Message"/>
+                                <controls:SymbolIcon Symbol="BulletList"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Cell Browser"
+                                  HotKey="Ctrl+Alt+C"
+                                  InputGesture="Ctrl+Alt+C"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.CellBrowser}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Image"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Asset Browser"
+                                  HotKey="Ctrl+Alt+A"
+                                  InputGesture="Ctrl+Alt+A"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.AssetBrowser}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Folder"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Script Editor"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.ScriptEditor}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Code"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
+                        <MenuItem Header="Viewport"
+                                  Command="{Binding OpenDockElement}"
+                                  CommandParameter="{x:Static models:DockElement.Viewport}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Pictures"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuItem>
 
-                    <MenuItem Header="Settings"
-                              HotKey="Ctrl+Alt+S"
-                              InputGesture="Ctrl+Alt+S"
-                              Command="{Binding OpenSettings}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Settings"/>
-                        </MenuItem.Icon>
+                    <MenuItem Header="Plugins"
+                              IsVisible="{Binding MenuBarPlugins.Count}"
+                              ItemsSource="{Binding MenuBarPlugins}">
+                        <MenuItem.Styles>
+                            <Style Selector="MenuItem" x:DataType="plugin:IMenuPluginDefinition">
+                                <Setter Property="Header"
+                                        Value="{Binding Name}"/>
+                                <Setter Property="HotKey"
+                                        Value="{Binding KeyGesture}"/>
+                                <Setter Property="InputGesture"
+                                        Value="{Binding KeyGesture}"/>
+                                <Setter Property="Icon"
+                                        Value="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"/>
+                                <Setter Property="Command"
+                                        Value="{Binding #Window.ViewModel.OpenPlugin}"/>
+                                <Setter Property="CommandParameter"
+                                        Value="{Binding }"/>
+                            </Style>
+                        </MenuItem.Styles>
                     </MenuItem>
 
-                    <MenuItem Header="Save"
-                              HotKey="Ctrl+S"
-                              InputGesture="Ctrl+S"
-                              Command="{Binding Save}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Save"/>
-                        </MenuItem.Icon>
+                    <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
+                              HorizontalAlignment="Right"
+                              ItemsSource="{Binding NotificationVM.LoadingItems}">
+                        <MenuItem.Header>
+                            <notificationView:NotificationView
+                                DataContext="{Binding NotificationVM.LatestNotification^}"/>
+                        </MenuItem.Header>
+
+                        <MenuItem.DataTemplates>
+                            <DataTemplate DataType="notification:NotificationItem">
+                                <notificationView:NotificationView DataContext="{Binding}"/>
+                            </DataTemplate>
+                        </MenuItem.DataTemplates>
                     </MenuItem>
-                </MenuItem>
+                </Menu>
 
-                <MenuItem Header="View">
-                    <MenuItem Header="Log"
-                              HotKey="Ctrl+Alt+L"
-                              InputGesture="Ctrl+Alt+L"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.Log}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Message"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
+                <Border HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <AutoCompleteBox Padding="6"
+                                     MinWidth="250"
+                                     MaxWidth="500"
+                                     Watermark="Search"
+                                     Classes="SampleApp"
+                                     ItemsSource="{Binding Actions}">
+                        <!-- ValueMemberBinding="{Binding Header, DataType=vm:MainAppSearchItem}" -->
+                        <!--wnd:AppWindow.AllowInteractionInTitleBar="True"-->
+                        <!-- <AutoCompleteBox.ItemTemplate> -->
+                        <!--     <DataTemplate x:DataType="vm:MainAppSearchItem"> -->
+                        <!--         <Panel> -->
+                        <!--             <StackPanel HorizontalAlignment="Left" -->
+                        <!--                         VerticalAlignment="Center"> -->
+                        <!--                 <TextBlock Text="{Binding Header}" /> -->
+                        <!--                 <TextBlock Text="{Binding Namespace}" -->
+                        <!--                            Theme="{StaticResource CaptionTextBlockStyle}" -->
+                        <!--                            Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" -->
+                        <!--                            FontStyle="Italic"/> -->
+                        <!--             </StackPanel> -->
+                        <!--         </Panel> -->
+                        <!--     </DataTemplate> -->
+                        <!-- </AutoCompleteBox.ItemTemplate> -->
+                    </AutoCompleteBox>
+                </Border>
+            </Panel>
 
-                    <MenuItem Header="Record Browser"
-                              HotKey="Ctrl+Alt+R"
-                              InputGesture="Ctrl+Alt+R"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.RecordBrowser}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="BulletList"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
+            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+        </DockPanel>
 
-                    <MenuItem Header="Cell Browser"
-                              HotKey="Ctrl+Alt+C"
-                              InputGesture="Ctrl+Alt+C"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.CellBrowser}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Image"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-
-                    <MenuItem Header="Asset Browser"
-                              HotKey="Ctrl+Alt+A"
-                              InputGesture="Ctrl+Alt+A"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.AssetBrowser}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Folder"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-
-                    <MenuItem Header="Script Editor"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.ScriptEditor}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Code"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-
-                    <MenuItem Header="Viewport"
-                              Command="{Binding OpenDockElement}"
-                              CommandParameter="{x:Static models:DockElement.Viewport}">
-                        <MenuItem.Icon>
-                            <controls:SymbolIcon Symbol="Pictures"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </MenuItem>
-
-                <MenuItem Header="Plugins"
-                          IsVisible="{Binding MenuBarPlugins.Count}"
-                          ItemsSource="{Binding MenuBarPlugins}">
-                    <MenuItem.Styles>
-                        <Style Selector="MenuItem" x:DataType="plugin:IMenuPluginDefinition">
-                            <Setter Property="Header"
-                                    Value="{Binding Name}"/>
-                            <Setter Property="HotKey"
-                                    Value="{Binding KeyGesture}"/>
-                            <Setter Property="InputGesture"
-                                    Value="{Binding KeyGesture}"/>
-                            <Setter Property="Icon"
-                                    Value="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"/>
-                            <Setter Property="Command"
-                                    Value="{Binding #Window.ViewModel.OpenPlugin}"/>
-                            <Setter Property="CommandParameter"
-                                    Value="{Binding }"/>
-                        </Style>
-                    </MenuItem.Styles>
-                </MenuItem>
-
-                <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
-                          HorizontalAlignment="Right"
-                          ItemsSource="{Binding NotificationVM.LoadingItems}">
-                    <MenuItem.Header>
-                        <notificationView:NotificationView DataContext="{Binding NotificationVM.LatestNotification^}"/>
-                    </MenuItem.Header>
-
-                    <MenuItem.DataTemplates>
-                        <DataTemplate DataType="notification:NotificationItem">
-                            <notificationView:NotificationView DataContext="{Binding}"/>
-                        </DataTemplate>
-                    </MenuItem.DataTemplates>
-                </MenuItem>
-            </Menu>
-
-            <Border HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                <AutoCompleteBox Padding="6"
-                                 MinWidth="250"
-                                 MaxWidth="500"
-                                 Watermark="Search"
-                                 Classes="SampleApp"
-                                 ItemsSource="{Binding Actions}">
-                    <!-- ValueMemberBinding="{Binding Header, DataType=vm:MainAppSearchItem}" -->
-                    <!--wnd:AppWindow.AllowInteractionInTitleBar="True"-->
-                    <!-- <AutoCompleteBox.ItemTemplate> -->
-                    <!--     <DataTemplate x:DataType="vm:MainAppSearchItem"> -->
-                    <!--         <Panel> -->
-                    <!--             <StackPanel HorizontalAlignment="Left" -->
-                    <!--                         VerticalAlignment="Center"> -->
-                    <!--                 <TextBlock Text="{Binding Header}" /> -->
-                    <!--                 <TextBlock Text="{Binding Namespace}" -->
-                    <!--                            Theme="{StaticResource CaptionTextBlockStyle}" -->
-                    <!--                            Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" -->
-                    <!--                            FontStyle="Italic"/> -->
-                    <!--             </StackPanel> -->
-                    <!--         </Panel> -->
-                    <!--     </DataTemplate> -->
-                    <!-- </AutoCompleteBox.ItemTemplate> -->
-                </AutoCompleteBox>
-            </Border>
-        </Panel>
-
-        <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
-    </DockPanel>
+        <mod:ModSelectionPopup
+            x:Name="ModSelectionPopup"
+            DataContext="{Binding ModSelectionVM}"/>
+    </Grid>
 </windowing:AppWindow>
