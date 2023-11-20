@@ -43,8 +43,8 @@
                         </ItemsPanelTemplate>
                     </Menu.ItemsPanel>
 
-                    <MenuItem Header="File">
-                        <MenuItem Header="Mods"
+                    <MenuItem Header="_File">
+                        <MenuItem Header="_Mods"
                                   HotKey="Ctrl+Alt+M"
                                   InputGesture="Ctrl+Alt+M"
                                   Command="{Binding #ModSelectionPopup.Show}">
@@ -53,20 +53,20 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Open"
+                        <MenuItem Header="_Open"
                                   Command="{Binding #ModSelectionPopup.Show}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Open"/>
                             </MenuItem.Icon>
 
-                            <MenuItem Header="Game Folder"
+                            <MenuItem Header="_Game Folder"
                                       Command="{Binding OpenGameFolder}">
                                 <MenuItem.Icon>
                                     <controls:SymbolIcon Symbol="Message"/>
                                 </MenuItem.Icon>
                             </MenuItem>
 
-                            <MenuItem Header="Data Folder"
+                            <MenuItem Header="_Data Folder"
                                       Command="{Binding OpenDataFolder}">
                                 <MenuItem.Icon>
                                     <controls:SymbolIcon Symbol="Message"/>
@@ -93,7 +93,7 @@
                         </MenuItem>
                     </MenuItem>
 
-                    <MenuItem Header="View">
+                    <MenuItem Header="_View">
                         <MenuItem Header="Log"
                                   HotKey="Ctrl+Alt+L"
                                   InputGesture="Ctrl+Alt+L"
@@ -114,7 +114,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Cell Browser"
+                        <MenuItem Header="_Cell Browser"
                                   HotKey="Ctrl+Alt+C"
                                   InputGesture="Ctrl+Alt+C"
                                   Command="{Binding OpenDockElement}"
@@ -124,7 +124,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Asset Browser"
+                        <MenuItem Header="_Asset Browser"
                                   HotKey="Ctrl+Alt+A"
                                   InputGesture="Ctrl+Alt+A"
                                   Command="{Binding OpenDockElement}"
@@ -134,7 +134,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Script Editor"
+                        <MenuItem Header="_Script Editor"
                                   Command="{Binding OpenDockElement}"
                                   CommandParameter="{x:Static models:DockElement.ScriptEditor}">
                             <MenuItem.Icon>
@@ -142,7 +142,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="Viewport"
+                        <MenuItem Header="_Viewport"
                                   Command="{Binding OpenDockElement}"
                                   CommandParameter="{x:Static models:DockElement.Viewport}">
                             <MenuItem.Icon>
@@ -151,7 +151,7 @@
                         </MenuItem>
                     </MenuItem>
 
-                    <MenuItem Header="Plugins"
+                    <MenuItem Header="_Plugins"
                               IsVisible="{Binding MenuBarPlugins.Count}"
                               ItemsSource="{Binding MenuBarPlugins}">
                         <MenuItem.Styles>
