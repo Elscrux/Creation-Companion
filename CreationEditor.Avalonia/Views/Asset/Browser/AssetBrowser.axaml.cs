@@ -21,9 +21,22 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     public AssetBrowser(IAssetBrowserVM assetBrowserVM) : this() {
         ViewModel = assetBrowserVM;
         this.WhenActivated(d => {
-            AssetTree.ContextRequested += ViewModel.ContextMenu;
-            d.Add(Disposable.Create(() => AssetTree.ContextRequested -= ViewModel.ContextMenu));
+            AssetTree.ContextRequested += ContextRequestHandler;
+            d.Add(Disposable.Create(() => AssetTree.ContextRequested -= ContextRequestHandler));
+
         });
+    }
+
+    private void ContextRequestHandler(object? sender, ContextRequestedEventArgs e) {
+        if (e.Source is not Control { DataContext: AssetTreeItem asset } control) return;
+
+        var contextFlyout = new MenuFlyout {
+            ItemsSource = ViewModel?.GetContextMenuItems(asset)
+        };
+
+        contextFlyout.ShowAt(control, true);
+
+        e.Handled = true;
     }
 
     private void AssetTree_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
@@ -57,7 +70,10 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         // Never allow the tree to drop things, changes are handled by file system watchers
         e.Inner.DragEffects = DragDropEffects.None;
 
-        ViewModel?.Drop(e);
+        if (e.TargetRow.Model is not AssetTreeItem { Asset: AssetDirectory directory }) return;
+        if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
+
+        ViewModel?.Drop(directory, dragInfo);
     }
 
     private void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {

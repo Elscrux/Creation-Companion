@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
 using CreationEditor.Avalonia.Models.Asset;
 using CreationEditor.Services.Asset;
 using Noggog;
@@ -27,6 +28,6 @@ public interface IAssetBrowserVM : IDisposableDropoff {
 
     HierarchicalTreeDataGridSource<AssetTreeItem> AssetTreeSource { get; }
 
-    Task Drop(TreeDataGridRowDragEventArgs dragArgs);
-    void ContextMenu(object? sender, ContextRequestedEventArgs e);
+    Task Drop(AssetDirectory directory, DragInfo dragInfo);
+    IEnumerable<Control> GetContextMenuItems(AssetTreeItem asset);
 }

@@ -400,10 +400,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return _referenceBrowserVMFactory(assets.Length == 1 ? assets[0] : assets, references);
     }
 
-    public async Task Drop(TreeDataGridRowDragEventArgs dragArgs) {
-        if (dragArgs.TargetRow.Model is not AssetTreeItem { Asset: AssetDirectory directory }) return;
-        if (dragArgs.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
-
+    public async Task Drop(AssetDirectory directory, DragInfo dragInfo) {
         var draggedAssets = dragInfo.Indexes
             .Select(indexPath => {
                 var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
@@ -476,37 +473,33 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    public void ContextMenu(object? sender, ContextRequestedEventArgs e) {
-        if (e.Source is not Control { DataContext: AssetTreeItem asset } control) return;
-
-        var contextFlyout = new MenuFlyout {
-            Items = {
-                _menuItemProvider.File(Open, AssetTreeSource.RowSelection!.SelectedItems),
-                _menuItemProvider.Rename(Rename, asset),
-                _menuItemProvider.Delete(Delete, AssetTreeSource.RowSelection!.SelectedItems),
-                new Separator(),
-                new MenuItem {
-                    Icon = new SymbolIcon { Symbol = Symbol.Copy },
-                    Header = "Copy Path",
-                    Command = CopyPath,
-                    CommandParameter = asset
-                }
+    public IEnumerable<Control> GetContextMenuItems(AssetTreeItem asset) {
+        List<Control> items = [
+            _menuItemProvider.File(Open, AssetTreeSource.RowSelection!.SelectedItems),
+            _menuItemProvider.Rename(Rename, asset),
+            _menuItemProvider.Delete(Delete, AssetTreeSource.RowSelection!.SelectedItems),
+            new Separator(),
+            new MenuItem {
+                Icon = new SymbolIcon { Symbol = Symbol.Copy },
+                Header = "Copy Path",
+                Command = CopyPath,
+                CommandParameter = asset
             }
-        };
+        ];
 
         if (asset.GetReferencedAssets().Any()) {
-            contextFlyout.Items.Add(_menuItemProvider.References(OpenReferences, asset));
+            items.Add(_menuItemProvider.References(OpenReferences, asset));
         }
 
         if (asset.Asset is AssetDirectory dir) {
-            contextFlyout.Items.Add(new Separator());
-            contextFlyout.Items.Add(new MenuItem {
+            items.Add(new Separator());
+            items.Add(new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Open },
                 Header = "Open in new Asset Browser",
                 Command = OpenAssetBrowser,
                 CommandParameter = dir
             });
-            contextFlyout.Items.Add(new MenuItem {
+            items.Add(new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.NewFolder },
                 Header = "Add Folder",
                 Command = AddFolder,
@@ -514,9 +507,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             });
         }
 
-        contextFlyout.ShowAt(control, true);
-
-        e.Handled = true;
+        return items;
     }
 
     private TaskDialog CreateAssetDialog(string header, object? content = null) {
