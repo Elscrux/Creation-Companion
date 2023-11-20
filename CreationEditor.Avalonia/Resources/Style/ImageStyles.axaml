@@ -5,7 +5,7 @@
                 Background="Black">
             <Image Height="350"
                    Width="350"
-                   Source="/Assets/Logo.ico"
+                   Source="avares://Creation Companion/Assets/Skyrim.ico"
                    Classes="Turning"/>
         </Border>
     </Design.PreviewWith>

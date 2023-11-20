@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
@@ -12,6 +13,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
+using CreationEditor.Skyrim.Avalonia.Services.Avalonia;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
@@ -57,6 +59,10 @@ public sealed class SkyrimModule : Module {
             .SingleInstance();
 
         // Provider
+        builder.RegisterType<SkyrimApplicationIconProvider>()
+            .As<IApplicationIconProvider>()
+            .SingleInstance();
+
         builder.RegisterType<SkyrimModInfoProvider>()
             .As<IModInfoProvider<IModGetter>>()
             .As<IModInfoProvider<ISkyrimModGetter>>();

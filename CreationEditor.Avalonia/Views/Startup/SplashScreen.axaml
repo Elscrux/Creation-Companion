@@ -10,7 +10,7 @@
     <Panel VerticalAlignment="Stretch">
         <Image Height="350"
                Width="350"
-               Source="/Assets/Logo.ico"
+               Source="{Binding AppIcon}"
                Classes="Spinning"/>
 
         <!-- <StackPanel VerticalAlignment="Bottom"> -->
