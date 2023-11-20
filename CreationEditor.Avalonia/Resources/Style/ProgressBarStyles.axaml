@@ -2,13 +2,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
         <Border Padding="20">
-            <ProgressBar Value="2"
+            <ProgressBar Classes="Animated"
+                         Value="2"
                          Height="10"
                          Maximum="10"/>
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="ProgressBar">
+    <Style Selector="ProgressBar.Animated">
         <Setter Property="Transitions">
             <Transitions>
                 <DoubleTransition Property="Value" Duration="0:0:0.5"/>
