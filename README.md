@@ -1,4 +1,4 @@
-# Creation Companion
+# <img src="CreationEditor.Skyrim.Avalonia/Assets/Skyrim-Basic.ico" align="center" width="100" height="100">reation Companion
 
 [![.NET](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Elscrux/Creation-Editor/actions/workflows/dotnet.yml)
 
@@ -39,3 +39,5 @@ Create custom scripts that can be recompiled at runtime to perform actions in ba
 
 ### Plugins
 There should be support for custom 3rd party extensions or integrations that people can install.
+
+![](CreationEditor.Skyrim.Avalonia/Assets/Skyrim.ico)
