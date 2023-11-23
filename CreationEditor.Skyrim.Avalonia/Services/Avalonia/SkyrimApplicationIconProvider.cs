@@ -8,7 +8,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Avalonia;
 public sealed class SkyrimApplicationIconProvider : IApplicationIconProvider {
     private const string BasePath = "avares://Creation Companion";
     private const string Path = "Assets/Skyrim.ico";
-    private const string SpinningPath = "Assets/Skyrim-Spinning.ico";
+    private const string SpinningPath = "Assets/Skyrim-Basic.ico";
 
     public IImage Icon { get; } = LoadImage(Path);
     public IImage SpinningIcon { get; } = LoadImage(SpinningPath);
