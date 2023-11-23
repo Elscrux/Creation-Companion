@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive;
-using System.Threading;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Record.Actions;
@@ -26,12 +25,10 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
         ICellLoadStrategy cellLoadStrategy) {
         _cellActionsProvider = cellActionsProvider;
 
-        View = ReactiveCommand.Create<object?>(obj => {
+        View = ReactiveCommand.CreateFromTask<object?>(async obj => {
             if (obj is not ICellGetter cell) return;
 
-            dockFactory.Open(DockElement.Viewport);
-
-            Thread.Sleep(250); // todo remove and replace with callback
+            await dockFactory.Open(DockElement.Viewport);
 
             cellLoadStrategy.LoadCell(cell);
         });

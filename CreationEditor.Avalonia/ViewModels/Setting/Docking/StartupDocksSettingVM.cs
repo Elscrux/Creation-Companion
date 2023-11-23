@@ -46,7 +46,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     }
 
     private void Start(StartupDock startupDock) {
-        _dockFactory.Open(startupDock.DockElement, startupDock.DockMode, startupDock.Dock);
+        _dockFactory.OpenFireAndForget(startupDock.DockElement, startupDock.DockMode, startupDock.Dock);
     }
 
     public void PreStartup() {}

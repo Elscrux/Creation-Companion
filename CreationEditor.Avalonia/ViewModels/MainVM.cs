@@ -136,7 +136,7 @@ public sealed class MainVM : ViewModel {
             return Task.Run(() => modSaveService.SaveMod(editorEnvironment.ActiveMod));
         });
 
-        OpenDockElement = ReactiveCommand.Create<DockElement>(element => dockFactory.Open(element));
+        OpenDockElement = ReactiveCommand.CreateFromTask<DockElement>(element => dockFactory.Open(element));
 
         WindowTitleObs = editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")

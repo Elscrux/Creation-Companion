@@ -35,7 +35,7 @@ public sealed class DockFactory(
     : IDockFactory {
     private bool _viewportCreated;
 
-    public void Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+    public void OpenFireAndForget(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
         Task.Run(async () => {
                 var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
                 if (dockResult.HasValue) {
@@ -45,6 +45,17 @@ public sealed class DockFactory(
                 }
             })
             .FireAndForget(e => logger.Here().Warning("Couldn't open dock {DockElement}: {Message}", dockElement, e.Message));
+    }
+
+    public Task Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        return Task.Run(async () => {
+            var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
+            if (dockResult.HasValue) {
+                Dispatcher.UIThread.Post(() => dockingManagerService.AddControl(dockResult.Value.GetControl(), dockResult.Value.DockConfig));
+            } else {
+                throw new Exception($"Failed to open dock {dockElement}");
+            }
+        });
     }
 
     private async Task<DockResult?> GetDock(DockElement dockElement, DockMode? dockMode, Dock? dock, object? parameter) {

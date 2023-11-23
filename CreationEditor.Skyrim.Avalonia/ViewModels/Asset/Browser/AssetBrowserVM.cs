@@ -310,9 +310,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         AddFolder = ReactiveCommand.CreateFromTask<AssetDirectory>(AddAssetFolder);
 
-        OpenAssetBrowser = ReactiveCommand.Create<AssetDirectory>(asset => {
-            dockFactory.Open(DockElement.AssetBrowser, parameter: asset.Path);
-        });
+        OpenAssetBrowser = ReactiveCommand.CreateFromTask<AssetDirectory>(
+            asset => dockFactory.Open(DockElement.AssetBrowser, parameter: asset.Path));
     }
 
     private async Task AddAssetFolder(AssetDirectory dir) {
