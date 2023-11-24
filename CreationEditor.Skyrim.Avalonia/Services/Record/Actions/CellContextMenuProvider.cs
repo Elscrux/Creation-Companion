@@ -11,8 +11,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public sealed class CellContextMenuProvider : IRecordContextMenuProvider {
-    public static Type? Type => null;
-
     public CellActionsProvider CellActionsProvider { get; }
     public IRecordActionsProvider RecordActionsProvider => CellActionsProvider;
     public ICommand PrimaryCommand => CellActionsProvider.View;

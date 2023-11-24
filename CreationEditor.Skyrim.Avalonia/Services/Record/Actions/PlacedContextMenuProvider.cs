@@ -10,8 +10,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public sealed class PlacedContextMenuProvider : IRecordContextMenuProvider {
-    public static Type? Type => null;
-
     public IRecordActionsProvider RecordActionsProvider { get; }
     public ICommand PrimaryCommand => RecordActionsProvider.Edit;
     public IEnumerable<object> MenuItems { get; }

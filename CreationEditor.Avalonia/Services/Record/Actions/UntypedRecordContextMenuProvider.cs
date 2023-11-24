@@ -9,8 +9,6 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Services.Record.Actions;
 
 public sealed class UntypedRecordContextMenuProvider : ReactiveObject, IRecordContextMenuProvider {
-    public static Type? Type => null;
-
     public IRecordActionsProvider RecordActionsProvider { get; }
     public ICommand PrimaryCommand => RecordActionsProvider.Edit;
     public IEnumerable<object> MenuItems { get; }
@@ -25,13 +23,13 @@ public sealed class UntypedRecordContextMenuProvider : ReactiveObject, IRecordCo
         var recordTypeBinding = selectedRecord
             .Select(record => record?.Registration.GetterType)
             .ToBinding();
-        MenuItems = new object[] {
+        MenuItems = [
             menuItemProvider.New(recordActionsProvider.New, recordTypeBinding),
             menuItemProvider.Edit(recordActionsProvider.Edit, recordBinding),
             menuItemProvider.Duplicate(recordActionsProvider.Duplicate, recordBinding),
             menuItemProvider.Delete(recordActionsProvider.Delete, recordBinding),
             new Separator(),
             menuItemProvider.References(recordActionsProvider.OpenReferences, recordBinding)
-        };
+        ];
     }
 }

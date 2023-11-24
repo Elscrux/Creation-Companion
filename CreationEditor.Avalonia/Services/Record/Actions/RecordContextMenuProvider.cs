@@ -9,8 +9,6 @@ namespace CreationEditor.Avalonia.Services.Record.Actions;
 public sealed class RecordContextMenuProvider<TRecord, TRecordGetter> : IRecordContextMenuProvider
     where TRecord : class, TRecordGetter, IMajorRecord
     where TRecordGetter : class, IMajorRecordGetter {
-    public static Type? Type => null;
-
     public IRecordActionsProvider RecordActionsProvider { get; }
     public ICommand PrimaryCommand => RecordActionsProvider.Edit;
     public IEnumerable<object> MenuItems { get; }
