@@ -2,10 +2,10 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
-             xmlns:avalonia="clr-namespace:CreationEditor.Skyrim.Avalonia"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:viewLocators="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewLocators">
     <Application.DataTemplates>
-        <avalonia:ViewLocator/>
+        <viewLocators:RegisteredViewLocator/>
     </Application.DataTemplates>
 
     <Application.Resources>
