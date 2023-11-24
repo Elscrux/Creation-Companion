@@ -23,6 +23,17 @@ public static class ObservableExtension {
         return observable.CombineLatest(collection.WhenCollectionChanges(), (t, _) => t);
     }
 
+    public static IDisposable SyncTo<T>(this IObservable<IObservableCollection<T>> observableCollectionChanged, ObservableCollection<T> observableCollection) {
+        return observableCollectionChanged
+            .Select(collection => {
+                observableCollection.Clear();
+                observableCollection.AddRange(collection);
+                return collection.ObserveCollectionChanges();
+            })
+            .Switch()
+            .Subscribe(e => observableCollection.Apply(e.EventArgs));
+    }
+
     public static IObservable<T> SelectWhenCollectionChanges<T>(this INotifyCollectionChanged source, Func<IObservable<T>> selector) {
         return source
             .WhenCollectionChanges()
