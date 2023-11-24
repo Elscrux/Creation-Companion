@@ -31,7 +31,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Icon = new SymbolIcon { Symbol = Symbol.OpenFile },
                 Header = "Open",
                 Command = command,
-                CommandParameter = parameter
             },
             parameter);
     }
@@ -44,7 +43,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 InputGesture = new KeyGesture(Key.F2),
                 HotKey = new KeyGesture(Key.F2),
                 Command = command,
-                CommandParameter = parameter
             },
             parameter);
     }
@@ -55,7 +53,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Icon = new SymbolIcon { Symbol = Symbol.New },
                 Header = "New",
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -66,7 +63,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Icon = new SymbolIcon { Symbol = Symbol.Edit },
                 Header = "Edit",
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -77,7 +73,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Icon = new SymbolIcon { Symbol = Symbol.Share },
                 Header = "Duplicate",
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -90,7 +85,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 InputGesture = new KeyGesture(Key.Delete),
                 HotKey = new KeyGesture(Key.Delete),
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -103,7 +97,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 InputGesture = new KeyGesture(Key.R, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.R, KeyModifiers.Control),
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -116,7 +109,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 InputGesture = new KeyGesture(Key.C, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.C, KeyModifiers.Control),
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
@@ -129,7 +121,6 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 InputGesture = new KeyGesture(Key.V, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.V, KeyModifiers.Control),
                 Command = command,
-                CommandParameter = parameter,
             },
             parameter);
     }
