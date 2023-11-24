@@ -3,9 +3,9 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.List;
+using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
@@ -85,8 +85,8 @@ public sealed class SkyrimModule : Module {
             .SingleInstance();
 
         // Factory
-        builder.RegisterType<SkyrimRecordListFactory>()
-            .As<IRecordListFactory>();
+        builder.RegisterType<SkyrimRecordProviderFactory>()
+            .As<IRecordProviderFactory>();
 
         builder.RegisterType<SkyrimRecordEditorFactory>()
             .As<IRecordEditorFactory>();

@@ -92,8 +92,8 @@
 
         <GridSplitter Grid.Column="1"/>
 
-        <record:RecordList Grid.Column="2"
-                           DataContext="{Binding RecordListVM}"
-                           Columns="{Binding Columns}"/>
+        <record:RecordList
+            Grid.Column="2"
+            DataContext="{Binding RecordListVM}"/>
     </Grid>
 </UserControl>

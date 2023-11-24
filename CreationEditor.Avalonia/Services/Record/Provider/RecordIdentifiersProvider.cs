@@ -1,18 +1,17 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
+namespace CreationEditor.Avalonia.Services.Record.Provider;
 
 public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
@@ -21,24 +20,18 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
-    [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
 
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     public IObservable<bool> IsBusy { get; }
-    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public RecordIdentifiersProvider(
         IEnumerable<IFormLinkIdentifier> identifiers,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        ILogger logger,
-        Func<IObservable<IMajorRecordGetter?>, UntypedRecordContextMenuProvider> untypedRecordContextMenuProviderFactory) {
+        ILogger logger) {
         Identifiers = identifiers;
         RecordBrowserSettings = recordBrowserSettings;
-        var selectedRecordObservable = this.WhenAnyValue(x => x.SelectedRecord)
-            .Select(x => x?.Record);
-        RecordContextMenuProvider = untypedRecordContextMenuProviderFactory(selectedRecordObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 

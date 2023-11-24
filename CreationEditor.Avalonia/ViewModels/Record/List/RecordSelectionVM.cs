@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.Services.Record.Provider;
 using DynamicData;
 using Noggog;
 using ReactiveUI;

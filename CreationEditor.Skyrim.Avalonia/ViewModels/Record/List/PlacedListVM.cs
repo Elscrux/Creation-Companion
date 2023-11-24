@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Controls;
+using System.Reactive.Linq;
+using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
@@ -15,19 +16,21 @@ public sealed class PlacedListVM : ViewModel {
     public PlacedProvider PlacedProvider { get; }
 
     public IRecordListVM RecordListVM { get; }
-    public IList<DataGridColumn> PlacedListColumns { get; }
 
     public PlacedListVM(
-        Func<IRecordProvider, IRecordListVM> recordListVMFactory,
+        IRecordListVMBuilder recordListVMBuilder,
         IExtraColumnsBuilder extraColumnsBuilder,
-        PlacedProvider placedProvider) {
+        PlacedProvider placedProvider,
+        Func<IObservable<IPlacedGetter?>, PlacedContextMenuProvider> cellContextMenuProviderFactory) {
         PlacedProvider = placedProvider.DisposeWith(this);
 
-        PlacedListColumns = extraColumnsBuilder
-            .AddRecordType<IPlacedGetter>()
-            .Build()
-            .ToList();
+        RecordListVM = recordListVMBuilder
+            .WithExtraColumns(extraColumnsBuilder.AddRecordType<IPlacedGetter>())
+            .WithContextMenuProviderFactory(CreateContextMenuProvider)
+            .BuildWithSource(PlacedProvider)
+            .DisposeWith(this);
 
-        RecordListVM = recordListVMFactory(PlacedProvider);
+        IRecordContextMenuProvider CreateContextMenuProvider(IObservable<IMajorRecordGetter?> selectedRecords)
+            => cellContextMenuProviderFactory(selectedRecords!.OfType<IPlacedGetter>());
     }
 }

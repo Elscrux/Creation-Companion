@@ -4,13 +4,16 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Lifecycle;
+using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
+using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
+using CreationEditor.Avalonia.ViewModels.Record.Picker;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views.Startup;
 using CreationEditor.Services.Asset;
@@ -116,6 +119,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<ExtraColumnsBuilder>()
             .As<IExtraColumnsBuilder>();
 
+        builder.RegisterType<RecordListVMBuilder>()
+            .As<IRecordListVMBuilder>();
+
         // Factory
         builder.RegisterType<BSEViewportFactory>()
             .As<IViewportFactory>()
@@ -125,7 +131,11 @@ public sealed class MainModule : Module {
         builder.RegisterType<MainVM>()
             .SingleInstance();
 
-        builder.RegisterType<ModSelectionVM>();
+        builder.RegisterType<ModSelectionVM>()
+            .As<ModSelectionVM>();
+
+        builder.RegisterType<RecordPickerVM>()
+            .As<IRecordPickerVM>();
 
         builder.RegisterType<RecordBrowserVM>()
             .As<IRecordBrowserVM>();

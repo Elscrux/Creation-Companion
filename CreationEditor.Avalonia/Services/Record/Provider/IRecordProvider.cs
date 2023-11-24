@@ -1,19 +1,16 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
-namespace CreationEditor.Avalonia.ViewModels.Record.Provider;
+namespace CreationEditor.Avalonia.Services.Record.Provider;
 
 public interface IRecordProvider : IDisposable {
     /// <summary>
     /// Cache of all records
     /// </summary>
     SourceCache<IReferencedRecord, FormKey> RecordCache { get; }
-
-    IReferencedRecord? SelectedRecord { get; set; }
 
     IObservable<Func<IReferencedRecord, bool>> Filter { get; }
 
@@ -23,14 +20,10 @@ public interface IRecordProvider : IDisposable {
     /// Emits true when records are being loaded and false when loading has finished
     /// </summary>
     IObservable<bool> IsBusy { get; }
-
-    IRecordContextMenuProvider RecordContextMenuProvider { get; }
 }
 
 public interface IRecordProvider<TReferenced> : IRecordProvider
     where TReferenced : IReferencedRecord {
-    public new TReferenced? SelectedRecord { get; set; }
-
     public static readonly Func<IRecordBrowserSettings, IObservable<Func<TReferenced, bool>>> DefaultFilter = recordBrowserSettingsVM =>
         recordBrowserSettingsVM.SettingsChanged
             .ThrottleMedium()

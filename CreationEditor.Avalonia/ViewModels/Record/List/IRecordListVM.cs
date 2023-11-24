@@ -1,15 +1,20 @@
 ﻿using System.Collections;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Record.Provider;
+using CreationEditor.Services.Mutagen.References.Record;
+using DynamicData.Binding;
 using Noggog;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public interface IRecordListVM : IDisposableDropoff {
-    public IEnumerable? Records { get; }
+    IEnumerable? Records { get; }
+    IRecordProvider RecordProvider { get; }
+    IReferencedRecord? SelectedRecord { get; set; }
 
-    public IRecordProvider RecordProvider { get; }
+    IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
-    public IList<DataGridColumn> Columns { get; }
+    IObservableCollection<DataGridColumn> Columns { get; }
 
-    public IObservable<bool> IsBusy { get; }
+    IObservable<bool> IsBusy { get; }
 }

@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
-using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -29,30 +27,15 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public ReferencedPlacedRecord? SelectedRecord { get; set; }
-    IReferencedRecord? IRecordProvider.SelectedRecord {
-        get => SelectedRecord;
-        set {
-            if (value is ReferencedPlacedRecord referencedRecord) {
-                SelectedRecord = referencedRecord;
-            }
-        }
-    }
-
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     public IObservable<bool> IsBusy { get; set; }
-    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public PlacedProvider(
         ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        IRecordBrowserSettings recordBrowserSettings,
-        Func<IObservable<IPlacedGetter?>, PlacedContextMenuProvider> placedContextMenuProviderFactory) {
+        IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
-        var selectedPlacedObservable = this.WhenAnyValue(x => x.SelectedRecord)
-            .Select(x => x?.Record);
-        RecordContextMenuProvider = placedContextMenuProviderFactory(selectedPlacedObservable);
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 

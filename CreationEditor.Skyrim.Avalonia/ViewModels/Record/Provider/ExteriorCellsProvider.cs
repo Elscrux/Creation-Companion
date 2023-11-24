@@ -1,16 +1,14 @@
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Avalonia.ViewModels.Record.Picker;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
-using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
-using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -19,43 +17,27 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>>, ICellLoadStrategy {
+public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
     private readonly CompositeDisposable _referencesDisposable = new();
-    private readonly IViewportRuntimeService _viewportRuntimeService;
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public IReferencedRecord<ICellGetter>? SelectedRecord { get; set; }
-    IReferencedRecord? IRecordProvider.SelectedRecord {
-        get => SelectedRecord;
-        set {
-            if (value is IReferencedRecord<ICellGetter> referencedRecord) {
-                SelectedRecord = referencedRecord;
-            }
-        }
-    }
-
+    public IRecordPickerVM WorldSpacePickerVM { get; }
     [Reactive] public FormKey WorldspaceFormKey { get; set; }
     [Reactive] public bool ShowWildernessCells { get; set; } = true;
 
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     public IObservable<bool> IsBusy { get; }
-    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
 
     public ExteriorCellsProvider(
         ILinkCacheProvider linkCacheProvider,
-        IViewportRuntimeService viewportRuntimeService,
         IRecordReferenceController recordReferenceController,
         IRecordController recordController,
         IRecordBrowserSettings recordBrowserSettings,
-        Func<IObservable<ICellGetter?>, ICellLoadStrategy, CellContextMenuProvider> cellContextMenuProviderFactory) {
-        _viewportRuntimeService = viewportRuntimeService;
+        IRecordPickerVM worldSpacePickerVM) {
         RecordBrowserSettings = recordBrowserSettings;
-        var selectedCellObservable = this.WhenAnyValue(x => x.SelectedRecord)
-            .Select(x => x?.Record);
-        RecordContextMenuProvider = cellContextMenuProviderFactory(selectedCellObservable, this);
-
+        WorldSpacePickerVM = worldSpacePickerVM;
         Filter = RecordBrowserSettings.SettingsChanged
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(
@@ -115,18 +97,6 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
             .OfType<ICellGetter>()
             .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
             .DisposeWith(this);
-    }
-
-    public void LoadCell(ICellGetter cell) {
-        _viewportRuntimeService.LoadExteriorCell(WorldspaceFormKey, cell);
-    }
-
-    public void TrySelect(ICellGetter cell) {
-        if (!RecordCache.TryGetValue(cell.FormKey, out var referencedRecord)) return;
-        if (referencedRecord is not IReferencedRecord<ICellGetter> referencedCell) return;
-
-        SelectedRecord = null;
-        SelectedRecord = referencedCell;
     }
 
     protected override void Dispose(bool disposing) {

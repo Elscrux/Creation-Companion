@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
-using CreationEditor.Skyrim.Avalonia.Views.Record.List;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
@@ -15,10 +14,6 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
     public ExteriorCellsVM ExteriorCellsVM { get; }
     public PlacedListVM PlacedListVM { get; }
 
-    public InteriorCells InteriorCells { get; } = new();
-    public ExteriorCells ExteriorCells { get; } = new();
-    public PlacedList PlacedList { get; } = new();
-
     [Reactive] public int SelectedTab { get; set; }
     [Reactive] public bool ShowPlaced { get; set; }
 
@@ -28,9 +23,9 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
         InteriorCellsVM interiorCellsVM,
         ExteriorCellsVM exteriorCellsVM,
         PlacedListVM placedListVM) {
-        InteriorCells.DataContext = InteriorCellsVM = interiorCellsVM;
-        ExteriorCells.DataContext = ExteriorCellsVM = exteriorCellsVM;
-        PlacedList.DataContext = PlacedListVM = placedListVM;
+        InteriorCellsVM = interiorCellsVM.DisposeWith(this);
+        ExteriorCellsVM = exteriorCellsVM.DisposeWith(this);
+        PlacedListVM = placedListVM.DisposeWith(this);
 
         TogglePlaced = ReactiveCommand.Create(() => { ShowPlaced = !ShowPlaced; });
 
@@ -41,20 +36,12 @@ public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
             .DisposeWith(this);
 
         this.WhenAnyValue(
-                x => x.InteriorCellsVM.InteriorCellsProvider.SelectedRecord,
-                x => x.ExteriorCellsVM.ExteriorCellsProvider.SelectedRecord,
+                x => x.InteriorCellsVM.RecordListVM.SelectedRecord,
+                x => x.ExteriorCellsVM.RecordListVM.SelectedRecord,
                 (interiorCell, exteriorCell)
                     => SelectedTab == 0 ? interiorCell : exteriorCell)
             .ThrottleMedium()
             .Subscribe(cell => PlacedListVM.PlacedProvider.CellFormKey = cell?.Record.FormKey ?? FormKey.Null)
             .DisposeWith(this);
-    }
-
-    protected override void Dispose(bool disposing) {
-        base.Dispose(disposing);
-
-        InteriorCellsVM.Dispose();
-        ExteriorCellsVM.Dispose();
-        PlacedListVM.Dispose();
     }
 }

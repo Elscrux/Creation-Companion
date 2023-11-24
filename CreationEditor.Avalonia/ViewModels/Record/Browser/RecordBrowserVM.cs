@@ -13,7 +13,7 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly Func<IExtraColumnsBuilder> _extraColumnsBuilderFactory;
-    private readonly IRecordListFactory _recordListFactory;
+    private readonly IRecordListVMBuilder _recordListVMBuilder;
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     [Reactive] public IRecordListVM? RecordListVM { get; set; }
@@ -29,10 +29,10 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     public RecordBrowserVM(
         Func<IExtraColumnsBuilder> extraColumnsBuilderFactory,
         IRecordBrowserGroupProvider recordBrowserGroupProvider,
-        IRecordListFactory recordListFactory,
+        IRecordListVMBuilder recordListVMBuilder,
         IRecordBrowserSettings recordBrowserSettingsVM) {
         _extraColumnsBuilderFactory = extraColumnsBuilderFactory;
-        _recordListFactory = recordListFactory;
+        _recordListVMBuilder = recordListVMBuilder;
         RecordBrowserSettings = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
 
@@ -65,15 +65,11 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         RecordListVM?.Dispose();
 
         // Create new record list
-        var recordListVM = _recordListFactory
-            .FromType(recordType, RecordBrowserSettings)
+        var recordListVM = _recordListVMBuilder
+            .WithExtraColumns(_extraColumnsBuilderFactory().AddRecordType(recordType))
+            .WithBrowserSettings(RecordBrowserSettings)
+            .BuildWithSource(recordType)
             .DisposeWith(this);
-
-        // Add extra columns
-        var extraColumnsBuilder = _extraColumnsBuilderFactory();
-        recordListVM.Columns.AddRange(extraColumnsBuilder
-            .AddRecordType(recordType)
-            .Build());
 
         // Complete setup
         _recordListType = recordType;

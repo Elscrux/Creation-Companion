@@ -34,7 +34,6 @@ public sealed class AssetController : IAssetController {
         _modelModificationService = modelModificationService;
         _recordController = recordController;
         _logger = logger;
-
     }
 
     private string CreateDeletePath(string path) {

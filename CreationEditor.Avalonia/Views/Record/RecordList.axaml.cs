@@ -1,6 +1,4 @@
 ﻿using System.Reactive.Disposables;
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.List;
@@ -9,35 +7,22 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record;
 
 public partial class RecordList : ReactiveUserControl<IRecordListVM> {
-    public static readonly StyledProperty<IList<DataGridColumn>?> ColumnsProperty
-        = AvaloniaProperty.Register<RecordList, IList<DataGridColumn>?>(nameof(Columns));
-
-    public IList<DataGridColumn>? Columns {
-        get => GetValue(ColumnsProperty);
-        set => SetValue(ColumnsProperty, value);
-    }
-
     public RecordList() {
         InitializeComponent();
 
-        this.WhenActivated(x => {
-            this.WhenAnyValue(list => list.ViewModel!.RecordProvider.SelectedRecord)
+        this.WhenActivated(disposables => {
+            this.WhenAnyValue(list => list.ViewModel!.SelectedRecord)
                 .Subscribe(ScrollToItem)
-                .DisposeWith(x);
+                .DisposeWith(disposables);
+
+            this.WhenAnyValue(list => list.ViewModel!.Records)
+                .Subscribe(records => RecordGrid.SelectedItem = records?.OfType<IReferencedRecord>().FirstOrDefault())
+                .DisposeWith(disposables);
+
+            this.WhenAnyValue(list => list.ViewModel!.Columns)
+                .SyncTo(RecordGrid.Columns)
+                .DisposeWith(disposables);
         });
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
-        base.OnPropertyChanged(change);
-
-        if (change.Property == ColumnsProperty) {
-            RecordGrid.Columns.Clear();
-
-            if (Columns is not null) {
-                RecordGrid.Columns.AddRange(Columns);
-                Sort();
-            }
-        }
     }
 
     private void ScrollToItem(IReferencedRecord? referencedRecord) {

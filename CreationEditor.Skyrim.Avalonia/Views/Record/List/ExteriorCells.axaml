@@ -51,7 +51,6 @@
 
         <record:RecordList
             Grid.Row="8"
-            DataContext="{Binding RecordListVM}"
-            Columns="{ReflectionBinding #Control.ViewModel.ExteriorListColumns}"/>
+            DataContext="{Binding RecordListVM}"/>
     </Grid>
 </UserControl>
