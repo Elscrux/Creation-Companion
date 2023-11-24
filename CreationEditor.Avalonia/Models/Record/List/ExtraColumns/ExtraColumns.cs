@@ -2,5 +2,5 @@
 
 public abstract class ExtraColumns<TType> : IExtraColumns {
     public Type Type { get; } = typeof(TType);
-    public abstract IEnumerable<ExtraColumn> Columns { get; }
+    public abstract IEnumerable<ExtraColumn> CreateColumns();
 }

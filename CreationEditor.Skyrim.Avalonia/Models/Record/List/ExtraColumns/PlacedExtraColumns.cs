@@ -7,15 +7,13 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 
 public class PlacedExtraColumns : ExtraColumns<IPlacedGetter> {
-    public override IEnumerable<ExtraColumn> Columns {
-        get {
-            yield return new ExtraColumn(new DataGridTextColumn {
-                Header = "Base",
-                Binding = new Binding("Base.EditorID", BindingMode.OneWay),
-                CanUserSort = true,
-                CustomSortComparer = SkyrimRecordComparers.BaseComparer,
-                Width = new DataGridLength(200),
-            }, 250);
-        }
+    public override IEnumerable<ExtraColumn> CreateColumns() {
+        yield return new ExtraColumn(new DataGridTextColumn {
+            Header = "Base",
+            Binding = new Binding("Base.EditorID", BindingMode.OneWay),
+            CanUserSort = true,
+            CustomSortComparer = SkyrimRecordComparers.BaseComparer,
+            Width = new DataGridLength(200),
+        }, 250);
     }
 }

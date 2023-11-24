@@ -10,7 +10,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
         _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
             .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
-                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.Columns)
+                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.CreateColumns())
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
             .SelectMany(c => c));
 
@@ -24,7 +24,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IExtraColumnsBuilder AddColumnType(Type columnType) {
         if (Activator.CreateInstance(columnType) is IUntypedExtraColumns extraColumns) {
-            _extraColumns.AddRange(extraColumns.Columns);
+            _extraColumns.AddRange(extraColumns.CreateColumns());
         }
 
         return this;
@@ -35,9 +35,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
         return AddColumnType(typeof(TExtraColumns));
     }
 
-    public IEnumerable<DataGridColumn> Build() {
-        return _extraColumns
-            .OrderByDescending(c => c.Priority)
-            .Select(c => c.Column);
-    }
+    public IEnumerable<DataGridColumn> Build() => _extraColumns
+        .OrderByDescending(c => c.Priority)
+        .Select(c => c.Column);
 }
