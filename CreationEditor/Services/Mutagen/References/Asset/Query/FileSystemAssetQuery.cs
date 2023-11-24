@@ -47,12 +47,12 @@ public sealed class FileSystemAssetQuery(
         }
     }
 
-    public void WriteCacheCheck(BinaryWriter writer, string source) {}
+    public void WriteCacheValidation(BinaryWriter writer, string source) {}
 
     public void WriteContext(BinaryWriter writer, string source) => writer.Write(source);
 
-    public void WriteUsages(BinaryWriter writer, IEnumerable<string> usages) {
-        foreach (var usage in usages) {
+    public void WriteReferences(BinaryWriter writer, IEnumerable<string> references) {
+        foreach (var usage in references) {
             writer.Write(usage);
         }
     }
@@ -61,8 +61,8 @@ public sealed class FileSystemAssetQuery(
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
 
-    public IEnumerable<string> ReadUsages(BinaryReader reader, string contextString, int assetUsageCount) {
-        for (var i = 0; i < assetUsageCount; i++) {
+    public IEnumerable<string> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
+        for (var i = 0; i < assetReferenceCount; i++) {
             yield return reader.ReadString();
         }
     }

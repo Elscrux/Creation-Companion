@@ -19,7 +19,7 @@ public sealed class ModSaveLocationProvider : IModSaveLocationProvider {
     }
 
     public void SaveInDataFolder() => _directoryPath = _dataDirectoryProvider.Path;
-    public void SaveInCustomDirectory(string absolutePath) => _directoryPath = absolutePath;
+    public void SaveInCustomDirectory(string fullPath) => _directoryPath = fullPath;
 
     public string GetSaveLocation() => _directoryPath;
     public string GetSaveLocation(ModKey modKey) => _fileSystem.Path.Combine(_directoryPath, modKey.FileName);

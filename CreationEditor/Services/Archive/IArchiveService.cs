@@ -11,7 +11,7 @@ public interface IArchiveService : IDisposable {
     /// <summary>
     /// Get an archive reader for an archive.
     /// </summary>
-    /// <param name="path">Absolute path to the archive</param>
+    /// <param name="path">Full path to the archive</param>
     /// <returns>Archive reader</returns>
     IArchiveReader GetReader(string path);
 
@@ -32,8 +32,8 @@ public interface IArchiveService : IDisposable {
     /// <summary>
     /// Tries to copy the content of a file in an archive to a temporary file.
     /// </summary>
-    /// <param name="filePath">Absolute path to the file in the archive</param>
-    /// <returns>The absolute path of the temporary file</returns>
+    /// <param name="filePath">Full path to the file in the archive</param>
+    /// <returns>The full path of the temporary file</returns>
     string? TryGetFileAsTempFile(string filePath);
 
     /// <summary>

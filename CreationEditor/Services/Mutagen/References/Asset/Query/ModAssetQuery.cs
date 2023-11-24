@@ -66,7 +66,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         }
     }
 
-    public void WriteCacheCheck(BinaryWriter writer, IModGetter mod) {
+    public void WriteCacheValidation(BinaryWriter writer, IModGetter mod) {
         var modFilePath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, mod.ModKey.FileName);
         if (!_fileSystem.File.Exists(modFilePath)) return;
 
@@ -79,8 +79,8 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         writer.Write(_mutagenTypeProvider.GetGameName(source));
     }
 
-    public void WriteUsages(BinaryWriter writer, IEnumerable<IFormLinkGetter> usages) {
-        foreach (var usage in usages) {
+    public void WriteReferences(BinaryWriter writer, IEnumerable<IFormLinkGetter> references) {
+        foreach (var usage in references) {
             writer.Write(usage.FormKey.ToString());
             writer.Write(_mutagenTypeProvider.GetTypeName(usage));
         }
@@ -103,8 +103,8 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         return game;
     }
 
-    public IEnumerable<IFormLinkGetter> ReadUsages(BinaryReader reader, string contextString, int assetUsageCount) {
-        for (var i = 0; i < assetUsageCount; i++) {
+    public IEnumerable<IFormLinkGetter> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
+        for (var i = 0; i < assetReferenceCount; i++) {
             var referenceFormKey = FormKey.Factory(reader.ReadString());
             var typeString = reader.ReadString();
             var type = _mutagenTypeProvider.GetType(contextString, typeString);

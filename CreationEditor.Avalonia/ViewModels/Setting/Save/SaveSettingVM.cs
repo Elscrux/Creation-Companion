@@ -20,9 +20,9 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
     public Type? Parent => null;
     public List<ISetting> Children { get; } = [];
 
-    public string AbsoluteCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrAbsoluteCustomSaveLocation)
-        ? Settings.DataRelativeOrAbsoluteCustomSaveLocation
-        : _fileSystem.Path.Combine(_dataDirectoryProvider.Path, Settings.DataRelativeOrAbsoluteCustomSaveLocation);
+    public string FullCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrFullCustomSaveLocation)
+        ? Settings.DataRelativeOrFullCustomSaveLocation
+        : _fileSystem.Path.Combine(_dataDirectoryProvider.Path, Settings.DataRelativeOrFullCustomSaveLocation);
 
     public ReactiveCommand<Unit, Unit> SelectCustomDirectory { get; }
 
@@ -67,7 +67,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
             if (localPath == _dataDirectoryProvider.Path) {
                 Settings.SaveLocation = SaveLocation.DataFolder;
             } else {
-                Settings.DataRelativeOrAbsoluteCustomSaveLocation
+                Settings.DataRelativeOrFullCustomSaveLocation
                     = localPath.StartsWith(_dataDirectoryProvider.Path)
                         ? $"./{_fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, localPath)}"
                         : localPath;
@@ -87,7 +87,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
                 _modSaveLocationProvider.SaveInDataFolder();
                 break;
             case SaveLocation.Custom:
-                _modSaveLocationProvider.SaveInCustomDirectory(AbsoluteCustomSaveLocation);
+                _modSaveLocationProvider.SaveInCustomDirectory(FullCustomSaveLocation);
                 break;
         }
 

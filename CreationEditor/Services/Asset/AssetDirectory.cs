@@ -226,10 +226,10 @@ public sealed class AssetDirectory : IAsset {
     /// <summary>
     /// Checks if the given asset exists in this directory or any of its subdirectories.
     /// </summary>
-    /// <param name="absolutePath">absolute path of the asset to check for</param>
+    /// <param name="fullPath">Full path of the asset to check for</param>
     /// <returns>true if the asset exists under this directory</returns>
-    public bool Contains(string absolutePath) {
-        return GetAssetFile(absolutePath) is not null;
+    public bool Contains(string fullPath) {
+        return GetAssetFile(fullPath) is not null;
     }
 
     /// <summary>

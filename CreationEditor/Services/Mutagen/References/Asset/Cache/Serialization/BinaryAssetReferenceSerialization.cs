@@ -91,7 +91,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
 
                         var assetUsageCount = reader.ReadInt32();
                         var usages = cacheableQuery
-                            .ReadUsages(reader, contextString, assetUsageCount)
+                            .ReadReferences(reader, contextString, assetUsageCount)
                             .ToHashSet();
 
                         assets.Add(assetLink, usages);
@@ -125,7 +125,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
         writer.Write(cacheableQuery.CacheVersion.ToString());
 
         // Write cache check
-        cacheableQuery.WriteCacheCheck(writer, source);
+        cacheableQuery.WriteCacheValidation(writer, source);
 
         // Write context string
         cacheableQuery.WriteContext(writer, source);
@@ -141,7 +141,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
             foreach (var (name, usages) in assets) {
                 writer.Write(name.DataRelativePath);
                 writer.Write(usages.Count);
-                cacheableQuery.WriteUsages(writer, usages);
+                cacheableQuery.WriteReferences(writer, usages);
             }
         }
     }

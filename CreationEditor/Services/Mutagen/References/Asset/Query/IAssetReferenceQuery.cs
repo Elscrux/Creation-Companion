@@ -5,9 +5,27 @@ public interface IAssetReferenceQuery<TSource, TReference>
     where TSource : notnull
     where TReference : notnull {
 
+    /// <summary>
+    /// Name of the query.
+    /// </summary>
     string QueryName { get; }
+
+    /// <summary>
+    /// Asset caches for the given query.
+    /// </summary>
     IDictionary<TSource, AssetReferenceCache<TSource, TReference>> AssetCaches { get; }
 
+    /// <summary>
+    /// Parses the given source into a list of asset references.
+    /// </summary>
+    /// <param name="source">Source to parse</param>
+    /// <returns>Enumerable of asset references</returns>
     IEnumerable<AssetQueryResult<TReference>> ParseAssets(TSource source);
+
+    /// <summary>
+    /// Returns the name of a given source.
+    /// </summary>
+    /// <param name="source">Source to get the name of</param>
+    /// <returns>Name of the given source</returns>
     string GetName(TSource source) => source.ToString() ?? string.Empty;
 }
