@@ -3,7 +3,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Record.Picker;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
@@ -23,7 +22,6 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    public IRecordPickerVM WorldSpacePickerVM { get; }
     [Reactive] public FormKey WorldspaceFormKey { get; set; }
     [Reactive] public bool ShowWildernessCells { get; set; } = true;
 
@@ -34,10 +32,8 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
         ILinkCacheProvider linkCacheProvider,
         IRecordReferenceController recordReferenceController,
         IRecordController recordController,
-        IRecordBrowserSettings recordBrowserSettings,
-        IRecordPickerVM worldSpacePickerVM) {
+        IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
-        WorldSpacePickerVM = worldSpacePickerVM;
         Filter = RecordBrowserSettings.SettingsChanged
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(

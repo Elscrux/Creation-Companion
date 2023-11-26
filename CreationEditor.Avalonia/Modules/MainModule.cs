@@ -13,7 +13,6 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Avalonia.ViewModels.Record.Picker;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views.Startup;
 using CreationEditor.Services.Asset;
@@ -133,9 +132,6 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ModSelectionVM>()
             .As<ModSelectionVM>();
-
-        builder.RegisterType<RecordPickerVM>()
-            .As<IRecordPickerVM>();
 
         builder.RegisterType<RecordBrowserVM>()
             .As<IRecordBrowserVM>();

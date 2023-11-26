@@ -49,7 +49,7 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
             .DisposeWith(this);
 
         SelectGridCell = ReactiveCommand.Create(() => {
-            if (!ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldSpacePickerVM.FormKey, out var worldspace)) return;
+            if (!ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) return;
 
             foreach (var cell in linkCacheProvider.LinkCache.EnumerateAllCells(worldspace.FormKey)) {
                 if (cell.Grid is null) continue;
