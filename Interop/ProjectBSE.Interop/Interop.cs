@@ -6,8 +6,8 @@ namespace ProjectBSE.Interop;
 
 public static partial class Interop {
     private const string DllName = "TGInterOp.dll";
-    public const int CurrentVersion = 3;
-    
+    public const int CurrentVersion = 4;
+
     public struct ReferenceTransform {
         public P3Float Translation;
         public P3Float Scale;
@@ -244,6 +244,7 @@ public static partial class Interop {
         public AlphaData[] Data; // max 289 (pass by pointer) 
         public ushort DataLength;
     }
+
     internal struct AlphaLayerUnmanaged {
         public TextureSetMarshaller.TextureSetUnmanaged TextureSet;
         public IntPtr Data;
@@ -368,11 +369,12 @@ public static partial class Interop {
     }
 
     [NativeMarshalling(typeof(InitConfigMarshaller))]
-    public struct InitConfig {
-        public uint Version;
-        public string AssetDirectory;
-        public ulong SizeOfWindowHandles;
-        public IntPtr[] WindowHandles;
+    public struct InitConfig() {
+        public uint Version = CurrentVersion;
+        public string AssetDirectory = string.Empty;
+        public ulong SizeOfWindowHandles = 0;
+        public IntPtr[] WindowHandles = Array.Empty<nint>();
+        public FeatureSet FeatureSet = new();
     }
 
     [CustomMarshaller(typeof(InitConfig), MarshalMode.Default, typeof(InitConfigMarshaller))]
@@ -387,7 +389,7 @@ public static partial class Interop {
             Marshal.Copy(managed.WindowHandles, 0, unmanaged.WindowHandles, managed.WindowHandles.Length);
             return unmanaged;
         }
-    
+
         public static InitConfig ConvertToManaged(InitConfigUnmanaged unmanaged) {
             var managed = new InitConfig {
                 Version = unmanaged.Version,
@@ -398,12 +400,12 @@ public static partial class Interop {
             Marshal.Copy(unmanaged.WindowHandles, managed.WindowHandles, 0, managed.WindowHandles.Length);
             return managed;
         }
-    
+
         public static void Free(InitConfigUnmanaged unmanaged) {
             Marshal.ZeroFreeCoTaskMemUTF8(unmanaged.AssetDirectory);
             Marshal.FreeCoTaskMem(unmanaged.WindowHandles);
         }
-    
+
         internal struct InitConfigUnmanaged {
             public uint Version;
             public IntPtr AssetDirectory;
@@ -412,6 +414,40 @@ public static partial class Interop {
         }
     }
 
+    [NativeMarshalling(typeof(FeatureSetMarshaller))]
+    public struct FeatureSet() {
+        public bool WideLines = false;
+        public int AnisotropicFiltering = int.MaxValue;
+        public uint MipMapLevels = 4;
+    }
+
+    [CustomMarshaller(typeof(FeatureSet), MarshalMode.Default, typeof(FeatureSetMarshaller))]
+    internal static class FeatureSetMarshaller {
+        public static FeatureSetUnmanaged ConvertToUnmanaged(FeatureSet managed) {
+            return new FeatureSetUnmanaged {
+                WideLines = managed.WideLines,
+                AnisotropicFiltering = managed.AnisotropicFiltering,
+                MipMapLevels = managed.MipMapLevels
+            };
+        }
+
+        public static FeatureSet ConvertToManaged(FeatureSetUnmanaged unmanaged) {
+            return new FeatureSet {
+                WideLines = unmanaged.WideLines,
+                AnisotropicFiltering = unmanaged.AnisotropicFiltering,
+                MipMapLevels = unmanaged.MipMapLevels
+            };
+        }
+
+        public static void Free(FeatureSetUnmanaged unmanaged) {
+        }
+
+        internal struct FeatureSetUnmanaged {
+            public bool WideLines;
+            public int AnisotropicFiltering;
+            public uint MipMapLevels;
+        }
+    }
     public struct SizeInformation {
         public long SizeInformationStruct;
         public long InitConfigStruct;
@@ -424,6 +460,7 @@ public static partial class Interop {
         public long QuadrantStruct;
         public long CornerSetsStruct;
         public long TerrainInfoStruct;
+        public long FeatureSetStruct;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -505,6 +542,10 @@ public static partial class Interop {
     [LibraryImport(DllName, EntryPoint = "initTGEditor", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial int InitTGEditor(InitConfig config, string[] formKeys, ulong count);
+
+    [LibraryImport(DllName, EntryPoint = "getMainWindowHandle")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static partial IntPtr GetMainWindowHandle();
 
     [LibraryImport(DllName, EntryPoint = "isFinished")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]

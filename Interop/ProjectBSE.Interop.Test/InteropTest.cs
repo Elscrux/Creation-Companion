@@ -6,10 +6,7 @@ namespace ProjectBSE.Interop.Test;
 //Must be run in debug mode to include dll
 public sealed class InteropTest {
     private static readonly InitConfig InitConfig = new() {
-        Version = CurrentVersion,
         AssetDirectory = "test",
-        SizeOfWindowHandles = 0,
-        WindowHandles = Array.Empty<nint>(),
     };
     private static readonly ReferenceLoad TestReference = new() {
         FormKey = "123456:Skyrim.esm",
@@ -25,15 +22,18 @@ public sealed class InteropTest {
         TestInit();
     }
 
-    private static void TestInit() {
-        var task = Record.ExceptionAsync(() => Task.Run(() => {
+    private static async void TestInit() {
+        var task = await Record.ExceptionAsync(() => Task.Run(() => {
             var initTgEditor = InitTGEditor(InitConfig, Array.Empty<string>(), 0);
+            Console.WriteLine(initTgEditor);
             // Assert.NotEqual(-1, initTgEditor);
         }));
 
+        Assert.Null(task);
+
         WaitFinishedInit();
 
-        Assert.Null(task.Exception);
+        Assert.Null(task);
     }
 
     [Fact]
@@ -51,6 +51,7 @@ public sealed class InteropTest {
         Assert.Equal(sizeInformation.QuadrantStruct, Marshal.SizeOf<Quadrant>());
         Assert.Equal(sizeInformation.CornerSetsStruct, Marshal.SizeOf<CornerSets>());
         Assert.Equal(sizeInformation.TerrainInfoStruct, Marshal.SizeOf<TerrainInfo>());
+        Assert.Equal(sizeInformation.FeatureSetStruct, Marshal.SizeOf<FeatureSet>());
     }
 
     [Fact]

@@ -61,8 +61,6 @@ public sealed class BSEViewportFactory(
         var initConfig = new InitConfig {
             Version = CurrentVersion,
             AssetDirectory = assetDirectory,
-            SizeOfWindowHandles = 0,
-            WindowHandles = Array.Empty<nint>(),
         };
 
         var code = InitTGEditor(initConfig, bsaFileNames, (ulong) bsaFileNames.Length);
@@ -70,6 +68,8 @@ public sealed class BSEViewportFactory(
     }
 
     private async Task<Process> CaptureProcess() {
+        //var mainWindowHandle = GetMainWindowHandle();
+
         for (var i = 0; i < ViewportEmbeddingAttempts; i++) {
             var process = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName)
                 .NotNull()
