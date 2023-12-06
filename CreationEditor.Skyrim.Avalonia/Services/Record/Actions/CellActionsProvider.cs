@@ -20,7 +20,11 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
 
             var cellLoadStrategy = context.GetSetting<ICellLoadStrategy>();
 
-            await dockFactory.Open(DockElement.Viewport);
+            try {
+                await dockFactory.Open(DockElement.Viewport);
+            } catch (Exception) {
+                // ignored
+            }
 
             cellLoadStrategy.LoadCell(cell);
         });

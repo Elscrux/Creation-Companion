@@ -416,8 +416,8 @@ public static partial class Interop {
 
     [NativeMarshalling(typeof(FeatureSetMarshaller))]
     public struct FeatureSet() {
-        public bool WideLines = false;
-        public int AnisotropicFiltering = int.MaxValue;
+        public uint WideLines = 0;
+        public uint AnisotropicFiltering = uint.MaxValue;
         public uint MipMapLevels = 4;
     }
 
@@ -443,8 +443,8 @@ public static partial class Interop {
         }
 
         internal struct FeatureSetUnmanaged {
-            public bool WideLines;
-            public int AnisotropicFiltering;
+            public uint WideLines;
+            public uint AnisotropicFiltering;
             public uint MipMapLevels;
         }
     }
