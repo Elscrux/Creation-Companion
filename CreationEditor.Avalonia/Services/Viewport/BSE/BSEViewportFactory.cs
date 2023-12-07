@@ -32,10 +32,10 @@ public sealed class BSEViewportFactory(
         WaitFinishedInit();
 
         // Capture the viewport process and embed it
-        var process = await CaptureProcess();
+        var mainWindowHandle = GetMainWindowHandle();
 
         return () => {
-            var viewportHost = new ProcessHost(process, "Viewport");
+            var viewportHost = new WindowHandleHost(mainWindowHandle, "Viewport");
             _viewportInitialized.OnNext(Unit.Default);
             return viewportHost;
         };
@@ -65,26 +65,5 @@ public sealed class BSEViewportFactory(
 
         var code = InitTGEditor(initConfig, bsaFileNames, (ulong) bsaFileNames.Length);
         logger.Here().Information("Closed viewport with code {Code}", code);
-    }
-
-    private async Task<Process> CaptureProcess() {
-        //var mainWindowHandle = GetMainWindowHandle();
-
-        for (var i = 0; i < ViewportEmbeddingAttempts; i++) {
-            var process = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName)
-                .NotNull()
-                .FirstOrDefault(p => p.MainWindowTitle == ViewportProcessName);
-
-            if (process is null) {
-                logger.Here().Verbose("Waiting for viewport to start...");
-                await Task.Delay(100);
-            } else {
-                logger.Here().Verbose("Viewport started, now embed it into the application");
-                return process;
-            }
-        }
-
-        logger.Here().Warning("Failed to embed viewport after {Count} attempts", ViewportEmbeddingAttempts);
-        throw new Exception("Failed to embed viewport");
     }
 }
