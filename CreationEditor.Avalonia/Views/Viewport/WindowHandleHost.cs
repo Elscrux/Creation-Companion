@@ -6,7 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 namespace CreationEditor.Avalonia.Views.Viewport;
 
-public sealed class ProcessHost(Process process, string descriptor) : NativeControlHost {
+public sealed class WindowHandleHost(IntPtr WindowHandle, string descriptor) : NativeControlHost {
     private Window? _rootWindow;
 
     private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -20,13 +20,13 @@ public sealed class ProcessHost(Process process, string descriptor) : NativeCont
         if (handle is null) return;
 
         if (OperatingSystem.IsWindows()) {
-            WinHelper.SetParent(process.MainWindowHandle, handle.Handle);
+            WinHelper.SetParent(WindowHandle, handle.Handle);
 
-            long style = WinHelper.GetWindowLongPtr(process.MainWindowHandle, WinHelper.StyleIndex);
+            long style = WinHelper.GetWindowLongPtr(WindowHandle, WinHelper.StyleIndex);
             style &= (long) ~WinHelper.WinStyle.ResizeBar;
             style &= (long) ~WinHelper.WinStyle.Caption;
 
-            WinHelper.SetWindowLongPtr(process.MainWindowHandle, WinHelper.StyleIndex, (nint) style);
+            WinHelper.SetWindowLongPtr(WindowHandle, WinHelper.StyleIndex, (nint) style);
         }
 
         DestroyNativeControl.Invoke(this, null);
@@ -46,7 +46,7 @@ public sealed class ProcessHost(Process process, string descriptor) : NativeCont
             case PlatformID.Win32Windows:
             case PlatformID.Win32NT:
             case PlatformID.WinCE:
-                return new PlatformHandle(process.MainWindowHandle, descriptor);
+                return new PlatformHandle(WindowHandle, descriptor);
             case PlatformID.Unix:
                 break;
             case PlatformID.Xbox:
