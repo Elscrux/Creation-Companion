@@ -10,7 +10,6 @@ public static class FileSystemExtension {
         var hashAlgorithm = new XxHash3();
         hashAlgorithm.Append(fileStream);
         return hashAlgorithm.GetCurrentHash();
-
     }
 
     public static bool IsFileHashValid(this IFileSystem fileSystem, string path, byte[] hash) {
