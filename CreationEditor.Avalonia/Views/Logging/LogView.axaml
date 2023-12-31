@@ -86,7 +86,8 @@
 
         <ListBox Grid.Column="1"
                  ItemsSource="{Binding LogItems}"
-                 Classes="Compact">
+                 Classes="Compact"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <Interaction.Behaviors>
                 <behavior:ListBoxAutoScrollToBottom ScrollingEnabled="{Binding AutoScroll}"/>
             </Interaction.Behaviors>
