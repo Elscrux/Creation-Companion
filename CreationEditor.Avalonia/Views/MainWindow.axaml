@@ -154,22 +154,16 @@
                     <MenuItem Header="_Plugins"
                               IsVisible="{Binding MenuBarPlugins.Count}"
                               ItemsSource="{Binding MenuBarPlugins}">
-                        <MenuItem.Styles>
-                            <Style Selector="MenuItem" x:DataType="plugin:IMenuPluginDefinition">
-                                <Setter Property="Header"
-                                        Value="{Binding Name}"/>
-                                <Setter Property="HotKey"
-                                        Value="{Binding KeyGesture}"/>
-                                <Setter Property="InputGesture"
-                                        Value="{Binding KeyGesture}"/>
-                                <Setter Property="Icon"
-                                        Value="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"/>
-                                <Setter Property="Command"
-                                        Value="{Binding #Window.ViewModel.OpenPlugin}"/>
-                                <Setter Property="CommandParameter"
-                                        Value="{Binding }"/>
-                            </Style>
-                        </MenuItem.Styles>
+                        <MenuItem.DataTemplates>
+                            <DataTemplate DataType="plugin:IMenuPluginDefinition">
+                                <MenuItem Header="{Binding Name}"
+                                          HotKey="{Binding KeyGesture}"
+                                          InputGesture="{Binding KeyGesture}"
+                                          Icon="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"
+                                          Command="{Binding #Window.ViewModel.OpenPlugin}"
+                                          CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </MenuItem.DataTemplates>
                     </MenuItem>
 
                     <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
