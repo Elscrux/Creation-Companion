@@ -34,7 +34,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
         ISettingImporter<StartupDocksSetting> settingImporter) {
         _dockFactory = dockFactory;
 
-        Settings = settingImporter.Import(this) ?? new StartupDocksSetting(new ObservableCollectionExtended<StartupDock>());
+        Settings = settingImporter.Import(this) ?? StartupDocksSetting.Default;
 
         AddStartupDock = ReactiveCommand.Create(() => Settings.Docks.Add(new StartupDock()));
 
