@@ -1,10 +1,9 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
-using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 namespace CreationEditor.Services.Asset;
 
-public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
+public sealed class AssetProvider : IAssetProvider {
     private readonly IFileSystem _fileSystem;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetTypeService _assetTypeService;
@@ -25,18 +24,6 @@ public sealed class AssetProvider : IAssetProvider, ILifecycleTask {
         _archiveService = archiveService;
         _dataDirectoryService = dataDirectoryService;
     }
-
-    public void PreStartup() {}
-
-    public void PostStartupAsync(CancellationToken token) {
-        // Force load all directories up front
-        var dataDirectory = GetAssetContainer(_dataDirectoryService.Path, token);
-        foreach (var _ in dataDirectory.GetAllChildren<IAsset, AssetDirectory>(directory => directory.Children)) {
-            // Do nothing, just loop through all children to load them once
-        }
-    }
-
-    public void OnExit() {}
 
     public AssetDirectory GetAssetContainer(string directory, CancellationToken token = default) {
         foreach (var (path, asset) in _assetDirectories) {
