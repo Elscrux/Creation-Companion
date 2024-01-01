@@ -3,27 +3,15 @@ using CreationEditor.Services.Archive;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 namespace CreationEditor.Services.Asset;
 
-public sealed class AssetProvider : IAssetProvider {
-    private readonly IFileSystem _fileSystem;
-    private readonly IAssetReferenceController _assetReferenceController;
-    private readonly IAssetTypeService _assetTypeService;
-    private readonly IArchiveService _archiveService;
-    private readonly IDataDirectoryService _dataDirectoryService;
+public sealed class AssetProvider(
+    IFileSystem fileSystem,
+    IAssetReferenceController assetReferenceController,
+    IAssetTypeService assetTypeService,
+    IArchiveService archiveService,
+    IDataDirectoryService dataDirectoryService)
+    : IAssetProvider {
 
     private readonly Dictionary<string, IAsset> _assetDirectories = new();
-
-    public AssetProvider(
-        IFileSystem fileSystem,
-        IAssetReferenceController assetReferenceController,
-        IAssetTypeService assetTypeService,
-        IArchiveService archiveService,
-        IDataDirectoryService dataDirectoryService) {
-        _fileSystem = fileSystem;
-        _assetReferenceController = assetReferenceController;
-        _assetTypeService = assetTypeService;
-        _archiveService = archiveService;
-        _dataDirectoryService = dataDirectoryService;
-    }
 
     public AssetDirectory GetAssetContainer(string directory, CancellationToken token = default) {
         foreach (var (path, asset) in _assetDirectories) {
@@ -42,7 +30,7 @@ public sealed class AssetProvider : IAssetProvider {
             }
         }
 
-        var assetDirectory = new AssetDirectory(_fileSystem.DirectoryInfo.New(directory), _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService);
+        var assetDirectory = new AssetDirectory(fileSystem.DirectoryInfo.New(directory), fileSystem, dataDirectoryService, assetReferenceController, assetTypeService, archiveService);
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }
