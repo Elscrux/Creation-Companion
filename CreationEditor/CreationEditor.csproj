@@ -58,7 +58,7 @@
         <Compile Update="Services\Mutagen\Type\MutagenTypeProvider.cs">
             <DependentUpon>IMutagenTypeProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Settings\SettingExporter.cs">
+        <Compile Update="Services\Settings\JsonSettingExporter.cs">
             <DependentUpon>ISettingExporter.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Settings\SettingProvider.cs">
@@ -67,7 +67,7 @@
         <Compile Update="Services\Settings\SettingPathProvider.cs">
             <DependentUpon>ISettingPathProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Settings\SettingImporter.cs">
+        <Compile Update="Services\Settings\JsonSettingImporter.cs">
             <DependentUpon>ISettingImporter.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Mutagen\Mod\Save\ModSaveService.cs">

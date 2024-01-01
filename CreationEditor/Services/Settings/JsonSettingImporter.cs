@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Serilog;
 namespace CreationEditor.Services.Settings;
 
-public sealed class SettingImporter<TSetting>(
+public sealed class JsonSettingImporter<TSetting>(
     ILogger logger,
     IFileSystem fileSystem,
     ISettingPathProvider settingPathProvider)

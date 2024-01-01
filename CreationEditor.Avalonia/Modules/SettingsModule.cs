@@ -13,10 +13,10 @@ public sealed class SettingsModule : Module {
             .As<ISettingPathProvider>()
             .SingleInstance();
 
-        builder.RegisterGeneric(typeof(SettingImporter<>))
+        builder.RegisterGeneric(typeof(JsonSettingImporter<>))
             .As(typeof(ISettingImporter<>));
 
-        builder.RegisterType<SettingExporter>()
+        builder.RegisterType<JsonSettingExporter>()
             .As<ISettingExporter>();
 
         builder.RegisterType<SettingsVM>()
