@@ -33,20 +33,23 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     public void PostStartupAsync(CancellationToken token) {
         if (Application.Current is null) throw new AppDomainUnloadedException("Application not started successfully");
 
-        Application.Current.Resources.MergedDictionaries.Add(_viewModeResourceDictionary);
-
-        Dispatcher.UIThread.Post(Apply);
+        Apply();
     }
 
     public void OnExit() {}
 
     public void Apply() {
+        if (Application.Current is null) throw new AppDomainUnloadedException("Application not started successfully");
         if (!_viewModeTemplates.TryGetValue(Setting.ViewMode, out var viewModeTemplate)) return;
+
+        Application.Current.Resources.MergedDictionaries.Remove(_viewModeResourceDictionary);
 
         _viewModeResourceDictionary.Clear();
 
-        foreach (var (name, value) in viewModeTemplate.Spacings) {
-            _viewModeResourceDictionary.AddDeferred(name, _ => value);
+        foreach (var (name, value) in viewModeTemplate.All) {
+            _viewModeResourceDictionary.Add(name, value);
         }
+
+        Dispatcher.UIThread.Post(() => Application.Current.Resources.MergedDictionaries.Add(_viewModeResourceDictionary));
     }
 }
