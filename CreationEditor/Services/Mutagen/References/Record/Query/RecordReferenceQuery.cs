@@ -26,15 +26,33 @@ public sealed class RecordReferenceQuery(
     : IRecordReferenceQuery, IDisposableDropoff {
     private static readonly string[] CacheLocation = ["References", "Record"];
 
-    private readonly Version _version = new(1, 0);
+    private static readonly Version Version = new(2, 0);
 
     private readonly DisposableBucket _disposables = new();
     private readonly ICacheLocationProvider _cacheLocationProvider = cacheLocationProviderFactory(CacheLocation);
 
-    private string ModFilePath(ModKey mod) => fileSystem.Path.Combine(dataDirectoryProvider.Path, mod.FileName);
-
     public IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches => _modCaches;
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
+
+    private string ModFilePath(ModKey mod) => fileSystem.Path.Combine(dataDirectoryProvider.Path, mod.FileName);
+    private bool TryGetCacheFileName(IModGetter mod, out string cacheFilePath) {
+        // Get mod path
+        var modKey = mod.ModKey;
+        var modFilePath = ModFilePath(modKey);
+        if (!fileSystem.File.Exists(modFilePath)) {
+            cacheFilePath = string.Empty;
+            return false;
+        }
+
+        // Create a unique cache file path for game, cache version, mod filename and mod hash
+        // Example: Skyrim/v2.0/NewMod.esp_4B0B3420E493A066.cache
+        var gameName = mutagenTypeProvider.GetGameName(mod);
+        var modHash = fileSystem.GetFileHash(modFilePath);
+        cacheFilePath = _cacheLocationProvider.CacheFile(gameName, $"v{Version}", $"{modKey.FileName}_{Convert.ToHexString(modHash)}");
+
+        return true;
+    }
+    private string GetGameName(string cacheFilePath) => cacheFilePath.Split(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar)[^3];
 
     public void Dispose() => _disposables.Dispose();
 
@@ -48,19 +66,39 @@ public sealed class RecordReferenceQuery(
         if (_modCaches.ContainsKey(mod.ModKey)) return;
 
         logger.Here().Debug("Starting to load Record References of {ModKey}", mod.ModKey);
-        try {
-            _modCaches.Add(mod.ModKey, CacheValid(mod.ModKey) ? LoadReferenceCache(mod.ModKey) : BuildReferenceCache(mod));
-        } catch (Exception e) {
-            // Catch any issues while loading references
-            logger.Here().Error("Loading record references for {ModKey} failed: {Message}", mod.ModKey, e.Message);
-            logger.Here().Debug("Try to generate record references for {ModKey} again", mod.ModKey);
 
-            // Delete broken cache
-            TryDeleteCache(mod.ModKey);
+        ModReferenceCache modReferenceCache;
+        if (TryGetCacheFileName(mod, out var cacheFilePath)) {
+            if (fileSystem.File.Exists(cacheFilePath)) {
+                // If cache file exists, try to load the cache
+                try {
+                    logger.Here().Verbose("Record Reference cache file found at {CacheFile}, trying to load the cache for {ModKey}", cacheFilePath, mod.ModKey);
+                    modReferenceCache = LoadReferenceCache(cacheFilePath);
+                } catch (Exception e) {
+                    // Catch any issues while loading references
+                    logger.Here().Error("Loading Record References for {ModKey} failed: {Message}", mod.ModKey, e.Message);
+                    logger.Here().Debug("Try to generate Record References for {ModKey} again", mod.ModKey);
 
-            // Try again
-            _modCaches.Add(mod.ModKey, BuildReferenceCache(mod));
+                    // Delete broken cache
+                    TryDeleteCache(cacheFilePath);
+
+                    // Try again
+                    modReferenceCache = BuildReferenceCache(mod);
+                    WriteReferenceCache(modReferenceCache, cacheFilePath);
+                }
+            } else {
+                // If cache file at path doesn't exist, build the cache and write it#
+                logger.Here().Verbose("No Record Reference cache file found at {CacheFile}, build the cache for {ModKey}", cacheFilePath, mod.ModKey);
+                modReferenceCache = BuildReferenceCache(mod);
+                WriteReferenceCache(modReferenceCache, cacheFilePath);
+            }
+        } else {
+            // If cache file path could not be generated, just build the cache
+            logger.Here().Verbose("Could not get Record Reference cache file path for {ModKey}, just build the cache", mod.ModKey);
+            modReferenceCache = BuildReferenceCache(mod);
         }
+
+        _modCaches.Add(mod.ModKey, modReferenceCache);
         logger.Here().Debug("Finished loading Record References of {ModKey}", mod.ModKey);
     }
 
@@ -82,48 +120,18 @@ public sealed class RecordReferenceQuery(
         notify.Stop();
     }
 
-    private void TryDeleteCache(ModKey modKey) {
-        var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
-        if (fileSystem.File.Exists(cacheFile)) {
-            try {
-                fileSystem.File.Delete(cacheFile);
-            } catch (Exception e) {
-                logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFile, e.Message);
-            }
+    private void TryDeleteCache(string cacheFilePath) {
+        if (!fileSystem.File.Exists(cacheFilePath)) return;
+
+        try {
+            fileSystem.File.Delete(cacheFilePath);
+        } catch (Exception e) {
+            logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFilePath, e.Message);
         }
     }
 
     /// <summary>
-    /// Check if the cache of a mod is up to date
-    /// </summary>
-    /// <param name="modKey">mod key to check cache for</param>
-    /// <returns></returns>
-    private bool CacheValid(ModKey modKey) {
-        var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
-        var modFilePath = ModFilePath(modKey);
-
-        // Check if mod and cache exist
-        if (!fileSystem.File.Exists(cacheFile)) return false;
-        if (!fileSystem.File.Exists(modFilePath)) return false;
-
-        // Open cache reader
-        using var fileStream = fileSystem.File.OpenRead(cacheFile);
-        using var zip = new GZipInputStream(fileStream);
-        using var reader = new BinaryReader(zip);
-
-        // Read version in cache
-        if (!Version.TryParse(reader.ReadString(), out var version)
-         || !version.Equals(_version)) return false;
-
-        // Read hash in cache
-        var hash = reader.ReadBytes(fileSystem.GetHashBytesLength());
-
-        // Validate hash
-        return fileSystem.IsFileHashValid(modFilePath, hash);
-    }
-
-    /// <summary>
-    /// Builds reference cache of one mod
+    /// Builds reference cache of a mod
     /// </summary>
     /// <param name="mod">mod to build reference cache for</param>
     /// <returns>reference cache of mod</returns>
@@ -145,82 +153,69 @@ public sealed class RecordReferenceQuery(
             counter.Stop();
         }
 
-        // Write modCache to file
-        var cacheFile = fileSystem.FileInfo.New(_cacheLocationProvider.CacheFile(mod.ModKey.FileName));
+        return new ModReferenceCache(modCache, records);
+    }
+
+    /// <summary>
+    /// Writes reference cache of a mod to cache file
+    /// </summary>
+    /// <param name="cache">reference cache to write</param>
+    /// <param name="cacheFilePath">path to the cache file</param>
+    private void WriteReferenceCache(ModReferenceCache cache, string cacheFilePath) {
+        // Open writer
+        var cacheFile = fileSystem.FileInfo.New(cacheFilePath);
         if (!cacheFile.Exists) cacheFile.Directory?.Create();
         using var fileStream = fileSystem.File.OpenWrite(cacheFile.FullName);
         using var zip = new GZipOutputStream(fileStream);
         using var writer = new BinaryWriter(zip);
 
-        // Write version
-        writer.Write(_version.ToString());
-
-        // Write hash
-        var modFilePath = ModFilePath(mod.ModKey);
-        if (!fileSystem.File.Exists(modFilePath)) return new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []);
-
-        var hash = fileSystem.GetFileHash(modFilePath);
-        writer.Write(hash);
-
-        // Write game
-        writer.Write(mutagenTypeProvider.GetGameName(mod));
-
-        writer.Write(records.Count);
-        foreach (var formKey in records) {
+        // Write form keys
+        writer.Write(cache.FormKeys.Count);
+        foreach (var formKey in cache.FormKeys) {
             writer.Write(formKey.ToString());
         }
 
-        // Write form count
-        writer.Write(modCache.Count);
+        // Write referenced form count
+        writer.Write(cache.Cache.Count);
 
         // Write references
-        using (var counter = new CountingNotifier(notificationService, "Saving Cache", modCache.Values.Sum(x => x.Count), TimeSpan.Zero)) {
-            foreach (var (formKey, references) in modCache) {
-                counter.NextStep();
+        using var counter = new CountingNotifier(notificationService, "Saving Cache", cache.Cache.Values.Sum(x => x.Count), TimeSpan.Zero);
+        foreach (var (formKey, references) in cache.Cache) {
+            counter.NextStep();
 
-                writer.Write(formKey.ToString());
-                writer.Write(references.Count);
-                foreach (var reference in references) {
-                    writer.Write(reference.FormKey.ToString());
-                    writer.Write(mutagenTypeProvider.GetTypeName(reference));
-                }
+            writer.Write(formKey.ToString());
+            writer.Write(references.Count);
+            foreach (var reference in references) {
+                writer.Write(reference.FormKey.ToString());
+                writer.Write(mutagenTypeProvider.GetTypeName(reference));
             }
-
-            return new ModReferenceCache(modCache, records);
         }
     }
 
     /// <summary>
     /// Load reference cache of a mod
     /// </summary>
-    /// <param name="modKey">mod to load cache for</param>
+    /// <param name="cacheFilePath">path to the cache file</param>
     /// <returns>reference cache of the given mod key</returns>
-    private ModReferenceCache LoadReferenceCache(ModKey modKey) {
+    private ModReferenceCache LoadReferenceCache(string cacheFilePath) {
         using var linearNotifier = new LinearNotifier(notificationService);
         linearNotifier.Next("Decompressing Cache");
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();
+        var game = GetGameName(cacheFilePath);
 
         // Read mod cache file
-        var cacheFile = _cacheLocationProvider.CacheFile(modKey.FileName);
-        var fileStream = fileSystem.File.OpenRead(cacheFile);
+        var fileStream = fileSystem.File.OpenRead(cacheFilePath);
         var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
-            // Skip version and hash
-            reader.ReadString();
-            reader.ReadBytes(fileSystem.GetHashBytesLength());
-
-            // Read game string
-            var game = reader.ReadString();
-
-            // Build ref cache
+            // Read form keys
             var recordCount = reader.ReadInt32();
             for (var i = 0; i < recordCount; i++) {
                 var formKey = FormKey.Factory(reader.ReadString());
                 records.Add(formKey);
             }
 
-            // Build ref cache
+            // Read references
             var formCount = reader.ReadInt32();
             using (var counter = new CountingNotifier(notificationService, "Reading Cache", formCount)) {
                 for (var i = 0; i < formCount; i++) {
