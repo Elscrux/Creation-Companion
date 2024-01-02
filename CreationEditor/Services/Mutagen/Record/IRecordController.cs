@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.Mutagen.References.Record;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Record;
 
@@ -80,6 +81,14 @@ public interface IRecordController {
     /// <param name="record">Record which updates are registered for</param>
     /// <param name="updateAction">An action that must update to the given record</param>
     void RegisterUpdate(IMajorRecordGetter record, Action updateAction);
+
+    /// <summary>
+    /// Replaces given references of a record with with another record.
+    /// </summary>
+    /// <param name="record">Record to replace references for</param>
+    /// <param name="references">References to record to edit</param>
+    /// <param name="replacingRecord">Record to replace references with</param>
+    void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord);
 
     /// <summary>
     /// Replaces all references of a record with with another record.

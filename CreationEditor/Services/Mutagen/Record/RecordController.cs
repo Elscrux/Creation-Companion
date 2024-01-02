@@ -142,9 +142,13 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     }
 
     public void ReplaceReferences(IReferencedRecord record, IMajorRecordGetter replacingRecord) {
+        ReplaceReferences(record.Record, record.References, replacingRecord);
+    }
+
+    public void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord) {
         var remap = new Dictionary<FormKey, FormKey> { { record.FormKey, replacingRecord.FormKey } };
 
-        foreach (var reference in record.References.ToList()) {
+        foreach (var reference in references.ToArray()) {
             if (!_editorEnvironment.LinkCache.TryResolve(reference, out var referenceRecord)) continue;
 
             var overrideRecord = GetOrAddOverride(referenceRecord);
