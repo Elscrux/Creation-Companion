@@ -55,7 +55,8 @@ public sealed class RecordActionsProvider<TRecord, TRecordGetter> : IRecordActio
         OpenReferences = ReactiveCommand.Create<object?>(obj => {
             if (obj is not TRecordGetter record) return;
 
-            var references = recordReferenceController.GetReferences(record.FormKey)
+            using var disposable = recordReferenceController.GetReferencedRecord(record, out var referencedRecord);
+            var references = referencedRecord.References
                 .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
