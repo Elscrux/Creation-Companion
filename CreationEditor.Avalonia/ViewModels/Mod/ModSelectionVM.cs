@@ -18,7 +18,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
-    public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
+    public static readonly IReadOnlyList<ModType> ModTypes = Enum.GetValues<ModType>();
 
     private const string NewModBaseName = "NewMod";
     private static string ReplacementName(int index) => $"{NewModBaseName} ({index})";
@@ -147,7 +147,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()
             .Subscribe(selectedMod => {
-                var mod = _modInfos.First(modInfo => modInfo.ModKey == selectedMod.ModKey);
+                var mod = _modInfos.Find(modInfo => modInfo.ModKey == selectedMod.ModKey);
                 if (mod is null) return;
 
                 SelectedModDetails.SetTo(mod);
@@ -171,11 +171,9 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
 
             //Check that all masters are valid and compile list of all recursive masters
             foreach (var master in modInfo.Masters) {
-                if (_masterInfos.TryGetValue(master, out var masterInfo)) {
-                    if (masterInfo.Valid) {
-                        masters.Add(masterInfo.Masters);
-                        continue;
-                    }
+                if (_masterInfos.TryGetValue(master, out var masterInfo) && masterInfo.Valid) {
+                    masters.Add(masterInfo.Masters);
+                    continue;
                 }
 
                 valid = false;
