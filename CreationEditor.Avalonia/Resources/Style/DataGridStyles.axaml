@@ -1,9 +1,19 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:collections="clr-namespace:Avalonia.Collections;assembly=Avalonia.Base">
     <Design.PreviewWith>
         <Border Padding="20">
-            <!-- Add Controls for Previewer Here -->
+            <Border.Resources>
+                <collections:AvaloniaList x:TypeArguments="Color" x:Key="List">
+                    <Color>Aqua</Color>
+                    <Color>Transparent</Color>
+                    <Color>Teal</Color>
+                    <Color>Brown</Color>
+                </collections:AvaloniaList>
+            </Border.Resources>
+            <DataGrid ItemsSource="{DynamicResource List}"
+                      AutoGenerateColumns="True"/>
         </Border>
     </Design.PreviewWith>
 
@@ -110,11 +120,101 @@
         <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
     </Style>
 
+    <Style Selector="DataGrid DataGridCell">
+        <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+    </Style>
+
     <Style Selector="DataGrid.MediumSpacing DataGridCell">
         <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
     </Style>
 
     <Style Selector="DataGrid.HighSpacing DataGridCell">
         <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+    </Style>
+
+    <Style Selector="DataGrid.Small">
+        <Style Selector="^ DataGridCellsPresenter">
+            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightSmall}"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightSmall}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ DataGridCell">
+            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeSmall}"/>
+            
+            <Style Selector="^ Border#CellBorder">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ ComboBox">
+            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightSmall}"/>
+            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeSmall}"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+    </Style>
+
+    <Style Selector="DataGrid">
+        <Style Selector="^ DataGridCellsPresenter">
+            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ DataGridCell">
+            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
+            
+            <Style Selector="^ Border#CellBorder">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ ComboBox">
+            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightMedium}"/>
+            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeMedium}"/>
+        </Style>
+    </Style>
+
+    <Style Selector="DataGrid.Medium">
+        <Style Selector="^ DataGridCellsPresenter">
+            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ DataGridCell">
+            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
+            
+            <Style Selector="^ Border#CellBorder">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ ComboBox">
+            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightMedium}"/>
+            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeMedium}"/>
+        </Style>
+    </Style>
+
+    <Style Selector="DataGrid.Large">
+        <Style Selector="^ DataGridCellsPresenter">
+            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ DataGridCell">
+            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeLarge}"/>
+            
+            <Style Selector="^ Border#CellBorder">
+                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
+            </Style>
+        </Style>
+        <Style Selector="^ ComboBox">
+            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightLarge}"/>
+            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeLarge}"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
     </Style>
 </Styles>

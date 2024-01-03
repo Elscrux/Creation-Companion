@@ -37,7 +37,7 @@
                             Converter="{x:Static converter:DoubleConverters.ToGridLengthStar}"
                             DefaultValueConverted="{x:Static GridLength.Auto}"/>
                     </Border.Resources>
-                    <Grid MinHeight="30" Margin="1"
+                    <Grid Margin="1"
                           MaxWidth="{TemplateBinding MaxWidth}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -57,13 +57,17 @@
                         <TextBox Grid.Row="0" Grid.Column="0"
                                  x:Name="PART_EditorIDBox"
                                  Margin="-1"
+                                 MinHeight="10"
                                  Watermark="EditorID"
+                                 FontSize="{TemplateBinding FontSize}"
                                  Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
                         <TextBox Grid.Row="0" Grid.Column="2"
                                  IsVisible="{TemplateBinding ShowFormKeyBox}"
                                  x:Name="PART_FormKeyBox"
                                  Margin="-1"
+                                 MinHeight="10"
                                  Watermark="FormKey"
+                                 FontSize="{TemplateBinding FontSize}"
                                  Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
 
                         <Button Grid.Row="0" Grid.Column="0"
@@ -88,9 +92,9 @@
 
                         <Button Grid.Row="0" Grid.Column="2"
                                 x:Name="PART_Dragger"
-                                Width="20" Height="20"
+                                MinWidth="10" MinHeight="10"
                                 Padding="0"
-                                Margin="5"
+                                Margin="5, 1"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
                             <Button.IsVisible>

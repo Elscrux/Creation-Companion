@@ -41,6 +41,7 @@
                             <ComboBox
                                 ItemsSource="{x:Static constants:EnumConstants.CombatReactions}"
                                 ToolTip.Tip="{Binding Reaction, Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"
+                                HorizontalAlignment="Stretch"
                                 SelectedItem="{Binding Reaction}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate DataType="skyrim:CombatReaction">

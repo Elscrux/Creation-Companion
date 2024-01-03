@@ -62,6 +62,7 @@
         <!-- Custom Style -->
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ButtonStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/CheckBoxStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ComboBoxStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ProgressBarStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ImageStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml"/>

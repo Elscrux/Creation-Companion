@@ -25,6 +25,11 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         });
     }
 
+
+    public RecordList(IRecordListVM vm) : this() {
+        ViewModel = vm;
+    }
+
     private void ScrollToItem(IReferencedRecord? referencedRecord) {
         if (RecordGrid is null || referencedRecord is null) return;
 
