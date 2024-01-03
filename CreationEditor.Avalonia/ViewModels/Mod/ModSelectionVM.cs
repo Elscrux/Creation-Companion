@@ -17,7 +17,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class ModSelectionVM : ViewModel {
+public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     public static readonly ModType[] ModTypes = Enum.GetValues<ModType>();
 
     private const string NewModBaseName = "NewMod";
