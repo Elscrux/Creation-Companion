@@ -482,77 +482,77 @@ public static partial class Interop {
     public delegate void TerrainAddCallback(uint count, TerrainInfo[] info, float[] buffer);
 
     [LibraryImport(DllName, EntryPoint = "getSizeInfo")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial SizeInformation GetSizeInfo();
 
     [LibraryImport(DllName, EntryPoint = "addLoadCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddLoadCallback(LoadCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "addUpdateCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddUpdateCallback(UpdateCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "addHideCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddHideCallback(HideCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "addDeleteCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddDeleteCallback(DeleteCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "addSelectCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddSelectCallback(SelectCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "addTerrainCallback")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool AddTerrainCallback(TerrainAddCallback callback);
 
     [LibraryImport(DllName, EntryPoint = "loadReferences")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void LoadReferences(ulong count, ReferenceLoad[] load);
 
     [LibraryImport(DllName, EntryPoint = "updateReferences")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool UpdateReferences(ulong count, ReferenceUpdate[] keys);
 
     [LibraryImport(DllName, EntryPoint = "hideReferences", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool HideReferences(ulong count, string[] formKeys, [MarshalAs(UnmanagedType.Bool)] bool hide);
 
     [LibraryImport(DllName, EntryPoint = "deleteReferences", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool DeleteReferences(ulong count, string[] formKeys);
 
     [LibraryImport(DllName, EntryPoint = "loadTerrain")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool LoadTerrain(uint count, TerrainInfo[] info, float[] buffer);
 
     [LibraryImport(DllName, EntryPoint = "initTGEditor", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int InitTGEditor(InitConfig config, string[] formKeys, ulong count);
 
     [LibraryImport(DllName, EntryPoint = "getMainWindowHandle")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr GetMainWindowHandle();
 
     [LibraryImport(DllName, EntryPoint = "isFinished")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool IsFinished();
 
     [LibraryImport(DllName, EntryPoint = "waitFinishedInit")]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void WaitFinishedInit();
 }
