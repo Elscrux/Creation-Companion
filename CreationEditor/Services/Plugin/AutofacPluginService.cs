@@ -27,25 +27,29 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
     public IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnloaded => _pluginsUnloaded;
 
     public void ReloadPlugins() {
-        // Get application directory
-        var applicationDirectory = AppContext.BaseDirectory;
+        UnregisterPlugins();
 
-        // Get plugins folder
-        var pluginsFolder = Path.Combine(applicationDirectory, PluginsFolderName);
+        var newPlugins = CollectPlugins(Path.Combine(AppContext.BaseDirectory, PluginsFolderName));
+
+        RegisterPlugins(newPlugins);
+    }
+
+    private IPlugin[] CollectPlugins(string pluginsFolder) {
+        // Check plugins folder
         if (!fileSystem.Directory.Exists(pluginsFolder)) {
             logger.Here().Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
-            return;
+            return [];
         }
 
         // Get plugin paths
         var pluginPaths = fileSystem.Directory.GetFiles(pluginsFolder, "*.dll");
         if (pluginPaths.Length == 0) {
             logger.Here().Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
-            return;
+            return [];
         }
 
         // Collect plugins objects from files
-        var newPlugins = pluginPaths
+        return pluginPaths
             .SelectMany(pluginPath => {
                 var assembly = Assembly.LoadFrom(pluginPath);
                 var plugins = assembly is null ? Array.Empty<IPlugin>() : CreatePlugins(assembly).ToArray();
@@ -57,14 +61,6 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
             })
             .NotNull()
             .ToArray();
-
-        _plugins.AddRange(newPlugins);
-
-        foreach (var plugin in _plugins.OfType<IPlugin>()) {
-            plugin.OnRegistered();
-        }
-
-        _pluginsLoaded.OnNext(newPlugins);
     }
 
     private IEnumerable<IPlugin> CreatePlugins(Assembly assembly) {
@@ -89,7 +85,19 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
         }
     }
 
+    private void RegisterPlugins(IReadOnlyList<IPlugin> plugins) {
+        _plugins.AddRange(plugins);
+
+        foreach (var plugin in _plugins.OfType<IPlugin>()) {
+            plugin.OnRegistered();
+        }
+
+        _pluginsLoaded.OnNext(plugins);
+    }
+
     private void UnregisterPlugins() {
+        if (_plugins.Count == 0) return;
+
         foreach (var plugin in _plugins.OfType<IPlugin>()) {
             plugin.OnUnregistered();
         }
