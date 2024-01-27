@@ -7,7 +7,7 @@ public interface IRecordController {
     /// <summary>
     /// Create a record of the given type in the active mod.
     /// </summary>
-    /// <param name="type"></param>
+    /// <param name="type">Getter type of record</param>
     /// <returns>Created record</returns>
     IMajorRecord CreateRecord(System.Type type);
 
