@@ -13,6 +13,6 @@ public sealed class StatePathProvider(IFileSystem fileSystem) : IStatePathProvid
     public string GetFullPath(string state) {
         return fileSystem.Path.Combine(
             GetDirectoryPath(),
-            $"{state.Replace(" ", "-")}.json");
+            state.Replace(" ", "-"));
     }
 }
