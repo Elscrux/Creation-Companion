@@ -110,13 +110,16 @@ public partial class PlacedPicker : ActivatableUserControl {
     public PlacedPicker() {
         InitializeComponent();
 
-        PlacedNameSelector = (identifier, linkCache) => linkCache is null
-            ? null
-            : identifier is IPlacedGetter placed
-                ? placed.GetSelfOrBaseEditorID(linkCache)
-                : linkCache.TryResolve<IPlacedGetter>(identifier.FormKey, out var referencedPlaced)
-                    ? referencedPlaced.GetSelfOrBaseEditorID(linkCache)
-                    : null;
+        PlacedNameSelector = (identifier, linkCache) => {
+            if (linkCache is null) return null;
+            if (identifier is IPlacedGetter placed) return placed.GetSelfOrBaseEditorID(linkCache);
+
+            if (linkCache.TryResolve<IPlacedGetter>(identifier.FormKey, out var referencedPlaced)) {
+                return referencedPlaced.GetSelfOrBaseEditorID(linkCache);
+            }
+
+            return null;
+        };
 
         CellNameSelector = (identifier, linkCache) => linkCache is not null && linkCache.TryResolve<ICellGetter>(identifier.FormKey, out var cell)
             ? CellConverters.ToName.Convert(cell, linkCache) as string
