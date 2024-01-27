@@ -16,13 +16,13 @@ public sealed class QueryPluginVM : ViewModel {
 
     private readonly Func<QueryColumnVM> _queryColumnVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
-    private readonly IQueryState _queryState;
 
     public Grid ColumnsGrid { get; } = new() {
         ColumnDefinitions = [new ColumnDefinition()]
     };
 
     public ReactiveCommand<Unit, Unit> AddColumn { get; }
+    public ReactiveCommand<QueryColumnVM, Unit> SaveColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DuplicateColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> CopyColumnText { get; }
@@ -34,11 +34,17 @@ public sealed class QueryPluginVM : ViewModel {
         MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
-        _queryState = queryState;
         ColumnsGrid.Children.Add(_paddingRight);
 
         AddColumn = ReactiveCommand.Create(() => {
             InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
+        });
+
+        SaveColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
+            var queryRunner = vm.QueryVM.QueryRunner;
+            if (queryRunner is null) return;
+
+            queryState.Save(queryRunner);
         });
 
         DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
@@ -133,6 +139,7 @@ public sealed class QueryPluginVM : ViewModel {
 
     private MenuItem[] GetColumnMenuItems(QueryColumnVM queryColumnVM) {
         return [
+            _menuItemProvider.Save(SaveColumn, queryColumnVM),
             _menuItemProvider.Duplicate(DuplicateColumn, queryColumnVM),
             _menuItemProvider.Delete(DeleteColumn, queryColumnVM),
             _menuItemProvider.Copy(CopyColumnText, queryColumnVM).Name("Copy Entries Text")
