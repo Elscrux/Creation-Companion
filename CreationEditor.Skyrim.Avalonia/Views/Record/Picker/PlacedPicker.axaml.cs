@@ -170,7 +170,7 @@ public partial class PlacedPicker : ActivatableUserControl {
                 ? record.Temporary
                     .Concat(record.Persistent)
                     .Where(x.Filter)
-                    .Select(placed => (IMajorRecordGetter) placed)
+                    .Cast<IMajorRecordGetter>()
                     .AsObservableChangeSet()
                 : new List<IMajorRecordGetter>()
                     .AsObservableChangeSet())
