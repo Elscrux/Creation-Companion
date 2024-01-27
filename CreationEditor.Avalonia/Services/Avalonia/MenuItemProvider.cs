@@ -122,4 +122,15 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter,
             new KeyGesture(Key.V, KeyModifiers.Control));
     }
+
+    public MenuItem Custom(ICommand command, string customHeader, object? parameter = null, object? icon = null, KeyGesture? keyGesture = null) {
+        return Init(
+            new MenuItem {
+                Command = command,
+                Icon = icon,
+                Header = customHeader,
+            },
+            parameter,
+            keyGesture);
+    }
 }

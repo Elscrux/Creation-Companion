@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Input;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
 public interface IMenuItemProvider {
@@ -13,4 +14,5 @@ public interface IMenuItemProvider {
     MenuItem References(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Custom(ICommand command, string customHeader, object? parameter = null, object? icon = null, KeyGesture? keyGesture = null);
 }
