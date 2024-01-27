@@ -2,7 +2,7 @@
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Selectables;
 
-public sealed class TypeItem(Type type, bool isSelected = true) : ReactiveObject, IReactiveSelectable {
+public class Selectable<T>(T value, bool isSelected = true) : ReactiveObject, IReactiveSelectable {
     [Reactive] public bool IsSelected { get; set; } = isSelected;
-    public Type Type { get; } = type;
+    public T Value { get; } = value;
 }

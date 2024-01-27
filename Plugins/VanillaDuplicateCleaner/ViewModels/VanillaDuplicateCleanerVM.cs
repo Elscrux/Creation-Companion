@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Threading;
+using CreationEditor.Avalonia.Models.Record;
+using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
@@ -23,7 +25,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
     public ModPickerVM ModPickerVM { get; }
-    public ObservableCollection<RecordReplacement> Records { get; } = [];
+    public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
 
     [Reactive] public bool IsBusy { get; set; }
     public ModKey ActiveModKey { get; set; } = ModKey.Null;
@@ -49,7 +51,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
                 if (mods.Count == 0) return;
 
                 ActiveModKey = mods.First().ModKey;
-                Records.Add(Process(ActiveModKey));
+                Records.Add(Process(ActiveModKey).Select(diff => new SelectableRecordDiff(diff)));
             });
 
         Run = ReactiveCommand.CreateRunInBackground(() => {
@@ -59,10 +61,10 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         });
     }
 
-    private List<RecordReplacement> Process(ModKey testingModKey) {
+    private List<RecordDiff> Process(ModKey modKey) {
         // Collect records from mods that may be replaced
         var recordEqualsMasks = new HashSet<RecordEqualsMask>();
-        var testingMod = _editorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == testingModKey);
+        var testingMod = _editorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == modKey);
         foreach (var record in GetRecords(testingMod.AsEnumerable())) {
             if (record.EditorID is null) continue;
 
@@ -71,7 +73,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         }
 
         // Find matching records in vanilla mods
-        var mappedRecords = new List<RecordReplacement>();
+        var mappedRecords = new List<RecordDiff>();
         var vanillaMods = _editorEnvironment.LinkCache.ListedOrder
             .Where(x => Enumerable.Contains(SkyrimDefinitions.SkyrimModKeys, x.ModKey))
             .ToArray();
@@ -81,7 +83,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
             var vanillaEqualsMask = new RecordEqualsMask(vanillaRecord);
             if (recordEqualsMasks.TryGetValue(vanillaEqualsMask, out var match)) {
-                mappedRecords.Add(new RecordReplacement(match.Record, vanillaRecord, match.Record.Registration.Name));
+                mappedRecords.Add(new RecordDiff(match.Record, vanillaRecord));
             }
         }
 
@@ -110,7 +112,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         // Replace mod references of records to be replaced with vanilla records
         foreach (var recordReplacement in recordReplacements) {
-            var references = RecordReferenceController.GetReferences(recordReplacement.Modified.FormKey).ToArray();
+            var references = RecordReferenceController.GetReferences(recordReplacement.RecordDiff.Old.FormKey).ToArray();
 
             // Clean references
             foreach (var usageFormLink in references) {
@@ -132,7 +134,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
             }
 
             // Clean record
-            if (_editorEnvironment.LinkCache.TryResolveContext(recordReplacement.Modified.ToLinkFromRuntimeType(), out var recordContext)) {
+            if (_editorEnvironment.LinkCache.TryResolveContext(recordReplacement.RecordDiff.Old.ToLinkFromRuntimeType(), out var recordContext)) {
                 var overrideRecord = recordContext.GetOrAddAsOverride(cleanedBaseMod);
 
                 if (references.Length == 0) {
@@ -149,7 +151,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         // Collect remapping data
         var remapData = recordReplacements
-            .ToDictionary(x => x.Modified.FormKey, x => x.VanillaReplacement.FormKey);
+            .ToDictionary(x => x.RecordDiff.Old.FormKey, x => x.RecordDiff.New.FormKey);
 
         // Remap links and save mods
         FinalizeMod(cleanedBaseMod);

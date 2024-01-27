@@ -6,7 +6,7 @@
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior;assembly=CreationEditor.Avalonia"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:viewModels="clr-namespace:VanillaDuplicateCleaner.ViewModels"
-             xmlns:models="clr-namespace:VanillaDuplicateCleaner.Models"
+             xmlns:selectables="clr-namespace:CreationEditor.Avalonia.Models.Selectables;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="VanillaDuplicateCleaner.Views.VanillaDuplicateCleanerView"
              x:Name="Control"
@@ -37,8 +37,8 @@
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Mod FormKey">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Modified.FormKey}"
+                                    <DataTemplate DataType="selectables:SelectableRecordDiff">
+                                        <TextBlock Text="{Binding RecordDiff.Old.FormKey}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"/>
                                     </DataTemplate>
@@ -46,9 +46,9 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
-                                x:DataType="models:RecordReplacement"
+                                x:DataType="selectables:SelectableRecordDiff"
                                 Header="Mod EditorID"
-                                Binding="{Binding Modified.EditorID}"/>
+                                Binding="{Binding RecordDiff.Old.EditorID}"/>
 
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.CellTemplate>
@@ -62,8 +62,8 @@
 
                             <DataGridTemplateColumn Header="Vanilla FormKey">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding VanillaReplacement.FormKey}"
+                                    <DataTemplate DataType="selectables:SelectableRecordDiff">
+                                        <TextBlock Text="{Binding RecordDiff.New.FormKey}"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"/>
                                     </DataTemplate>
@@ -71,14 +71,14 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
-                                x:DataType="models:RecordReplacement"
+                                x:DataType="selectables:SelectableRecordDiff"
                                 Header="Vanilla EditorID"
-                                Binding="{Binding VanillaReplacement.EditorID}"/>
+                                Binding="{Binding RecordDiff.New.EditorID}"/>
 
                             <DataGridTextColumn
-                                x:DataType="models:RecordReplacement"
+                                x:DataType="selectables:SelectableRecordDiff"
                                 Header="Type"
-                                Binding="{Binding Type}"/>
+                                Binding="{Binding RecordDiff.Old.Registration.Name}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Expander>
