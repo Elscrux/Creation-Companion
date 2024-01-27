@@ -55,7 +55,7 @@ public sealed class WindowHandleHost(IntPtr windowHandle, string descriptor) : N
             case PlatformID.Other:
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException("Unknown platform " + Environment.OSVersion.Platform);
         }
 
         return base.CreateNativeControlCore(parent);
