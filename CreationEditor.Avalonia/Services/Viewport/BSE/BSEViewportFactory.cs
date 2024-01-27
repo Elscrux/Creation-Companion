@@ -14,8 +14,6 @@ public sealed class BSEViewportFactory(
     IDataDirectoryProvider dataDirectoryProvider,
     IFileSystem fileSystem)
     : IViewportFactory {
-    private const string ViewportProcessName = "BSE";
-    private const int ViewportEmbeddingAttempts = 50;
 
     public bool IsMultiInstanceCapable => false;
 
