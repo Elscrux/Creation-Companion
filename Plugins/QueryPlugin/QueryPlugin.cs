@@ -7,24 +7,19 @@ using QueryPlugin.ViewModels;
 using QueryPlugin.Views;
 namespace QueryPlugin;
 
-public sealed class QueryPlugin : IMenuPlugin {
-    private readonly PluginContext _pluginContext;
-    private readonly Func<QueryPluginVM> _queryPluginVMFactory;
+public sealed class QueryPlugin(
+    PluginContext pluginContext,
+    Func<QueryPluginVM> queryPluginVMFactory)
+    : IMenuPlugin {
+
+    private readonly PluginContext _pluginContext = pluginContext;
 
     public string Name => "Query";
     public string Description => "Query records.";
     public Guid Guid => new("e07d38ba-10fd-44b9-9a91-f87095ef316b");
     public KeyGesture KeyGesture => new(Key.Q, KeyModifiers.Control);
 
-
-    public QueryPlugin(
-        PluginContext pluginContext,
-        Func<QueryPluginVM> queryPluginVMFactory) {
-        _pluginContext = pluginContext;
-        _queryPluginVMFactory = queryPluginVMFactory;
-    }
-
-    public Control GetControl() => new QueryPluginView(_queryPluginVMFactory());
+    public Control GetControl() => new QueryPluginView(queryPluginVMFactory());
 
     public object GetIcon() => new SymbolIcon { Symbol = Symbol.List };
 }
