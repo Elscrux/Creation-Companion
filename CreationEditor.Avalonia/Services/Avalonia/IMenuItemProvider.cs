@@ -3,14 +3,14 @@ using Avalonia.Controls;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
 public interface IMenuItemProvider {
-    MenuItem View(ICommand command, object? parameter = null);
-    MenuItem New(ICommand command, object? parameter = null);
-    MenuItem Edit(ICommand command, object? parameter = null);
-    MenuItem Rename(ICommand command, object? parameter = null);
-    MenuItem Duplicate(ICommand command, object? parameter = null);
-    MenuItem Delete(ICommand command, object? parameter = null);
-    MenuItem File(ICommand command, object? parameter = null);
-    MenuItem References(ICommand command, object? parameter = null);
-    MenuItem Copy(ICommand command, object? parameter = null);
-    MenuItem Paste(ICommand command, object? parameter = null);
+    MenuItem View(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem New(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Edit(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Rename(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Duplicate(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Delete(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem File(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem References(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null);
 }

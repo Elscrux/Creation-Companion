@@ -15,31 +15,31 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return menuItem;
     }
 
-    public MenuItem View(ICommand command, object? parameter = null) {
+    public MenuItem View(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.View },
-                Header = "View",
+                Header = customHeader ?? "View",
                 Command = command,
             },
             parameter);
     }
 
-    public MenuItem File(ICommand command, object? parameter = null) {
+    public MenuItem File(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.OpenFile },
-                Header = "Open",
+                Header = customHeader ?? "Open",
                 Command = command,
             },
             parameter);
     }
 
-    public MenuItem Rename(ICommand command, object? parameter = null) {
+    public MenuItem Rename(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Rename },
-                Header = "Rename",
+                Header = customHeader ?? "Rename",
                 InputGesture = new KeyGesture(Key.F2),
                 HotKey = new KeyGesture(Key.F2),
                 Command = command,
@@ -47,41 +47,41 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem New(ICommand command, object? parameter = null) {
+    public MenuItem New(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.New },
-                Header = "New",
+                Header = customHeader ?? "New",
                 Command = command,
             },
             parameter);
     }
 
-    public MenuItem Edit(ICommand command, object? parameter = null) {
+    public MenuItem Edit(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Edit },
-                Header = "Edit",
+                Header = customHeader ?? "Edit",
                 Command = command,
             },
             parameter);
     }
 
-    public MenuItem Duplicate(ICommand command, object? parameter = null) {
+    public MenuItem Duplicate(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Share },
-                Header = "Duplicate",
+                Header = customHeader ?? "Duplicate",
                 Command = command,
             },
             parameter);
     }
 
-    public MenuItem Delete(ICommand command, object? parameter = null) {
+    public MenuItem Delete(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Delete },
-                Header = "Delete",
+                Header = customHeader ?? "Delete",
                 InputGesture = new KeyGesture(Key.Delete),
                 HotKey = new KeyGesture(Key.Delete),
                 Command = command,
@@ -89,11 +89,11 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem References(ICommand command, object? parameter = null) {
+    public MenuItem References(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.List },
-                Header = "Open References",
+                Header = customHeader ?? "Open References",
                 InputGesture = new KeyGesture(Key.R, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.R, KeyModifiers.Control),
                 Command = command,
@@ -101,11 +101,11 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem Copy(ICommand command, object? parameter = null) {
+    public MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Copy },
-                Header = "Copy",
+                Header = customHeader ?? "Copy",
                 InputGesture = new KeyGesture(Key.C, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.C, KeyModifiers.Control),
                 Command = command,
@@ -113,11 +113,11 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem Paste(ICommand command, object? parameter = null) {
+    public MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null) {
         return AddParameter(
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Paste },
-                Header = "Paste",
+                Header = customHeader ?? "Paste",
                 InputGesture = new KeyGesture(Key.V, KeyModifiers.Control),
                 HotKey = new KeyGesture(Key.V, KeyModifiers.Control),
                 Command = command,
