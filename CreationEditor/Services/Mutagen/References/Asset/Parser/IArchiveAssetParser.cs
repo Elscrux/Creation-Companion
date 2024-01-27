@@ -6,7 +6,7 @@ public interface IArchiveAssetParser {
     /// Name of the parser.
     /// </summary>
     string Name { get; }
-    
+
     /// <summary>
     /// Parses the given archive file into a list of asset references.
     /// </summary>

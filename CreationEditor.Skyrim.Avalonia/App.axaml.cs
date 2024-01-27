@@ -86,10 +86,10 @@ public partial class App : Application {
         var extensionModules = pluginService.GetAssemblies()
             .SelectMany(assembly => assembly.GetTypes())
             .Where(type => type.InheritsFrom(typeof(ExtensionModule)))
-            .Select(System.Activator.CreateInstance)
+            .Select(Activator.CreateInstance)
             .OfType<ExtensionModule>()
             .ToList();
-        
+
         foreach (var extensionModule in extensionModules) {
             builder.RegisterModule(extensionModule);
         }

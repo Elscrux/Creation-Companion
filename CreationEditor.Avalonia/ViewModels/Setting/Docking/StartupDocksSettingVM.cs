@@ -8,7 +8,6 @@ using CreationEditor.Avalonia.Models.Settings.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
-using DynamicData.Binding;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 

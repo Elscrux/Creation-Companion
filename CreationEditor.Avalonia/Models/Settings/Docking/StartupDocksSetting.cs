@@ -23,6 +23,6 @@ public sealed class StartupDocksSetting(IList<StartupDock> docks) : ISettingMode
             Dock = Dock.Bottom
         },
     });
-    
+
     [JsonProperty] public IList<StartupDock> Docks { get; } = docks;
 }

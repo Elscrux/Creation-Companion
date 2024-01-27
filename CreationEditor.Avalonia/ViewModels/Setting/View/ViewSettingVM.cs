@@ -40,6 +40,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
 
     public void Apply() {
         if (Application.Current is null) throw new AppDomainUnloadedException("Application not started successfully");
+
         if (!_viewModeTemplates.TryGetValue(Setting.ViewMode, out var viewModeTemplate)) return;
 
         Application.Current.Resources.MergedDictionaries.Remove(_viewModeResourceDictionary);

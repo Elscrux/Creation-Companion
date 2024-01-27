@@ -62,7 +62,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
 
         return RecordContextMenuProvider.GetMenuItems(recordListContext);
     }
-    
+
     public RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
         return new RecordListContext(referencedRecords, RecordProvider.RecordTypes, _settings);
     }

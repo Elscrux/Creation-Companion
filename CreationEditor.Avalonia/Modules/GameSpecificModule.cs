@@ -23,7 +23,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
 
     protected abstract GameRelease GameRelease { get; }
-    
+
     protected abstract IReg<IEditorEnvironment> EditorEnvironment { get; }
     protected abstract IReg<IModInfoProvider<TModGetter>> ModInfoProvider { get; }
     protected abstract IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider { get; }

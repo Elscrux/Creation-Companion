@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using Windows.Interop;
 using Avalonia;
 using Avalonia.Controls;

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Controls;

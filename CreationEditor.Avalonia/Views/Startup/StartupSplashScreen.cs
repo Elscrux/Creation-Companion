@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Views.Startup;
 
 public sealed class StartupSplashScreen : IApplicationSplashScreen {
     public string AppName => "Creation Companion";
-    [Reactive]public IImage AppIcon { get; set; }
+    [Reactive] public IImage AppIcon { get; set; }
     public object SplashScreenContent { get; }
     public int MinimumShowTime => 0;
 

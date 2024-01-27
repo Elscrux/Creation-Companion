@@ -23,7 +23,7 @@ public class DesignModSelectionVM : IModSelectionVM {
     public IObservable<bool> AnyModsLoaded { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
     public IObservable<bool> NewModValid { get; } = Observable.Return(true);
-    public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => { });
+    public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
     public string NewModName { get; set; } = "NewMod";
     public ModType NewModType { get; set; } = ModType.Plugin;

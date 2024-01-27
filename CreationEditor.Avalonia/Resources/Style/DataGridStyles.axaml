@@ -142,7 +142,7 @@
         </Style>
         <Style Selector="^ DataGridCell">
             <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeSmall}"/>
-            
+
             <Style Selector="^ Border#CellBorder">
                 <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
             </Style>
@@ -164,7 +164,7 @@
         </Style>
         <Style Selector="^ DataGridCell">
             <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
-            
+
             <Style Selector="^ Border#CellBorder">
                 <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
             </Style>
@@ -185,7 +185,7 @@
         </Style>
         <Style Selector="^ DataGridCell">
             <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
-            
+
             <Style Selector="^ Border#CellBorder">
                 <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
             </Style>
@@ -206,7 +206,7 @@
         </Style>
         <Style Selector="^ DataGridCell">
             <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeLarge}"/>
-            
+
             <Style Selector="^ Border#CellBorder">
                 <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
             </Style>

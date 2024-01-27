@@ -19,7 +19,7 @@ public interface IRecordListVM : IDisposableDropoff {
     IObservable<bool> IsBusy { get; }
 
     IRecordContextMenuProvider RecordContextMenuProvider { get; }
-    
+
     RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords);
     IRecordListVM AddSetting<T>(T t);
 }

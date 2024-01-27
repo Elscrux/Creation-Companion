@@ -440,6 +440,7 @@ public static partial class Interop {
         }
 
         public static void Free(FeatureSetUnmanaged unmanaged) {
+            // Nothing to free
         }
 
         internal struct FeatureSetUnmanaged {
@@ -448,6 +449,7 @@ public static partial class Interop {
             public uint MipMapLevels;
         }
     }
+
     public struct SizeInformation {
         public long SizeInformationStruct;
         public long InitConfigStruct;

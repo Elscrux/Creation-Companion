@@ -30,7 +30,7 @@ public static class InteropUtility {
         var sizeOf = Marshal.SizeOf<T>();
         var pointer = Marshal.AllocCoTaskMem(sizeOf * list.Count);
         for (var i = 0; i < list.Count; i++) {
-            var itemPtr = new IntPtr(pointer + (i * sizeOf));
+            var itemPtr = new IntPtr(pointer + i * sizeOf);
             Marshal.StructureToPtr(list[i], itemPtr, false);
         }
         return pointer;
@@ -40,7 +40,7 @@ public static class InteropUtility {
         var sizeOf = Marshal.SizeOf<T>();
         pointer = Marshal.AllocCoTaskMem(sizeOf * list.Count);
         for (var i = 0; i < list.Count; i++) {
-            var itemPtr = new IntPtr(pointer + (i * sizeOf));
+            var itemPtr = new IntPtr(pointer + i * sizeOf);
             Marshal.StructureToPtr(list[i], itemPtr, false);
         }
 
