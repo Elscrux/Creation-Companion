@@ -165,7 +165,7 @@
                             <ContentControl.ContentTemplate>
                                 <dataTemplates:ConditionDataTemplate
                                     Condition="{Binding}"
-                                    ValueChanged="{Binding DataChanged, Mode=OneWayToSource}"
+                                    ValueChanged="{Binding DataChanged, Mode=TwoWay}"
                                     Context="{Binding #Editor.Context}"
                                     QuestContext="{Binding #Editor.QuestContext}"
                                     LinkCache="{Binding #Editor.LinkCache}"/>
