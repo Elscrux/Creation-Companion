@@ -17,7 +17,6 @@ using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
-using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using Serilog;
@@ -45,7 +44,6 @@ public partial class App : Application {
 
             builder.RegisterModule<MutagenModule>();
             builder.RegisterModule<EditorModule>();
-            builder.RegisterModule<GameSpecificModule<ISkyrimMod, ISkyrimModGetter>>();
             builder.RegisterModule<SkyrimModule>();
 
             LoadPluginModules(builder);
