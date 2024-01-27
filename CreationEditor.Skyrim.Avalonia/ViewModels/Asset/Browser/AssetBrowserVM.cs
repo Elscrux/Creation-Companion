@@ -257,7 +257,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         MoveTo = ReactiveCommand.Create<string>(MoveToPath);
 
-        var src = new CancellationTokenSource();
+        var src = new CancellationTokenSource().DisposeWith(this);
         var cancellationToken = src.Token;
         Task.Run(() => {
             var assetContainer = assetProvider.GetAssetContainer(_root, cancellationToken);

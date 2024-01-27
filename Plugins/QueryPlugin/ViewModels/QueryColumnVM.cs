@@ -23,15 +23,16 @@ public sealed class QueryColumnVM : ViewModel {
             .ThrottleMedium()
             .Subscribe(_ => {
                 lastCancellationTokenSource?.Cancel();
-                var cancellationTokenSource = lastCancellationTokenSource = new CancellationTokenSource();
+                var cancellationTokenSource = lastCancellationTokenSource = new CancellationTokenSource().DisposeWith(this);
+                var cancellationToken = cancellationTokenSource.Token;
                 Task.Run(() => {
                     QueriedFields.Clear();
                     foreach (var obj in QueryVM.QueryRunner.RunQuery()) {
-                        if (cancellationTokenSource.Token.IsCancellationRequested) return;
+                        if (cancellationToken.IsCancellationRequested) return;
 
                         QueriedFields.Add(obj);
                     }
-                }, cancellationTokenSource.Token);
+                }, cancellationToken);
             })
             .DisposeWith(this);
     }
