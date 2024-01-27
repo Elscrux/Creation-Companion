@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Autofac;
@@ -12,9 +14,11 @@ using CreationEditor.Avalonia.Services.Exceptions;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
+using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
@@ -44,6 +48,8 @@ public partial class App : Application {
             builder.RegisterModule<GameSpecificModule<ISkyrimMod, ISkyrimModGetter>>();
             builder.RegisterModule<SkyrimModule>();
 
+            LoadPluginModules(builder);
+
             var window = new MainWindow();
             builder.RegisterInstance(window).As<MainWindow>();
 
@@ -71,5 +77,23 @@ public partial class App : Application {
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+    private void LoadPluginModules(ContainerBuilder builder) {
+        // Load plugins extension modules to include in the base container
+        // TODO: Maybe show a confirmation dialog to select which plugins to load?
+        var pluginService = new PluginsFolderAssemblyProvider(new FileSystem());
+
+        // Note that loading the assemblies alone can lead to
+        // additional registrations being made through assembly scanning
+        var extensionModules = pluginService.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => type.InheritsFrom(typeof(ExtensionModule)))
+            .Select(System.Activator.CreateInstance)
+            .OfType<ExtensionModule>()
+            .ToList();
+        
+        foreach (var extensionModule in extensionModules) {
+            builder.RegisterModule(extensionModule);
+        }
     }
 }
