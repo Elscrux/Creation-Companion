@@ -151,5 +151,11 @@
         <Compile Update="Services\Query\QueryRunner.cs">
           <DependentUpon>IQueryRunner.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Plugin\PluginsFolderAssemblyProvider.cs">
+          <DependentUpon>IPluginAssemblyProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Plugin\AutofacPluginService.cs">
+          <DependentUpon>IPluginService.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

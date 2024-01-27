@@ -21,6 +21,7 @@ using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
+using CreationEditor.Services.Plugin;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 using FluentAvalonia.UI.Windowing;
@@ -74,6 +75,10 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         // Provider
+        builder.RegisterType<PluginsFolderAssemblyProvider>()
+            .As<IPluginAssemblyProvider>()
+            .SingleInstance();
+
         builder.RegisterType<MutagenTypeProvider>()
             .As<IMutagenTypeProvider>()
             .SingleInstance();

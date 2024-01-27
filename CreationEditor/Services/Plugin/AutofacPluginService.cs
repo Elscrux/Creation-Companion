@@ -1,5 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
 using System.Reflection;
 using Autofac;
 using Mutagen.Bethesda.Plugins.Records;
@@ -8,13 +7,12 @@ using Serilog;
 namespace CreationEditor.Services.Plugin;
 
 public sealed class AutofacPluginService<TMod, TModGetter>(
-    IFileSystem fileSystem,
+    IPluginAssemblyProvider pluginAssemblyProvider,
     ILogger logger,
     ILifetimeScope lifetimeScope)
     : IPluginService, IDisposable
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
-    private const string PluginsFolderName = "Plugins";
 
     private readonly List<ILifetimeScope> _pluginScopes = [];
     private readonly PluginContext _pluginContext = new(new Version(1, 0));
@@ -29,38 +27,23 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
     public void ReloadPlugins() {
         UnregisterPlugins();
 
-        var newPlugins = CollectPlugins(Path.Combine(AppContext.BaseDirectory, PluginsFolderName));
+        var newPlugins = GetPlugins();
 
         RegisterPlugins(newPlugins);
     }
 
-    private IPlugin[] CollectPlugins(string pluginsFolder) {
-        // Check plugins folder
-        if (!fileSystem.Directory.Exists(pluginsFolder)) {
-            logger.Here().Warning("Couldn't load any plugins because the plugins folder {PluginsFolder} doesn't exist", pluginsFolder);
-            return [];
-        }
+    private List<IPlugin> GetPlugins() {
+        return pluginAssemblyProvider.GetAssemblies()
+            .SelectMany(assembly => {
+                var plugins = CreatePlugins(assembly).ToList();
 
-        // Get plugin paths
-        var pluginPaths = fileSystem.Directory.GetFiles(pluginsFolder, "*.dll");
-        if (pluginPaths.Length == 0) {
-            logger.Here().Information("Couldn't load any plugins because there were no plugins in {PluginsFolder}", pluginsFolder);
-            return [];
-        }
-
-        // Collect plugins objects from files
-        return pluginPaths
-            .SelectMany(pluginPath => {
-                var assembly = Assembly.LoadFrom(pluginPath);
-                var plugins = assembly is null ? Array.Empty<IPlugin>() : CreatePlugins(assembly).ToArray();
-
-                if (plugins.Length == 0) {
-                    logger.Here().Information("Couldn't load a plugin in file {File} because none of the assembly types implement the {Interface} interface", pluginPath, nameof(IPlugin));
+                if (plugins.Count == 0) {
+                    logger.Here().Information("No plugins found in {Assembly} because none of the assembly's types implement {PluginType}", assembly, nameof(IPlugin));
                 }
                 return plugins;
             })
             .NotNull()
-            .ToArray();
+            .ToList();
     }
 
     private IEnumerable<IPlugin> CreatePlugins(Assembly assembly) {
