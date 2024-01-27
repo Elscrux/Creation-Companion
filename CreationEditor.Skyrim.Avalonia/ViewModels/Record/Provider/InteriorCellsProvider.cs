@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Services.Record.Provider;
@@ -18,6 +19,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IEnumerable<Type> RecordTypes { get; } = [typeof(ICellGetter)];
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }

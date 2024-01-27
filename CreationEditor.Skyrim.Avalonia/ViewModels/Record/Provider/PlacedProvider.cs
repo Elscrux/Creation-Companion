@@ -23,6 +23,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IEnumerable<Type> RecordTypes { get; } = [typeof(IPlacedGetter)];
     [Reactive] public FormKey CellFormKey { get; set; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);

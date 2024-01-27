@@ -17,6 +17,8 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     private readonly CompositeDisposable _referencesDisposable = new();
 
     [Reactive] public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
+    public IEnumerable<Type> RecordTypes => _recordTypes.ToList();
+    private readonly HashSet<Type> _recordTypes = [];
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
@@ -46,6 +48,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                 RecordCache.Edit(updater => {
                     foreach (var identifier in x.Identifiers) {
                         var formKey = identifier.FormKey;
+                        _recordTypes.Add(identifier.Type);
                         if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
                             recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 

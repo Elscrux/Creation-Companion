@@ -16,6 +16,8 @@ public interface IRecordProvider : IDisposable {
 
     IRecordBrowserSettings RecordBrowserSettings { get; }
 
+    IEnumerable<Type> RecordTypes { get; }
+
     /// <summary>
     /// Emits true when records are being loaded and false when loading has finished
     /// </summary>

@@ -16,6 +16,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
     public IList<Type> Types { get; }
     public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IEnumerable<Type> RecordTypes => Types;
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 

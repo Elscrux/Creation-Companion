@@ -18,6 +18,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
+    public IEnumerable<Type> RecordTypes { get; } = [typeof(TMajorRecordGetter)];
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
