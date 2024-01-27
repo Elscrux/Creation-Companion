@@ -90,7 +90,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         if (dataGrid.SelectedItems is null) return;
 
         var keyGesture = new KeyGesture(e.Key, e.KeyModifiers);
-        ViewModel.RecordContextMenuProvider.ExecuteHotkey(keyGesture, () => {
+        ViewModel.RecordContextMenuProvider.TryToExecuteHotkey(keyGesture, () => {
             var selectedRecords = dataGrid.SelectedItems
                 .OfType<IReferencedRecord>()
                 .ToList();

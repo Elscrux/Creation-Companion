@@ -27,7 +27,7 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
 
     }
 
-    public void ExecuteHotkey(KeyGesture keyGesture, Func<RecordListContext> contextFactory) {
+    public void TryToExecuteHotkey(KeyGesture keyGesture, Func<RecordListContext> contextFactory) {
         if (!_hotKeys.TryGetValue(keyGesture, out var recordActions)) return;
 
         var recordAction = recordActions.FirstOrDefault();
