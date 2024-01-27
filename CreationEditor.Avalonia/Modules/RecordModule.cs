@@ -4,10 +4,10 @@ using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.Provider;
-using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Query;
+using IRecordActionsProvider = CreationEditor.Avalonia.Services.Record.Actions.IRecordActionsProvider;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class RecordModule : Module {
@@ -46,17 +46,11 @@ public sealed class RecordModule : Module {
 
         builder.RegisterAssemblyTypes(assemblies)
             .AssignableTo<IRecordActionsProvider>()
-            .AsSelf();
+            .As<IRecordActionsProvider>()
+            .SingleInstance();
 
-        builder.RegisterGeneric(typeof(RecordActionsProvider<,>))
-            .AsSelf();
-
-        builder.RegisterAssemblyTypes(assemblies)
-            .Where(x => x.GetInterfaces().Contains(typeof(IRecordContextMenuProvider)))
-            .AsSelf();
-
-        builder.RegisterGeneric(typeof(RecordContextMenuProvider<,>))
-            .AsSelf();
+        builder.RegisterType<InjectedRecordContextMenuProvider>()
+            .As<IRecordContextMenuProvider>();
 
         // Record Editor
         builder.RegisterType<RecordEditorController>()

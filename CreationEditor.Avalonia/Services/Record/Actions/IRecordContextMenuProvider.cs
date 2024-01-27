@@ -1,9 +1,8 @@
-﻿using System.Windows.Input;
-using CreationEditor.Services.Mutagen.Record;
+﻿using Avalonia.Input;
 namespace CreationEditor.Avalonia.Services.Record.Actions;
 
 public interface IRecordContextMenuProvider {
-    IRecordActionsProvider RecordActionsProvider { get; }
-    ICommand PrimaryCommand { get; }
-    IEnumerable<object> MenuItems { get; }
+    IEnumerable<object> GetMenuItems(RecordListContext context);
+    void ExecutePrimary(RecordListContext context);
+    void ExecuteHotkey(KeyGesture keyGesture, Func<RecordListContext> contextFactory);
 }

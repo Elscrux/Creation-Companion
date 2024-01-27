@@ -1,30 +1,21 @@
-﻿using CreationEditor.Avalonia.Services.Record.Actions;
-using CreationEditor.Avalonia.Services.Record.List;
+﻿using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Filter;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.Provider;
 
 public sealed class RecordListVMBuilder(
     IRecordProviderFactory recordProviderFactory,
-    Func<IRecordProvider, Func<IObservable<IMajorRecordGetter?>, IRecordContextMenuProvider>, IRecordListVM> recordListVMFactory,
-    Func<IObservable<IMajorRecordGetter?>, UntypedRecordContextMenuProvider> defaultContextMenuProviderFactory,
+    Func<IRecordProvider, IRecordListVM> recordListVMFactory,
     IRecordBrowserSettings defaultRecordBrowserSettings)
     : IRecordListVMBuilder {
 
-    private Func<IObservable<IMajorRecordGetter?>, IRecordContextMenuProvider> _contextMenuProviderFactory = defaultContextMenuProviderFactory;
     private IExtraColumnsBuilder? _extraColumnsBuilder;
 
     public IRecordListVMBuilder WithExtraColumns(IExtraColumnsBuilder extraColumnsBuilder) {
         _extraColumnsBuilder = extraColumnsBuilder;
-        return this;
-    }
-
-    public IRecordListVMBuilder WithContextMenuProviderFactory(Func<IObservable<IMajorRecordGetter?>, IRecordContextMenuProvider> contextMenuProviderFactory) {
-        _contextMenuProviderFactory = contextMenuProviderFactory;
         return this;
     }
 
@@ -44,7 +35,7 @@ public sealed class RecordListVMBuilder(
     }
 
     public IRecordListVM BuildWithSource(IRecordProvider recordProvider) {
-        var recordListVM = recordListVMFactory(recordProvider, _contextMenuProviderFactory);
+        var recordListVM = recordListVMFactory(recordProvider);
         recordProvider.DisposeWith(recordListVM);
 
         if (_extraColumnsBuilder is not null) {

@@ -12,33 +12,26 @@
     <Grid>
         <!-- Background needs to be transparent to make the context menu work in empty area -->
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
-        <DataGrid x:Name="RecordGrid"
-                  Background="{DynamicResource SystemControlTransparentBrush}"
-                  ItemsSource="{Binding Records}"
-                  SelectedItem="{Binding SelectedRecord}"
-                  CanUserSortColumns="True"
-                  CanUserReorderColumns="True" CanUserResizeColumns="True"
-                  AutoGenerateColumns="False"
-                  attached:FormLinkDragDrop.AllowDragDataGrid="True"
-                  attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
-                  attached:DragDropExtended.AllowDrag="True"
-                  attached:DoubleTappedProperty.Command="{Binding RecordContextMenuProvider.PrimaryCommand}"
-                  attached:DoubleTappedProperty.CommandParameter="{Binding SelectedRecord, Converter={x:Static converter:ReferencedRecordConverter.ToRecord}}"
-                  IsReadOnly="True">
-            <DataGrid.KeyBindings>
-                <KeyBinding Gesture="Delete"
-                            Command="{Binding RecordContextMenuProvider.RecordActionsProvider.Delete}"/>
-                <KeyBinding Gesture="Ctrl+D"
-                            Command="{Binding RecordContextMenuProvider.RecordActionsProvider.Duplicate}"/>
-            </DataGrid.KeyBindings>
-            <DataGrid.ContextFlyout>
-                <MenuFlyout ItemsSource="{Binding RecordContextMenuProvider.MenuItems}"/>
-            </DataGrid.ContextFlyout>
-        </DataGrid>
+        <DataGrid
+            x:Name="RecordGrid"
+            DoubleTapped="RecordGrid_OnDoubleTapped"
+            ContextRequested="RecordGrid_ContextRequested"
+            Background="{DynamicResource SystemControlTransparentBrush}"
+            ItemsSource="{Binding Records}"
+            SelectedItem="{Binding SelectedRecord}"
+            CanUserSortColumns="True"
+            CanUserReorderColumns="True" CanUserResizeColumns="True"
+            AutoGenerateColumns="False"
+            KeyDown="RecordGrid_OnKeyDown"
+            attached:FormLinkDragDrop.AllowDragDataGrid="True"
+            attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
+            attached:DragDropExtended.AllowDrag="True"
+            IsReadOnly="True"/>
 
-        <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusy^, FallbackValue=false}"
-                                           HorizontalAlignment="Left" VerticalAlignment="Top"
-                                           Width="100" Height="100"
-                                           Margin="50"/>
+        <avaloniaProgressRing:ProgressRing
+            IsActive="{Binding IsBusy^, FallbackValue=false}"
+            HorizontalAlignment="Left" VerticalAlignment="Top"
+            Width="100" Height="100"
+            Margin="50"/>
     </Grid>
 </UserControl>

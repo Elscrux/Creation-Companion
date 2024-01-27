@@ -1,10 +1,8 @@
-﻿using CreationEditor.Avalonia.Services.Record.Actions;
-using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
+﻿using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Filter;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Services.Record.List;
 
 public interface IRecordListVMBuilder {
@@ -14,13 +12,6 @@ public interface IRecordListVMBuilder {
     /// <param name="extraColumnsBuilder">Extra columns builder to use</param>
     /// <returns>This instance for builder pattern</returns>
     IRecordListVMBuilder WithExtraColumns(IExtraColumnsBuilder extraColumnsBuilder);
-
-    /// <summary>
-    /// Set the record provider factory to use when creating record lists. If not set, the default factory will be used.
-    /// </summary>
-    /// <param name="contextMenuProviderFactory">Context menu provider factory to use</param>
-    /// <returns>This instance for builder pattern</returns>
-    IRecordListVMBuilder WithContextMenuProviderFactory(Func<IObservable<IMajorRecordGetter?>, IRecordContextMenuProvider> contextMenuProviderFactory);
 
     /// <summary>
     /// Set the default record browser settings to use when creating record lists. If not set, the default settings will be used.

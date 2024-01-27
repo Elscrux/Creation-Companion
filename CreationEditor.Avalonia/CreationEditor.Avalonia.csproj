@@ -103,6 +103,12 @@
         <Compile Update="Services\Avalonia\MenuItemProvider.cs">
           <DependentUpon>IMenuItemProvider.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Record\Actions\GenericRecordActionsProvider.cs">
+          <DependentUpon>IRecordActionsProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Record\Actions\InjectedRecordContextMenuProvider.cs">
+          <DependentUpon>IRecordContextMenuProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
-using CreationEditor.Avalonia.Services.Record.Actions;
+﻿using System.Reactive;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
@@ -9,10 +6,8 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
-using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
@@ -35,8 +30,7 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
         IExtraColumnsBuilder extraColumnsBuilder,
         ExteriorCellsProvider exteriorCellsProvider,
         IViewportRuntimeService viewportRuntimeService,
-        ILinkCacheProvider linkCacheProvider,
-        Func<IObservable<ICellGetter?>, ICellLoadStrategy, CellContextMenuProvider> cellContextMenuProviderFactory) {
+        ILinkCacheProvider linkCacheProvider) {
         _viewportRuntimeService = viewportRuntimeService;
         ExteriorCellsProvider = exteriorCellsProvider.DisposeWith(this);
 
@@ -44,8 +38,8 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
             .WithExtraColumns(extraColumnsBuilder
                 .AddRecordType<ICellGetter>()
                 .AddColumnType<CellGridExtraColumns>())
-            .WithContextMenuProviderFactory(CreateContextMenuProvider)
             .BuildWithSource(ExteriorCellsProvider)
+            .AddSetting<ICellLoadStrategy>(this)
             .DisposeWith(this);
 
         SelectGridCell = ReactiveCommand.Create(() => {
@@ -65,9 +59,6 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
                 break;
             }
         });
-
-        IRecordContextMenuProvider CreateContextMenuProvider(IObservable<IMajorRecordGetter?> selectedRecords)
-            => cellContextMenuProviderFactory(selectedRecords!.OfType<ICellGetter?>(), this);
     }
 
     public void LoadCell(ICellGetter cell) {

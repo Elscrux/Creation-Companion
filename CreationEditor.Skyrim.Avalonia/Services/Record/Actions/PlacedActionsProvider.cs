@@ -1,5 +1,5 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Collections.Generic;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Services.Environment;
@@ -9,24 +9,16 @@ using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public sealed class PlacedActionsProvider : IRecordActionsProvider {
-    private readonly RecordActionsProvider<IPlaced, IPlacedGetter> _placedActionsProvider;
-
-    public ReactiveCommand<Type?, Unit> New => _placedActionsProvider.New;
-    public ReactiveCommand<object?, Unit> Edit => _placedActionsProvider.Edit;
-    public ReactiveCommand<object?, Unit> EditBase { get; }
-    public ReactiveCommand<object?, Unit> Duplicate => _placedActionsProvider.Duplicate;
-    public ReactiveCommand<object?, Unit> Delete => _placedActionsProvider.Delete;
-    public ReactiveCommand<object?, Unit> OpenReferences => _placedActionsProvider.OpenReferences;
+    private readonly IList<RecordAction> _actions;
 
     public PlacedActionsProvider(
-        RecordActionsProvider<IPlaced, IPlacedGetter> placedActionsProvider,
+        IMenuItemProvider menuItemProvider,
         ILinkCacheProvider linkCacheProvider,
         IRecordEditorController recordEditorController,
         IRecordController recordController) {
-        _placedActionsProvider = placedActionsProvider;
 
-        EditBase = ReactiveCommand.Create<object?>(obj => {
-            if (obj is not IPlacedObjectGetter placedObject) return;
+        var editBaseCommand = ReactiveCommand.Create<RecordListContext>(context => {
+            if (context.SelectedRecords[0].Record is not IPlacedObjectGetter placedObject) return;
 
             var placeable = placedObject.Base.TryResolve(linkCacheProvider.LinkCache);
             if (placeable is null) return;
@@ -34,5 +26,16 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
             var newOverride = recordController.GetOrAddOverride<IPlaceableObject, IPlaceableObjectGetter>(placeable);
             recordEditorController.OpenEditor(newOverride);
         });
+
+        _actions = new RecordAction[] {
+            new(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is IPlacedObjectGetter,
+                45,
+                RecordActionGroup.Modification,
+                editBaseCommand,
+                context => menuItemProvider.View(editBaseCommand, context))
+        };
+
     }
+
+    public IEnumerable<RecordAction> GetActions() => _actions;
 }
