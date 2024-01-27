@@ -20,7 +20,7 @@ public sealed class BSEViewportFactory(
     private readonly Subject<Unit> _viewportInitialized = new();
     public IObservable<Unit> ViewportInitialized => _viewportInitialized;
 
-    public async Task<Func<Control>> CreateViewport() {
+    public Task<Func<Control>> CreateViewport() {
         // Run startup logic
         Task.Run(StartupEditor)
             .FireAndForget(e => logger.Here().Error("Initializing viewport failed: {Message}", e.ToString()));
@@ -31,11 +31,11 @@ public sealed class BSEViewportFactory(
         // Capture the viewport process and embed it
         var mainWindowHandle = GetMainWindowHandle();
 
-        return () => {
+        return Task.FromResult<Func<Control>>(() => {
             var viewportHost = new WindowHandleHost(mainWindowHandle, "Viewport");
             _viewportInitialized.OnNext(Unit.Default);
             return viewportHost;
-        };
+        });
     }
 
     private void StartupEditor() {
