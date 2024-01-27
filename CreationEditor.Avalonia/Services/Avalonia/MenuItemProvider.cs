@@ -17,6 +17,17 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return menuItem;
     }
 
+    public MenuItem Save(ICommand command, object? parameter = null, string? customHeader = null) {
+        return Init(
+            new MenuItem {
+                Command = command,
+                Icon = new SymbolIcon { Symbol = Symbol.Save },
+                Header = customHeader ?? "Save",
+            },
+            parameter,
+            new KeyGesture(Key.S, KeyModifiers.Control));
+    }
+
     public MenuItem View(ICommand command, object? parameter = null, string? customHeader = null) {
         return Init(
             new MenuItem {

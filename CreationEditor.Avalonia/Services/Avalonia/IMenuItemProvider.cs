@@ -4,6 +4,7 @@ using Avalonia.Input;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
 public interface IMenuItemProvider {
+    MenuItem Save(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem View(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem New(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem Edit(ICommand command, object? parameter = null, string? customHeader = null);
