@@ -47,12 +47,6 @@
                       Classes="NoCellSelection"
                       attached:DoubleTappedProperty.Command="{Binding ToggleActive}">
 
-                <Interaction.Behaviors>
-                    <behavior:DataGridSelectionBehavior
-                        EnabledMapping="MastersValid"
-                        SelectionGuard="{Binding CanSelect}"/>
-                </Interaction.Behaviors>
-
                 <DataGrid.KeyBindings>
                     <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>
                 </DataGrid.KeyBindings>
@@ -62,6 +56,12 @@
                         <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}"/>
                     </MenuFlyout>
                 </DataGrid.ContextFlyout>
+
+                <Interaction.Behaviors>
+                    <behavior:DataGridSelectionBehavior
+                        EnabledMapping="MastersValid"
+                        SelectionGuard="{Binding CanSelect}"/>
+                </Interaction.Behaviors>
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name"
