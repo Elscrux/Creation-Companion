@@ -5,11 +5,7 @@ using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class DockDragBehavior : Behavior<Control> {
-    private readonly DragHandler _dragHandler;
-
-    public DockDragBehavior() {
-        _dragHandler = new DragHandler(Drag);
-    }
+    private readonly DragHandler _dragHandler = new(Drag);
 
     protected override void OnAttached() {
         base.OnAttached();
