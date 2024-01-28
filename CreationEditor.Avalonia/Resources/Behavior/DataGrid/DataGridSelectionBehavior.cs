@@ -2,7 +2,6 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
@@ -35,7 +34,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     public bool AddColumn { get; init; } = true;
     public bool AddContextFlyout { get; init; } = true;
-    public bool AddKeyBind { get; init; } = true;
+    public bool AddKeyBinding { get; init; } = true;
+
+    public bool ColumnEnabled { get; set; }
+    public bool ContextFlyoutEnabled { get; set; }
+    public bool KeyBindingEnabled { get; set; }
 
     public Key ToggleSelectionKeyBinding { get; init; } = Key.Space;
 
@@ -72,12 +75,16 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
         if (AddColumn) AddSelectionColumn();
         if (AddContextFlyout) AddSelectionMenu();
-        if (AddKeyBind) AddKeyBindings();
+        if (AddKeyBinding) AddKeyBindings();
 
         if (AssociatedObject is not null) AssociatedObject.LayoutUpdated += UpdateAllChecked;
     }
 
     protected override void OnDetaching() {
+        if (ColumnEnabled) RemoveSelectionColumn();
+        if (ContextFlyoutEnabled) RemoveSelectionMenu();
+        if (KeyBindingEnabled) RemoveKeyBindings();
+
         if (AssociatedObject is not null) AssociatedObject.LayoutUpdated -= UpdateAllChecked;
 
         _attachedDisposable.Clear();
@@ -140,6 +147,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         AssociatedObject?.Columns.Insert(0, new DataGridTemplateColumn {
             HeaderTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
                 var checkBox = new CheckBox {
+                    [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
                     MinWidth = 20,
                     DataContext = this,
@@ -186,32 +194,65 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
             IsReadOnly = true,
             Width = new DataGridLength(columnWidth)
         });
+
+        ColumnEnabled = true;
+    }
+
+    private void RemoveSelectionColumn() {
+        AssociatedObject?.Columns?.RemoveAt(0);
+        ColumnEnabled = false;
     }
 
     private void AddSelectionMenu() {
         if (AssociatedObject is null) return;
 
         AssociatedObject.ContextFlyout ??= new MenuFlyout();
-        if (AssociatedObject.ContextFlyout is not MenuFlyout { ItemsSource: AvaloniaList<object> menuList }) return;
+        if (AssociatedObject.ContextFlyout is not MenuFlyout menuFlyout) return;
 
-        menuList.InsertRange(0, new TemplatedControl[] {
-            new MenuItem {
-                Header = "Select All",
-                Command = ReactiveCommand.Create(() => SelectDynamic())
-            },
-            new MenuItem {
-                Header = "Invert",
-                Command = ReactiveCommand.Create(InvertAll),
-            },
-            new Separator(),
+        if (menuFlyout.Items.Count > 0) menuFlyout.Items.Insert(0, new Separator());
+        menuFlyout.Items.Insert(0, new MenuItem {
+            [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
+            Header = "Invert",
+            Command = ReactiveCommand.Create(InvertAll),
         });
+        menuFlyout.Items.Insert(0, new MenuItem {
+            [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
+            Header = "Select All",
+            Command = ReactiveCommand.Create(() => SelectDynamic())
+        });
+
+        ContextFlyoutEnabled = true;
+    }
+
+    private void RemoveSelectionMenu() {
+        if (AssociatedObject?.ContextFlyout is not MenuFlyout menuFlyout) return;
+
+        if (menuFlyout.Items.Count > 2) {
+            menuFlyout.Items.RemoveAt(0);
+            menuFlyout.Items.RemoveAt(0);
+            menuFlyout.Items.RemoveAt(0);
+        } else {
+            menuFlyout.Items.Clear();
+        }
+
+        ContextFlyoutEnabled = false;
     }
 
     private void AddKeyBindings() {
-        AssociatedObject?.KeyBindings.Add(new KeyBinding {
+        AssociatedObject?.KeyBindings.Insert(0, new KeyBinding {
             Command = ReactiveCommand.Create(ToggleSelection),
             Gesture = new KeyGesture(ToggleSelectionKeyBinding),
         });
+
+        KeyBindingEnabled = true;
+    }
+
+    private void RemoveKeyBindings() {
+        if (AssociatedObject is null) return;
+
+        AssociatedObject.KeyBindings.RemoveAt(0);
+
+        KeyBindingEnabled = false;
     }
 
     private void TryProcess(Action action) {
