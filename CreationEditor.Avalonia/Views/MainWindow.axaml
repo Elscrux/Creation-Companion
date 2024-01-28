@@ -188,7 +188,6 @@
                                      MinWidth="250"
                                      MaxWidth="500"
                                      Watermark="Search"
-                                     Classes="SampleApp"
                                      ItemsSource="{Binding Actions}">
                         <!-- ValueMemberBinding="{Binding Header, DataType=vm:MainAppSearchItem}" -->
                         <!--wnd:AppWindow.AllowInteractionInTitleBar="True"-->
