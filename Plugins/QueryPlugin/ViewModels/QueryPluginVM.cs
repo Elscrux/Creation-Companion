@@ -4,6 +4,7 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
+using DynamicData.Binding;
 using QueryPlugin.Views;
 using ReactiveUI;
 namespace QueryPlugin.ViewModels;
@@ -26,6 +27,9 @@ public sealed class QueryPluginVM : ViewModel {
     public ReactiveCommand<QueryColumnVM, Unit> DuplicateColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> CopyColumnText { get; }
+    public ReactiveCommand<Unit, Unit> RestoreColumns { get; }
+
+    public IObservableCollection<IQueryRunner> Queries { get; }
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
@@ -35,6 +39,8 @@ public sealed class QueryPluginVM : ViewModel {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
         ColumnsGrid.Children.Add(_paddingRight);
+
+        Queries = new ObservableCollectionExtended<IQueryRunner>(queryState.LoadAllQueries());
 
         AddColumn = ReactiveCommand.Create(() => {
             InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
@@ -53,7 +59,6 @@ public sealed class QueryPluginVM : ViewModel {
             var insertedColumn = InsertColumn(columnIndex + 2);
             if (insertedColumn.ViewModel is null) return;
 
-            insertedColumn.ViewModel.Name = vm.Name;
             insertedColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(vm.QueryVM.QueryRunner.CreateMemento());
         });
 
@@ -68,6 +73,16 @@ public sealed class QueryPluginVM : ViewModel {
 
             var text = string.Join(Environment.NewLine, vm.QueriedFields);
             clipboard?.SetTextAsync(text);
+        });
+
+        RestoreColumns = ReactiveCommand.Create(() => {
+            foreach (var query in Queries) {
+                var queryColumn = InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
+                if (queryColumn.ViewModel is null) continue;
+
+                queryColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(query.CreateMemento());
+            }
+            Queries.Clear();
         });
     }
 
