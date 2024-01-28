@@ -9,7 +9,6 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Definitions;
-using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -28,9 +27,8 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
 
     [Reactive] public bool IsBusy { get; set; }
-    public ModKey ActiveModKey { get; set; } = ModKey.Null;
 
-    public ReactiveCommand<Unit, Unit> Run { get; }
+    public ReactiveCommand<ModKey, Unit> Run { get; }
 
     public VanillaDuplicateCleanerVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
@@ -44,19 +42,17 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
         ModPickerVM.MultiSelect = false;
 
-        ModPickerVM.SelectedMods
-            .Subscribe(mods => {
+        ModPickerVM.SelectedModKey
+            .Subscribe(modKey => {
                 Records.Clear();
-                ActiveModKey = ModKey.Null;
-                if (mods.Count == 0) return;
+                if (modKey.IsNull) return;
 
-                ActiveModKey = mods.First().ModKey;
-                Records.Add(Process(ActiveModKey).Select(diff => new SelectableRecordDiff(diff)));
+                Records.AddRange(Process(modKey).Select(diff => new SelectableRecordDiff(diff)));
             });
 
-        Run = ReactiveCommand.CreateRunInBackground(() => {
+        Run = ReactiveCommand.CreateRunInBackground<ModKey>(modKey => {
             Dispatcher.UIThread.Post(() => IsBusy = true);
-            Save(ActiveModKey);
+            Save(modKey);
             Dispatcher.UIThread.Post(() => IsBusy = false);
         });
     }
