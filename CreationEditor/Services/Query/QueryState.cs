@@ -16,6 +16,7 @@ public sealed class JsonQueryState(
     IContractResolver contractResolver,
     ILogger logger,
     IFileSystem fileSystem,
+    Func<IQueryRunner> queryRunnerFactory,
     IStatePathProvider statePathProvider)
     : IQueryState {
 
@@ -32,7 +33,14 @@ public sealed class JsonQueryState(
         return fileSystem.Directory
             .EnumerateFiles(statePathProvider.GetDirectoryPath(), "*.json")
             .Select(filePath => fileSystem.File.ReadAllText(filePath))
-            .Select(json => JsonConvert.DeserializeObject<IQueryRunner>(json, _serializerSettings))
+            .Select(json => {
+                var memento = JsonConvert.DeserializeObject<QueryRunnerMemento>(json, _serializerSettings);
+                if (memento is null) return null;
+
+                var queryRunner = queryRunnerFactory();
+                queryRunner.RestoreMemento(memento);
+                return queryRunner;
+            })
             .NotNull();
     }
 
