@@ -6,6 +6,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using DynamicData;
 using DynamicData.Binding;
+using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,6 +19,8 @@ public sealed class ModPickerVM : ViewModel {
 
     public ReadOnlyObservableCollection<LoadOrderModItem> Mods { get; }
     public IObservable<IReadOnlyCollection<LoadOrderModItem>> SelectedMods { get; }
+    public IObservable<LoadOrderModItem?> SelectedMod { get; }
+    public IObservable<ModKey> SelectedModKey { get; }
 
     public ModPickerVM(
         ILinkCacheProvider linkCacheProvider,
@@ -40,6 +43,14 @@ public sealed class ModPickerVM : ViewModel {
 
         var modSelected = Mods.ToObservableChangeSet()
             .AutoRefresh(modItem => modItem.IsSelected);
+
+        SelectedMod = modSelected
+            .ToCollection()
+            .Select(mods => mods.FirstOrDefault(mod => mod.IsSelected));
+
+        SelectedModKey = modSelected
+            .ToCollection()
+            .Select(mods => mods.FirstOrDefault(mod => mod.IsSelected)?.ModKey ?? ModKey.Null);
 
         SelectedMods = modSelected
             .ToCollection()
