@@ -6,13 +6,15 @@ using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query;
 
-public sealed class QueryRunner : IQueryRunner, IDisposable {
+public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
     private readonly DisposableBucket _disposables = new();
     private readonly IQueryConditionFactory _queryConditionFactory;
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.NewGuid();
+    [Reactive] public string Name { get; set; } = string.Empty;
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
@@ -102,6 +104,8 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
     public QueryRunnerMemento CreateMemento() {
         return new QueryRunnerMemento(
+            Id,
+            Name,
             QueryFrom.CreateMemento(),
             QueryConditions.Select(x => x.CreateMemento()).ToList(),
             OrderBySelector.CreateMemento(),
@@ -109,6 +113,8 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
     }
 
     public void RestoreMemento(QueryRunnerMemento memento) {
+        Id = memento.Id;
+        Name = memento.Name;
         QueryFrom.RestoreMemento(memento.QueryFrom);
         QueryConditions.Clear();
         QueryConditions.AddRange(memento.QueryConditions.Select(entryMemento => {
