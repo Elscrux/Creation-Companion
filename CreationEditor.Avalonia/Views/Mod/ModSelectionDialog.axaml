@@ -48,7 +48,7 @@
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
                         IsEnabled="{Binding CanLoad^}"
-                        Classes="AccentButton"
+                        Classes="Accent"
                         Content="Load"
                         Command="{Binding #Popup.LoadAndHide}"/>
                     <Button

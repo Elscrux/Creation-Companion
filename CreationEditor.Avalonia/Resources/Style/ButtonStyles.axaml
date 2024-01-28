@@ -18,7 +18,7 @@
     </Style>
 
     <!-- Copied from https://github.com/amwx/FluentAvalonia/blob/master/src/FluentAvalonia/Styling/ControlThemes/BasicControls/ButtonStyles.axaml -->
-    <Style Selector="Button.AccentButton">
+    <Style Selector="Button.Accent">
         <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="CornerRadius" Value="5"/>
             <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}"/>
