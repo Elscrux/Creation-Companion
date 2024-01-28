@@ -220,7 +220,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
     }
 
     public IEnumerable<ICompareFunction> Get(Type type) {
-        if (type.InheritsFrom(typeof(ReadOnlyMemorySlice<>))) return Array.Empty<ICompareFunction>();
+        if (type.InheritsFrom(typeof(ReadOnlyMemorySlice<>))) return [];
 
         type = type.InheritsFrom(typeof(Nullable<>))
             ? type.GetGenericArguments()[0]
@@ -230,7 +230,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             .OrderByDescending(x => x.Priority)
             .FirstOrDefault(x => x.Accepts(type));
 
-        return priorityCategory?.CompareFunctions ?? Array.Empty<ICompareFunction>();
+        return priorityCategory?.CompareFunctions ?? [];
     }
 
     private sealed record FunctionCategory(IEnumerable<ICompareFunction> CompareFunctions, Func<Type, bool> Accepts, int Priority);

@@ -10,7 +10,7 @@ public struct CacheValidationResult<TContent> {
     }
 
     public static CacheValidationResult<TContent> FullyInvalid() {
-        return new CacheValidationResult<TContent>(true, Array.Empty<TContent>());
+        return new CacheValidationResult<TContent>(true, []);
     }
 
     public static CacheValidationResult<TContent> PartlyInvalid(IList<TContent> invalidatedContent) {
@@ -18,6 +18,6 @@ public struct CacheValidationResult<TContent> {
     }
 
     public static CacheValidationResult<TContent> Valid() {
-        return new CacheValidationResult<TContent>(false, Array.Empty<TContent>());
+        return new CacheValidationResult<TContent>(false, []);
     }
 }

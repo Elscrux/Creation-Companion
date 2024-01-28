@@ -230,7 +230,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
                     IPackageGetter p when p.OwnerQuest.IsNull => ConditionConstants.PackageOnlyFunctions,
                     IPackageGetter => ConditionConstants.PackageOnlyFunctions.Concat(ConditionConstants.QuestOnlyFunctions),
                     ICameraPathGetter => ConditionConstants.CameraPathOnlyFunctions,
-                    _ => Array.Empty<Condition.Function>()
+                    _ => []
                 };
             })
             .Select(additional => ConditionConstants.BaseFunctions.Concat(additional))

@@ -373,7 +373,7 @@ public static partial class Interop {
         public uint Version = CurrentVersion;
         public string AssetDirectory = string.Empty;
         public ulong SizeOfWindowHandles = 0;
-        public IntPtr[] WindowHandles = Array.Empty<nint>();
+        public IntPtr[] WindowHandles = [];
         public FeatureSet FeatureSet = new();
     }
 

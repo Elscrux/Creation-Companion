@@ -138,7 +138,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 .ThrottleMedium()
                 .Select(tuple => Selector(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
 
-        AssetTreeSource = new HierarchicalTreeDataGridSource<AssetTreeItem>(Array.Empty<AssetTreeItem>()) {
+        AssetTreeSource = new HierarchicalTreeDataGridSource<AssetTreeItem>([]) {
             Columns = {
                 new HierarchicalExpanderColumn<AssetTreeItem>(
                     new TemplateColumn<AssetTreeItem>(

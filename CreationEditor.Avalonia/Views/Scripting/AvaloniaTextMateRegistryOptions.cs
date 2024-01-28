@@ -103,7 +103,7 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
         return _availableGrammarDefinitions.Find(availableGrammar => string.Equals(availableGrammar.Name, scopeName));
     }
 
-    public ICollection<string> GetInjections(string scopeName) => Array.Empty<string>();
+    public ICollection<string> GetInjections(string scopeName) => [];
 
     public IRawTheme? GetDefaultTheme() => LoadTheme(_defaultTheme);
 }

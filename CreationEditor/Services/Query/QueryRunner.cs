@@ -54,7 +54,7 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
             .Select(_ => QueryConditions
                 .Select(c => c.Summary)
                 .CombineLatest()
-                .StartWith(Array.Empty<string>()))
+                .StartWith([]))
             .Switch()
             .CombineLatest(selectionChanged, (conditions, query) => (Conditions: conditions, Query: query))
             .ThrottleMedium()

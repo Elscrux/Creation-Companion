@@ -24,7 +24,7 @@ public sealed class InteropTest {
 
     private static async void TestInit() {
         var task = await Record.ExceptionAsync(() => Task.Run(() => {
-            var initTgEditor = InitTGEditor(InitConfig, Array.Empty<string>(), 0);
+            var initTgEditor = InitTGEditor(InitConfig, [], 0);
             Console.WriteLine(initTgEditor);
             // Assert.NotEqual(-1, initTgEditor);
         }));

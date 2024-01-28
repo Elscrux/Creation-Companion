@@ -310,7 +310,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .Select(x => x.Any(modItem => modItem.IsSelected));
 
         var scopedRecordsCollection = this.WhenAnyValue(x => x.ScopedRecords)
-            .Select(idents => (idents ?? Array.Empty<IMajorRecordGetter>()).AsObservableChangeSet())
+            .Select(idents => (idents ?? []).AsObservableChangeSet())
             .Switch()
             .ToObservableCollection(ActivatedDisposable);
 

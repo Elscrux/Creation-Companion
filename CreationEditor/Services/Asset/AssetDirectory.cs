@@ -169,7 +169,7 @@ public sealed class AssetDirectory : IAsset {
         }
 
         var addedDirectories = new HashSet<string>(AssetCompare.PathComparer);
-        IEnumerable<IAsset> assets = Array.Empty<IAsset>();
+        IEnumerable<IAsset> assets = [];
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
                 .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService) : null)

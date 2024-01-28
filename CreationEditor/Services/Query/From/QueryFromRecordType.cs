@@ -26,7 +26,7 @@ public sealed class QueryFromRecordType : ReactiveObject, IQueryFrom {
 
     public IEnumerable<IMajorRecordGetter> GetRecords() {
         return SelectedItem is null
-            ? Array.Empty<IMajorRecordGetter>()
+            ? []
             : _modScopeProvider.SelectedMods.WinningOverrides(SelectedItem.Type);
     }
 

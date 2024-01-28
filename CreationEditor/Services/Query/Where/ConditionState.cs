@@ -46,7 +46,7 @@ public sealed class ConditionState : ReactiveObject {
     public IObservable<IList<string>> Summary => SubConditions
         .Select(x => x.Summary)
         .CombineLatest()
-        .StartWith(Array.Empty<string>());
+        .StartWith([]);
 
     public string GetFullSummary(IList<string> summaries) {
         if (summaries.Count > SubConditions.Count) return string.Empty;

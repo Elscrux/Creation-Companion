@@ -126,10 +126,7 @@ public sealed class HashFileSystemValidation(
 
     private async Task<HashFileSystemCacheData> BuildCache(string rootDirectoryPath) {
         var rootDirectory = await BuildDirectoryCache(rootDirectoryPath, 1)
-         ?? new HashDirectoryCacheData(
-                fileSystem.Path.GetFileName(rootDirectoryPath),
-                Array.Empty<HashDirectoryCacheData>(),
-                Array.Empty<HashFileCacheData>());
+         ?? new HashDirectoryCacheData(fileSystem.Path.GetFileName(rootDirectoryPath), [], []);
 
         return new HashFileSystemCacheData(fileSystem.GetHashBytesLength(), rootDirectory);
 

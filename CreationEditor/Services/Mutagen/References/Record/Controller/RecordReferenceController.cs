@@ -81,7 +81,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {
-        return _referenceCache?.GetReferences(formKey, _editorEnvironment.LinkCache) ?? Array.Empty<IFormLinkIdentifier>();
+        return _referenceCache?.GetReferences(formKey, _editorEnvironment.LinkCache) ?? [];
     }
 
     public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)

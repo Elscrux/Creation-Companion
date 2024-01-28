@@ -34,7 +34,7 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
     }
 
     private IEnumerable<IQueryField> GetFields() {
-        if (RecordType is null) return Array.Empty<IQueryField>();
+        if (RecordType is null) return [];
 
         if (!RecordType.IsInterface) {
             return GetQueryFields(RecordType);
