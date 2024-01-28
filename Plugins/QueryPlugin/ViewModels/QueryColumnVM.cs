@@ -8,7 +8,6 @@ using ReactiveUI.Fody.Helpers;
 namespace QueryPlugin.ViewModels;
 
 public sealed class QueryColumnVM : ViewModel {
-    [Reactive] public string Name { get; set; } = string.Empty;
     [Reactive] public IList<MenuItem>? MenuItems { get; set; }
 
     public IObservableCollection<object?> QueriedFields { get; } = new ObservableCollectionExtended<object?>();

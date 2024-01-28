@@ -16,7 +16,7 @@
             <Grid ColumnDefinitions="*,5,Auto,5,Auto"
                   ToolTip.Tip="{Binding QueryVM.QueryRunner.Summary^}">
                 <TextBox Grid.Column="0"
-                         Text="{Binding Name}"
+                         Text="{Binding QueryVM.QueryRunner.Name}"
                          Watermark="Column Name"/>
 
                 <Button Grid.Column="2"
