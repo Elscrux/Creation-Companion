@@ -24,7 +24,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
     private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
-    public ModPickerVM ModPickerVM { get; }
+    public SingleModPickerVM ModPickerVM { get; }
     public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
 
     [Reactive] public bool IsBusy { get; set; }
@@ -35,20 +35,19 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         IRecordReferenceController recordReferenceController,
         IModSaveService modSaveService,
-        ModPickerVM modPickerVM) {
+        SingleModPickerVM modPickerVM) {
         _editorEnvironment = editorEnvironment;
         _modSaveService = modSaveService;
         RecordReferenceController = recordReferenceController;
         ModPickerVM = modPickerVM;
         ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
-        ModPickerVM.MultiSelect = false;
 
-        ModPickerVM.SelectedModKey
-            .Subscribe(modKey => {
+        ModPickerVM.WhenAnyValue(x => x.SelectedMod)
+            .Subscribe(mod => {
                 Records.Clear();
-                if (modKey.IsNull) return;
+                if (mod == null || mod.ModKey.IsNull) return;
 
-                Records.AddRange(Process(modKey).Select(diff => new SelectableRecordDiff(diff)));
+                Records.AddRange(Process(mod.ModKey).Select(diff => new SelectableRecordDiff(diff)));
             });
 
         Run = ReactiveCommand.CreateRunInBackground<ModKey>(modKey => {

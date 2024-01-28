@@ -136,7 +136,7 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<ModSelectionVM>()
-            .As<ModSelectionVM>();
+            .AsSelf();
 
         builder.RegisterType<RecordBrowserVM>()
             .As<IRecordBrowserVM>();
@@ -145,12 +145,15 @@ public sealed class MainModule : Module {
             .As<IRecordListVM>();
 
         builder.RegisterType<ReferenceBrowserVM>()
-            .As<ReferenceBrowserVM>();
+            .AsSelf();
 
         builder.RegisterType<ReferenceRemapperVM>()
-            .As<ReferenceRemapperVM>();
+            .AsSelf();
 
-        builder.RegisterType<ModPickerVM>()
-            .As<ModPickerVM>();
+        builder.RegisterType<SingleModPickerVM>()
+            .AsSelf();
+
+        builder.RegisterType<MultiModPickerVM>()
+            .AsSelf();
     }
 }

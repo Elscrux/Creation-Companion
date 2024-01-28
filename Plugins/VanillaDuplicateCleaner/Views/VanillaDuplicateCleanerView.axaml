@@ -88,7 +88,7 @@
                                 Spacing="5">
                         <Button Content="Run"
                                 Command="{Binding Run}"
-                                CommandParameter="{Binding ModPickerVM.SelectedModKey^}"/>
+                                CommandParameter="{Binding ModPickerVM.SelectedMod}"/>
                         <TextBlock IsVisible="{Binding RecordReferenceController.IsLoading^}"
                                    VerticalAlignment="Center"
                                    Text="Warning! Record references were not yet loaded. Cleaning will be limited."

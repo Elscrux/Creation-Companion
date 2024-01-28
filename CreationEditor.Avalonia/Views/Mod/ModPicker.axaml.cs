@@ -2,12 +2,12 @@
 using CreationEditor.Avalonia.ViewModels.Mod;
 namespace CreationEditor.Avalonia.Views.Mod;
 
-public partial class ModPicker : ReactiveUserControl<ModPickerVM> {
+public partial class ModPicker : ReactiveUserControl<IModPickerVM> {
     public ModPicker() {
         InitializeComponent();
     }
 
-    public ModPicker(ModPickerVM vm) : this() {
+    public ModPicker(MultiModPickerVM vm) : this() {
         DataContext = vm;
     }
 }
