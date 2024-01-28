@@ -17,6 +17,7 @@
         </Border>
     </Design.PreviewWith>
 
+    <!-- Adds button at the top of the DataGrid to add new rows and a column at the very right to delete rows. -->
     <Style Selector="DataGrid.Mutable">
         <Setter Property="Template">
             <ControlTemplate>

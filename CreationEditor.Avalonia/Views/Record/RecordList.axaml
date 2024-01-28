@@ -26,6 +26,7 @@
             attached:FormLinkDragDrop.AllowDragDataGrid="True"
             attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
             attached:DragDropExtended.AllowDrag="True"
+            Classes="Small"
             IsReadOnly="True"/>
 
         <avaloniaProgressRing:ProgressRing
