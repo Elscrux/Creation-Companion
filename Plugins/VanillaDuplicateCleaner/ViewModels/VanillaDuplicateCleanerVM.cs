@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Threading;
+using CreationEditor;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
@@ -111,38 +112,27 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
             var references = RecordReferenceController.GetReferences(recordReplacement.RecordDiff.Old.FormKey).ToArray();
 
             // Clean references
-            foreach (var usageFormLink in references) {
-                if (!_editorEnvironment.LinkCache.TryResolveContext(usageFormLink, out var context)) continue;
+            foreach (var reference in references) {
+                if (!_editorEnvironment.LinkCache.TryResolveContext(reference, out var context)) continue;
 
                 // Add references to the relevant cleaned mod
                 if (context.ModKey == modKey) {
                     context.GetOrAddAsOverride(cleanedBaseMod);
                 } else {
                     var modName = $"Cleaned{context.ModKey.Name}From{modKey.Name}";
-                    var cleanedMod = cleanedOtherMods.Find(m => m.ModKey.Name == modName);
-                    if (cleanedMod is null) {
-                        cleanedMod = new SkyrimMod(ModKey.FromName(modName, ModType.Plugin), SkyrimRelease.SkyrimSE);
-                        cleanedOtherMods.Add(cleanedMod);
-                    }
+                    var cleanedMod = cleanedOtherMods.FindOrAdd(
+                        mod => mod.ModKey.Name == modName,
+                        () => new SkyrimMod(ModKey.FromName(modName, ModType.Plugin), SkyrimRelease.SkyrimSE));
 
                     context.GetOrAddAsOverride(cleanedMod);
                 }
             }
 
             // Clean record
-            if (_editorEnvironment.LinkCache.TryResolveContext(recordReplacement.RecordDiff.Old.ToLinkFromRuntimeType(), out var recordContext)) {
-                var overrideRecord = recordContext.GetOrAddAsOverride(cleanedBaseMod);
-
-                if (references.Length == 0) {
-                    // No references available - we can delete this record
-                    overrideRecord.IsDeleted = true;
-                } else {
-                    // Otherwise mark record for deletion
-                    if (overrideRecord.EditorID?.StartsWith("x", StringComparison.OrdinalIgnoreCase) is false) {
-                        overrideRecord.EditorID = "xDELETE" + overrideRecord.EditorID;
-                    }
-                }
-            }
+            recordReplacement.RecordDiff.Old.MarkForDeletion(
+                _editorEnvironment.LinkCache,
+                cleanedBaseMod,
+                () => references);
         }
 
         // Collect remapping data
