@@ -221,7 +221,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
             .Select(searcher => Task.Run(() => {
                 // Collect all references of a text searcher from all mods
                 var refs = selectedMods.SelectMany(mod => searcher.GetTextReference(mod, SearchText, ComparisonType))
-                    .DistinctBy(x => x.Record is IFormKeyGetter formKeyGetter ? (IComparable) formKeyGetter.FormKey.ToString() : Guid.NewGuid())
+                    .Distinct()
                     .ToList();
 
                 // Replace text if requested
