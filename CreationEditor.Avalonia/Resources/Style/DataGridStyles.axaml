@@ -1,7 +1,8 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-        xmlns:collections="clr-namespace:Avalonia.Collections;assembly=Avalonia.Base">
+        xmlns:collections="clr-namespace:Avalonia.Collections;assembly=Avalonia.Base"
+        xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker">
     <Design.PreviewWith>
         <Border Padding="20">
             <Border.Resources>
@@ -117,105 +118,187 @@
         <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundBrush}"/>
     </Style>
 
-    <Style Selector="DataGrid.LowSpacing DataGridCell">
-        <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
-    </Style>
+    <Style Selector="DataGrid">
+        <Style Selector="^ DataGridCellsPresenter">
+            <!-- <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/> -->
+        </Style>
+        <Style Selector="^ DataGridCell">
+            <Setter Property="MinHeight" Value="0"/>
 
-    <Style Selector="DataGrid DataGridCell">
-        <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
-    </Style>
+            <Style Selector="^ TextBlock#CellTextBlock">
+                <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
+            </Style>
 
-    <Style Selector="DataGrid.MediumSpacing DataGridCell">
-        <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
-    </Style>
+            <Style Selector="^ CheckBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
 
-    <Style Selector="DataGrid.HighSpacing DataGridCell">
-        <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+            <Style Selector="^ ComboBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+
+            <Style Selector="^ AutoCompleteBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ NumericUpDown">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ picker|FormKeyPicker">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+        </Style>
     </Style>
 
     <Style Selector="DataGrid.Small">
         <Style Selector="^ DataGridCellsPresenter">
-            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightSmall}"/>
-
-            <Style Selector="^ CheckBox">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightSmall}"/>
-            </Style>
+            <!-- <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightSmall}"/> -->
         </Style>
         <Style Selector="^ DataGridCell">
-            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeSmall}"/>
+            <Setter Property="MinHeight" Value="0"/>
 
-            <Style Selector="^ Border#CellBorder">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            <Style Selector="^ TextBlock#CellTextBlock">
+                <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeSmall}"/>
             </Style>
-        </Style>
-        <Style Selector="^ ComboBox">
-            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightSmall}"/>
-            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeSmall}"/>
-            <Setter Property="VerticalAlignment" Value="Stretch"/>
-        </Style>
-    </Style>
-
-    <Style Selector="DataGrid">
-        <Style Selector="^ DataGridCellsPresenter">
-            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
 
             <Style Selector="^ CheckBox">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
+                <Setter Property="FontSize" Value="11"/>
             </Style>
-        </Style>
-        <Style Selector="^ DataGridCell">
-            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
 
-            <Style Selector="^ Border#CellBorder">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            <Style Selector="^ ComboBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
+                <Setter Property="FontSize" Value="12"/>
             </Style>
-        </Style>
-        <Style Selector="^ ComboBox">
-            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightMedium}"/>
-            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeMedium}"/>
+
+            <Style Selector="^ AutoCompleteBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
+                <Setter Property="FontSize" Value="11"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ NumericUpDown">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
+                <Setter Property="FontSize" Value="11"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ picker|FormKeyPicker">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginLowSpacing}"/>
+                <Setter Property="FontSize" Value="11"/>
+            </Style>
         </Style>
     </Style>
 
     <Style Selector="DataGrid.Medium">
         <Style Selector="^ DataGridCellsPresenter">
-            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
-
-            <Style Selector="^ CheckBox">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
-            </Style>
+            <!-- <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/> -->
         </Style>
         <Style Selector="^ DataGridCell">
-            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
+            <Setter Property="MinHeight" Value="0"/>
 
-            <Style Selector="^ Border#CellBorder">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightMedium}"/>
+            <Style Selector="^ TextBlock#CellTextBlock">
+                <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeMedium}"/>
             </Style>
-        </Style>
-        <Style Selector="^ ComboBox">
-            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightMedium}"/>
-            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeMedium}"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+
+            <Style Selector="^ ComboBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+
+            <Style Selector="^ AutoCompleteBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ NumericUpDown">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ picker|FormKeyPicker">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginMediumSpacing}"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
         </Style>
     </Style>
 
     <Style Selector="DataGrid.Large">
         <Style Selector="^ DataGridCellsPresenter">
-            <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
-
-            <Style Selector="^ CheckBox">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
-            </Style>
+            <!-- <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/> -->
         </Style>
         <Style Selector="^ DataGridCell">
-            <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeLarge}"/>
+            <Setter Property="MinHeight" Value="0"/>
 
-            <Style Selector="^ Border#CellBorder">
-                <Setter Property="MaxHeight" Value="{DynamicResource DataGridMaxHeightLarge}"/>
+            <Style Selector="^ TextBlock#CellTextBlock">
+                <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeLarge}"/>
             </Style>
-        </Style>
-        <Style Selector="^ ComboBox">
-            <Setter Property="MaxHeight" Value="{DynamicResource ComboBoxMaxHeightLarge}"/>
-            <Setter Property="FontSize" Value="{DynamicResource ComboBoxFontSizeLarge}"/>
-            <Setter Property="VerticalAlignment" Value="Stretch"/>
+
+            <Style Selector="^ CheckBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+
+            <Style Selector="^ ComboBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+                <Setter Property="FontSize" Value="16"/>
+            </Style>
+
+            <Style Selector="^ AutoCompleteBox">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+                <Setter Property="FontSize" Value="15"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ NumericUpDown">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+                <Setter Property="FontSize" Value="15"/>
+
+                <Style Selector="^ TextBox#PART_TextBox">
+                    <Setter Property="MinHeight" Value="0"/>
+                </Style>
+            </Style>
+
+            <Style Selector="^ picker|FormKeyPicker">
+                <Setter Property="Margin" Value="{DynamicResource DataGridMarginHighSpacing}"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
         </Style>
     </Style>
 </Styles>

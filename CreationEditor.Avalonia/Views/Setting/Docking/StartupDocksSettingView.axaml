@@ -15,7 +15,7 @@
               GridLinesVisibility="Horizontal"
               attached:ListShortcuts.Add="{Binding AddStartupDock}"
               attached:ListShortcuts.Remove="{Binding RemoveStartupDock}"
-              Classes="NoCellSelection MediumSpacing Mutable">
+              Classes="NoCellSelection Medium Mutable">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">
                 <DataGridTemplateColumn.CellTemplate>

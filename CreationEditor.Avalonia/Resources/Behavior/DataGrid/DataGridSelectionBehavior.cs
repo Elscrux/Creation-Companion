@@ -165,16 +165,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     MinWidth = 20,
-                    Classes = { "CenteredBorder" },
+                    Classes = { "CenteredBorder", "CheckmarkOnly" },
                     Styles = {
                         new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
                             Setters = {
                                 new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center),
-                            }
-                        },
-                        new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Descendant().OfType<ContentPresenter>()) {
-                            Setters = {
-                                new Setter(Visual.IsVisibleProperty, false),
                             }
                         },
                     }

@@ -11,20 +11,20 @@ public class CompactViewModeTemplate : IViewModeTemplate {
     };
 
     public Dictionary<string, double> FontSizes { get; } = new() {
-        { "DataGridFontSizeSmall", 8 },
-        { "DataGridFontSizeMedium", 10 },
-        { "DataGridFontSizeLarge", 12 },
+        { "TextBlockFontSizeHeading1", 24 },
+        { "TextBlockFontSizeHeading2", 20 },
+        { "TextBlockFontSizeHeading3", 16 },
+        { "DataGridFontSizeSmall", 12 },
+        { "DataGridFontSizeMedium", 14 },
+        { "DataGridFontSizeLarge", 16 },
         { "ComboBoxFontSizeSmall", 6.25 },
         { "ComboBoxFontSizeMedium", 9 },
         { "ComboBoxFontSizeLarge", 12 },
     };
 
     public Dictionary<string, double> MaxHeights { get; } = new() {
-        { "DataGridMaxHeightSmall", 20 },
-        { "DataGridMaxHeightMedium", 24 },
-        { "DataGridMaxHeightLarge", 28 },
-        { "ComboBoxMaxHeightSmall", 20 },
-        { "ComboBoxMaxHeightMedium", 24 },
-        { "ComboBoxMaxHeightLarge", 28 },
+        { "DataGridMaxHeightSmall", 26 },
+        { "DataGridMaxHeightMedium", 28 },
+        { "DataGridMaxHeightLarge", 32 },
     };
 }

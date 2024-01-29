@@ -44,7 +44,7 @@
                       IsReadOnly="True"
                       SelectionMode="Extended"
                       GridLinesVisibility="None"
-                      Classes="NoCellSelection"
+                      Classes="NoCellSelection Small"
                       attached:DoubleTappedProperty.Command="{Binding ToggleActive}">
 
                 <DataGrid.KeyBindings>
@@ -67,7 +67,7 @@
                     <DataGridTextColumn Header="Name"
                                         Binding="{Binding ModKey.FileName.String}"
                                         IsReadOnly="True"
-                                        MinWidth="136"
+                                        MinWidth="130"
                                         x:DataType="model:LoadOrderModItem"/>
                     <DataGridTextColumn Header="Type"
                                         Binding="{Binding ModKey.Type}"
@@ -78,7 +78,8 @@
                                             MinWidth="78">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="model:LoadOrderModItem">
-                                <CheckBox IsChecked="{Binding IsActive}"/>
+                                <CheckBox IsChecked="{Binding IsActive}"
+                                          Classes="CheckmarkOnly"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

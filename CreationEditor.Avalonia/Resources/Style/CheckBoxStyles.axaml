@@ -6,7 +6,7 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="CheckBox.CheckmarkOnly">
-        <Setter Property="MaxWidth" Value="24"/>
+    <Style Selector="CheckBox.CheckmarkOnly ContentPresenter">
+        <Setter Property="Margin" Value="0"/>
     </Style>
 </Styles>

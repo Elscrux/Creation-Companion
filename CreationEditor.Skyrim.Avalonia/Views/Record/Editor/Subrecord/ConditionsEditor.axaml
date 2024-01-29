@@ -26,7 +26,7 @@
               AutoGenerateColumns="False"
               GridLinesVisibility="Horizontal"
               MinHeight="250"
-              Classes="NoCellSelection HighSpacing Mutable"
+              Classes="NoCellSelection Medium Mutable"
               attached:DragDropExtended.AllowDrag="True"
               attached:DragDropExtended.AllowDrop="True"
               attached:DragDropExtended.CanDrop="{Binding #Editor.CanDrop}">
@@ -96,7 +96,7 @@
                             </Grid.Resources>
 
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition
                                     Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthAutoIfTrue}, ConverterParameter=0}"/>
                                 <ColumnDefinition
@@ -107,6 +107,7 @@
 
                             <CheckBox Grid.Column="0"
                                       ToolTip.Tip="Swap Subject and Target"
+                                      Classes="CheckmarkOnly"
                                       IsChecked="{Binding SwapSubjectAndTarget}"
                                       VerticalAlignment="Top"/>
 
@@ -188,9 +189,10 @@
             <DataGridTemplateColumn Header="Value" MinWidth="113" Width="113">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="model:EditableCondition">
-                        <Grid ColumnDefinitions="24,*">
+                        <Grid ColumnDefinitions="Auto,*">
                             <CheckBox Grid.Column="0"
                                       ToolTip.Tip="Use Global"
+                                      Classes="CheckmarkOnly"
                                       IsChecked="{Binding UseGlobal}"
                                       VerticalAlignment="Top"/>
 

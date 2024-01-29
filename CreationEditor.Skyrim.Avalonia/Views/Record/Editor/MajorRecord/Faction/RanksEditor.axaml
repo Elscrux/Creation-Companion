@@ -21,7 +21,7 @@
                   attached:DragDropExtended.AllowDrag="True"
                   attached:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRankIndex}"
-                  Classes="NoCellSelection LowSpacing Mutable"
+                  Classes="NoCellSelection Medium Mutable"
                   attached:ListShortcuts.Add="{Binding AddRank}"
                   attached:ListShortcuts.Remove="{Binding RemoveRank}">
             <DataGrid.Columns>
