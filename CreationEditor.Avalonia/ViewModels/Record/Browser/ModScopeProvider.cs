@@ -45,9 +45,7 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
             .ToObservableChangeSet()
             .AutoRefresh(mod => mod.IsSelected)
             .Filter(mod => mod.IsSelected)
-            .Transform(x => {
-                return LinkCache.ListedOrder.First(mod => mod.ModKey == x.ModKey);
-            })
+            .Transform(x => LinkCache.GetMod(x.ModKey))
             .AddKey(x => x.ModKey)
             .AsObservableCache();
 

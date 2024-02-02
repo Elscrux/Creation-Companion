@@ -212,8 +212,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
         var selectedModKeys = Mods.Where(mod => mod.IsSelected)
             .Select(mod => mod.ModKey);
 
-        var selectedMods = _editorEnvironment.LinkCache.PriorityOrder.Where(mod => selectedModKeys.Contains(mod.ModKey))
-            .ToList();
+        var selectedMods = _editorEnvironment.LinkCache.ResolveMods(selectedModKeys).ToList();
 
         var recordReferencesEnumerable = await Task.WhenAll(Searchers.Where(searcher => searcher.IsSelected)
             .Select(searcher => searcher.Searcher)

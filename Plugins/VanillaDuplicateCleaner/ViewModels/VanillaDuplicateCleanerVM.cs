@@ -60,7 +60,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private List<RecordDiff> Process(ModKey modKey) {
         // Collect records from mods that may be replaced
         var recordEqualsMasks = new HashSet<RecordEqualsMask>();
-        var testingMod = _editorEnvironment.LinkCache.PriorityOrder.First(mod => mod.ModKey == modKey);
+        var testingMod = _editorEnvironment.Environment.GetMod(modKey);
         foreach (var record in GetRecords(testingMod.AsEnumerable())) {
             if (record.EditorID is null) continue;
 
