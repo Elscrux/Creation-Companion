@@ -134,11 +134,6 @@ public static class ObservableCollectionExtension {
         }
     }
 
-    public static void Apply<T>(this IList<T> source, Change<T> item, IEqualityComparer<T>? equalityComparer = null)
-        where T : notnull {
-        source.Clone(item.AsEnumerable(), equalityComparer);
-    }
-
     public static void RemoveRange<T>(this IObservableCollection<T> collection, IEnumerable<T> itemsToRemove) {
         ArgumentNullException.ThrowIfNull(itemsToRemove);
 
@@ -164,36 +159,6 @@ public static class ObservableCollectionExtension {
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
         propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
         collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value) });
-    }
-
-    private static void RemoveRange<T>(this IList<T> source, int index, int count) {
-        ArgumentNullException.ThrowIfNull(source);
-
-        switch (source) {
-            case List<T> list:
-                list.RemoveRange(index, count);
-                break;
-            case Noggog.IExtendedList<T> list:
-                list.RemoveRange(index, count);
-                break;
-            default:
-                throw new NotSupportedException($"Cannot remove range from {source.GetType().FullName}");
-        }
-    }
-
-    public static void AddSorted<T>(this IList<T> list, T item)
-        where T : IComparable {
-        var i = 0;
-        while (i < list.Count && list[i].CompareTo(item) < 0) i++;
-
-        list.Insert(i, item);
-    }
-
-    public static void AddSorted<T>(this IList<T> list, T item, IComparer<T> comparer) {
-        var i = 0;
-        while (i < list.Count && comparer.Compare(list[i], item) < 0) i++;
-
-        list.Insert(i, item);
     }
 
     public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) => collection.ApplyOrder(collection.OrderBy(selector));
