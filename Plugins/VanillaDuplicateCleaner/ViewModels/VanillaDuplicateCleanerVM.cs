@@ -44,10 +44,11 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         ModPickerVM.WhenAnyValue(x => x.SelectedMod)
             .Subscribe(mod => {
-                Records.Clear();
-                if (mod == null || mod.ModKey.IsNull) return;
-
-                Records.AddRange(Process(mod.ModKey).Select(diff => new SelectableRecordDiff(diff)));
+                if (mod is null || mod.ModKey.IsNull) { 
+                    Records.Clear();
+                } else {
+                    Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff(diff)));
+                }
             });
 
         Run = ReactiveCommand.CreateRunInBackground<ModKey>(modKey => {

@@ -28,7 +28,7 @@ public static class ObservableCollectionExtension {
     public static ReadOnlyObservableCollection<TTarget> SelectObservableCollectionSync<TSource, TTarget>(
         this IObservableCollection<TSource> source,
         Func<TSource, TTarget> selector,
-        IDisposableDropoff disposable) {
+        IDisposableDropoff disposable) where TTarget : notnull {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(selector);
 
@@ -43,7 +43,7 @@ public static class ObservableCollectionExtension {
         return new ReadOnlyObservableCollection<TTarget>(internalCollection);
     }
 
-    public static ReadOnlyObservableCollection<T> Combine<T>(this IObservableCollection<T> lhs, IDisposableDropoff disposableDropoff, params IObservableCollection<T>[] rhsList) {
+    public static ReadOnlyObservableCollection<T> Combine<T>(this IObservableCollection<T> lhs, IDisposableDropoff disposableDropoff, params IObservableCollection<T>[] rhsList) where T : notnull {
         var internalCollection = new ObservableCollectionExtended<T>();
         foreach (var rhs in rhsList) {
             internalCollection.AddRange(rhs);
@@ -68,9 +68,7 @@ public static class ObservableCollectionExtension {
             .Merge()
             .Subscribe(e => {
                 if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    internalCollection.Clear();
-
-                    internalCollection.AddRange(lhs);
+                    internalCollection.ReplaceWith(lhs);
                     foreach (var rhs in rhsList) {
                         internalCollection.AddRange(rhs);
                     }
@@ -83,7 +81,8 @@ public static class ObservableCollectionExtension {
         return new ReadOnlyObservableCollection<T>(internalCollection);
     }
 
-    public static void Apply<T>(this ObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null) {
+    public static void Apply<T>(this ObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null)
+        where T : notnull {
         var comparer = equalityComparer ?? EqualityComparer<T>.Default;
 
         switch (change.Action) {
@@ -124,10 +123,11 @@ public static class ObservableCollectionExtension {
                 }
                 break;
             case NotifyCollectionChangedAction.Reset:
-                source.Clear();
-                if (change.NewItems is null) break;
-
-                source.AddRange(change.NewItems.OfType<T>());
+                if (change.NewItems is null) { 
+                    source.Clear();
+                } else {
+                    source.ReplaceWith(change.NewItems.OfType<T>());
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(change));

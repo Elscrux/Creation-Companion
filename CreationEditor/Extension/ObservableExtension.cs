@@ -23,9 +23,10 @@ public static class ObservableExtension {
         return observable.CombineLatest(collection.WhenCollectionChanges(), (t, _) => t);
     }
 
-    public static IDisposable SyncTo<T>(this IObservable<IObservableCollection<T>> observableCollectionChanged, ObservableCollection<T> observableCollection) {
+    public static IDisposable SyncTo<T>(this IObservable<IObservableCollection<T>> observableCollectionChanged, ObservableCollection<T> observableCollection) where T : notnull {
         return observableCollectionChanged
             .Select(collection => {
+                // todo Use ReplaceWith when Avalonia PR is merged
                 observableCollection.Clear();
                 observableCollection.AddRange(collection);
                 return collection.ObserveCollectionChanges();

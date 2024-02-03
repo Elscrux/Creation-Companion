@@ -17,7 +17,25 @@ public static class ListExtension {
         return item;
     }
 
-    public static void RemoveRange<T>(this IList<T> source, int index, int count) {
+    public static void ReplaceWith<T>(this IList<T> list, IEnumerable<T> newItems) where T : notnull {
+        var counter = 0;
+        using var enumerator = newItems.GetEnumerator();
+        while (enumerator.MoveNext()) {
+            if (counter < list.Count) {
+                list[counter] = enumerator.Current;
+            } else {
+                list.Add(enumerator.Current);
+            }
+            ++counter;
+        }
+
+        var remainingCount = list.Count - counter;
+        if (remainingCount > 0) {
+            list.RemoveRange(counter, remainingCount);
+        }
+    }
+
+    public static void RemoveRange<T>(this IList<T> source, int index, int count) where T : notnull {
         ArgumentNullException.ThrowIfNull(source);
 
         switch (source) {

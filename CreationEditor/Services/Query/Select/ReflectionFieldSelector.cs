@@ -26,8 +26,7 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
     public ReflectionFieldSelector() {
         this.WhenAnyValue(x => x.RecordType)
             .Subscribe(_ => {
-                Fields.Clear();
-                Fields.AddRange(GetFields());
+                Fields.ReplaceWith(GetFields());
                 SelectedField = Fields.FirstOrDefault(field => field.Name == "EditorID") ?? Fields.FirstOrDefault();
             })
             .DisposeWith(_disposables);

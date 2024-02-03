@@ -63,8 +63,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         this.WhenAnyValue(x => x.FieldSelector.SelectedField)
             .NotNull()
             .Subscribe(field => {
-                CompareFunctions.Clear();
-                CompareFunctions.AddRange(compareFunctionFactory.Get(field.Type));
+                CompareFunctions.ReplaceWith(compareFunctionFactory.Get(field.Type));
                 SelectedCompareFunction = CompareFunctions.FirstOrDefault();
                 ConditionState = new ConditionState(SelectedCompareFunction, field.Type, _queryConditionFactory);
             })

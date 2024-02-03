@@ -158,13 +158,12 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         faction.EditorID = EditorID;
         faction.Name = Name;
         faction.Flags = Flags;
-        faction.Relations.Clear();
-        faction.Relations.AddRange(Relations
+        faction.Relations.ReplaceWith(Relations
             .Where(r => !r.TargetFormKey.IsNull)
             .Select(r => r.ToRelation()));
 
         for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
-        faction.Ranks.SetTo(Ranks);
+        faction.Ranks.ReplaceWith(Ranks);
 
         faction.CrimeValues = CrimeGoldUseDefaults ? GetDefaultCrimeValues() : CrimeValues;
         faction.JailOutfit = JailOutfit;

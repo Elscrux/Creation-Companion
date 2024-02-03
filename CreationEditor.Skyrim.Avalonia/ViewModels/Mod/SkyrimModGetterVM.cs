@@ -45,7 +45,6 @@ public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter
         Localization = modInfo.Localization;
         FormVersion = modInfo.FormVersion;
 
-        Masters.Clear();
-        Masters.AddRange(modInfo.Masters);
+        Masters.ReplaceWith(modInfo.Masters);
     }
 }
