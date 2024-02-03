@@ -33,6 +33,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         RecordChangedDiff = new JoinedObservable<IMajorRecordGetter>(_recordChangedDiff);
     }
 
+    #region CreateRecord
     public IMajorRecord CreateRecord(System.Type type) {
         var group = _editorEnvironment.ActiveMod.GetTopLevelGroup(type);
         var record = group.AddNew(_editorEnvironment.ActiveMod.GetNextFormKey());
@@ -58,7 +59,9 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         return record;
     }
+    #endregion
 
+    #region DuplicateRecord
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
@@ -85,6 +88,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         return duplicate;
     }
 
+    #region DeleteRecord
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
@@ -107,6 +111,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         _recordDeleted.OnNext(newOverride);
     }
 
+    #region GetOrAddOverride
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
@@ -128,6 +133,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public IMajorRecord GetOrAddOverride(IMajorRecordGetter record) {
         if (!_editorEnvironment.LinkCache.TryResolveContext(record.FormKey, record.Registration.GetterType, out var context)) {
             context = _editorEnvironment.ActiveModLinkCache.ResolveContext(record);
+    #endregion
         }
 
         var newOverride = context.GetOrAddAsOverride(_editorEnvironment.ActiveMod);
@@ -141,6 +147,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         return newOverride;
     }
 
+    #region ReplaceReferences
     public void ReplaceReferences(IReferencedRecord record, IMajorRecordGetter replacingRecord) {
         ReplaceReferences(record.Record, record.References, replacingRecord);
     }
@@ -155,6 +162,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
             RegisterUpdate(overrideRecord, () => overrideRecord.RemapLinks(remap));
         }
     }
+    #endregion
 
     public void RegisterUpdate(IMajorRecordGetter record, Action updateAction) {
         var changeSubject = new Subject<IMajorRecordGetter>();
