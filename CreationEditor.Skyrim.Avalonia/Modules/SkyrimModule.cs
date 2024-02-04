@@ -25,7 +25,6 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
-using CreationEditor.Skyrim.Services.Environment;
 using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
@@ -34,7 +33,6 @@ namespace CreationEditor.Skyrim.Avalonia.Modules;
 public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGetter> {
     protected override GameRelease GameRelease => GameRelease.SkyrimSE;
 
-    protected override IReg<IEditorEnvironment> EditorEnvironment => Register<SkyrimEditorEnvironment>();
     protected override IReg<IModInfoProvider<ISkyrimModGetter>> ModInfoProvider => Register<SkyrimModInfoProvider>();
     protected override IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider => Register<SkyrimRecordBrowserGroupProvider>();
     protected override IReg<IRecordProviderFactory> RecordProviderFactory => Register<SkyrimRecordProviderFactory>();

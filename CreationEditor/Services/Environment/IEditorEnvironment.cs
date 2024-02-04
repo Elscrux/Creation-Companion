@@ -46,3 +46,13 @@ public interface IEditorEnvironment : ILinkCacheProvider {
     /// </summary>
     IObservable<List<ModKey>> LoadOrderChanged { get; }
 }
+
+public interface IEditorEnvironment<TMod, TModGetter> : IEditorEnvironment
+    where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
+    where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
+    public IGameEnvironment<TMod, TModGetter> Environment { get; protected set; }
+    public new ILinkCache<TMod, TModGetter> LinkCache => Environment.LinkCache;
+
+    public new TMod ActiveMod { get; protected set; }
+    public new ILinkCache<TMod, TModGetter> ActiveModLinkCache { get; protected set; }
+}
