@@ -10,7 +10,10 @@ using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Services.Environment;
 
-public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMod, TModGetter> where TMod : class, TModGetter, IContextMod<TMod, TModGetter> where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
+public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMod, TModGetter>
+    where TMod : class, TModGetter, IContextMod<TMod, TModGetter>
+    where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
+
     private readonly IFileSystem _fileSystem;
     private readonly IGameReleaseContext _gameReleaseContext;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
@@ -101,7 +104,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
             .WithLoadOrder(modKeys);
 
         foreach (var mutableMod in mutableMods) {
-            builder.WithOutputMod(mutableMod, OutputModTrimming.Self);
+            builder = builder.WithOutputMod(mutableMod, OutputModTrimming.Self);
         }
 
         Environment = builder
