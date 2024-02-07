@@ -19,6 +19,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly INotificationService _notificationService;
     private readonly ILogger _logger;
+    private readonly Func<Type, object?>? _resolver;
 
     public IGameEnvironment<TMod, TModGetter> Environment { get; set; }
     IGameEnvironment IEditorEnvironment.GameEnvironment => Environment;
@@ -45,12 +46,14 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         IGameReleaseContext gameReleaseContext,
         IDataDirectoryProvider dataDirectoryProvider,
         INotificationService notificationService,
-        ILogger logger) {
+        ILogger logger,
+        Func<Type, object?>? resolver = null) {
         _fileSystem = fileSystem;
         _gameReleaseContext = gameReleaseContext;
         _dataDirectoryProvider = dataDirectoryProvider;
         _notificationService = notificationService;
         _logger = logger;
+        _resolver = resolver;
 
         ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, _gameReleaseContext.Release);
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
@@ -140,6 +143,10 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         var builder = GameEnvironmentBuilder<TMod, TModGetter>
             .Create(_gameReleaseContext.Release)
             .WithLoadOrder(modKeys);
+
+        if (_resolver is not null) {
+            builder = builder.WithResolver(_resolver);
+        }
 
         foreach (var mutableMod in mutableMods) {
             builder = builder.WithOutputMod(mutableMod, OutputModTrimming.Self);
