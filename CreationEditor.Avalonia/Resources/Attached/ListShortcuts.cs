@@ -81,7 +81,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                                 var t = source.GetType().GetGenericArguments()[0];
 
                                 var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
-                                genericAddRemoveButtonMethodInfo.Invoke(null, new object?[] { source, args.NewValue.GetValueOrDefault() });
+                                genericAddRemoveButtonMethodInfo.Invoke(null, [source, args.NewValue.GetValueOrDefault()]);
                             });
                     }
                     void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {

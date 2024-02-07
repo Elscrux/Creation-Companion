@@ -170,50 +170,50 @@ public partial class ConditionsEditor : ActivatableUserControl {
     protected override void WhenActivated() {
         // Update RunOnTypes when the context changes
         RunOnTypes = this.WhenAnyValue(x => x.Context)
-            .Select(context => {
+            .Select<IMajorRecordGetter?, EditableCondition.ExtendedRunOnType[]>(context => {
                 switch (context) {
                     case IPackageGetter:
-                        return new[] {
+                        return [
                             EditableCondition.ExtendedRunOnType.Subject,
                             EditableCondition.ExtendedRunOnType.Target,
                             EditableCondition.ExtendedRunOnType.Reference,
                             EditableCondition.ExtendedRunOnType.LinkedReference,
                             EditableCondition.ExtendedRunOnType.PackageData,
-                            EditableCondition.ExtendedRunOnType.Player,
-                        };
+                            EditableCondition.ExtendedRunOnType.Player
+                        ];
                     case IQuestGetter:
                     case IStoryManagerEventNodeGetter:
                     case IStoryManagerBranchNodeGetter:
                     case IStoryManagerQuestNodeGetter:
-                        return new[] {
+                        return [
                             EditableCondition.ExtendedRunOnType.Subject,
                             EditableCondition.ExtendedRunOnType.Target,
                             EditableCondition.ExtendedRunOnType.Reference,
                             EditableCondition.ExtendedRunOnType.LinkedReference,
                             EditableCondition.ExtendedRunOnType.QuestAlias,
                             EditableCondition.ExtendedRunOnType.EventData,
-                            EditableCondition.ExtendedRunOnType.Player,
-                        };
+                            EditableCondition.ExtendedRunOnType.Player
+                        ];
                     case IDialogResponsesGetter:
                     case IMagicEffectGetter:
                     case IIdleAnimationGetter:
                     case IPerkGetter:
-                        return new[] {
+                        return [
                             EditableCondition.ExtendedRunOnType.Subject,
                             EditableCondition.ExtendedRunOnType.Target,
                             EditableCondition.ExtendedRunOnType.Reference,
                             EditableCondition.ExtendedRunOnType.CombatTarget,
                             EditableCondition.ExtendedRunOnType.LinkedReference,
-                            EditableCondition.ExtendedRunOnType.Player,
-                        };
+                            EditableCondition.ExtendedRunOnType.Player
+                        ];
                     default:
-                        return new[] {
+                        return [
                             EditableCondition.ExtendedRunOnType.Subject,
                             EditableCondition.ExtendedRunOnType.Target,
                             EditableCondition.ExtendedRunOnType.Reference,
                             EditableCondition.ExtendedRunOnType.LinkedReference,
                             EditableCondition.ExtendedRunOnType.Player,
-                        };
+                        ];
                 }
             })
             .ToObservableCollection(ActivatedDisposable);

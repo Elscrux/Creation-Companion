@@ -56,7 +56,7 @@ public sealed class InteropTest {
 
     [Fact]
     public void TestLoadRefs() {
-        var referenceLoads = new[] { TestReference };
+        ReferenceLoad[] referenceLoads = [TestReference];
         var count = Convert.ToUInt32(referenceLoads.Length);
 
         Assert.True(AddLoadCallback((callbackCount, callbackLoads) => {

@@ -45,7 +45,7 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
                 .Select(action => action.MenuItemFactory(context)))
             // Flatten the groups into a single list and add separators between groups
             .SelectMany<IEnumerable<MenuItem>, object>(
-                (x, i) => i == 0 ? x : new object[] { new Separator() }.Concat(x));
+                (x, i) => i == 0 ? x : [new Separator(), ..x]);
     }
 
     public void ExecutePrimary(RecordListContext context) {

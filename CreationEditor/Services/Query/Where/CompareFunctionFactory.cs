@@ -41,8 +41,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             return new ValueFieldInformation(listType, listType);
         };
 
-        RegisterCompareFunction(
-            new ICompareFunction[] {
+        RegisterCompareFunction([
                 new CompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(item => Equals(item, context.CompareValue)),
@@ -51,7 +50,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
                     "All Match",
                     (context, enumerable) => enumerable.Cast<object?>().All(item => Equals(item, context.CompareValue)),
                     simpleListFieldOverride)
-            },
+            ],
             SimpleListAccepts<IEnumerable>,
             -50);
 
@@ -60,7 +59,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             var keyValueType = typeof(IKeyValue<,>).MakeGenericType(type.GetGenericArguments());
             return new CollectionFieldInformation(typeof(IEnumerable), keyValueType);
         };
-        RegisterCompareFunction(new ICompareFunction[] {
+        RegisterCompareFunction([
                 new CompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(o => CheckSubConditions(context, o)),
@@ -69,11 +68,11 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
                     dictionaryFieldOverride),
-            },
+            ],
             DictionaryAccepts, -10);
 
         // List
-        RegisterCompareFunction<IEnumerable>(new ICompareFunction[] {
+        RegisterCompareFunction<IEnumerable>([
                 new CompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(o => CheckSubConditions(context, o)),
@@ -82,7 +81,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
                     FieldCategory.Collection)
-            },
+            ],
             -100);
 
         // Translated String
@@ -112,7 +111,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             (stringFunction, a, b) => stringFunction(a, b)));
 
         // Form Link
-        RegisterCompareFunction<IFormLinkGetter>(new ICompareFunction[] {
+        RegisterCompareFunction<IFormLinkGetter>([
             new CompareFunction<IFormLinkGetter, IFormLinkGetter>(
                 "Equals",
                 (context, formLink) =>
@@ -124,31 +123,31 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
                     linkCacheProvider.LinkCache.TryResolve(formLink, out var record)
                  && context.SubConditions.EvaluateConditions(record),
                 FieldCategory.Collection),
-        });
+        ]);
 
         // Form Key
-        RegisterCompareFunction(new[] { GetSimpleEquals<FormKey>() });
+        RegisterCompareFunction([GetSimpleEquals<FormKey>()]);
 
         // Color
-        RegisterCompareFunction(new[] { GetSimpleEquals<Color>() });
+        RegisterCompareFunction([GetSimpleEquals<Color>()]);
 
         // Enum
-        RegisterCompareFunction(new[] {
+        RegisterCompareFunction([
                 new CompareFunction<Enum, Enum>(
                     "Equals",
                     (context, e) => context.CompareValue is Enum flag && e.HasFlag(flag))
-            },
+            ],
             type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() is not null,
             10);
 
-        RegisterCompareFunction(new[] {
+        RegisterCompareFunction([
             new CompareFunction<Enum, Enum>(
                 "Equals",
                 (context, e) => context.CompareValue is Enum other && e.Equals(other))
-        });
+        ]);
 
         // Bool
-        RegisterCompareFunction(new[] { GetSimpleEquals<bool>() });
+        RegisterCompareFunction([GetSimpleEquals<bool>()]);
 
         // Numeric
         RegisterCompareFunction(GetNumericFunctions<double>());
@@ -163,9 +162,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         RegisterCompareFunction(GetNumericFunctions<byte>());
 
         // Object
-        RegisterCompareFunction(new[] {
-                new CompareFunction<object, object>("Matching", CheckSubConditions, FieldCategory.Collection)
-            },
+        RegisterCompareFunction([new CompareFunction<object, object>("Matching", CheckSubConditions, FieldCategory.Collection)],
             int.MinValue);
 
         // Pre-sort

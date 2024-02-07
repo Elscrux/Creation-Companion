@@ -27,13 +27,13 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
             recordEditorController.OpenEditor(newOverride);
         });
 
-        _actions = new RecordAction[] {
-            new(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is IPlacedObjectGetter,
+        _actions = [
+            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is IPlacedObjectGetter,
                 45,
                 RecordActionGroup.Modification,
                 editBaseCommand,
                 context => menuItemProvider.View(editBaseCommand, context))
-        };
+        ];
 
     }
 

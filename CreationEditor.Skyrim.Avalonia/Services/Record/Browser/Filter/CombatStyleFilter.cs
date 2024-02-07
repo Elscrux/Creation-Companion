@@ -15,14 +15,14 @@ public sealed class CombatStyleFilter : SimpleRecordFilter<ICombatStyleGetter> {
     }) {}
 
     public static bool IsBiggest(ICombatStyleGetter combatStyle, float score) {
-        var scores = new[] {
+        float[] scores = [
             combatStyle.EquipmentScoreMultMelee,
             combatStyle.EquipmentScoreMultMagic,
             combatStyle.EquipmentScoreMultRanged,
             combatStyle.EquipmentScoreMultShout,
             combatStyle.EquipmentScoreMultStaff,
             combatStyle.EquipmentScoreMultUnarmed
-        };
+        ];
 
         var found = false;
 

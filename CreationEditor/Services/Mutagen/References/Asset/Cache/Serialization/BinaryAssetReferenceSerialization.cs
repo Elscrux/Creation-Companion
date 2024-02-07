@@ -19,7 +19,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
     where TSource : notnull
     where TReference : notnull {
 
-    private readonly ICacheLocationProvider _cacheLocationProvider = assetReferenceLocationProviderFactory(new[] { "References", "Assets" });
+    private readonly ICacheLocationProvider _cacheLocationProvider = assetReferenceLocationProviderFactory(["References", "Assets"]);
     private readonly Version _version = new(2, 0);
 
     private string GetCacheFile(TSource source, IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery) {

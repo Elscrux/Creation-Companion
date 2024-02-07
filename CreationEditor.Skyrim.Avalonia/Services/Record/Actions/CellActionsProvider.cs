@@ -30,14 +30,14 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
             cellLoadStrategy.LoadCell(cell);
         });
 
-        _actions = new RecordAction[] {
-            new(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is ICellGetter,
+        _actions = [
+            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is ICellGetter,
                 100,
                 RecordActionGroup.Viewing,
                 viewCommand,
                 context => menuItemProvider.View(viewCommand, context),
                 true)
-        };
+        ];
 
     }
 

@@ -31,52 +31,48 @@ public static class ConditionConstants {
         Condition.Function.GetVATSRightTargetVisible,
     ];
 
-    public static readonly IEnumerable<Condition.Function> QuestOnlyFunctions
-        = new[] {
-            Condition.Function.GetInCurrentLocAlias,
-            Condition.Function.GetIsAliasRef,
-            Condition.Function.GetIsEditorLocAlias,
-            Condition.Function.GetKeywordDataForAlias,
-            Condition.Function.GetLocAliasRefTypeAliveCount,
-            Condition.Function.GetLocAliasRefTypeDeadCount,
-            Condition.Function.GetLocationAliasCleared,
-            Condition.Function.HasSameEditorLocAsRefAlias,
-            Condition.Function.IsInSameCurrentLocAsRefAlias,
-            Condition.Function.IsLocAliasLoaded,
-            Condition.Function.LocAliasHasKeyword,
-            Condition.Function.LocAliasIsLocation,
-        };
+    public static readonly IEnumerable<Condition.Function> QuestOnlyFunctions = [
+        Condition.Function.GetInCurrentLocAlias,
+        Condition.Function.GetIsAliasRef,
+        Condition.Function.GetIsEditorLocAlias,
+        Condition.Function.GetKeywordDataForAlias,
+        Condition.Function.GetLocAliasRefTypeAliveCount,
+        Condition.Function.GetLocAliasRefTypeDeadCount,
+        Condition.Function.GetLocationAliasCleared,
+        Condition.Function.HasSameEditorLocAsRefAlias,
+        Condition.Function.IsInSameCurrentLocAsRefAlias,
+        Condition.Function.IsLocAliasLoaded,
+        Condition.Function.LocAliasHasKeyword,
+        Condition.Function.LocAliasIsLocation,
+    ];
 
-    public static readonly IEnumerable<Condition.Function> QuestAndStoryManagerOnlyFunctions
-        = new[] {
-            Condition.Function.GetEventData
-        };
+    public static readonly IEnumerable<Condition.Function> QuestAndStoryManagerOnlyFunctions = [
+        Condition.Function.GetEventData
+    ];
 
-    public static readonly IEnumerable<Condition.Function> PackageOnlyFunctions
-        = new[] {
-            Condition.Function.GetNumericPackageData,
-            Condition.Function.GetWithinPackageLocation,
-            Condition.Function.IsNullPackageData,
-            Condition.Function.IsContinuingPackagePCNear,
-        };
+    public static readonly IEnumerable<Condition.Function> PackageOnlyFunctions = [
+        Condition.Function.GetNumericPackageData,
+        Condition.Function.GetWithinPackageLocation,
+        Condition.Function.IsNullPackageData,
+        Condition.Function.IsContinuingPackagePCNear,
+    ];
 
-    public static readonly IEnumerable<Condition.Function> DisabledFunctions
-        = new[] {
-            Condition.Function.MenuMode,
-            Condition.Function.GetScriptVariable,
-            Condition.Function.GetQuestVariable,
-            Condition.Function.GetIsCreature,
-            Condition.Function.GetIsCreatureType,
-            Condition.Function.IsIdlePlaying,
-            Condition.Function.GetPersuasionNumber,
-            Condition.Function.GetTotalPersuasionNumber,
-            Condition.Function.GetClassDefaultMatch,
-            Condition.Function.IsHorseStolen,
-            Condition.Function.GetHitLocation,
-            Condition.Function.GetIsAlignment,
-            Condition.Function.GetConcussed,
-            Condition.Function.GetKillingBlowLimb,
-        };
+    public static readonly IEnumerable<Condition.Function> DisabledFunctions = [
+        Condition.Function.MenuMode,
+        Condition.Function.GetScriptVariable,
+        Condition.Function.GetQuestVariable,
+        Condition.Function.GetIsCreature,
+        Condition.Function.GetIsCreatureType,
+        Condition.Function.IsIdlePlaying,
+        Condition.Function.GetPersuasionNumber,
+        Condition.Function.GetTotalPersuasionNumber,
+        Condition.Function.GetClassDefaultMatch,
+        Condition.Function.IsHorseStolen,
+        Condition.Function.GetHitLocation,
+        Condition.Function.GetIsAlignment,
+        Condition.Function.GetConcussed,
+        Condition.Function.GetKillingBlowLimb,
+    ];
 
     public static readonly IEnumerable<Condition.Function> BaseFunctions
         = Enum.GetValues<Condition.Function>()

@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Skyrim.Assets;
 namespace CreationEditor.Skyrim.Avalonia.Services.Asset;
 
 public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
-    public IReadOnlyList<IAssetType> AllAssetTypes { get; } = new[] {
+    public IReadOnlyList<IAssetType> AllAssetTypes { get; } = [
         SkyrimTextureAssetType.Instance,
         SkyrimModelAssetType.Instance,
         SkyrimScriptSourceAssetType.Instance,
@@ -19,7 +19,7 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
         SkyrimBodyTextureAssetType.Instance,
         SkyrimBehaviorAssetType.Instance,
         SkyrimTranslationAssetType.Instance,
-    };
+    ];
 
     public IDictionary<IAssetType, Func<string, IAssetLink>> AssetTypeConstructor { get; }
         = new Dictionary<IAssetType, Func<string, IAssetLink>> {

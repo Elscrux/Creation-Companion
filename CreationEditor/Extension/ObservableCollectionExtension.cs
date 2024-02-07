@@ -155,10 +155,10 @@ public static class ObservableCollectionExtension {
         if (smallestIndex is null) return;
 
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(NotifyCollectionChangedEventArgs) })!;
-        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count)) });
-        propertyChanged.Invoke(collection, new object?[] { new PropertyChangedEventArgs("Item[]") });
-        collectionChanged.Invoke(collection, new object?[] { new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value) });
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, [typeof(NotifyCollectionChangedEventArgs)])!;
+        propertyChanged.Invoke(collection, [new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count))]);
+        propertyChanged.Invoke(collection, [new PropertyChangedEventArgs("Item[]")]);
+        collectionChanged.Invoke(collection, [new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value)]);
     }
 
     public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) => collection.ApplyOrder(collection.OrderBy(selector));
