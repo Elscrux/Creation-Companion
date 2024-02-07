@@ -15,6 +15,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
 public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
+    public ILinkCacheProvider LinkCacheProvider { get; }
     private readonly IViewportRuntimeService _viewportRuntimeService;
     public ExteriorCellsProvider ExteriorCellsProvider { get; }
 
@@ -31,6 +32,7 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
         ExteriorCellsProvider exteriorCellsProvider,
         IViewportRuntimeService viewportRuntimeService,
         ILinkCacheProvider linkCacheProvider) {
+        LinkCacheProvider = linkCacheProvider;
         _viewportRuntimeService = viewportRuntimeService;
         ExteriorCellsProvider = exteriorCellsProvider.DisposeWith(this);
 
@@ -43,9 +45,9 @@ public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
             .DisposeWith(this);
 
         SelectGridCell = ReactiveCommand.Create(() => {
-            if (!ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) return;
+            if (!LinkCacheProvider.LinkCache.TryResolve<IWorldspaceGetter>(ExteriorCellsProvider.WorldspaceFormKey, out var worldspace)) return;
 
-            foreach (var cell in linkCacheProvider.LinkCache.EnumerateAllCells(worldspace.FormKey)) {
+            foreach (var cell in LinkCacheProvider.LinkCache.EnumerateAllCells(worldspace.FormKey)) {
                 if (cell.Grid is null) continue;
 
                 var gridPoint = cell.Grid.Point;

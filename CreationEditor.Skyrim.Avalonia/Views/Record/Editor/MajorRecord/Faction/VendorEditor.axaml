@@ -32,7 +32,7 @@
                             <picker:PlacedPickerButton
                                 Placed="{Binding EditableRecord.MerchantContainer}"
                                 Filter="{Binding ChestFilter}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Classes="GroupBoxStretch"
@@ -44,7 +44,7 @@
                                                         ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
                                     <picker:TargetPicker
                                         Target="{Binding EditableRecord.VendorLocation.Target, Mode=TwoWay}"
-                                        LinkCache="{Binding LinkCache}">
+                                        LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}">
                                         <picker:TargetPicker.Types>
                                             <generic:List x:TypeArguments="picker:TargetPickerType">
                                                 <picker:TargetPickerType>Cell</picker:TargetPickerType>
@@ -86,7 +86,7 @@
                                 <picker1:FormKeyPicker
                                     FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
                                     ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
-                                    LinkCache="{Binding LinkCache}"/>
+                                    LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                             </HeaderedContentControl>
 
                             <CheckBox Content="Treat as Blacklist"
@@ -126,7 +126,7 @@
                             <view:ConditionsEditor
                                 Height="500"
                                 Conditions="{Binding EditableRecord.Conditions}"
-                                LinkCache="{Binding LinkCache}"
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"
                                 CopyPasteController="{Binding ConditionsCopyPasteController}"/>
                         </HeaderedContentControl>
                     </StackPanel>

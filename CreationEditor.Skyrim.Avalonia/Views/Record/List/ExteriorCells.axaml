@@ -17,7 +17,7 @@
             <picker:FormKeyPicker
                 FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
                 ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
-                LinkCache="{Binding ExteriorCellsProvider.RecordBrowserSettings.ModScopeProvider.LinkCache}"
+                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"
                 MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
         </HeaderedContentControl>
 

@@ -22,13 +22,12 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
     public Mutagen.Bethesda.Skyrim.Faction Record { get; set; } = null!;
     [Reactive] public EditableFaction EditableRecord { get; set; } = null!;
 
-    [Reactive] public ILinkCache LinkCache { get; set; }
-
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public Func<IPlacedGetter, bool> ChestFilter { get; }
     public RelationEditorVM RelationEditorVM { get; set; } = null!;
     public RankEditorVM RankEditorVM { get; set; } = null!;
+    public ILinkCacheProvider LinkCacheProvider { get; }
     public IConditionCopyPasteController ConditionsCopyPasteController { get; }
 
     public FactionEditorVM(
@@ -36,20 +35,15 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
         IRecordController recordController,
         ILinkCacheProvider linkCacheProvider,
         IConditionCopyPasteController conditionsCopyPasteController) {
+        LinkCacheProvider = linkCacheProvider;
         ConditionsCopyPasteController = conditionsCopyPasteController;
-
-        LinkCache = linkCacheProvider.LinkCache;
 
         ChestFilter = placed => {
             if (placed is not IPlacedObjectGetter placedObject) return false;
 
-            var placeableObjectGetter = placedObject.Base.TryResolve(LinkCache);
+            var placeableObjectGetter = placedObject.Base.TryResolve(LinkCacheProvider.LinkCache);
             return placeableObjectGetter is IContainerGetter;
         };
-
-        linkCacheProvider.LinkCacheChanged
-            .Subscribe(newLinkCache => LinkCache = newLinkCache)
-            .DisposeWith(this);
 
         Save = ReactiveCommand.Create(() => {
             recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));

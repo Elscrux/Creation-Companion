@@ -88,7 +88,7 @@
                                                 ToolTip.Tip="Player gets teleported here after being released from custody. Should point to the PrisonMarker reference outside the prison building.">
                             <picker:PlacedPickerButton
                                 Placed="{Binding EditableRecord.ExteriorJailMarker}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Margin="5"
@@ -96,7 +96,7 @@
                                                 ToolTip.Tip="A marker near which followers will wait if the player gets sent to jail.">
                             <picker:PlacedPickerButton
                                 Placed="{Binding EditableRecord.FollowerWaitMarker}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Margin="5"
@@ -105,7 +105,7 @@
                             <picker:PlacedPickerButton
                                 Placed="{Binding EditableRecord.StolenGoodsContainer}"
                                 Filter="{Binding ChestFilter}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Margin="5"
@@ -114,7 +114,7 @@
                             <picker:PlacedPickerButton
                                 Placed="{Binding EditableRecord.PlayerInventoryContainer}"
                                 Filter="{Binding ChestFilter}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Margin="5"
@@ -123,7 +123,7 @@
                             <picker1:FormKeyPicker
                                 FormKey="{Binding EditableRecord.JailOutfit.FormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.OutfitTypes}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Margin="5"
@@ -132,7 +132,7 @@
                             <picker1:FormKeyPicker
                                 FormKey="{Binding EditableRecord.SharedCrimeFactionList.FormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
-                                LinkCache="{Binding LinkCache}"/>
+                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <CheckBox Content="Attack on Sight"
