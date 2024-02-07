@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Definitions;
 using Mutagen.Bethesda;
@@ -22,6 +23,7 @@ namespace VanillaDuplicateCleaner.ViewModels;
 
 public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
+    private readonly IRecordController _recordController;
     private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
     public SingleModPickerVM ModPickerVM { get; }
@@ -33,10 +35,12 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
     public VanillaDuplicateCleanerVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
+        IRecordController recordController,
         IRecordReferenceController recordReferenceController,
         IModSaveService modSaveService,
         SingleModPickerVM modPickerVM) {
         _editorEnvironment = editorEnvironment;
+        _recordController = recordController;
         _modSaveService = modSaveService;
         RecordReferenceController = recordReferenceController;
         ModPickerVM = modPickerVM;
@@ -129,10 +133,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
             }
 
             // Clean record
-            recordReplacement.RecordDiff.Old.MarkForDeletion(
-                _editorEnvironment.LinkCache,
-                cleanedBaseMod,
-                () => references);
+            _recordController.MarkForDeletion(recordReplacement.RecordDiff.Old, cleanedBaseMod, () => references);
         }
 
         // Collect remapping data
