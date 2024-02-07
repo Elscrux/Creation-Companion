@@ -38,6 +38,27 @@ public interface IEditorEnvironment : ILinkCacheProvider {
     void Build(IEnumerable<ModKey> modKeys, string newModName, ModType modType);
 
     /// <summary>
+    /// Add a mutable mod to the end of the load order before the active mod of an existing environment and builds it again
+    /// <example>
+    /// Resulting load order:
+    /// <list type="bullet">
+    /// <item><description>Game.esm</description></item>
+    /// <item><description>OtherMod.esp</description></item>
+    /// <item><description>NewModPassedInThisMethod.esp</description></item>
+    /// <item><description>ActiveMod.esp</description></item>
+    /// </list>
+    /// </example>
+    /// </summary>
+    /// <param name="mod">Mod to add</param>
+    void AddMutableMod(IMod mod);
+
+    /// <summary>
+    /// Remove a mutable mod added with <see cref="AddMutableMod"/> from the environment and builds it again
+    /// </summary>
+    /// <param name="mod">Mod to remove</param>
+    void RemoveMutableMod(IMod mod);
+
+    /// <summary>
     /// Emits when the active mod changes
     /// </summary>
     IObservable<ModKey> ActiveModChanged { get; }

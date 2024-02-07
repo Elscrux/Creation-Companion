@@ -98,6 +98,44 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         linearNotifier.Stop();
     }
 
+    public void AddMutableMod(IMod mod) {
+        if (mod is not TMod gameMod) {
+            throw new ArgumentException($"Mod is not a {_gameReleaseContext.Release} mod", nameof(mod));
+        }
+
+        AddMutableMod(gameMod);
+    }
+
+    public void AddMutableMod(TMod mod) {
+        // Add the mod to the load order but keep the active mod at the end
+        var loadOrder = Environment.LinkCache.ListedOrder
+            .Where(m => m.ModKey != ActiveMod.ModKey)
+            .Select(m => m.ModKey)
+            .Append(mod.ModKey)
+            .Append(ActiveMod.ModKey)
+            .Distinct()
+            .ToArray();
+
+        BuildEnvironment(loadOrder, [mod]);
+    }
+
+    public void RemoveMutableMod(IMod mod) {
+        if (mod is not TMod gameMod) {
+            throw new ArgumentException($"Mod is not a {_gameReleaseContext.Release} mod", nameof(mod));
+        }
+
+        RemoveMutableMod(gameMod);
+    }
+
+    public void RemoveMutableMod(TMod mod) {
+        var loadOrder = Environment.LinkCache.ListedOrder
+            .Where(m => m.ModKey != mod.ModKey)
+            .Select(m => m.ModKey)
+            .ToArray();
+
+        BuildEnvironment(loadOrder, []);
+    }
+
     private void BuildEnvironment(ModKey[] modKeys, IEnumerable<TMod> mutableMods) {
         var builder = GameEnvironmentBuilder<TMod, TModGetter>
             .Create(_gameReleaseContext.Release)
