@@ -89,7 +89,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         RegisterCompareFunction<ITranslatedStringGetter>(
             GetStringFunctions<ITranslatedStringGetter>(
                 (stringFunction, translatedString, text) => {
-                    if (translatedString.String != null && stringFunction(translatedString.String, text)) return true;
+                    if (translatedString.String is not null && stringFunction(translatedString.String, text)) return true;
 
                     foreach (var (_, translation) in translatedString) {
                         if (stringFunction(translation, text)) {
@@ -138,7 +138,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
                     "Equals",
                     (context, e) => context.CompareValue is Enum flag && e.HasFlag(flag))
             },
-            type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() != null,
+            type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() is not null,
             10);
 
         RegisterCompareFunction(new[] {

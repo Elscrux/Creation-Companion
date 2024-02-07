@@ -16,7 +16,7 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
         var emptyContext = new RecordListContext([], [], null);
         foreach (var actions in _groups.SelectMany(x => x.Value)
             .GroupBy(x => x.MenuItemFactory(emptyContext).HotKey)) {
-            if (actions.Key == null) continue;
+            if (actions.Key is null) continue;
 
             var recordActions = actions
                 .OrderByDescending(x => x.Priority)

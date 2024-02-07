@@ -43,7 +43,7 @@ public sealed class GetFactionRankDataTemplate : ICustomConditionValueDataTempla
                                 var uInt32 = Convert.ToUInt32(value);
                                 return faction.Ranks.FirstOrDefault(rank => rank.Number == uInt32);
                             },
-                            (rank, _) => rank != null ? Convert.ToSingle(rank.Number) : 0
+                            (rank, _) => rank is not null ? Convert.ToSingle(rank.Number) : 0
                         ),
                         Mode = BindingMode.TwoWay
                     },

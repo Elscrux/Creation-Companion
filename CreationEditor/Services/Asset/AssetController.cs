@@ -60,7 +60,7 @@ public sealed class AssetController : IAssetController {
 
     public void Rename(string path, string newName, CancellationToken token = default) {
         var directoryPath = _fileSystem.Path.GetDirectoryName(path);
-        if (directoryPath != null) {
+        if (directoryPath is not null) {
             try {
                 MoveInternal(path, _fileSystem.Path.Combine(directoryPath, newName), true, token);
             } catch (Exception e) {

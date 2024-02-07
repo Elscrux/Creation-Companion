@@ -57,7 +57,7 @@ public static class ModExtension {
         }
 
         foreach (var musicTrack in mod.EnumerateMajorRecords<IMusicTrackGetter>()) {
-            if (musicTrack.Conditions != null) yield return musicTrack.Conditions;
+            if (musicTrack.Conditions is not null) yield return musicTrack.Conditions;
         }
 
         foreach (var soundDescriptor in mod.EnumerateMajorRecords<ISoundDescriptorGetter>()) {
@@ -65,7 +65,7 @@ public static class ModExtension {
         }
 
         foreach (var faction in mod.EnumerateMajorRecords<IFactionGetter>()) {
-            if (faction.Conditions != null) yield return faction.Conditions;
+            if (faction.Conditions is not null) yield return faction.Conditions;
         }
 
         foreach (var package in mod.EnumerateMajorRecords<IPackageGetter>()) {

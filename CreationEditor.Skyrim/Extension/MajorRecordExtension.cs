@@ -50,7 +50,7 @@ public static class MajorRecordExtension {
                 }
                 break;
             case IMusicTrack musicTrack:
-                if (musicTrack.Conditions != null) yield return musicTrack.Conditions;
+                if (musicTrack.Conditions is not null) yield return musicTrack.Conditions;
 
                 break;
             case ISoundDescriptor soundDescriptor:
@@ -58,7 +58,7 @@ public static class MajorRecordExtension {
 
                 break;
             case IFaction faction:
-                if (faction.Conditions != null) yield return faction.Conditions;
+                if (faction.Conditions is not null) yield return faction.Conditions;
 
                 break;
             case IPackage package:
@@ -173,7 +173,7 @@ public static class MajorRecordExtension {
                 }
                 break;
             case IMusicTrackGetter musicTrack:
-                if (musicTrack.Conditions != null) yield return musicTrack.Conditions;
+                if (musicTrack.Conditions is not null) yield return musicTrack.Conditions;
 
                 break;
             case ISoundDescriptorGetter soundDescriptor:
@@ -181,7 +181,7 @@ public static class MajorRecordExtension {
 
                 break;
             case IFactionGetter faction:
-                if (faction.Conditions != null) yield return faction.Conditions;
+                if (faction.Conditions is not null) yield return faction.Conditions;
 
                 break;
             case IPackageGetter package:

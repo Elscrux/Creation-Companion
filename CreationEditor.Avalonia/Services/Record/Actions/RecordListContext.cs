@@ -14,7 +14,7 @@ public sealed record RecordListContext(
     }
 
     public bool TryGetSetting<T>([MaybeNullWhen(false)] out T setting) {
-        if (Settings != null && Settings.TryGetValue(typeof(T), out var obj) && obj is T t) {
+        if (Settings is not null && Settings.TryGetValue(typeof(T), out var obj) && obj is T t) {
             setting = t;
             return true;
         }
