@@ -36,8 +36,8 @@ public sealed class RecordReference(
     }
 
     public string Name => Record.EditorID ?? string.Empty;
-    public string Identifier => Record.FormKey.ToString();
-    public string Type => Record.Registration.Name;
+    public string Identifier => formLinkIdentifier.FormKey.ToString();
+    public string Type => formLinkIdentifier.Type.Name;
 
     private ReadOnlyObservableCollection<IReference>? _children;
     public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
