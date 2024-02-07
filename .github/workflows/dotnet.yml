@@ -39,8 +39,8 @@ jobs:
     - name: Build
       run: dotnet build -c Release --no-restore
     
-    #- name: Test
-    #  run: dotnet test -c Release --no-build
+    - name: Test
+      run: dotnet test -c Release --no-build
     
     - name: Download renderer artifact
       uses: aochmann/actions-download-artifact@1.0.4
