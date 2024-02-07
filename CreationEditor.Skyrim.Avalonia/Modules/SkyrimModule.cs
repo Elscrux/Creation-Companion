@@ -9,7 +9,6 @@ using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
-using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Avalonia;

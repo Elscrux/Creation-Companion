@@ -24,7 +24,6 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
     protected abstract GameRelease GameRelease { get; }
 
-    protected abstract IReg<IEditorEnvironment> EditorEnvironment { get; }
     protected abstract IReg<IModInfoProvider<TModGetter>> ModInfoProvider { get; }
     protected abstract IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider { get; }
     protected abstract IReg<IRecordProviderFactory> RecordProviderFactory { get; }
@@ -52,7 +51,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
 
         // General
-        Register(builder, EditorEnvironment)
+        builder.RegisterType<EditorEnvironment<TMod, TModGetter>>()
             .As<ILinkCacheProvider>()
             .As<IEditorEnvironment>()
             .As<IEditorEnvironment<TMod, TModGetter>>()
