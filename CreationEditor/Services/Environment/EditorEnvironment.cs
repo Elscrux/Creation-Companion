@@ -58,8 +58,9 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, _gameReleaseContext.Release);
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
 
-        Environment = GameEnvironmentBuilder<TMod, TModGetter>
-            .Create(_gameReleaseContext.Release)
+        var builder = GameEnvironmentBuilder<TMod, TModGetter>.Create(_gameReleaseContext.Release);
+        if (_resolver is not null) builder = builder.WithResolver(_resolver);
+        Environment = builder
             .WithLoadOrder(ActiveMod.ModKey)
             .Build();
     }
