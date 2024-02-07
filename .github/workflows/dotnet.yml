@@ -39,17 +39,16 @@ jobs:
     - name: Build
       run: dotnet build -c Release --no-restore
     
-    - name: Test
-      run: dotnet test -c Release --no-build
-    
     - name: Download renderer artifact
-      if: github.ref == 'refs/heads/master'
       uses: aochmann/actions-download-artifact@1.0.4
       with:
         repo: ${{ matrix.renderer }}
         latest: true
         name: ${{ matrix.renderer-name }}
         path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
+    
+    -   name: Test
+        run: dotnet test -c Release --no-build
     
     - name: Upload a Build Artifact
       if: github.ref == 'refs/heads/master'
