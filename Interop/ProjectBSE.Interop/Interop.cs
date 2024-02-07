@@ -485,7 +485,8 @@ public static partial class Interop {
 
     [LibraryImport(DllName, EntryPoint = "getSizeInfo")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial SizeInformation GetSizeInfo();
+    private static partial SizeInformation GetSizeInfo_Native();
+    public static SizeInformation GetSizeInfo() => GetSizeInfo_Native();
 
     [LibraryImport(DllName, EntryPoint = "addLoadCallback")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -519,42 +520,52 @@ public static partial class Interop {
 
     [LibraryImport(DllName, EntryPoint = "loadReferences")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void LoadReferences(ulong count, ReferenceLoad[] load);
+    private static partial void LoadReferences_Native(ulong count, ReferenceLoad[] load);
+    public static void LoadReferences(ReferenceLoad[] load) => LoadReferences_Native((ulong) load.Length, load);
 
     [LibraryImport(DllName, EntryPoint = "updateReferences")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool UpdateReferences(ulong count, ReferenceUpdate[] keys);
+    private static partial bool UpdateReferences_Native(ulong count, ReferenceUpdate[] keys);
+    public static void UpdateReferences(ReferenceUpdate[] keys) => UpdateReferences_Native((ulong) keys.Length, keys);
 
     [LibraryImport(DllName, EntryPoint = "hideReferences", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool HideReferences(ulong count, string[] formKeys, [MarshalAs(UnmanagedType.Bool)] bool hide);
+    private static partial bool HideReferences_Native(ulong count, string[] formKeys, [MarshalAs(UnmanagedType.Bool)] bool hide);
+    public static void HideReferences(string[] formKeys) => HideReferences_Native((ulong) formKeys.Length, formKeys, true);
+    public static void ShowReferences(string[] formKeys) => HideReferences_Native((ulong) formKeys.Length, formKeys, false);
 
     [LibraryImport(DllName, EntryPoint = "deleteReferences", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool DeleteReferences(ulong count, string[] formKeys);
+    private static partial bool DeleteReferences_Native(ulong count, string[] formKeys);
+    public static void DeleteReferences(string[] formKeys) => DeleteReferences_Native((ulong) formKeys.Length, formKeys);
 
     [LibraryImport(DllName, EntryPoint = "loadTerrain")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool LoadTerrain(uint count, TerrainInfo[] info, float[] buffer);
+    private static partial bool LoadTerrain_Native(uint count, TerrainInfo[] info, float[] buffer);
+    public static void LoadTerrain(TerrainInfo[] info, float[] buffer) => LoadTerrain_Native((uint) info.Length, info, buffer);
 
     [LibraryImport(DllName, EntryPoint = "initTGEditor", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int InitTGEditor(InitConfig config, string[] formKeys, ulong count);
+    private static partial int InitTGEditor_Native(InitConfig config, string[] formKeys, ulong count);
+    public static int InitTGEditor(InitConfig config, string[] formKeys) => InitTGEditor_Native(config, formKeys, (ulong) formKeys.Length);
 
     [LibraryImport(DllName, EntryPoint = "getMainWindowHandle")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr GetMainWindowHandle();
+    private static partial IntPtr GetMainWindowHandle_Native();
+    public static IntPtr GetMainWindowHandle() => GetMainWindowHandle_Native();
 
     [LibraryImport(DllName, EntryPoint = "isFinished")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool IsFinished();
+    private static partial bool IsFinished_Native();
+    public static bool IsFinished() => IsFinished_Native();
 
     [LibraryImport(DllName, EntryPoint = "waitFinishedInit")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void WaitFinishedInit();
+    private static partial void WaitFinishedInit_Native();
+    public static void WaitFinishedInit() => WaitFinishedInit_Native();
 }

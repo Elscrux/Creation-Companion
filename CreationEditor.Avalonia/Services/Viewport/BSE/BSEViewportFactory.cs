@@ -60,7 +60,7 @@ public sealed class BSEViewportFactory(
             AssetDirectory = assetDirectory,
         };
 
-        var code = InitTGEditor(initConfig, bsaFileNames, (ulong) bsaFileNames.Length);
+        var code = InitTGEditor(initConfig, bsaFileNames);
         logger.Here().Information("Closed viewport with code {Code}", code);
     }
 }

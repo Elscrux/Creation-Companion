@@ -131,7 +131,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     .Select(x => x.FormKey)
                     .ToArray();
 
-                DeleteReferences(Convert.ToUInt32(unloadReferences.Length), unloadReferences);
+                DeleteReferences(unloadReferences);
             }
 
             _worldspaceRuntimeSettings = null;
@@ -143,11 +143,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     }
 
     private void UnloadCell(ExteriorCellRuntimeSettings cell) {
-        DeleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
+        DeleteReferences(cell.References.Select(x => x.FormKey).ToArray());
     }
 
     private void UnloadCell(InteriorCellRuntimeSettings cell) {
-        DeleteReferences(Convert.ToUInt32(cell.References.Count), cell.References.Select(x => x.FormKey).ToArray());
+        DeleteReferences(cell.References.Select(x => x.FormKey).ToArray());
     }
 
     private void LoadLandscape(ILandscapeGetter landscape, P2Int originToLoad) {
@@ -271,7 +271,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
         };
 
         // todo: pass multiple terrains, WARNING normal begin and color begin will be dynamic in that case!
-        LoadTerrain(1, new[] { landscapeInfo }, floatBuffer);
+        LoadTerrain([landscapeInfo], floatBuffer);
 
         unmanagedMemory.Dispose();
     }
@@ -343,7 +343,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             }
         }
 
-        LoadReferences(Convert.ToUInt32(refs.Count), refs.ToArray());
+        LoadReferences(refs.ToArray());
 
         return refs;
     }
