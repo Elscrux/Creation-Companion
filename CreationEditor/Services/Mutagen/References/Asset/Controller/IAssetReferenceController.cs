@@ -1,9 +1,8 @@
 ﻿using CreationEditor.Services.Asset;
 using Mutagen.Bethesda.Plugins.Assets;
-using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
-public interface IAssetReferenceController : IReferenceController<IMajorRecordGetter>, IReferenceController<AssetFile>, IDisposable {
+public interface IAssetReferenceController : IReferenceController<RecordModPair>, IReferenceController<AssetFile>, IDisposable {
     /// <summary>
     /// Observable that emits true when the controller is currently loading references.
     /// </summary>

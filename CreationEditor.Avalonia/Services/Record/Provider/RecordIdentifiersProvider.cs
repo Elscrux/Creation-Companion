@@ -64,22 +64,22 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
 
         IsBusy = isBusy;
 
-        recordController.RecordChanged
+        recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .Subscribe(record => {
+            .Subscribe(x => {
                 // Don't add if record not in the original identifiers list
-                if (!RecordCache.TryGetValue(record.FormKey, out var listRecord)) return;
+                if (!RecordCache.TryGetValue(x.Record.FormKey, out var listRecord)) return;
 
                 // Modify value
-                listRecord.Record = record;
+                listRecord.Record = x.Record;
 
                 // Force update
                 RecordCache.AddOrUpdate(listRecord);
             })
             .DisposeWith(this);
 
-        recordController.RecordDeleted
-            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+        recordController.WinningRecordDeleted
+            .Subscribe(x => RecordCache.RemoveKey(x.Record.FormKey))
             .DisposeWith(this);
     }
 

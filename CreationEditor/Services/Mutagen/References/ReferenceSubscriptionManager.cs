@@ -5,13 +5,14 @@ namespace CreationEditor.Services.Mutagen.References;
 
 public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference>(
     Action<TSubscriber, Change<TReference>> changeAction,
+    Action<TSubscriber, IReadOnlyList<TReference>> changeAllAction,
     Func<TSubscriber, TIdentifier> identifierSelector,
     IEqualityComparer<TIdentifier>? comparer = null)
     where TIdentifier : notnull
     where TReference : notnull {
 
     private readonly object _lockObject = new();
-    private readonly ConcurrentDictionary<TIdentifier, List<ReferenceSubscription>> _identifierSubscriptions = new(comparer);
+    private readonly ConcurrentDictionary<TIdentifier, ConcurrentDictionary<ReferenceSubscription, byte>> _identifierSubscriptions = new(comparer);
 
     public IDisposable Register(TSubscriber subscriber) {
         var identifier = identifierSelector(subscriber);
@@ -19,7 +20,7 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
 
         var newSubscription = new ReferenceSubscription(this, identifier, subscriber);
 
-        lock (_lockObject) subscriptions.Add(newSubscription);
+        subscriptions.TryAdd(newSubscription, byte.MaxValue);
 
         return newSubscription;
     }
@@ -29,47 +30,47 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
     }
 
     public void Unregister(TIdentifier identifier, TSubscriber subscriber) {
-        if (_identifierSubscriptions.TryGetValue(identifier, out var subscriptions)) {
-            subscriptions.RemoveWhere(s => Equals(s.Subscriber, subscriber));
-        }
+        if (!_identifierSubscriptions.TryGetValue(identifier, out var subscriptions)) return;
+
+        var unregisteredKeys = subscriptions.Keys.Where(s => Equals(s.Subscriber, subscriber)).ToList();
+        subscriptions.Remove(unregisteredKeys);
     }
 
     public void UnregisterWhere(Predicate<TSubscriber> removePredicate) {
         var emptyIdents = new List<TIdentifier>();
-        lock (_lockObject) {
-            foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
-                subscriptions.RemoveWhere(subscription => removePredicate(subscription.Subscriber));
+        foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
+            var unregisteredKeys = subscriptions.Keys.Where(s => removePredicate(s.Subscriber)).ToList();
+            subscriptions.Remove(unregisteredKeys);
 
-                if (subscriptions.Count == 0) {
-                    emptyIdents.Add(identifier);
-                }
+            if (subscriptions.IsEmpty) {
+                emptyIdents.Add(identifier);
             }
         }
 
         _identifierSubscriptions.Remove(emptyIdents);
     }
 
-    public bool Change(TIdentifier identifier, Change<TReference> change) {
+    public bool Update(TIdentifier identifier, Change<TReference> change) {
         if (!_identifierSubscriptions.TryGetValue(identifier, out var subscriptions)) return false;
+        if (subscriptions.IsEmpty) return true;
 
         lock (_lockObject) {
-            foreach (var subscription in subscriptions.ToArray()) {
-                changeAction(subscription.Subscriber, change);
+            foreach (var subscription in subscriptions) {
+                changeAction(subscription.Key.Subscriber, change);
             }
         }
 
         return true;
     }
 
-    public void Change(Func<TIdentifier, Change<TReference>> changeSelector) {
+    public void UpdateAll(Func<TIdentifier, IEnumerable<TReference>> newReferencesSelector) {
         foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
-            var change = changeSelector(identifier);
-            if (change is null) continue;
+            if (subscriptions.IsEmpty) continue;
 
-            lock (_lockObject) {
-                foreach (var subscription in subscriptions) {
-                    changeAction(subscription.Subscriber, change);
-                }
+            var references = newReferencesSelector(identifier).ToList();
+
+            foreach (var subscription in subscriptions) {
+                changeAllAction(subscription.Key.Subscriber, references);
             }
         }
     }
@@ -81,12 +82,10 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
         public void Dispose() {
             if (!ReferenceSubscriptionManager._identifierSubscriptions.TryGetValue(Identifier, out var subscriptions)) return;
 
-            lock (ReferenceSubscriptionManager._lockObject) {
-                subscriptions.Remove(this);
+            subscriptions.TryRemove(this, out _);
 
-                if (subscriptions.Count == 0) {
-                    ReferenceSubscriptionManager._identifierSubscriptions.TryRemove(Identifier, out _);
-                }
+            if (subscriptions.IsEmpty) {
+                ReferenceSubscriptionManager._identifierSubscriptions.TryRemove(Identifier, out _);
             }
         }
     }

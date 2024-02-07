@@ -54,17 +54,17 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
 
         IsBusy = isBusy;
 
-        recordController.RecordChanged
+        recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .Subscribe(record => {
-                if (!Types.Contains(record.GetType())) return;
+            .Subscribe(x => {
+                if (!Types.Contains(x.Record.GetType())) return;
 
-                if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
+                if (RecordCache.TryGetValue(x.Record.FormKey, out var listRecord)) {
                     // Modify value
-                    listRecord.Record = record;
+                    listRecord.Record = x.Record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    recordReferenceController.GetReferencedRecord(x.Record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 
@@ -73,8 +73,8 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
             })
             .DisposeWith(this);
 
-        recordController.RecordDeleted
-            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+        recordController.WinningRecordDeleted
+            .Subscribe(x => RecordCache.RemoveKey(x.Record.FormKey))
             .DisposeWith(this);
     }
 

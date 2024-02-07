@@ -6,11 +6,15 @@ namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 public sealed class ImmutableRecordReferenceCache : IRecordReferenceCache {
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches;
 
-    internal ImmutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery) {
+    public ImmutableRecordReferenceCache(IDictionary<ModKey, ModReferenceCache> caches) {
+        _modCaches = new Dictionary<ModKey, ModReferenceCache>(caches);
+    }
+
+    public ImmutableRecordReferenceCache(IRecordReferenceQuery recordReferenceQuery) {
         _modCaches = new Dictionary<ModKey, ModReferenceCache>(recordReferenceQuery.ModCaches);
     }
 
-    internal ImmutableRecordReferenceCache(ImmutableRecordReferenceCache immutableRecordReferenceCache) {
+    public ImmutableRecordReferenceCache(ImmutableRecordReferenceCache immutableRecordReferenceCache) {
         _modCaches = new Dictionary<ModKey, ModReferenceCache>(immutableRecordReferenceCache._modCaches);
     }
 
@@ -48,4 +52,6 @@ public sealed class ImmutableRecordReferenceCache : IRecordReferenceCache {
             yield return reference;
         }
     }
+
+    internal ModReferenceCache GetModReferenceCache(ModKey modKey) => _modCaches[modKey];
 }

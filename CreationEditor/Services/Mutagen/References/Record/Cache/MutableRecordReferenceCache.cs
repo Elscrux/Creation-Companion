@@ -1,60 +1,66 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using System.Collections.Concurrent;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
 
-public sealed class MutableRecordReferenceCache : IRecordReferenceCache {
-    private readonly IModGetter _mutableMod;
-    private readonly ImmutableRecordReferenceCache? _immutableReferenceCache;
-    private readonly ModReferenceCache _mutableModReferenceCache;
+public sealed class MutableRecordReferenceCache(
+    IDictionary<ModKey, ModReferenceCache> mutableModReferenceCaches,
+    ImmutableRecordReferenceCache? immutableReferenceCache = null)
+    : IRecordReferenceCache {
 
-    internal MutableRecordReferenceCache(IModGetter mutableMod, ModReferenceCache mutableModReferenceCache, ImmutableRecordReferenceCache? immutableReferenceCache = null) {
-        _mutableMod = mutableMod;
-        _mutableModReferenceCache = mutableModReferenceCache;
-        _immutableReferenceCache = immutableReferenceCache;
+    private readonly ConcurrentDictionary<ModKey, ModReferenceCache> _mutableModReferenceCaches = new(mutableModReferenceCaches);
+
+    public bool AddRecord(IMod mod, IMajorRecordGetter record) {
+        return _mutableModReferenceCaches[mod.ModKey].FormKeys.Add(record.FormKey);
     }
 
-    public bool AddRecord(IMajorRecordGetter record) {
-        return _mutableModReferenceCache.FormKeys.Add(record.FormKey);
-    }
-
-    public bool RemoveReference(FormKey formKey, IFormLinkIdentifier oldReference) {
+    public bool RemoveReference(IMod mod, FormKey formKey, IFormLinkIdentifier oldReference) {
         // when the record was not part of the MUTABLE MOD before we need to reevaluate all old form from the other one too  
 
-        return _mutableModReferenceCache.Cache.TryGetValue(formKey, out var references)
+        return _mutableModReferenceCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)
          && references.Remove(oldReference);
     }
 
-    public void RemoveReferences(FormKey formKey, IEnumerable<IFormLinkIdentifier> oldReferences) {
-        if (!_mutableModReferenceCache.Cache.TryGetValue(formKey, out var references)) return;
+    public void RemoveReferences(IMod mod, FormKey formKey, IEnumerable<IFormLinkIdentifier> oldReferences) {
+        if (!_mutableModReferenceCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)) return;
 
         foreach (var oldReference in oldReferences) {
             references.Remove(oldReference);
         }
     }
 
-    public bool AddReference(FormKey formKey, IFormLinkIdentifier newReference) {
-        var references = _mutableModReferenceCache.Cache.GetOrAdd(formKey);
+    public bool AddReference(IMod mod, FormKey formKey, IFormLinkIdentifier newReference) {
+        var references = _mutableModReferenceCaches[mod.ModKey].Cache.GetOrAdd(formKey);
 
         return references.Add(newReference);
     }
 
-    public void AddReferences(FormKey formKey, IEnumerable<IFormLinkIdentifier> newReferences) {
-        var references = _mutableModReferenceCache.Cache.GetOrAdd(formKey);
+    public void AddReferences(IMod mod, FormKey formKey, IEnumerable<IFormLinkIdentifier> newReferences) {
+        var references = _mutableModReferenceCaches[mod.ModKey].Cache.GetOrAdd(formKey);
         foreach (var newReference in newReferences) {
             references.Add(newReference);
         }
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
-        if (_mutableModReferenceCache.Cache.TryGetValue(formKey, out var references)) {
+        foreach (var mod in modOrder) {
+            var modReferenceCache = GetModReferenceCache(mod.ModKey);
+            if (!modReferenceCache.Cache.TryGetValue(formKey, out var references)) continue;
+
             foreach (var reference in references) {
-                yield return reference;
-            }
-        } else if (_immutableReferenceCache is not null) {
-            foreach (var reference in _immutableReferenceCache.GetReferences(formKey, modOrder)) {
-                yield return reference;
+                var containingMod = modOrder.FirstOrDefault(m => GetModReferenceCache(m.ModKey).FormKeys.Contains(reference.FormKey));
+                if (containingMod?.ModKey == mod.ModKey) {
+                    yield return reference;
+                }
             }
         }
+    }
+
+    private ModReferenceCache GetModReferenceCache(ModKey modKey) {
+        if (_mutableModReferenceCaches.TryGetValue(modKey, out var modReferenceCache)) return modReferenceCache;
+        if (immutableReferenceCache is not null) return immutableReferenceCache.GetModReferenceCache(modKey);
+
+        throw new KeyNotFoundException($"Mod {modKey} not found in the reference cache");
     }
 }

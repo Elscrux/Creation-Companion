@@ -135,7 +135,7 @@ public sealed class RecordReferenceQuery(
     /// </summary>
     /// <param name="mod">mod to build reference cache for</param>
     /// <returns>reference cache of mod</returns>
-    private ModReferenceCache BuildReferenceCache(IModGetter mod) {
+    public ModReferenceCache BuildReferenceCache(IModGetter mod) {
         // Fill modCache
         var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();

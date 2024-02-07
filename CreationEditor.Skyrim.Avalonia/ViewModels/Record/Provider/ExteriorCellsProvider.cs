@@ -64,10 +64,11 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
 
         IsBusy = isBusy;
 
-        recordController.RecordChanged
+        recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .OfType<ICellGetter>()
-            .Subscribe(cell => {
+            .Subscribe(x => {
+                if (x.Record is not ICellGetter cell) return;
+
                 if (RecordCache.TryGetValue(cell.FormKey, out var listRecord)) {
                     // Modify value
                     listRecord.Record = cell;
@@ -91,9 +92,12 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
             })
             .DisposeWith(this);
 
-        recordController.RecordDeleted
-            .OfType<ICellGetter>()
-            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+        recordController.WinningRecordDeleted
+            .Subscribe(x => {
+                if (x.Record is not ICellGetter cell) return;
+
+                RecordCache.RemoveKey(cell.FormKey);
+            })
             .DisposeWith(this);
     }
 

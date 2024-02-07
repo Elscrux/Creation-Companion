@@ -58,7 +58,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                             if (!refFormKeys.Add(record.FormKey)) continue;
 
                             recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
-                            var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, RecordBrowserSettings.ModScopeProvider.LinkCache);
+                            var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, linkCacheProvider.LinkCache);
 
                             updater.AddOrUpdate(referencedPlacedRecord);
                         }
@@ -70,27 +70,31 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
         IsBusy = isBusy;
 
-        recordController.RecordChanged
+        recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .Subscribe(majorRecord => {
-                if (majorRecord is not IPlacedGetter record) return;
+            .Subscribe(x => {
+                if (x.Record is not IPlacedGetter placed) return;
 
-                if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
+                if (RecordCache.TryGetValue(placed.FormKey, out var referencedPlaced)) {
                     // Modify value
-                    listRecord.Record = record;
+                    referencedPlaced.Record = placed;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(this);
-                    listRecord = outListRecord;
+                    recordReferenceController.GetReferencedRecord(placed, out var outReferencedPlaced).DisposeWith(this);
+                    referencedPlaced = outReferencedPlaced;
                 }
 
                 // Force update
-                RecordCache.AddOrUpdate(listRecord);
+                RecordCache.AddOrUpdate(referencedPlaced);
             })
             .DisposeWith(this);
 
-        recordController.RecordDeleted
-            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+        recordController.WinningRecordDeleted
+            .Subscribe(x => {
+                if (x.Record is not IPlacedGetter placed) return;
+
+                RecordCache.RemoveKey(placed.FormKey);
+            })
             .DisposeWith(this);
     }
 

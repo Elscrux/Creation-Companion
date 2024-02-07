@@ -39,16 +39,19 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkGetter> _modAssetReferenceManager
         = new((asset, change) => asset.RecordReferences.Apply(change),
+            (record, newData) => record.RecordReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifDirectoryAssetReferenceManager
         = new((asset, change) => asset.NifDirectoryReferences.Apply(change),
+            (record, newData) => record.NifDirectoryReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifArchiveAssetReferenceManager
         = new((asset, change) => asset.NifArchiveReferences.Apply(change),
+            (record, newData) => record.NifArchiveReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
@@ -90,7 +93,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
         recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
-        recordController.RecordDeleted.Subscribe(RegisterDeletion).DisposeWith(_disposables);
+        recordController.WinningRecordDeleted.Subscribe(RegisterDeletion).DisposeWith(_disposables);
     }
 
     public void Dispose() => _disposables.Dispose();
@@ -114,11 +117,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         }
 
         // Update existing subscriptions
-        _modAssetReferenceManager.Change(asset => {
-            var references = _modAssetCaches.GetReferences(asset);
-
-            return new Change<IFormLinkGetter>(ListChangeReason.AddRange, references);
-        });
+        _modAssetReferenceManager.UpdateAll(asset => _modAssetCaches.GetReferences(asset));
 
         linearNotifier.Stop();
     }
@@ -131,11 +130,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         linearNotifier.Stop();
 
         // Change existing subscriptions
-        _nifDirectoryAssetReferenceManager.Change(asset => {
-            var references = _nifDirectoryAssetReferenceCache.GetReferences(asset);
-
-            return new Change<string>(ListChangeReason.AddRange, references);
-        });
+        _nifDirectoryAssetReferenceManager.UpdateAll(asset => _nifDirectoryAssetReferenceCache.GetReferences(asset));
     }
 
     private async Task InitNifArchiveReferences() {
@@ -155,11 +150,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             _nifArchiveAssetCaches.AddRange(assetCaches);
 
             // Update existing subscriptions with new references
-            _nifArchiveAssetReferenceManager.Change(asset => {
-                var references = assetCaches.GetReferences(asset);
-
-                return new Change<string>(ListChangeReason.AddRange, references);
-            });
+            _nifArchiveAssetReferenceManager.UpdateAll(asset => assetCaches.GetReferences(asset));
 
             linearNotifier.Stop();
         }
@@ -187,11 +178,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             _nifArchiveAssetCaches.Add(newCache);
 
             // Change existing subscriptions
-            _nifArchiveAssetReferenceManager.Change(asset => {
-                var references = newCache.GetReferences(asset);
-
-                return new Change<string>(ListChangeReason.AddRange, references);
-            });
+            _nifArchiveAssetReferenceManager.UpdateAll(asset => newCache.GetReferences(asset));
 
             notifier.Stop();
         }
@@ -201,11 +188,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             if (cache is null) return;
 
             // Change existing subscriptions
-            _nifArchiveAssetReferenceManager.Change(asset => {
-                var references = cache.GetReferences(asset);
-
-                return new Change<string>(ListChangeReason.RemoveRange, references);
-            });
+            _nifArchiveAssetReferenceManager.UpdateAll(asset => cache.GetReferences(asset));
         }
     }
 
@@ -276,7 +259,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             _nifDirectoryAssetReferenceCache.AddReference(added, dataRelativePath);
 
             var change = new Change<string>(ListChangeReason.Add, dataRelativePath);
-            _nifDirectoryAssetReferenceManager.Change(added, change);
+            _nifDirectoryAssetReferenceManager.Update(added, change);
         }
     }
 
@@ -286,30 +269,30 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             _nifDirectoryAssetReferenceCache.RemoveReference(removed, dataRelativePath);
 
             var change = new Change<string>(ListChangeReason.Remove, dataRelativePath);
-            _nifDirectoryAssetReferenceManager.Change(removed, change);
+            _nifDirectoryAssetReferenceManager.Update(removed, change);
         }
     }
 
-    public Action<IMajorRecordGetter> RegisterUpdate(IMajorRecordGetter record) {
+    public Action<RecordModPair> RegisterUpdate(RecordModPair old) {
         var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
         if (modCache is null) return _ => {};
 
         // Collect the references before and after the update
         HashSet<IAssetLinkGetter> before;
         using (var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache()) {
-            before = record.EnumerateAllAssetLinks(assetLinkCache).ToHashSet();
+            before = old.Record.EnumerateAllAssetLinks(assetLinkCache).ToHashSet();
         }
 
-        return newRecord => {
+        return x => {
             HashSet<IAssetLinkGetter> after;
             using (var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache()) {
-                after = newRecord.EnumerateAllAssetLinks(assetLinkCache).ToHashSet();
+                after = x.Record.EnumerateAllAssetLinks(assetLinkCache).ToHashSet();
             }
 
             // Calculate the diff
             var removedReferences = before.Except(after);
             var addedReferences = after.Except(before);
-            var newRecordLink = newRecord.ToLinkFromRuntimeType();
+            var newRecordLink = x.Record.ToLinkFromRuntimeType();
 
             // Remove the record from its former references
             RemoveRecordReferences(modCache, newRecordLink, removedReferences);
@@ -319,9 +302,9 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         };
     }
 
-    public void RegisterCreation(IMajorRecordGetter record) {
+    public void RegisterCreation(RecordModPair pair) {
         if (_nifDirectoryAssetReferenceCache is null) {
-            _recordCreations.Enqueue(record);
+            _recordCreations.Enqueue(pair.Record);
             return;
         }
 
@@ -329,12 +312,12 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
-        AddRecordReferences(modCache, record.ToLinkFromRuntimeType(), record.EnumerateAllAssetLinks(assetLinkCache));
+        AddRecordReferences(modCache, pair.Record.ToLinkFromRuntimeType(), pair.Record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
-    public void RegisterDeletion(IMajorRecordGetter record) {
+    public void RegisterDeletion(RecordModPair pair) {
         if (_nifDirectoryAssetReferenceCache is null) {
-            _recordDeletions.Enqueue(record);
+            _recordDeletions.Enqueue(pair.Record);
             return;
         }
 
@@ -342,7 +325,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
-        RemoveRecordReferences(modCache, record.ToLinkFromRuntimeType(), record.EnumerateAllAssetLinks(assetLinkCache));
+        RemoveRecordReferences(modCache, pair.Record.ToLinkFromRuntimeType(), pair.Record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
     private void AddRecordReferences(AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
@@ -350,7 +333,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             if (!modReferenceCache.AddReference(reference, newRecordLink)) continue;
 
             var change = new Change<IFormLinkGetter>(ListChangeReason.Add, newRecordLink);
-            _modAssetReferenceManager.Change(reference, change);
+            _modAssetReferenceManager.Update(reference, change);
         }
     }
 
@@ -359,7 +342,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             if (!modReferenceCache.RemoveReference(reference, newRecordLink)) continue;
 
             var change = new Change<IFormLinkGetter>(ListChangeReason.Remove, newRecordLink);
-            _modAssetReferenceManager.Change(reference, change);
+            _modAssetReferenceManager.Update(reference, change);
         }
     }
 

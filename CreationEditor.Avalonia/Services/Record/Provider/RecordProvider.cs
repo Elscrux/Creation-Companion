@@ -52,10 +52,10 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
         IsBusy = isBusy;
 
-        recordController.RecordChanged
+        recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .Subscribe(majorRecord => {
-                if (majorRecord is not TMajorRecordGetter record) return;
+            .Subscribe(x => {
+                if (x.Record is not TMajorRecordGetter record) return;
 
                 if (RecordCache.TryGetValue(record.FormKey, out var listRecord)) {
                     // Modify value
@@ -71,8 +71,8 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
             })
             .DisposeWith(this);
 
-        recordController.RecordDeleted
-            .Subscribe(record => RecordCache.RemoveKey(record.FormKey))
+        recordController.WinningRecordDeleted
+            .Subscribe(x => RecordCache.RemoveKey(x.Record.FormKey))
             .DisposeWith(this);
     }
 

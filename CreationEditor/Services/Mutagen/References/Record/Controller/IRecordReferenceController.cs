@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 
-public interface IRecordReferenceController : IReferenceController<IMajorRecordGetter> {
+public interface IRecordReferenceController : IReferenceController<RecordModPair> {
     /// <summary>
     /// Get references to the given form key.
     /// Note that this will only return the references that currently exist.
