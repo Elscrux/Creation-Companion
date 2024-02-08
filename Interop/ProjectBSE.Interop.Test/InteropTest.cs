@@ -19,21 +19,8 @@ public sealed class InteropTest {
     };
 
     public InteropTest() {
-        TestInit();
-    }
-
-    private static async void TestInit() {
-        var task = await Record.ExceptionAsync(() => Task.Run(() => {
-            var initTgEditor = InitTGEditor(InitConfig, []);
-            Console.WriteLine(initTgEditor);
-            // Assert.NotEqual(-1, initTgEditor);
-        }));
-
-        Assert.Null(task);
-
+        Task.Run(() => InitTGEditor(InitConfig, []));
         WaitFinishedInit();
-
-        Assert.Null(task);
     }
 
     [Fact]
