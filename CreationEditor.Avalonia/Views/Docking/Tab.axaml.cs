@@ -1,4 +1,4 @@
-﻿using System.Windows.Input;
+﻿using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -48,12 +48,12 @@ public partial class Tab : UserControl, IDockPreview {
         });
     }
 
-    private void OnTabPointerReleased(object? sender, PointerReleasedEventArgs e) {
+    private async void OnTabPointerReleased(object? sender, PointerReleasedEventArgs e) {
         if (sender is not Control control) return;
 
         var currentPoint = e.GetCurrentPoint(control);
         if (currentPoint.Properties.PointerUpdateKind != PointerUpdateKind.MiddleButtonReleased) return;
 
-        (DockedItem.Close as ICommand).Execute(null);
+        await DockedItem.Close.Execute();
     }
 }

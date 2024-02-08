@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Disposables;
-using System.Windows.Input;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -76,7 +76,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         ViewModel?.Drop(directory, dragInfo);
     }
 
-    private void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {
+    private async void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {
         if (AssetTree.RowSelection is null || ViewModel is null) return;
 
         switch (e.Key) {
@@ -87,29 +87,27 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             // Open references
             case Key.R when (e.KeyModifiers & KeyModifiers.Control) != 0:
                 if (AssetTree.RowSelection.SelectedItem is AssetTreeItem item) {
-                    var command = ViewModel.OpenReferences as ICommand;
-                    if (command.CanExecute(null)) {
-                        command.Execute(item);
-                    }
+                    if (!await ViewModel.OpenReferences.CanExecute) break;
+
+                    await ViewModel.OpenReferences.Execute(item);
                 }
                 break;
             // Rename
             case Key.F2:
                 if (AssetTree.RowSelection.SelectedItem is AssetTreeItem assetTreeItem) {
-                    var command = ViewModel.Rename as ICommand;
-                    if (command.CanExecute(null)) {
-                        command.Execute(assetTreeItem);
-                    }
+                    if (!await ViewModel.Rename.CanExecute) break;
+
+                    await ViewModel.Rename.Execute(assetTreeItem);
                 }
                 break;
             // Delete
             case Key.Delete:
-                (ViewModel.Delete as ICommand).Execute(AssetTree.RowSelection.SelectedItems.OfType<AssetTreeItem?>().ToList());
+                await ViewModel.Delete.Execute(AssetTree.RowSelection.SelectedItems.OfType<AssetTreeItem?>().ToList());
                 break;
         }
     }
 
-    private void AssetTree_OnDoubleTapped(object? sender, TappedEventArgs e) {
+    private async void AssetTree_OnDoubleTapped(object? sender, TappedEventArgs e) {
         if (AssetTree.RowSelection is null || ViewModel is null) return;
 
         if (AssetTree.RowSelection.SelectedItem is AssetTreeItem { IsDirectory: true }) {
@@ -120,7 +118,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                 expanderCell.IsExpanded = !expanderCell.IsExpanded;
             }
         } else {
-            (ViewModel.Open as ICommand).Execute(AssetTree.RowSelection.SelectedItems.OfType<AssetTreeItem>().ToList());
+            await ViewModel.Open.Execute(AssetTree.RowSelection.SelectedItems.OfType<AssetTreeItem>().ToList());
         }
     }
 }
