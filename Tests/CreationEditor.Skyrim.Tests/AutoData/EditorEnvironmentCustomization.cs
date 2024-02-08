@@ -1,5 +1,4 @@
-﻿using System.IO.Abstractions;
-using AutoFixture;
+﻿using AutoFixture;
 using AutoFixture.Kernel;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
@@ -9,7 +8,6 @@ using CreationEditor.Skyrim.Tests.Mock;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Testing.AutoData;
 using Serilog.Core;
@@ -26,14 +24,18 @@ public sealed class EditorEnvironmentCustomization(
 
         fixture.Register<INotificationService>(fixture.Create<NotificationService>);
         fixture.Register<IRecordReferenceCacheFactory>(() => new EmptyRecordReferenceCacheFactory(fixture));
+        fixture.Register<Func<IEditorEnvironmentUpdater>>(() => fixture.Create<EditorEnvironmentUpdater<ISkyrimMod, ISkyrimModGetter>>);
         fixture.Customizations.Add(new SingletonBuilder<IRecordController, RecordController<ISkyrimMod, ISkyrimModGetter>>(fixture));
 
-        var fileSystem = fixture.Create<IFileSystem>();
+        var builder = fixture.Create<Func<IEditorEnvironmentUpdater>>();
         var gameReleaseContext = fixture.Create<IGameReleaseContext>();
-        var dataDirectoryProvider = fixture.Create<IDataDirectoryProvider>();
         var gameEnvironment = fixture.Create<IGameEnvironment>();
-        var editorEnvironment = new EditorEnvironment<ISkyrimMod, ISkyrimModGetter>(fileSystem, gameReleaseContext, dataDirectoryProvider, new NotificationService(), Logger.None, t => fixture.Create(t, new SpecimenContext(fixture)));
-        editorEnvironment.Build(gameEnvironment.LoadOrder.Keys, "NewMod", ModType.Plugin);
+        var editorEnvironment = new EditorEnvironment<ISkyrimMod, ISkyrimModGetter>(builder, gameReleaseContext, Logger.None, t => fixture.Create(t, new SpecimenContext(fixture)));
+        editorEnvironment.Update(updater => updater
+            .LoadOrder.AddImmutableMods(gameEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey))
+            .ActiveMod.New("NewMod")
+            .Build());
+
         fixture.Inject<IEditorEnvironment>(editorEnvironment);
         fixture.Inject<IEditorEnvironment<ISkyrimMod, ISkyrimModGetter>>(editorEnvironment);
     }

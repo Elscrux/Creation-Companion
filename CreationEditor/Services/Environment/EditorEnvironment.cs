@@ -1,6 +1,4 @@
-﻿using System.IO.Abstractions;
-using System.Reactive.Subjects;
-using CreationEditor.Services.Notification;
+﻿using System.Reactive.Subjects;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
@@ -14,10 +12,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter>
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
 
-    private readonly IFileSystem _fileSystem;
-    private readonly IGameReleaseContext _gameReleaseContext;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
-    private readonly INotificationService _notificationService;
+    private readonly Func<IEditorEnvironmentUpdater> _getUpdater;
     private readonly ILogger _logger;
     private readonly Func<Type, object?>? _resolver;
 
@@ -42,123 +37,50 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
     public IObservable<ILinkCache> LinkCacheChanged => _linkCacheChanged;
 
     public EditorEnvironment(
-        IFileSystem fileSystem,
+        Func<IEditorEnvironmentUpdater> getUpdater,
         IGameReleaseContext gameReleaseContext,
-        IDataDirectoryProvider dataDirectoryProvider,
-        INotificationService notificationService,
         ILogger logger,
         Func<Type, object?>? resolver = null) {
-        _fileSystem = fileSystem;
-        _gameReleaseContext = gameReleaseContext;
-        _dataDirectoryProvider = dataDirectoryProvider;
-        _notificationService = notificationService;
+        _getUpdater = getUpdater;
         _logger = logger;
         _resolver = resolver;
 
-        ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, _gameReleaseContext.Release);
+        ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, gameReleaseContext.Release);
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
 
-        var builder = GameEnvironmentBuilder<TMod, TModGetter>.Create(_gameReleaseContext.Release);
+        var builder = GameEnvironmentBuilder<TMod, TModGetter>.Create(gameReleaseContext.Release);
         if (_resolver is not null) builder = builder.WithResolver(_resolver);
         Environment = builder
             .WithLoadOrder(ActiveMod.ModKey)
             .Build();
     }
 
-    public void Build(IEnumerable<ModKey> modKeys, ModKey activeMod) {
-        var modKeysArray = modKeys.ToArray();
+    public void Update(Func<IEditorEnvironmentUpdater, IEditorEnvironmentResult> applyUpdates) {
+        // Set up updater with current environment state
+        var updater = _getUpdater();
+        updater.SetTo(this);
 
-        var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
-        _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, activeMod.FileName);
-
-        var linearNotifier = new LinearNotifier(_notificationService, 2);
-
-        linearNotifier.Next($"Preparing {activeMod.FileName}");
-        var activeModPath = new ModPath(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, activeMod.FileName));
-        ActiveMod = ModInstantiator<TMod>.Importer(activeModPath, _gameReleaseContext.Release, _fileSystem);
-        ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
-
-        linearNotifier.Next("Building GameEnvironment");
-
-        BuildEnvironment(modKeysArray, []);
-
-        linearNotifier.Stop();
-    }
-
-    public void Build(IEnumerable<ModKey> modKeys, string newModName, ModType modType) {
-        var modKeysArray = modKeys.ToArray();
-
-        var modsString = string.Join(' ', modKeysArray.Select(modKey => modKey.FileName));
-        _logger.Here().Information("Loading mods {LoadedMods} without active mod", modsString);
-
-        ActiveMod = ModInstantiator<TMod>.Activator(new ModKey(newModName, modType), _gameReleaseContext.Release);
-        ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
-
-        var linearNotifier = new LinearNotifier(_notificationService);
-        linearNotifier.Next("Building GameEnvironment");
-
-        BuildEnvironment(modKeysArray, []);
-
-        linearNotifier.Stop();
-    }
-
-    public void AddMutableMod(IMod mod) {
-        if (mod is not TMod gameMod) {
-            throw new ArgumentException($"Mod is not a {_gameReleaseContext.Release} mod", nameof(mod));
+        // Call updater
+        if (applyUpdates(updater) is not EditorEnvironmentResult<TMod, TModGetter> result) {
+            throw new InvalidOperationException("Editor Environment Updater did not return an EditorEnvironmentResult");
         }
 
-        AddMutableMod(gameMod);
-    }
+        var modsString = string.Join(' ', updater.GetLoadOrder().Select(modKey => modKey.FileName));
+        _logger.Here().Information("Loading mods {LoadedMods} with active mod {ActiveMod}", modsString, result.ActiveMod.ModKey.FileName);
 
-    public void AddMutableMod(TMod mod) {
-        // Add the mod to the load order but keep the active mod at the end
-        var loadOrder = Environment.LinkCache.ListedOrder
-            .Where(m => m.ModKey != ActiveMod.ModKey)
-            .Select(m => m.ModKey)
-            .Append(mod.ModKey)
-            .Append(ActiveMod.ModKey)
-            .Distinct()
-            .ToArray();
-
-        BuildEnvironment(loadOrder, [mod]);
-    }
-
-    public void RemoveMutableMod(IMod mod) {
-        if (mod is not TMod gameMod) {
-            throw new ArgumentException($"Mod is not a {_gameReleaseContext.Release} mod", nameof(mod));
-        }
-
-        RemoveMutableMod(gameMod);
-    }
-
-    public void RemoveMutableMod(TMod mod) {
-        var loadOrder = Environment.LinkCache.ListedOrder
-            .Where(m => m.ModKey != mod.ModKey)
-            .Select(m => m.ModKey)
-            .ToArray();
-
-        BuildEnvironment(loadOrder, []);
-    }
-
-    private void BuildEnvironment(ModKey[] modKeys, IEnumerable<TMod> mutableMods) {
-        var builder = GameEnvironmentBuilder<TMod, TModGetter>
-            .Create(_gameReleaseContext.Release)
-            .WithLoadOrder(modKeys);
-
+        // Build new environment
+        var builder = result.EnvironmentBuilder;
         if (_resolver is not null) {
             builder = builder.WithResolver(_resolver);
         }
 
-        foreach (var mutableMod in mutableMods) {
-            builder = builder.WithOutputMod(mutableMod, OutputModTrimming.Self);
-        }
+        ActiveMod = result.ActiveMod;
+        ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
+        Environment = builder.Build();
 
-        Environment = builder
-            .WithOutputMod(ActiveMod, OutputModTrimming.Self)
-            .Build();
-
+        // Emit changes
         _activeModChanged.OnNext(ActiveMod.ModKey);
-        _loadOrderChanged.OnNext(Environment.LoadOrder.Keys.ToList());
+        _loadOrderChanged.OnNext(Environment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
         _linkCacheChanged.OnNext(Environment.LinkCache);
     }
 }

@@ -57,6 +57,9 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
             .As<IEditorEnvironment<TMod, TModGetter>>()
             .SingleInstance();
 
+        builder.RegisterType<EditorEnvironmentUpdater<TMod, TModGetter>>()
+            .As<IEditorEnvironmentUpdater>();
+
         builder.RegisterInstance(new GameReleaseInjection(GameRelease))
             .AsImplementedInterfaces();
 

@@ -72,7 +72,10 @@ public sealed class RecordReferenceControllerTests {
         // Build the initial environment with the master mod
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
         masterMod.WriteToBinary(modPath, fileSystem: fileSystem);
-        editorEnvironment.Build([masterMod.ModKey], "NewMod", ModType.Plugin);
+        editorEnvironment.Update(updater => updater
+            .LoadOrder.SetImmutableMods([masterMod.ModKey])
+            .ActiveMod.New("NewMod")
+            .Build());
 
         // Add a reference to the record in the current active mod
         var armorOverride = recordController.GetOrAddOverride<IArmor, IArmorGetter>(armor);
@@ -82,7 +85,8 @@ public sealed class RecordReferenceControllerTests {
         Assert.Equal(1, recordReferenceController.GetReferences(armorAddon.FormKey).Count());
 
         // Now swap the active mod
-        editorEnvironment.Build([masterMod.ModKey], "TotallyNewMod", ModType.Plugin);
+        editorEnvironment.SetActive("TotallyNewMod");
+
         await Task.Delay(250); // wait for the new editor environment to propagate a little
 
         // Check the reference is gone
@@ -140,7 +144,11 @@ public sealed class RecordReferenceControllerTests {
         // Build the initial environment with the master mod
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
         masterMod.WriteToBinary(modPath, fileSystem: fileSystem);
-        editorEnvironment.Build([masterMod.ModKey], "NewMod", ModType.Plugin);
+        editorEnvironment.Update(updater => updater
+            .LoadOrder.SetImmutableMods([masterMod.ModKey])
+            .ActiveMod.New("NewMod")
+            .Build());
+
         await Task.Delay(250); // wait for the new editor environment to propagate a little
 
         // Check there are two references in the master mod
@@ -168,7 +176,8 @@ public sealed class RecordReferenceControllerTests {
         Assert.Equal(0, recordReferenceController.GetReferences(armorAddon.FormKey).Count());
 
         // Load different active mod
-        editorEnvironment.Build([masterMod.ModKey], "NewActiveMod", ModType.Plugin);
+        editorEnvironment.SetActive("NewActiveMod");
+
         await Task.Delay(250); // wait for the new editor environment to propagate a little
         editorEnvironment.AddMutableMod(additionalMutableMod);
         await Task.Delay(250); // wait for the new editor environment to propagate a little

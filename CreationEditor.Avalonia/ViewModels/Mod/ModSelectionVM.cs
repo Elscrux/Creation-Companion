@@ -202,11 +202,16 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             }
         }
 
-        var orderedMods = loadedMods.OrderBy(key => modKeys.IndexOf(key));
-        if (ActiveMod is null) {
-            _editorEnvironment.Build(orderedMods, NewModName, NewModType);
-        } else {
-            _editorEnvironment.Build(orderedMods, ActiveMod.Value);
-        }
+        _editorEnvironment.Update(updater => {
+            if (ActiveMod is null) {
+                updater.ActiveMod.New(ModCreationVM.NewModName ?? ModCreationVM.ModNameWatermark, ModCreationVM.NewModType);
+            } else {
+                updater.ActiveMod.Existing(ActiveMod.Value);
+            }
+
+            return updater
+                .LoadOrder.SetImmutableMods(loadedMods.OrderBy(key => modKeys.IndexOf(key)))
+                .Build();
+        });
     }
 }
