@@ -21,5 +21,5 @@ public interface IViewportRuntimeService {
     /// <summary>
     /// Emits the up to date list of selected references in the viewport
     /// </summary>
-    IObservable<IList<FormKey>> SelectedReferences { get; }
+    IObservable<IReadOnlyList<FormKey>> SelectedReferences { get; }
 }

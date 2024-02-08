@@ -20,7 +20,6 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     private sealed record InteriorCellRuntimeSettings(List<ReferenceLoad> References);
     private sealed record ExteriorCellRuntimeSettings(List<ReferenceLoad> References, Vector2 LocalOffset);
 
-    private SelectCallback? _selectCallback;
     private readonly DisposableBucket _disposableDropoff = new();
     private readonly ILogger _logger;
     private readonly ILinkCacheProvider _linkCacheProvider;
@@ -32,8 +31,8 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     private WorldspaceRuntimeSettings? _worldspaceRuntimeSettings;
 
-    private readonly Subject<IList<FormKey>> _selectedReferences = new();
-    public IObservable<IList<FormKey>> SelectedReferences => _selectedReferences;
+    private readonly Subject<IReadOnlyList<FormKey>> _selectedReferences = new();
+    public IObservable<IReadOnlyList<FormKey>> SelectedReferences => _selectedReferences;
 
     public BSERuntimeService(
         ILogger logger,
@@ -50,24 +49,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     private void SetupSelectionCallback() {
         // Needs to be saved in variable to avoid garbage collection
-        _selectCallback = (count, formKeyStrings) => {
-            var convertedFormKeys = new List<FormKey>();
+        AddSelectCallback(formKeys => {
+            _logger.Here().Verbose("Selected {Count} references: {Refs}", formKeys.Length, string.Join(", ", formKeys));
 
-            foreach (var formKeyString in formKeyStrings.ToStringArray((int) count)) {
-                var formKey = FormKey.TryFactory(formKeyString);
-                if (formKey.HasValue) {
-                    convertedFormKeys.Add(formKey.Value);
-                } else {
-                    _logger.Here().Error("Couldn't convert select {FormKey}", formKeyString);
-                }
-            }
-
-            _logger.Here().Verbose("Selected {Count} references: {Refs}", count, string.Join(", ", convertedFormKeys));
-
-            _selectedReferences.OnNext(convertedFormKeys);
-        };
-
-        AddSelectCallback(_selectCallback);
+            _selectedReferences.OnNext(formKeys);
+        });
     }
 
     public void LoadInteriorCell(ICellGetter cell) {
@@ -257,7 +243,6 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             }
 
             quadrant.AlphaLayers = alphaLayers;
-            quadrant.AlphaLayersLength = alphaLayersCount;
         }
 
         var landscapeInfo = new TerrainInfo {
@@ -329,7 +314,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     var scale = placedObject.Scale ?? 1;
 
                     refs.Add(new ReferenceLoad {
-                        FormKey = placedObject.FormKey.ToString(),
+                        FormKey = placedObject.FormKey,
                         Path = model.ToLower(),
                         Transform = new ReferenceTransform {
                             Translation = relativePosition,

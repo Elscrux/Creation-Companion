@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using Mutagen.Bethesda.Plugins;
 using Noggog;
 using static ProjectBSE.Interop.Interop;
 namespace ProjectBSE.Interop.Test;
@@ -9,7 +9,7 @@ public sealed class InteropTest {
         AssetDirectory = "test",
     };
     private static readonly ReferenceLoad TestReference = new() {
-        FormKey = "123456:Skyrim.esm",
+        FormKey = FormKey.Factory("123456:Base.esm"),
         Path = "test.nif",
         Transform = new ReferenceTransform {
             Translation = new P3Float(1, 2, 3),
@@ -40,34 +40,37 @@ public sealed class InteropTest {
     public void TestSize() {
         var sizeInformation = GetSizeInfo();
 
-        Assert.Equal(sizeInformation.SizeInformationStruct, Marshal.SizeOf<SizeInformation>());
-        Assert.Equal(sizeInformation.InitConfigStruct, Marshal.SizeOf<InitConfig>());
-        Assert.Equal(sizeInformation.ReferenceTransformStruct, Marshal.SizeOf<ReferenceTransform>());
-        Assert.Equal(sizeInformation.ReferenceLoadStruct, Marshal.SizeOf<ReferenceLoad>());
-        Assert.Equal(sizeInformation.ReferenceUpdateStruct, Marshal.SizeOf<ReferenceUpdate>());
-        Assert.Equal(sizeInformation.TextureSetStruct, Marshal.SizeOf<TextureSet>());
-        Assert.Equal(sizeInformation.AlphaDataStruct, Marshal.SizeOf<AlphaData>());
-        Assert.Equal(sizeInformation.AlphaLayerStruct, Marshal.SizeOf<AlphaLayer>());
-        Assert.Equal(sizeInformation.QuadrantStruct, Marshal.SizeOf<Quadrant>());
-        Assert.Equal(sizeInformation.CornerSetsStruct, Marshal.SizeOf<CornerSets>());
-        Assert.Equal(sizeInformation.TerrainInfoStruct, Marshal.SizeOf<TerrainInfo>());
-        Assert.Equal(sizeInformation.FeatureSetStruct, Marshal.SizeOf<FeatureSet>());
+        Assert.Equal(sizeInformation.SizeInformationStruct, SizeInformationSize);
+        Assert.Equal(sizeInformation.InitConfigStruct, InitConfigSize);
+        Assert.Equal(sizeInformation.ReferenceTransformStruct, ReferenceTransformSize);
+        Assert.Equal(sizeInformation.ReferenceLoadStruct, ReferenceLoadSize);
+        Assert.Equal(sizeInformation.ReferenceUpdateStruct, ReferenceUpdateSize);
+        Assert.Equal(sizeInformation.TextureSetStruct, TextureSetSize);
+        Assert.Equal(sizeInformation.AlphaDataStruct, AlphaDataSize);
+        Assert.Equal(sizeInformation.AlphaLayerStruct, AlphaLayerSize);
+        Assert.Equal(sizeInformation.QuadrantStruct, QuadrantSize);
+        Assert.Equal(sizeInformation.CornerSetsStruct, CornerSetsSize);
+        Assert.Equal(sizeInformation.TerrainInfoStruct, TerrainInfoSize);
+        Assert.Equal(sizeInformation.FeatureSetStruct, FeatureSetSize);
     }
 
     [Fact]
     public void TestLoadRefs() {
         ReferenceLoad[] referenceLoads = [TestReference];
-        var count = Convert.ToUInt32(referenceLoads.Length);
 
-        Assert.True(AddLoadCallback((callbackCount, callbackLoads) => {
-            Assert.Equal(count, callbackCount);
-            for (var i = 0; i < callbackLoads.Length; i++) {
-                Assert.Equal(callbackLoads[i].FormKey, referenceLoads[i].FormKey);
+        var loadCallbackTriggered = false;
+        AddLoadCallback(refs => {
+            Assert.Equal(referenceLoads.Length, refs.Length);
+            for (var i = 0; i < refs.Length; i++) {
+                Assert.Equal(refs[i].FormKey, referenceLoads[i].FormKey);
             }
-        }));
+            loadCallbackTriggered = true;
+        });
 
         WaitFinishedInit();
 
         LoadReferences(referenceLoads);
+
+        Assert.True(loadCallbackTriggered);
     }
 }
