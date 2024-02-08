@@ -73,4 +73,34 @@ public sealed class InteropTest {
 
         Assert.True(loadCallbackTriggered);
     }
+
+    [Fact]
+    public void TestHideRefs() {
+        var hideFormKey = FormKey.Factory("123456:Base.esm");
+        var showFormKey = FormKey.Factory("654321:Base.esm");
+        FormKey[] showFormKeys = [showFormKey];
+        FormKey[] hideFormKeys = [hideFormKey];
+
+        var hideCallbackTriggered = false;
+        AddHideCallback(formKeys => {
+            Assert.Equal(hideFormKeys.Length, formKeys.Length);
+            Assert.Equal(hideFormKey, formKeys[0]);
+            hideCallbackTriggered = true;
+        });
+
+        var showCallbackTriggered = false;
+        AddShowCallback(formKeys => {
+            Assert.Equal(showFormKeys.Length, formKeys.Length);
+            Assert.Equal(showFormKey, formKeys[0]);
+            showCallbackTriggered = true;
+        });
+
+        WaitFinishedInit();
+
+        ShowReferences(showFormKeys);
+        Assert.True(showCallbackTriggered);
+
+        HideReferences(hideFormKeys);
+        Assert.True(hideCallbackTriggered);
+    }
 }
