@@ -61,7 +61,6 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
 
         var mutableMods = _editorEnvironment.LinkCache.PriorityOrder.OfType<IMod>().ToList();
         _referenceCache = await _recordReferenceCacheFactory.GetMutableRecordReferenceCache(mutableMods, _editorEnvironment.LinkCache.PriorityOrder);
-        Console.WriteLine($"Updated reference cache with {string.Join(", ", mutableMods.Select(mod => mod.ModKey))}");
 
         linearNotifier.Stop();
 
