@@ -40,7 +40,7 @@ jobs:
       run: dotnet build -c Release --no-restore
     
     -   name: Test
-        run: dotnet test --filter FullyQualifiedName!=ProjectBSE.Interop.Test.* -c Release --no-build
+        run: dotnet test --filter  'FullyQualifiedName!~ProjectBSE.Interop.Test' -c Debug --no-build
     
     - name: Download renderer artifact
       if: github.ref == 'refs/heads/master'
