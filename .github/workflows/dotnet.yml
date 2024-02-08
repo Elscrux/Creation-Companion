@@ -48,7 +48,9 @@ jobs:
         path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
     
     -   name: Test
-        run: dotnet test -c Release --no-build
+        run: |
+            cp -r CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }} Interop/ProjectBSE.Interop.Test/bin/Release/net${{ matrix.dotnet-version }}
+            dotnet test -c Release --no-build
     
     - name: Upload a Build Artifact
       if: github.ref == 'refs/heads/master'
