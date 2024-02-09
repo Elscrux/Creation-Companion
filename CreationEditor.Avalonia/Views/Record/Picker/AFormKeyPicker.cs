@@ -757,12 +757,12 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.AllowsSearchMode)
-            .Where(x => !x)
+            .Negate()
             .Subscribe(_ => InSearchMode = false)
             .DisposeWith(ActivatedDisposable);
 
         this.WhenAnyValue(x => x.InSearchMode)
-            .Where(x => !x)
+            .Negate()
             .ObserveOnGui()
             .Subscribe(_ => ViewingAllowedTypes = false)
             .DisposeWith(ActivatedDisposable);
