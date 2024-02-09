@@ -47,7 +47,7 @@ public sealed class BsaArchiveService : IArchiveService {
         _dataDirectory = dataDirectoryProvider.Path;
 
         // Collect bsa files in the data directory and sort them based on the load order
-        var bsaNameOrder = editorEnvironment.GameEnvironment.LoadOrder.ListedOrder
+        var bsaNameOrder = editorEnvironment.GameEnvironment.LinkCache.ListedOrder
             .SelectMany(GetModBSAFiles)
             .ToArray();
 
@@ -118,11 +118,11 @@ public sealed class BsaArchiveService : IArchiveService {
             .Select(e => e.Name)
             .NotNull();
     }
-    private IEnumerable<string> GetModBSAFiles(IModListingGetter<IModGetter> modListing) {
+    private IEnumerable<string> GetModBSAFiles(IModGetter mod) {
         var extension = GetExtension();
 
-        yield return modListing.ModKey.Name + extension;
-        yield return modListing.ModKey.Name + " - Textures" + extension;
+        yield return mod.ModKey.Name + extension;
+        yield return mod.ModKey.Name + " - Textures" + extension;
     }
 
     public IArchiveReader GetReader(string path) {

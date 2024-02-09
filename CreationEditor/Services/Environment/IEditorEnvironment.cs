@@ -9,10 +9,6 @@ public interface IEditorEnvironment : ILinkCacheProvider {
     /// Game environment for the editor
     /// </summary>
     IGameEnvironment GameEnvironment { get; }
-    /// <summary>
-    /// A list of all loaded mods in the current game environment
-    /// </summary>
-    IEnumerable<ModKey> LoadedMods => GameEnvironment.LoadOrder.Keys;
 
     /// <summary>
     /// Currently active mod
