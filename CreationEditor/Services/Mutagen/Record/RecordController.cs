@@ -253,12 +253,13 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
             if (duplicate.EditorID is not null) duplicate.EditorID = editorIdMapper(duplicate);
             newRecordMod.GetTopLevelGroup((duplicate as IMajorRecordGetter).Registration.GetterType).AddUntyped(duplicate);
-            _recordChanged.OnNext((duplicate, newRecordMod));
+            _recordCreated.OnNext((duplicate, newRecordMod));
 
             remapData.Add(record.FormKey, targetFormKey);
             newRecords.Add(duplicate);
         }
 
+        // Remap references to use the new injected records
         foreach (var record in records) {
             var references = referenceGetter(record.FormKey).ToArray();
 
