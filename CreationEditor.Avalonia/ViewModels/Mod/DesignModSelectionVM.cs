@@ -19,12 +19,10 @@ public class DesignModSelectionVM : IModSelectionVM {
     public string ModSearchText { get; set; } = string.Empty;
     public LoadOrderModItem? SelectedMod { get; set; } = new(ModKey.FromFileName("BestMod.esp"), true, 3);
     public IModGetterVM SelectedModDetails { get; init; } = null;
+    public ModCreationVM ModCreationVM { get; }
     public IObservable<bool> CanLoad { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsLoaded { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
-    public IObservable<bool> NewModValid { get; } = Observable.Return(true);
     public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
-    public string NewModName { get; set; } = "NewMod";
-    public ModType NewModType { get; set; } = ModType.Plugin;
 }

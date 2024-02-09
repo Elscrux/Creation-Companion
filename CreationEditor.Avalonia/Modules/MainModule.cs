@@ -155,5 +155,8 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<MultiModPickerVM>()
             .AsSelf();
+
+        builder.RegisterType<ModCreationVM>()
+            .AsSelf();
     }
 }

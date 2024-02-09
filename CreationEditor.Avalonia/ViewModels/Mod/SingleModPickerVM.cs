@@ -3,21 +3,24 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Filter;
 using DynamicData;
-using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class SingleModPickerVM : ViewModel, IModPickerVM {
+    public ModCreationVM ModCreationVM { get; }
+
     [Reactive] public Func<LoadOrderModItem, bool>? Filter { get; set; }
 
     public ReadOnlyObservableCollection<LoadOrderModItem> Mods { get; }
     [Reactive] public LoadOrderModItem? SelectedMod { get; set; }
 
-    public SingleModPickerVM(ILinkCacheProvider linkCacheProvider) {
+    [Reactive] public bool CanCreateNewMod { get; set; }
+
+    public SingleModPickerVM(ILinkCacheProvider linkCacheProvider, ModCreationVM modCreationVM) {
+        ModCreationVM = modCreationVM;
+
         Mods = linkCacheProvider.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()

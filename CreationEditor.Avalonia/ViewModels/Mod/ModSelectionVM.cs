@@ -15,13 +15,11 @@ using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     public static readonly IReadOnlyList<ModType> ModTypes = Enum.GetValues<ModType>();
-
-    private const string NewModBaseName = "NewMod";
-    private static string ReplacementName(int index) => $"{NewModBaseName} ({index})";
 
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly List<ModInfo> _modInfos;
@@ -34,6 +32,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
 
     [Reactive] public LoadOrderModItem? SelectedMod { get; set; }
     public IModGetterVM SelectedModDetails { get; init; }
+    public ModCreationVM ModCreationVM { get; }
 
     public ModKey? ActiveMod => _mods.Items.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => _mods.Items.Where(mod => mod.IsSelected).Select(x => x.ModKey);
@@ -41,42 +40,25 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     public IObservable<bool> CanLoad { get; }
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
-    public IObservable<bool> NewModValid { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
-
-    [Reactive] public string NewModName { get; set; } = NewModBaseName;
-    [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
 
     public ModSelectionVM(
         IGameReleaseContext gameReleaseContext,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
+        ModCreationVM modCreationVM,
         IPluginListingsPathProvider pluginListingsProvider) {
         _editorEnvironment = editorEnvironment;
         SelectedModDetails = modGetterVM;
+        ModCreationVM = modCreationVM;
 
         // Collect mod infos
         using (var gameEnvironment = GameEnvironment.Typical.Construct(gameReleaseContext.Release, LinkCachePreferences.OnlyIdentifiers())) {
             _modInfos = SelectedModDetails.GetModInfos(gameEnvironment.LinkCache.ListedOrder).ToList();
         }
-
-        // Try use NewModBaseName as new name for the mod, otherwise find a new name
-        if (_modInfos.Exists(modInfo => modInfo.ModKey.Name == NewModBaseName)) {
-            var counter = 2;
-            while (_modInfos.Exists(modInfo => modInfo.ModKey.Name == ReplacementName(counter))) {
-                counter++;
-            }
-            NewModName = ReplacementName(counter);
-        }
-
-        NewModValid = this.WhenAnyValue(
-                x => x.NewModName,
-                x => x.NewModType,
-                (name, type) => (Name: name, Type: type))
-            .Select(x => _modInfos.TrueForAll(modInfo => modInfo.ModKey.Type != x.Type || modInfo.ModKey.Name != x.Name));
 
         var filePath = pluginListingsProvider.Get(gameReleaseContext.Release);
         if (!fileSystem.File.Exists(filePath)) MessageBoxManager.GetMessageBoxStandard("Warning", $"Make sure {filePath} exists.");
@@ -154,7 +136,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             })
             .DisposeWith(this);
 
-        CanLoad = NewModValid.CombineLatest(AnyModsLoaded, AnyModsActive,
+        CanLoad = ModCreationVM.IsValid().CombineLatest(AnyModsLoaded, AnyModsActive,
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
@@ -204,7 +186,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
 
         _editorEnvironment.Update(updater => {
             if (ActiveMod is null) {
-                updater.ActiveMod.New(ModCreationVM.NewModName ?? ModCreationVM.ModNameWatermark, ModCreationVM.NewModType);
+                updater.ActiveMod.New(ModCreationVM.ModNameOrBackup, ModCreationVM.NewModType);
             } else {
                 updater.ActiveMod.Existing(ActiveMod.Value);
             }
