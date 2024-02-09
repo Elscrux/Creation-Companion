@@ -26,7 +26,7 @@ public sealed class LinearNotifier : ANotifier, IDisposable {
     /// linearNotifier.Next("Finalize");
     /// Finalize(); 
     /// 
-    /// linearNotifier.Stop();
+    /// linearNotifier.Stop(); // this is optional, as it will stop automatically after the last step
     /// </code>
     /// </example>
     public LinearNotifier(INotificationService notificationService, int count = 1)
@@ -38,6 +38,9 @@ public sealed class LinearNotifier : ANotifier, IDisposable {
         if (_countFloat is > 1) {
             NotificationService.Notify(ID, message, _currentStep / _countFloat.Value);
             _currentStep++;
+            if (_currentStep >= _countFloat) {
+                Stop();
+            }
         } else {
             NotificationService.Notify(ID, message);
         }
