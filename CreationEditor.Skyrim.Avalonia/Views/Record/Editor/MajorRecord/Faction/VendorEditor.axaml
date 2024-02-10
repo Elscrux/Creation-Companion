@@ -74,26 +74,34 @@
                                             Classes="GroupBoxStretch"
                                             Margin="5"
                                             Header="Vendor Buy/Sell List" FontSize="12">
-                        <StackPanel>
-                            <CheckBox Content="Only Buy Stolen Items"
-                                      ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
-                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
-                                      Margin="5"/>
-
-                            <HeaderedContentControl Margin="5"
-                                                    Header="List"
-                                                    ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
+                        <Grid RowDefinitions="Auto,*"
+                              ColumnDefinitions="*,*">
+                            <HeaderedContentControl
+                                Grid.Column="0" Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                Margin="5"
+                                Header="List"
+                                ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
                                 <picker1:FormKeyPicker
                                     FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
                                     ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
                                     LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
                             </HeaderedContentControl>
 
-                            <CheckBox Content="Treat as Blacklist"
+                            <CheckBox Grid.Column="0" Grid.Row="1"
+                                      VerticalAlignment="Top"
+                                      Content="Only Buy Stolen Items"
+                                      ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
+                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      Margin="5"/>
+
+                            <CheckBox Grid.Column="1" Grid.Row="1"
+                                      VerticalAlignment="Top"
+                                      Content="Treat as Blacklist"
                                       ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword(s) in the selected list."
                                       IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
                                       Margin="5"/>
-                        </StackPanel>
+                        </Grid>
                     </HeaderedContentControl>
                 </Grid>
 
