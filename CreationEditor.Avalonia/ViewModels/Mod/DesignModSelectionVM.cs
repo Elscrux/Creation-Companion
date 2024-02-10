@@ -9,20 +9,21 @@ namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public class DesignModSelectionVM : IModSelectionVM {
     public IObservableCollection<LoadOrderModItem> DisplayedMods { get; } = new ObservableCollectionExtended<LoadOrderModItem> {
-        new(ModKey.FromFileName("Skyrim.esm"), true, 0),
-        new(ModKey.FromFileName("Update.esm"), true, 1),
-        new(ModKey.FromFileName("Dawnguard.esm"), true, 2),
-        new(ModKey.FromFileName("BestMod.esp"), true, 3),
-        new(ModKey.FromFileName("SecondBestMod.esp"), false, 4),
-        new(ModKey.FromFileName("ThirdBestMod.esp"), true, 5),
+        new(new ModInfo(ModKey.FromFileName("Skyrim.esm")), true, 0),
+        new(new ModInfo(ModKey.FromFileName("Update.esm")), true, 1),
+        new(new ModInfo(ModKey.FromFileName("Dawnguard.esm")), true, 2),
+        new(new ModInfo(ModKey.FromFileName("BestMod.esp")), true, 3),
+        new(new ModInfo(ModKey.FromFileName("SecondBestMod.esp")), false, 4),
+        new(new ModInfo(ModKey.FromFileName("ThirdBestMod.esp")), true, 5),
     };
     public string ModSearchText { get; set; } = string.Empty;
-    public LoadOrderModItem? SelectedMod { get; set; } = new(ModKey.FromFileName("BestMod.esp"), true, 3);
+    public LoadOrderModItem? SelectedMod { get; set; } = new(new ModInfo(ModKey.FromFileName("BestMod.esp")), true, 3);
     public IModGetterVM SelectedModDetails { get; init; } = null;
     public ModCreationVM ModCreationVM { get; }
     public IObservable<bool> CanLoad { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsLoaded { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
     public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
+    public ReactiveCommand<Unit, Unit> ToggleSelection { get; } = ReactiveCommand.Create(() => {});
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
 }

@@ -44,7 +44,7 @@
                       SelectionMode="Extended"
                       GridLinesVisibility="None"
                       Classes="NoCellSelection Small"
-                      attached:DoubleTappedProperty.Command="{Binding ToggleActive}">
+                      attached:DoubleTappedProperty.Command="{Binding ToggleSelection}">
 
                 <DataGrid.KeyBindings>
                     <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>
@@ -64,12 +64,12 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name"
-                                        Binding="{Binding ModKey.FileName.String}"
+                                        Binding="{Binding ModInfo.ModKey.FileName.String}"
                                         IsReadOnly="True"
                                         MinWidth="130"
                                         x:DataType="model:LoadOrderModItem"/>
                     <DataGridTextColumn Header="Type"
-                                        Binding="{Binding ModKey.Type}"
+                                        Binding="{Binding ModInfo.ModKey.Type}"
                                         IsReadOnly="True"
                                         MinWidth="70"
                                         x:DataType="model:LoadOrderModItem"/>
@@ -89,7 +89,7 @@
                 Grid.Row="2"
                 Margin="5"
                 VerticalAlignment="Center"
-                ShowButton="False"
+                ShowAddButton="False"
                 IsVisible="{ReflectionBinding !#Selection.ViewModel.AnyModsActive^}"
                 DataContext="{Binding ModCreationVM}"/>
         </Grid>

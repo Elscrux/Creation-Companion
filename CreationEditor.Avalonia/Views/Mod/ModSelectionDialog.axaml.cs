@@ -17,8 +17,9 @@ public partial class ModSelectionPopup : ReactiveUserControl<ModSelectionVM> {
         CancelButton.IsEnabled = true;
     }
 
-    public void LoadAndHide() {
-        ViewModel?.LoadMods();
-        Hide();
+    public async Task LoadAndHide() {
+        if (ViewModel is not null && await ViewModel.LoadMods()) {
+            Hide();
+        }
     }
 }

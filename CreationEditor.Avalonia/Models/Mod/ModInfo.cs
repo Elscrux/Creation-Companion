@@ -7,4 +7,6 @@ public sealed record ModInfo(
     string? Description,
     bool Localization,
     int FormVersion,
-    ModKey[] Masters);
+    ModKey[] Masters) {
+    public ModInfo(ModKey modKey) : this(modKey, null, null, false, -1, []) { }
+}

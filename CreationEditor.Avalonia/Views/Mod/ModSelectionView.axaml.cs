@@ -1,12 +1,10 @@
-﻿using Avalonia.Controls.Presenters;
-using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Layout;
+﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
-using Avalonia.Styling;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using FluentAvalonia.UI.Controls;
-using ReactiveUI;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 namespace CreationEditor.Avalonia.Views.Mod;
 
 public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
@@ -18,50 +16,22 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
         DataContext = modSelectionVM;
     }
 
-    public static void ShowAsContentDialog(ModSelectionVM modSelectionVM, bool allowLoading = true) {
-        var contentDialog = new ContentDialog {
-            Styles = {
-                new Style(x => x
-                    .OfType<ContentDialog>()
-                    .Class(":fullsize")
-                    .Template()
-                    .OfType<FABorder>()
-                    .Name("BackgroundElement")
-                ) {
-                    Setters = {
-                        new Setter(HorizontalAlignmentProperty, HorizontalAlignment.Stretch),
-                        new Setter(MinWidthProperty, 750.0),
-                    }
-                },
-            },
-            DataContext = modSelectionVM,
-            [!ContentDialog.IsPrimaryButtonEnabledProperty] = new Binding($"{nameof(ModSelectionVM.CanLoad)}^"),
-            [ContentDialog.IsSecondaryButtonEnabledProperty] = allowLoading,
-            Title = "Select Mods",
-            Content = new ModSelectionView(modSelectionVM) {
-                [!MaxHeightProperty] = new Binding("Bounds.Height") {
-                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
-                        AncestorType = typeof(ContentPresenter),
-                        Tree = TreeType.Visual
-                    },
-                }
-            },
-            FullSizeDesired = true,
-            PrimaryButtonText = "Load",
-            PrimaryButtonCommand = ReactiveCommand.Create(modSelectionVM.LoadMods),
-            SecondaryButtonText = "Cancel",
-            KeyBindings = {
-                new KeyBinding {
-                    Command = ReactiveCommand.Create(() => {
-                        if (allowLoading) modSelectionVM.LoadMods();
-                    }),
-                    Gesture = new KeyGesture(Key.Enter)
-                }
-            },
-            DefaultButton = ContentDialogButton.Primary,
-        };
-        contentDialog.SecondaryButtonCommandParameter = ReactiveCommand.Create(() => contentDialog.Hide());
+    protected override void OnLoaded(RoutedEventArgs e) {
+        base.OnLoaded(e);
 
-        contentDialog.ShowAsync();
+        if (DataContext is ModSelectionVM modSelectionVM) {
+            if (modSelectionVM.MissingPluginsFile) {
+                var messageBox = MessageBoxManager.GetMessageBoxStandard(
+                    "Warning",
+                    $"Make sure {modSelectionVM.PluginsFilePath} exists.",
+                    ButtonEnum.Ok,
+                    Icon.Warning,
+                    WindowStartupLocation.CenterOwner);
+
+                messageBox.ShowWindowDialogAsync(this.FindLogicalAncestorOfType<Window>());
+            }
+
+            modSelectionVM.RefreshListings();
+        }
     }
 }

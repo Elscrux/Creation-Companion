@@ -187,8 +187,35 @@ public static class ObservableExtension {
             .ToObservableCollection(disposable);
     }
 
-    public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<T, TTarget>(
+    public static ReadOnlyObservableCollection<T> ToObservableCollection<T, TKey>(
         this IObservable<IEnumerable<T>> listObservable,
+        Func<T, TKey> keySelector,
+        IDisposableDropoff disposable)
+        where T : notnull {
+        return listObservable
+            .ObserveOnGui()
+            .Pairwise()
+            .Select(x => {
+                if (x.Current is null) return [];
+                if (x.Previous is null) return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
+
+                var prev = x.Previous.ToList();
+                var cur = x.Current.ToList();
+                return new ChangeSet<T>(
+                    prev
+                        .ExceptBy(cur.Select(keySelector), keySelector)
+                        .Select(item => new Change<T>(ListChangeReason.Remove, item))
+                        .Concat(
+                            cur
+                                .ExceptBy(prev.Select(keySelector), keySelector)
+                                .Select(item => new Change<T>(ListChangeReason.Add, item))));
+            })
+            .ToObservableCollection(disposable);
+    }
+
+    public static ReadOnlyObservableCollection<TTarget> ToObservableCollection<T, TKey, TTarget>(
+        this IObservable<IEnumerable<T>> listObservable,
+        Func<T, TKey> keySelector,
         Func<T, TTarget> selector,
         IDisposableDropoff disposable)
         where T : notnull where TTarget : notnull {
@@ -199,15 +226,15 @@ public static class ObservableExtension {
                 if (x.Current is null) return [];
                 if (x.Previous is null) return new ChangeSet<T>(x.Current.Select(c => new Change<T>(ListChangeReason.Add, c)));
 
-                var prev = x.Previous.ToArray();
-                var cur = x.Current.ToArray();
+                var prev = x.Previous.ToList();
+                var cur = x.Current.ToList();
                 return new ChangeSet<T>(
                     prev
-                        .Except(cur)
+                        .ExceptBy(cur.Select(keySelector), keySelector)
                         .Select(item => new Change<T>(ListChangeReason.Remove, item))
                         .Concat(
                             cur
-                                .Except(prev)
+                                .ExceptBy(prev.Select(keySelector), keySelector)
                                 .Select(item => new Change<T>(ListChangeReason.Add, item))));
             })
             .ToObservableCollection(selector, disposable);
