@@ -56,7 +56,6 @@ public sealed class AssetTypeService : IAssetTypeService {
         return constructor(filePath);
     }
 
-    // todo replace with direct directory access when everything uses the same instance
-    public string GetAssetTypeIdentifier(IAssetType assetType) => Provider.AssetTypeIdentifiers.FirstOrDefault(pair => pair.Key.GetType() == assetType.GetType()).Value;
+    public string GetAssetTypeIdentifier(IAssetType assetType) => Provider.AssetTypeIdentifiers[assetType];
     public IAssetType GetAssetTypeFromIdentifier(string identifier) => _identifierAssetTypes[identifier];
 }
