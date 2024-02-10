@@ -11,10 +11,10 @@ namespace CreationEditor.Avalonia.ViewModels.Mod;
 public sealed class SingleModPickerVM : ViewModel, IModPickerVM {
     public ModCreationVM ModCreationVM { get; }
 
-    [Reactive] public Func<LoadOrderModItem, bool>? Filter { get; set; }
+    [Reactive] public Func<OrderedModItem, bool>? Filter { get; set; }
 
-    public ReadOnlyObservableCollection<LoadOrderModItem> Mods { get; }
-    [Reactive] public LoadOrderModItem? SelectedMod { get; set; }
+    public ReadOnlyObservableCollection<OrderedModItem> Mods { get; }
+    [Reactive] public OrderedModItem? SelectedMod { get; set; }
 
     [Reactive] public bool CanCreateNewMod { get; set; }
 
@@ -24,10 +24,10 @@ public sealed class SingleModPickerVM : ViewModel, IModPickerVM {
         Mods = linkCacheProvider.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
-            .Transform((mod, i) => new LoadOrderModItem(mod.ModKey, true, (uint) i))
+            .Transform((mod, i) => new OrderedModItem(mod.ModKey, (uint) i))
             .Filter(this.WhenAnyValue(x => x.Filter)
-                .Select(filter => new Func<LoadOrderModItem, bool>(mod => filter is null || filter(mod))))
-            .Sort(new FuncComparer<LoadOrderModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
+                .Select(filter => new Func<OrderedModItem, bool>(mod => filter is null || filter(mod))))
+            .Sort(new FuncComparer<OrderedModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
             .ToObservableCollection(this);
     }
 }

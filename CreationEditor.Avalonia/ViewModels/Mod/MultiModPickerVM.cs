@@ -13,10 +13,10 @@ namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class MultiModPickerVM : ViewModel, IModPickerVM {
     [Reactive] public string ModSearchText { get; set; } = string.Empty;
-    [Reactive] public Func<LoadOrderModItem, bool>? Filter { get; set; }
+    [Reactive] public Func<OrderedModItem, bool>? Filter { get; set; }
 
-    public ReadOnlyObservableCollection<LoadOrderModItem> Mods { get; }
-    public IObservable<IReadOnlyCollection<LoadOrderModItem>> SelectedMods { get; }
+    public ReadOnlyObservableCollection<OrderedModItem> Mods { get; }
+    public IObservable<IReadOnlyCollection<OrderedModItem>> SelectedMods { get; }
 
     public MultiModPickerVM(
         ILinkCacheProvider linkCacheProvider,
@@ -25,16 +25,16 @@ public sealed class MultiModPickerVM : ViewModel, IModPickerVM {
         Mods = linkCacheProvider.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
-            .Transform((mod, i) => new LoadOrderModItem(mod.ModKey, true, (uint) i))
+            .Transform((mod, i) => new OrderedModItem(mod.ModKey, (uint) i))
             .Filter(this.WhenAnyValue(x => x.ModSearchText)
                 .ThrottleMedium()
                 .CombineLatest(this.WhenAnyValue(x => x.Filter),
                     (searchText, filter) => (SearchText: searchText, Filter: filter))
-                .Select(x => new Func<LoadOrderModItem, bool>(mod =>
+                .Select(x => new Func<OrderedModItem, bool>(mod =>
                     (x.SearchText.IsNullOrEmpty()
                      || searchFilter.Filter(mod.ModKey.FileName.String, x.SearchText))
                  && (x.Filter is null || x.Filter(mod)))))
-            .Sort(new FuncComparer<LoadOrderModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
+            .Sort(new FuncComparer<OrderedModItem>((x, y) => x.LoadOrderIndex.CompareTo(y.LoadOrderIndex)))
             .ToObservableCollection(this);
 
         var modSelected = Mods.ToObservableChangeSet()
