@@ -6,11 +6,15 @@
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Kernel"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:mod1="clr-namespace:CreationEditor.Avalonia.Views.Mod"
              mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="300"
              x:Class="CreationEditor.Avalonia.Views.Mod.ModCreation"
              x:CompileBindings="True" x:DataType="mod:ModCreationVM"
              x:Name="Creation">
+    <UserControl.Styles>
+        <Style Selector="DataValidationErrors">
+            <Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+        </Style>
+    </UserControl.Styles>
     <StackPanel Orientation="Horizontal"
                 Spacing="4">
         <TextBox Text="{Binding NewModName}"
@@ -34,16 +38,18 @@
             Click="AddButton_Click"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            IsVisible="{Binding #Creation.ShowButton}"
+            IsEnabled="{Binding !HasErrors}"
+            IsVisible="{Binding #Creation.ShowAddButton}"
             Padding="7">
             <Button.Content>
                 <controls:SymbolIcon Symbol="Add"/>
             </Button.Content>
         </Button>
 
-        <TextBlock VerticalAlignment="Center"
-                   IsVisible="False"
-                   x:Name="StatusMessage">
-        </TextBlock>
+        <Popup x:Name="Popup"
+               WindowManagerAddShadowHint="False"
+               PlacementAnchor="Top"
+               PlacementTarget="Creation"
+               InheritsTransform="True"/>
     </StackPanel>
 </UserControl>

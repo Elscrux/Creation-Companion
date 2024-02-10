@@ -1,19 +1,18 @@
-﻿using System.Reactive;
+﻿using System.IO.Abstractions;
+using System.Reactive;
 using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Validation.Abstractions;
-using ReactiveUI.Validation.Contexts;
 using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class ModCreationVM : ViewModel, IValidatableViewModel {
-    public ValidationContext ValidationContext { get; } = new();
-
-    private readonly IListingsProvider _listingsProvider;
+public sealed class ModCreationVM : ValidatableViewModel {
+    private readonly IEditorEnvironment _editorEnvironment;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
+    private readonly IFileSystem _fileSystem;
 
     private const string WatermarkBase = "NewMod";
     private static string WatermarkName(int index) => $"{WatermarkBase} ({index})";
@@ -27,25 +26,16 @@ public sealed class ModCreationVM : ViewModel, IValidatableViewModel {
 
     public ReactiveCommand<Unit, Unit> CreateModCommand { get; }
 
-    public ModCreationVM(IEditorEnvironment editorEnvironment, ILoadOrderListingsProvider listingsProvider) {
-        _listingsProvider = listingsProvider;
+    public ModCreationVM(
+        IEditorEnvironment editorEnvironment,
+        IDataDirectoryProvider dataDirectoryProvider,
+        IFileSystem fileSystem) {
+        _editorEnvironment = editorEnvironment;
+        _dataDirectoryProvider = dataDirectoryProvider;
+        _fileSystem = fileSystem;
 
-        editorEnvironment
-            .LoadOrderChanged
-            .Subscribe(loadOrder => {
-                // Assign new watermark if the name is already taken
-                if (NameIsFree(loadOrder, ModNameOrBackup)) return;
-
-                var counter = 2;
-                ModNameWatermark = WatermarkName(counter);
-                for (var i = 0; i < loadOrder.Count; i++) {
-                    if (!string.Equals(loadOrder[i].Name, ModNameWatermark, StringComparison.OrdinalIgnoreCase)) continue;
-
-                    counter++;
-                    ModNameWatermark = WatermarkName(counter);
-                    i = 0;
-                }
-            })
+        editorEnvironment.LoadOrderChanged
+            .Subscribe(UpdateWatermark)
             .DisposeWith(this);
 
         CreateModCommand = ReactiveCommand.Create(() => {
@@ -56,15 +46,47 @@ public sealed class ModCreationVM : ViewModel, IValidatableViewModel {
 
         this.ValidationRule(
             x => x.NewModName,
-            name => NameIsFree(editorEnvironment.GameEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey), name),
+            NameIsFree,
             "Name is already taken");
+
+        this.ValidationRule(
+            x => x.NewModName,
+            name => string.IsNullOrWhiteSpace(name) || name.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars()) == -1,
+            name => {
+                var index = name!.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars());
+                return $"Name contains invalid character {name[index]}";
+            });
     }
 
-    private bool NameIsFree(IEnumerable<ModKey> loadOrder, string? name) {
-        if (string.IsNullOrWhiteSpace(name)) return true;
+    private void UpdateWatermark(List<ModKey> loadOrder) {
+        // Assign new watermark if the name is already taken
+        ModNameWatermark = WatermarkBase;
+        if (NameIsFree(ModNameOrBackup, loadOrder)) return;
 
-        // Check if the name is already taken in the load order or the listings in the data directory
-        return loadOrder.All(modKey => !string.Equals(modKey.Name, name, StringComparison.OrdinalIgnoreCase))
-         && _listingsProvider.Get().Select(x => x.ModKey).All(modKey => !string.Equals(modKey.Name, name, StringComparison.OrdinalIgnoreCase));
+        var counter = 2;
+        while (!NameIsFree(ModNameWatermark, loadOrder)) {
+            ModNameWatermark = WatermarkName(counter);
+            counter++;
+        }
+    }
+
+    private bool NameIsFree(string? modName, IEnumerable<ModKey> loadOrder) {
+        if (string.IsNullOrWhiteSpace(modName)) return true;
+        if (loadOrder.Any(modKey => string.Equals(modKey.Name, modName, StringComparison.OrdinalIgnoreCase))) return false;
+
+        return !ModExistsOnDisk(modName);
+    }
+
+    private bool NameIsFree(string? modName) => NameIsFree(modName, _editorEnvironment.LinkCache.ListedOrder.Select(mod => mod.ModKey));
+
+    private bool ModExistsOnDisk(string name) {
+        if (name.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars()) != -1) return false;
+
+        var directoryPath = _dataDirectoryProvider.Path;
+        return Enum.GetValues<ModType>()
+            .Exists(modType => {
+                var modpath = _fileSystem.Path.Combine(directoryPath, new ModKey(name, modType).FileName);
+                return _fileSystem.File.Exists(modpath);
+            });
     }
 }
