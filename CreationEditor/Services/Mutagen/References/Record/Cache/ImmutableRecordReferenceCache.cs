@@ -25,13 +25,13 @@ public sealed class ImmutableRecordReferenceCache : IRecordReferenceCache {
     /// <param name="modOrder">list of mods to get references from, earlier items are prioritized</param>
     /// <returns>form links of references</returns>
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
-        foreach (var mod in modOrder) {
-            if (!_modCaches.TryGetValue(mod.ModKey, out var modReferenceCache)
+        foreach (var modKey in modOrder.Select(x => x.ModKey)) {
+            if (!_modCaches.TryGetValue(modKey, out var modReferenceCache)
              || !modReferenceCache.Cache.TryGetValue(formKey, out var references)) continue;
 
             foreach (var reference in references) {
                 var containingMod = modOrder.FirstOrDefault(m => _modCaches.TryGetValue(m.ModKey, out var referenceCache) && referenceCache.FormKeys.Contains(reference.FormKey));
-                if (containingMod?.ModKey == mod.ModKey) {
+                if (containingMod?.ModKey == modKey) {
                     yield return reference;
                 }
             }
@@ -53,5 +53,5 @@ public sealed class ImmutableRecordReferenceCache : IRecordReferenceCache {
         }
     }
 
-    internal ModReferenceCache GetModReferenceCache(ModKey modKey) => _modCaches[modKey];
+    internal ModReferenceCache? GetModReferenceCache(ModKey modKey) => _modCaches.GetValueOrDefault(modKey);
 }
