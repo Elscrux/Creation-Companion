@@ -25,6 +25,11 @@ public interface IRecordEditorController {
     void CloseEditor(IMajorRecord record);
 
     /// <summary>
+    /// Close all record editors.
+    /// </summary>
+    void CloseAllEditors();
+
+    /// <summary>
     /// Check if any record editors are open.
     /// </summary>
     /// <returns>True if at least one record editor is open</returns>

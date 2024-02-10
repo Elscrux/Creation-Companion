@@ -9,14 +9,14 @@ using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
+using EditorControl = (Control Control, IRecordEditorVM EditorVM);
+
 public sealed class RecordEditorController : IRecordEditorController, IDisposable {
     private readonly CompositeDisposable _disposable = new();
     private readonly ILogger _logger;
     private readonly ILifetimeScope _lifetimeScope;
     private readonly IDockingManagerService _dockingManagerService;
     private readonly IRecordEditorFactory _recordEditorFactory;
-
-    private sealed record EditorControl(Control Control, IRecordEditorVM EditorVM);
 
     private readonly Dictionary<FormKey, EditorControl> _openRecordEditors = new();
 
@@ -96,6 +96,16 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
 
             RemoveEditorCache(editorControl.Control);
         }
+    }
+
+    public void CloseAllEditors() {
+        foreach (var  control in _openRecordEditors.Values.Select(x => x.Control)) {
+            _dockingManagerService.RemoveControl(control);
+
+            RemoveEditorCache(control);
+        }
+
+        _openRecordEditors.Clear();
     }
 
     private void OnClosed(IDockedItem dockedItem) {
