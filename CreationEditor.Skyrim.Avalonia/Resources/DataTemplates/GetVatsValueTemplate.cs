@@ -71,7 +71,7 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
                 VatsFunction.WeaponOrList => new GetVATSValueWeaponOrListConditionData(),
                 VatsFunction.WeaponType => new GetVATSValueWeaponTypeConditionData(),
                 VatsFunction.Weapon => new GetVATSValueWeaponConditionData(),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             };
 
             if (condition.Data.GetType() == newData.GetType()) return;
@@ -102,7 +102,7 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
             GetVATSValueWeaponOrListConditionData => VatsFunction.WeaponOrList,
             GetVATSValueWeaponTypeConditionData => VatsFunction.WeaponType,
             GetVATSValueWeaponConditionData => VatsFunction.Weapon,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(data))
         };
 
         var type = condition.Data.GetType();

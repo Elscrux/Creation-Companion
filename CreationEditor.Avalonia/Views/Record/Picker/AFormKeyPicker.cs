@@ -734,7 +734,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                         return formID.Raw == term.ID.Value.Raw;
                                     });
                             default:
-                                throw new NotImplementedException();
+                                throw new InvalidOperationException();
                         }
                     })
                     .Switch())

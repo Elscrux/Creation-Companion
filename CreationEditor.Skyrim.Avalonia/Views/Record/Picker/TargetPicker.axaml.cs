@@ -201,7 +201,7 @@ public partial class TargetPicker : ActivatableUserControl {
                 LocationTargetRadius.LocationType.ObjectID => TargetPickerType.Object,
                 LocationTargetRadius.LocationType.ObjectType => TargetPickerType.ObjectType,
                 LocationTargetRadius.LocationType.LinkedReference => TargetPickerType.LinkedRef,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             },
             _ => throw new ArgumentOutOfRangeException(nameof(target))
 

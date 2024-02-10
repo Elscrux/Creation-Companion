@@ -45,7 +45,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
         var control = field switch {
             ValueFieldInformation value => GetValueControl(value, state),
             CollectionFieldInformation collection => GetCollectionControl(collection, state),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new InvalidOperationException()
         };
 
         control.DataContext = state;

@@ -80,7 +80,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
         return AssociatedObject switch {
             ColumnDefinition => ColumnDefinition.WidthProperty,
             RowDefinition => RowDefinition.HeightProperty,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new InvalidOperationException()
         };
     }
 
@@ -88,7 +88,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
         return AssociatedObject switch {
             ColumnDefinition => ColumnDefinition.MinWidthProperty,
             RowDefinition => RowDefinition.MinHeightProperty,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new InvalidOperationException()
         };
     }
 }

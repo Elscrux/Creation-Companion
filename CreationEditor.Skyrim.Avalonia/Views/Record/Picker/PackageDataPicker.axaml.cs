@@ -111,12 +111,12 @@ public partial class PackageDataPicker : ActivatableUserControl {
                                     ILocationObjectIdGetter objectId => $"Object: {objectId.Link.GetEditorID(x.LinkCache)}",
                                     ILocationObjectTypeGetter objectType => $"Type: {objectType.Type}",
                                     ILocationTargetGetter target => $"Target: {target.Link.GetSelfOrBaseEditorID(x.LinkCache)}",
-                                    _ => throw new ArgumentOutOfRangeException()
+                                    _ => throw new InvalidOperationException()
                                 }),
                             IPackageDataObjectListGetter objectListData => new PackageData(d.Key, valueName, "Object List", $"Radius: {objectListData.Data}"),
                             IPackageDataTargetGetter targetData => new PackageData(d.Key, valueName, "Target", targetData.Target.CountOrDistance),
                             IPackageDataTopicGetter topicData => new PackageData(d.Key, valueName, "Topic", topicData.Topics.FirstOrDefault()),
-                            _ => throw new ArgumentOutOfRangeException()
+                            _ => throw new InvalidOperationException()
                         };
                     }).ToList();
             })

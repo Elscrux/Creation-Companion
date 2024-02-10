@@ -51,7 +51,7 @@ public sealed class ObservableCollectionSelectorAdaptor<T, TTarget>
 
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new InvalidOperationException();
             }
         }
 
@@ -106,7 +106,7 @@ public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget>
                     ChangeReason.Remove => ListChangeReason.Remove,
                     ChangeReason.Refresh => ListChangeReason.Refresh,
                     ChangeReason.Moved => ListChangeReason.Moved,
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => throw new InvalidOperationException()
                 },
                 _selector(change.Current, change.Key),
                 change.Previous.HasValue

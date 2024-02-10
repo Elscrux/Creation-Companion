@@ -196,7 +196,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     quadrant = ref cornerSets.TopRight;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new InvalidOperationException();
             }
 
             var layers = grouping.ToArray();
@@ -306,7 +306,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         ISpellGetter => null,
                         ITextureSetGetter => null,
                         IAcousticSpaceGetter => null,
-                        _ => throw new ArgumentOutOfRangeException()
+                        _ => throw new InvalidOperationException()
                     };
 
                     if (model is null) continue;
@@ -324,7 +324,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     });
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(placed));
+                    throw new InvalidOperationException();
             }
         }
 
