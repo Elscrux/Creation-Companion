@@ -15,7 +15,7 @@ public sealed class JsonSettingExporter(
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
-        logger.Here().Information("Exporting setting {Name} to {Path}", setting.Name, filePath);
+        logger.Here().Verbose("Exporting setting {Name} to {Path}", setting.Name, filePath);
         var content = JsonConvert.SerializeObject(setting.Model, Formatting.Indented);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 

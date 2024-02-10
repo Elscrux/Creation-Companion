@@ -13,7 +13,7 @@ public sealed class JsonSettingImporter<TSetting>(
         var filePath = fileSystem.FileInfo.New(settingPathProvider.GetFullPath(setting));
         if (!filePath.Exists) return default;
 
-        logger.Here().Information("Importing setting {Name} from {Path}", setting.Name, filePath);
+        logger.Here().Verbose("Importing setting {Name} from {Path}", setting.Name, filePath);
         var content = fileSystem.File.ReadAllText(filePath.FullName);
         return JsonConvert.DeserializeObject<TSetting>(content);
     }

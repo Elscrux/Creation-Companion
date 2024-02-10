@@ -50,7 +50,7 @@ public sealed class JsonQueryState(
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
-        logger.Here().Information("Exporting Query {Id} to {Path}", queryRunner.Id, filePath);
+        logger.Here().Verbose("Exporting Query {Id} to {Path}", queryRunner.Id, filePath);
         var content = JsonConvert.SerializeObject(queryRunner.CreateMemento(), _serializerSettings);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 
