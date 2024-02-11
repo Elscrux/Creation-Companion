@@ -66,7 +66,7 @@
                                 BlacklistFormKeys="{ReflectionBinding $parent[view:RelationsEditor].ViewModel.BlacklistedFormKeys}"
                                 FormKey="{Binding TargetFormKey}"
                                 ScopedTypes="{x:Static constants:RecordTypeConstants.RelatableTypes}"
-                                LinkCache="{ReflectionBinding $parent[view:FactionEditor].ViewModel.LinkCache}"/>
+                                LinkCache="{ReflectionBinding $parent[view:FactionEditor].ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
