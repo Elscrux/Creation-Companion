@@ -31,6 +31,12 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         });
     }
 
+    public object? SearchItems(string search) {
+        return ViewModel?.Records?
+            .OfType<IReferencedRecord>()
+            .FirstOrDefault(record => record.Record.EditorID is not null && record.Record.EditorID.StartsWith(search, StringComparison.OrdinalIgnoreCase));
+    }
+
     public RecordList(IRecordListVM vm) : this() {
         ViewModel = vm;
     }

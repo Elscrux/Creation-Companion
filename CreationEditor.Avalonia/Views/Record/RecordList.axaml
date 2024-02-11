@@ -6,6 +6,7 @@
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              mc:Ignorable="d"
              x:CompileBindings="True" x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
@@ -27,7 +28,11 @@
             attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
             attached:DragDropExtended.AllowDrag="True"
             Classes="Small"
-            IsReadOnly="True"/>
+            IsReadOnly="True">
+            <Interaction.Behaviors>
+                <behavior:DataGridTextSearchBehavior TextSearchValueSelector="SearchItems"/>
+            </Interaction.Behaviors>
+        </DataGrid>
 
         <avaloniaProgressRing:ProgressRing
             IsActive="{Binding IsBusy^, FallbackValue=false}"
