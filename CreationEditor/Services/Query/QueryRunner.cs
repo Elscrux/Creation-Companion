@@ -1,5 +1,6 @@
 using System.Reactive;
 using System.Reactive.Linq;
+using CreationEditor.Services.Environment;
 using CreationEditor.Services.Query.From;
 using CreationEditor.Services.Query.Select;
 using CreationEditor.Services.Query.Where;
@@ -25,6 +26,7 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
     public IObservable<string> Summary { get; }
 
     public QueryRunner(
+        ILinkCacheProvider linkCacheProvider,
         IQueryFromFactory queryFromFactory,
         IQueryConditionFactory queryConditionFactory) {
         _queryConditionFactory = queryConditionFactory;
@@ -48,13 +50,15 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
             x => x.FieldSelector.SelectedField,
             (from, orderBy, select) => (From: from, OrderBy: orderBy, Select: select));
 
-        SettingsChanged = conditionChanges.Merge(selectionChanged.Unit());
+        SettingsChanged = conditionChanges
+            .Merge(selectionChanged.Unit())
+            .Merge(linkCacheProvider.LinkCacheChanged.Unit());
 
         Summary = conditionChanges
             .Select(_ => QueryConditions
                 .Select(c => c.Summary)
                 .CombineLatest()
-                .StartWith([]))
+                .StartWith(Array.Empty<string>()))
             .Switch()
             .CombineLatest(selectionChanged, (conditions, query) => (Conditions: conditions, Query: query))
             .ThrottleMedium()
