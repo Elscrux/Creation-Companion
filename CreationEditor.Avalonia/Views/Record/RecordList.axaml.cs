@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -34,6 +35,12 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         ViewModel = vm;
     }
 
+    protected override void OnLoaded(RoutedEventArgs e) {
+        base.OnLoaded(e);
+
+        Sort();
+    }
+
     private void ScrollToItem(IReferencedRecord? referencedRecord) {
         if (RecordGrid is null || referencedRecord is null) return;
 
@@ -44,8 +51,9 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
     private void Sort() {
         if (!RecordGrid.Columns.Any()) return;
 
-        RecordGrid.Columns.First().ClearSort();
-        RecordGrid.Columns.First().Sort();
+        var column = RecordGrid.Columns.First();
+        column.ClearSort();
+        column.Sort();
     }
 
     private void RecordGrid_ContextRequested(object? sender, ContextRequestedEventArgs e) {
