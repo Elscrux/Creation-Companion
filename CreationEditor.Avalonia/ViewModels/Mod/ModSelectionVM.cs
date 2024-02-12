@@ -43,8 +43,8 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     public bool MissingPluginsFile { get; }
     public string PluginsFilePath { get; }
 
-    public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModInfo.ModKey;
-    public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModInfo.ModKey);
+    public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModKey;
+    public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
     public IObservable<bool> CanLoad { get; }
     public IObservable<bool> AnyModsLoaded { get; }
@@ -123,7 +123,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
         _editorEnvironment.ActiveModChanged
             .Subscribe(activeMod => {
                 foreach (var mod in _mods) {
-                    mod.IsActive = mod.ModInfo.ModKey == activeMod;
+                    mod.IsActive = mod.ModKey == activeMod;
                 }
             })
             .DisposeWith(this);
@@ -135,8 +135,8 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
                 .ThrottleMedium()
                 .Select(searchText => new Func<LoadOrderModItem, bool>(mod =>
                     searchText.IsNullOrWhitespace()
-                 || mod.ModInfo.ModKey.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
-            .AddKey(item => item.ModInfo.ModKey)
+                 || mod.ModKey.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
+            .AddKey(item => item.ModKey)
             .SortBy(item => item.LoadOrderIndex)
             .ToObservableCollection(this);
 
@@ -159,7 +159,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
                 if (activeMod is null) return;
 
                 foreach (var item in x.AllMods) {
-                    if (activeMod.ModInfo.ModKey != item.ModInfo.ModKey) {
+                    if (activeMod.ModKey != item.ModKey) {
                         item.IsActive = false;
                     }
                 }
@@ -190,7 +190,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()
             .Subscribe(selectedMod => {
-                var mod = _mods.FirstOrDefault(mod => mod.ModInfo.ModKey == selectedMod.ModInfo.ModKey);
+                var mod = _mods.FirstOrDefault(mod => mod.ModKey == selectedMod.ModKey);
                 if (mod is null) return;
 
                 SelectedModDetails.SetTo(mod.ModInfo);
@@ -247,7 +247,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
         //Load all mods that are selected, or masters of selected mods
         var loadedMods = new HashSet<ModKey>();
         var missingMods = new Queue<ModKey>(SelectedMods);
-        var mods = _mods.ToDictionary(x => x.ModInfo.ModKey, x => x);
+        var mods = _mods.ToDictionary(x => x.ModKey, x => x);
 
         while (missingMods.Count != 0) {
             var modKey = missingMods.Dequeue();
