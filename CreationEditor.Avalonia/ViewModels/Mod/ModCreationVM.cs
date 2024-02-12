@@ -16,7 +16,7 @@ public sealed class ModCreationVM : ValidatableViewModel {
 
     private const string WatermarkBase = "NewMod";
     private static string WatermarkName(int index) => $"{WatermarkBase} ({index})";
-    [Reactive] public string ModNameWatermark { get; set; } = WatermarkBase;
+    [Reactive] public string ModNameWatermark { get; set; }
 
     [Reactive] public string? NewModName { get; set; }
     [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
@@ -34,8 +34,9 @@ public sealed class ModCreationVM : ValidatableViewModel {
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
 
+        ModNameWatermark = GetNewWatermark(_editorEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
         editorEnvironment.LoadOrderChanged
-            .Subscribe(UpdateWatermark)
+            .Subscribe(loadOrder => ModNameWatermark = GetNewWatermark(loadOrder))
             .DisposeWith(this);
 
         CreateModCommand = ReactiveCommand.Create(() => {
@@ -58,16 +59,18 @@ public sealed class ModCreationVM : ValidatableViewModel {
             });
     }
 
-    private void UpdateWatermark(List<ModKey> loadOrder) {
+    private string GetNewWatermark(IReadOnlyList<ModKey> loadOrder) {
         // Assign new watermark if the name is already taken
-        ModNameWatermark = WatermarkBase;
-        if (NameIsFree(ModNameOrBackup, loadOrder)) return;
+        var watermark = WatermarkBase;
+        if (NameIsFree(watermark, loadOrder)) return watermark;
 
         var counter = 2;
-        while (!NameIsFree(ModNameWatermark, loadOrder)) {
-            ModNameWatermark = WatermarkName(counter);
+        while (!NameIsFree(watermark, loadOrder)) {
+            watermark = WatermarkName(counter);
             counter++;
         }
+
+        return watermark;
     }
 
     private bool NameIsFree(string? modName, IEnumerable<ModKey> loadOrder) {
