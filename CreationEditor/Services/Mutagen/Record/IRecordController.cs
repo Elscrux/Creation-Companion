@@ -179,7 +179,7 @@ public interface IRecordController {
         IMod newRecordMod,
         IMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string> editorIdMapper);
+        Func<IMajorRecordGetter, string?> editorIdMapper);
     #endregion
 
     #region MarkForDeletion

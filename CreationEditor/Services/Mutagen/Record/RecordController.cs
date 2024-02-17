@@ -217,7 +217,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         IMod newRecordMod,
         IMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string> editorIdMapper) {
+        Func<IMajorRecordGetter, string?> editorIdMapper) {
         return InjectRecords(
             records,
             CastOrThrow<TModGetter>(injectionTarget),
@@ -233,7 +233,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         TMod newRecordMod,
         TMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string> editorIdMapper) {
+        Func<IMajorRecordGetter, string?> editorIdMapper) {
 
         // Find free IDs in the injection target mod
         var range = (int) Math.Pow(16, 6);
