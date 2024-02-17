@@ -132,8 +132,8 @@ public sealed class MainVM : ViewModel {
             settingsWindow.ShowDialog(mainWindow);
         });
 
-        Save = ReactiveCommand.CreateFromTask(() => {
-            return Task.Run(() => modSaveService.SaveMod(editorEnvironment.ActiveMod));
+        Save = ReactiveCommand.CreateRunInBackground(() => {
+            Parallel.ForEach(editorEnvironment.MutableMods, modSaveService.SaveMod);
         });
 
         OpenDockElement = ReactiveCommand.CreateFromTask<DockElement>(element => dockFactory.Open(element));

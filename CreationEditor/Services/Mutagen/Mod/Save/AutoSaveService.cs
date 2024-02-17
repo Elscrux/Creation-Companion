@@ -19,14 +19,20 @@ public sealed class AutoSaveService(
         _onIntervalDisposable?.Dispose();
         _onIntervalDisposable = Observable
             .Interval(TimeSpan.FromMinutes(minutes))
-            .Subscribe(_ => SaveMod(editorEnvironment.ActiveMod));
+            .Subscribe(SaveMods);
     }
 
     private void OnShutdown() {
         _onShutdownDisposable?.Dispose();
         _onShutdownDisposable = AppDomain.CurrentDomain.Events().ProcessExit.Unit()
             .Merge(AppDomain.CurrentDomain.Events().UnhandledException.Unit())
-            .Subscribe(_ => SaveMod(editorEnvironment.ActiveMod));
+            .Subscribe(SaveMods);
+    }
+
+    private void SaveMods() {
+        foreach (var mutableMods in editorEnvironment.MutableMods) {
+            SaveMod(mutableMods);
+        }
     }
 
     public void SetSettings(AutoSaveSettings settings) {
