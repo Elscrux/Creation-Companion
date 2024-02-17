@@ -3,6 +3,7 @@ using System.Reactive;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -24,7 +25,7 @@ public sealed class ModCreationVM : ValidatableViewModel {
     public string ModNameOrBackup => NewModName ?? ModNameWatermark;
     public ModKey? NewModKey => new ModKey(ModNameOrBackup, NewModType);
 
-    public ReactiveCommand<Unit, Unit> CreateModCommand { get; }
+    public ReactiveCommand<Unit, IMod> CreateModCommand { get; }
 
     public ModCreationVM(
         IEditorEnvironment editorEnvironment,
@@ -42,7 +43,7 @@ public sealed class ModCreationVM : ValidatableViewModel {
         CreateModCommand = ReactiveCommand.Create(() => {
             var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNameWatermark, NewModType) : new ModKey(NewModName, NewModType);
             NewModName = null;
-            editorEnvironment.AddNewMutableMod(modKey);
+            return editorEnvironment.AddNewMutableMod(modKey);
         }, this.IsValid());
 
         this.ValidationRule(
