@@ -12,12 +12,12 @@
     </Style>
 
     <Style Selector="TextBlock.h2">
-        <Setter Property="FontSize" Value="{DynamicResource TextBlockFontSizeHeading1}"/>
+        <Setter Property="FontSize" Value="{DynamicResource TextBlockFontSizeHeading2}"/>
         <Setter Property="FontWeight" Value="Medium"/>
     </Style>
 
     <Style Selector="TextBlock.h3">
-        <Setter Property="FontSize" Value="{DynamicResource TextBlockFontSizeHeading1}"/>
+        <Setter Property="FontSize" Value="{DynamicResource TextBlockFontSizeHeading3}"/>
         <Setter Property="FontWeight" Value="Medium"/>
     </Style>
 </Styles>
