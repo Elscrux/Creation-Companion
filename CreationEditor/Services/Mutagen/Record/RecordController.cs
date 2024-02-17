@@ -55,6 +55,9 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         _logger = logger;
         _editorEnvironment = editorEnvironment;
         RecordChangedDiff = new JoinedObservable<RecordModPair>(_recordChangedDiff);
+
+        // Set up the record changed observable
+        RecordChangedDiff.Subscribe(_ => pair => _recordChanged.OnNext(pair));
     }
 
     private static TTarget CastOrThrow<TTarget>(IModGetter mod) {
@@ -354,17 +357,9 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         }
     }
     public void RegisterUpdate(IMajorRecordGetter record, TMod mod, Action updateAction) {
-        var changeSubject = new Subject<IMajorRecordGetter>();
-
         // Notify pre update
         var pair = (record, mod);
         _recordChangedDiff.OnNext(new UpdateAction<RecordModPair>(pair, updateAction));
-
-        updateAction();
-
-        // Notify post update
-        changeSubject.OnNext(record);
-        _recordChanged.OnNext(pair);
     }
     #endregion
 }
