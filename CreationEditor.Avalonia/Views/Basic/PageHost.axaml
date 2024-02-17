@@ -1,0 +1,28 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Basic.PageHost">
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    FlowDirection="RightToLeft"
+                    Spacing="10">
+            <Button x:Name="NextButton"
+                    Content="Next"
+                    Classes="Accent"/>
+
+            <Button x:Name="BackButton"
+                    Content="Back"/>
+        </StackPanel>
+
+        <TransitioningContentControl
+            x:Name="PageControl"
+            TabIndex="0">
+            <TransitioningContentControl.PageTransition>
+                <PageSlide></PageSlide>
+            </TransitioningContentControl.PageTransition>
+        </TransitioningContentControl>
+    </DockPanel>
+</UserControl>

@@ -1,5 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -15,6 +16,17 @@
     <Style Selector="Button.Transparent:not(:pointerover)">
         <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlTransparentBrush}"/>
+    </Style>
+
+    <Style Selector="Button.LoadSpinner">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <avaloniaProgressRing:ProgressRing
+                        Width="20" Height="20"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Copied from https://github.com/amwx/FluentAvalonia/blob/master/src/FluentAvalonia/Styling/ControlThemes/BasicControls/ButtonStyles.axaml -->
