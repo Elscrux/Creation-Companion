@@ -217,14 +217,16 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         IMod newRecordMod,
         IMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string?> editorIdMapper) {
+        Func<IMajorRecordGetter, string?> editorIdMapper,
+        bool forceDelete = false) {
         return InjectRecords(
             records,
             CastOrThrow<TModGetter>(injectionTarget),
             CastOrThrow<TMod>(newRecordMod),
             CastOrThrow<TMod>(editMod),
             referenceGetter,
-            editorIdMapper);
+            editorIdMapper,
+            forceDelete);
     }
 
     public IReadOnlyList<IMajorRecord> InjectRecords(
@@ -233,7 +235,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         TMod newRecordMod,
         TMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string?> editorIdMapper) {
+        Func<IMajorRecordGetter, string?> editorIdMapper,
+        bool forceDelete = false) {
 
         // Find free IDs in the injection target mod
         var range = (int) Math.Pow(16, 6);
@@ -275,7 +278,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
             }
 
             // Mark original records for deletion
-            MarkForDeletion(record, editMod, () => references);
+            MarkForDeletion(record, editMod, () => references, forceDelete);
         }
 
         return newRecords;

@@ -172,6 +172,7 @@ public interface IRecordController {
     /// <param name="editMod">Mod to replace existing records with injected records in</param>
     /// <param name="referenceGetter">Function to get references of a record</param>
     /// <param name="editorIdMapper">Function to map editor ids of the records</param>
+    /// <param name="forceDelete">If true, the old record will be deleted even if it is referenced by other records (note that the known references will be updated, so this is just a setting for extra security)</param>
     /// <returns>Injected records in the same order as the input records</returns>
     IReadOnlyList<IMajorRecord> InjectRecords(
         IReadOnlyList<IMajorRecordGetter> records,
@@ -179,7 +180,8 @@ public interface IRecordController {
         IMod newRecordMod,
         IMod editMod,
         Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        Func<IMajorRecordGetter, string?> editorIdMapper);
+        Func<IMajorRecordGetter, string?> editorIdMapper,
+        bool forceDelete = false);
     #endregion
 
     #region MarkForDeletion
