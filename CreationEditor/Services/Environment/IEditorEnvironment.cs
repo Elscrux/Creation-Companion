@@ -15,6 +15,10 @@ public interface IEditorEnvironment : ILinkCacheProvider {
     /// </summary>
     IMod ActiveMod { get; }
     /// <summary>
+    /// List of all mods
+    /// </summary>
+    IReadOnlyList<IMod> MutableMods { get; }
+    /// <summary>
     /// Link cache of the active mod
     /// </summary>
     ILinkCache ActiveModLinkCache { get; } //todo potentially remove
@@ -38,5 +42,6 @@ public interface IEditorEnvironment<TMod, TModGetter> : IEditorEnvironment
     public new ILinkCache<TMod, TModGetter> LinkCache => Environment.LinkCache;
 
     public new TMod ActiveMod { get; protected set; }
+    public new IReadOnlyList<TMod> MutableMods { get; }
     public new ILinkCache<TMod, TModGetter> ActiveModLinkCache { get; protected set; }
 }

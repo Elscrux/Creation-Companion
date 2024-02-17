@@ -24,6 +24,10 @@ public static class EditorEnvironmentMixIn {
         editorEnvironment.Update(updater => updater.ActiveMod.New(newModName, modType).Build());
     }
 
+    public static IMod GetMutableMod(this IEditorEnvironment editorEnvironment, ModKey modKey) {
+        return editorEnvironment.MutableMods.First(x => x.ModKey == modKey);
+    }
+
     public static TModGetter GetMod<TModSetter, TModGetter>(this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment, ModKey modKey)
         where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
         where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {

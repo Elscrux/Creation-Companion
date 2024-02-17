@@ -24,6 +24,10 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
     public TMod ActiveMod { get; set; }
     IMod IEditorEnvironment.ActiveMod => ActiveMod;
 
+    private readonly List<TMod> _mutableMods;
+    public IReadOnlyList<TMod> MutableMods => _mutableMods;
+    IReadOnlyList<IMod> IEditorEnvironment.MutableMods => _mutableMods;
+
     public ILinkCache<TMod, TModGetter> ActiveModLinkCache { get; set; }
     ILinkCache IEditorEnvironment.ActiveModLinkCache => ActiveModLinkCache;
 
@@ -47,6 +51,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
 
         ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, gameReleaseContext.Release);
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
+        _mutableMods = [ActiveMod];
 
         var builder = GameEnvironmentBuilder<TMod, TModGetter>.Create(gameReleaseContext.Release);
         if (_resolver is not null) builder = builder.WithResolver(_resolver);
@@ -77,6 +82,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         ActiveMod = result.ActiveMod;
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
         Environment = builder.Build();
+        _mutableMods.ReplaceWith(Environment.LinkCache.ListedOrder.OfType<TMod>());
 
         // Emit changes
         _activeModChanged.OnNext(ActiveMod.ModKey);
