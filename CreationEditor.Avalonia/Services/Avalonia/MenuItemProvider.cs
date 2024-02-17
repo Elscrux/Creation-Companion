@@ -138,7 +138,10 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = icon,
+                Icon = icon switch {
+                    Symbol symbol => new SymbolIcon { Symbol = symbol },
+                    _ => icon
+                },
                 Header = customHeader,
             },
             parameter,
