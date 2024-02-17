@@ -45,12 +45,21 @@
 
             <DataTemplate DataType="vm:SingleModPickerVM">
                 <StackPanel Orientation="Horizontal">
+                    <controls:FAComboBox
+                        IsEditable="True"
+                        IsTextSearchEnabled="True"
+                        ItemsSource="{Binding Mods}"
+                        SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
+                        Text="{Binding SelectionText, Mode=OneWayToSource}"
+                        DisplayMemberBinding="{Binding ModKey.FileName.String, DataType=model:OrderedModItem}"/>
+
                     <Button IsVisible="{Binding CanCreateNewMod}"
                             VerticalAlignment="Stretch"
                             Margin="5, 0">
                         <Button.Content>
                             <controls:SymbolIcon Symbol="Add"/>
                         </Button.Content>
+
                         <Button.Flyout>
                             <Flyout>
                                 <view:ModCreation
@@ -59,13 +68,6 @@
                             </Flyout>
                         </Button.Flyout>
                     </Button>
-
-                    <controls:FAComboBox
-                        IsEditable="True"
-                        IsTextSearchEnabled="True"
-                        ItemsSource="{Binding Mods}"
-                        SelectedItem="{Binding SelectedMod}"
-                        DisplayMemberBinding="{Binding ModKey.FileName, DataType=model:OrderedModItem}"/>
                 </StackPanel>
             </DataTemplate>
         </ContentControl.DataTemplates>
