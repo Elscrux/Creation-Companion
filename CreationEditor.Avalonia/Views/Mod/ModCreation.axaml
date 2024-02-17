@@ -12,7 +12,7 @@
              x:Name="Creation">
     <UserControl.Styles>
         <Style Selector="DataValidationErrors">
-            <Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}" />
+            <Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}"/>
         </Style>
     </UserControl.Styles>
     <StackPanel Orientation="Horizontal"

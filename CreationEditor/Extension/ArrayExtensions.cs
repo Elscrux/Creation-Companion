@@ -144,7 +144,7 @@ public static class ArrayExtensions {
         Array.Sort(t, index, length, comparer);
     }
     #endregion
-    
+
     #region TrueForAll
     public static bool TrueForAll<T>(this T[] t, Predicate<T> predicate) {
         return Array.TrueForAll(t, predicate);

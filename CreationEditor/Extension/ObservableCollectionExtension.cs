@@ -123,7 +123,7 @@ public static class ObservableCollectionExtension {
                 }
                 break;
             case NotifyCollectionChangedAction.Reset:
-                if (change.NewItems is null) { 
+                if (change.NewItems is null) {
                     source.Clear();
                 } else {
                     source.ReplaceWith(change.NewItems.OfType<T>());

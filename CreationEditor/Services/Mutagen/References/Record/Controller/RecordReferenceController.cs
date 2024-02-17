@@ -72,8 +72,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         _referenceSubscriptionManager.UpdateAll(formKey => _referenceCache.GetReferences(formKey, _editorEnvironment.LinkCache));
 
         // Handle previous record creations and deletions  while the reference cache wasn't initialized
-        while (_recordCreations.TryDequeue(out var record)) RegisterCreation((record));
-        while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion((record));
+        while (_recordCreations.TryDequeue(out var record)) RegisterCreation(record);
+        while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         _isLoading.OnNext(false);
     }

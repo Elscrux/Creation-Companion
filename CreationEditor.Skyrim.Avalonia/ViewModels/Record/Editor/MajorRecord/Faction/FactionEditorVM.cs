@@ -9,7 +9,6 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction;
-using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;

@@ -29,7 +29,7 @@ public partial class ModCreation : ReactiveUserControl<ModCreationVM> {
 
         Popup.IsOpen = false;
         Popup.Child = new Border {
-            Child = new TextBlock { 
+            Child = new TextBlock {
                 Text = ViewModel.NewModKey + " added",
                 Margin = new Thickness(10)
             },

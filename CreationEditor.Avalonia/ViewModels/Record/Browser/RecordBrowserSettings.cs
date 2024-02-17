@@ -40,6 +40,6 @@ public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;
-        return !editorID.IsNullOrEmpty() && SearchFilter.Filter(editorID, SearchTerm) || SearchFilter.Filter(record.FormKey.ToString(), SearchTerm);
+        return (!editorID.IsNullOrEmpty() && SearchFilter.Filter(editorID, SearchTerm)) || SearchFilter.Filter(record.FormKey.ToString(), SearchTerm);
     }
 }

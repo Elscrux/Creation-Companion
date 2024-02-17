@@ -5,7 +5,6 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Order;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;

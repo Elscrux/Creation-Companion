@@ -5,7 +5,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-
 public sealed class LoadOrderModItem : ReactiveObject, IReactiveSelectable, IModKeyed, IDisposableDropoff {
     private readonly DisposableBucket _disposables = new();
 

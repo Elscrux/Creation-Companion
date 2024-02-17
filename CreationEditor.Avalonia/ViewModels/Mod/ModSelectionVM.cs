@@ -146,13 +146,13 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             .Select(collection => collection.Any(mod => mod.IsSelected));
 
         var modActivated = connectedMods
-            .AutoRefresh(modItem => modItem.IsActive);
+            .AutoRefresh(modItem => modItem.IsActive)
+            .ToCollection();
 
         AnyModsActive = modActivated
-            .ToCollection()
             .Select(collection => collection.Any(mod => mod.IsActive));
 
-        modActivated.ToCollection()
+        modActivated
             .CombineLatest(_mods.ObserveCollectionChanges().Select(_ => _mods), (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
             .Subscribe(x => {
                 var activeMod = x.ChangedMods.FirstOrDefault(mod => mod.IsActive);

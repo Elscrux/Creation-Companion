@@ -39,7 +39,7 @@ public sealed class DataGridTextSearchBehavior : Behavior<DataGrid> {
         _lastTimestamp = currentTimestamp;
 
         _currentSearch += e.KeySymbol;
-        
+
         var target = TextSearchValueSelector?.Invoke(_currentSearch);
         if (target is null) return;
 

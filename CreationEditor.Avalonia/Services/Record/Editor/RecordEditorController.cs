@@ -99,7 +99,7 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
     }
 
     public void CloseAllEditors() {
-        foreach (var  control in _openRecordEditors.Values.Select(x => x.Control)) {
+        foreach (var control in _openRecordEditors.Values.Select(x => x.Control)) {
             _dockingManagerService.RemoveControl(control);
 
             RemoveEditorCache(control);
