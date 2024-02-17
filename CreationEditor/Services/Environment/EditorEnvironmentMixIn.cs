@@ -23,4 +23,34 @@ public static class EditorEnvironmentMixIn {
     public static void SetActive(this IEditorEnvironment editorEnvironment, string newModName, ModType modType = ModType.Plugin) {
         editorEnvironment.Update(updater => updater.ActiveMod.New(newModName, modType).Build());
     }
+
+    public static TModGetter GetMod<TModSetter, TModGetter>(this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment, ModKey modKey)
+        where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
+        where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
+        return editorEnvironment.LinkCache.GetMod(modKey);
+    }
+
+    public static IModGetter GetMod(this IEditorEnvironment environment, ModKey modKey) {
+        return environment.LinkCache.GetMod(modKey);
+    }
+
+    public static TModGetter? ResolveMod<TModSetter, TModGetter>(this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment, ModKey? modKey)
+        where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
+        where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
+        return editorEnvironment.LinkCache.ResolveMod(modKey);
+    }
+
+    public static IModGetter? ResolveMod(this IEditorEnvironment environment, ModKey? modKey) {
+        return environment.LinkCache.ResolveMod(modKey);
+    }
+
+    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment, IEnumerable<ModKey> modKeys)
+        where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
+        where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
+        return editorEnvironment.LinkCache.ResolveMods(modKeys);
+    }
+
+    public static IEnumerable<IModGetter> ResolveMods(this IEditorEnvironment editorEnvironment, IEnumerable<ModKey> modKeys) {
+        return editorEnvironment.LinkCache.ResolveMods(modKeys);
+    }
 }
