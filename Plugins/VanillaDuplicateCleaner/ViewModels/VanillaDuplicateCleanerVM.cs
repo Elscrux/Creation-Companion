@@ -7,7 +7,6 @@ using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Definitions;
@@ -24,7 +23,6 @@ namespace VanillaDuplicateCleaner.ViewModels;
 public sealed class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
     private readonly IRecordController _recordController;
-    private readonly IModSaveService _modSaveService;
     public IRecordReferenceController RecordReferenceController { get; }
     public SingleModPickerVM ModPickerVM { get; }
     public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
@@ -37,18 +35,16 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
-        IModSaveService modSaveService,
         SingleModPickerVM modPickerVM) {
         _editorEnvironment = editorEnvironment;
         _recordController = recordController;
-        _modSaveService = modSaveService;
         RecordReferenceController = recordReferenceController;
         ModPickerVM = modPickerVM;
         ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
 
         ModPickerVM.WhenAnyValue(x => x.SelectedMod)
             .Subscribe(mod => {
-                if (mod is null || mod.ModKey.IsNull) { 
+                if (mod is null || mod.ModKey.IsNull) {
                     Records.Clear();
                 } else {
                     Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff(diff)));
@@ -148,7 +144,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
 
         void FinalizeMod(IMod mod) {
             mod.RemapLinks(remapData);
-            _modSaveService.SaveMod(mod);
+            _editorEnvironment.AddMutableMod(mod);
         }
     }
 }
