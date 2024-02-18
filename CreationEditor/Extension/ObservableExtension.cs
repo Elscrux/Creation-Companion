@@ -25,14 +25,11 @@ public static class ObservableExtension {
 
     public static IDisposable SyncTo<T>(this IObservable<IObservableCollection<T>> observableCollectionChanged, ObservableCollection<T> observableCollection) where T : notnull {
         return observableCollectionChanged
-            .Select(collection => {
+            .Subscribe(collection => {
                 // todo Use ReplaceWith when Avalonia PR is merged
                 observableCollection.Clear();
                 observableCollection.AddRange(collection);
-                return collection.ObserveCollectionChanges();
-            })
-            .Switch()
-            .Subscribe(e => observableCollection.Apply(e.EventArgs));
+            });
     }
 
     public static IObservable<T> SelectWhenCollectionChanges<T>(this INotifyCollectionChanged source, Func<IObservable<T>> selector) {
