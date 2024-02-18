@@ -20,6 +20,18 @@ public interface IDockingManagerService {
     void RemoveControl(Control control);
 
     /// <summary>
+    /// Gets a open dock by type
+    /// </summary>
+    /// <typeparam name="T">Type to search for</typeparam>
+    T? TryGetControl<T>();
+
+    /// <summary>
+    /// Gets a open dock by type
+    /// </summary>
+    /// <param name="filter">Filter to search for</param>
+    Control? TryGetControl(Func<Control, bool> filter);
+
+    /// <summary>
     /// Focus a control in the docking manager
     /// </summary>
     /// <param name="control">Control to focus</param>

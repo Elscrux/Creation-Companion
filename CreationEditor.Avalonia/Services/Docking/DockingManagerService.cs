@@ -22,6 +22,21 @@ public sealed class DockingManagerService : ReactiveObject, IDockingManagerServi
         }
     }
 
+    public T? TryGetControl<T>() {
+        return Root.IterateAllChildren()
+            .OfType<IDockedItem>()
+            .Select(x => x.Control)
+            .OfType<T>()
+            .FirstOrDefault();
+    }
+
+    public Control? TryGetControl(Func<Control, bool> filter) {
+        return Root.IterateAllChildren()
+            .OfType<IDockedItem>()
+            .Select(x => x.Control)
+            .FirstOrDefault(filter);
+    }
+
     public void Focus(Control control) {
         if (Root.TryGetDock(control, out var dockedItem)) {
             dockedItem.DockParent.Focus(dockedItem);
