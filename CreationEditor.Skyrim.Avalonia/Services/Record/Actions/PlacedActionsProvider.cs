@@ -32,7 +32,8 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
                 45,
                 RecordActionGroup.Modification,
                 editBaseCommand,
-                context => menuItemProvider.View(editBaseCommand, context))
+                context => menuItemProvider.View(editBaseCommand, context),
+                () => menuItemProvider.View(editBaseCommand).HotKey)
         ];
 
     }

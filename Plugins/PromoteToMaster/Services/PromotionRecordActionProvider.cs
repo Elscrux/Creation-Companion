@@ -47,7 +47,7 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
                     "Promote to Master",
                     context,
                     Symbol.Up),
-                true)
+                IsPrimary: true)
         ];
     }
 

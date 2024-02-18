@@ -13,9 +13,9 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
             .GroupBy(x => x.Group)
             .ToDictionary(x => x.Key, x => x.ToList());
 
-        var emptyContext = new RecordListContext([], [], null);
-        foreach (var actions in _groups.SelectMany(x => x.Value)
-            .GroupBy(x => x.MenuItemFactory(emptyContext).HotKey)) {
+        foreach (var actions in _groups
+            .SelectMany(x => x.Value)
+            .GroupBy(x => x.HotKeyFactory?.Invoke())) {
             if (actions.Key is null) continue;
 
             var recordActions = actions
@@ -24,7 +24,6 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
 
             _hotKeys.Add(actions.Key, recordActions);
         }
-
     }
 
     public void TryToExecuteHotkey(KeyGesture keyGesture, Func<RecordListContext> contextFactory) {

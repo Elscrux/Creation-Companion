@@ -76,7 +76,8 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
                 100,
                 RecordActionGroup.Modification,
                 newCommand,
-                context => menuItemProvider.New(newCommand, context)
+                context => menuItemProvider.New(newCommand, context),
+                () => menuItemProvider.New(newCommand).HotKey
             ),
             new RecordAction(context => context.SelectedRecords.Any(),
                 50,
@@ -88,6 +89,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
                     context.SelectedRecords.Count > 1
                         ? $"Edit All ({context.SelectedRecords.Count}"
                         : "Edit"),
+                () => menuItemProvider.Edit(editCommand).HotKey,
                 true
             ),
             new RecordAction(context => context.SelectedRecords.Any(),
@@ -99,7 +101,8 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
                     context,
                     context.SelectedRecords.Count > 1
                         ? $"Duplicate All ({context.SelectedRecords.Count})"
-                        : "Duplicate")
+                        : "Duplicate"),
+                () => menuItemProvider.Duplicate(duplicateCommand).HotKey
             ),
             new RecordAction(context => context.SelectedRecords.Any(),
                 30,
@@ -110,13 +113,15 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
                     context,
                     context.SelectedRecords.Count > 1
                         ? $"Delete All ({context.SelectedRecords.Count})"
-                        : "Delete")
+                        : "Delete"),
+                () => menuItemProvider.Delete(deleteCommand).HotKey
             ),
             new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].References.Any(),
                 50,
                 RecordActionGroup.Inspection,
                 openReferencesCommand,
-                context => menuItemProvider.References(openReferencesCommand, context)
+                context => menuItemProvider.References(openReferencesCommand, context),
+                () => menuItemProvider.References(openReferencesCommand).HotKey
             ),
         ];
     }
