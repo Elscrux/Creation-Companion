@@ -20,6 +20,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     ReactiveCommand<IReadOnlyList<AssetTreeItem?>, Unit> Delete { get; }
     ReactiveCommand<AssetTreeItem, Unit> Rename { get; }
     ReactiveCommand<AssetTreeItem, Unit> OpenReferences { get; }
+    ReactiveCommand<string, Unit> MoveTo { get; }
     ReactiveCommand<AssetDirectory, Unit> AddFolder { get; }
     ReactiveCommand<AssetDirectory, Unit> OpenAssetBrowser { get; }
 
