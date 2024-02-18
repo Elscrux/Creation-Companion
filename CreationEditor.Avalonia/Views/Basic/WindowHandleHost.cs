@@ -3,19 +3,15 @@ using Windows.Interop;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
-namespace CreationEditor.Avalonia.Views.Viewport;
+namespace CreationEditor.Avalonia.Views.Basic;
 
-public sealed class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeControlHost {
-    private Window? _rootWindow;
-
+public class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeControlHost {
     private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
         if (e.Root is not Window window) return;
 
-        _rootWindow = window;
-
-        var handle = _rootWindow.TryGetPlatformHandle();
+        var handle = window.TryGetPlatformHandle();
         if (handle is null) return;
 
         if (OperatingSystem.IsWindows()) {
@@ -31,12 +27,6 @@ public sealed class WindowHandleHost(IntPtr windowHandle, string descriptor) : N
         DestroyNativeControl.Invoke(this, null);
 
         base.OnAttachedToVisualTree(e);
-    }
-
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
-        base.OnDetachedFromVisualTree(e);
-
-        _rootWindow = null;
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent) {

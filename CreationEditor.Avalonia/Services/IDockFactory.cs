@@ -22,4 +22,24 @@ public interface IDockFactory {
     /// <param name="dock">Side to open the dock</param>
     /// <param name="parameter">Optional custom parameter which may be used by individual elements</param>
     void OpenFireAndForget(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null);
+
+    /// <summary>
+    /// Retrieve a dock of that kind if one is already open
+    /// </summary>
+    /// <param name="dockElement">Type of dock element to open</param>
+    /// <param name="dockMode">Area to open the dock</param>
+    /// <param name="dock">Side to open the dock</param>
+    /// <param name="parameter">Optional custom parameter which may be used by individual elements</param>
+    /// <returns>The dock</returns>
+    Control? TryGetDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null);
+
+    /// <summary>
+    /// Retrieve a dock of that kind if one is already open, or open a new one
+    /// </summary>
+    /// <param name="dockElement">Type of dock element to open</param>
+    /// <param name="dockMode">Area to open the dock</param>
+    /// <param name="dock">Side to open the dock</param>
+    /// <param name="parameter">Optional custom parameter which may be used by individual elements</param>
+    /// <returns>The dock</returns>
+    Task<Control> GetOrOpenDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null);
 }

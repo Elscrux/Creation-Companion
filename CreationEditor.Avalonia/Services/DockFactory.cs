@@ -41,24 +41,48 @@ public sealed class DockFactory(
                 if (dockResult.HasValue) {
                     Dispatcher.UIThread.Post(() => dockingManagerService.AddControl(dockResult.Value.GetControl(), dockResult.Value.DockConfig));
                 } else {
-                    throw new Exception($"Failed to open dock {dockElement}");
+                    throw new InvalidOperationException($"Failed to open dock {dockElement}");
                 }
             })
             .FireAndForget(e => logger.Here().Warning("Couldn't open dock {DockElement}: {Message}", dockElement, e.Message));
     }
 
     public Task Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        return Task.Run(async () => {
-            var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
-            if (dockResult.HasValue) {
-                Dispatcher.UIThread.Post(() => dockingManagerService.AddControl(dockResult.Value.GetControl(), dockResult.Value.DockConfig));
-            } else {
-                throw new Exception($"Failed to open dock {dockElement}");
-            }
+        return Task.Run(async () => await CreateDock(dockElement, dockMode, dock, parameter));
+    }
+
+    public Control? TryGetDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        return dockElement switch {
+            DockElement.Log => dockingManagerService.TryGetControl<LogView>(),
+            DockElement.RecordBrowser => dockingManagerService.TryGetControl<RecordBrowser>(),
+            DockElement.CellBrowser => dockingManagerService.TryGetControl<ICellBrowser>() as Control,
+            DockElement.AssetBrowser => dockingManagerService.TryGetControl<AssetBrowser>(),
+            DockElement.ScriptEditor => dockingManagerService.TryGetControl<ScriptEditor>(),
+            DockElement.Viewport => dockingManagerService.TryGetControl<IViewport>() as Control,
+            _ => throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null)
+        };
+    }
+
+    public Task<Control> GetOrOpenDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        var openDock = TryGetDock(dockElement);
+        if (openDock is null) return CreateDock(dockElement);
+
+        dockingManagerService.Focus(openDock);
+        return Task.FromResult(openDock);
+    }
+
+    private async Task<Control> CreateDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
+        if (!dockResult.HasValue) throw new InvalidOperationException($"Failed to open dock {dockElement}");
+
+        return Dispatcher.UIThread.Invoke(() => {
+            var control = dockResult.Value.GetControl();
+            dockingManagerService.AddControl(control, dockResult.Value.DockConfig);
+            return control;
         });
     }
 
-    private async Task<DockResult?> GetDock(DockElement dockElement, DockMode? dockMode, Dock? dock, object? parameter) {
+    private async Task<DockResult?> GetDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
         Func<Control> getControl;
         DockConfig dockConfig;
 

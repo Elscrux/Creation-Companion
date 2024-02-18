@@ -32,7 +32,7 @@ public sealed class BSEViewportFactory(
         var mainWindowHandle = GetMainWindowHandle();
 
         return Task.FromResult<Func<Control>>(() => {
-            var viewportHost = new WindowHandleHost(mainWindowHandle, "Viewport");
+            var viewportHost = new ViewportHost(mainWindowHandle, "Viewport");
             _viewportInitialized.OnNext(Unit.Default);
             return viewportHost;
         });
