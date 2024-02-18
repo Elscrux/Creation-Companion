@@ -9,7 +9,9 @@ namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeDataGrid> {
     private readonly DisposableBucket _disposables = new();
 
-    protected override void OnAttachedToVisualTree() {
+    protected override void OnAttached() {
+        base.OnAttached();
+
         if (AssociatedObject is { RowSelection: {} selection }) {
             (selection as ITreeSelectionModel).Events().SelectionChanged
                 .Select(_ => selection.SelectedItem)
@@ -27,7 +29,9 @@ public sealed class ScrollToSelection : Behavior<global::Avalonia.Controls.TreeD
         }
     }
 
-    protected override void OnDetachedFromVisualTree() {
+    protected override void OnDetaching() {
+        base.OnDetaching();
+
         _disposables.Dispose();
     }
 }
