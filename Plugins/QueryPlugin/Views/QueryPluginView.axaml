@@ -27,7 +27,7 @@
                 Grid.Row="0"
                 Grid.Column="0" Grid.ColumnSpan="2"
                 Title="You can restore previously saved columns"
-                IsOpen="{Binding Queries.Count}">
+                IsOpen="{Binding QueryCount}">
                 <controls:InfoBar.ActionButton>
                     <Button Content="Restore"
                             Command="{Binding RestoreColumns}"/>

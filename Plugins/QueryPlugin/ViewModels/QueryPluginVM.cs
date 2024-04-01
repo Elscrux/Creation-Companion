@@ -4,7 +4,6 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
-using DynamicData.Binding;
 using QueryPlugin.Views;
 using ReactiveUI;
 namespace QueryPlugin.ViewModels;
@@ -28,8 +27,7 @@ public sealed class QueryPluginVM : ViewModel {
     public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
     public ReactiveCommand<QueryColumnVM, Unit> CopyColumnText { get; }
     public ReactiveCommand<Unit, Unit> RestoreColumns { get; }
-
-    public IObservableCollection<IQueryRunner> Queries { get; }
+    public int QueryCount { get; }
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
@@ -40,7 +38,7 @@ public sealed class QueryPluginVM : ViewModel {
         _menuItemProvider = menuItemProvider;
         ColumnsGrid.Children.Add(_paddingRight);
 
-        Queries = new ObservableCollectionExtended<IQueryRunner>(queryState.LoadAllQueries());
+        QueryCount = queryState.GetQueryCount();
 
         AddColumn = ReactiveCommand.Create(() => {
             InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
@@ -76,13 +74,10 @@ public sealed class QueryPluginVM : ViewModel {
         });
 
         RestoreColumns = ReactiveCommand.Create(() => {
-            foreach (var query in Queries) {
+            foreach (var query in queryState.LoadAllQueries()) {
                 var queryColumn = InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
-                if (queryColumn.ViewModel is null) continue;
-
-                queryColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(query.CreateMemento());
+                queryColumn.ViewModel?.QueryVM.QueryRunner.RestoreMemento(query.CreateMemento());
             }
-            Queries.Clear();
         });
     }
 
