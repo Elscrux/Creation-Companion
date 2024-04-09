@@ -12,7 +12,8 @@
     x:Name="Browser">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="150"/>
+            <ColumnDefinition MinWidth="175"
+                              Width="175"/>
             <ColumnDefinition Width="5"/>
             <ColumnDefinition MinWidth="150"
                               Width="4*"/>
