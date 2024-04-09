@@ -1,17 +1,16 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
         <Border Padding="20">
             <StackPanel Spacing="10">
-                <controls:HyperlinkButton Content="Link"/>
-                <controls:HyperlinkButton Content="Disabled"
+                <HyperlinkButton Content="Link"/>
+                <HyperlinkButton Content="Disabled"
                                           IsEnabled="False"/>
                 <TextBlock>
                     <TextBlock.Inlines>
                         <Run>Use</Run>
                         <InlineUIContainer>
-                            <controls:HyperlinkButton
+                            <HyperlinkButton
                                 NavigateUri="https://docs.avaloniaui.net"
                                 Content="Avalonia"/>
                         </InlineUIContainer>
@@ -22,7 +21,7 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="controls|HyperlinkButton">
+    <Style Selector="HyperlinkButton">
         <Setter Property="Padding" Value="0"/>
 
         <Style Selector="^:pointerover /template/ ContentPresenter#ContentPresenter">
