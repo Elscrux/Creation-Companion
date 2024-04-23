@@ -19,8 +19,8 @@ public sealed class QueryFromRecordType : ReactiveObject, IQueryFrom {
         _modScopeProvider = modScopeProvider;
 
         Items = mutagenTypeProvider
-            .GetRecordTypes(GameRelease.SkyrimSE)
-            .Select(type => new QueryFromItem(type.Name, mutagenTypeProvider.GetRecordGetterType(type)))
+            .GetRegistrations(GameRelease.SkyrimSE)
+            .Select(registration => new QueryFromItem(registration.Name, registration.GetterType))
             .ToList();
     }
 

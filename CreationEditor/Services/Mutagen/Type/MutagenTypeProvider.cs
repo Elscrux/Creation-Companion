@@ -67,18 +67,26 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
         return fullName[startIndex..^6];
     }
 
-    public IEnumerable<System.Type> GetRecordTypes(GameRelease gameRelease) {
-        var gameCategory = gameRelease.ToCategory();
-        var gameNamespace = $"{BaseNamespace}{gameCategory}.{gameCategory}Mod";
-        var registration = LoquiRegistration.GetRegisterByFullName(gameNamespace);
-        if (registration is null) yield break;
+    public IEnumerable<System.Type> GetRecordClassTypes(GameRelease gameRelease) {
+        return GetRegistrations(gameRelease).Select(x => x.ClassType);
+    }
 
-        foreach (var type in registration.ClassType
-            .GetProperties()
-            .Select(x => x.PropertyType.InheritsFrom(typeof(IGroupCommonGetter)) ? x.PropertyType.GetGenericArguments()[0] : null)
-            .NotNull()) {
-            yield return type;
-        }
+    public IEnumerable<System.Type> GetRecordGetterTypes(GameRelease gameRelease) {
+        return GetRegistrations(gameRelease).Select(x => x.GetterType);
+    }
+
+    public IEnumerable<System.Type> GetRecordSetterTypes(GameRelease gameRelease) {
+        return GetRegistrations(gameRelease).Select(x => x.SetterType);
+    }
+
+    public IEnumerable<ILoquiRegistration> GetRegistrations(GameRelease gameRelease) {
+        var gameCategory = gameRelease.ToCategory();
+        var gameNamespace = BaseNamespace + gameCategory;
+
+        return LoquiRegistration.StaticRegister.Registrations
+            .Where(x =>
+                string.Equals(x.ClassType.Namespace, gameNamespace, StringComparison.Ordinal)
+             && x.GetterType.IsAssignableTo(typeof(IMajorRecordGetter)));
     }
 
     public System.Type GetRecordGetterType(System.Type type) {

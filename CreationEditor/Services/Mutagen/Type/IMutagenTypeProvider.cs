@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Loqui;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -52,11 +53,32 @@ public interface IMutagenTypeProvider {
     string GetTypeName(IFormLinkIdentifier formLinkIdentifier);
 
     /// <summary>
-    /// Returns all record types of a game release 
+    /// Returns all record class types of a game release 
     /// </summary>
     /// <param name="gameRelease">Game release to get types for</param>
-    /// <returns>Record types of the game</returns>
-    IEnumerable<System.Type> GetRecordTypes(GameRelease gameRelease);
+    /// <returns>Record class types of the game</returns>
+    IEnumerable<System.Type> GetRecordClassTypes(GameRelease gameRelease);
+
+    /// <summary>
+    /// Returns all record getter types of a game release 
+    /// </summary>
+    /// <param name="gameRelease">Game release to get types for</param>
+    /// <returns>Record getter types of the game</returns>
+    IEnumerable<System.Type> GetRecordGetterTypes(GameRelease gameRelease);
+
+    /// <summary>
+    /// Returns all record setter types of a game release 
+    /// </summary>
+    /// <param name="gameRelease">Game release to get types for</param>
+    /// <returns>Record setter types of the game</returns>
+    IEnumerable<System.Type> GetRecordSetterTypes(GameRelease gameRelease);
+
+    /// <summary>
+    /// Returns all record registrations of a game release 
+    /// </summary>
+    /// <param name="gameRelease">Game release to get types for</param>
+    /// <returns>Record registrations of the game</returns>
+    IEnumerable<ILoquiRegistration> GetRegistrations(GameRelease gameRelease);
 
     /// <summary>
     /// Returns the getter type of record class type

@@ -7,6 +7,7 @@ using Serilog;
 namespace CreationEditor.Services.Query;
 
 public interface IQueryState {
+    int GetQueryCount();
     IEnumerable<IQueryRunner> LoadAllQueries();
 
     bool Save(IQueryRunner queryRunner);
@@ -28,6 +29,12 @@ public sealed class JsonQueryState(
 
     private static string GetFileName(IQueryRunner queryRunner) => "Query-" + queryRunner.Id + ".json";
     private IFileInfo GetFilePath(IQueryRunner queryRunner) => fileSystem.FileInfo.New(statePathProvider.GetFullPath(GetFileName(queryRunner)));
+
+    public int GetQueryCount() {
+        return fileSystem.Directory
+            .EnumerateFiles(statePathProvider.GetDirectoryPath(), "*.json")
+            .Count();
+    }
 
     public IEnumerable<IQueryRunner> LoadAllQueries() {
         return fileSystem.Directory
