@@ -47,7 +47,7 @@ public sealed class AssetDirectory : IAsset {
         IAssetReferenceController assetReferenceController,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService,
-        bool isVirtual = false) {
+        bool isVirtual) {
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
         _fileSystem = fileSystem;
@@ -56,6 +56,22 @@ public sealed class AssetDirectory : IAsset {
         Directory = directory;
         IsVirtual = isVirtual;
     }
+
+    public AssetDirectory(
+        IDirectoryInfo directory,
+        IFileSystem fileSystem,
+        IDataDirectoryService dataDirectoryService,
+        IAssetReferenceController assetReferenceController,
+        IAssetTypeService assetTypeService,
+        IArchiveService archiveService)
+        : this(
+            directory,
+            fileSystem,
+            dataDirectoryService,
+            assetReferenceController,
+            assetTypeService,
+            archiveService,
+            !fileSystem.Path.Exists(directory.FullName)) {}
 
     private void Add(string path) {
         try {
@@ -69,7 +85,7 @@ public sealed class AssetDirectory : IAsset {
                 _assetReferenceController.RegisterCreation(asset);
                 Assets.AddOrUpdate(asset);
             } else {
-                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService);
+                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false);
                 assetDirectory.DisposeWith(_disposables);
                 Assets.AddOrUpdate(assetDirectory);
             }
@@ -164,15 +180,11 @@ public sealed class AssetDirectory : IAsset {
     }
 
     private void Refresh() {
-        if (Assets.Count > 0) {
-            Assets.Clear();
-        }
-
         var addedDirectories = new HashSet<string>(AssetCompare.PathComparer);
         IEnumerable<IAsset> assets = [];
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
-                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService) : null)
+                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false) : null)
                 .NotNull());
         }
 
@@ -198,9 +210,11 @@ public sealed class AssetDirectory : IAsset {
                 var asset = FileToAsset(file, true);
                 return addedFiles.Add(_fileSystem.Path.GetFileName(file)) ? asset : null;
             })
-            .NotNull());
+            .NotNull())
+            .ToList();
 
         Assets.Edit(updater => {
+            updater.Clear();
             foreach (var asset in assets) {
                 updater.AddOrUpdate(asset);
             }

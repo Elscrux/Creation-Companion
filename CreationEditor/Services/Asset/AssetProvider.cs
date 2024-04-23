@@ -20,14 +20,13 @@ public sealed class AssetProvider(
             if (!directory.StartsWith(path, AssetCompare.PathComparison)) continue;
 
             // Retrieve child or self from the children
-            foreach (var child in asset.GetChildren<IAsset, AssetDirectory>(
-                a => directory.StartsWith(a.Path, AssetCompare.PathComparison),
-                a => a.Children,
-                true)) {
-                if (string.Equals(directory, child.Path, AssetCompare.PathComparison)) {
-                    return child;
-                }
-            }
+            var dir = asset.GetChildren<IAsset, AssetDirectory>(
+                    a => directory.StartsWith(a.Path, AssetCompare.PathComparison),
+                    a => a.Children,
+                    true)
+                .FirstOrDefault(child => string.Equals(directory, child.Path, AssetCompare.PathComparison));
+
+            if (dir is not null) return dir;
         }
 
         var assetDirectory = new AssetDirectory(fileSystem.DirectoryInfo.New(directory), fileSystem, dataDirectoryService, assetReferenceController, assetTypeService, archiveService);
