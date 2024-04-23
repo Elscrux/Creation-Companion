@@ -200,8 +200,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 return checkNull ?? AssetComparers.PathComparer.Compare(x?.Asset, y?.Asset);
                             },
                         }),
-                    directory => directory.Children,
-                    directory => directory.HasChildren),
+                    directory => directory.Children),
+                    // directory => directory.HasChildren), TODO add this back when https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132 is fixed and still needed
                 new TemplateColumn<AssetTreeItem>(
                     "Count",
                     new FuncDataTemplate<AssetTreeItem>((asset, _) => {

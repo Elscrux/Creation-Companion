@@ -126,7 +126,7 @@ public sealed class AssetDirectory : IAsset {
 
     public void Dispose() => _disposables.Dispose();
 
-    private void LoadAssets() {
+    public void LoadAssets() {
         if (_loadedAssets) return;
 
         _loadedAssets = true;

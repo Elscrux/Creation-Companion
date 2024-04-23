@@ -27,31 +27,34 @@ public sealed class AssetTreeItem(
     public bool IsVirtual => Asset.IsVirtual;
     public IEnumerable<IReferencedAsset> GetReferencedAssets() => Asset.GetReferencedAssets();
 
-    public ReadOnlyObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
-    private ReadOnlyObservableCollection<AssetTreeItem>? _children;
+    public IObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
+    private IObservableCollection<AssetTreeItem>? _children;
 
-    private ReadOnlyObservableCollection<AssetTreeItem> LoadChildren() {
+    private IObservableCollection<AssetTreeItem> LoadChildren() {
         if (Asset is AssetDirectory assetDirectory) {
             // Load up with initial items so the returning collection is already filled with something
             // Otherwise the TreeDataGrid doesn't like it, see https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132
             // There might be more issues that this one though
-            var initialItem = assetDirectory.Children
-                .Select(Selector)
-                .Order(AssetComparers.PathComparer)
-                .Cast<AssetTreeItem>();
+            // DISABLED FOR NOW - this causes duplicate items to be added to the collection
+            // var initialItem = assetDirectory.Children
+            //     .Select(Selector)
+            //     .Order(AssetComparers.PathComparer)
+            //     .Cast<AssetTreeItem>()
+            //     .ToList();
 
+            assetDirectory.LoadAssets();
             return assetDirectory.Assets
                 .Connect()
                 .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Filter(filterObservable)
                 .Transform((Func<IAsset, AssetTreeItem>) Selector)
                 .Sort(AssetComparers.PathComparer)
-                .ToObservableCollectionSync(initialItem, _disposables);
+                .ToObservableCollection( _disposables);
 
             AssetTreeItem Selector(IAsset a) => new(fileSystem.Path.Combine(Path, fileSystem.Path.GetFileName(a.Path)), a, fileSystem, filterObservable);
         }
 
-        return new ReadOnlyObservableCollection<AssetTreeItem>(new ObservableCollectionExtended<AssetTreeItem>());
+        return new ObservableCollectionExtended<AssetTreeItem>();
     }
 
     // public IObservable<bool> AnyOrphaned { get; }
