@@ -70,6 +70,7 @@ public sealed class InteropTest {
 
         var hideCallbackTriggered = false;
         AddHideCallback(formKeys => {
+            Assert.NotNull(formKeys);
             Assert.Equal(hideFormKeys.Length, formKeys.Length);
             Assert.Equal(hideFormKey, formKeys[0]);
             hideCallbackTriggered = true;
@@ -77,6 +78,7 @@ public sealed class InteropTest {
 
         var showCallbackTriggered = false;
         AddShowCallback(formKeys => {
+            Assert.NotNull(formKeys);
             Assert.Equal(showFormKeys.Length, formKeys.Length);
             Assert.Equal(showFormKey, formKeys[0]);
             showCallbackTriggered = true;

@@ -9,16 +9,16 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
 
     [Reactive] public Type? RecordType { get; set; }
 
-    private static readonly string[] BlacklistedNames = {
+    private static readonly string[] BlacklistedNames = [
         "BinaryWriteTranslator",
         "Registration",
         "StaticRegistration",
         "FormVersion",
-    };
+    ];
 
-    private static readonly Type[] BlacklistedTypes = {
+    private static readonly Type[] BlacklistedTypes = [
         typeof(Type),
-    };
+    ];
 
     public IObservableCollection<IQueryField> Fields { get; } = new ObservableCollectionExtended<IQueryField>();
     [Reactive] public IQueryField? SelectedField { get; set; }

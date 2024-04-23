@@ -48,11 +48,7 @@ public sealed class SingleModPickerVM : ViewModel, IModPickerVM {
 
         // When the own mod creator creates a new mod, select it
         ModCreationVM.CreateModCommand
-            .Subscribe(mod => {
-                if (mod is null) return;
-
-                SelectMod(mod.ModKey);
-            })
+            .Subscribe(mod => SelectMod(mod.ModKey))
             .DisposeWith(this);
 
         Mods.WhenCollectionChanges()

@@ -13,7 +13,7 @@ public sealed class SkyrimApplicationIconProvider : IApplicationIconProvider {
     public IImage Icon { get; } = LoadImage(Path);
     public IImage SpinningIcon { get; } = LoadImage(SpinningPath);
 
-    private static IImage LoadImage(string path) {
+    private static Bitmap LoadImage(string path) {
         using var stream = AssetLoader.Open(new Uri($"{BasePath}/{path}"));
         return new Bitmap(stream);
     }

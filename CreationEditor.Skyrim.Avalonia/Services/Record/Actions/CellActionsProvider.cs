@@ -31,7 +31,7 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is ICellGetter,
+            new RecordAction(context => context.SelectedRecords is [{ Record: ICellGetter }],
                 100,
                 RecordActionGroup.Viewing,
                 viewCommand,

@@ -16,14 +16,23 @@ public static class RecordTypeConstants {
     public static readonly IEnumerable<Type> KeywordTypes = typeof(IKeywordGetter).AsEnumerable();
     public static readonly IEnumerable<Type> ObjectIdTypes = typeof(IObjectIdGetter).AsEnumerable();
 
+    // Sound Descriptor
+    public static readonly Type[] SoundDescriptorTypes = [typeof(ISoundDescriptorGetter)];
+
+    // Static
+    public static readonly Type[] StaticTypes = [typeof(IStaticGetter)];
+
+    // Spell
+    public static readonly Type[] SpellTypes = [typeof(ISpellGetter)];
+
     // Placed
     public static readonly Type PlacedBaseType = typeof(IPlacedGetter);
     public static readonly Type PlacedSimpleType = typeof(IPlacedSimpleGetter);
     public static readonly IEnumerable<Type> PlacedTypes = PlacedBaseType.AsEnumerable();
-    public static readonly Type[] AllPlacedInterfaceTypes = { PlacedBaseType, PlacedSimpleType };
+    public static readonly Type[] AllPlacedInterfaceTypes = [PlacedBaseType, PlacedSimpleType];
 
     // Package
-    public static readonly Type[] PackageDataNumericTypes = { typeof(bool), typeof(float), typeof(int) };
+    public static readonly Type[] PackageDataNumericTypes = [typeof(bool), typeof(float), typeof(int)];
     public static readonly Type[] PackageDataLocationTypes = LocationTypes.Concat(AllPlacedInterfaceTypes).ToArray();
     public static readonly Type[] PackageDataTypes = PackageDataNumericTypes.Concat(PackageDataLocationTypes).ToArray();
 

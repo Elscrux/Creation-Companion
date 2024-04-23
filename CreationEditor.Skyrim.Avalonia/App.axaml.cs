@@ -76,6 +76,7 @@ public partial class App : Application {
 
         base.OnFrameworkInitializationCompleted();
     }
+
     private void LoadPluginModules(ContainerBuilder builder) {
         // Load plugins extension modules to include in the base container
         // TODO: Maybe show a confirmation dialog to select which plugins to load?

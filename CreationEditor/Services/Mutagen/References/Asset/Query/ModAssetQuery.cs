@@ -42,7 +42,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
         linkCacheProvider.LinkCacheChanged
             .Subscribe(linkCache => {
-                _assetLinkCache?.Dispose();
+                _assetLinkCache.Dispose();
                 _assetLinkCache = linkCache.CreateImmutableAssetLinkCache();
             })
             .DisposeWith(_disposableDropoff);
@@ -115,6 +115,6 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
     public void Dispose() {
         _disposableDropoff.Dispose();
-        _assetLinkCache?.Dispose();
+        _assetLinkCache.Dispose();
     }
 }

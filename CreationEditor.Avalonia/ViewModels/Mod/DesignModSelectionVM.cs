@@ -18,8 +18,8 @@ public class DesignModSelectionVM : IModSelectionVM {
     };
     public string ModSearchText { get; set; } = string.Empty;
     public LoadOrderModItem? SelectedMod { get; set; } = new(new ModInfo(ModKey.FromFileName("BestMod.esp")), true, 3);
-    public IModGetterVM SelectedModDetails { get; init; } = null;
-    public ModCreationVM ModCreationVM { get; }
+    public IModGetterVM SelectedModDetails { get; init; } = null!;
+    public ModCreationVM ModCreationVM => null!;
     public IObservable<bool> CanLoad { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsLoaded { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);

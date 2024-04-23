@@ -28,7 +28,7 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].Record is IPlacedObjectGetter,
+            new RecordAction(context => context.SelectedRecords is [{ Record: IPlacedObjectGetter }],
                 45,
                 RecordActionGroup.Modification,
                 editBaseCommand,

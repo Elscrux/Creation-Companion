@@ -171,50 +171,40 @@ public partial class ConditionsEditor : ActivatableUserControl {
         // Update RunOnTypes when the context changes
         RunOnTypes = this.WhenAnyValue(x => x.Context)
             .Select<IMajorRecordGetter?, EditableCondition.ExtendedRunOnType[]>(context => {
-                switch (context) {
-                    case IPackageGetter:
-                        return [
-                            EditableCondition.ExtendedRunOnType.Subject,
-                            EditableCondition.ExtendedRunOnType.Target,
-                            EditableCondition.ExtendedRunOnType.Reference,
-                            EditableCondition.ExtendedRunOnType.LinkedReference,
-                            EditableCondition.ExtendedRunOnType.PackageData,
-                            EditableCondition.ExtendedRunOnType.Player
-                        ];
-                    case IQuestGetter:
-                    case IStoryManagerEventNodeGetter:
-                    case IStoryManagerBranchNodeGetter:
-                    case IStoryManagerQuestNodeGetter:
-                        return [
-                            EditableCondition.ExtendedRunOnType.Subject,
-                            EditableCondition.ExtendedRunOnType.Target,
-                            EditableCondition.ExtendedRunOnType.Reference,
-                            EditableCondition.ExtendedRunOnType.LinkedReference,
-                            EditableCondition.ExtendedRunOnType.QuestAlias,
-                            EditableCondition.ExtendedRunOnType.EventData,
-                            EditableCondition.ExtendedRunOnType.Player
-                        ];
-                    case IDialogResponsesGetter:
-                    case IMagicEffectGetter:
-                    case IIdleAnimationGetter:
-                    case IPerkGetter:
-                        return [
-                            EditableCondition.ExtendedRunOnType.Subject,
-                            EditableCondition.ExtendedRunOnType.Target,
-                            EditableCondition.ExtendedRunOnType.Reference,
-                            EditableCondition.ExtendedRunOnType.CombatTarget,
-                            EditableCondition.ExtendedRunOnType.LinkedReference,
-                            EditableCondition.ExtendedRunOnType.Player
-                        ];
-                    default:
-                        return [
-                            EditableCondition.ExtendedRunOnType.Subject,
-                            EditableCondition.ExtendedRunOnType.Target,
-                            EditableCondition.ExtendedRunOnType.Reference,
-                            EditableCondition.ExtendedRunOnType.LinkedReference,
-                            EditableCondition.ExtendedRunOnType.Player,
-                        ];
-                }
+                return context switch {
+                    IPackageGetter => [
+                        EditableCondition.ExtendedRunOnType.Subject,
+                        EditableCondition.ExtendedRunOnType.Target,
+                        EditableCondition.ExtendedRunOnType.Reference,
+                        EditableCondition.ExtendedRunOnType.LinkedReference,
+                        EditableCondition.ExtendedRunOnType.PackageData,
+                        EditableCondition.ExtendedRunOnType.Player,
+                    ],
+                    IQuestGetter or IStoryManagerEventNodeGetter or IStoryManagerBranchNodeGetter or IStoryManagerQuestNodeGetter => [
+                        EditableCondition.ExtendedRunOnType.Subject,
+                        EditableCondition.ExtendedRunOnType.Target,
+                        EditableCondition.ExtendedRunOnType.Reference,
+                        EditableCondition.ExtendedRunOnType.LinkedReference,
+                        EditableCondition.ExtendedRunOnType.QuestAlias,
+                        EditableCondition.ExtendedRunOnType.EventData,
+                        EditableCondition.ExtendedRunOnType.Player,
+                    ],
+                    IDialogResponsesGetter or IMagicEffectGetter or IIdleAnimationGetter or IPerkGetter => [
+                        EditableCondition.ExtendedRunOnType.Subject,
+                        EditableCondition.ExtendedRunOnType.Target,
+                        EditableCondition.ExtendedRunOnType.Reference,
+                        EditableCondition.ExtendedRunOnType.CombatTarget,
+                        EditableCondition.ExtendedRunOnType.LinkedReference,
+                        EditableCondition.ExtendedRunOnType.Player,
+                    ],
+                    _ => [
+                        EditableCondition.ExtendedRunOnType.Subject,
+                        EditableCondition.ExtendedRunOnType.Target,
+                        EditableCondition.ExtendedRunOnType.Reference,
+                        EditableCondition.ExtendedRunOnType.LinkedReference,
+                        EditableCondition.ExtendedRunOnType.Player,
+                    ]
+                };
             })
             .ToObservableCollection(ActivatedDisposable);
 
@@ -227,7 +217,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
                     IStoryManagerBranchNodeGetter => ConditionConstants.QuestAndStoryManagerOnlyFunctions,
                     IStoryManagerQuestNodeGetter => ConditionConstants.QuestAndStoryManagerOnlyFunctions,
                     IPerkGetter => ConditionConstants.PerkOnlyFunctions,
-                    IPackageGetter p when p.OwnerQuest.IsNull => ConditionConstants.PackageOnlyFunctions,
+                    IPackageGetter { OwnerQuest.IsNull: true } => ConditionConstants.PackageOnlyFunctions,
                     IPackageGetter => ConditionConstants.PackageOnlyFunctions.Concat(ConditionConstants.QuestOnlyFunctions),
                     ICameraPathGetter => ConditionConstants.CameraPathOnlyFunctions,
                     _ => []

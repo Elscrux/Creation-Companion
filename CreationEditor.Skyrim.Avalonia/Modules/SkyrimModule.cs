@@ -81,7 +81,6 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
             .As<ICellBrowserVM>();
 
         builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
-            .InNamespaceOf<FactionEditorVM>()
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
     }

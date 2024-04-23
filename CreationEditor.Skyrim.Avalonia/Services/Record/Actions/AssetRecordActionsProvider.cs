@@ -30,8 +30,7 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
 
         _actions = [
             new RecordAction(
-                context => context.SelectedRecords.Count == 1
-                 && context.SelectedRecords[0].Record is IModeledGetter { Model.File.RawPath: {} rawFilePath }
+                context => context.SelectedRecords is [{ Record: IModeledGetter { Model.File.RawPath: {} rawFilePath } }]
                  && !string.IsNullOrWhiteSpace(rawFilePath),
                 50,
                 RecordActionGroup.Linking,

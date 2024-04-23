@@ -6,21 +6,23 @@ using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Skyrim.Definitions;
 
 public static class SkyrimDefinitions {
-    public static readonly ModKey[] SkyrimModKeys = {
+    public static readonly ModKey[] SkyrimModKeys = [
         Mutagen.Bethesda.FormKeys.SkyrimSE.Skyrim.ModKey,
         Update.ModKey,
         Dawnguard.ModKey,
         HearthFires.ModKey,
         Dragonborn.ModKey,
-    };
+    ];
 
     public static readonly ImmutableArray<AStoryManagerEvent> StoryManagerEvents
-        = typeof(AStoryManagerEvent)
-            .GetAllSubClasses<AStoryManagerEvent>()
-            .ToImmutableArray();
+        = [
+            ..typeof(AStoryManagerEvent)
+                .GetAllSubClasses<AStoryManagerEvent>()
+        ];
 
     public static readonly ImmutableArray<IConditionValueEnums> ConditionValueEnums
-        = typeof(IConditionValueEnums)
-            .GetAllSubClasses<IConditionValueEnums>()
-            .ToImmutableArray();
+        = [
+            ..typeof(IConditionValueEnums)
+                .GetAllSubClasses<IConditionValueEnums>()
+        ];
 }

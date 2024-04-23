@@ -748,8 +748,6 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         this.WhenAnyValue(x => x.FormLink)
             .Subscribe(x => {
-                if (x is null) return;
-
                 if (!x.FormKey.Equals(FormKey)) {
                     FormKey = FormLink.FormKey;
                 }

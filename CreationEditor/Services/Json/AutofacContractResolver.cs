@@ -20,9 +20,7 @@ public sealed class AutofacContractResolver(IComponentContext componentContext) 
         // attempt to create the contact from the resolved type
         if (componentContext.ComponentRegistry.TryGetRegistration(new TypedService(objectType), out var registration)) {
             var viewType = registration.Activator.LimitType;
-            if (viewType is not null) {
-                return base.CreateObjectContract(viewType);
-            }
+            return base.CreateObjectContract(viewType);
         }
 
         // fall back to using the registered type
