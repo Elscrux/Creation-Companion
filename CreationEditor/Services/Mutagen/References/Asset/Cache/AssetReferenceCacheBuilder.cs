@@ -62,6 +62,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
                 await validatableQuery.CacheValidation.GetInvalidatedContent(source);
             }
 
+            logger.Here().Debug("Invalid cache for {Source}, parsing all assets", source);
             return FullyParseCache(assetReferenceCacheableQuery);
         }
 
@@ -76,6 +77,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
         Task<AssetReferenceCache<TSource, TReference>> ParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
             if (assetReferenceCacheableQuery is not IAssetReferenceCacheableValidatableQuery<TSource, TReference> { CacheValidation: {} cacheValidation }) {
                 // No internal cache validation, just deserialize
+                logger.Here().Debug("Valid cache, no cache content validation needed for {Source}, deserializing cache", source);
                 return Task.Run(() => assetReferenceCacheableQuery.Serialization.Deserialize(source, assetReferenceCacheableQuery));
             }
 
@@ -88,15 +90,22 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             var validationResult = await cacheValidation.GetInvalidatedContent(source);
 
             // If fully invalidated, parse from the ground up
-            if (validationResult.CacheFullyInvalidated) return FullyParseCache(cacheable);
+            if (validationResult.CacheFullyInvalidated) {
+                logger.Here().Debug("Fully invalidated cache content for {Source}, parsing all assets", source);
+                return FullyParseCache(cacheable);
+            }
 
             // Otherwise, deserialize existing cache
             var deserializationTask = Task.Run(() => assetReferenceCacheableQuery.Serialization.Deserialize(source, assetReferenceCacheableQuery));
 
             // If no assets were invalidated, use deserialized cache
-            if (validationResult.InvalidatedContent.Count == 0) return await deserializationTask;
+            if (validationResult.InvalidatedContent.Count == 0) {
+                logger.Here().Debug("Valid cache content {Source}, deserializing cache", source);
+                return await deserializationTask;
+            }
 
             // Otherwise, parse invalidated assets and merge with deserialized cache
+            logger.Here().Debug("Partly invalidated cache content for {Source}, parsing invalidated assets and using {ValidatedContentCount} validated assets", source, validationResult.InvalidatedContent.Count);
             return await MergeCacheAndParsed(validationResult, deserializationTask, assetReferenceCacheableQuery);
         }
 
