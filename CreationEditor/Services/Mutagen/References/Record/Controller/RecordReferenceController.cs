@@ -10,10 +10,12 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 
 public sealed class RecordReferenceController : IRecordReferenceController, IDisposable {
     private readonly CompositeDisposable _disposable = new();
+    private readonly ILogger _logger;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IRecordReferenceCacheFactory _recordReferenceCacheFactory;
     private readonly INotificationService _notificationService;
@@ -33,10 +35,12 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             record => record.FormKey);
 
     public RecordReferenceController(
+        ILogger logger,
         IRecordController recordController,
         IEditorEnvironment editorEnvironment,
         IRecordReferenceCacheFactory recordReferenceCacheFactory,
         INotificationService notificationService) {
+        _logger = logger;
         _editorEnvironment = editorEnvironment;
         _recordReferenceCacheFactory = recordReferenceCacheFactory;
         _notificationService = notificationService;
@@ -76,6 +80,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         _isLoading.OnNext(false);
+
+        _logger.Here().Information("Loaded Record References for {Count} Mods", modKeys.Count);
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {

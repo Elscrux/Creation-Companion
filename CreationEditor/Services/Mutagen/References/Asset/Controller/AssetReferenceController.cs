@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -23,6 +22,7 @@ namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly CompositeDisposable _disposables = new();
 
+    private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IArchiveService _archiveService;
     private readonly INotificationService _notificationService;
@@ -73,6 +73,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         IRecordController recordController,
         NifFileAssetParser nifFileAssetParser,
         IAssetReferenceCacheFactory assetReferenceCacheFactory) {
+        _logger = logger;
         _fileSystem = fileSystem;
         _archiveService = archiveService;
         _notificationService = notificationService;
@@ -141,11 +142,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         if (archives.Length > 0) {
             using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Archive Nif References");
 
-            var elapsedTime = Stopwatch.GetTimestamp();
-
             var assetCaches = await Task.WhenAll(archives
                 .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetNifArchiveCache(mod))));
-            Console.WriteLine($"NIF ASSET: {Stopwatch.GetElapsedTime(elapsedTime, Stopwatch.GetTimestamp())}");
 
             _nifArchiveAssetCaches.AddRange(assetCaches);
 
@@ -153,6 +151,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             _nifArchiveAssetReferenceManager.UpdateAll(asset => assetCaches.GetReferences(asset));
 
             linearNotifier.Stop();
+
+            _logger.Here().Information("Loaded Nif References for {Count} Archives", _nifArchiveAssetCaches.Count);
         }
 
         _archiveService.ArchiveCreated
