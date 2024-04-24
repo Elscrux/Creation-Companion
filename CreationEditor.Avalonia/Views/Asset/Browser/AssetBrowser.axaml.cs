@@ -110,6 +110,9 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     private async void AssetTree_OnDoubleTapped(object? sender, TappedEventArgs e) {
         if (AssetTree.RowSelection is null || ViewModel is null) return;
 
+        // Ignore double taps on the chevron
+        if (e.Source is Visual v && v.GetVisualChildren().Any(x => x.Name == "ChevronPath")) return;
+
         if (AssetTree.RowSelection.SelectedItem is AssetTreeItem { IsDirectory: true }) {
             if (e.Source is not Visual visual) return;
 
