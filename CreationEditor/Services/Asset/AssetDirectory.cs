@@ -150,6 +150,9 @@ public sealed class AssetDirectory : IAsset {
         Refresh();
 
         if (!IsVirtual) {
+            // potential performance issue - every loaded directory will check if a file change is relevant
+            // instead, it might be best to subscribe just for changes in the current directory
+            // would require a change in the data directory service api
             _dataDirectoryService.Created
                 .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
                 .ObserveOnGui()
