@@ -17,11 +17,11 @@ public interface IAssetReferenceCacheableQuery<TSource, TReference>
     IAssetReferenceSerialization<TSource, TReference> Serialization { get; }
 
     /// <summary>
-    /// Check if the cache is up to date. Consumes the next step(s) of the BinaryReader.
+    /// Check if the cache is up-to-date. Consumes the next step(s) of the BinaryReader.
     /// </summary>
     /// <param name="reader">BinaryReader to read the cache from as the next step</param>
     /// <param name="source">Source to check the cache for</param>
-    /// <returns>True if the cache is up to date, false otherwise</returns>
+    /// <returns>True if the cache is up-to-date, false otherwise</returns>
     bool IsCacheUpToDate(BinaryReader reader, TSource source);
 
     /// <summary>
