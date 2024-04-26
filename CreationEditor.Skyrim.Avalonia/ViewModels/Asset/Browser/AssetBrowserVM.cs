@@ -516,12 +516,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             XamlRoot = _mainWindow,
             Buttons = {
                 TaskDialogButton.OKButton,
-                TaskDialogButton.CancelButton
+                TaskDialogButton.CancelButton,
             },
         };
 
         if (IsBusyLoadingReferences) {
-            assetDialog.Header += " - WARNING: Not all references have been loaded yet.";
+            assetDialog.IconSource = new SymbolIconSource { Symbol = Symbol.ReportHacked };
+            assetDialog.Header += " - Not all references have been loaded yet.";
         }
 
         return assetDialog;
