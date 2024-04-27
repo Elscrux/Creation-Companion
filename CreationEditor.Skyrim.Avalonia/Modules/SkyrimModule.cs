@@ -24,6 +24,7 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
+using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
 using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
@@ -83,5 +84,9 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
         builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
             .Where(x => x.Name.Contains("EditorVM"))
             .AsImplementedInterfaces();
+
+        // Converter
+        builder.RegisterType<HtmlConverter>()
+            .AsSelf();
     }
 }

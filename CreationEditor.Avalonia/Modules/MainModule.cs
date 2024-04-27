@@ -114,6 +114,10 @@ public sealed class MainModule : Module {
             .As<IDockFactory>()
             .SingleInstance();
 
+        builder.RegisterType<BSEViewportFactory>()
+            .As<IViewportFactory>()
+            .SingleInstance();
+
         // Pipeline
         builder.RegisterType<SavePipeline>()
             .As<ISavePipeline>()
@@ -125,11 +129,6 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordListVMBuilder>()
             .As<IRecordListVMBuilder>();
-
-        // Factory
-        builder.RegisterType<BSEViewportFactory>()
-            .As<IViewportFactory>()
-            .SingleInstance();
 
         // View Model
         builder.RegisterType<MainVM>()

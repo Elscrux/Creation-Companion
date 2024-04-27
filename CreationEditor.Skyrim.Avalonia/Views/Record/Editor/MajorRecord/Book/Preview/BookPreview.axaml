@@ -1,0 +1,62 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:book="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Book"
+             xmlns:preview="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview.BookPreview"
+             x:CompileBindings="True" x:DataType="book:BookEditorVM"
+             x:Name="Preview">
+    <Grid x:Name="Grid">
+        <Border x:Name="BookBackground"
+                Background="SaddleBrown"
+                CornerRadius="16"
+                Height="{x:Static preview:BookPreview.BookHeight}"
+                Width="{x:Static preview:BookPreview.BookWidth}">
+            <Border Background="White"
+                    BoxShadow="0 0 10 2 #BF000000"
+                    HorizontalAlignment="Center"
+                    Margin="{x:Static preview:BookPreview.BookMargins}">
+                <Grid>
+                    <ScrollViewer Margin="{x:Static preview:BookPreview.PageMargins}">
+                        <StackPanel
+                            x:Name="LeftPage"
+                            Margin="{x:Static preview:BookPreview.LeftPageMargins}"
+                            VerticalAlignment="Top"
+                            Height="{x:Static preview:BookPreview.PageHeight}"
+                            Width="{x:Static preview:BookPreview.PageWidth}"/>
+                    </ScrollViewer>
+
+                    <ScrollViewer Margin="{x:Static preview:BookPreview.PageMargins}">
+                        <StackPanel
+                            x:Name="RightPage"
+                            Margin="{x:Static preview:BookPreview.RightPageMargins}"
+                            VerticalAlignment="Top"
+                            Height="{x:Static preview:BookPreview.PageHeight}"
+                            Width="{x:Static preview:BookPreview.PageWidth}"/>
+                    </ScrollViewer>
+
+                    <Border Background="Black"
+                            BoxShadow="0 0 10 1 #BF000000"
+                            Height="{x:Static preview:BookPreview.BookHeight}"
+                            Width="1"/>
+                </Grid>
+            </Border>
+        </Border>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10"
+                    Margin="10"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Right">
+            <Button x:Name="BackButton"
+                    Content="Back"
+                    Click="Back"/>
+
+            <Button x:Name="NextButton"
+                    Content="Next"
+                    Click="Next"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

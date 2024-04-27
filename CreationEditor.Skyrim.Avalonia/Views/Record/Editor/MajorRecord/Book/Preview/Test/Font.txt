@@ -1,0 +1,30 @@
+﻿<font size="30">
+30 font size
+test
+123 test 123
+
+[pagebreak]
+30 font size?
+test
+123 test 123
+
+
+<font size="16">
+16 size now
+
+
+some text
+<font face='$HandwrittenFont'><align='center'>
+centered text?
+
+<align='right'><font face='$DaedricFont'>
+right text in daedric
+
+</font>
+
+handwritten again?
+
+</font>
+</font>
+</font>
+default again?

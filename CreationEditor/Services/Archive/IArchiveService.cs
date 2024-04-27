@@ -30,6 +30,13 @@ public interface IArchiveService : IDisposable {
     IEnumerable<string> GetSubdirectories(string directoryPath);
 
     /// <summary>
+    /// Tries to get a file stream of a file in an archive.
+    /// </summary>
+    /// <param name="filePath">Full path to the file in the archive</param>
+    /// <returns>FileStream of the file in the archive</returns>
+    Stream? TryGetFileStream(string filePath);
+
+    /// <summary>
     /// Tries to copy the content of a file in an archive to a temporary file.
     /// </summary>
     /// <param name="filePath">Full path to the file in the archive</param>

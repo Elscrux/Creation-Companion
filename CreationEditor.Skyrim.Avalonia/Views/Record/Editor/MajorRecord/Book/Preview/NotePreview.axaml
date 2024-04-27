@@ -1,0 +1,37 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:preview="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview.NotePreview">
+    <Grid x:Name="Grid">
+        <Border x:Name="NoteBackground"
+                Background="#FFFFEDBE"
+                CornerRadius="16"
+                Height="{x:Static preview:NotePreview.NoteHeight}"
+                Width="{x:Static preview:NotePreview.NoteWidth}">
+                <ScrollViewer Margin="{x:Static preview:NotePreview.NoteMargins}">
+                    <StackPanel
+                        x:Name="Page"
+                        VerticalAlignment="Top"
+                        Height="{x:Static preview:NotePreview.PageHeight}"
+                        Width="{x:Static preview:NotePreview.PageWidth}"/>
+                </ScrollViewer>
+        </Border>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10"
+                    Margin="10"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Right">
+            <Button x:Name="BackButton"
+                    Content="Back"
+                    Click="Back"/>
+
+            <Button x:Name="NextButton"
+                    Content="Next"
+                    Click="Next"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

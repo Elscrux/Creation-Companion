@@ -33,4 +33,18 @@ public sealed class AssetProvider(
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }
+
+    public AssetFile? GetAssetFile(string filePath, CancellationToken token = default) {
+        var directoryName = fileSystem.Path.GetDirectoryName(filePath);
+        if (directoryName is null) return null;
+
+        var assetContainer = GetAssetContainer(directoryName, token);
+        return assetContainer.GetAssetFile(filePath);
+    }
+
+    public Stream? GetAssetFileStream(AssetFile assetFile, CancellationToken token = default) {
+        return assetFile.IsVirtual
+            ? archiveService.TryGetFileStream(assetFile.Path)
+            : fileSystem.File.OpenRead(assetFile.Path);
+    }
 }

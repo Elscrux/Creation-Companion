@@ -13,9 +13,10 @@ public sealed class AssetModule : Module {
     protected override void Load(ContainerBuilder builder) {
         var assetReferenceQueryType = typeof(IAssetReferenceQuery<,>);
         builder.RegisterAssemblyTypes(assetReferenceQueryType.Assembly)
-            .Where(x => !x.IsInterface && Array.Exists(x.GetInterfaces(), i =>
-                i.IsGenericType &&
-                i.GetGenericTypeDefinition() == assetReferenceQueryType))
+            .Where(x => !x.IsInterface && Array.Exists(x.GetInterfaces(),
+                i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == assetReferenceQueryType))
             .AsSelf();
 
         builder.RegisterAssemblyTypes(typeof(IArchiveAssetParser).Assembly)
@@ -49,6 +50,9 @@ public sealed class AssetModule : Module {
 
         builder.RegisterType<AssetTypeService>()
             .As<IAssetTypeService>();
+
+        builder.RegisterType<ImageLoader>()
+            .As<IImageLoader>();
 
         builder.RegisterType<AssetController>()
             .As<IAssetController>()

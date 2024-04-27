@@ -1,0 +1,13 @@
+﻿<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>e1
+s2<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>
+
+s3<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>m3<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>e3
+
+s4<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>m41<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>m42<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>e4
+
+[pagebreak]
+Standalone 208x183:
+<img src='img://Textures/Interface/Books/Illuminated_Letters/O_letter.png'>
+[pagebreak]
+Standalone 664x1013:
+<img src='img://Textures/Interface/Books/labyrinthdrawing.png'>

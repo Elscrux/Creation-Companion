@@ -1,0 +1,17 @@
+﻿1 and a are on same lines as p
+1<p align="left">a
+b
+c</p>x
+y
+c & x are on same lines as p
+[pagebreak]
+1 & a are on different lines than p
+1
+<p align="left">
+a
+b
+c
+</p>
+x
+y
+c & x are on different lines than p

@@ -130,8 +130,7 @@ public sealed class BsaArchiveService : IArchiveService {
         return global::Mutagen.Bethesda.Archives.Archive.CreateReader(_gameReleaseContext.Release, path);
     }
 
-    public string? TryGetFileAsTempFile(string filePath) {
-        // Make the path relative to the data folder
+    public Stream? TryGetFileStream(string filePath) {
         filePath = _fileSystem.Path.GetRelativePath(_dataDirectory, filePath);
 
         var directoryPath = _fileSystem.Path.GetDirectoryName(filePath);
@@ -141,19 +140,24 @@ public sealed class BsaArchiveService : IArchiveService {
         foreach (var reader in _archives.Values) {
             if (!reader.TryGetFolder(directoryPath, out var archiveFolder)) continue;
 
-            var archiveFile = archiveFolder.Files.FirstOrDefault(f => f.Path == filePath);
+            var archiveFile = archiveFolder.Files.FirstOrDefault(f => AssetCompare.PathComparer.Equals(f.Path, filePath));
             if (archiveFile is null) continue;
 
-            // Copy file to temp file
-            var tempFilePath = _fileSystem.Path.GetTempFileName() + _fileSystem.Path.GetExtension(filePath);
-            using var tempFileStream = _fileSystem.File.Create(tempFilePath);
-            using var archiveFileStream = archiveFile.AsStream();
-            archiveFileStream.CopyTo(tempFileStream);
-
-            return tempFilePath;
+            return archiveFile.AsStream();
         }
 
         return null;
+    }
+
+    public string? TryGetFileAsTempFile(string filePath) {
+        var fileStream = TryGetFileStream(filePath);
+        if (fileStream is null) return null;
+
+        var tempFilePath = _fileSystem.Path.GetTempFileName() + _fileSystem.Path.GetExtension(filePath);
+        using var tempFileStream = _fileSystem.File.Create(tempFilePath);
+        fileStream.CopyTo(tempFileStream);
+
+        return tempFilePath;
     }
 
     public IEnumerable<string> GetFilesInDirectory(string directoryPath) {

@@ -259,14 +259,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         var src = new CancellationTokenSource().DisposeWith(this);
         var cancellationToken = src.Token;
-        Task.Run(() => {
-            var assetContainer = assetProvider.GetAssetContainer(_root, cancellationToken);
-            var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter);
-            Dispatcher.UIThread.Post(() => {
-                AssetTreeSource.Items = rootTree.Children;
-                IsBusyLoadingAssets = false;
-            });
-        }, cancellationToken);
+        Task.Run(() => UpdateAssetContentsAsync(assetProvider, cancellationToken, filter), cancellationToken);
 
         Undo = ReactiveCommand.Create(() => _assetController.Undo());
         Redo = ReactiveCommand.Create(() => _assetController.Redo());
@@ -312,6 +305,16 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         OpenAssetBrowser = ReactiveCommand.CreateFromTask<AssetDirectory>(
             asset => dockFactory.Open(DockElement.AssetBrowser, parameter: asset.Path));
+    }
+
+    private void UpdateAssetContentsAsync(IAssetProvider assetProvider, CancellationToken cancellationToken, IObservable<Func<IAsset, bool>> filter) {
+        Dispatcher.UIThread.Post(() => IsBusyLoadingAssets = true);
+        var assetContainer = assetProvider.GetAssetContainer(_root, cancellationToken);
+        var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter);
+        Dispatcher.UIThread.Post(() => {
+            AssetTreeSource.Items = rootTree.Children;
+            IsBusyLoadingAssets = false;
+        });
     }
 
     private async Task AddAssetFolder(AssetDirectory dir) {
