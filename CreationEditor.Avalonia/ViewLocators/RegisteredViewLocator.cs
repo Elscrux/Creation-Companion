@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-namespace CreationEditor.Skyrim.Avalonia.ViewLocators;
+namespace CreationEditor.Avalonia.ViewLocators;
 
 public sealed class RegisteredViewLocator : IDataTemplate {
     private readonly ReflectionViewLocator _reflectionViewLocator = new();

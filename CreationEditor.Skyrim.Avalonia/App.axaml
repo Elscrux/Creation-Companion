@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:viewLocators="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewLocators">
+             xmlns:viewLocators="clr-namespace:CreationEditor.Avalonia.ViewLocators;assembly=CreationEditor.Avalonia">
     <Application.DataTemplates>
         <viewLocators:RegisteredViewLocator/>
     </Application.DataTemplates>

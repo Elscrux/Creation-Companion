@@ -1,10 +1,9 @@
-using System;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Settings;
-namespace CreationEditor.Skyrim.Avalonia.ViewLocators;
+namespace CreationEditor.Avalonia.ViewLocators;
 
 public sealed class ReflectionViewLocator : IDataTemplate {
     public Control Build(object? data) {
