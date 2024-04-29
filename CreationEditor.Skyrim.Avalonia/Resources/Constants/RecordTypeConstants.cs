@@ -31,6 +31,38 @@ public static class RecordTypeConstants {
     public static readonly IEnumerable<Type> PlacedTypes = PlacedBaseType.AsEnumerable();
     public static readonly Type[] AllPlacedInterfaceTypes = [PlacedBaseType, PlacedSimpleType];
 
+    // Placeable
+    public static readonly Type[] PlaceableTypes = [
+        typeof(IAcousticSpaceGetter),
+        typeof(IActivatorGetter),
+        typeof(IAddonNodeGetter),
+        typeof(IAlchemicalApparatusGetter),
+        typeof(IAmmunitionGetter),
+        typeof(IArmorGetter),
+        typeof(IArtObjectGetter),
+        typeof(IBookGetter),
+        typeof(IContainerGetter),
+        typeof(IDoorGetter),
+        typeof(IFloraGetter),
+        typeof(IFurnitureGetter),
+        typeof(IIdleMarkerGetter),
+        typeof(IIngestibleGetter),
+        typeof(IIngredientGetter),
+        typeof(IKeyGetter),
+        typeof(ILightGetter),
+        typeof(IMiscItemGetter),
+        typeof(IMoveableStaticGetter),
+        typeof(IScrollGetter),
+        typeof(ISoulGemGetter),
+        typeof(ISoundMarkerGetter),
+        typeof(ISpellGetter),
+        typeof(IStaticGetter),
+        typeof(ITalkingActivatorGetter),
+        typeof(ITextureSetGetter),
+        typeof(ITreeGetter),
+        typeof(IWeaponGetter)
+    ];
+
     // Package
     public static readonly Type[] PackageDataNumericTypes = [typeof(bool), typeof(float), typeof(int)];
     public static readonly Type[] PackageDataLocationTypes = LocationTypes.Concat(AllPlacedInterfaceTypes).ToArray();

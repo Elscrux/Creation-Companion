@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj"/>
+        <ProjectReference Include="..\..\CreationEditor.Skyrim.Avalonia\CreationEditor.Skyrim.Avalonia.csproj" />
+        <ProjectReference Include="..\..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj"/>
+        <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ReactiveUI" Version="19.5.41" />
+        <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins"/>
+    </Target>
+
+</Project>

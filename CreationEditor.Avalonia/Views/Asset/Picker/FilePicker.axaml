@@ -1,0 +1,44 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="100"
+             x:Class="CreationEditor.Avalonia.Views.Asset.Picker.FilePicker"
+             x:Name="View">
+    <Grid ColumnDefinitions="*,Auto,Auto"
+          MaxHeight="27">
+        <Border Grid.Column="0"
+                BorderThickness="1,1,0,1"
+                BorderBrush="{DynamicResource ButtonBorderBrush}"
+                CornerRadius="4,0,0,4"
+                VerticalAlignment="Center">
+            <Grid MaxWidth="{ReflectionBinding $parent.Bounds.Width}">
+                <TextBlock
+                    IsVisible="{Binding !#View.AllowTextEdit}"
+                    Text="{Binding #View.PathStrings}"
+                    ToolTip.Tip="{Binding #View.PathStrings}"
+                    TextTrimming="{x:Static TextTrimming.CharacterEllipsis}"
+                    Padding="4"/>
+
+                <TextBox
+                    IsVisible="{Binding #View.AllowTextEdit}"
+                    Text="{Binding #View.PathStrings}"
+                    ToolTip.Tip="{Binding #View.PathStrings}"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                BorderBrush="{DynamicResource ButtonBorderBrush}"
+                BorderThickness="0.5"/>
+
+        <Button Grid.Column="2" Command="{Binding #View.Pick}"
+                BorderThickness="0,1,1,1"
+                CornerRadius="0,4,4,0"
+                VerticalAlignment="Center">
+            <controls:SymbolIcon
+                Symbol="Folder"
+                ToolTip.Tip="Open"/>
+        </Button>
+    </Grid>
+</UserControl>

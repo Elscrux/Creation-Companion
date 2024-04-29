@@ -18,13 +18,6 @@
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="Views\VanillaDuplicateCleanerView.axaml.cs">
-        <DependentUpon>VanillaDuplicateCleanerView.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-    </ItemGroup>
-
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
     </Target>
