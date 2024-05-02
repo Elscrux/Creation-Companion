@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
 using CreationEditor.Services.Query.Select;
 using DynamicData.Binding;
 using Noggog;
@@ -93,17 +94,28 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
                 x => x.ConditionState.CompareValue,
                 (field, negate, or, function, compareValue) => (Field: field, Negate: negate, Or: or, Function: function, CompareValue: compareValue))
             .CombineLatest(conditionStateChanges
-                    .Select(s => s.SubConditions.SelectWhenCollectionChanges(() => s.Summary.Select(x => (Summary: x, State: s))))
+                    .Select(s => s.SubConditions.SelectWhenCollectionChanges(() => s.Summary.Select(x => (Summaries: x, State: s))))
                     .Switch(),
-                (condition, x) => (Condition: condition, x.Summary, x.State))
-            .Select(x =>
-                x.Condition.Field?.Name
-              + (x.Condition.Negate ? " Not " : " ")
-              + (x.Condition.Function is null
-                    ? string.Empty
-                    : $"{x.Condition.Function.Operator} {(x.Summary.Count > 0
-                        ? $"({x.State.GetFullSummary(x.Summary)})"
-                        : x.Condition.CompareValue)}"));
+                (condition, x) => (Condition: condition, x.Summaries, x.State))
+            .Select(CreateSummary);
+    }
+
+    private static string CreateSummary(((IQueryField? Field, bool Negate, bool Or, ICompareFunction? Function, object? CompareValue) Condition, IList<string> Summaries, ConditionState State) x) {
+        var stringBuilder = new StringBuilder();
+        stringBuilder.Append(x.Condition.Field?.Name);
+        if (x.Condition.Negate) {
+            stringBuilder.Append(" Not");
+        }
+
+        if (x.Condition.Function is not null) {
+            var conditionCompareValue = x.Summaries.Count > 0
+                ? $"({x.State.GetFullSummary(x.Summaries)})"
+                : x.Condition.CompareValue;
+
+            stringBuilder.Append($" {x.Condition.Function.Operator} {conditionCompareValue}");
+        }
+
+        return stringBuilder.ToString();
     }
 
     public bool Evaluate(object? obj) {
