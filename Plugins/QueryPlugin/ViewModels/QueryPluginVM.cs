@@ -4,6 +4,7 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
+using CreationEditor.Services.State;
 using QueryPlugin.Views;
 using ReactiveUI;
 namespace QueryPlugin.ViewModels;
@@ -31,24 +32,24 @@ public sealed class QueryPluginVM : ViewModel {
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
+        Func<string, IStateRepository<QueryRunnerMemento>> stateRepositoryFactory,
         IMenuItemProvider menuItemProvider,
-        IQueryState queryState,
         MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
         ColumnsGrid.Children.Add(_paddingRight);
 
-        QueryCount = queryState.GetQueryCount();
+        var stateRepository = stateRepositoryFactory("Query");
+
+        QueryCount = stateRepository.Count();
 
         AddColumn = ReactiveCommand.Create(() => {
             InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
         });
 
         SaveColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
-            var queryRunner = vm.QueryVM.QueryRunner;
-            if (queryRunner is null) return;
-
-            queryState.Save(queryRunner);
+            var memento = vm.QueryVM.QueryRunner.CreateMemento();
+            stateRepository.Save(memento, vm.QueryVM.QueryRunner.Id, memento.Name);
         });
 
         DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
@@ -74,9 +75,9 @@ public sealed class QueryPluginVM : ViewModel {
         });
 
         RestoreColumns = ReactiveCommand.Create(() => {
-            foreach (var query in queryState.LoadAllQueries()) {
+            foreach (var queryMemento in stateRepository.LoadAll()) {
                 var queryColumn = InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
-                queryColumn.ViewModel?.QueryVM.QueryRunner.RestoreMemento(query.CreateMemento());
+                queryColumn.ViewModel?.QueryVM.QueryRunner.RestoreMemento(queryMemento);
             }
         });
     }

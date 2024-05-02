@@ -156,5 +156,8 @@
         <Compile Update="Services\Plugin\AutofacPluginService.cs">
           <DependentUpon>IPluginService.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\State\JsonStateRepository.cs">
+          <DependentUpon>IStateRepository.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

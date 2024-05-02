@@ -24,10 +24,6 @@ public sealed class QueryModule : Module {
         builder.RegisterType<QueryVM>()
             .AsSelf();
 
-        builder.RegisterType<JsonQueryState>()
-            .As<IQueryState>()
-            .SingleInstance();
-
         builder.RegisterType<QueryFromFactory>()
             .As<IQueryFromFactory>()
             .SingleInstance();

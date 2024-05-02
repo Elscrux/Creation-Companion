@@ -94,8 +94,8 @@ public sealed class MainModule : Module {
         builder.RegisterType<CacheLocationProvider>()
             .As<ICacheLocationProvider>();
 
-        builder.RegisterType<StatePathProvider>()
-            .As<IStatePathProvider>();
+        builder.RegisterGeneric(typeof(JsonStateRepository<>))
+            .As(typeof(IStateRepository<>));
 
         builder.RegisterType<ModScopeProvider>()
             .AsSelf()
