@@ -29,7 +29,9 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
     private readonly Func<QueryVM> _queryVMFactory;
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
 
-    [Reactive] public bool IsBusy { get; set; }
+    public HeatmapCreator HeatmapCreator { get; }
+
+    [Reactive] public int BusyTasks { get; set; }
 
     public ILinkCacheProvider LinkCacheProvider { get; }
 
@@ -53,7 +55,7 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
     public ReactiveCommand<string, Unit> SaveMap { get; }
     public ReactiveCommand<Guid, Unit> LoadMap { get; }
     public ReactiveCommand<StateIdentifier, Unit> DeleteMap { get; }
-    public List<StateIdentifier> SavedMaps { get; }
+    public IObservableCollection<StateIdentifier> SavedMaps { get; } = new ObservableCollectionExtended<StateIdentifier>();
 
     public MapperVM(
         Func<QueryVM> queryVMFactory,
@@ -64,10 +66,10 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
         IMutagenTypeProvider mutagenTypeProvider,
         ILinkCacheProvider linkCacheProvider) {
         _queryVMFactory = queryVMFactory;
-        var heatmapCreator = new HeatmapCreator();
+        HeatmapCreator = new HeatmapCreator();
         LinkCacheProvider = linkCacheProvider;
         var stateRepository = stateRepositoryFactory("Heatmap");
-        SavedMaps = stateRepository.LoadAllStateIdentifiers().ToList();
+        SavedMaps.AddRange(stateRepository.LoadAllStateIdentifiers());
 
         var registrationsByGetterType = mutagenTypeProvider
             .GetRegistrations(gameReleaseContext.Release)
@@ -110,32 +112,32 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
             SavedMaps.RemoveWhere(x => x.Id == id.Id);
         });
 
+        // Logical update
         var logicalMappingUpdates = Mappings
             .WhenCollectionChanges()
             .Select(_ => Mappings.Select(m => m.LogicalUpdates).CombineLatest())
             .Switch();
 
-        var visualMappingUpdates = Mappings
-            .WhenCollectionChanges()
-            .Select(_ => Mappings.Select(m => m.VisualUpdates).CombineLatest())
-            .Switch();
-
-        // Logical update
         this.WhenAnyValue(x => x.WorldspaceFormKey)
             .Where(worldspace => !worldspace.IsNull)
             .CombineLatest(logicalMappingUpdates, (x, _) => x)
             .ThrottleMedium()
             .ObserveOnGui()
-            .Do(_ => IsBusy = true)
+            .Do(_ => BusyTasks++)
             .ObserveOnTaskpool()
-            .DoTask(async worldspace => await heatmapCreator.CalculateSpots(Mappings, LinkCacheProvider.LinkCache, recordReferenceController, worldspace))
+            .DoTask(async worldspace => await HeatmapCreator.CalculateSpots(Mappings, LinkCacheProvider.LinkCache, recordReferenceController, worldspace))
             .ObserveOnGui()
-            .Do(_ => DrawingsImage = heatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
-            .Do(_ => IsBusy = false)
+            .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
+            .Do(_ => BusyTasks--)
             .Subscribe()
             .DisposeWith(this);
 
         // Visual  update
+        var visualMappingUpdates = Mappings
+            .WhenCollectionChanges()
+            .Select(_ => Mappings.Select(m => m.VisualUpdates).CombineLatest())
+            .Switch();
+
         this.WhenAnyValue(
                 x => x.ImageSource,
                 x => x.LeftCell,
@@ -147,9 +149,9 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
             .CombineLatest(visualMappingUpdates)
             .ThrottleMedium()
             .ObserveOnGui()
-            .Do(_ => IsBusy = true)
-            .Do(_ => DrawingsImage = heatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
-            .Do(_ => IsBusy = false)
+            .Do(_ => BusyTasks++)
+            .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
+            .Do(_ => BusyTasks--)
             .Subscribe()
             .DisposeWith(this);
 
@@ -193,6 +195,11 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
     }
 
     public void RestoreMemento(MapperMemento memento) {
+        Mappings.ReplaceWith(memento.MarkingMappings.Select(m => {
+            var markingMapping = CreateMapping();
+            markingMapping.RestoreMemento(m);
+            return markingMapping;
+        }));
         ImageFilePath = memento.ImagePath;
         WorldspaceFormKey = memento.Worldspace;
         LeftCell = memento.LeftCell;
@@ -200,11 +207,5 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
         TopCell = memento.TopCell;
         BottomCell = memento.BottomCell;
         MarkingSize = memento.MarkingSize;
-
-        Mappings.ReplaceWith(memento.MarkingMappings.Select(m => {
-            var markingMapping = CreateMapping();
-            markingMapping.RestoreMemento(m);
-            return markingMapping;
-        }));
     }
 }

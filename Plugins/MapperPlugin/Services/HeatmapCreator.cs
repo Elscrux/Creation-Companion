@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
 using Avalonia;
 using Avalonia.Media;
 using CreationEditor.Avalonia;
@@ -22,7 +22,13 @@ public sealed class HeatmapCreator {
 
     private Dictionary<MarkingMapping, MappingSpots>? _spotsPerMapping;
 
-    private readonly MappingSpots _spotsCache = new();
+    private readonly ConcurrentDictionary<IFormLinkIdentifier, Dictionary<Point, int>> _spotsCache = new();
+
+    private int _leftCoordinate;
+    private int _topCoordinate;
+    private double _widthImageScale;
+    private double _heightImageScale;
+    private int _markingSize;
 
     public DrawingImage? GetDrawing(Size imageSize, int markingSize, int leftCell, int rightCell, int topCell, int bottomCell) {
         if (_spotsPerMapping is null) return null;
@@ -30,36 +36,35 @@ public sealed class HeatmapCreator {
         var (imageWidth, imageHeight) = imageSize;
         var mainGroup = GetDrawingGroup(imageWidth, imageHeight);
 
-        var worldspaceWidth = (rightCell - leftCell) * CellSize;
-        var worldspaceHeight = (bottomCell - topCell) * CellSize;
-        var leftCoordinate = leftCell * CellSize;
-        var topCoordinate = topCell * CellSize;
+        _markingSize = markingSize;
+        var worldspaceWidth = Math.Abs(rightCell - leftCell) * CellSize;
+        var worldspaceHeight = Math.Abs(topCell - bottomCell) * CellSize;
+        _leftCoordinate = leftCell * CellSize;
+        _topCoordinate = topCell * CellSize;
         var rightCoordinate = rightCell * CellSize;
         var bottomCoordinate = bottomCell * CellSize;
 
-        var widthScale = worldspaceWidth / imageWidth;
-        var heightScale = worldspaceHeight / imageHeight;
+        _widthImageScale = worldspaceWidth / imageWidth;
+        _heightImageScale = worldspaceHeight / imageHeight;
 
         foreach (var (mapping, mappingSpots) in _spotsPerMapping) {
             if (!mapping.Enable) continue;
 
-            foreach (var (record, spots) in mappingSpots) {
-                foreach (var (worldspacePosition, count) in spots) {
-                    // Skip points outside worldspace bounds
-                    if (worldspacePosition.X < leftCoordinate || worldspacePosition.X > rightCoordinate) continue;
-                    if (worldspacePosition.Y < bottomCoordinate || worldspacePosition.Y > topCoordinate) continue;
+            foreach (var (_, spots) in mappingSpots) {
+                var color = mapping is { UseQuery: true, UseRandomColorsInQuery: true }
+                    ? ColorExtension.RandomColorRgb()
+                    : mapping.Color;
 
-                    var size = markingSize * mapping.Size * (1 + Math.Log(count) / 2);
+                foreach (var (worldspacePosition, _) in spots) {
+                    // Skip points outside worldspace bounds
+                    if (worldspacePosition.X < _leftCoordinate || worldspacePosition.X > rightCoordinate) continue;
+                    if (worldspacePosition.Y < bottomCoordinate || worldspacePosition.Y > _topCoordinate) continue;
+
+                    var size = GetSize(mapping.Size);
                     // Convert worldspace position to image position
                     // Worldspace is centered at 0,0
                     // Image has top-left corner at 0,0
-                    var imagePosition = new Point(
-                        (worldspacePosition.X - leftCoordinate) / widthScale,
-                        (worldspacePosition.Y - topCoordinate) / heightScale);
-
-                    var color = mapping is { UseQuery: true, UseRandomColorsInQuery: true }
-                        ? ColorExtension.RandomColorRgb()
-                        : mapping.Color;
+                    var imagePosition = WorldspaceToImageCoordinates(worldspacePosition);
 
                     var geometryDrawing = new GeometryDrawing {
                         Brush = new SolidColorBrush(color),
@@ -98,7 +103,6 @@ public sealed class HeatmapCreator {
         RecordSpots GetSpots(IFormLinkIdentifier record) {
             if (_spotsCache.TryGetValue(record, out var cachedSpots)) return (record, cachedSpots);
 
-            var timestamp = Stopwatch.GetTimestamp();
             var spots = new Dictionary<Point, int>();
             foreach (var reference in recordReferenceController.GetReferences(record.FormKey)) {
                 if (!reference.Type.InheritsFrom(typeof(IPlacedGetter))) continue;
@@ -128,9 +132,8 @@ public sealed class HeatmapCreator {
                     spots.Add(point, 1);
                 }
             }
-            Console.WriteLine($"GetPoints for {record.FormKey}: {Stopwatch.GetElapsedTime(timestamp, Stopwatch.GetTimestamp())}");
 
-            _spotsCache.Add(record, spots);
+            _spotsCache.TryAdd(record, spots);
             return (record, spots);
 
             Point Cluster(P3Float position) {
@@ -144,24 +147,53 @@ public sealed class HeatmapCreator {
 
     private static DrawingGroup GetDrawingGroup(double width, double height) {
         var mainGroup = new DrawingGroup();
+        const int thickness = 10;
+        const int halfThickness = thickness / 2;
         mainGroup.Children.Add(new GeometryDrawing {
-            Geometry = new LineGeometry(new Point(0, 0), new Point(0, height)),
-            Pen = new Pen(Brushes.Transparent, 100)
+            Geometry = new LineGeometry(new Point(halfThickness, halfThickness), new Point(halfThickness, height - halfThickness)),
+            Pen = new Pen(Brushes.Transparent, thickness)
         });
         mainGroup.Children.Add(new GeometryDrawing {
-            Geometry = new LineGeometry(new Point(width, 0), new Point(width, height)),
-            Pen = new Pen(Brushes.Transparent, 100)
+            Geometry = new LineGeometry(new Point(width - halfThickness, halfThickness), new Point(width - halfThickness, height - halfThickness)),
+            Pen = new Pen(Brushes.Transparent, thickness)
         });
         mainGroup.Children.Add(new GeometryDrawing {
-            Geometry = new LineGeometry(new Point(0, 0), new Point(width, 0)),
-            Pen = new Pen(Brushes.Transparent, 100)
+            Geometry = new LineGeometry(new Point(halfThickness, halfThickness), new Point(width - halfThickness, halfThickness)),
+            Pen = new Pen(Brushes.Transparent, thickness)
         });
         mainGroup.Children.Add(new GeometryDrawing {
-            Geometry = new LineGeometry(new Point(0, height), new Point(width, height)),
-            Pen = new Pen(Brushes.Transparent, 100)
+            Geometry = new LineGeometry(new Point(halfThickness, height - halfThickness), new Point(width - halfThickness, height - halfThickness)),
+            Pen = new Pen(Brushes.Transparent, thickness)
         });
         return mainGroup;
     }
 
+    public IFormLinkIdentifier? GetMappingAt(Point imageCoordinates) {
+        if (_spotsPerMapping is null) return null;
 
+        foreach (var (mapping, mappingSpots) in _spotsPerMapping) {
+            var imageSize = GetSize(mapping.Size);
+
+            foreach (var (record, spots) in mappingSpots) {
+                foreach (var (worldspacePosition, _) in spots) {
+                    var (x, y) = WorldspaceToImageCoordinates(worldspacePosition);
+
+                    var xDist = Math.Abs(x - imageCoordinates.X);
+                    var yDist = Math.Abs(y - imageCoordinates.Y);
+
+                    if (xDist < imageSize && yDist < imageSize) {
+                        return record;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Point WorldspaceToImageCoordinates(Point worldspacePosition) => new(
+        (worldspacePosition.X - _leftCoordinate) / _widthImageScale,
+        (_topCoordinate - worldspacePosition.Y) / _heightImageScale);
+
+    private double GetSize(float mappingSize) => _markingSize * mappingSize * (1 + Math.Log(1) / 2);
 }

@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
@@ -9,6 +8,7 @@ using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.Constants;
 using FluentAvalonia.UI.Controls;
 using MapperPlugin.ViewModels;
+using Mutagen.Bethesda;
 namespace MapperPlugin.Views;
 
 public partial class MapperView : ReactiveUserControl<MapperVM> {
@@ -81,19 +81,26 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
 
     private void Drawings_OnPointerPressed(object? sender, PointerPressedEventArgs e) {
         if (ViewModel?.ImageSource is null) return;
+        if (!e.GetCurrentPoint(Drawings).Properties.IsLeftButtonPressed) return;
 
-        if (e.GetCurrentPoint(Drawings).Properties.IsLeftButtonPressed) {
-            var position = e.GetPosition(Drawings);
+        var position = e.GetPosition(Drawings);
+        var imageSize = ViewModel.ImageSource.Size;
+        var drawingsBounds = Drawings.Bounds;
+        var imageCoordinates = new Point(
+            position.X / drawingsBounds.Width * imageSize.Width,
+            position.Y / drawingsBounds.Height * imageSize.Height);
 
-            Console.WriteLine($"Clicked at {position}");
+        var record = ViewModel.HeatmapCreator.GetMappingAt(imageCoordinates);
+        if (record is null) return;
 
-            // todo infer worldspace position and get correct record and show tooltip
-            
-            var worldspacePosition = new Point(
-                (int) (position.X * ViewModel.ImageSource!.Size.Width),
-                (int) (position.Y * ViewModel.ImageSource!.Size.Height));
+        if (!ViewModel.LinkCacheProvider.LinkCache.TryResolveIdentifier(record.ToStandardizedIdentifier(), out var editorId)) return;
 
-            Console.WriteLine($"Worldspace position: {worldspacePosition}");
-        }
+        var flyout = new Flyout {
+            Content = new TextBlock {
+                Text = editorId ?? record.FormKey.ToString(),
+            },
+        };
+
+        flyout.ShowAt(Drawings, true);
     }
 }

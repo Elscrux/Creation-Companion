@@ -63,13 +63,17 @@
                       RowDefinitions="Auto,Auto,*,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto,Auto">
                     <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="{Binding LeftCell}"/>
+                               Text="{Binding LeftCell}"
+                               VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="0" Grid.Column="2"
-                               Text="{Binding RightCell}"/>
+                               Text="{Binding RightCell}"
+                               VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="1" Grid.Column="3"
-                               Text="{Binding TopCell}"/>
+                               Text="{Binding TopCell}"
+                               HorizontalAlignment="Center"/>
                     <TextBlock Grid.Row="3" Grid.Column="3"
-                               Text="{Binding BottomCell}"/>
+                               Text="{Binding BottomCell}"
+                               HorizontalAlignment="Center"/>
 
                     <controls:RangeSlider
                         Grid.Column="1"
@@ -109,51 +113,44 @@
                         BorderThickness="5"
                         BorderBrush="{DynamicResource SystemAccentColor}"
                         CornerRadius="5">
-                        <ZoomBorder
-                            Stretch="None" ZoomSpeed="1.2"
-                            ClipToBounds="True" Focusable="True"
-                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                            <Interaction.Behaviors>
-                                <zoomBorder:LimitPanAndZoomToSize/>
-                            </Interaction.Behaviors>
+                        <Grid>
+                            <ZoomBorder
+                                Stretch="None" ZoomSpeed="1.2"
+                                ClipToBounds="True" Focusable="True"
+                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                <Interaction.Behaviors>
+                                    <zoomBorder:LimitPanAndZoomToSize/>
+                                </Interaction.Behaviors>
 
-                            <Grid>
-                                <Grid.Resources>
-                                    <converters:ReturnParameterIfTrueConverter
-                                        x:Key="IfTrueConverter"
-                                        x:TypeArguments="system:Double"
-                                        DefaultValue="5"/>
-                                </Grid.Resources>
-
-                                <Image x:Name="Map"
-                                       Source="{Binding ImageSource}">
-                                    <Image.Effect>
+                                <Grid>
+                                    <Grid.Resources>
+                                        <converters:ReturnParameterIfTrueConverter
+                                            x:Key="IfTrueConverter"
+                                            x:TypeArguments="system:Double"
+                                            DefaultValue="5"/>
+                                    </Grid.Resources>
+                                    <Grid.Effect>
                                         <BlurEffect
-                                            Radius="{Binding !IsBusy,
+                                            Radius="{Binding !BusyTasks,
                                                  Converter={StaticResource IfTrueConverter},
                                                  ConverterParameter=0}"/>
-                                    </Image.Effect>
-                                </Image>
+                                    </Grid.Effect>
 
-                                <Image x:Name="Drawings"
-                                       PointerPressed="Drawings_OnPointerPressed"
-                                       Source="{Binding DrawingsImage}">
-                                    <Image.Effect>
-                                        <BlurEffect
-                                            Radius="{Binding !IsBusy,
-                                                 Converter={StaticResource IfTrueConverter},
-                                                 ConverterParameter=0}"/>
-                                    </Image.Effect>
-                                </Image>
+                                    <Image x:Name="Map"
+                                           Source="{Binding ImageSource}"/>
 
-                                <avaloniaProgressRing:ProgressRing
-                                    IsActive="{Binding IsBusy}"
-                                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                                    Width="200" Height="200"/>
-                            </Grid>
-                        </ZoomBorder>
+                                    <Image x:Name="Drawings"
+                                           PointerPressed="Drawings_OnPointerPressed"
+                                           Source="{Binding DrawingsImage}"/>
+                                </Grid>
+                            </ZoomBorder>
+
+                            <avaloniaProgressRing:ProgressRing
+                                IsActive="{Binding BusyTasks}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Width="200" Height="200"/>
+                        </Grid>
                     </Border>
-
                 </Grid>
             </Grid>
 
@@ -198,6 +195,7 @@
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
                                                     <Button
+                                                        HorizontalAlignment="Stretch"
                                                         Content="{Binding Name}"
                                                         Command="{ReflectionBinding #View.ViewModel.LoadMap}"
                                                         CommandParameter="{Binding Id}"/>
