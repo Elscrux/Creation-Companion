@@ -13,6 +13,7 @@
         <PackageReference Include="Avalonia" Version="11.1.0-beta1" />
         <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6" />
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.0-beta1" />
+        <PackageReference Include="Avalonia.Controls.PanAndZoom" Version="11.0.0.3" />
         <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.2" />
         <PackageReference Include="Avalonia.HtmlRenderer" Version="11.0.0" />
         <PackageReference Include="Avalonia.Desktop" Version="11.1.0-beta1" />
