@@ -7,6 +7,10 @@
         </Border>
     </Design.PreviewWith>
 
+    <Style Selector="Button.HideNotEnabled[IsEnabled=False]">
+        <Setter Property="IsVisible" Value="False"/>
+    </Style>
+
     <Style Selector="Button.Stretch">
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>

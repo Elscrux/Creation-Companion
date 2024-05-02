@@ -1,16 +1,16 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Avalonia.Threading;
+using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Asset.Picker;
 
 public partial class FilePicker : UserControl {
-    public static readonly StyledProperty<string?> PathStringsProperty
-        = AvaloniaProperty.Register<FilePicker, string?>(nameof(PathStrings));
+    public static readonly StyledProperty<string?> WatermarkProperty
+        = AvaloniaProperty.Register<FilePicker, string?>(nameof(Watermark));
 
-    public string? PathStrings {
-        get => GetValue(PathStringsProperty);
-        set => SetValue(PathStringsProperty, value);
+    public string? Watermark {
+        get => GetValue(WatermarkProperty);
+        set => SetValue(WatermarkProperty, value);
     }
 
     public static readonly StyledProperty<bool> AllowTextEditProperty
@@ -29,14 +29,6 @@ public partial class FilePicker : UserControl {
         set => SetValue(TitleProperty, value);
     }
 
-    public static readonly StyledProperty<bool> AllowMultipleProperty
-        = AvaloniaProperty.Register<FilePicker, bool>(nameof(AllowMultiple));
-
-    public bool AllowMultiple {
-        get => GetValue(AllowMultipleProperty);
-        set => SetValue(AllowMultipleProperty, value);
-    }
-
     public static readonly StyledProperty<IReadOnlyList<FilePickerFileType>?> FilterProperty
         = AvaloniaProperty.Register<FilePicker, IReadOnlyList<FilePickerFileType>?>(nameof(Filter));
 
@@ -45,20 +37,12 @@ public partial class FilePicker : UserControl {
         set => SetValue(FilterProperty, value);
     }
 
-    public static readonly StyledProperty<IReadOnlyList<IStorageFile>> PickedFilesProperty
-        = AvaloniaProperty.Register<FilePicker, IReadOnlyList<IStorageFile>>(nameof(PickedFiles));
+    public static readonly StyledProperty<string?> FilePathProperty
+        = AvaloniaProperty.Register<FilePicker, string?>(nameof(FilePath));
 
-    public IReadOnlyList<IStorageFile> PickedFiles {
-        get => GetValue(PickedFilesProperty);
-        set => SetValue(PickedFilesProperty, value);
-    }
-
-    public static readonly StyledProperty<IStorageFile?> PickedFileProperty
-        = AvaloniaProperty.Register<FilePicker, IStorageFile?>(nameof(PickedFile));
-
-    public IStorageFile? PickedFile {
-        get => GetValue(PickedFileProperty);
-        set => SetValue(PickedFileProperty, value);
+    public string? FilePath {
+        get => GetValue(FilePathProperty);
+        set => SetValue(FilePathProperty, value);
     }
 
     private IStorageFolder? _startFolder;
@@ -71,17 +55,20 @@ public partial class FilePicker : UserControl {
         var topLevel = TopLevel.GetTopLevel(this);
         if (topLevel is null) return;
 
+        var storageProvider = topLevel.StorageProvider;
         var filePickerOpenOptions = new FilePickerOpenOptions {
             Title = Title,
             SuggestedStartLocation = _startFolder,
             SuggestedFileName = null,
-            AllowMultiple = AllowMultiple,
             FileTypeFilter = Filter
         };
-        var storageProvider = topLevel.StorageProvider;
-        PickedFiles = await storageProvider.OpenFilePickerAsync(filePickerOpenOptions);
-        PickedFile = PickedFiles.FirstOrDefault();
-        if (PickedFile is not null) _startFolder = await PickedFile.GetParentAsync();
-        PathStrings = string.Join(", ", PickedFiles.Select(x => x.Path.LocalPath));
+
+        // Open dialog
+        var pickedFiles = await storageProvider.OpenFilePickerAsync(filePickerOpenOptions);
+
+        // Process results
+        var pickedFile = pickedFiles.FirstOrDefault();
+        if (pickedFile is not null) _startFolder = await pickedFile.GetParentAsync();
+        FilePath = pickedFile?.Path.LocalPath;
     }
 }

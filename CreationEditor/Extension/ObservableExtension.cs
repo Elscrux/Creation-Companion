@@ -14,8 +14,10 @@ public static class ObservableExtension {
     public static IObservable<T> ObserveOnGui<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.MainThreadScheduler);
     public static IObservable<T> ObserveOnTaskpool<T>(this IObservable<T> obs) => obs.ObserveOn(RxApp.TaskpoolScheduler);
 
-    public static IObservable<T> ThrottleMedium<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
     public static IObservable<T> ThrottleShort<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler);
+    public static IObservable<T> ThrottleMedium<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
+    public static IObservable<T> ThrottleLong<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(700), RxApp.MainThreadScheduler);
+    public static IObservable<T> ThrottleVeryLong<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(1200), RxApp.MainThreadScheduler);
 
     public static IObservable<Unit> WhenCollectionChanges(this INotifyCollectionChanged source) => source.ObserveCollectionChanges().Unit().StartWith(Unit.Default);
 
@@ -370,4 +372,6 @@ public static class ObservableExtension {
 
     public static IObservable<bool> WhereTrue(this IObservable<bool> obs) => obs.Where(x => x);
     public static IObservable<bool?> WhereTrue(this IObservable<bool?> obs) => obs.Where(x => x is true);
+    public static IObservable<bool> WhereFalse(this IObservable<bool> obs) => obs.Where(x => !x);
+    public static IObservable<bool?> WhereFalse(this IObservable<bool?> obs) => obs.Where(x => x is not true);
 }
