@@ -4,10 +4,8 @@ namespace CreationEditor.Skyrim;
 
 public static class PlacedExtension {
     public static string? GetSelfOrBaseEditorID(this IPlacedGetter placed, ILinkCache linkCache) {
-        if (placed is null) return null;
-
-        var editorID = placed.EditorID;
-        if (editorID is not null || linkCache is null) return editorID;
+        var editorId = placed.EditorID;
+        if (editorId is not null) return editorId;
 
         switch (placed) {
             case IPlacedObjectGetter placedObjectGetter:
