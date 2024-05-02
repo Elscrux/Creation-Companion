@@ -26,5 +26,9 @@ public interface IQueryRunner : IReactiveObject, IMementoProvider<QueryRunnerMem
     IObservable<Unit> SettingsChanged { get; }
     IObservable<string> Summary { get; }
 
+    bool EnableConditions { get; set; }
+    bool EnableOrderBy { get; set; }
+    bool EnableSelect { get; set; }
+
     IEnumerable<object?> RunQuery();
 }

@@ -26,6 +26,7 @@
 
         <!-- WHERE -->
         <Grid Grid.Row="1"
+              IsVisible="{Binding QueryRunner.EnableConditions}"
               ColumnDefinitions="Auto,*">
             <TextBlock Grid.Column="0"
                        Text="where "/>
@@ -40,6 +41,7 @@
 
         <!-- SELECT -->
         <StackPanel Grid.Row="2"
+                    IsVisible="{Binding QueryRunner.EnableSelect}"
                     Orientation="Horizontal">
             <TextBlock Text="select "/>
             <ComboBox ItemsSource="{Binding QueryRunner.FieldSelector.Fields}"
@@ -54,6 +56,7 @@
 
         <!-- ORDER BY -->
         <StackPanel Grid.Row="3"
+                    IsVisible="{Binding QueryRunner.EnableOrderBy}"
                     Orientation="Horizontal">
             <TextBlock Text="order by "/>
             <ComboBox ItemsSource="{Binding QueryRunner.OrderBySelector.Fields}"
