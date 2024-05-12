@@ -253,6 +253,7 @@
                     <DataGridTemplateColumn Header="Enabled">
                         <DataTemplate x:DataType="viewModels:MarkingMapping">
                             <CheckBox IsChecked="{Binding Enable}"
+                                      ToolTip.Tip="Toggle Query"
                                       Classes="CheckmarkOnly"/>
                         </DataTemplate>
                     </DataGridTemplateColumn>
