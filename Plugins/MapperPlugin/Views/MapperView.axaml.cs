@@ -97,7 +97,9 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
 
         var flyout = new Flyout {
             Content = new TextBlock {
-                Text = editorId ?? record.FormKey.ToString(),
+                Text = editorId is null
+                    ? record.FormKey.ToString()
+                    : editorId + " " + record.FormKey,
             },
         };
 
