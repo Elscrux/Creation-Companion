@@ -32,7 +32,7 @@ public static class RecordTypeConstants {
     public static readonly Type[] AllPlacedInterfaceTypes = [PlacedBaseType, PlacedSimpleType];
 
     // Placeable
-    public static readonly Type[] PlaceableTypes = [
+    public static readonly Type[] PlaceableObjectTypes = [
         typeof(IAcousticSpaceGetter),
         typeof(IActivatorGetter),
         typeof(IAddonNodeGetter),
@@ -61,6 +61,13 @@ public static class RecordTypeConstants {
         typeof(ITextureSetGetter),
         typeof(ITreeGetter),
         typeof(IWeaponGetter)
+    ];
+
+    public static readonly Type[] PlaceableTypes = [
+        typeof(INpcGetter),
+        typeof(IProjectileGetter),
+        typeof(IHazardGetter),
+        ..PlaceableObjectTypes
     ];
 
     // Package
