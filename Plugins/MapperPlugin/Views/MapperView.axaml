@@ -18,310 +18,311 @@
              x:Class="MapperPlugin.Views.MapperView"
              x:CompileBindings="True" x:DataType="viewModels:MapperVM"
              x:Name="View">
-    <ScrollViewer>
-        <Grid Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="500"
-                                  MinWidth="400"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="500"
+                              MinWidth="400"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0"
-                  RowDefinitions="Auto,5,*,5"
-                  VerticalAlignment="Top"
-                  MinHeight="200">
-                <!-- Worldspace and Map Selection -->
-                <Grid Grid.Row="0"
-                      ColumnDefinitions="Auto,Auto,*">
-                    <TextBlock
-                        Grid.Column="0"
-                        VerticalAlignment="Center"
-                        Margin="5,0"
-                        Text="Worldspace:"/>
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto,5,*,5"
+              VerticalAlignment="Top"
+              MinHeight="200">
+            <!-- Worldspace and Map Selection -->
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="Auto,Auto,*">
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Margin="5,0"
+                    Text="Worldspace:"/>
 
-                    <record:FormKeyPicker
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        FormKey="{Binding WorldspaceFormKey}"
-                        ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
-                        LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
+                <record:FormKeyPicker
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    FormKey="{Binding WorldspaceFormKey}"
+                    ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
+                    LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
 
-                    <asset:FilePicker
-                        Grid.Column="2"
-                        IsVisible="{Binding !WorldspaceFormKey.IsNull}"
-                        Watermark="Select Map"
-                        FilePath="{Binding ImageFilePath, Mode=TwoWay}"
-                        Margin="5"
-                        Filter="{x:Static viewConstants:StandardFileTypes.ImageAll}"/>
-                </Grid>
+                <asset:FilePicker
+                    Grid.Column="2"
+                    IsVisible="{Binding !WorldspaceFormKey.IsNull}"
+                    Watermark="Select Map"
+                    FilePath="{Binding ImageFilePath, Mode=TwoWay}"
+                    Margin="5"
+                    Filter="{x:Static viewConstants:StandardFileTypes.ImageAll}"/>
+            </Grid>
 
-                <!-- Map Image -->
-                <Grid Grid.Row="2"
-                      IsVisible="{Binding ImageSource, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      HorizontalAlignment="Left"
-                      RowDefinitions="Auto,Auto,*,Auto,Auto"
-                      ColumnDefinitions="Auto,*,Auto,Auto">
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="{Binding LeftCell}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2"
-                               Text="{Binding RightCell}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Grid.Row="1" Grid.Column="3"
-                               Text="{Binding TopCell}"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Grid.Row="3" Grid.Column="3"
-                               Text="{Binding BottomCell}"
-                               HorizontalAlignment="Center"/>
+            <!-- Map Image -->
+            <Grid Grid.Row="2"
+                  IsVisible="{Binding ImageSource, Converter={x:Static ObjectConverters.IsNotNull}}"
+                  HorizontalAlignment="Left"
+                  RowDefinitions="Auto,Auto,*,Auto,Auto"
+                  ColumnDefinitions="Auto,*,Auto,Auto">
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                           Text="{Binding LeftCell}"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="2"
+                           Text="{Binding RightCell}"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="1" Grid.Column="3"
+                           Text="{Binding TopCell}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="3" Grid.Column="3"
+                           Text="{Binding BottomCell}"
+                           HorizontalAlignment="Center"/>
+
+                <controls:RangeSlider
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    ShowValueToolTip="True"
+                    ToolTipStringFormat="N0"
+                    MinWidth="250"
+                    Minimum="-128" Maximum="128"
+                    MinimumRange="1"
+                    StepFrequency="1"
+                    RangeStart="{Binding LeftCell, Mode=TwoWay}"
+                    RangeEnd="{Binding RightCell, Mode=TwoWay}"/>
+
+                <LayoutTransformControl
+                    Grid.Column="3"
+                    Grid.Row="2"
+                    VerticalAlignment="Stretch">
+                    <LayoutTransformControl.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </LayoutTransformControl.LayoutTransform>
 
                     <controls:RangeSlider
-                        Grid.Column="1"
-                        Grid.Row="0"
                         ShowValueToolTip="True"
                         ToolTipStringFormat="N0"
                         MinWidth="250"
                         Minimum="-128" Maximum="128"
                         MinimumRange="1"
                         StepFrequency="1"
-                        RangeStart="{Binding LeftCell, Mode=TwoWay}"
-                        RangeEnd="{Binding RightCell, Mode=TwoWay}"/>
+                        RangeStart="{Binding BottomCell, Mode=TwoWay}"
+                        RangeEnd="{Binding TopCell, Mode=TwoWay}"/>
+                </LayoutTransformControl>
 
-                    <LayoutTransformControl
-                        Grid.Column="3"
-                        Grid.Row="2"
-                        VerticalAlignment="Stretch">
-                        <LayoutTransformControl.LayoutTransform>
-                            <RotateTransform Angle="-90"/>
-                        </LayoutTransformControl.LayoutTransform>
+                <Border
+                    Grid.Column="0" Grid.ColumnSpan="3"
+                    Grid.Row="1" Grid.RowSpan="3"
+                    Margin="5"
+                    BorderThickness="5"
+                    BorderBrush="{DynamicResource SystemAccentColor}"
+                    CornerRadius="5">
+                    <Grid>
+                        <ZoomBorder
+                            Stretch="None" ZoomSpeed="1.2"
+                            ClipToBounds="True" Focusable="True"
+                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Interaction.Behaviors>
+                                <zoomBorder:LimitPanAndZoomToSize/>
+                            </Interaction.Behaviors>
 
-                        <controls:RangeSlider
-                            ShowValueToolTip="True"
-                            ToolTipStringFormat="N0"
-                            MinWidth="250"
-                            Minimum="-128" Maximum="128"
-                            MinimumRange="1"
-                            StepFrequency="1"
-                            RangeStart="{Binding BottomCell, Mode=TwoWay}"
-                            RangeEnd="{Binding TopCell, Mode=TwoWay}"/>
-                    </LayoutTransformControl>
-
-                    <Border
-                        Grid.Column="0" Grid.ColumnSpan="3"
-                        Grid.Row="1" Grid.RowSpan="3"
-                        Margin="5"
-                        BorderThickness="5"
-                        BorderBrush="{DynamicResource SystemAccentColor}"
-                        CornerRadius="5">
-                        <Grid>
-                            <ZoomBorder
-                                Stretch="None" ZoomSpeed="1.2"
-                                ClipToBounds="True" Focusable="True"
-                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                <Interaction.Behaviors>
-                                    <zoomBorder:LimitPanAndZoomToSize/>
-                                </Interaction.Behaviors>
-
-                                <Grid>
-                                    <Grid.Resources>
-                                        <converters:ReturnParameterIfTrueConverter
-                                            x:Key="IfTrueConverter"
-                                            x:TypeArguments="system:Double"
-                                            DefaultValue="5"/>
-                                    </Grid.Resources>
-                                    <Grid.Effect>
-                                        <BlurEffect
-                                            Radius="{Binding !BusyTasks,
+                            <Grid>
+                                <Grid.Resources>
+                                    <converters:ReturnParameterIfTrueConverter
+                                        x:Key="IfTrueConverter"
+                                        x:TypeArguments="system:Double"
+                                        DefaultValue="5"/>
+                                </Grid.Resources>
+                                <Grid.Effect>
+                                    <BlurEffect
+                                        Radius="{Binding !BusyTasks,
                                                  Converter={StaticResource IfTrueConverter},
                                                  ConverterParameter=0}"/>
-                                    </Grid.Effect>
+                                </Grid.Effect>
 
-                                    <Image x:Name="Map"
-                                           Source="{Binding ImageSource}"/>
+                                <Image x:Name="Map"
+                                       Source="{Binding ImageSource}"/>
 
-                                    <Image x:Name="Drawings"
-                                           PointerPressed="Drawings_OnPointerPressed"
-                                           Source="{Binding DrawingsImage}"/>
-                                </Grid>
-                            </ZoomBorder>
+                                <Image x:Name="Drawings"
+                                       PointerPressed="Drawings_OnPointerPressed"
+                                       Source="{Binding DrawingsImage}"/>
+                            </Grid>
+                        </ZoomBorder>
 
-                            <avaloniaProgressRing:ProgressRing
-                                IsActive="{Binding BusyTasks}"
-                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Width="200" Height="200"/>
-                        </Grid>
-                    </Border>
-                </Grid>
+                        <avaloniaProgressRing:ProgressRing
+                            IsActive="{Binding BusyTasks}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="200" Height="200"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Column="1"/>
+
+        <Grid Grid.Column="2"
+              RowDefinitions="Auto,5,Auto,5,*">
+            <controls:CommandBar
+                Grid.Row="0"
+                DefaultLabelPosition="Right">
+                <controls:CommandBar.PrimaryCommands>
+                    <controls:CommandBarButton
+                        IconSource="Share"
+                        Label="Export"
+                        IsCompact="False"
+                        Command="{Binding #View.ExportImage}"/>
+
+                    <controls:CommandBarSeparator/>
+
+                    <controls:CommandBarButton
+                        IconSource="Save"
+                        Label="Save"
+                        IsCompact="False">
+                        <controls:CommandBarButton.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox x:Name="Name" Watermark="Enter a name"/>
+                                    <Button Content="Save"
+                                            Command="{Binding SaveMap}"
+                                            CommandParameter="{Binding #Name.Text}"/>
+                                </StackPanel>
+                            </Flyout>
+                        </controls:CommandBarButton.Flyout>
+                    </controls:CommandBarButton>
+
+                    <controls:CommandBarButton
+                        IconSource="Restore"
+                        Label="Load"
+                        IsCompact="False">
+                        <controls:CommandBarButton.Flyout>
+                            <Flyout>
+                                <ItemsRepeater ItemsSource="{Binding SavedMaps}">
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button
+                                                    HorizontalAlignment="Stretch"
+                                                    Content="{Binding Name}"
+                                                    Command="{ReflectionBinding #View.ViewModel.LoadMap}"
+                                                    CommandParameter="{Binding Id}"/>
+
+                                                <Button HorizontalAlignment="Right"
+                                                        VerticalAlignment="Stretch"
+                                                        Command="{ReflectionBinding #View.ViewModel.DeleteMap}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Content>
+                                                        <controls:SymbolIcon
+                                                            Symbol="Delete"
+                                                            Foreground="IndianRed"/>
+                                                    </Button.Content>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </Flyout>
+                        </controls:CommandBarButton.Flyout>
+                    </controls:CommandBarButton>
+                </controls:CommandBar.PrimaryCommands>
+            </controls:CommandBar>
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,5,Auto"
+                Margin="5"
+                VerticalAlignment="Top">
+                <!-- MarkingSize -->
+                <TextBlock
+                    Grid.Column="0" Grid.Row="0"
+                    VerticalAlignment="Center"
+                    Text="Size of all Markings:"/>
+
+                <Slider
+                    Grid.Column="2" Grid.Row="0"
+                    Minimum="1"
+                    MinWidth="200"
+                    MaxWidth="1000"
+                    Value="{Binding MarkingSize}"/>
             </Grid>
 
-            <GridSplitter Grid.Column="1"/>
+            <DataGrid
+                Grid.Row="4"
+                ItemsSource="{Binding Mappings}"
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                AutoGenerateColumns="False"
+                Classes="NoCellSelection Medium Mutable"
+                attached:ListShortcuts.Add="{Binding AddMapping}"
+                attached:ListShortcuts.Remove="{Binding RemoveMapping}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Enabled">
+                        <DataTemplate x:DataType="viewModels:MarkingMapping">
+                            <CheckBox IsChecked="{Binding Enable}"
+                                      Classes="CheckmarkOnly"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
 
-            <StackPanel Grid.Column="2"
-                        Spacing="5">
-                <controls:CommandBar DefaultLabelPosition="Right">
-                    <controls:CommandBar.PrimaryCommands>
-                        <controls:CommandBarButton
-                            IconSource="Share"
-                            Label="Export"
-                            IsCompact="False"
-                            Command="{Binding #View.ExportImage}"/>
+                    <DataGridTemplateColumn Header="Record">
+                        <DataTemplate x:DataType="viewModels:MarkingMapping">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding UseQuery}"/>
 
-                        <controls:CommandBarSeparator/>
+                                <record:FormKeyPicker
+                                    IsVisible="{Binding !UseQuery}"
+                                    VerticalAlignment="Center"
+                                    FormLink="{Binding Record}"
+                                    ScopedTypes="{x:Static constants:RecordTypeConstants.PlaceableTypes}"
+                                    LinkCache="{ReflectionBinding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
 
-                        <controls:CommandBarButton
-                            IconSource="Save"
-                            Label="Save"
-                            IsCompact="False">
-                            <controls:CommandBarButton.Flyout>
-                                <Flyout>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBox x:Name="Name" Watermark="Enter a name"/>
-                                        <Button Content="Save"
-                                                Command="{Binding SaveMap}"
-                                                CommandParameter="{Binding #Name.Text}"/>
-                                    </StackPanel>
-                                </Flyout>
-                            </controls:CommandBarButton.Flyout>
-                        </controls:CommandBarButton>
+                                <StackPanel Orientation="Horizontal"
+                                            IsVisible="{Binding UseQuery}"
+                                            Spacing="5"
+                                            VerticalAlignment="Stretch">
+                                    <Button Content="{Binding QueryVM.QueryRunner.Summary^, FallbackValue=Query}">
+                                        <ToolTip.Tip>
+                                            <ItemsRepeater ItemsSource="{Binding CurrentRecords}">
+                                                <ItemsRepeater.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding FormKey}"/>
+                                                    </DataTemplate>
+                                                </ItemsRepeater.ItemTemplate>
+                                            </ItemsRepeater>
+                                        </ToolTip.Tip>
+                                        <Button.Flyout>
+                                            <Flyout FlyoutPresenterClasses="Flyout750x250">
+                                                <query:QueryView DataContext="{Binding QueryVM}"/>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
 
-                        <controls:CommandBarButton
-                            IconSource="Restore"
-                            Label="Load"
-                            IsCompact="False">
-                            <controls:CommandBarButton.Flyout>
-                                <Flyout>
-                                    <ItemsRepeater ItemsSource="{Binding SavedMaps}">
-                                        <ItemsRepeater.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Button
-                                                        HorizontalAlignment="Stretch"
-                                                        Content="{Binding Name}"
-                                                        Command="{ReflectionBinding #View.ViewModel.LoadMap}"
-                                                        CommandParameter="{Binding Id}"/>
+                                    <CheckBox
+                                        Content="Use Random Colors"
+                                        IsChecked="{Binding UseRandomColorsInQuery}"
+                                        ToolTip.Tip="Every individual record will receive a random color"/>
 
-                                                    <Button HorizontalAlignment="Right"
-                                                            VerticalAlignment="Stretch"
-                                                            Command="{ReflectionBinding #View.ViewModel.DeleteMap}"
-                                                            CommandParameter="{Binding}">
-                                                        <Button.Content>
-                                                            <controls:SymbolIcon
-                                                                Symbol="Delete"
-                                                                Foreground="IndianRed"/>
-                                                        </Button.Content>
-                                                    </Button>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsRepeater.ItemTemplate>
-                                    </ItemsRepeater>
-                                </Flyout>
-                            </controls:CommandBarButton.Flyout>
-                        </controls:CommandBarButton>
-                    </controls:CommandBar.PrimaryCommands>
-                </controls:CommandBar>
+                                    <StackPanel IsVisible="{Binding NeedsForceUpdate}">
+                                        <TextBlock Text="There are more than 10 results"
+                                                   Foreground="IndianRed"/>
 
-                <Grid
-                    ColumnDefinitions="Auto,5,Auto"
-                    Margin="5"
-                    VerticalAlignment="Top">
-                    <!-- MarkingSize -->
-                    <TextBlock
-                        Grid.Column="0" Grid.Row="0"
-                        VerticalAlignment="Center"
-                        Text="Size of all Markings:"/>
-
-                    <Slider
-                        Grid.Column="2" Grid.Row="0"
-                        Minimum="1"
-                        MinWidth="200"
-                        MaxWidth="1000"
-                        Value="{Binding MarkingSize}"/>
-                </Grid>
-
-                <DataGrid
-                    ItemsSource="{Binding Mappings}"
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="True"
-                    AutoGenerateColumns="False"
-                    Classes="NoCellSelection Medium Mutable"
-                    Height="500"
-                    attached:ListShortcuts.Add="{Binding AddMapping}"
-                    attached:ListShortcuts.Remove="{Binding RemoveMapping}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Enabled">
-                            <DataTemplate x:DataType="viewModels:MarkingMapping">
-                                <CheckBox IsChecked="{Binding Enable}"
-                                          Classes="CheckmarkOnly"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Header="Record">
-                            <DataTemplate x:DataType="viewModels:MarkingMapping">
-                                <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding UseQuery}"/>
-
-                                    <record:FormKeyPicker
-                                        IsVisible="{Binding !UseQuery}"
-                                        VerticalAlignment="Center"
-                                        FormLink="{Binding Record}"
-                                        ScopedTypes="{x:Static constants:RecordTypeConstants.PlaceableTypes}"
-                                        LinkCache="{ReflectionBinding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
-
-                                    <StackPanel Orientation="Horizontal"
-                                                IsVisible="{Binding UseQuery}"
-                                                Spacing="5"
-                                                VerticalAlignment="Stretch">
-                                        <Button Content="{Binding QueryVM.QueryRunner.Summary^, FallbackValue=Query}">
-                                            <ToolTip.Tip>
-                                                <ItemsRepeater ItemsSource="{Binding CurrentRecords}">
-                                                    <ItemsRepeater.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding FormKey}"/>
-                                                        </DataTemplate>
-                                                    </ItemsRepeater.ItemTemplate>
-                                                </ItemsRepeater>
-                                            </ToolTip.Tip>
-                                            <Button.Flyout>
-                                                <Flyout FlyoutPresenterClasses="Flyout750x250">
-                                                    <query:QueryView DataContext="{Binding QueryVM}"/>
-                                                </Flyout>
-                                            </Button.Flyout>
-                                        </Button>
-
-                                        <CheckBox
-                                            Content="Use Random Colors"
-                                            IsChecked="{Binding UseRandomColorsInQuery}"
-                                            ToolTip.Tip="Every individual record will receive a random color"/>
-
-                                        <StackPanel IsVisible="{Binding NeedsForceUpdate}">
-                                            <TextBlock Text="There are more than 10 results"
-                                                       Foreground="IndianRed"/>
-
-                                            <Button Content="Force update"
-                                                    Command="{Binding ForceUpdate}"/>
-                                        </StackPanel>
+                                        <Button Content="Force update"
+                                                Command="{Binding ForceUpdate}"/>
                                     </StackPanel>
                                 </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Color">
-                            <DataTemplate x:DataType="viewModels:MarkingMapping">
-                                <controls:ColorPickerButton Color="{Binding Color}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Color">
+                        <DataTemplate x:DataType="viewModels:MarkingMapping">
+                            <controls:ColorPickerButton Color="{Binding Color}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Size">
-                            <DataTemplate x:DataType="viewModels:MarkingMapping">
-                                <Slider
-                                    Minimum="0.1"
-                                    Maximum="3"
-                                    Value="{Binding Size}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </StackPanel>
+                    <DataGridTemplateColumn Header="Size">
+                        <DataTemplate x:DataType="viewModels:MarkingMapping">
+                            <Slider
+                                Minimum="0.1"
+                                Maximum="3"
+                                Value="{Binding Size}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
-    </ScrollViewer>
+    </Grid>
 </UserControl>
