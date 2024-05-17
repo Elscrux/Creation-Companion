@@ -112,6 +112,9 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
             SavedMaps.RemoveWhere(x => x.Id == id.Id);
         });
 
+        LinkCacheProvider.LinkCacheChanged
+            .Subscribe(_ => HeatmapCreator.ClearCache());
+
         // Logical update
         var logicalMappingUpdates = Mappings
             .WhenCollectionChanges()

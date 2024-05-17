@@ -196,4 +196,6 @@ public sealed class HeatmapCreator {
         (_topCoordinate - worldspacePosition.Y) / _heightImageScale);
 
     private double GetSize(float mappingSize) => _markingSize * mappingSize * (1 + Math.Log(1) / 2);
+
+    public void ClearCache() => _spotsCache.Clear();
 }
