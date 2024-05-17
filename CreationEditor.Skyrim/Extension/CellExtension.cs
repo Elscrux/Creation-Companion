@@ -29,6 +29,23 @@ public static class CellExtension {
     }
 
     /// <summary>
+    /// Returns all doors in a cell, based on the load order.
+    /// All references that are overridden by a higher priority mod are excluded.
+    /// </summary>
+    /// <param name="cell">Cell to get doors from</param>
+    /// <param name="linkCache">Link cache to determine the load order</param>
+    /// <param name="includeDeleted">Whether to exclude deleted doors</param>
+    /// <returns>All doors in the cell</returns>
+    public static IEnumerable<IPlacedObjectGetter> GetDoors(this ICellGetter cell, ILinkCache linkCache, bool includeDeleted = false) {
+        foreach (var placedObjectGetter in cell.GetAllPlaced(linkCache, includeDeleted).OfType<IPlacedObjectGetter>()) {
+            var baseObject = placedObjectGetter.Base.TryResolve(linkCache);
+            if (baseObject is not IDoorGetter) continue;
+
+            yield return placedObjectGetter;
+        }
+    }
+
+    /// <summary>
     /// Takes an interior cell and returns all doors that lead to a worldspace.
     /// Doors to worldspaces through connected cells are also included at the end.
     /// </summary>
@@ -49,7 +66,7 @@ public static class CellExtension {
             var currentCell = missingCells.Dequeue();
             searchedCells.Add(currentCell.FormKey);
 
-            foreach (var door in GetDoors(currentCell)) {
+            foreach (var door in GetDoors(currentCell, linkCache)) {
                 if (door.TeleportDestination is null) continue;
                 if (!linkCache.TryResolveSimpleContext<IPlacedObjectGetter>(door.TeleportDestination.Door.FormKey, out var destinationContext)) continue;
                 if (destinationContext.Parent?.Record is not ICellGetter destinationCell) continue;
@@ -59,14 +76,6 @@ public static class CellExtension {
                 } else if (!searchedCells.Contains(destinationCell.FormKey)) {
                     missingCells.Enqueue(destinationCell);
                 }
-            }
-        }
-        IEnumerable<IPlacedObjectGetter> GetDoors(ICellGetter c) {
-            foreach (var placedObjectGetter in c.Persistent.Concat(c.Temporary).OfType<IPlacedObjectGetter>()) {
-                var baseObject = placedObjectGetter.Base.TryResolve(linkCache);
-                if (baseObject is not IDoorGetter) continue;
-
-                yield return placedObjectGetter;
             }
         }
     }
