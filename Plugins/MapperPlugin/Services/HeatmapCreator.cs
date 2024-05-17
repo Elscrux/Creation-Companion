@@ -107,7 +107,7 @@ public sealed class HeatmapCreator {
             foreach (var reference in recordReferenceController.GetReferences(record.FormKey)) {
                 if (!reference.Type.InheritsFrom(typeof(IPlacedGetter))) continue;
                 if (!linkCache.TryResolveSimpleContext(reference, out var referenceRecordContext)) continue;
-                if (referenceRecordContext.Record is not IPlacedGetter { Placement: not null } placed) continue;
+                if (referenceRecordContext.Record is not IPlacedGetter { IsDeleted: false, Placement: not null } placed) continue;
                 if (referenceRecordContext.Parent?.Record is not ICellGetter parentCell) continue;
 
                 var position = placed.Placement.Position;
