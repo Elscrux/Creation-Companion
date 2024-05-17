@@ -170,8 +170,7 @@ public partial class PlacedPicker : ActivatableUserControl {
             .DistinctUntilChanged()
             .ObserveOnTaskpool()
             .Select(x => x.LinkCache is not null && x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var record)
-                ? record.Temporary
-                    .Concat(record.Persistent)
+                ? record.GetAllPlaced(x.LinkCache)
                     .Where(x.Filter)
                     .Cast<IMajorRecordGetter>()
                     .AsObservableChangeSet()

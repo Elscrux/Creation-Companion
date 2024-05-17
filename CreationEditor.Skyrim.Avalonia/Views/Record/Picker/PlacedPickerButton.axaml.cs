@@ -112,7 +112,7 @@ public partial class PlacedPickerButton : ActivatableUserControl {
                 // In case the cell can't be resolved, return null to show spinner
                 if (!x.LinkCache.TryResolve<ICellGetter>(x.Cell, out var cell)) return null;
 
-                var placed = cell.Temporary.Concat(cell.Persistent).FirstOrDefault(placed => placed.FormKey == x.Placed);
+                var placed = cell.GetAllPlaced(x.LinkCache).FirstOrDefault(placed => placed.FormKey == x.Placed);
                 if (placed is null) return defaultText;
 
                 var placedEditorID = PlacedConverters.ToName.Convert(placed, x.LinkCache) as string;

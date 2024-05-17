@@ -4,12 +4,22 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim;
 
 public static class CellExtension {
-    public static IEnumerable<IPlacedGetter> GetAllPlacedObjects(this ICellGetter cell, ILinkCache linkCache) {
+    /// <summary>
+    /// Returns all placed objects in a cell, based on the load order.
+    /// All references that are overridden by a higher priority mod are excluded.
+    /// </summary>
+    /// <param name="cell">Cell to get placed from</param>
+    /// <param name="linkCache">Link cache to determine the load order</param>
+    /// <param name="includeDeleted">Whether to exclude deleted references</param>
+    /// <returns>All placed objects in the cell</returns>
+    public static IEnumerable<IPlacedGetter> GetAllPlaced(this ICellGetter cell, ILinkCache linkCache, bool includeDeleted = false) {
         var allCells = linkCache.ResolveAll<ICellGetter>(cell.FormKey).ToArray();
 
-        return PlacedObjects().DistinctBy(x => x.FormKey);
+        return PlacedObjectsImpl()
+            .Where(x => includeDeleted || !x.IsDeleted)
+            .DistinctBy(x => x.FormKey);
 
-        IEnumerable<IPlacedGetter> PlacedObjects() {
+        IEnumerable<IPlacedGetter> PlacedObjectsImpl() {
             foreach (var cellGetter in allCells) {
                 foreach (var placed in cellGetter.Temporary.Concat(cellGetter.Persistent)) {
                     yield return placed;

@@ -54,7 +54,7 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
                 HashSet<FormKey> refFormKeys = [];
                 foreach (var cell in linkCacheProvider.LinkCache.ResolveAll<ICellGetter>(CellFormKey)) {
                     RecordCache.Edit(updater => {
-                        foreach (var record in cell.Temporary.Concat(cell.Persistent)) {
+                        foreach (var record in cell.GetAllPlaced(linkCacheProvider.LinkCache)) {
                             if (!refFormKeys.Add(record.FormKey)) continue;
 
                             recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);

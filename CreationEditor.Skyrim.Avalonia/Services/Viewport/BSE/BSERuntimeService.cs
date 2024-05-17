@@ -59,7 +59,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
     public void LoadInteriorCell(ICellGetter cell) {
         if (_interiorCellKey != cell.FormKey) UnloadEverything();
 
-        var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
+        var placedObjects = cell.GetAllPlaced(_linkCacheProvider.LinkCache);
         var cellReferences = LoadCellReferences(placedObjects, P2Int.Origin);
         _interiorCell = new InteriorCellRuntimeSettings(cellReferences);
 
@@ -94,7 +94,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             editorCellOrigin -= _worldspaceRuntimeSettings.Origin;
         }
 
-        var placedObjects = cell.GetAllPlacedObjects(_linkCacheProvider.LinkCache);
+        var placedObjects = cell.GetAllPlaced(_linkCacheProvider.LinkCache);
         var loadedReferences = LoadCellReferences(placedObjects, editorCellOrigin);
         if (cell.Landscape is not null) LoadLandscape(cell.Landscape, editorCellOrigin);
         var localOffset = new Vector2(editorCellOrigin.X, editorCellOrigin.Y);
