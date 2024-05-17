@@ -43,21 +43,7 @@ public sealed class MutableRecordReferenceCache(
         }
     }
 
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
-        foreach (var modKey in modOrder.Select(x => x.ModKey)) {
-            var modReferenceCache = GetModReferenceCache(modKey);
-            if (modReferenceCache is null || !modReferenceCache.Cache.TryGetValue(formKey, out var references)) continue;
-
-            foreach (var reference in references) {
-                var containingMod = modOrder.FirstOrDefault(m => GetModReferenceCache(m.ModKey) is {} x && x.FormKeys.Contains(reference.FormKey));
-                if (containingMod?.ModKey == modKey) {
-                    yield return reference;
-                }
-            }
-        }
-    }
-
-    private ModReferenceCache? GetModReferenceCache(ModKey modKey) {
+    public ModReferenceCache? GetModReferenceCache(ModKey modKey) {
         if (_mutableModReferenceCaches.TryGetValue(modKey, out var modReferenceCache)) return modReferenceCache;
 
         return immutableReferenceCache?.GetModReferenceCache(modKey);

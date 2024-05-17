@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 namespace CreationEditor.Services.Mutagen.References.Record.Cache;
@@ -25,5 +26,17 @@ public static class RecordReferenceCacheMixIn {
     /// <returns>form links of references</returns>
     public static IEnumerable<IFormLinkIdentifier> GetReferences(this IRecordReferenceCache recordReferenceCache, FormKey formKey, IGameEnvironment environment) {
         return recordReferenceCache.GetReferences(formKey, environment.LinkCache);
+    }
+
+    /// <summary>
+    /// Returns references of one form key in a link cache.
+    /// This is using the priority order so winning overrides are prioritized.
+    /// </summary>
+    /// <param name="recordReferenceCache">reference cache to search for references</param>
+    /// <param name="formKey">form key to search references for</param>
+    /// <param name="editorEnvironment">editor environment to get references from</param>
+    /// <returns>form links of references</returns>
+    public static IEnumerable<IFormLinkIdentifier> GetReferences(this IRecordReferenceCache recordReferenceCache, FormKey formKey, IEditorEnvironment editorEnvironment) {
+        return recordReferenceCache.GetReferences(formKey, editorEnvironment.LinkCache);
     }
 }

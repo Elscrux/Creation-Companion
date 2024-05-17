@@ -73,7 +73,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         _referenceSubscriptionManager.UnregisterWhere(referencedRecord => !modKeys.Contains(referencedRecord.FormKey.ModKey));
 
         // Change existing subscriptions
-        _referenceSubscriptionManager.UpdateAll(formKey => _referenceCache.GetReferences(formKey, _editorEnvironment.LinkCache));
+        _referenceSubscriptionManager.UpdateAll(formKey => _referenceCache.GetReferences(formKey, _editorEnvironment));
 
         // Handle previous record creations and deletions  while the reference cache wasn't initialized
         while (_recordCreations.TryDequeue(out var record)) RegisterCreation(record);
@@ -85,12 +85,12 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey) {
-        return _referenceCache?.GetReferences(formKey, _editorEnvironment.LinkCache) ?? [];
+        return _referenceCache?.GetReferences(formKey, _editorEnvironment) ?? [];
     }
 
     public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter {
-        var references = _referenceCache?.GetReferences(record.FormKey, _editorEnvironment.LinkCache);
+        var references = _referenceCache?.GetReferences(record.FormKey, _editorEnvironment);
         outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);
 
         return _referenceSubscriptionManager.Register(outReferencedRecord);
