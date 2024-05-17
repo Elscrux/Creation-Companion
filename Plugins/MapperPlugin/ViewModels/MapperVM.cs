@@ -112,9 +112,6 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
             SavedMaps.RemoveWhere(x => x.Id == id.Id);
         });
 
-        LinkCacheProvider.LinkCacheChanged
-            .Subscribe(_ => HeatmapCreator.ClearCache());
-
         // Logical update
         var logicalMappingUpdates = Mappings
             .WhenCollectionChanges()
@@ -123,7 +120,10 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
 
         this.WhenAnyValue(x => x.WorldspaceFormKey)
             .Where(worldspace => !worldspace.IsNull)
-            .CombineLatest(logicalMappingUpdates, (x, _) => x)
+            .CombineLatest(
+                logicalMappingUpdates,
+                LinkCacheProvider.LinkCacheChanged.Do(_ => HeatmapCreator.ClearCache()),
+                (x, _, _) => x)
             .ThrottleMedium()
             .ObserveOnGui()
             .Do(_ => BusyTasks++)
