@@ -215,7 +215,15 @@
                 </Border>
             </Panel>
 
-            <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+            <Grid>
+                <Border DockPanel.Dock="Top"
+                        VerticalAlignment="Top"
+                        BorderBrush="{DynamicResource ButtonBackground}"
+                        Height="2"
+                        BorderThickness="0,0,0,2"/>
+
+                <docking:DockingManager DataContext="{Binding DockingManagerService.Root}"/>
+            </Grid>
         </DockPanel>
 
         <mod:ModSelectionPopup
