@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
     xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
-    d:DesignHeight="1000" d:DesignWidth="1000"
+    d:DesignHeight="1080" d:DesignWidth="1920"
     x:CompileBindings="True" x:DataType="vm:ModSelectionVM"
     x:Name="Popup">
     <UserControl.Effect>
@@ -20,7 +20,7 @@
         Background="#2B2B2B"
         BorderBrush="{DynamicResource ButtonBackground}"
         BorderThickness="1"
-        MaxHeight="750" MaxWidth="750"
+        MaxHeight="750" MaxWidth="1000"
         MinHeight="200" MinWidth="200"
         CornerRadius="20"
         Margin="10">
@@ -45,6 +45,7 @@
                 <Grid ColumnDefinitions="*,25,*"
                       HorizontalAlignment="Stretch">
                     <Button
+                        x:Name="LoadButton"
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
                         IsEnabled="{Binding CanLoad^}"

@@ -78,6 +78,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="model:LoadOrderModItem">
                                 <CheckBox IsChecked="{Binding IsActive}"
+                                          HorizontalAlignment="Center"
                                           Classes="CheckmarkOnly"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -85,16 +86,19 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <view:ModCreation
-                Grid.Row="2"
-                Margin="5"
-                VerticalAlignment="Center"
-                ShowAddButton="False"
-                IsVisible="{ReflectionBinding !#Selection.ViewModel.AnyModsActive^}"
-                DataContext="{Binding ModCreationVM}"/>
+            <StackPanel Grid.Row="2"
+                        Margin="5"
+                        IsVisible="{ReflectionBinding !#Selection.ViewModel.AnyModsActive^}">
+                <Label Content="Create a New Mod"/>
+                <view:ModCreation
+                    VerticalAlignment="Center"
+                    ShowAddButton="False"
+                    DataContext="{Binding ModCreationVM}"/>
+            </StackPanel>
         </Grid>
 
-        <GridSplitter Grid.Column="1"/>
+        <GridSplitter Grid.Column="1"
+                      Margin="10,0"/>
 
         <ScrollViewer Grid.Column="2">
             <view:ModView DataContext="{Binding SelectedModDetails}"/>
