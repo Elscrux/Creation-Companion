@@ -17,12 +17,6 @@
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="CornerRadius" Value="3"/>
     </Style>
-    <Style
-        Selector="
-                docking|DockedControl.BorderedDock.AccentSelected:focus-within,
-                ContentControl.BorderedDock.AccentSelected:focus-within">
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}"/>
-    </Style>
     <Style Selector="Button.DockClose">
         <Setter Property="Margin" Value="2"/>
         <Setter Property="Padding" Value="4"/>
