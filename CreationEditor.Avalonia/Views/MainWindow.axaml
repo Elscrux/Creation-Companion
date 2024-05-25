@@ -184,11 +184,17 @@
 
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Center">
-                    <AutoCompleteBox Padding="6"
-                                     MinWidth="250"
-                                     MaxWidth="500"
+                    <AutoCompleteBox Padding="3"
+                                     MaxHeight="26"
+                                     Width="500"
                                      Watermark="Search"
                                      ItemsSource="{Binding Actions}">
+                        <AutoCompleteBox.Styles>
+                            <Style Selector="AutoCompleteBox TextBox">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="MinHeight" Value="0"/>
+                            </Style>
+                        </AutoCompleteBox.Styles>
                         <!-- ValueMemberBinding="{Binding Header, DataType=vm:MainAppSearchItem}" -->
                         <!--wnd:AppWindow.AllowInteractionInTitleBar="True"-->
                         <!-- <AutoCompleteBox.ItemTemplate> -->
