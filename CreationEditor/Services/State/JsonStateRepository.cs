@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using Mutagen.Bethesda.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Noggog;
@@ -21,7 +22,11 @@ public sealed class JsonStateRepository<T>(
     private readonly JsonSerializerSettings _serializerSettings = new() {
         Formatting = Formatting.Indented,
         TypeNameHandling = TypeNameHandling.Auto,
-        ContractResolver = contractResolver
+        ContractResolver = contractResolver,
+        Converters = {
+            JsonConvertersMixIn.FormKey,
+            JsonConvertersMixIn.ModKey,
+        },
     };
 
     private string GetDirectoryPath() {

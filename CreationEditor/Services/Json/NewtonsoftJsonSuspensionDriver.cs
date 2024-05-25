@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
+using Mutagen.Bethesda.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ReactiveUI;
@@ -14,7 +15,11 @@ public sealed class NewtonsoftJsonSuspensionDriver(
 
     private readonly JsonSerializerSettings _settings = new() {
         TypeNameHandling = TypeNameHandling.All,
-        ContractResolver = contractResolver
+        ContractResolver = contractResolver,
+        Converters = {
+            JsonConvertersMixIn.FormKey,
+            JsonConvertersMixIn.ModKey,
+        }
     };
 
     public IObservable<Unit> InvalidateState() {
