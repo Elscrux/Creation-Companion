@@ -1,7 +1,8 @@
-﻿namespace CreationEditor;
+﻿using System.Collections;
+namespace CreationEditor;
 
 public static class EnumerableExtension {
-    public static bool CountIsExactly<T>(this IEnumerable<T> enumerable, int count) {
+    public static bool CountIsExactly(this IEnumerable enumerable, int count) {
         var counter = 0;
         foreach (var _ in enumerable) {
             counter++;
@@ -9,5 +10,25 @@ public static class EnumerableExtension {
         }
 
         return counter == count;
+    }
+
+    public static bool CountIsLessThan(this IEnumerable enumerable, int count) {
+        var counter = 0;
+        foreach (var _ in enumerable) {
+            counter++;
+            if (counter >= count) return false;
+        }
+
+        return true;
+    }
+    
+    public static bool CountIsGreaterThan(this IEnumerable enumerable, int count) {
+        var counter = 0;
+        foreach (var _ in enumerable) {
+            counter++;
+            if (counter > count) return true;
+        }
+
+        return false;
     }
 }

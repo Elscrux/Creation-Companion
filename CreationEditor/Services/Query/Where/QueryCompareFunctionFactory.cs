@@ -68,6 +68,15 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
                     dictionaryFieldOverride),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Equals",
+                    (enumerable, count) => enumerable.CountIsExactly(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Less Than",
+                    (enumerable, count) => enumerable.CountIsLessThan(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Greater Than",
+                    (enumerable, count) => enumerable.CountIsGreaterThan(count))
             ],
             DictionaryAccepts, -10);
 
@@ -81,6 +90,15 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
                     QueryFieldCategory.Collection),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Equals",
+                    (enumerable, count) => enumerable.CountIsExactly(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Less Than",
+                    (enumerable, count) => enumerable.CountIsLessThan(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Greater Than",
+                    (enumerable, count) => enumerable.CountIsGreaterThan(count))
             ],
             -100);
 
