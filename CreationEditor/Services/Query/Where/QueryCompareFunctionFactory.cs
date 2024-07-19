@@ -114,9 +114,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction<IFormLinkGetter>([
             new QueryCompareFunction<IFormLinkGetter, IFormLinkGetter>(
                 "Equals",
-                (context, formLink) =>
-                    context.CompareValue is IFormLinkGetter compareFormLink
-                 && FormLinkIdentifierEqualityComparer.Instance.Equals(formLink, compareFormLink)),
+                (formLink, compareFormLink) => FormLinkIdentifierEqualityComparer.Instance.Equals(formLink, compareFormLink)),
             new QueryCompareFunction<IFormLinkGetter, object>(
                 "Matching",
                 (context, formLink) =>
@@ -135,7 +133,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction([
                 new QueryCompareFunction<Enum, Enum>(
                     "Equals",
-                    (context, e) => context.CompareValue is Enum flag && e.HasFlag(flag))
+                    (e, flag) => e.HasFlag(flag))
             ],
             type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() is not null,
             10);
@@ -143,7 +141,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction([
             new QueryCompareFunction<Enum, Enum>(
                 "Equals",
-                (context, e) => context.CompareValue is Enum other && e.Equals(other))
+                (e, other) => e.Equals(other))
         ]);
 
         // Bool

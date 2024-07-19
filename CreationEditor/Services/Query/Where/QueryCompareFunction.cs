@@ -16,7 +16,7 @@ public sealed record QueryCompareFunction<TField, TCompareValue> : IQueryCompare
     public QueryCompareFunction(
         string @operator,
         Func<QueryConditionState, TField, bool> evaluate,
-        QueryFieldCategory queryFieldCategory = QueryFieldCategory.Value) {
+        QueryFieldCategory queryFieldCategory) {
         Operator = @operator;
         _evaluate = evaluate;
         _getField = queryFieldCategory switch {
@@ -51,17 +51,20 @@ public sealed record QueryCompareFunction<TField, TCompareValue> : IQueryCompare
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
     public QueryCompareFunction(string @operator, Func<TField, TCompareValue, bool> evaluate)
-        : this(@operator, (state, fieldValue) => {
-            switch (state.CompareValue) {
-                case TCompareValue compareValue:
-                    return evaluate(fieldValue, compareValue);
-                case null:
-                    return fieldValue is null;
-                default:
-                    var x = (TCompareValue?) Convert.ChangeType(state.CompareValue, typeof(TCompareValue));
-                    return x is not null && evaluate(fieldValue, x);
-            }
-        }) {}
+        : this(
+            @operator,
+            (state, fieldValue) => {
+                switch (state.CompareValue) {
+                    case TCompareValue compareValue:
+                        return evaluate(fieldValue, compareValue);
+                    case null:
+                        return fieldValue is null;
+                    default:
+                        var x = (TCompareValue?) Convert.ChangeType(state.CompareValue, typeof(TCompareValue));
+                        return x is not null && evaluate(fieldValue, x);
+                }
+            },
+            QueryFieldCategory.Value) {}
 
     public IQueryFieldInformation GetField(Type actualType) => _getField(actualType);
 
