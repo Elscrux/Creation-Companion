@@ -12,16 +12,16 @@ public sealed record QueryRunnerMemento(
     string Name,
     QueryFromMemento QueryFrom,
     List<QueryConditionMemento> QueryConditions,
-    FieldSelectorMemento OrderBySelector,
-    FieldSelectorMemento FieldSelector);
+    QueryFieldSelectorMemento OrderBySelector,
+    QueryFieldSelectorMemento FieldSelector);
 
 public interface IQueryRunner : IReactiveObject, IMementoProvider<QueryRunnerMemento> {
     Guid Id { get; }
     string Name { get; set; }
     IQueryFrom QueryFrom { get; }
     IObservableCollection<IQueryCondition> QueryConditions { get; }
-    IFieldSelector FieldSelector { get; }
-    public IFieldSelector OrderBySelector { get; }
+    IQueryFieldSelector FieldSelector { get; }
+    public IQueryFieldSelector OrderBySelector { get; }
 
     IObservable<Unit> SettingsChanged { get; }
     IObservable<string> Summary { get; }

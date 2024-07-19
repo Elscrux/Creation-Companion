@@ -127,8 +127,8 @@
         <Compile Update="Services\Mutagen\Mod\Save\IdenticalToMasterRemoveStep.cs">
           <DependentUpon>ISaveStep.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\CompareFunctionFactory.cs">
-          <DependentUpon>ICompareFunctionFactory.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\QueryCompareFunctionFactory.cs">
+          <DependentUpon>IQueryCompareFunctionFactory.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\From\QueryFromFactory.cs">
           <DependentUpon>IQueryFromFactory.cs</DependentUpon>
@@ -136,8 +136,8 @@
         <Compile Update="Services\Query\Where\QueryConditionFactory.cs">
           <DependentUpon>IQueryConditionFactory.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Where\CompareFunction.cs">
-          <DependentUpon>ICompareFunction.cs</DependentUpon>
+        <Compile Update="Services\Query\Where\QueryCompareFunction.cs">
+          <DependentUpon>IQueryCompareFunction.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\Where\QueryCondition.cs">
           <DependentUpon>IQueryCondition.cs</DependentUpon>
@@ -145,8 +145,8 @@
         <Compile Update="Services\Query\Select\ReflectionQueryField.cs">
           <DependentUpon>IQueryField.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Query\Select\ReflectionFieldSelector.cs">
-          <DependentUpon>IFieldSelector.cs</DependentUpon>
+        <Compile Update="Services\Query\Select\ReflectionQueryFieldSelector.cs">
+          <DependentUpon>IQueryFieldSelector.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\QueryRunner.cs">
           <DependentUpon>IQueryRunner.cs</DependentUpon>

@@ -1,42 +1,42 @@
 namespace CreationEditor.Services.Query.Where;
 
-public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
-    private readonly Func<ConditionState, TField, bool> _evaluate;
-    private readonly Func<Type, IFieldInformation> _getField;
+public sealed record QueryCompareFunction<TField, TCompareValue> : IQueryCompareFunction {
+    private readonly Func<QueryConditionState, TField, bool> _evaluate;
+    private readonly Func<Type, IQueryFieldInformation> _getField;
 
     public string Operator { get; }
 
     /// <summary>
-    /// Create a new <see cref="CompareFunction{TField,TCompareValue}"/>.
+    /// Create a new <see cref="QueryCompareFunction{TField,TCompareValue}"/>.
     /// </summary>
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
-    /// <param name="fieldCategory">Determines the field category which is used to edit the set value</param>
+    /// <param name="queryFieldCategory">Determines the field category which is used to edit the set value</param>
     /// <exception cref="ArgumentOutOfRangeException">Invalid field category</exception>
-    public CompareFunction(
+    public QueryCompareFunction(
         string @operator,
-        Func<ConditionState, TField, bool> evaluate,
-        FieldCategory fieldCategory = FieldCategory.Value) {
+        Func<QueryConditionState, TField, bool> evaluate,
+        QueryFieldCategory queryFieldCategory = QueryFieldCategory.Value) {
         Operator = @operator;
         _evaluate = evaluate;
-        _getField = fieldCategory switch {
-            FieldCategory.Value => ValueFields,
-            FieldCategory.Collection => CollectionFields,
-            _ => throw new ArgumentOutOfRangeException(nameof(fieldCategory), fieldCategory, null)
+        _getField = queryFieldCategory switch {
+            QueryFieldCategory.Value => ValueFields,
+            QueryFieldCategory.Collection => CollectionFields,
+            _ => throw new ArgumentOutOfRangeException(nameof(queryFieldCategory), queryFieldCategory, null)
         };
     }
 
     /// <summary>
-    /// Create a new <see cref="CompareFunction{TField,TCompareValue}"/>.
+    /// Create a new <see cref="QueryCompareFunction{TField,TCompareValue}"/>.
     /// </summary>
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
     /// <param name="getField">Custom function to determine which field should be used</param>
     /// <exception cref="ArgumentOutOfRangeException">Invalid field category</exception>
-    public CompareFunction(
+    public QueryCompareFunction(
         string @operator,
-        Func<ConditionState, TField, bool> evaluate,
-        Func<Type, IFieldInformation> getField) {
+        Func<QueryConditionState, TField, bool> evaluate,
+        Func<Type, IQueryFieldInformation> getField) {
         Operator = @operator;
         _evaluate = evaluate;
         _getField = getField;
@@ -50,7 +50,7 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
     /// </summary>
     /// <param name="operator">Operator Name</param>
     /// <param name="evaluate">Used to evaluate the function</param>
-    public CompareFunction(string @operator, Func<TField, TCompareValue, bool> evaluate)
+    public QueryCompareFunction(string @operator, Func<TField, TCompareValue, bool> evaluate)
         : this(@operator, (state, fieldValue) => {
             switch (state.CompareValue) {
                 case TCompareValue compareValue:
@@ -63,20 +63,20 @@ public sealed record CompareFunction<TField, TCompareValue> : ICompareFunction {
             }
         }) {}
 
-    public IFieldInformation GetField(Type actualType) => _getField(actualType);
+    public IQueryFieldInformation GetField(Type actualType) => _getField(actualType);
 
-    public bool Evaluate(ConditionState conditionState, object fieldValue) {
+    public bool Evaluate(QueryConditionState conditionState, object fieldValue) {
         if (fieldValue is TField fieldT) {
             return _evaluate(conditionState, fieldT);
         }
         return false;
     }
 
-    private static ValueFieldInformation ValueFields(Type type) {
-        return new ValueFieldInformation(typeof(TCompareValue), type);
+    private static ValueQueryFieldInformation ValueFields(Type type) {
+        return new ValueQueryFieldInformation(typeof(TCompareValue), type);
     }
-    private static CollectionFieldInformation CollectionFields(Type type) {
+    private static CollectionQueryFieldInformation CollectionFields(Type type) {
         var listType = type.GetGenericArguments().FirstOrDefault() ?? type;
-        return new CollectionFieldInformation(listType, listType);
+        return new CollectionQueryFieldInformation(listType, listType);
     }
 }

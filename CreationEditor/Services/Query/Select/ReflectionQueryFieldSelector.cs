@@ -4,7 +4,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Select;
 
-public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, IDisposable {
+public sealed class ReflectionQueryFieldSelector : ReactiveObject, IQueryFieldSelector, IDisposable {
     private readonly DisposableBucket _disposables = new();
 
     [Reactive] public Type? RecordType { get; set; }
@@ -23,7 +23,7 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
     public IObservableCollection<IQueryField> Fields { get; } = new ObservableCollectionExtended<IQueryField>();
     [Reactive] public IQueryField? SelectedField { get; set; }
 
-    public ReflectionFieldSelector() {
+    public ReflectionQueryFieldSelector() {
         this.WhenAnyValue(x => x.RecordType)
             .Subscribe(_ => {
                 Fields.ReplaceWith(GetFields());
@@ -71,13 +71,13 @@ public sealed class ReflectionFieldSelector : ReactiveObject, IFieldSelector, ID
         }
     }
 
-    public FieldSelectorMemento CreateMemento() {
-        return new FieldSelectorMemento(
+    public QueryFieldSelectorMemento CreateMemento() {
+        return new QueryFieldSelectorMemento(
             SelectedField is null ? null : new QueryFieldMemento(SelectedField.Name),
             RecordType?.AssemblyQualifiedName ?? string.Empty);
     }
 
-    public void RestoreMemento(FieldSelectorMemento memento) {
+    public void RestoreMemento(QueryFieldSelectorMemento memento) {
         RecordType = Type.GetType(memento.RecordTypeName);
 
         if (memento.SelectedField is not null) {

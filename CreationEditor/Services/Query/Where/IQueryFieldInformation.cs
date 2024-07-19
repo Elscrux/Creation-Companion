@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
-public interface IFieldInformation {
+public interface IQueryFieldInformation {
     string Name { get; }
     Type TypeClass { get; }
 
@@ -27,10 +27,10 @@ public interface IFieldInformation {
     }
 }
 
-public sealed record ValueFieldInformation(Type TypeClass, Type ActualType) : IFieldInformation {
-    public string Name => nameof(ConditionState.CompareValue);
+public sealed record ValueQueryFieldInformation(Type TypeClass, Type ActualType) : IQueryFieldInformation {
+    public string Name => nameof(QueryConditionState.CompareValue);
 }
 
-public sealed record CollectionFieldInformation(Type TypeClass, Type ElementType) : IFieldInformation {
-    public string Name => nameof(ConditionState.SubConditions);
+public sealed record CollectionQueryFieldInformation(Type TypeClass, Type ElementType) : IQueryFieldInformation {
+    public string Name => nameof(QueryConditionState.SubConditions);
 }

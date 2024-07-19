@@ -12,11 +12,11 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
     private readonly IQueryConditionFactory _queryConditionFactory;
     private readonly DisposableBucket _disposables = new();
 
-    [Reactive] public ConditionState ConditionState { get; set; }
-    public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();
+    [Reactive] public QueryConditionState ConditionState { get; set; }
+    public IQueryFieldSelector FieldSelector { get; } = new ReflectionQueryFieldSelector();
 
-    public IObservableCollection<ICompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<ICompareFunction>();
-    [Reactive] public ICompareFunction? SelectedCompareFunction { get; set; }
+    public IObservableCollection<IQueryCompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<IQueryCompareFunction>();
+    [Reactive] public IQueryCompareFunction? SelectedCompareFunction { get; set; }
 
     public IObservableCollection<IQueryCondition> SubConditions => ConditionState.SubConditions;
     public object? CompareValue {
@@ -32,11 +32,11 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
 
     public QueryCondition(
         IQueryConditionFactory queryConditionFactory,
-        ICompareFunctionFactory compareFunctionFactory,
+        IQueryCompareFunctionFactory queryCompareFunctionFactory,
         Type? recordType = null) {
         _queryConditionFactory = queryConditionFactory;
         FieldSelector.RecordType = recordType;
-        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
+        ConditionState = new QueryConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
 
         var conditionStateChanges = this.WhenAnyValue(x => x.ConditionState);
 
@@ -64,9 +64,9 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         this.WhenAnyValue(x => x.FieldSelector.SelectedField)
             .NotNull()
             .Subscribe(field => {
-                CompareFunctions.ReplaceWith(compareFunctionFactory.Get(field.Type));
+                CompareFunctions.ReplaceWith(queryCompareFunctionFactory.Get(field.Type));
                 SelectedCompareFunction = CompareFunctions.FirstOrDefault();
-                ConditionState = new ConditionState(SelectedCompareFunction, field.Type, _queryConditionFactory);
+                ConditionState = new QueryConditionState(SelectedCompareFunction, field.Type, _queryConditionFactory);
             })
             .DisposeWith(_disposables);
 
@@ -82,7 +82,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
                     if (Equals(old, updated)) return;
                 }
 
-                ConditionState = new ConditionState(function.Current, FieldSelector.SelectedField?.Type, _queryConditionFactory);
+                ConditionState = new QueryConditionState(function.Current, FieldSelector.SelectedField?.Type, _queryConditionFactory);
             })
             .DisposeWith(this);
 
@@ -100,7 +100,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             .Select(CreateSummary);
     }
 
-    private static string CreateSummary(((IQueryField? Field, bool Negate, bool Or, ICompareFunction? Function, object? CompareValue) Condition, IList<string> Summaries, ConditionState State) x) {
+    private static string CreateSummary(((IQueryField? Field, bool Negate, bool Or, IQueryCompareFunction? Function, object? CompareValue) Condition, IList<string> Summaries, QueryConditionState State) x) {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(x.Condition.Field?.Name);
         if (x.Condition.Negate) {
@@ -144,7 +144,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
 
         // Function and Compare Value
-        ConditionState = new ConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
+        ConditionState = new QueryConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);
         CompareValue = memento.CompareValue;
         SubConditions.AddRange(memento.SubConditions.Select(x => {
             var queryCondition = _queryConditionFactory.Create();

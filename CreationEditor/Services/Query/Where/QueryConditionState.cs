@@ -5,8 +5,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class ConditionState : ReactiveObject {
-    private readonly ICompareFunction? _selectedCompareFunction;
+public sealed class QueryConditionState : ReactiveObject {
+    private readonly IQueryCompareFunction? _selectedCompareFunction;
     private readonly Type? _underlyingType;
 
     [Reactive] public object? CompareValue { get; set; }
@@ -17,8 +17,8 @@ public sealed class ConditionState : ReactiveObject {
     /// </summary>
     /// <param name="selectedCompareFunction">Condition compare function</param>
     /// <param name="underlyingType">Type of field</param>
-    public ConditionState(
-        ICompareFunction? selectedCompareFunction,
+    public QueryConditionState(
+        IQueryCompareFunction? selectedCompareFunction,
         Type? underlyingType) {
         _selectedCompareFunction = selectedCompareFunction;
         _underlyingType = underlyingType;
@@ -26,18 +26,18 @@ public sealed class ConditionState : ReactiveObject {
 
     /// <inheritdoc />
     /// <param name="queryConditionFactory">Factory to initialize a first field</param>
-    public ConditionState(
-        ICompareFunction? selectedCompareFunction,
+    public QueryConditionState(
+        IQueryCompareFunction? selectedCompareFunction,
         Type? underlyingType,
         IQueryConditionFactory queryConditionFactory)
         : this(selectedCompareFunction, underlyingType) {
         var fieldInformation = GetField();
-        if (fieldInformation is CollectionFieldInformation collection) {
+        if (fieldInformation is CollectionQueryFieldInformation collection) {
             SubConditions.Add(queryConditionFactory.Create(collection.ElementType));
         }
     }
 
-    public IFieldInformation? GetField() {
+    public IQueryFieldInformation? GetField() {
         if (_underlyingType is null || _selectedCompareFunction is null) return null;
 
         return _selectedCompareFunction.GetField(_underlyingType);

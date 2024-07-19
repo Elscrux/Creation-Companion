@@ -20,8 +20,8 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
-    public IFieldSelector OrderBySelector { get; } = new ReflectionFieldSelector();
-    public IFieldSelector FieldSelector { get; } = new ReflectionFieldSelector();
+    public IQueryFieldSelector OrderBySelector { get; } = new ReflectionQueryFieldSelector();
+    public IQueryFieldSelector FieldSelector { get; } = new ReflectionQueryFieldSelector();
 
     public IObservable<Unit> SettingsChanged { get; }
     public IObservable<string> Summary { get; }

@@ -8,18 +8,18 @@ namespace CreationEditor.Services.Query.Where;
 public sealed record QueryConditionMemento(
     object? CompareValue,
     QueryConditionMemento[] SubConditions,
-    FieldSelectorMemento FieldSelector,
+    QueryFieldSelectorMemento FieldSelector,
     string SelectedFunctionOperator,
     bool IsOr,
     bool Negate);
 
 public interface IQueryCondition : IMementoProvider<QueryConditionMemento>, IDisposableDropoff {
-    IObservableCollection<ICompareFunction> CompareFunctions { get; }
-    ICompareFunction? SelectedCompareFunction { get; }
+    IObservableCollection<IQueryCompareFunction> CompareFunctions { get; }
+    IQueryCompareFunction? SelectedCompareFunction { get; }
 
-    ConditionState ConditionState { get; set; }
+    QueryConditionState ConditionState { get; set; }
 
-    IFieldSelector FieldSelector { get; }
+    IQueryFieldSelector FieldSelector { get; }
 
     bool IsOr { get; set; }
     bool Negate { get; set; }

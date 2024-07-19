@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Services.Query.Where;
 
-public enum FieldCategory {
+public enum QueryFieldCategory {
     Value,
     Collection
 }

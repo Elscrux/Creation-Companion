@@ -11,10 +11,10 @@ using Mutagen.Bethesda.Strings;
 using Noggog;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class CompareFunctionFactory : ICompareFunctionFactory {
-    private readonly List<FunctionCategory> _compareFunctions = [];
+public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
+    private readonly List<QueryFunctionCategory> _compareFunctions = [];
 
-    private static bool CheckSubConditions(ConditionState conditionState, object? item) =>
+    private static bool CheckSubConditions(QueryConditionState conditionState, object? item) =>
         conditionState.SubConditions.EvaluateConditions(item);
 
     private static bool DefaultAccepts<T>(Type type) => type.InheritsFrom(typeof(T));
@@ -25,28 +25,28 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         if (genericArguments.Length > 1) return false;
 
         var genericArgument = genericArguments[0];
-        return IFieldInformation.IsValueType(genericArgument);
+        return IQueryFieldInformation.IsValueType(genericArgument);
     }
     private static bool DictionaryAccepts(Type type) {
         var genericArguments = type.GetGenericArguments();
         return genericArguments.Length == 2 && type.InheritsFrom(typeof(IEnumerable));
     }
 
-    public CompareFunctionFactory(
+    public QueryCompareFunctionFactory(
         ILinkCacheProvider linkCacheProvider) {
 
         // Simple List
-        Func<Type, IFieldInformation> simpleListFieldOverride = type => {
+        Func<Type, IQueryFieldInformation> simpleListFieldOverride = type => {
             var listType = type.GetGenericArguments()[0];
-            return new ValueFieldInformation(listType, listType);
+            return new ValueQueryFieldInformation(listType, listType);
         };
 
         RegisterCompareFunction([
-                new CompareFunction<IEnumerable, object>(
+                new QueryCompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(item => Equals(item, context.CompareValue)),
                     simpleListFieldOverride),
-                new CompareFunction<IEnumerable, object>(
+                new QueryCompareFunction<IEnumerable, object>(
                     "All Match",
                     (context, enumerable) => enumerable.Cast<object?>().All(item => Equals(item, context.CompareValue)),
                     simpleListFieldOverride)
@@ -55,16 +55,16 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             -50);
 
         // Dictionary
-        Func<Type, IFieldInformation> dictionaryFieldOverride = type => {
+        Func<Type, IQueryFieldInformation> dictionaryFieldOverride = type => {
             var keyValueType = typeof(IKeyValue<,>).MakeGenericType(type.GetGenericArguments());
-            return new CollectionFieldInformation(typeof(IEnumerable), keyValueType);
+            return new CollectionQueryFieldInformation(typeof(IEnumerable), keyValueType);
         };
         RegisterCompareFunction([
-                new CompareFunction<IEnumerable, object>(
+                new QueryCompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(o => CheckSubConditions(context, o)),
                     dictionaryFieldOverride),
-                new CompareFunction<IEnumerable, object>(
+                new QueryCompareFunction<IEnumerable, object>(
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
                     dictionaryFieldOverride),
@@ -73,14 +73,14 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
 
         // List
         RegisterCompareFunction<IEnumerable>([
-                new CompareFunction<IEnumerable, object>(
+                new QueryCompareFunction<IEnumerable, object>(
                     "One Matches",
                     (context, enumerable) => enumerable.Cast<object?>().Any(o => CheckSubConditions(context, o)),
-                    FieldCategory.Collection),
-                new CompareFunction<IEnumerable, object>(
+                    QueryFieldCategory.Collection),
+                new QueryCompareFunction<IEnumerable, object>(
                     "All Matches",
                     (context, enumerable) => enumerable.Any() && enumerable.Cast<object?>().All(o => CheckSubConditions(context, o)),
-                    FieldCategory.Collection)
+                    QueryFieldCategory.Collection),
             ],
             -100);
 
@@ -112,17 +112,17 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
 
         // Form Link
         RegisterCompareFunction<IFormLinkGetter>([
-            new CompareFunction<IFormLinkGetter, IFormLinkGetter>(
+            new QueryCompareFunction<IFormLinkGetter, IFormLinkGetter>(
                 "Equals",
                 (context, formLink) =>
                     context.CompareValue is IFormLinkGetter compareFormLink
                  && FormLinkIdentifierEqualityComparer.Instance.Equals(formLink, compareFormLink)),
-            new CompareFunction<IFormLinkGetter, object>(
+            new QueryCompareFunction<IFormLinkGetter, object>(
                 "Matching",
                 (context, formLink) =>
                     linkCacheProvider.LinkCache.TryResolve(formLink, out var record)
                  && context.SubConditions.EvaluateConditions(record),
-                FieldCategory.Collection),
+                QueryFieldCategory.Collection),
         ]);
 
         // Form Key
@@ -133,7 +133,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
 
         // Enum
         RegisterCompareFunction([
-                new CompareFunction<Enum, Enum>(
+                new QueryCompareFunction<Enum, Enum>(
                     "Equals",
                     (context, e) => context.CompareValue is Enum flag && e.HasFlag(flag))
             ],
@@ -141,7 +141,7 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             10);
 
         RegisterCompareFunction([
-            new CompareFunction<Enum, Enum>(
+            new QueryCompareFunction<Enum, Enum>(
                 "Equals",
                 (context, e) => context.CompareValue is Enum other && e.Equals(other))
         ]);
@@ -162,24 +162,24 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         RegisterCompareFunction(GetNumericFunctions<byte>());
 
         // Object
-        RegisterCompareFunction([new CompareFunction<object, object>("Matching", CheckSubConditions, FieldCategory.Collection)],
+        RegisterCompareFunction([new QueryCompareFunction<object, object>("Matching", CheckSubConditions, QueryFieldCategory.Collection)],
             int.MinValue);
 
         // Pre-sort
         _compareFunctions.Sort((a, b) => b.Priority.CompareTo(a.Priority));
     }
 
-    public static IEnumerable<ICompareFunction> GetStringFunctions<T>(
+    public static IEnumerable<IQueryCompareFunction> GetStringFunctions<T>(
         Func<Func<string, string, bool>, T, string, bool> translationFunction) {
-        yield return new CompareFunction<T, string>("Equals", (a, b)
+        yield return new QueryCompareFunction<T, string>("Equals", (a, b)
             => translationFunction(StringComparer.OrdinalIgnoreCase.Equals, a, b));
-        yield return new CompareFunction<T, string>("Contains", (a, b)
+        yield return new QueryCompareFunction<T, string>("Contains", (a, b)
             => translationFunction((x, y) => x.Contains(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new CompareFunction<T, string>("Starts With", (a, b)
+        yield return new QueryCompareFunction<T, string>("Starts With", (a, b)
             => translationFunction((x, y) => x.StartsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new CompareFunction<T, string>("Ends With", (a, b)
+        yield return new QueryCompareFunction<T, string>("Ends With", (a, b)
             => translationFunction((x, y) => x.EndsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new CompareFunction<T, string>("Matches RegEx", (a, b)
+        yield return new QueryCompareFunction<T, string>("Matches RegEx", (a, b)
             => translationFunction((x, y) => {
                 try {
                     return Regex.IsMatch(x, y);
@@ -189,34 +189,34 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
             }, a, b));
     }
 
-    public static IEnumerable<CompareFunction<T, T>> GetNumericFunctions<T>()
+    public static IEnumerable<QueryCompareFunction<T, T>> GetNumericFunctions<T>()
         where T : IComparisonOperators<T, T, bool> {
-        yield return new CompareFunction<T, T>("Equals", (x, y) => x == y);
-        yield return new CompareFunction<T, T>("Smaller Than", (x, y) => x < y);
-        yield return new CompareFunction<T, T>("Smaller or Equal", (x, y) => x <= y);
-        yield return new CompareFunction<T, T>("Greater Than", (x, y) => x > y);
-        yield return new CompareFunction<T, T>("Greater or Equal", (x, y) => x >= y);
+        yield return new QueryCompareFunction<T, T>("Equals", (x, y) => x == y);
+        yield return new QueryCompareFunction<T, T>("Smaller Than", (x, y) => x < y);
+        yield return new QueryCompareFunction<T, T>("Smaller or Equal", (x, y) => x <= y);
+        yield return new QueryCompareFunction<T, T>("Greater Than", (x, y) => x > y);
+        yield return new QueryCompareFunction<T, T>("Greater or Equal", (x, y) => x >= y);
     }
 
-    public static CompareFunction<T, T> GetSimpleEquals<T>() {
-        return new CompareFunction<T, T>(
+    public static QueryCompareFunction<T, T> GetSimpleEquals<T>() {
+        return new QueryCompareFunction<T, T>(
             "Equals",
             (a, b) => Equals(a, b));
     }
 
-    public void RegisterCompareFunction<T>(IEnumerable<ICompareFunction> compareFunctions, int priority = 0) {
-        _compareFunctions.Add(new FunctionCategory(compareFunctions, DefaultAccepts<T>, priority));
+    public void RegisterCompareFunction<T>(IEnumerable<IQueryCompareFunction> compareFunctions, int priority = 0) {
+        _compareFunctions.Add(new QueryFunctionCategory(compareFunctions, DefaultAccepts<T>, priority));
     }
 
-    public void RegisterCompareFunction<T>(IEnumerable<CompareFunction<T, T>> compareFunctions, int priority = 0) {
-        _compareFunctions.Add(new FunctionCategory(compareFunctions, DefaultAccepts<T>, priority));
+    public void RegisterCompareFunction<T>(IEnumerable<QueryCompareFunction<T, T>> compareFunctions, int priority = 0) {
+        _compareFunctions.Add(new QueryFunctionCategory(compareFunctions, DefaultAccepts<T>, priority));
     }
 
-    public void RegisterCompareFunction(IEnumerable<ICompareFunction> compareFunctions, Func<Type, bool> accepts, int priority = 0) {
-        _compareFunctions.Add(new FunctionCategory(compareFunctions, accepts, priority));
+    public void RegisterCompareFunction(IEnumerable<IQueryCompareFunction> compareFunctions, Func<Type, bool> accepts, int priority = 0) {
+        _compareFunctions.Add(new QueryFunctionCategory(compareFunctions, accepts, priority));
     }
 
-    public IEnumerable<ICompareFunction> Get(Type type) {
+    public IEnumerable<IQueryCompareFunction> Get(Type type) {
         if (type.InheritsFrom(typeof(ReadOnlyMemorySlice<>))) return [];
 
         type = type.InheritsFrom(typeof(Nullable<>))
@@ -230,5 +230,5 @@ public sealed class CompareFunctionFactory : ICompareFunctionFactory {
         return priorityCategory?.CompareFunctions ?? [];
     }
 
-    private sealed record FunctionCategory(IEnumerable<ICompareFunction> CompareFunctions, Func<Type, bool> Accepts, int Priority);
+    private sealed record QueryFunctionCategory(IEnumerable<IQueryCompareFunction> CompareFunctions, Func<Type, bool> Accepts, int Priority);
 }

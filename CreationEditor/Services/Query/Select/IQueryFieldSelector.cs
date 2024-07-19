@@ -2,9 +2,9 @@ using CreationEditor.Core;
 using DynamicData.Binding;
 namespace CreationEditor.Services.Query.Select;
 
-public sealed record FieldSelectorMemento(QueryFieldMemento? SelectedField, string RecordTypeName);
+public sealed record QueryFieldSelectorMemento(QueryFieldMemento? SelectedField, string RecordTypeName);
 
-public interface IFieldSelector : IMementoProvider<FieldSelectorMemento> {
+public interface IQueryFieldSelector : IMementoProvider<QueryFieldSelectorMemento> {
     IQueryField? SelectedField { get; set; }
     IObservableCollection<IQueryField> Fields { get; }
 

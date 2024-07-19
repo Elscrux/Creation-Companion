@@ -139,7 +139,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
                         return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             DataContext = condition,
-                            ItemTemplate = new FuncDataTemplate<ICompareFunction>((function, _) => {
+                            ItemTemplate = new FuncDataTemplate<IQueryCompareFunction>((function, _) => {
                                 if (function is null) return null;
 
                                 return new TextBlock { Text = function.Operator };

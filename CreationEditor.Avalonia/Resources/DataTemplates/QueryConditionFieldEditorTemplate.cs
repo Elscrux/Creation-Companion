@@ -33,18 +33,18 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
         set => SetValue(ConditionFactoryProperty, value);
     }
 
-    public bool Match(object? data) => data is ConditionState;
+    public bool Match(object? data) => data is QueryConditionState;
 
     public Control Build(object? param) {
-        if (param is not ConditionState state) return new TextBlock { Text = $"No Condition is available for {param}" };
+        if (param is not QueryConditionState state) return new TextBlock { Text = $"No Condition is available for {param}" };
 
         var field = state.GetField();
         if (field is null) return new TextBlock { Text = $"No Field is available for {param}" };
 
         // Convert fields to controls
         var control = field switch {
-            ValueFieldInformation value => GetValueControl(value, state),
-            CollectionFieldInformation collection => GetCollectionControl(collection, state),
+            ValueQueryFieldInformation value => GetValueControl(value, state),
+            CollectionQueryFieldInformation collection => GetCollectionControl(collection, state),
             _ => throw new InvalidOperationException()
         };
 
@@ -53,19 +53,19 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
         return control;
     }
 
-    private Control GetValueControl(ValueFieldInformation value, ConditionState? state = null) {
-        var binding = new Binding(value.Name);
+    private Control GetValueControl(ValueQueryFieldInformation valueQuery, QueryConditionState? state = null) {
+        var binding = new Binding(valueQuery.Name);
 
         Control? control;
-        if (value.TypeClass == typeof(bool)) {
+        if (valueQuery.TypeClass == typeof(bool)) {
             control = new CheckBox {
                 [!ToggleButton.IsCheckedProperty] = binding
             };
-        } else if (value.TypeClass == typeof(string)) {
+        } else if (valueQuery.TypeClass == typeof(string)) {
             control = new TextBox {
                 [!TextBox.TextProperty] = binding
             };
-        } else if (value.TypeClass == typeof(float) || value.TypeClass == typeof(double)) {
+        } else if (valueQuery.TypeClass == typeof(float) || valueQuery.TypeClass == typeof(double)) {
             control = new NumericUpDown {
                 Minimum = decimal.MinValue,
                 Maximum = decimal.MaxValue,
@@ -74,16 +74,16 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N4",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(Enum)) {
+        } else if (valueQuery.TypeClass == typeof(Enum)) {
             control = new ComboBox {
-                ItemsSource = Enum.GetValues(value.ActualType).Cast<Enum>().OrderBy(x => x.ToString()).ToArray(),
+                ItemsSource = Enum.GetValues(valueQuery.ActualType).Cast<Enum>().OrderBy(x => x.ToString()).ToArray(),
                 [!SelectingItemsControl.SelectedItemProperty] = binding,
             };
-        } else if (value.TypeClass == typeof(FormKey)) {
-            control = GetFormKeyPicker(value.ActualType.GetGenericArguments());
-        } else if (value.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
-            control = GetFormKeyPicker(value.ActualType.GetGenericArguments());
-        } else if (value.TypeClass == typeof(long)) {
+        } else if (valueQuery.TypeClass == typeof(FormKey)) {
+            control = GetFormKeyPicker(valueQuery.ActualType.GetGenericArguments());
+        } else if (valueQuery.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
+            control = GetFormKeyPicker(valueQuery.ActualType.GetGenericArguments());
+        } else if (valueQuery.TypeClass == typeof(long)) {
             control = new NumericUpDown {
                 Minimum = long.MinValue,
                 Maximum = long.MaxValue,
@@ -91,7 +91,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(ulong)) {
+        } else if (valueQuery.TypeClass == typeof(ulong)) {
             control = new NumericUpDown {
                 Minimum = ulong.MinValue,
                 Maximum = ulong.MaxValue,
@@ -99,7 +99,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(int)) {
+        } else if (valueQuery.TypeClass == typeof(int)) {
             control = new NumericUpDown {
                 Minimum = int.MinValue,
                 Maximum = int.MaxValue,
@@ -107,7 +107,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(uint)) {
+        } else if (valueQuery.TypeClass == typeof(uint)) {
             control = new NumericUpDown {
                 Minimum = uint.MinValue,
                 Maximum = uint.MaxValue,
@@ -115,7 +115,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(short)) {
+        } else if (valueQuery.TypeClass == typeof(short)) {
             control = new NumericUpDown {
                 Minimum = short.MinValue,
                 Maximum = short.MaxValue,
@@ -123,7 +123,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(ushort)) {
+        } else if (valueQuery.TypeClass == typeof(ushort)) {
             control = new NumericUpDown {
                 Minimum = ushort.MinValue,
                 Maximum = ushort.MaxValue,
@@ -131,7 +131,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(sbyte)) {
+        } else if (valueQuery.TypeClass == typeof(sbyte)) {
             control = new NumericUpDown {
                 Minimum = sbyte.MinValue,
                 Maximum = sbyte.MaxValue,
@@ -139,7 +139,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(byte)) {
+        } else if (valueQuery.TypeClass == typeof(byte)) {
             control = new NumericUpDown {
                 Minimum = byte.MinValue,
                 Maximum = byte.MaxValue,
@@ -147,9 +147,9 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 FormatString = "N0",
                 [!NumericUpDown.ValueProperty] = binding
             };
-        } else if (value.TypeClass == typeof(Color)) {
+        } else if (valueQuery.TypeClass == typeof(Color)) {
             control = new ColorPickerButton {
-                [!ColorPickerButton.ColorProperty] = new Binding(value.Name) {
+                [!ColorPickerButton.ColorProperty] = new Binding(valueQuery.Name) {
                     Converter = new ExtendedFuncValueConverter<Color, global::Avalonia.Media.Color?, object?>(
                         (color, _) => global::Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B),
                         (color, _) => color.HasValue
@@ -159,7 +159,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
             };
         } else {
             control = new TextBlock {
-                Text = $"No Control is available for {value.TypeClass}"
+                Text = $"No Control is available for {valueQuery.TypeClass}"
             };
         }
         return control;
@@ -180,7 +180,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 ScopedTypes = scopedTypes,
             };
 
-            if (value.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
+            if (valueQuery.TypeClass.InheritsFrom(typeof(IFormLinkGetter))) {
                 if (state is { CompareValue: FormLinkInformation formLink }) {
                     formKeyPicker[AFormKeyPicker.FormKeyProperty] = formLink.FormKey;
                 } else {
@@ -200,7 +200,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
         }
     }
 
-    private Button GetCollectionControl(CollectionFieldInformation collection, ConditionState state) {
+    private Button GetCollectionControl(CollectionQueryFieldInformation collectionQuery, QueryConditionState state) {
         return new Button {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -214,7 +214,7 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                     "Flyout750x250"
                 },
                 Content = new QueryConditionsView {
-                    ContextType = collection.ElementType,
+                    ContextType = collectionQuery.ElementType,
                     QueryConditions = state.SubConditions,
                     [!QueryConditionsView.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
                     [!QueryConditionsView.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding()
