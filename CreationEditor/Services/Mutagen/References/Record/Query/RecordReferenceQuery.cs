@@ -76,7 +76,7 @@ public sealed class RecordReferenceQuery(
                     modReferenceCache = LoadReferenceCache(cacheFilePath);
                 } catch (Exception e) {
                     // Catch any issues while loading references
-                    logger.Here().Error("Loading Record References for {ModKey} failed: {Message}", mod.ModKey, e.Message);
+                    logger.Here().Error(e, "Loading Record References for {ModKey} failed: {Message}", mod.ModKey, e.Message);
                     logger.Here().Debug("Try to generate Record References for {ModKey} again", mod.ModKey);
 
                     // Delete broken cache
@@ -126,7 +126,7 @@ public sealed class RecordReferenceQuery(
         try {
             fileSystem.File.Delete(cacheFilePath);
         } catch (Exception e) {
-            logger.Here().Warning("Trying to delete cache file {CacheFile} failed: {Message}", cacheFilePath, e.Message);
+            logger.Here().Warning(e, "Trying to delete cache file {CacheFile} failed: {Message}", cacheFilePath, e.Message);
         }
     }
 

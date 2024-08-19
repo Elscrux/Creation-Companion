@@ -28,7 +28,7 @@ public sealed class AssetController(
         try {
             MoveInternal(path, CreateDeletePath(path), true, token);
         } catch (Exception e) {
-            logger.Here().Error("Couldn't delete {Path}: {Exception}", path, e.Message);
+            logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", path, e.Message);
         }
     }
 
@@ -36,7 +36,7 @@ public sealed class AssetController(
         try {
             MoveInternal(path, destination, false, token);
         } catch (Exception e) {
-            logger.Here().Error("Couldn't move {Path} to {Destination}: {Exception}", path, destination, e.Message);
+            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", path, destination, e.Message);
         }
     }
 
@@ -46,7 +46,7 @@ public sealed class AssetController(
             try {
                 MoveInternal(path, fileSystem.Path.Combine(directoryPath, newName), true, token);
             } catch (Exception e) {
-                logger.Here().Error("Couldn't rename {Path} to {NewName}: {Exception}", path, newName, e.Message);
+                logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", path, newName, e.Message);
             }
         } else {
             logger.Here().Warning("Couldn't find path to base directory of {Path}", path);
@@ -146,7 +146,7 @@ public sealed class AssetController(
                 fileSystem.Directory.Move(path, destination);
             }
         } catch (Exception e) {
-            logger.Here().Warning("Couldn't move {File} to {Dir}: {Exception}", path, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't move {File} to {Dir}: {Exception}", path, destination, e.Message);
             return false;
         }
 

@@ -48,7 +48,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
 
             return cacheableQuery.IsCacheUpToDate(reader, source);
         } catch (Exception e) {
-            logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning(e, "Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
             return false;
         }
     }
@@ -100,7 +100,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
                     cache.Add(assetType, assets);
                 }
             } catch (Exception e) {
-                logger.Here().Warning("Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
+                logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
             }
         }
 

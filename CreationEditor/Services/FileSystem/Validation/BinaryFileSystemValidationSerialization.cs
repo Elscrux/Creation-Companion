@@ -30,7 +30,7 @@ public sealed class BinaryFileSystemValidationSerialization(
             if (!Version.TryParse(versionString, out var version)) return false;
             if (!_version.Equals(version)) return false;
         } catch (Exception e) {
-            logger.Here().Warning("Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning(e, "Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
             return false;
         }
 
@@ -45,7 +45,7 @@ public sealed class BinaryFileSystemValidationSerialization(
             hashFileSystemCacheData = Deserialize(new BinaryReader(fileSystemStream));
             return true;
         } catch (Exception e) {
-            logger.Here().Error("Failed to deserialize cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Error(e, "Failed to deserialize cache file {File}: {Exception}", cacheFile, e.Message);
             hashFileSystemCacheData = null;
             return false;
         }

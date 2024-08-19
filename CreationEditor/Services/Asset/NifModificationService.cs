@@ -111,7 +111,7 @@ public sealed class NifModificationService(
             try {
                 nif.Save(file);
             } catch (Exception e) {
-                logger.Here().Error("Couldn't save modified nif {File}: {Exception}", file, e.Message);
+                logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", file, e.Message);
             }
         }
     }

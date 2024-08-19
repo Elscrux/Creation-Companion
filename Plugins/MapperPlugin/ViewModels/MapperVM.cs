@@ -168,7 +168,7 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
                 try {
                     ImageSource = new Bitmap(path);
                 } catch (Exception e) {
-                    logger.Here().Error("Failed to load image: {Exception}", e.Message);
+                    logger.Here().Error(e, "Failed to load image: {Exception}", e.Message);
                 }
             })
             .DisposeWith(this);

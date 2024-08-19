@@ -40,7 +40,7 @@ public sealed class ModSaveService(
             // Try to save mod
             mod.WriteToBinary(filePath, binaryWriteParameters);
         } catch (Exception e) {
-            logger.Here().Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            logger.Here().Warning(e, "Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
             try {
                 // Save at backup location if failed once
                 filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
@@ -67,8 +67,11 @@ public sealed class ModSaveService(
                 backupFilePath,
                 true);
         } catch (Exception e) {
-            logger.Here().Warning(
-                "Failed to create backup of mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            logger.Here().Warning(e,
+                "Failed to create backup of mod {ModName} at {FilePath}: {Exception}",
+                mod.ModKey.FileName,
+                filePath,
+                e.Message);
         }
 
         LimitBackups(limit, mod);
