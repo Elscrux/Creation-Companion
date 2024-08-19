@@ -36,9 +36,11 @@ public sealed class AssetTypeService : IAssetTypeService {
         var extension = _fileSystem.Path.GetExtension(filePath);
         if (extension.Length == 0) return null;
 
-        if (extension == ".xwm" && filePath.Contains(_fileSystem.Path.Combine("data", "music"), AssetCompare.PathComparison)) {
-            return Provider.Music;
-        }
+        // Temporary adjustments
+        if (extension == ".xwm" && filePath.Contains("music", AssetCompare.PathComparison)) return Provider.Music;
+        if (filePath.Contains("interface", AssetCompare.PathComparison)) return null;
+        if (filePath.Contains("source\\scripts", AssetCompare.PathComparison)) return null;
+
         _assetTypesExtensions.TryGetValue(extension, out var assetType);
 
         return assetType;
