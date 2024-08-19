@@ -5,7 +5,6 @@ using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.References.Asset;
 using DynamicData;
-using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Models.Asset;
@@ -48,7 +47,8 @@ public sealed class AssetTreeItem(
                 .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Filter(filterObservable)
                 .Transform((Func<IAsset, AssetTreeItem>) Selector)
-                .SortAndBind(out var collection, AssetComparers.PathComparer);
+                .SortAndBind(out var collection, AssetComparers.PathComparer)
+                .Subscribe();
 
             return collection;
 
