@@ -11,14 +11,12 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Picker.TargetPicker"
              x:Name="Picker">
     <Button HorizontalAlignment="Stretch">
-        <Button.Content>
-            <Binding Path="#Picker.ButtonText^">
-                <Binding.FallbackValue>
-                    <avaloniaProgressRing:ProgressRing
-                        Width="20" Height="20"/>
-                </Binding.FallbackValue>
-            </Binding>
-        </Button.Content>
+        <Binding Path="#Picker.ButtonText^">
+            <Binding.FallbackValue>
+                <avaloniaProgressRing:ProgressRing
+                    Width="20" Height="20"/>
+            </Binding.FallbackValue>
+        </Binding>
         <Button.Flyout>
             <Flyout IsOpen="{Binding #Picker.IsOpen, Mode=OneWayToSource}"
                     Placement="TopEdgeAlignedLeft">

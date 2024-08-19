@@ -205,11 +205,9 @@
                                                         VerticalAlignment="Stretch"
                                                         Command="{ReflectionBinding #View.ViewModel.DeleteMap}"
                                                         CommandParameter="{Binding}">
-                                                    <Button.Content>
-                                                        <controls:SymbolIcon
-                                                            Symbol="Delete"
-                                                            Foreground="IndianRed"/>
-                                                    </Button.Content>
+                                                    <controls:SymbolIcon
+                                                        Symbol="Delete"
+                                                        Foreground="IndianRed"/>
                                                 </Button>
                                             </StackPanel>
                                         </DataTemplate>

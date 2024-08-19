@@ -263,14 +263,14 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
     public static Interop.TextureSet GetTextureSet(ITextureSetGetter textureSet) {
         return new Interop.TextureSet {
-            Diffuse = textureSet.Diffuse?.DataRelativePath,
-            Normal = textureSet.NormalOrGloss?.DataRelativePath,
-            Specular = textureSet.BacklightMaskOrSpecular?.DataRelativePath,
-            EnvironmentMask = textureSet.Environment?.DataRelativePath,
-            Height = textureSet.Height?.DataRelativePath,
-            Environment = textureSet.Environment?.DataRelativePath,
-            Multilayer = textureSet.Multilayer?.DataRelativePath,
-            Emissive = textureSet.GlowOrDetailMap?.DataRelativePath,
+            Diffuse = textureSet.Diffuse?.DataRelativePath.Path,
+            Normal = textureSet.NormalOrGloss?.DataRelativePath.Path,
+            Specular = textureSet.BacklightMaskOrSpecular?.DataRelativePath.Path,
+            EnvironmentMask = textureSet.Environment?.DataRelativePath.Path,
+            Height = textureSet.Height?.DataRelativePath.Path,
+            Environment = textureSet.Environment?.DataRelativePath.Path,
+            Multilayer = textureSet.Multilayer?.DataRelativePath.Path,
+            Emissive = textureSet.GlowOrDetailMap?.DataRelativePath.Path,
         };
     }
 
@@ -309,13 +309,13 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         _ => throw new InvalidOperationException()
                     };
 
-                    if (model is null) continue;
+                    if (!model.HasValue) continue;
 
                     var scale = placedObject.Scale ?? 1;
 
                     refs.Add(new ReferenceLoad {
                         FormKey = placedObject.FormKey,
-                        Path = model.ToLower(),
+                        Path = model.Value.Path.ToLower(),
                         Transform = new ReferenceTransform {
                             Translation = relativePosition,
                             Scale = new P3Float(scale, scale, scale),

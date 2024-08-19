@@ -16,12 +16,12 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Binary.Streams;
 using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
@@ -86,7 +86,10 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
                 var path = fileSystem.Path.Combine(directoryPath, listing.FileName);
                 if (!fileSystem.Path.Exists(path)) return null;
 
-                using var stream = new MutagenBinaryReadStream(path, release);
+                var binaryReadParameters = new BinaryReadParameters { FileSystem = fileSystem };
+                var modPath = new ModPath(listing.ModKey, path);
+                var parsingMeta = ParsingMeta.Factory(binaryReadParameters, release, modPath);
+                var stream = new MutagenBinaryReadStream(path, parsingMeta);
                 using var frame = new MutagenFrame(stream);
                 return modGetterVM.GetModInfo(listing.ModKey, frame);
             })
@@ -197,8 +200,10 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             })
             .DisposeWith(this);
 
-        CanLoad = ModCreationVM.IsValid().CombineLatest(AnyModsLoaded, AnyModsActive,
-            (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
+        CanLoad = AnyModsLoaded;
+        // todo add back in when ReactiveUI.Validation is updated
+        // CanLoad = ModCreationVM.IsValid().CombineLatest(AnyModsLoaded, AnyModsActive,
+        //     (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
     /// <summary>

@@ -20,6 +20,7 @@ using DynamicData;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Masters;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
@@ -580,12 +581,13 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         return new State(StatusIndicatorState.Passive, LinkCacheMissing, FormKey.Null, string.Empty);
                     }
 
-                    if (!FormID.TryFactory(x.Raw, out var formID) || x.LinkCache.ListedOrder.Count < formID.ModIndex.ID) {
-                        return new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
-                    }
+                    // todo update based on https://github.com/Mutagen-Modding/Mutagen/blob/dev/Mutagen.Bethesda.WPF/Plugins/AFormKeyPicker.cs
+                    // if (!FormID.TryFactory(x.Raw, out var formID) || x.LinkCache.ListedOrder.Count < formID.ModIndex.ID) {
+                    //     return new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
+                    // }
 
-                    var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
-                    formKey = new FormKey(targetMod.ModKey, formID.ID);
+                    // var targetMod = x.LinkCache.ListedOrder[formID.ModIndex.ID];
+                    // formKey = new FormKey(targetMod.ModKey, formID.ID);
                     return x.LinkCache.TryResolveIdentifier(formKey, EnabledTypes(x.Types), out var editorId)
                         ? new State(StatusIndicatorState.Success, LocatedRecord, formKey, editorId ?? string.Empty)
                         : new State(StatusIndicatorState.Failure, RecordNotResolved, FormKey.Null, string.Empty);
@@ -712,27 +714,28 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                         });
                                     });
                             case FormKeyPickerSearchMode.FormKey:
-                                var modKeyToId = x.Cache?.ListedOrder
-                                        .Select((mod, index) => (Mod: mod, Index: (byte) index))
-                                        .Take(ModIndex.MaxIndex)
-                                        .ToDictionary(t => t.Mod.ModKey, t => t.Index)
-                                 ?? default;
-
-                                return formKeyStrChanged
-                                    .ThrottleMedium()
-                                    .ObserveOn(RxApp.TaskpoolScheduler)
-                                    .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
-                                    .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
-                                        var fk = ident.FormKey;
-                                        if (fk == term.FormKey) return true;
-                                        if (term.ID is null) return false;
-
-                                        if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
-                                        if (modKeyToId is null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
-
-                                        var formID = new FormID(new ModIndex(index), fk.ID);
-                                        return formID.Raw == term.ID.Value.Raw;
-                                    });
+                                // todo update based on https://github.com/Mutagen-Modding/Mutagen/blob/dev/Mutagen.Bethesda.WPF/Plugins/AFormKeyPicker.cs
+                                // var modKeyToId = x.Cache?.ListedOrder
+                                //         .Select((mod, index) => (Mod: mod, Index: (byte) index))
+                                //         .Take(ModIndex.MaxIndex)
+                                //         .ToDictionary(t => t.Mod.ModKey, t => t.Index)
+                                //  ?? default;
+                                //
+                                // return formKeyStrChanged
+                                //     .ThrottleMedium()
+                                //     .ObserveOn(RxApp.TaskpoolScheduler)
+                                //     .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
+                                //     .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
+                                //         var fk = ident.FormKey;
+                                //         if (fk == term.FormKey) return true;
+                                //         if (term.ID is null) return false;
+                                //
+                                //         if (term.RawStr.Length <= 6) return fk.ID == term.ID.Value.Raw;
+                                //         if (modKeyToId is null || !modKeyToId.TryGetValue(fk.ModKey, out var index)) return false;
+                                //
+                                //         var formID = new FormID(new ModIndex(index), fk.ID);
+                                //         return formID.Raw == term.ID.Value.Raw;
+                                //     });
                             default:
                                 throw new InvalidOperationException();
                         }

@@ -21,8 +21,8 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
         SkyrimTranslationAssetType.Instance,
     ];
 
-    public IDictionary<IAssetType, Func<string, IAssetLink>> AssetTypeConstructor { get; }
-        = new Dictionary<IAssetType, Func<string, IAssetLink>> {
+    public IDictionary<IAssetType, Func<DataRelativePath, IAssetLink>> AssetTypeConstructor { get; }
+        = new Dictionary<IAssetType, Func<DataRelativePath, IAssetLink>> {
             { SkyrimTextureAssetType.Instance, path => new AssetLink<SkyrimTextureAssetType>(path) },
             { SkyrimModelAssetType.Instance, path => new AssetLink<SkyrimModelAssetType>(path) },
             { SkyrimScriptSourceAssetType.Instance, path => new AssetLink<SkyrimScriptSourceAssetType>(path) },
@@ -58,10 +58,10 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
     public IAssetType Sound => SkyrimSoundAssetType.Instance;
     public IAssetType Music => SkyrimMusicAssetType.Instance;
 
-    public IAssetLink TextureLink(string path) => new AssetLink<SkyrimTextureAssetType>(path);
-    public IAssetLink ModelLink(string path) => new AssetLink<SkyrimModelAssetType>(path);
-    public IAssetLink ScriptSourceLink(string path) => new AssetLink<SkyrimScriptSourceAssetType>(path);
-    public IAssetLink ScriptLink(string path) => new AssetLink<SkyrimScriptCompiledAssetType>(path);
-    public IAssetLink SoundLink(string path) => new AssetLink<SkyrimSoundAssetType>(path);
-    public IAssetLink MusicLink(string path) => new AssetLink<SkyrimMusicAssetType>(path);
+    public IAssetLink TextureLink(DataRelativePath path) => new AssetLink<SkyrimTextureAssetType>(path);
+    public IAssetLink ModelLink(DataRelativePath path) => new AssetLink<SkyrimModelAssetType>(path);
+    public IAssetLink ScriptSourceLink(DataRelativePath path) => new AssetLink<SkyrimScriptSourceAssetType>(path);
+    public IAssetLink ScriptLink(DataRelativePath path) => new AssetLink<SkyrimScriptCompiledAssetType>(path);
+    public IAssetLink SoundLink(DataRelativePath path) => new AssetLink<SkyrimSoundAssetType>(path);
+    public IAssetLink MusicLink(DataRelativePath path) => new AssetLink<SkyrimMusicAssetType>(path);
 }

@@ -4,12 +4,16 @@ using CreationEditor.Services.Archive;
 using CreationEditor.Services.Mutagen.References.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using DynamicData;
+using Mutagen.Bethesda.Plugins.Assets;
+using Mutagen.Bethesda.Plugins.Exceptions;
 using Noggog;
+using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetDirectory : IAsset {
     private readonly DisposableBucket _disposables = new();
 
+    private readonly ILogger _logger;
     private readonly IAssetTypeService _assetTypeService;
     private readonly IArchiveService _archiveService;
     private readonly IFileSystem _fileSystem;
@@ -42,12 +46,14 @@ public sealed class AssetDirectory : IAsset {
 
     public AssetDirectory(
         IDirectoryInfo directory,
+        ILogger logger,
         IFileSystem fileSystem,
         IDataDirectoryService dataDirectoryService,
         IAssetReferenceController assetReferenceController,
         IAssetTypeService assetTypeService,
         IArchiveService archiveService,
         bool isVirtual) {
+        _logger = logger;
         _assetTypeService = assetTypeService;
         _archiveService = archiveService;
         _fileSystem = fileSystem;
@@ -59,6 +65,7 @@ public sealed class AssetDirectory : IAsset {
 
     public AssetDirectory(
         IDirectoryInfo directory,
+        ILogger logger,
         IFileSystem fileSystem,
         IDataDirectoryService dataDirectoryService,
         IAssetReferenceController assetReferenceController,
@@ -66,6 +73,7 @@ public sealed class AssetDirectory : IAsset {
         IArchiveService archiveService)
         : this(
             directory,
+            logger,
             fileSystem,
             dataDirectoryService,
             assetReferenceController,
@@ -85,7 +93,7 @@ public sealed class AssetDirectory : IAsset {
                 _assetReferenceController.RegisterCreation(asset);
                 Assets.AddOrUpdate(asset);
             } else {
-                var assetDirectory = new AssetDirectory(directoryInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false);
+                var assetDirectory = new AssetDirectory(directoryInfo, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false);
                 assetDirectory.DisposeWith(_disposables);
                 Assets.AddOrUpdate(assetDirectory);
             }
@@ -187,13 +195,13 @@ public sealed class AssetDirectory : IAsset {
         IEnumerable<IAsset> assets = [];
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
-                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false) : null)
+                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false) : null)
                 .NotNull());
         }
 
         assets = assets.Concat(_archiveService.GetSubdirectories(Path)
             .Select(dirPath => _fileSystem.DirectoryInfo.New(dirPath))
-            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
+            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
             .NotNull());
 
         var addedFiles = new HashSet<string>();
@@ -225,11 +233,17 @@ public sealed class AssetDirectory : IAsset {
     }
 
     private AssetFile? FileToAsset(string file, bool isVirtual = false) {
-        var assetLink = _assetTypeService.GetAssetLink(file);
+        IAssetLink? assetLink;
+        try {
+            assetLink = _assetTypeService.GetAssetLink(file);
+        } catch (AssetPathMisalignedException e) {
+            _logger.Here().Warning(e, "Failed to parse asset path {Path}: {Exception}", file, e.Message);
+            return null;
+        }
         if (assetLink is null) return null;
 
         _assetReferenceController.GetReferencedAsset(assetLink, out var referencedAsset).DisposeWith(_disposables);
-        var fileName = _fileSystem.Path.Combine(Path, _fileSystem.Path.GetFileName(assetLink.RawPath));
+        var fileName = _fileSystem.Path.Combine(Path, _fileSystem.Path.GetFileName(assetLink.GivenPath));
         return new AssetFile(fileName, referencedAsset, isVirtual);
     }
 

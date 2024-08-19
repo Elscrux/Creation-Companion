@@ -3,6 +3,7 @@ using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
 public sealed class NifArchiveAssetParser(
@@ -14,7 +15,7 @@ public sealed class NifArchiveAssetParser(
 
     public string Name => "NifArchive";
 
-    public IEnumerable<AssetQueryResult<string>> ParseAssets(string archivePath) {
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string archivePath) {
         var archiveReader = archiveService.GetReader(archivePath);
 
         foreach (var archiveFile in archiveReader.Files) {
@@ -24,7 +25,7 @@ public sealed class NifArchiveAssetParser(
         }
     }
 
-    public IEnumerable<AssetQueryResult<string>> ParseFile(string archive, string filePath) {
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(string archive, string filePath) {
         var archiveReader = archiveService.GetReader(archive);
 
         var directory = fileSystem.Path.GetDirectoryName(filePath);
@@ -39,10 +40,8 @@ public sealed class NifArchiveAssetParser(
         }
     }
 
-    private IEnumerable<AssetQueryResult<string>> ParseArchiveFile(IArchiveFile archiveFile) {
-        var filePath = archiveFile.Path;
-
-        var assetType = assetTypeService.GetAssetType(filePath);
+    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseArchiveFile(IArchiveFile archiveFile) {
+        var assetType = assetTypeService.GetAssetType(archiveFile.Path);
         if (assetType != assetTypeService.Provider.Model) yield break;
 
         var tempPath = fileSystem.Path.GetTempFileName();
@@ -52,9 +51,9 @@ public sealed class NifArchiveAssetParser(
             archiveFile.AsStream().CopyTo(bsaStream);
             bsaStream.Close();
 
-            //Parse temp file as nif and delete it afterwards
-            foreach (var result in modelAssetQuery.ParseAssets(tempPath)) {
-                yield return result with { Reference = filePath };
+            //Parse temp file as nif and delete it afterward
+            foreach (var result in modelAssetQuery.ParseAssets(tempPath, archiveFile.Path)) {
+                yield return result;
             }
         } finally {
             fileSystem.File.Delete(tempPath);

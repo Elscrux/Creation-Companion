@@ -6,6 +6,7 @@ using CreationEditor.Services.Mutagen.References.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData.Binding;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -21,7 +22,7 @@ public sealed class AssetReference : IReference, IDisposable {
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IRecordReferenceController _recordReferenceController;
 
-    public string Name => Asset.DataRelativePath;
+    public string Name => Asset.DataRelativePath.Path;
     public string Identifier => string.Empty;
     public string Type => Asset.Type.BaseFolder;
 
@@ -71,7 +72,7 @@ public sealed class AssetReference : IReference, IDisposable {
                         }
                     }
                 } else {
-                    collection.Apply(e.EventArgs.Transform<string, AssetReference>(GetAssetReference));
+                    collection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
                 }
             });
 
@@ -94,14 +95,14 @@ public sealed class AssetReference : IReference, IDisposable {
                         }
                     }
                 } else {
-                    collection.Apply(e.EventArgs.Transform<string, AssetReference>(GetAssetReference));
+                    collection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
                 }
             });
 
         return new ReadOnlyObservableCollection<IReference>(collection);
 
         RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
-        AssetReference? GetAssetReference(string path) {
+        AssetReference? GetAssetReference(DataRelativePath path) {
             var assetLink = _assetTypeService.GetAssetLink(path);
             if (assetLink is null) return null;
 
@@ -139,7 +140,7 @@ public sealed class AssetReference : IReference, IDisposable {
     }
 
     public AssetReference(
-        string path,
+        DataRelativePath path,
         ILinkCacheProvider linkCacheProvider,
         IAssetTypeService assetTypeService,
         IAssetReferenceController assetReferenceController,

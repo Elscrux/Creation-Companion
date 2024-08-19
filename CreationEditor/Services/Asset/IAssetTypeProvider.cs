@@ -11,7 +11,7 @@ public interface IAssetTypeProvider {
     /// <summary>
     /// Map for constructors of asset links for each asset type
     /// </summary>
-    IDictionary<IAssetType, Func<string, IAssetLink>> AssetTypeConstructor { get; }
+    IDictionary<IAssetType, Func<DataRelativePath, IAssetLink>> AssetTypeConstructor { get; }
 
     /// <summary>
     /// Map for identifiers of asset types. Each identifier is a three character string.

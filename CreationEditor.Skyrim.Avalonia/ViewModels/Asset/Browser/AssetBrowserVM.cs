@@ -39,6 +39,7 @@ using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim.Assets;
@@ -234,9 +235,9 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (asset?.Asset is AssetFile assetFile && assetFile.ReferencedAsset.AssetLink.Type == SkyrimModelAssetType.Instance) {
                             // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
                             var assetLinks = modelAssetQuery
-                                .ParseAssets(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetFile.ReferencedAsset.AssetLink.DataRelativePath))
+                                .ParseAssets(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetFile.ReferencedAsset.AssetLink.DataRelativePath.Path), assetFile.ReferencedAsset.AssetLink.DataRelativePath)
                                 .Select(r => r.AssetLink)
-                                .Where(assetLink => !DataDirectory.Contains(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetLink.DataRelativePath)))
+                                .Where(assetLink => !DataDirectory.Contains(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetLink.DataRelativePath.Path)))
                                 .ToArray();
 
                             if (assetLinks.Length > 0) {
@@ -378,13 +379,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     private ReferenceBrowserVM? GetReferenceBrowserVM(params AssetTreeItem[] assets) {
         var recordReferences = new HashSet<IFormLinkGetter>(FormLinkIdentifierEqualityComparer.Instance);
-        var assetReferences = new HashSet<string>(AssetCompare.PathComparer);
+        var assetReferences = new HashSet<DataRelativePath>();
 
         // Gather all references to all assets
         var referencedAssets = assets
             .NotNull()
             .SelectMany(a => a.GetReferencedAssets())
-            .DistinctBy(a => a.AssetLink.DataRelativePath.ToLowerInvariant());
+            .DistinctBy(a => a.AssetLink.DataRelativePath);
 
         foreach (var referencedAsset in referencedAssets) {
             recordReferences.AddRange(referencedAsset.RecordReferences);

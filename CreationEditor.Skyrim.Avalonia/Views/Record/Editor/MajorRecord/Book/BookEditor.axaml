@@ -142,9 +142,7 @@
                   VerticalAlignment="Top">
                 <StackPanel Spacing="10">
                     <Button Click="Switch_OnClick">
-                        <Button.Content>
-                            <controls:SymbolIcon Symbol="Switch"/>
-                        </Button.Content>
+                        <controls:SymbolIcon Symbol="Switch"/>
                     </Button>
 
                     <ComboBox ItemsSource="{x:Static constants:EnumConstants.Languages}"

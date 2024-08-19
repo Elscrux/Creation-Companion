@@ -37,18 +37,17 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
+        <!-- todo add back in when ReactiveUI.Validation is updated -->
+        <!-- IsEnabled="{Binding !HasErrors}" -->
         <Button
             Click="AddButton_Click"
             Height="32"
             Width="32"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            IsEnabled="{Binding !HasErrors}"
             IsVisible="{Binding #Creation.ShowAddButton}"
             Padding="7">
-            <Button.Content>
-                <controls:SymbolIcon Symbol="Add"/>
-            </Button.Content>
+            <controls:SymbolIcon Symbol="Add"/>
         </Button>
 
         <Popup x:Name="Popup"

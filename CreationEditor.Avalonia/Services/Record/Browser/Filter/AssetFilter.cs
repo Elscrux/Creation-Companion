@@ -36,7 +36,7 @@ public abstract class AssetFilter<T> : IRecordFilter {
         if (record is not IAssetLinkContainerGetter assetLinkContainer) yield break;
 
         foreach (var assetLink in assetLinkContainer.EnumerateListedAssetLinks()) {
-            yield return assetLink.DataRelativePath;
+            yield return assetLink.DataRelativePath.Path;
         }
     }
 }

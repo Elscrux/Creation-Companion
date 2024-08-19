@@ -44,14 +44,14 @@ public sealed class AssetTypeService : IAssetTypeService {
         return assetType;
     }
 
-    public IAssetLink? GetAssetLink(string filePath) {
-        var assetType = GetAssetType(filePath);
+    public IAssetLink? GetAssetLink(DataRelativePath filePath) {
+        var assetType = GetAssetType(filePath.Path);
         if (assetType is null) return null;
 
         return GetAssetLink(filePath, assetType);
     }
 
-    public IAssetLink GetAssetLink(string filePath, IAssetType assetType) {
+    public IAssetLink GetAssetLink(DataRelativePath filePath, IAssetType assetType) {
         var constructor = Provider.AssetTypeConstructor[assetType];
         return constructor(filePath);
     }

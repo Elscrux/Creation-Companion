@@ -139,7 +139,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
             writer.Write(assetTypeService.GetAssetTypeIdentifier(assetType));
             writer.Write(assets.Count);
             foreach (var (name, usages) in assets) {
-                writer.Write(name.DataRelativePath);
+                writer.Write(name.DataRelativePath.Path);
                 writer.Write(usages.Count);
                 cacheableQuery.WriteReferences(writer, usages);
             }

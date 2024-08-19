@@ -34,12 +34,10 @@
                                 IsVisible="False"
                                 Classes="Transparent"
                                 Foreground="ForestGreen">
-                            <Button.Content>
-                                <StackPanel Orientation="Horizontal">
-                                    <controls:SymbolIcon Symbol="Add"/>
-                                    <TextBlock Text="Add"/>
-                                </StackPanel>
-                            </Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <controls:SymbolIcon Symbol="Add"/>
+                                <TextBlock Text="Add"/>
+                            </StackPanel>
                         </Button>
 
                         <DataGridColumnHeader Grid.Row="1" Grid.Column="0" Name="PART_TopLeftCornerHeader"

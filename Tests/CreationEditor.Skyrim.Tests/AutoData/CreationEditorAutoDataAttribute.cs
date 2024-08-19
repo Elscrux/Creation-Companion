@@ -1,21 +1,20 @@
 ﻿using AutoFixture;
 using AutoFixture.Xunit2;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Testing.AutoData;
+using Noggog.Testing.AutoFixture;
 namespace CreationEditor.Skyrim.Tests.AutoData;
 
 public sealed class CreationEditorAutoDataAttribute(
     bool configureMembers = false,
     GameRelease release = GameRelease.SkyrimSE,
-    bool useMockFileSystem = true)
-    : AutoDataAttribute(() => new Fixture().Customize(new CreationEditorCustomization(configureMembers, release, useMockFileSystem)));
+    TargetFileSystem targetFileSystem = TargetFileSystem.Fake)
+    : AutoDataAttribute(() => new Fixture().Customize(new CreationEditorCustomization(configureMembers, release, targetFileSystem)));
 
 public sealed class CreationEditorCustomization(
     bool configureMembers,
     GameRelease release,
-    bool useMockFileSystem) : ICustomization {
+    TargetFileSystem targetFileSystem) : ICustomization {
     public void Customize(IFixture fixture) {
-        fixture.Customize(new MutagenDefaultCustomization(configureMembers, release, useMockFileSystem));
-        fixture.Customize(new EditorEnvironmentCustomization());
+        fixture.Customize(new EditorEnvironmentCustomization(configureMembers, release, targetFileSystem));
     }
 }

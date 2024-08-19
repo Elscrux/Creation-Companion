@@ -1,9 +1,11 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetProvider(
+    ILogger logger,
     IFileSystem fileSystem,
     IAssetReferenceController assetReferenceController,
     IAssetTypeService assetTypeService,
@@ -29,7 +31,7 @@ public sealed class AssetProvider(
             if (dir is not null) return dir;
         }
 
-        var assetDirectory = new AssetDirectory(fileSystem.DirectoryInfo.New(directory), fileSystem, dataDirectoryService, assetReferenceController, assetTypeService, archiveService);
+        var assetDirectory = new AssetDirectory(fileSystem.DirectoryInfo.New(directory), logger, fileSystem, dataDirectoryService, assetReferenceController, assetTypeService, archiveService);
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }

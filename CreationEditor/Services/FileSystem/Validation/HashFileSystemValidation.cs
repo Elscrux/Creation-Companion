@@ -2,12 +2,11 @@
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
+using Mutagen.Bethesda.Assets;
 using Noggog;
-using Serilog;
 namespace CreationEditor.Services.FileSystem.Validation;
 
 public sealed class HashFileSystemValidation(
-    ILogger logger,
     IFileSystem fileSystem,
     IHashFileSystemValidationSerialization fileSystemValidationSerialization,
     string searchPattern = "*.*")
@@ -15,30 +14,27 @@ public sealed class HashFileSystemValidation(
 
     private const int MaxParallelLevel = 2;
 
-    public async Task<CacheValidationResult<string>> GetInvalidatedContent(string source) {
+    public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(string source) {
         var validate = fileSystemValidationSerialization.Validate(source);
         if (!validate || !fileSystemValidationSerialization.TryDeserialize(source, out var fileSystemCacheData)) {
             var buildCache = await BuildCache(source);
             fileSystemValidationSerialization.Serialize(buildCache, source);
 
-            return CacheValidationResult<string>.FullyInvalid();
+            return CacheValidationResult<DataRelativePath>.FullyInvalid(() => {
+                fileSystemValidationSerialization.Serialize(buildCache, source);
+            });
         }
 
         var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source, 1).ToArrayAsync();
-        if (invalidatedFiles.Length == 0) return CacheValidationResult<string>.Valid();
+        if (invalidatedFiles.Length == 0) return CacheValidationResult<DataRelativePath>.Valid();
 
-        // Do cache update process in the background
-        Task.Run(() => {
+        return CacheValidationResult<DataRelativePath>.PartlyInvalid(invalidatedFiles
+                .Select(x => new DataRelativePath(fileSystem.Path.GetRelativePath(source, x)))
+                .ToArray(),
+            () => {
                 UpdateCache(fileSystemCacheData, invalidatedFiles, source);
                 fileSystemValidationSerialization.Serialize(fileSystemCacheData, source);
-            })
-            .FireAndForget(e => {
-                logger.Here().Warning("Failed to update cache for {Source}: {Message}", source, e.Message);
-            });
-
-        return CacheValidationResult<string>.PartlyInvalid(invalidatedFiles
-            .Select(x => fileSystem.Path.GetRelativePath(source, x))
-            .ToArray());
+        });
 
         async IAsyncEnumerable<string> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, string directoryPath, int level) {
             var nextLevel = level + 1;
@@ -76,7 +72,6 @@ public sealed class HashFileSystemValidation(
                     }
                 }
             }
-            yield break;
 
             async IAsyncEnumerable<string> DirectoryParse(string subDirectoryPath) {
                 var subDirectoryName = fileSystem.Path.GetFileName(subDirectoryPath);

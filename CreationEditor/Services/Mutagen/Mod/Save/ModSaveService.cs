@@ -21,9 +21,10 @@ public sealed class ModSaveService(
 
         // todo add options for localization export!
         var binaryWriteParameters = new BinaryWriteParameters {
+            FileSystem = fileSystem,
             StringsWriter = null,
             TargetLanguageOverride = null,
-            Encodings = null
+            Encodings = null,
         };
 
         savePipeline.Execute(linkCacheProvider.LinkCache, mod);
@@ -37,15 +38,15 @@ public sealed class ModSaveService(
         logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {
             // Try to save mod
-            mod.WriteToBinaryParallel(filePath, binaryWriteParameters, fileSystem);
+            mod.WriteToBinary(filePath, binaryWriteParameters);
         } catch (Exception e) {
             logger.Here().Warning("Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
             try {
                 // Save at backup location if failed once
                 filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
-                mod.WriteToBinaryParallel(filePath, binaryWriteParameters, fileSystem);
+                mod.WriteToBinary(filePath, binaryWriteParameters);
             } catch (Exception e2) {
-                logger.Here().Warning("Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
+                logger.Here().Warning(e2, "Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
             }
         }
     }

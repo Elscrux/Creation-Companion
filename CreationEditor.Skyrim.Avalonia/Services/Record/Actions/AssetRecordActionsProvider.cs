@@ -20,27 +20,27 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
         IMenuItemProvider menuItemProvider) {
 
         var goToAsset = ReactiveCommand.CreateFromTask<RecordListContext>(async context => {
-            if (context.SelectedRecords[0].Record is not IModeledGetter { Model.File.DataRelativePath: {} dataRelativePath }) return;
+            if (context.SelectedRecords[0].Record is not IModeledGetter { Model.File.DataRelativePath: var dataRelativePath }) return;
 
             var assetBrowser = await dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
             if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
 
-            await assetBrowserVM.MoveTo.Execute(dataRelativePath);
+            await assetBrowserVM.MoveTo.Execute(dataRelativePath.Path);
         });
 
         _actions = [
             new RecordAction(
-                context => context.SelectedRecords is [{ Record: IModeledGetter { Model.File.RawPath: {} rawFilePath } }]
-                 && !string.IsNullOrWhiteSpace(rawFilePath),
+                context => context.SelectedRecords is [{ Record: IModeledGetter { Model.File.DataRelativePath: var rawFilePath } }]
+                 && !string.IsNullOrWhiteSpace(rawFilePath.Path),
                 50,
                 RecordActionGroup.Linking,
                 goToAsset,
                 context => {
-                    var rawFilePath = ((context.SelectedRecords[0].Record as IModeledGetter)!).Model!.File.RawPath;
+                    var dataRelativePath = ((context.SelectedRecords[0].Record as IModeledGetter)!).Model!.File.DataRelativePath;
 
                     return menuItemProvider.Custom(
                         goToAsset,
-                        $"Go to {fileSystem.Path.GetFileName(rawFilePath)}",
+                        $"Go to {fileSystem.Path.GetFileName(dataRelativePath.Path)}",
                         context,
                         Symbol.Go);
                 }

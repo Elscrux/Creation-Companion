@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Asset;
+﻿using System.Runtime.CompilerServices;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
@@ -11,7 +12,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
     /// <summary>
     /// Builds an asset reference cache for the given asset query and source.
     /// </summary>
-    /// <param name="query">Query to to parse the source with</param>
+    /// <param name="query">Query to parse the source with</param>
     /// <param name="source">Source to parse</param>
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TReference"></typeparam>
@@ -57,13 +58,24 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             }
 
             // Cache is invalid, parse assets and serialize them
+            Task<CacheValidationResult<TReference>>? updateValidationCache = null;
             if (cacheable is IAssetReferenceCacheableValidatableQuery<TSource, TReference> validatableQuery) {
                 // Build validation cache to use for validation next time
-                await validatableQuery.CacheValidation.GetInvalidatedContent(source);
+                updateValidationCache = validatableQuery.CacheValidation.GetInvalidatedContent(source);
             }
 
             logger.Here().Debug("Invalid cache for {Source}, parsing all assets", sourceName);
-            return FullyParseCache(assetReferenceCacheableQuery);
+            var referenceCache = FullyParseCache(assetReferenceCacheableQuery);
+
+            // In case of a validation cache, update it only after the cache has been fully parsed
+            // This ensures that the cache is only updated if the parsing was successful
+            // Otherwise, the validation cache would be updated when the reference cache is not up to date
+            if (updateValidationCache is not null) {
+                var cacheValidationResult = await updateValidationCache;
+                cacheValidationResult.UpdateCache();
+            }
+
+            return referenceCache;
         }
 
         AssetReferenceCache<TSource, TReference> FullyParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
@@ -117,8 +129,9 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             var newParseCache = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
             var parseTask = Task.Run(() => {
                 foreach (var invalidatedContent in validationResult.InvalidatedContent) {
-                    if (invalidatedContent is TSource sourceContent) {
-                        ParseSource(sourceContent, newParseCache);
+                    var newSource = query.ReferenceToSource(invalidatedContent);
+                    if (newSource is not null) {
+                        ParseSource(newSource, newParseCache);
                     }
                 }
             });
@@ -147,6 +160,10 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
 
             // Serialize merged cache
             assetReferenceCacheableQuery.Serialization.Serialize(source, assetReferenceCacheableQuery, deserializedCache);
+
+            // Update validation cache
+            validationResult.UpdateCache();
+
             return deserializedCache;
         }
     }

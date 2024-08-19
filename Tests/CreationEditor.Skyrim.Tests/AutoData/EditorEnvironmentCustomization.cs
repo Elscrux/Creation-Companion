@@ -10,18 +10,23 @@ using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Testing.AutoData;
+using Noggog.Testing.AutoFixture;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.AutoData;
 
 public sealed class EditorEnvironmentCustomization(
     bool configureMembers = false,
     GameRelease release = GameRelease.SkyrimSE,
-    bool useMockFileSystem = true) : ICustomization {
+    TargetFileSystem targetFileSystem = TargetFileSystem.Fake) : ICustomization {
 
     public void Customize(IFixture fixture) {
-        var mutagenDefaultCustomization = new MutagenDefaultCustomization(configureMembers, release, useMockFileSystem);
+        // Mutagen customizations
+        var mutagenDefaultCustomization = new MutagenDefaultCustomization(configureMembers, release, targetFileSystem);
         mutagenDefaultCustomization.Customize(fixture);
+        var mutagenConcreteModsCustomization = new MutagenConcreteModsCustomization(release, configureMembers);
+        mutagenConcreteModsCustomization.Customize(fixture);
 
+        // Custom customizations
         fixture.Register<INotificationService>(fixture.Create<NotificationService>);
         fixture.Register<IRecordReferenceCacheFactory>(() => new EmptyRecordReferenceCacheFactory(fixture));
         fixture.Register<Func<IEditorEnvironmentUpdater>>(() => fixture.Create<EditorEnvironmentUpdater<ISkyrimMod, ISkyrimModGetter>>);

@@ -5,26 +5,31 @@ using CreationEditor.Services.FileSystem.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
+using Mutagen.Bethesda.Plugins.Exceptions;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class FileSystemAssetQuery(
     Func<string, IFileSystemValidation> fileSystemValidationFactory,
+    ILogger logger,
     IFileSystem fileSystem,
     IDataDirectoryProvider dataDirectoryProvider,
     IFileAssetParser fileAssetParser,
-    IAssetReferenceSerialization<string, string> serialization)
-    : IAssetReferenceCacheableQuery<string, string>, IAssetReferenceCacheableValidatableQuery<string, string> {
+    IAssetReferenceSerialization<string, DataRelativePath> serialization)
+    : IAssetReferenceCacheableQuery<string, DataRelativePath>, IAssetReferenceCacheableValidatableQuery<string, DataRelativePath> {
     private const string WildcardSearchPattern = "*";
 
     public Version CacheVersion { get; } = new(1, 0);
-    public IAssetReferenceSerialization<string, string> Serialization { get; } = serialization;
-    public IInternalCacheValidation<string, string> CacheValidation { get; } = fileSystemValidationFactory(fileAssetParser.FilterPattern);
+    public IAssetReferenceSerialization<string, DataRelativePath> Serialization { get; } = serialization;
+    public IInternalCacheValidation<string, DataRelativePath> CacheValidation { get; } = fileSystemValidationFactory(fileAssetParser.FilterPattern);
     public string QueryName => fileAssetParser.Name;
-    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
-        = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
+    public IDictionary<string, AssetReferenceCache<string, DataRelativePath>> AssetCaches { get; }
+        = new ConcurrentDictionary<string, AssetReferenceCache<string, DataRelativePath>>();
 
-    public IEnumerable<AssetQueryResult<string>> ParseAssets(string path) {
+    public string ReferenceToSource(DataRelativePath reference) => reference.Path;
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string path) {
         var isFilePath = fileSystem.Path.HasExtension(path);
 
         // If the path is not rooted, combine it with the data directory
@@ -51,9 +56,9 @@ public sealed class FileSystemAssetQuery(
 
     public void WriteContext(BinaryWriter writer, string source) => writer.Write(source);
 
-    public void WriteReferences(BinaryWriter writer, IEnumerable<string> references) {
+    public void WriteReferences(BinaryWriter writer, IEnumerable<DataRelativePath> references) {
         foreach (var usage in references) {
-            writer.Write(usage);
+            writer.Write(usage.Path);
         }
     }
 
@@ -61,7 +66,7 @@ public sealed class FileSystemAssetQuery(
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
 
-    public IEnumerable<string> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
+    public IEnumerable<DataRelativePath> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
         for (var i = 0; i < assetReferenceCount; i++) {
             yield return reader.ReadString();
         }

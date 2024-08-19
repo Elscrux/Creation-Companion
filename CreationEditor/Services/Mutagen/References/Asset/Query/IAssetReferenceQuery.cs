@@ -16,6 +16,13 @@ public interface IAssetReferenceQuery<TSource, TReference>
     IDictionary<TSource, AssetReferenceCache<TSource, TReference>> AssetCaches { get; }
 
     /// <summary>
+    /// Attempts to convert a reference to a source.
+    /// </summary>
+    /// <param name="reference">Reference to convert</param>
+    /// <returns>Source of the reference, or null if the reference couldn't be converted</returns>
+    TSource? ReferenceToSource(TReference reference);
+
+    /// <summary>
     /// Parses the given source into a list of asset references.
     /// </summary>
     /// <param name="source">Source to parse</param>

@@ -2,21 +2,27 @@
 using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
+using Mutagen.Bethesda.Assets;
+using Mutagen.Bethesda.Plugins.Exceptions;
 using nifly;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ModelAssetQuery(
+    ILogger logger,
     IFileSystem fileSystem,
     IAssetTypeService assetTypeService)
-    : IAssetReferenceQuery<string, string> {
+    : IAssetReferenceQuery<string, DataRelativePath> {
 
     public string QueryName => "Model";
-    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
-        = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
+    public IDictionary<string, AssetReferenceCache<string, DataRelativePath>> AssetCaches { get; }
+        = new ConcurrentDictionary<string, AssetReferenceCache<string, DataRelativePath>>();
 
-    public IEnumerable<AssetQueryResult<string>> ParseAssets(string source) => ParseAssetsInternal(source).Distinct();
+    public string ReferenceToSource(DataRelativePath reference) => reference.Path;
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source) => ParseAssetsInternal(source, source).Distinct();
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source, DataRelativePath actualReference) => ParseAssetsInternal(source, actualReference).Distinct();
 
-    private IEnumerable<AssetQueryResult<string>> ParseAssetsInternal(string path) {
+    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssetsInternal(string path, DataRelativePath actualReference) {
         if (!fileSystem.File.Exists(path)) yield break;
 
         using var nif = new NifFile();
@@ -53,14 +59,26 @@ public sealed class ModelAssetQuery(
             }
         }
 
-        IEnumerable<AssetQueryResult<string>> GetAssets(NiString? asset) {
+        IEnumerable<AssetQueryResult<DataRelativePath>> GetAssets(NiString? asset) {
             if (asset is null) yield break;
 
             var assetString = asset.get();
             if (!string.IsNullOrEmpty(assetString)) {
-                var assetLink = assetTypeService.GetAssetLink(assetString);
+                DataRelativePath dataRelativePath;
+                try {
+                    dataRelativePath = assetString;
+                } catch (AssetPathMisalignedException e) {
+                    logger.Here().Warning(e,
+                        "Failed to parse asset path {AssetString} referenced in {Path}: {Exception}",
+                        assetString,
+                        path,
+                        e.Message);
+                    yield break;
+                }
+
+                var assetLink = assetTypeService.GetAssetLink(dataRelativePath);
                 if (assetLink is not null) {
-                    yield return new AssetQueryResult<string>(assetLink, path);
+                    yield return new AssetQueryResult<DataRelativePath>(assetLink, actualReference);
                 }
             }
         }

@@ -121,7 +121,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction<IAssetLinkGetter>(
             GetStringFunctions<IAssetLinkGetter>(
                 (stringFunction, translatedString, text) =>
-                    stringFunction(translatedString.DataRelativePath, text)),
+                    stringFunction(translatedString.DataRelativePath.Path, text)),
             10);
 
         // String

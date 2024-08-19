@@ -37,12 +37,10 @@
                                 IsVisible="False"
                                 Classes="Transparent"
                                 Foreground="ForestGreen">
-                            <Button.Content>
-                                <StackPanel Orientation="Horizontal">
-                                    <controls:SymbolIcon Symbol="Add"/>
-                                    <TextBlock Text="Add"/>
-                                </StackPanel>
-                            </Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <controls:SymbolIcon Symbol="Add"/>
+                                <TextBlock Text="Add"/>
+                            </StackPanel>
                         </Button>
                         <ScrollViewer Name="PART_HeaderScrollViewer"
                                       DockPanel.Dock="Top"

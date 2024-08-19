@@ -31,7 +31,7 @@ internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
         if (Record is IModeledGetter { Model: {} model }) {
             hashCode = HashCode.Combine(
                 hashCode,
-                model.File.RawPath
+                model.File.GivenPath
                     .ToLower()
                     .Replace('/', '\\')
                     .TrimStart("meshes\\")

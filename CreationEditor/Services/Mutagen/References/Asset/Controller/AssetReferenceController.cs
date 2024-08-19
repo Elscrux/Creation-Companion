@@ -11,6 +11,7 @@ using CreationEditor.Services.Mutagen.References.Asset.Parser;
 using CreationEditor.Services.Notification;
 using DynamicData;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
@@ -43,21 +44,21 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
-    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifDirectoryAssetReferenceManager
+    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, DataRelativePath> _nifDirectoryAssetReferenceManager
         = new((asset, change) => asset.NifDirectoryReferences.Apply(change),
             (record, newData) => record.NifDirectoryReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
-    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, string> _nifArchiveAssetReferenceManager
+    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, DataRelativePath> _nifArchiveAssetReferenceManager
         = new((asset, change) => asset.NifArchiveReferences.Apply(change),
             (record, newData) => record.NifArchiveReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = [];
-    private AssetReferenceCache<string, string> _nifDirectoryAssetReferenceCache = null!;
-    private readonly List<AssetReferenceCache<string, string>> _nifArchiveAssetCaches = [];
+    private AssetReferenceCache<string, DataRelativePath> _nifDirectoryAssetReferenceCache = null!;
+    private readonly List<AssetReferenceCache<string, DataRelativePath>> _nifArchiveAssetCaches = [];
 
     private int _loadingProcesses;
     private readonly BehaviorSubject<bool> _isLoading = new(true);
@@ -258,7 +259,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
             _nifDirectoryAssetReferenceCache.AddReference(added, dataRelativePath);
 
-            var change = new Change<string>(ListChangeReason.Add, dataRelativePath);
+            var change = new Change<DataRelativePath>(ListChangeReason.Add, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(added, change);
         }
     }
@@ -268,7 +269,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
             _nifDirectoryAssetReferenceCache.RemoveReference(removed, dataRelativePath);
 
-            var change = new Change<string>(ListChangeReason.Remove, dataRelativePath);
+            var change = new Change<DataRelativePath>(ListChangeReason.Remove, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(removed, change);
         }
     }

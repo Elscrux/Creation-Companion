@@ -56,9 +56,7 @@
                     <Button IsVisible="{Binding CanCreateNewMod}"
                             VerticalAlignment="Stretch"
                             Margin="5, 0">
-                        <Button.Content>
-                            <controls:SymbolIcon Symbol="Add"/>
-                        </Button.Content>
+                        <controls:SymbolIcon Symbol="Add"/>
 
                         <Button.Flyout>
                             <Flyout>

@@ -6,6 +6,7 @@ using CreationEditor.Skyrim.Tests.AutoData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Tests.Test;
 
@@ -71,7 +72,7 @@ public sealed class RecordReferenceControllerTests {
 
         // Build the initial environment with the master mod
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
-        masterMod.WriteToBinary(modPath, fileSystem: fileSystem);
+        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
             .LoadOrder.SetImmutableMods([masterMod.ModKey])
             .ActiveMod.New("NewMod")
@@ -143,7 +144,7 @@ public sealed class RecordReferenceControllerTests {
 
         // Build the initial environment with the master mod
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
-        masterMod.WriteToBinary(modPath, fileSystem: fileSystem);
+        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem});
         editorEnvironment.Update(updater => updater
             .LoadOrder.SetImmutableMods([masterMod.ModKey])
             .ActiveMod.New("NewMod")

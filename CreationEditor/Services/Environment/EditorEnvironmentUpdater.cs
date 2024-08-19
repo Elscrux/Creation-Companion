@@ -3,6 +3,7 @@ using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
@@ -87,7 +88,8 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
                 : ModInstantiator<TMod>.Importer(
                     new ModPath(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, ActiveMod.ModKey.FileName)),
                     _gameReleaseContext.Release,
-                    _fileSystem),
+                    new BinaryReadParameters { FileSystem = _fileSystem }
+                ),
             ActiveModBuilder.ActiveModMode.New => ModInstantiator<TMod>.Activator(
                 ActiveMod.ModKey,
                 _gameReleaseContext.Release),

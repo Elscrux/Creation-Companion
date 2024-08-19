@@ -3,21 +3,26 @@
 public struct CacheValidationResult<TContent> {
     public bool CacheFullyInvalidated { get; }
     public IList<TContent> InvalidatedContent { get; }
+    /// <summary>
+    /// Receiver is responsible for calling this action to update the cache
+    /// </summary>
+    public Action UpdateCache { get; set; }
 
-    private CacheValidationResult(bool cacheFullyInvalidated, IList<TContent> invalidatedContent) {
+    private CacheValidationResult(bool cacheFullyInvalidated, IList<TContent> invalidatedContent, Action updateCache) {
         CacheFullyInvalidated = cacheFullyInvalidated;
         InvalidatedContent = invalidatedContent;
+        UpdateCache = updateCache;
     }
 
-    public static CacheValidationResult<TContent> FullyInvalid() {
-        return new CacheValidationResult<TContent>(true, []);
+    public static CacheValidationResult<TContent> FullyInvalid(Action updateCache) {
+        return new CacheValidationResult<TContent>(true, [], updateCache);
     }
 
-    public static CacheValidationResult<TContent> PartlyInvalid(IList<TContent> invalidatedContent) {
-        return new CacheValidationResult<TContent>(false, invalidatedContent);
+    public static CacheValidationResult<TContent> PartlyInvalid(IList<TContent> invalidatedContent, Action updateCache) {
+        return new CacheValidationResult<TContent>(false, invalidatedContent, updateCache);
     }
 
     public static CacheValidationResult<TContent> Valid() {
-        return new CacheValidationResult<TContent>(false, []);
+        return new CacheValidationResult<TContent>(false, [], () => {});
     }
 }

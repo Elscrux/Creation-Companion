@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.Mutagen.References.Asset.Query;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
 public interface IArchiveAssetParser {
@@ -12,5 +13,5 @@ public interface IArchiveAssetParser {
     /// </summary>
     /// <param name="archivePath">Full path to the archive file to parse</param>
     /// <returns>Enumerable of asset references</returns>
-    IEnumerable<AssetQueryResult<string>> ParseAssets(string archivePath);
+    IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string archivePath);
 }

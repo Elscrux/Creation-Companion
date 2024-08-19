@@ -8,10 +8,10 @@ public sealed class AssetLinkEqualityComparer : IEqualityComparer<IAssetLinkGett
         if (ReferenceEquals(x, y)) return true;
         if (x is null || y is null) return false;
 
-        return string.Equals(x.DataRelativePath, y.DataRelativePath, AssetCompare.PathComparison);
+        return x.DataRelativePath.Equals(y.DataRelativePath);
     }
 
     public int GetHashCode(IAssetLinkGetter obj) {
-        return HashCode.Combine(obj.DataRelativePath.ToLowerInvariant());
+        return obj.DataRelativePath.GetHashCode();
     }
 }

@@ -124,7 +124,7 @@ public sealed class AssetController(
 
             // Remap references in NIFs
             foreach (var reference in assetFile.ReferencedAsset.NifReferences) {
-                var fullPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, reference);
+                var fullPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, reference.Path);
                 modelModificationService.RemapLinks(fullPath, p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, AssetCompare.PathComparison), dataRelativePath);
             }
         }

@@ -3,19 +3,20 @@ using System.IO.Abstractions;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ArchiveAssetQuery(
     IFileSystem fileSystem,
     IArchiveAssetParser archiveAssetParser,
-    IAssetReferenceSerialization<string, string> serialization)
-    : IAssetReferenceCacheableQuery<string, string> {
+    IAssetReferenceSerialization<string, DataRelativePath> serialization)
+    : IAssetReferenceCacheableQuery<string, DataRelativePath> {
 
     public Version CacheVersion { get; } = new(1, 0);
-    public IAssetReferenceSerialization<string, string> Serialization { get; } = serialization;
+    public IAssetReferenceSerialization<string, DataRelativePath> Serialization { get; } = serialization;
     public string QueryName => archiveAssetParser.Name;
-    public IDictionary<string, AssetReferenceCache<string, string>> AssetCaches { get; }
-        = new ConcurrentDictionary<string, AssetReferenceCache<string, string>>();
+    public IDictionary<string, AssetReferenceCache<string, DataRelativePath>> AssetCaches { get; }
+        = new ConcurrentDictionary<string, AssetReferenceCache<string, DataRelativePath>>();
 
     public void WriteCacheValidation(BinaryWriter writer, string source) {
         var hash = fileSystem.GetFileHash(source);
@@ -24,9 +25,9 @@ public sealed class ArchiveAssetQuery(
 
     public void WriteContext(BinaryWriter writer, string source) => writer.Write(source);
 
-    public void WriteReferences(BinaryWriter writer, IEnumerable<string> references) {
+    public void WriteReferences(BinaryWriter writer, IEnumerable<DataRelativePath> references) {
         foreach (var usage in references) {
-            writer.Write(usage);
+            writer.Write(usage.Path);
         }
     }
 
@@ -37,11 +38,12 @@ public sealed class ArchiveAssetQuery(
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
 
-    public IEnumerable<string> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
+    public IEnumerable<DataRelativePath> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
         for (var i = 0; i < assetReferenceCount; i++) {
             yield return reader.ReadString();
         }
     }
 
-    public IEnumerable<AssetQueryResult<string>> ParseAssets(string archivePath) => archiveAssetParser.ParseAssets(archivePath);
+    public string? ReferenceToSource(DataRelativePath reference) => null;
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string archivePath) => archiveAssetParser.ParseAssets(archivePath);
 }
