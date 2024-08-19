@@ -239,15 +239,16 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
 
     private IEnumerable<Control> ProcessText(string nodeText, TextOptions textOptions) {
         // Handle spaces before and after [pagebreak]
-        while (nodeText.Contains(" [pagebreak]", StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace(" [pagebreak]", "[pagebreak]", StringComparison.OrdinalIgnoreCase);
-        while (nodeText.Contains("[pagebreak] ", StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace("[pagebreak] ", "[pagebreak]", StringComparison.OrdinalIgnoreCase);
+        const string pagebreak = "[pagebreak]";
+        while (nodeText.Contains(" " + pagebreak, StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace(" " + pagebreak, pagebreak, StringComparison.OrdinalIgnoreCase);
+        while (nodeText.Contains(pagebreak + " ", StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace(pagebreak + " ", pagebreak, StringComparison.OrdinalIgnoreCase);
 
         // Add newlines around pagebreaks to ensure the split works in all valid cases
-        if (nodeText.StartsWith("[pagebreak]", StringComparison.OrdinalIgnoreCase)) nodeText = "\n" + nodeText;
-        if (nodeText.EndsWith("[pagebreak]", StringComparison.OrdinalIgnoreCase)) nodeText += "\n";
+        if (nodeText.StartsWith(pagebreak, StringComparison.OrdinalIgnoreCase)) nodeText = "\n" + nodeText;
+        if (nodeText.EndsWith(pagebreak, StringComparison.OrdinalIgnoreCase)) nodeText += "\n";
 
         return nodeText
-            .Split("\n[pagebreak]\n")
+            .Split($"\n{pagebreak}\n")
             .SelectMany(GetTextBlock);
 
         IEnumerable<Control> GetTextBlock(string text, int i) {

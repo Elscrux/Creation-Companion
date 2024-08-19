@@ -1,4 +1,5 @@
-﻿using CreationEditor.Avalonia.Models.Record.Browser;
+﻿using System.Text;
+using CreationEditor.Avalonia.Models.Record.Browser;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
@@ -11,7 +12,7 @@ public static class RecordFilterExtension {
 
         foreach (var element in elements) {
             foreach (var selectedString in stringSelector(element)) {
-                var accumulatedPath = string.Empty;
+                var accumulatedPath = new StringBuilder();
                 var currentRoot = root;
 
                 var directories = selectedString.Split(separator);
@@ -19,11 +20,15 @@ public static class RecordFilterExtension {
                     var directory = directories[i];
                     if (directory.IsNullOrEmpty()) break;
 
-                    accumulatedPath += i == directories.Length - 1 ? directory : directory + separator[0];
+                    if (i == directories.Length - 1) {
+                        accumulatedPath.Append(directory);
+                    } else {
+                        accumulatedPath.Append(directory + separator[0]);
+                    }
 
                     var listing = currentRoot.RecordFilters.FirstOrDefault(x => string.Equals(x.DisplayName, directory, StringComparison.OrdinalIgnoreCase));
                     if (listing is null) {
-                        var path = accumulatedPath;
+                        var path = accumulatedPath.ToString();
                         listing = new RecordFilterListing(
                             directory,
                             record => {

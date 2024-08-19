@@ -75,7 +75,7 @@ public sealed class DockFactory(
         var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
         if (!dockResult.HasValue) throw new InvalidOperationException($"Failed to open dock {dockElement}");
 
-        return Dispatcher.UIThread.Invoke(() => {
+        return await Dispatcher.UIThread.InvokeAsync(() => {
             var control = dockResult.Value.GetControl();
             dockingManagerService.AddControl(control, dockResult.Value.DockConfig);
             return control;

@@ -196,7 +196,9 @@ public sealed class ReferenceBrowserVM : ViewModel {
             contextFlyout.ShowAt(control, true);
         }
 
-        if (selectedAssetReferences.Count > 0) {}
+        if (selectedAssetReferences.Count > 0) {
+            // TODO: Implement asset reference context menu
+        }
 
         e.Handled = true;
     }

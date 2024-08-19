@@ -63,7 +63,7 @@ public partial class EventDataPicker : ActivatableUserControl {
                     // Use the first value in the list in case the event member is null
                     EventMember = eventMembers.FirstOrDefault();
                 } else if (eventMembers.Any()) {
-                    EventMember = EventMember.ToEnum(eventMembers.First().GetType());
+                    EventMember = EventMember.ToEnum(eventMembers[0].GetType());
                 } else {
                     EventMember = GetEventDataConditionData.EventMember.None;
                 }

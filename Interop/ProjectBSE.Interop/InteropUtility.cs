@@ -4,6 +4,16 @@ using Mutagen.Bethesda.Plugins;
 namespace ProjectBSE.Interop;
 
 public static class InteropUtility {
+    public static FormKey[] ToFormKeyArray(this IntPtr pointer, int count) {
+        var managedArray = new FormKey[count];
+        for (var i = 0; i < count; i++) {
+            var ptr = Marshal.ReadIntPtr(pointer, i * IntPtr.Size);
+            var str = Marshal.PtrToStringAnsi(ptr);
+            managedArray[i] = string.IsNullOrWhiteSpace(str) ? FormKey.Null : FormKey.Factory(str);
+        }
+        return managedArray;
+    }
+
     public static string?[] ToStringArray(this IntPtr pointer, int count) {
         var result = new string?[count];
 
@@ -13,16 +23,6 @@ public static class InteropUtility {
         }
 
         return result;
-    }
-
-    public static FormKey[] ToFormKeyArray(this IntPtr pointer, int count) {
-        var managedArray = new FormKey[count];
-        for (var i = 0; i < count; i++) {
-            var ptr = Marshal.ReadIntPtr(pointer, i * IntPtr.Size);
-            var str = Marshal.PtrToStringAnsi(ptr);
-            managedArray[i] = string.IsNullOrWhiteSpace(str) ? FormKey.Null : FormKey.Factory(str);
-        }
-        return managedArray;
     }
 
     public static string[] ToStringArray(this IList<FormKey> formKeys) {

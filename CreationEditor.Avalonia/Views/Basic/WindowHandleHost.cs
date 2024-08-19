@@ -18,8 +18,8 @@ public class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeCo
             WinHelper.SetParent(windowHandle, handle.Handle);
 
             long style = WinHelper.GetWindowLongPtr(windowHandle, WinHelper.StyleIndex);
-            style &= (long) ~WinHelper.WinStyle.ResizeBar;
-            style &= (long) ~WinHelper.WinStyle.Caption;
+            style &= (long) ~WinHelper.WinStyles.ResizeBar;
+            style &= (long) ~WinHelper.WinStyles.Caption;
 
             WinHelper.SetWindowLongPtr(windowHandle, WinHelper.StyleIndex, (nint) style);
         }

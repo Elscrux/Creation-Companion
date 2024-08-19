@@ -14,8 +14,8 @@ public sealed class ReturnParameterIfTrueMultiConverter<TIn> : IMultiValueConver
         var parsedValue = pass ? TIn.Parse(parameter as string ?? string.Empty, ParseFormatProvider) : DefaultValue;
         if (Converter is null) return parsedValue;
 
-        if (pass is not true && DefaultValueConverted is not null) return DefaultValueConverted;
+        if (!pass && DefaultValueConverted is not null) return DefaultValueConverted;
 
-        return Converter?.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture);
+        return Converter.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture);
     }
 }

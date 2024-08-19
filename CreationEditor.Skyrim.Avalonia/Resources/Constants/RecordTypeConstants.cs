@@ -71,12 +71,12 @@ public static class RecordTypeConstants {
     ];
 
     // Package
-    public static readonly Type[] PackageDataNumericTypes = [typeof(bool), typeof(float), typeof(int)];
-    public static readonly Type[] PackageDataLocationTypes = LocationTypes.Concat(AllPlacedInterfaceTypes).ToArray();
-    public static readonly Type[] PackageDataTypes = PackageDataNumericTypes.Concat(PackageDataLocationTypes).ToArray();
+    public static readonly IReadOnlyList<Type> PackageDataNumericTypes = [typeof(bool), typeof(float), typeof(int)];
+    public static readonly IReadOnlyList<Type> PackageDataLocationTypes = LocationTypes.Concat(AllPlacedInterfaceTypes).ToArray();
+    public static readonly IReadOnlyList<Type> PackageDataTypes = PackageDataNumericTypes.Concat(PackageDataLocationTypes).ToArray();
 
     // Alias
-    public static readonly Type[] AllAliasTypes
+    public static readonly IReadOnlyList<Type> AllAliasTypes
         = AllPlacedInterfaceTypes
             .Concat(LocationTypes)
             .ToArray();

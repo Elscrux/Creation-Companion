@@ -152,7 +152,7 @@ public sealed class AssetReference : IReference, IDisposable {
 
         var assetLink = _assetTypeService.GetAssetLink(path);
 
-        Asset = assetLink ?? throw new Exception($"AssetLink for {path} could not be retrieved");
+        Asset = assetLink ?? throw new ArgumentException($"AssetLink for {path} could not be retrieved");
     }
 
     public void Dispose() => _disposables.Dispose();

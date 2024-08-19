@@ -64,7 +64,7 @@ public sealed class RecordListVM : ViewModel, IRecordListVM {
     }
 
     public RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
-        return new RecordListContext(referencedRecords, RecordProvider.RecordTypes, _settings);
+        return new RecordListContext(referencedRecords, RecordProvider.RecordTypes.ToList(), _settings);
     }
 
     public IRecordListVM AddSetting<T>(T t) {

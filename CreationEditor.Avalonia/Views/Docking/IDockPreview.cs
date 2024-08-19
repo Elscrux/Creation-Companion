@@ -14,18 +14,15 @@ public interface IDockPreview {
             : null;
 
     public void ShowPreview(Dock dock) {
-        if (this is Visual visual) {
-            AdornerLayer.SetAdorner(visual, new Rectangle {
+        AdornerLayer.SetAdorner((Visual) this,
+            new Rectangle {
                 Fill = Brush,
                 IsHitTestVisible = false,
                 Opacity = 0.5
             });
-        }
     }
 
     public void HidePreview() {
-        if (this is Visual visual) {
-            AdornerLayer.SetAdorner(visual, null);
-        }
+        AdornerLayer.SetAdorner((Visual) this, null);
     }
 }

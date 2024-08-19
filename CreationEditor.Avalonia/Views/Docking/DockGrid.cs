@@ -172,13 +172,13 @@ public sealed class DockGrid : Grid {
             }
 
             if (removeRow && removeColumn) {
-                throw new Exception("Both row, and column can be deleted. This state isn't allowed by definition");
+                throw new DockException("Both row, and column can be deleted. This state isn't allowed by definition");
             } else if (removeRow) {
                 changeRow = true;
             } else if (removeColumn) {
                 changeRow = false;
             } else {
-                throw new Exception("Both row, and column can't be deleted. This state isn't allowed by definition");
+                throw new DockException("Both row, and column can't be deleted. This state isn't allowed by definition");
             }
         }
 
@@ -198,7 +198,7 @@ public sealed class DockGrid : Grid {
                     if (currentRowSpan > 2) {
                         SetRowSpan(child, currentRowSpan - 2);
                     } else {
-                        throw new Exception($"To small to decrease span {child.GetType().Name}");
+                        throw new DockException($"To small to decrease span {child.GetType().Name}");
                     }
                 } else {
                     // We're outside the row, but the row removal will affect us - change row
@@ -227,7 +227,7 @@ public sealed class DockGrid : Grid {
                     if (currentColumnSpan > 2) {
                         SetColumnSpan(child, currentColumnSpan - 2);
                     } else {
-                        throw new Exception($"To small to decrease span {child.GetType().Name}");
+                        throw new DockException($"To small to decrease span {child.GetType().Name}");
                     }
                 } else {
                     // We're outside the column, but the column removal will affect us - change column

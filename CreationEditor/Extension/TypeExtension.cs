@@ -14,7 +14,7 @@ public static class TypeExtension {
     }
 
     /// <summary>
-    /// Returns if all of the types in the calling enumerable inherit from the parameter type.
+    /// Returns if all the types in the calling enumerable inherit from the parameter type.
     /// All 1 : 1
     /// </summary>
     /// <param name="types">Types that inherit</param>
@@ -32,7 +32,7 @@ public static class TypeExtension {
     /// <param name="parentTypes">Parent types</param>
     /// <returns>true if any inherits</returns>
     public static bool InheritsFromAny(this Type type, params Type[] parentTypes) {
-        return parentTypes.Any(parentType => type.InheritsFrom(parentType));
+        return parentTypes.Exists(parentType => type.InheritsFrom(parentType));
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public static class TypeExtension {
     /// <param name="parentTypes">Parent types</param>
     /// <returns>true if any inherits</returns>
     public static bool InheritsFromAll(this Type type, params Type[] parentTypes) {
-        return parentTypes.All(parentType => type.InheritsFrom(parentType));
+        return parentTypes.TrueForAll(parentType => type.InheritsFrom(parentType));
     }
 
     /// <summary>

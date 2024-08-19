@@ -10,7 +10,7 @@ public interface IDockObject {
             }
 
             if (root is not DockingManagerVM dockingManagerVM) {
-                throw new Exception("No docking manager found as root");
+                throw new DockException("No docking manager found as root");
             }
 
             return dockingManagerVM;

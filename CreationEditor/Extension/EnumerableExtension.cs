@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Noggog;
 namespace CreationEditor;
 
 public static class EnumerableExtension {
@@ -30,5 +31,13 @@ public static class EnumerableExtension {
         }
 
         return false;
+    }
+    
+    public static IEnumerable<T1> Keys<T1, T2>(this IEnumerable<IKeyValue<T1,T2>> enumerable) {
+        return enumerable.Select(x => x.Key);
+    }
+    
+    public static IEnumerable<T2> Values<T1, T2>(this IEnumerable<IKeyValue<T1,T2>> enumerable) {
+        return enumerable.Select(x => x.Value);
     }
 }

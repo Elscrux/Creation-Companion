@@ -27,10 +27,10 @@ public sealed class AssetTreeItem(
     public bool IsVirtual => Asset.IsVirtual;
     public IEnumerable<IReferencedAsset> GetReferencedAssets() => Asset.GetReferencedAssets();
 
-    public IObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
-    private IObservableCollection<AssetTreeItem>? _children;
+    public ReadOnlyObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
+    private ReadOnlyObservableCollection<AssetTreeItem>? _children;
 
-    private IObservableCollection<AssetTreeItem> LoadChildren() {
+    private ReadOnlyObservableCollection<AssetTreeItem> LoadChildren() {
         if (Asset is AssetDirectory assetDirectory) {
             // Load up with initial items so the returning collection is already filled with something
             // Otherwise the TreeDataGrid doesn't like it, see https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132
@@ -43,18 +43,19 @@ public sealed class AssetTreeItem(
             //     .ToList();
 
             assetDirectory.LoadAssets();
-            return assetDirectory.Assets
+            assetDirectory.Assets
                 .Connect()
                 .SubscribeOn(RxApp.TaskpoolScheduler)
                 .Filter(filterObservable)
                 .Transform((Func<IAsset, AssetTreeItem>) Selector)
-                .Sort(AssetComparers.PathComparer)
-                .ToObservableCollection( _disposables);
+                .SortAndBind(out var collection, AssetComparers.PathComparer);
+
+            return collection;
 
             AssetTreeItem Selector(IAsset a) => new(fileSystem.Path.Combine(Path, fileSystem.Path.GetFileName(a.Path)), a, fileSystem, filterObservable);
         }
 
-        return new ObservableCollectionExtended<AssetTreeItem>();
+        return new ReadOnlyObservableCollection<AssetTreeItem>([]);
     }
 
     // public IObservable<bool> AnyOrphaned { get; }

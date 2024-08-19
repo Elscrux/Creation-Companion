@@ -164,7 +164,7 @@ public partial class TargetPicker : ActivatableUserControl {
 
         // Update the target to the selected type when the dialog closes
         this.WhenAnyValue(x => x.IsOpen)
-            .Where(isOpen => isOpen == false)
+            .WhereFalse()
             .CombineLatest(this.WhenAnyValue(x => x.SelectedType), (_, type) => type)
             .Subscribe(type => {
                 Target = type switch {

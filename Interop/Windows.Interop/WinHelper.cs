@@ -14,7 +14,7 @@ public static partial class WinHelper {
 
     //Sets window attributes
     [LibraryImport(WindowsDll, EntryPoint = "SetWindowLongA")]
-    public static partial int SetWindowLong(IntPtr hWnd, int nIndex, WinStyle dwNewLong);
+    public static partial int SetWindowLong(IntPtr hWnd, int nIndex, WinStyles dwNewLong);
 
     [LibraryImport(WindowsDll, EntryPoint = "GetWindowLongPtrA")]
     public static partial IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
@@ -24,7 +24,7 @@ public static partial class WinHelper {
     public const int StyleIndex = -16;
 
     [Flags]
-    public enum WinStyle {
+    public enum WinStyles {
         Visible = 0x10000000,
         Child = 0x40000000, //child window
         Border = 0x00800000, //window with border

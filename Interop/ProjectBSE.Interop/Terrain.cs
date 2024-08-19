@@ -179,7 +179,10 @@ public static partial class Interop {
         public static unsafe Quadrant ConvertToManaged(QuadrantUnmanaged unmanaged) {
             return new Quadrant {
                 BaseLayer = BaseLayerMarshaller.ConvertToManaged(unmanaged.BaseLayer),
-                AlphaLayers = ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.AllocateContainerForManagedElements(unmanaged.AlphaLayers, unmanaged.AlphaLayersLength) ?? throw new Exception(),
+                AlphaLayers =
+                    ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.AllocateContainerForManagedElements(
+                        unmanaged.AlphaLayers,
+                        unmanaged.AlphaLayersLength) ?? throw new ArgumentException("AlphaLayers is null"),
             };
         }
 

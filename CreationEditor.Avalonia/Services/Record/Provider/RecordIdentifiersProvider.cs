@@ -17,7 +17,7 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
     private readonly CompositeDisposable _referencesDisposable = new();
 
     [Reactive] public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
-    public IEnumerable<Type> RecordTypes => _recordTypes.ToList();
+    public IEnumerable<Type> RecordTypes => _recordTypes;
     private readonly HashSet<Type> _recordTypes = [];
     public IRecordBrowserSettings RecordBrowserSettings { get; }
 

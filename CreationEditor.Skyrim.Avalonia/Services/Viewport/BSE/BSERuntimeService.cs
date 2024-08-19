@@ -155,10 +155,10 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             counter++;
         }
 
-        foreach (var x in landscape.VertexNormals) {
-            var xValue = (sbyte) x.Value.X;
-            var yValue = (sbyte) x.Value.Y;
-            var zValue = (sbyte) x.Value.Z;
+        foreach (var value in landscape.VertexNormals.Values()) {
+            var xValue = (sbyte) value.X;
+            var yValue = (sbyte) value.Y;
+            var zValue = (sbyte) value.Z;
 
             floatBuffer[counter] = xValue / 127f;
             counter++;
@@ -168,12 +168,12 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             counter++;
         }
 
-        foreach (var x in landscape.VertexColors) {
-            floatBuffer[counter] = x.Value.X / 255f;
+        foreach (var value in landscape.VertexColors.Values()) {
+            floatBuffer[counter] = value.X / 255f;
             counter++;
-            floatBuffer[counter] = x.Value.Y / 255f;
+            floatBuffer[counter] = value.Y / 255f;
             counter++;
-            floatBuffer[counter] = x.Value.Z / 255f;
+            floatBuffer[counter] = value.Z / 255f;
             counter++;
         }
 

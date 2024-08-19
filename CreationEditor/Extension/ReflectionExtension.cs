@@ -25,11 +25,9 @@ public static class ReflectionExtension {
     }
 
     public static bool TryGetProperty<T>(this object obj, string name, [MaybeNullWhen(false)] out T outValue) {
-        if (obj.TryGetProperty(name, out var value)) {
-            if (value is T tValue) {
-                outValue = tValue;
-                return true;
-            }
+        if (obj.TryGetProperty(name, out var value) && value is T tValue) {
+            outValue = tValue;
+            return true;
         }
 
         outValue = default;

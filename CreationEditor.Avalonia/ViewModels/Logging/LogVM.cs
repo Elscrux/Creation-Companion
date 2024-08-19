@@ -10,7 +10,7 @@ using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
 public sealed class LogVM : ViewModel, ILogVM {
-    public static readonly LogEventLevel[] LogLevels = Enum.GetValues<LogEventLevel>();
+    public static readonly IReadOnlyList<LogEventLevel> LogLevels = Enum.GetValues<LogEventLevel>();
 
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; } = LogLevels.ToDictionary(x => x, _ => true);
 

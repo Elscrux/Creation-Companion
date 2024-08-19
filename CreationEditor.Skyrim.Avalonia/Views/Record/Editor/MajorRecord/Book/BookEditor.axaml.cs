@@ -30,6 +30,8 @@ public partial class BookEditor : ReactiveUserControl<BookEditorVM> {
 
                     vm.WhenAnyValue(x => x.Language)
                         .Subscribe(_ => {
+                            if (vm.EditableRecord is null) return;
+
                             TextEditor.Document.Text = vm.EditableRecord.BookText.TryLookup(vm.Language, out var bookText)
                                 ? bookText
                                 : vm.EditableRecord.BookText;

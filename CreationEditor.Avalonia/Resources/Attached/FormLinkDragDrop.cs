@@ -129,7 +129,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
                         }
                     case Control control:
                         ToggleControl();
-                        if (allowsDrop == false) return;
+                        if (!allowsDrop) return;
 
                         control.Loaded -= OnControlLoadedChanged;
                         control.Loaded += OnControlLoadedChanged;

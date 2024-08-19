@@ -176,10 +176,10 @@
                         <controls:CommandBarButton.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox x:Name="Name" Watermark="Enter a name"/>
+                                    <TextBox x:Name="MapName" Watermark="Enter a name"/>
                                     <Button Content="Save"
                                             Command="{Binding SaveMap}"
-                                            CommandParameter="{Binding #Name.Text}"/>
+                                            CommandParameter="{Binding #MapName.Text}"/>
                                 </StackPanel>
                             </Flyout>
                         </controls:CommandBarButton.Flyout>

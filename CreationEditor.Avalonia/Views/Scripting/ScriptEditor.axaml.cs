@@ -47,7 +47,7 @@ public partial class ScriptEditor : ActivatableUserControl {
 
         _textMateInstallation = Editor.InstallTextMate(_textMateRegistryOptions);
         var papyrusGrammar = _textMateRegistryOptions.GetGrammarDefinition("papyrus");
-        if (papyrusGrammar is null) throw new Exception();
+        if (papyrusGrammar is null) throw new NotImplementedException();
 
         _textMateInstallation.SetGrammar(papyrusGrammar.Contributes.Grammars[0].ScopeName);
 

@@ -15,7 +15,7 @@ public sealed class ReturnParameterIfTrueConverter<TIn> : IValueConverter
 
         if (value is not true && DefaultValueConverted is not null) return DefaultValueConverted;
 
-        return Converter?.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture) ?? DefaultValueConverted;
+        return Converter.Convert(parsedValue, targetType, null, CultureInfo.CurrentCulture) ?? DefaultValueConverted;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
