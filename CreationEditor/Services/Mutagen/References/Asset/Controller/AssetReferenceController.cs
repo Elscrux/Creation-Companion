@@ -89,9 +89,9 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             .DisposeWith(_disposables);
 
         Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences))
-            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory References"));
+            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory References {Exception}", e.Message));
         Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences))
-            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive References"));
+            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive References {Exception}", e.Message));
 
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
         recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
