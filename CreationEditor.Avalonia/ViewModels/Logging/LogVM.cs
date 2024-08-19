@@ -14,7 +14,7 @@ public sealed class LogVM : ViewModel, ILogVM {
 
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; } = LogLevels.ToDictionary(x => x, _ => true);
 
-    public int MaxLogCount { get; set; } = 100;
+    public int MaxLogCount { get; set; } = 1000;
 
     public IObservableCollection<ILogItem> LogItems { get; }
 
