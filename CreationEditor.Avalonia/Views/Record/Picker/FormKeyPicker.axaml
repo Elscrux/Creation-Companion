@@ -192,8 +192,8 @@
                                     <ScrollViewer Grid.Row="1"
                                                   HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
                                                   VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
-                                        <ItemsRepeater ItemsSource="{TemplateBinding ApplicableEditorIDs}">
-                                            <ItemsRepeater.ItemTemplate>
+                                        <ItemsControl ItemsSource="{TemplateBinding ApplicableEditorIDs}">
+                                            <ItemsControl.ItemTemplate>
                                                 <DataTemplate DataType="picker:RecordNamePair">
                                                     <Border HorizontalAlignment="Stretch"
                                                             VerticalAlignment="Stretch"
@@ -216,8 +216,8 @@
                                                         </Grid>
                                                     </Border>
                                                 </DataTemplate>
-                                            </ItemsRepeater.ItemTemplate>
-                                        </ItemsRepeater>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="1">

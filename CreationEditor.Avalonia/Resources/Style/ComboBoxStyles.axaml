@@ -138,21 +138,22 @@
                                PlacementTarget="Background"
                                IsLightDismissEnabled="True"
                                InheritsTransform="True">
-                            <controls:FABorder x:Name="PopupBorder"
-                                               Background="{DynamicResource ComboBoxDropDownBackground}"
-                                               BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
-                                               BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
-                                               Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
-                                               HorizontalAlignment="Stretch"
-                                               CornerRadius="{DynamicResource OverlayCornerRadius}">
-                                <ScrollViewer
-                                    HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
-                                    VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                            <Border x:Name="PopupBorder"
+                                    Background="{DynamicResource ComboBoxDropDownBackground}"
+                                    BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
+                                    BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
+                                    Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
+                                    HorizontalAlignment="Stretch"
+                                    CornerRadius="{DynamicResource OverlayCornerRadius}"
+                                    BackgroundSizing="InnerBorderEdge">
+                                <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                              VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                              IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}">
                                     <ItemsPresenter Name="PART_ItemsPresenter"
                                                     Margin="{DynamicResource ComboBoxDropdownContentMargin}"
-                                                    ItemsPanel="{TemplateBinding ItemsPanel}"/>
+                                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
                                 </ScrollViewer>
-                            </controls:FABorder>
+                            </Border>
                         </Popup>
                     </Grid>
                 </DataValidationErrors>

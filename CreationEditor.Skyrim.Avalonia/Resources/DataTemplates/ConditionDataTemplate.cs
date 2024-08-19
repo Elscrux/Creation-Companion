@@ -116,7 +116,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
 
         // Return an item repeater with the parameters
         return parameterControls.Count != 0
-            ? new ItemsRepeater { ItemsSource = parameterControls }
+            ? new ItemsControl { ItemsSource = parameterControls }
             : null;
     }
 

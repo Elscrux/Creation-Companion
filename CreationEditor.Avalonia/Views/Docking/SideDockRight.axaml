@@ -29,17 +29,19 @@
             </LayoutTransformControl.LayoutTransform>
 
             <Border Classes="TabBar">
-                <ItemsRepeater ItemsSource="{Binding Tabs}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal"/>
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="model:IDockedItem">
                             <docking:Tab DockContainer="{Binding #Dock.DataContext}"
                                          DockedItem="{Binding}"/>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Border>
         </LayoutTransformControl>
     </Grid>

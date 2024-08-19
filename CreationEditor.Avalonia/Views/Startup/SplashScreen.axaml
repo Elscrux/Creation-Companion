@@ -14,21 +14,23 @@
                Classes="Spinning"/>
 
         <!-- <StackPanel VerticalAlignment="Bottom"> -->
-        <!--     <ItemsRepeater -->
+        <!--     <ItemsControl -->
         <!--         Margin="0, 0, 0, 25" -->
         <!--         HorizontalAlignment="Center" -->
         <!--         ItemsSource="{Binding Messages}"> -->
-        <!--         <ItemsRepeater.ItemTemplate> -->
+        <!--         <ItemsControl.ItemTemplate> -->
         <!--             <DataTemplate DataType="system:String"> -->
         <!--                 <TextBlock Text="{Binding}" -->
         <!--                            Foreground="{DynamicResource ButtonForeground}" -->
         <!--                            HorizontalAlignment="Center"/> -->
         <!--             </DataTemplate> -->
-        <!--         </ItemsRepeater.ItemTemplate> -->
-        <!--         <ItemsRepeater.Layout> -->
-        <!--             <StackLayout Orientation="Vertical"/> -->
-        <!--         </ItemsRepeater.Layout> -->
-        <!--     </ItemsRepeater> -->
+        <!--         </ItemsControl.ItemTemplate> -->
+        <!--         <ItemsControl.ItemsPanel> -->
+        <!--             <ItemsPanelTemplate> -->
+        <!--                 <StackPanel Orientation="Horizontal"/> -->
+        <!--             </ItemsPanelTemplate> -->
+        <!--         </ItemsControl.ItemsPanel> -->
+        <!--     </ItemsControl> -->
         <!-- -->
         <!--     <TextBlock HorizontalAlignment="Center" -->
         <!--                Foreground="{DynamicResource ButtonForeground}" -->

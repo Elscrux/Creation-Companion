@@ -191,8 +191,8 @@
                         IsCompact="False">
                         <controls:CommandBarButton.Flyout>
                             <Flyout>
-                                <ItemsRepeater ItemsSource="{Binding SavedMaps}">
-                                    <ItemsRepeater.ItemTemplate>
+                                <ItemsControl ItemsSource="{Binding SavedMaps}">
+                                    <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
                                                 <Button
@@ -213,8 +213,8 @@
                                                 </Button>
                                             </StackPanel>
                                         </DataTemplate>
-                                    </ItemsRepeater.ItemTemplate>
-                                </ItemsRepeater>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </Flyout>
                         </controls:CommandBarButton.Flyout>
                     </controls:CommandBarButton>
@@ -276,13 +276,13 @@
                                             VerticalAlignment="Stretch">
                                     <Button Content="{Binding QueryVM.QueryRunner.Summary^, FallbackValue=Query}">
                                         <ToolTip.Tip>
-                                            <ItemsRepeater ItemsSource="{Binding CurrentRecords}">
-                                                <ItemsRepeater.ItemTemplate>
+                                            <ItemsControl ItemsSource="{Binding CurrentRecords}">
+                                                <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding FormKey}"/>
                                                     </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </ToolTip.Tip>
                                         <Button.Flyout>
                                             <Flyout FlyoutPresenterClasses="Flyout750x250">

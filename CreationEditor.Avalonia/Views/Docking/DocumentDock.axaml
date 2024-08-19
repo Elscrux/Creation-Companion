@@ -20,18 +20,20 @@
           Classes="AccentSelected TabGrid">
         <Border Grid.Row="0"
                 Classes="TabBar">
-            <ItemsRepeater ItemsSource="{Binding Tabs}">
-                <ItemsRepeater.Layout>
-                    <WrapLayout Orientation="Horizontal"/>
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding Tabs}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="model:IDockedItem">
                         <docking:Tab DockContainer="{Binding #Dock.DataContext}"
                                      DockedItem="{Binding}"
                                      Classes="Large"/>
                     </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Border>
 
         <ContentControl Grid.Row="1"

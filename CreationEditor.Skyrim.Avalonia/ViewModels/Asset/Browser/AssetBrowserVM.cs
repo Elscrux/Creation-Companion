@@ -537,7 +537,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var assetTreeItems = footerAssets.ToArray();
         if (assetTreeItems.Length > 1) {
             dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
-            dialog.Footer = new ItemsRepeater {
+            dialog.Footer = new ItemsControl {
                 ItemsSource = assetTreeItems,
                 ItemTemplate = new FuncDataTemplate<AssetTreeItem>((asset, _) => new TextBlock { Text = GetRootRelativePath(asset.Path) }),
             };

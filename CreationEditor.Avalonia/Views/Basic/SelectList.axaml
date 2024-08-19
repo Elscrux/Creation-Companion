@@ -11,9 +11,9 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <ScrollViewer MaxHeight="750">
-                    <ItemsRepeater ItemsSource="{TemplateBinding ItemsSource}"
+                    <ItemsControl ItemsSource="{TemplateBinding ItemsSource}"
                                    ItemTemplate="{TemplateBinding DataTemplate}">
-                        <ItemsRepeater.ContextFlyout>
+                        <ItemsControl.ContextFlyout>
                             <MenuFlyout>
                                 <MenuItem Header="Select All"
                                           Command="{x:Static command:SelectableCommand.SelectAll}"
@@ -25,8 +25,8 @@
                                           Command="{x:Static command:SelectableCommand.ToggleAll}"
                                           CommandParameter="{TemplateBinding ItemsSource}"/>
                             </MenuFlyout>
-                        </ItemsRepeater.ContextFlyout>
-                    </ItemsRepeater>
+                        </ItemsControl.ContextFlyout>
+                    </ItemsControl>
                 </ScrollViewer>
             </ControlTemplate>
         </Setter>
