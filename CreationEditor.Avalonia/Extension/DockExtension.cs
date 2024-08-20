@@ -8,7 +8,7 @@ public static class DockExtension {
             Dock.Top => Dock.Bottom,
             Dock.Right => Dock.Left,
             Dock.Left => Dock.Right,
-            _ => throw new ArgumentOutOfRangeException(nameof(dock), dock, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(dock), dock, null),
         };
     }
 }

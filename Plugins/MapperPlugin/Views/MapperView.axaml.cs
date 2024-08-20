@@ -32,8 +32,8 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                 Children = {
                     new Image {
                         Source = Drawings.Source,
-                    }
-                }
+                    },
+                },
             },
             XamlRoot = this,
             Buttons = {
@@ -44,10 +44,10 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                 },
                 new TaskDialogButton {
                     Text = "Export Mask",
-                    DialogResult = TaskDialogStandardResult.Yes
+                    DialogResult = TaskDialogStandardResult.Yes,
                 },
-                TaskDialogButton.CancelButton
-            }
+                TaskDialogButton.CancelButton,
+            },
         };
 
         var exportMode = await dialog.ShowAsync();

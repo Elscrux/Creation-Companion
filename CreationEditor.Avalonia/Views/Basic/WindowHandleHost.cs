@@ -6,7 +6,8 @@ using Avalonia.Platform;
 namespace CreationEditor.Avalonia.Views.Basic;
 
 public class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeControlHost {
-    private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost).GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo DestroyNativeControl = typeof(NativeControlHost)
+        .GetMethod("DestroyNativeControl", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
         if (e.Root is not Window window) return;

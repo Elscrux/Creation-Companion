@@ -50,7 +50,8 @@ public sealed class BSEViewportFactory(
 
         if (bsaFileNames.Length > 0) {
             logger.Here().Debug(
-                "Loading BSAs: {FileNames}", string.Join(", ", bsaFileNames));
+                "Loading BSAs: {FileNames}",
+                string.Join(", ", bsaFileNames));
         } else {
             logger.Here().Warning("No BSAs detected in {AssetDirectory}", assetDirectory);
         }

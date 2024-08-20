@@ -10,17 +10,17 @@ public sealed class StartupDocksSetting(IList<StartupDock> docks) : ISettingMode
         new() {
             DockElement = DockElement.RecordBrowser,
             DockMode = DockMode.Side,
-            Dock = Dock.Left
+            Dock = Dock.Left,
         },
         new() {
             DockElement = DockElement.CellBrowser,
             DockMode = DockMode.Side,
-            Dock = Dock.Right
+            Dock = Dock.Right,
         },
         new() {
             DockElement = DockElement.Log,
             DockMode = DockMode.Side,
-            Dock = Dock.Bottom
+            Dock = Dock.Bottom,
         },
     });
 

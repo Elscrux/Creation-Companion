@@ -20,7 +20,8 @@ public sealed class ModelAssetQuery(
 
     public string ReferenceToSource(DataRelativePath reference) => reference.Path;
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source) => ParseAssetsInternal(source, source).Distinct();
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source, DataRelativePath actualReference) => ParseAssetsInternal(source, actualReference).Distinct();
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source, DataRelativePath actualReference) =>
+        ParseAssetsInternal(source, actualReference).Distinct();
 
     private IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssetsInternal(string path, DataRelativePath actualReference) {
         if (!fileSystem.File.Exists(path)) yield break;

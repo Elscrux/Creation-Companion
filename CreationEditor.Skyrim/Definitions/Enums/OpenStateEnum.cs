@@ -7,7 +7,7 @@ public class OpenStateEnum : IConditionValueEnums {
         Open,
         Opening,
         Closed,
-        Closing
+        Closing,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<OpenState>().Cast<Enum>().ToList();

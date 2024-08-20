@@ -38,7 +38,10 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
                 var plugins = CreatePlugins(assembly).ToList();
 
                 if (plugins.Count == 0) {
-                    logger.Here().Warning("No plugins found in {Assembly} because none of the assembly's types implement {PluginType}", assembly, nameof(IPlugin));
+                    logger.Here().Warning(
+                        "No plugins found in {Assembly} because none of the assembly's types implement {PluginType}",
+                        assembly,
+                        nameof(IPlugin));
                 }
                 return plugins;
             })

@@ -7,7 +7,6 @@ using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Exceptions;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 

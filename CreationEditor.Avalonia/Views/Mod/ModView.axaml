@@ -71,7 +71,7 @@
                 <ItemsControl ItemsSource="{Binding Masters}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="plugins:ModKey">
-                            <TextBlock 
+                            <TextBlock
                                 Margin="4,2"
                                 Text="{Binding FileName}"/>
                         </DataTemplate>

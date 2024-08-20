@@ -39,7 +39,9 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
     public object? SearchItems(string search) {
         return ViewModel?.Records?
             .OfType<IReferencedRecord>()
-            .FirstOrDefault(record => record.Record.EditorID is not null && record.Record.EditorID.StartsWith(search, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(record =>
+                record.Record.EditorID is not null
+             && record.Record.EditorID.StartsWith(search, StringComparison.OrdinalIgnoreCase));
     }
 
     protected override void OnLoaded(RoutedEventArgs e) {
@@ -75,7 +77,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
 
         var recordListContext = ViewModel.GetRecordListContext(selectedRecords);
         var contextFlyout = new MenuFlyout {
-            ItemsSource = ViewModel?.RecordContextMenuProvider.GetMenuItems(recordListContext)
+            ItemsSource = ViewModel?.RecordContextMenuProvider.GetMenuItems(recordListContext),
         };
 
         contextFlyout.ShowAt(control, true);
@@ -104,13 +106,15 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         if (dataGrid.SelectedItems is null) return;
 
         var keyGesture = new KeyGesture(e.Key, e.KeyModifiers);
-        ViewModel.RecordContextMenuProvider.TryToExecuteHotkey(keyGesture, () => {
-            var selectedRecords = dataGrid.SelectedItems
-                .OfType<IReferencedRecord>()
-                .ToList();
+        ViewModel.RecordContextMenuProvider.TryToExecuteHotkey(
+            keyGesture,
+            () => {
+                var selectedRecords = dataGrid.SelectedItems
+                    .OfType<IReferencedRecord>()
+                    .ToList();
 
-            return ViewModel.GetRecordListContext(selectedRecords);
-        });
+                return ViewModel.GetRecordListContext(selectedRecords);
+            });
 
         e.Handled = true;
     }

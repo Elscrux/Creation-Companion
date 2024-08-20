@@ -267,7 +267,7 @@ public sealed class DockGrid : Grid {
             var childSize = child switch {
                 GridSplitter => new Size(GridSplitterSize, GridSplitterSize),
                 DockGrid dockGrid => dockGrid.AdjustSize(this),
-                _ => new Size(ColumnDefinitions[childColumn].MinWidth, RowDefinitions[childRow].MinHeight)
+                _ => new Size(ColumnDefinitions[childColumn].MinWidth, RowDefinitions[childRow].MinHeight),
             };
 
             if (columnSizes[childColumn] < childSize.Width) {

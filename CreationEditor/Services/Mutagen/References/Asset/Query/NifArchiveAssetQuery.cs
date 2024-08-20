@@ -21,8 +21,10 @@ public sealed class NifArchiveAssetQuery(
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source) => _archiveAssetQuery.ParseAssets(source);
     public bool IsCacheUpToDate(BinaryReader reader, string source) => _archiveAssetQuery.IsCacheUpToDate(reader, source);
     public string ReadContextString(BinaryReader reader) => _archiveAssetQuery.ReadContextString(reader);
-    public IEnumerable<DataRelativePath> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) => _archiveAssetQuery.ReadReferences(reader, contextString, assetReferenceCount);
+    public IEnumerable<DataRelativePath> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) =>
+        _archiveAssetQuery.ReadReferences(reader, contextString, assetReferenceCount);
     public void WriteCacheValidation(BinaryWriter writer, string source) => _archiveAssetQuery.WriteCacheValidation(writer, source);
     public void WriteContext(BinaryWriter writer, string source) => _archiveAssetQuery.WriteContext(writer, source);
-    public void WriteReferences(BinaryWriter writer, IEnumerable<DataRelativePath> references) => _archiveAssetQuery.WriteReferences(writer, references);
+    public void WriteReferences(BinaryWriter writer, IEnumerable<DataRelativePath> references) =>
+        _archiveAssetQuery.WriteReferences(writer, references);
 }

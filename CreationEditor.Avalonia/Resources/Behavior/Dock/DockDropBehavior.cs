@@ -10,7 +10,8 @@ using CreationEditor.Avalonia.Views.Docking;
 namespace CreationEditor.Avalonia.Behavior;
 
 public class DockDropBehavior : Behavior<Control> {
-    public static readonly StyledProperty<DockContainerVM?> DockContainerProperty = AvaloniaProperty.Register<Control, DockContainerVM?>(nameof(DockContainer));
+    public static readonly StyledProperty<DockContainerVM?> DockContainerProperty =
+        AvaloniaProperty.Register<Control, DockContainerVM?>(nameof(DockContainer));
 
     public DockContainerVM? DockContainer {
         get => GetValue(DockContainerProperty);
@@ -90,7 +91,11 @@ public class DockDropBehavior : Behavior<Control> {
     }
 
     [MemberNotNullWhen(true, nameof(DockContainer))]
-    protected bool CanDock<T>(object? sender, DragEventArgs e, [MaybeNullWhen(false)] out DockDragData outDockDragData, [MaybeNullWhen(false)] out T outControl)
+    protected bool CanDock<T>(
+        object? sender,
+        DragEventArgs e,
+        [MaybeNullWhen(false)] out DockDragData outDockDragData,
+        [MaybeNullWhen(false)] out T outControl)
         where T : Control {
         outDockDragData = null;
         outControl = null;
@@ -130,7 +135,7 @@ public class DockDropBehavior : Behavior<Control> {
             (position.Distance(new Point(0, 0), new Point(0, visual.Bounds.Height)), Dock.Left),
             (position.Distance(new Point(visual.Bounds.Width, 0), new Point(0, visual.Bounds.Height)), Dock.Right),
             (position.Distance(new Point(0, 0), new Point(visual.Bounds.Width, 0)), Dock.Top),
-            (position.Distance(new Point(0, visual.Bounds.Height), new Point(visual.Bounds.Width, 0)), Dock.Bottom)
+            (position.Distance(new Point(0, visual.Bounds.Height), new Point(visual.Bounds.Width, 0)), Dock.Bottom),
         };
 
         return dockPositions.MinBy(x => x.Distance).Dock;

@@ -6,7 +6,7 @@ public static class ModExtension {
     public static uint GetRecordCount(this IModGetter mod) {
         return mod switch {
             ISkyrimModGetter skyrimMod => skyrimMod.ModHeader.Stats.NumRecords,
-            _ => throw new ArgumentOutOfRangeException(nameof(mod))
+            _ => throw new ArgumentOutOfRangeException(nameof(mod)),
         };
     }
 

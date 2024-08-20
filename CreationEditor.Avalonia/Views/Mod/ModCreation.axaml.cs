@@ -31,7 +31,7 @@ public partial class ModCreation : ReactiveUserControl<ModCreationVM> {
         Popup.Child = new Border {
             Child = new TextBlock {
                 Text = ViewModel.NewModKey + " added",
-                Margin = new Thickness(10)
+                Margin = new Thickness(10),
             },
             Background = StandardBrushes.BackgroundBrush,
             CornerRadius = new CornerRadius(10),

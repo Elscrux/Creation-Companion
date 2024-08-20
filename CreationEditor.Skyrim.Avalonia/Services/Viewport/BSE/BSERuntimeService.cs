@@ -75,7 +75,10 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
             // Worldspace not loaded - unload everything
             UnloadEverything();
 
-            _worldspaceRuntimeSettings = new WorldspaceRuntimeSettings(worldspaceFormKey, origin, new Dictionary<P2Int, ExteriorCellRuntimeSettings>());
+            _worldspaceRuntimeSettings = new WorldspaceRuntimeSettings(
+                worldspaceFormKey,
+                origin,
+                new Dictionary<P2Int, ExteriorCellRuntimeSettings>());
         } else {
             // Worldspace loaded
 
@@ -217,13 +220,13 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         var alphaData = alphaLayerRecord.AlphaLayerData
                             .Select(x => new AlphaData {
                                 Opacity = x.Opacity,
-                                Position = x.Position
+                                Position = x.Position,
                             })
                             .ToArray();
 
                         var alphaLayer = new Interop.AlphaLayer {
                             Data = alphaData,
-                            DataLength = (ushort) alphaData.Length
+                            DataLength = (ushort) alphaData.Length,
                         };
                         if (textureSetRecord is not null) {
                             alphaLayer.TextureSet = GetTextureSet(textureSetRecord);
@@ -236,7 +239,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                 } else {
                     if (textureSetRecord is not null) {
                         quadrant.BaseLayer = new Interop.BaseLayer {
-                            TextureSet = GetTextureSet(textureSetRecord)
+                            TextureSet = GetTextureSet(textureSetRecord),
                         };
                     }
                 }
@@ -306,7 +309,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         ISpellGetter => null,
                         ITextureSetGetter => null,
                         IAcousticSpaceGetter => null,
-                        _ => throw new InvalidOperationException()
+                        _ => throw new InvalidOperationException(),
                     };
 
                     if (!model.HasValue) continue;
@@ -319,8 +322,8 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                         Transform = new ReferenceTransform {
                             Translation = relativePosition,
                             Scale = new P3Float(scale, scale, scale),
-                            Rotations = placement.Rotation
-                        }
+                            Rotations = placement.Rotation,
+                        },
                     });
                     break;
                 default:

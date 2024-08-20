@@ -11,7 +11,8 @@ public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IRefe
     [Reactive] public TMajorRecordGetter Record { get; set; }
     public IObservableCollection<IFormLinkIdentifier> References { get; }
 
-    public ReferencedRecord(TMajorRecordGetter record,
+    public ReferencedRecord(
+        TMajorRecordGetter record,
         IEnumerable<IFormLinkIdentifier>? references = null) {
         Record = record;
         References = references is null
@@ -23,7 +24,7 @@ public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IRefe
         return obj switch {
             IReferencedRecord<TMajorRecordGetter> referencedRecord => referencedRecord.Equals(this),
             TMajorRecordGetter record => record.FormKey.Equals(Record.FormKey),
-            _ => false
+            _ => false,
         };
     }
 

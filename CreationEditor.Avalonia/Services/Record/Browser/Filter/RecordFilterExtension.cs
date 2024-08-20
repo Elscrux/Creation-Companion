@@ -4,7 +4,8 @@ using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
 public static class RecordFilterExtension {
-    public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(this IEnumerable<T> elements,
+    public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(
+        this IEnumerable<T> elements,
         Func<T, IEnumerable<string>> stringSelector,
         params char[] separator) {
 
@@ -26,7 +27,8 @@ public static class RecordFilterExtension {
                         accumulatedPath.Append(directory + separator[0]);
                     }
 
-                    var listing = currentRoot.RecordFilters.FirstOrDefault(x => string.Equals(x.DisplayName, directory, StringComparison.OrdinalIgnoreCase));
+                    var listing = currentRoot.RecordFilters
+                        .FirstOrDefault(x => string.Equals(x.DisplayName, directory, StringComparison.OrdinalIgnoreCase));
                     if (listing is null) {
                         var path = accumulatedPath.ToString();
                         listing = new RecordFilterListing(
@@ -57,7 +59,8 @@ public static class RecordFilterExtension {
         return root.RecordFilters;
     }
 
-    public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(this IEnumerable<T> elements,
+    public static IEnumerable<RecordFilterListing> GetRecursiveListings<T>(
+        this IEnumerable<T> elements,
         Func<T, string?> stringSelector,
         params char[] separator) {
         return elements.GetRecursiveListings(

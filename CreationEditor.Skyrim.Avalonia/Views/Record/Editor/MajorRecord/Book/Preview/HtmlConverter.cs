@@ -131,7 +131,7 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
 
                 // Handle leftover controls in case no inlining was needed
                 if (i == counter) {
-                   leftoverControls = currentControls.SkipWhile(c => c.Tag is not true).ToList(); 
+                    leftoverControls = currentControls.SkipWhile(c => c.Tag is not true).ToList();
                 }
 
                 continue;
@@ -184,7 +184,7 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
                         Foreground = text.Foreground,
                         TextDecorations = text.TextDecorations,
                         BaselineAlignment = BaselineAlignment.Bottom,
-                        Text = text.Text
+                        Text = text.Text,
                     });
                     break;
                 default:
@@ -240,8 +240,10 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
     private IEnumerable<Control> ProcessText(string nodeText, TextOptions textOptions) {
         // Handle spaces before and after [pagebreak]
         const string pagebreak = "[pagebreak]";
-        while (nodeText.Contains(" " + pagebreak, StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace(" " + pagebreak, pagebreak, StringComparison.OrdinalIgnoreCase);
-        while (nodeText.Contains(pagebreak + " ", StringComparison.OrdinalIgnoreCase)) nodeText = nodeText.Replace(pagebreak + " ", pagebreak, StringComparison.OrdinalIgnoreCase);
+        while (nodeText.Contains(" " + pagebreak, StringComparison.OrdinalIgnoreCase))
+            nodeText = nodeText.Replace(" " + pagebreak, pagebreak, StringComparison.OrdinalIgnoreCase);
+        while (nodeText.Contains(pagebreak + " ", StringComparison.OrdinalIgnoreCase))
+            nodeText = nodeText.Replace(pagebreak + " ", pagebreak, StringComparison.OrdinalIgnoreCase);
 
         // Add newlines around pagebreaks to ensure the split works in all valid cases
         if (nodeText.StartsWith(pagebreak, StringComparison.OrdinalIgnoreCase)) nodeText = "\n" + nodeText;
@@ -290,7 +292,7 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
                 "left" => HorizontalAlignment.Left,
                 "center" => HorizontalAlignment.Center,
                 "right" => HorizontalAlignment.Right,
-                _ => HorizontalAlignment.Left
+                _ => HorizontalAlignment.Left,
             };
 
             textOptions = textOptions with { Alignment = horizontalAlignment };
@@ -327,7 +329,7 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
                 "$SkyrimBooks_UnreadableFont" => "SkyrimBooks_Unreadable",
                 "$ControllerButtons" => "Controller  Buttons",
                 "$ControllerButtonsInverted" => "Controller  Buttons inverted",
-                _ => htmlConverterOptions.DefaultFont
+                _ => htmlConverterOptions.DefaultFont,
             };
             try {
                 textOptions = textOptions with { FontFamily = FontFamily.Parse(faceStr) }; // use mapping for fonts
@@ -338,7 +340,8 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
         if (node.TryGetAttribute<int>("size", out var size)) {
             textOptions = textOptions with { FontSize = size <= 0 ? 1 : size };
         }
-        if (node.TryGetAttribute<string>("alpha", out var hexAlpha) && int.TryParse(hexAlpha.TrimStart('#'), NumberStyles.HexNumber, null, out var alpha)) {
+        if (node.TryGetAttribute<string>("alpha", out var hexAlpha)
+         && int.TryParse(hexAlpha.TrimStart('#'), NumberStyles.HexNumber, null, out var alpha)) {
             textOptions = textOptions with { FontColor = new SolidColorBrush(textOptions.FontColor.Color, alpha / 255.0) };
         }
         return GetNodes(node.ChildNodes, textOptions);
@@ -357,7 +360,7 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
                 Stretch = Stretch.Fill,
                 Width = imageNode.TryGetAttribute<int>("width", out var w) ? w : 64,
                 Height = imageNode.TryGetAttribute<int>("height", out var h) ? h : 64,
-            }
+            },
         ];
     }
 

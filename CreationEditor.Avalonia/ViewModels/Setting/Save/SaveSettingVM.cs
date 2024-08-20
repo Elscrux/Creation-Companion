@@ -53,7 +53,7 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
 
             var folderPickerOpenOptions = new FolderPickerOpenOptions {
                 Title = "Mod Save Location",
-                SuggestedStartLocation = startLocation
+                SuggestedStartLocation = startLocation,
             };
 
             var pickedDirectories = await mainWindow.StorageProvider

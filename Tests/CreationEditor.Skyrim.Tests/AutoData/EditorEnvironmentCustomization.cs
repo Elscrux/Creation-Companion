@@ -35,7 +35,11 @@ public sealed class EditorEnvironmentCustomization(
         var builder = fixture.Create<Func<IEditorEnvironmentUpdater>>();
         var gameReleaseContext = fixture.Create<IGameReleaseContext>();
         var gameEnvironment = fixture.Create<IGameEnvironment>();
-        var editorEnvironment = new EditorEnvironment<ISkyrimMod, ISkyrimModGetter>(builder, gameReleaseContext, Logger.None, t => fixture.Create(t, new SpecimenContext(fixture)));
+        var editorEnvironment = new EditorEnvironment<ISkyrimMod, ISkyrimModGetter>(
+            builder,
+            gameReleaseContext,
+            Logger.None,
+            t => fixture.Create(t, new SpecimenContext(fixture)));
         editorEnvironment.Update(updater => updater
             .LoadOrder.AddImmutableMods(gameEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey))
             .ActiveMod.New("NewMod")

@@ -4,7 +4,8 @@ using Avalonia.Input;
 using Avalonia.Xaml.Interactivity;
 namespace CreationEditor.Avalonia.Behavior.TreeDataGrid;
 
-public sealed class ExpandAllChildren<T> : Behavior<global::Avalonia.Controls.TreeDataGrid> where T : class {
+public sealed class ExpandAllChildren<T> : Behavior<global::Avalonia.Controls.TreeDataGrid>
+    where T : class {
     protected override void OnAttachedToVisualTree() {
         if (AssociatedObject is null) return;
 

@@ -133,7 +133,9 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         Name = parent.Name;
         FormKey = parent.FormKey;
         Flags = parent.Flags;
-        Relations = new ObservableCollectionExtended<EditableRelation>(parent.Relations.Select(r => new EditableRelation { Reaction = r.Reaction, TargetFormKey = r.Target.FormKey }));
+        Relations = new ObservableCollectionExtended<EditableRelation>(parent.Relations.Select(r => new EditableRelation {
+            Reaction = r.Reaction, TargetFormKey = r.Target.FormKey,
+        }));
         Ranks = new ObservableCollectionExtended<Rank>(parent.Ranks);
 
         CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
@@ -189,7 +191,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
             Trespass = 5,
             StealMult = 0.5f,
             Escape = 100,
-            Werewolf = 1000
+            Werewolf = 1000,
         };
     }
 

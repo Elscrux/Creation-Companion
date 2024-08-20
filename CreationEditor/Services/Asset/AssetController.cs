@@ -119,13 +119,17 @@ public sealed class AssetController(
                 if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
 
                 var recordOverride = recordController.GetOrAddOverride(record);
-                recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) { { assetFile.ReferencedAsset.AssetLink, shortenedPath } });
+                recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
+                    { assetFile.ReferencedAsset.AssetLink, shortenedPath },
+                });
             }
 
             // Remap references in NIFs
             foreach (var reference in assetFile.ReferencedAsset.NifReferences) {
                 var fullPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, reference.Path);
-                modelModificationService.RemapLinks(fullPath, p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, AssetCompare.PathComparison), dataRelativePath);
+                modelModificationService.RemapLinks(fullPath,
+                    p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, AssetCompare.PathComparison),
+                    dataRelativePath);
             }
         }
     }

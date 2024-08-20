@@ -11,7 +11,7 @@ public class SitStateEnum : IConditionValueEnums {
         LoadingHorseMountIdle = 11,
         GettingReadyToMount = 12,
         IsSittingOnHorse = 13,
-        GettingReadyToDismount = 14
+        GettingReadyToDismount = 14,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<SitState>().Cast<Enum>().ToList();

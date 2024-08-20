@@ -156,7 +156,9 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             .Select(collection => collection.Any(mod => mod.IsActive));
 
         modActivated
-            .CombineLatest(_mods.ObserveCollectionChanges().Select(_ => _mods), (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
+            .CombineLatest(
+                _mods.ObserveCollectionChanges().Select(_ => _mods),
+                (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
             .Subscribe(x => {
                 var activeMod = x.ChangedMods.FirstOrDefault(mod => mod.IsActive);
                 if (activeMod is null) return;
@@ -279,7 +281,9 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     }
 
     private async Task<bool> CheckPendingSave() {
-        if (_editorEnvironment.ActiveMod.ModKey.IsNull || _editorEnvironment.ActiveMod.ModKey == ActiveMod || !_editorEnvironment.ActiveMod.EnumerateMajorRecords().Any()) return true;
+        if (_editorEnvironment.ActiveMod.ModKey.IsNull
+         || _editorEnvironment.ActiveMod.ModKey == ActiveMod
+         || !_editorEnvironment.ActiveMod.EnumerateMajorRecords().Any()) return true;
 
         var anyEditorsOpen = _recordEditorController.AnyEditorsOpen();
         var appendix = anyEditorsOpen ? "\nUnless you cancel, this will close all open editors." : string.Empty;

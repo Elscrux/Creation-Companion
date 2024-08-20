@@ -329,7 +329,10 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         RemoveRecordReferences(modCache, pair.Record.ToLinkFromRuntimeType(), pair.Record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
-    private void AddRecordReferences(AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
+    private void AddRecordReferences(
+        AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache,
+        IFormLinkGetter newRecordLink,
+        IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
             if (!modReferenceCache.AddReference(reference, newRecordLink)) continue;
 
@@ -338,7 +341,10 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         }
     }
 
-    private void RemoveRecordReferences(AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache, IFormLinkGetter newRecordLink, IEnumerable<IAssetLinkGetter> references) {
+    private void RemoveRecordReferences(
+        AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache,
+        IFormLinkGetter newRecordLink,
+        IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
             if (!modReferenceCache.RemoveReference(reference, newRecordLink)) continue;
 

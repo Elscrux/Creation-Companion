@@ -18,7 +18,7 @@ public interface IDockPreview {
             new Rectangle {
                 Fill = Brush,
                 IsHitTestVisible = false,
-                Opacity = 0.5
+                Opacity = 0.5,
             });
     }
 

@@ -24,7 +24,9 @@ public static class GameEnvironmentExtension {
         return environment.LinkCache.ResolveMod(modKey);
     }
 
-    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(this IGameEnvironment<TModSetter, TModGetter> environment, IEnumerable<ModKey> modKeys)
+    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(
+        this IGameEnvironment<TModSetter, TModGetter> environment,
+        IEnumerable<ModKey> modKeys)
         where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
         where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
         return environment.LinkCache.ResolveMods(modKeys);

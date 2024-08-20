@@ -17,15 +17,20 @@ public static class ObservableExtension {
     public static IObservable<T> ThrottleShort<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler);
     public static IObservable<T> ThrottleMedium<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
     public static IObservable<T> ThrottleLong<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(700), RxApp.MainThreadScheduler);
-    public static IObservable<T> ThrottleVeryLong<T>(this IObservable<T> obs) => obs.Throttle(TimeSpan.FromMilliseconds(1200), RxApp.MainThreadScheduler);
+    public static IObservable<T> ThrottleVeryLong<T>(this IObservable<T> obs) =>
+        obs.Throttle(TimeSpan.FromMilliseconds(1200), RxApp.MainThreadScheduler);
 
-    public static IObservable<Unit> WhenCollectionChanges(this INotifyCollectionChanged source) => source.ObserveCollectionChanges().Unit().StartWith(Unit.Default);
+    public static IObservable<Unit> WhenCollectionChanges(this INotifyCollectionChanged source) =>
+        source.ObserveCollectionChanges().Unit().StartWith(Unit.Default);
 
     public static IObservable<T> UpdateWhenCollectionChanges<T>(this IObservable<T> observable, INotifyCollectionChanged collection) {
         return observable.CombineLatest(collection.WhenCollectionChanges(), (t, _) => t);
     }
 
-    public static IDisposable SyncTo<T>(this IObservable<IObservableCollection<T>> observableCollectionChanged, ObservableCollection<T> observableCollection) where T : notnull {
+    public static IDisposable SyncTo<T>(
+        this IObservable<IObservableCollection<T>> observableCollectionChanged,
+        ObservableCollection<T> observableCollection)
+        where T : notnull {
         return observableCollectionChanged
             .Subscribe(observableCollection.ReplaceWith);
     }
@@ -213,7 +218,8 @@ public static class ObservableExtension {
         Func<T, TKey> keySelector,
         Func<T, TTarget> selector,
         IDisposableDropoff disposable)
-        where T : notnull where TTarget : notnull {
+        where T : notnull
+        where TTarget : notnull {
         return listObservable
             .ObserveOnGui()
             .Pairwise()

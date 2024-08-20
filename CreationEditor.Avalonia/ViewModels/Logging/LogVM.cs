@@ -47,14 +47,16 @@ public sealed class LogVM : ViewModel, ILogVM {
         Clear = ReactiveCommand.Create<Unit>(_ => _logAddedCache.Clear());
 
         ToggleEvent = ReactiveCommand.Create<LogEventLevel>(level => {
-            LevelsVisibility.UpdateOrAdd(level, visibility => {
-                if (visibility) {
-                    VisibilityLevels.Remove(level);
-                } else {
-                    VisibilityLevels.Add(level);
-                }
-                return !visibility;
-            });
+            LevelsVisibility.UpdateOrAdd(
+                level,
+                visibility => {
+                    if (visibility) {
+                        VisibilityLevels.Remove(level);
+                    } else {
+                        VisibilityLevels.Add(level);
+                    }
+                    return !visibility;
+                });
         });
 
         ToggleAutoScroll = ReactiveCommand.Create(() => {

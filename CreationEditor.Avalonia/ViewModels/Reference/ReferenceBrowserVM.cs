@@ -106,8 +106,8 @@ public sealed class ReferenceBrowserVM : ViewModel {
                     reference => reference.HasChildren
                 ),
                 identifierColumn,
-                typeColumn
-            }
+                typeColumn,
+            },
         };
         if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> treeRowSelection) treeRowSelection.SingleSelect = false;
 
@@ -115,8 +115,8 @@ public sealed class ReferenceBrowserVM : ViewModel {
             Columns = {
                 nameColumn,
                 identifierColumn,
-                typeColumn
-            }
+                typeColumn,
+            },
         };
         if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> flatRowSelection) flatRowSelection.SingleSelect = false;
 
@@ -150,7 +150,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
 
             var referenceBrowserVM = referenceBrowserFactory(referencedRecords, recordReferences);
             var referenceWindow = new ReferenceWindow(records.Select(record => record.Record)) {
-                Content = new ReferenceBrowser(referenceBrowserVM)
+                Content = new ReferenceBrowser(referenceBrowserVM),
             };
 
             referenceWindow.Show(mainWindow);
@@ -185,7 +185,7 @@ public sealed class ReferenceBrowserVM : ViewModel {
                     _menuItemProvider.Edit(EditRecord, records),
                     _menuItemProvider.Duplicate(DuplicateRecord, records),
                     _menuItemProvider.Delete(DeleteRecord, records),
-                }
+                },
             };
 
             if (selectedRecordReferences.Exists(reference => reference.ReferencedRecord.References.Count > 0)) {

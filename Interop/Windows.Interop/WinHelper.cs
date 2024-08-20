@@ -30,6 +30,6 @@ public static partial class WinHelper {
         Border = 0x00800000, //window with border
         Frame = 0x00400000, //window with double border but no title
         ResizeBar = 0x00040000, //resize window bar
-        Caption = Border | Frame //window with a title bar
+        Caption = Border | Frame, //window with a title bar
     }
 }

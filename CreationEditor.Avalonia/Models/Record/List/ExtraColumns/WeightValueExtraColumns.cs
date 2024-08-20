@@ -11,7 +11,8 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
                 Binding = new Binding("Record.Weight", BindingMode.OneWay),
                 CanUserSort = true,
                 Width = new DataGridLength(85),
-            }, 10);
+            },
+            10);
 
         yield return new ExtraColumn(
             new DataGridTextColumn {
@@ -19,6 +20,7 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
                 Binding = new Binding("Record.Value", BindingMode.OneWay),
                 CanUserSort = true,
                 Width = new DataGridLength(75),
-            }, 11);
+            },
+            11);
     }
 }

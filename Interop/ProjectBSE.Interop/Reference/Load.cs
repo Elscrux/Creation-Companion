@@ -50,15 +50,16 @@ public static partial class Interop {
             return new ReferenceLoadUnmanaged {
                 FormKey = Marshal.StringToCoTaskMemUTF8(managed.FormKey.ToString()),
                 Path = Marshal.StringToCoTaskMemUTF8(managed.Path),
-                Transform = managed.Transform
+                Transform = managed.Transform,
             };
         }
 
         public static ReferenceLoad ConvertToManaged(ReferenceLoadUnmanaged unmanaged) {
             return new ReferenceLoad {
-                FormKey = FormKey.Factory(Marshal.PtrToStringUTF8(unmanaged.FormKey) ?? throw new InvalidCastException("FormKey could not be converted to string")),
+                FormKey = FormKey.Factory(Marshal.PtrToStringUTF8(unmanaged.FormKey)
+                 ?? throw new InvalidCastException("FormKey could not be converted to string")),
                 Path = Marshal.PtrToStringUTF8(unmanaged.Path) ?? throw new InvalidCastException("Path could not be converted to string"),
-                Transform = unmanaged.Transform
+                Transform = unmanaged.Transform,
             };
         }
 

@@ -31,7 +31,14 @@ public sealed class AssetProvider(
             if (dir is not null) return dir;
         }
 
-        var assetDirectory = new AssetDirectory(fileSystem.DirectoryInfo.New(directory), logger, fileSystem, dataDirectoryService, assetReferenceController, assetTypeService, archiveService);
+        var assetDirectory = new AssetDirectory(
+            fileSystem.DirectoryInfo.New(directory),
+            logger,
+            fileSystem,
+            dataDirectoryService,
+            assetReferenceController,
+            assetTypeService,
+            archiveService);
         _assetDirectories.Add(assetDirectory.Path, assetDirectory);
         return assetDirectory;
     }

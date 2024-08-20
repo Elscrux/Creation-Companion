@@ -5,7 +5,7 @@ public class WeaponOutStateEnum : IConditionValueEnums {
     private enum WeaponOutState {
         NoWeaponDrawn,
         FistsOnly,
-        AnyWeaponNotSpell
+        AnyWeaponNotSpell,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<WeaponOutState>().Cast<Enum>().ToList();

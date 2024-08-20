@@ -143,51 +143,52 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     private void AddSelectionColumn() {
         const double columnWidth = 24;
-        AssociatedObject?.Columns.Insert(0, new DataGridTemplateColumn {
-            HeaderTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
-                var checkBox = new CheckBox {
-                    [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
-                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
-                    MinWidth = 20,
-                    DataContext = this,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                };
+        AssociatedObject?.Columns.Insert(0,
+            new DataGridTemplateColumn {
+                HeaderTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
+                    var checkBox = new CheckBox {
+                        [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(AllChecked)),
+                        MinWidth = 20,
+                        DataContext = this,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                    };
 
-                checkBox.WhenAnyValue(x => x.IsChecked)
-                    .Subscribe(isChecked => SelectAllItems(isChecked is true))
-                    .DisposeWith(_attachedDisposable);
+                    checkBox.WhenAnyValue(x => x.IsChecked)
+                        .Subscribe(isChecked => SelectAllItems(isChecked is true))
+                        .DisposeWith(_attachedDisposable);
 
-                return checkBox;
-            }),
-            CellTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
-                var checkBox = new CheckBox {
-                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    MinWidth = 20,
-                    Classes = { "CenteredBorder", "CheckmarkOnly" },
-                    Styles = {
-                        new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
-                            Setters = {
-                                new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center),
-                            }
+                    return checkBox;
+                }),
+                CellTemplate = new FuncDataTemplate<IReactiveSelectable>((_, _) => {
+                    var checkBox = new CheckBox {
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IReactiveSelectable.IsSelected)),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        MinWidth = 20,
+                        Classes = { "CenteredBorder", "CheckmarkOnly" },
+                        Styles = {
+                            new Style(x => x.OfType<CheckBox>().Class("CenteredBorder").Child().OfType<Border>()) {
+                                Setters = {
+                                    new Setter(Layoutable.HorizontalAlignmentProperty, HorizontalAlignment.Center),
+                                },
+                            },
                         },
+                    };
+
+                    if (EnabledMapping is not null) {
+                        checkBox
+                            .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
+                            .DisposeWith(_visualsAttachedDisposable);
                     }
-                };
 
-                if (EnabledMapping is not null) {
-                    checkBox
-                        .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
-                        .DisposeWith(_visualsAttachedDisposable);
-                }
-
-                return checkBox;
-            }),
-            CanUserResize = false,
-            CanUserSort = false,
-            CanUserReorder = false,
-            IsReadOnly = true,
-            Width = new DataGridLength(columnWidth)
-        });
+                    return checkBox;
+                }),
+                CanUserResize = false,
+                CanUserSort = false,
+                CanUserReorder = false,
+                IsReadOnly = true,
+                Width = new DataGridLength(columnWidth),
+            });
 
         ColumnEnabled = true;
     }
@@ -204,16 +205,18 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         if (AssociatedObject.ContextFlyout is not MenuFlyout menuFlyout) return;
 
         if (menuFlyout.Items.Count > 0) menuFlyout.Items.Insert(0, new Separator());
-        menuFlyout.Items.Insert(0, new MenuItem {
-            [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
-            Header = "Invert",
-            Command = ReactiveCommand.Create(InvertAll),
-        });
-        menuFlyout.Items.Insert(0, new MenuItem {
-            [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
-            Header = "Select All",
-            Command = ReactiveCommand.Create(() => SelectDynamic())
-        });
+        menuFlyout.Items.Insert(0,
+            new MenuItem {
+                [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
+                Header = "Invert",
+                Command = ReactiveCommand.Create(InvertAll),
+            });
+        menuFlyout.Items.Insert(0,
+            new MenuItem {
+                [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
+                Header = "Select All",
+                Command = ReactiveCommand.Create(() => SelectDynamic()),
+            });
 
         ContextFlyoutEnabled = true;
     }
@@ -233,10 +236,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     private void AddKeyBindings() {
-        AssociatedObject?.KeyBindings.Insert(0, new KeyBinding {
-            Command = ReactiveCommand.Create(ToggleSelection),
-            Gesture = new KeyGesture(ToggleSelectionKeyBinding),
-        });
+        AssociatedObject?.KeyBindings.Insert(0,
+            new KeyBinding {
+                Command = ReactiveCommand.Create(ToggleSelection),
+                Gesture = new KeyGesture(ToggleSelectionKeyBinding),
+            });
 
         KeyBindingEnabled = true;
     }

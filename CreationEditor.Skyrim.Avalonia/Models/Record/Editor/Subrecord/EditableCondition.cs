@@ -21,7 +21,7 @@ public sealed class EditableCondition : ReactiveObject {
         QuestAlias,
         PackageData,
         EventData,
-        Player
+        Player,
     }
 
     private static readonly PropertyInfo? FunctionProperty = typeof(IConditionDataGetter).GetProperty(nameof(IConditionDataGetter.Function));
@@ -161,7 +161,7 @@ public sealed class EditableCondition : ReactiveObject {
             ExtendedRunOnType.QuestAlias => QuestAlias,
             ExtendedRunOnType.PackageData => PackageData,
             ExtendedRunOnType.EventData => Convert.ToInt32(EventData),
-            _ => -1
+            _ => -1,
         };
 
         return condition;
@@ -173,7 +173,7 @@ public sealed class EditableCondition : ReactiveObject {
         "Reference",
         "Unknown3",
         "UseAliases",
-        "UsePackageData"
+        "UsePackageData",
     ];
 
     public static IEnumerable<PropertyInfo> GetParameterProperties(ConditionData data) {

@@ -30,10 +30,10 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                                         Text = "Remap",
                                         DialogResult = "OK",
                                         Command = vm.RemapReferences,
-                                        [!TaskDialogButton.CommandParameterProperty] = formKeyPicker.FormKeyChanged.ToBinding()
+                                        [!TaskDialogButton.CommandParameterProperty] = formKeyPicker.FormKeyChanged.ToBinding(),
                                     },
-                                    TaskDialogButton.CancelButton
-                                }
+                                    TaskDialogButton.CancelButton,
+                                },
                             };
 
                             dialog.ShowAsync();

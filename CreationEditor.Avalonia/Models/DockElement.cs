@@ -29,5 +29,5 @@ public enum DockElement {
     /// <summary>
     /// Viewing and modifying the content of cells.
     /// </summary>
-    Viewport
+    Viewport,
 }

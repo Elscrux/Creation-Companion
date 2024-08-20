@@ -21,10 +21,11 @@ public sealed class LifecycleStartup(
     public void PostStartupAsync(Subject<string> done, CancellationToken cancellationToken = default) {
         logger.Here().Debug("Run {Count} Lifecycle Task(s) post startup", LifecycleTasks.Count);
 
-        Parallel.ForEach(LifecycleTasks, task => {
-            task.PostStartupAsync(cancellationToken);
-            done.OnNext(task.GetType().Name);
-        });
+        Parallel.ForEach(LifecycleTasks,
+            task => {
+                task.PostStartupAsync(cancellationToken);
+                done.OnNext(task.GetType().Name);
+            });
     }
 
     public void Exit() {

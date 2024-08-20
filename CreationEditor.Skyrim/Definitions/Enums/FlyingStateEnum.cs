@@ -7,7 +7,7 @@ public class FlyingStateEnum : IConditionValueEnums {
         Takeoff,
         Cruising,
         Hovering,
-        Landing
+        Landing,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<FlyingState>().Cast<Enum>().ToList();

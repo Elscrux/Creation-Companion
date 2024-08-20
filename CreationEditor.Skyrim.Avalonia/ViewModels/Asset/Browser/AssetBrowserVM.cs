@@ -134,8 +134,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     this.WhenAnyValue(x => x.ShowEmptyDirectories),
                     this.WhenAnyValue(x => x.ShowOnlyOrphaned),
                     this.WhenAnyValue(x => x.SearchText),
-                    (showBsaAssets, showEmptyDirectories, showOnlyOrphaned, searchText) =>
-                        (ShowBsaAssets: showBsaAssets, ShowEmptyDirectories: showEmptyDirectories, ShowOnlyOrphaned: showOnlyOrphaned, SearchText: searchText))
+                    (showBsaAssets, showEmptyDirectories, showOnlyOrphaned, searchText) => (
+                        ShowBsaAssets: showBsaAssets,
+                        ShowEmptyDirectories: showEmptyDirectories,
+                        ShowOnlyOrphaned: showOnlyOrphaned,
+                        SearchText: searchText))
                 .ThrottleMedium()
                 .Select(tuple => Selector(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
 
@@ -145,13 +148,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     new TemplateColumn<AssetTreeItem>(
                         "Name",
                         new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                            if (asset is null) return null;
-
                             // Name
                             var textBlock = new TextBlock {
                                 Text = _fileSystem.Path.GetFileName(asset.Path),
                                 [ToolTip.TipProperty] = GetRootRelativePath(asset.Path),
-                                VerticalAlignment = VerticalAlignment.Center
+                                VerticalAlignment = VerticalAlignment.Center,
                             };
 
                             if (asset.IsVirtual) {
@@ -160,13 +161,17 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                             // Symbol
                             var symbolIcon = new SymbolIcon {
-                                Symbol = asset.Asset is AssetFile file ? assetSymbolService.GetSymbol(file.ReferencedAsset.AssetLink.Extension) : Symbol.Folder,
-                                VerticalAlignment = VerticalAlignment.Center
+                                Symbol = asset.Asset is AssetFile file
+                                    ? assetSymbolService.GetSymbol(file.ReferencedAsset.AssetLink.Extension)
+                                    : Symbol.Folder,
+                                VerticalAlignment = VerticalAlignment.Center,
                             };
 
                             switch (asset.Asset) {
                                 case AssetFile:
-                                    symbolIcon[!TemplatedControl.ForegroundProperty] = asset.AnyOrphaned.Select(x => x ? Brushes.IndianRed : Brushes.ForestGreen).ToBinding();
+                                    symbolIcon[!TemplatedControl.ForegroundProperty] = asset.AnyOrphaned.Select(x => x
+                                        ? Brushes.IndianRed
+                                        : Brushes.ForestGreen).ToBinding();
                                     break;
                                 case AssetDirectory:
                                     symbolIcon.Foreground = Brushes.Goldenrod;
@@ -202,17 +207,17 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             },
                         }),
                     directory => directory.Children),
-                    // directory => directory.HasChildren), TODO add this back when https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132 is fixed and still needed
+                // directory => directory.HasChildren), TODO add this back when https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/issues/132 is fixed and still needed
                 new TemplateColumn<AssetTreeItem>(
                     "Count",
                     new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                        if (asset is null || asset.Asset is AssetDirectory) return null;
+                        if (asset.Asset is AssetDirectory) return null;
 
                         return new TextBlock {
                             Text = asset.GetReferencedAssets()
                                 .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
                                 .Sum()
-                                .ToString()
+                                .ToString(),
                         };
                     }),
                     null,
@@ -232,25 +237,26 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 new TemplateColumn<AssetTreeItem>(
                     "Flags",
                     new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                        if (asset?.Asset is AssetFile assetFile && assetFile.ReferencedAsset.AssetLink.Type == SkyrimModelAssetType.Instance) {
-                            // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
-                            var assetLinks = modelAssetQuery
-                                .ParseAssets(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetFile.ReferencedAsset.AssetLink.DataRelativePath.Path), assetFile.ReferencedAsset.AssetLink.DataRelativePath)
-                                .Select(r => r.AssetLink)
-                                .Where(assetLink => !DataDirectory.Contains(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetLink.DataRelativePath.Path)))
-                                .ToArray();
+                        if (asset.Asset is not AssetFile assetFile
+                         || assetFile.ReferencedAsset.AssetLink.Type != SkyrimModelAssetType.Instance) return null;
 
-                            if (assetLinks.Length > 0) {
-                                return new SymbolIcon {
-                                    Symbol = Symbol.ImportantFilled,
-                                    Foreground = StandardBrushes.InvalidBrush,
-                                    [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath))
-                                };
-                            }
-                        }
+                        // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
+                        var assetLinks = modelAssetQuery
+                            .ParseAssets(_fileSystem.Path.Combine(_dataDirectoryProvider.Path,
+                                    assetFile.ReferencedAsset.AssetLink.DataRelativePath.Path),
+                                assetFile.ReferencedAsset.AssetLink.DataRelativePath)
+                            .Select(r => r.AssetLink)
+                            .Where(assetLink =>
+                                !DataDirectory.Contains(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, assetLink.DataRelativePath.Path)))
+                            .ToArray();
+                        if (assetLinks.Length == 0) return null;
 
-                        return null;
-                    }))
+                        return new SymbolIcon {
+                            Symbol = Symbol.ImportantFilled,
+                            Foreground = StandardBrushes.InvalidBrush,
+                            [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath)),
+                        };
+                    })),
             },
         };
 
@@ -278,7 +284,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     Children = {
                         new TextBlock { Text = "Do you really want to proceed? There are still references to these assets." },
                         referenceBrowser,
-                    }
+                    },
                 };
             }
 
@@ -319,9 +325,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private async Task AddAssetFolder(AssetDirectory dir) {
-        var textBox = new TextBox {
-            Text = "New Folder"
-        };
+        var textBox = new TextBox { Text = "New Folder" };
         var relativePath = GetRootRelativePath(dir.Path);
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
@@ -350,20 +354,14 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var directory = _fileSystem.Path.GetDirectoryName(asset.Path);
         if (directory is null) return;
 
-        var textBox = new TextBox {
-            Text = name
-        };
-        var content = new StackPanel {
-            Children = {
-                textBox
-            }
-        };
+        var textBox = new TextBox { Text = name };
+        var content = new StackPanel { Children = { textBox } };
 
         var referenceBrowserVM = GetReferenceBrowserVM(asset);
         if (referenceBrowserVM is not null) {
             var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
             content.Children.Add(new TextBlock {
-                Text = "Do you really want to proceed? These references will be modified to point to the new path."
+                Text = "Do you really want to proceed? These references will be modified to point to the new path.",
             });
             content.Children.Add(referenceBrowser);
         }
@@ -432,15 +430,15 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         Inlines = new InlineCollection {
                             new Run("Move "),
                             new Run(draggedAssets.Length.ToString()) {
-                                Foreground = StandardBrushes.ValidBrush
+                                Foreground = StandardBrushes.ValidBrush,
                             },
                             new Run(" Items from "),
                             new Run(relativeSrcDirectory) {
-                                Foreground = StandardBrushes.ValidBrush
+                                Foreground = StandardBrushes.ValidBrush,
                             },
                             new Run(" to "),
                             new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.ValidBrush
+                                Foreground = StandardBrushes.ValidBrush,
                             },
                         },
                         FontSize = 14,
@@ -449,22 +447,24 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         Inlines = new InlineCollection {
                             new Run("Move "),
                             new Run(GetRootRelativePath(firstDraggedAsset.Path)) {
-                                Foreground = StandardBrushes.ValidBrush
+                                Foreground = StandardBrushes.ValidBrush,
                             },
                             new Run(" to "),
                             new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.ValidBrush
+                                Foreground = StandardBrushes.ValidBrush,
                             },
                         },
                         FontSize = 14,
-                    }
-            }
+                    },
+            },
         };
 
         var referenceBrowserVM = GetReferenceBrowserVM(draggedAssets);
         if (referenceBrowserVM is not null) {
             var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
-            content.Children.Add(new TextBlock { Text = "Do you really want to proceed? These references will be modified to point to the new path." });
+            content.Children.Add(new TextBlock {
+                Text = "Do you really want to proceed? These references will be modified to point to the new path.",
+            });
             content.Children.Add(referenceBrowser);
         }
 
@@ -486,8 +486,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 Icon = new SymbolIcon { Symbol = Symbol.Copy },
                 Header = "Copy Path",
                 Command = CopyPath,
-                CommandParameter = asset
-            }
+                CommandParameter = asset,
+            },
         ];
 
         if (asset.GetReferencedAssets().Any()) {
@@ -500,13 +500,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 Icon = new SymbolIcon { Symbol = Symbol.Open },
                 Header = "Open in new Asset Browser",
                 Command = OpenAssetBrowser,
-                CommandParameter = dir
+                CommandParameter = dir,
             });
             items.Add(new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.NewFolder },
                 Header = "Add Folder",
                 Command = AddFolder,
-                CommandParameter = dir
+                CommandParameter = dir,
             });
         }
 
@@ -597,7 +597,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             Process.Start(new ProcessStartInfo {
                 FileName = openPath,
                 UseShellExecute = true,
-                Verb = "open"
+                Verb = "open",
             });
         }
     }

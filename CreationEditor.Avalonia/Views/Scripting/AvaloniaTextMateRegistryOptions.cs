@@ -28,11 +28,11 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
             IgnoreReadOnlyFields = false,
             IgnoreReadOnlyProperties = false,
             IncludeFields = false,
-            WriteIndented = false
+            WriteIndented = false,
         };
         var languageOptions = new JsonSerializerOptions {
             AllowTrailingCommas = true,
-            ReadCommentHandling = JsonCommentHandling.Skip
+            ReadCommentHandling = JsonCommentHandling.Skip,
         };
 
         foreach (var grammarName in grammars) {
@@ -78,7 +78,7 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
             ThemeName.TomorrowNightBlue => "tomorrow-night-blue-color-theme.json",
             ThemeName.HighContrastLight => "hc_light.json",
             ThemeName.HighContrastDark => "hc_black.json",
-            _ => throw new ArgumentOutOfRangeException(nameof(name))
+            _ => throw new ArgumentOutOfRangeException(nameof(name)),
         };
     }
 

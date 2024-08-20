@@ -15,8 +15,7 @@
         </Button.Resources>
         <Binding Path="#Editor.ButtonText^"
                  TargetNullValue="{StaticResource Spinner}"
-                 FallbackValue="{StaticResource Spinner}">
-        </Binding>
+                 FallbackValue="{StaticResource Spinner}"/>
         <Button.Flyout>
             <Flyout IsOpen="{Binding #Editor.IsOpen, Mode=OneWayToSource}">
                 <picker:PlacedPicker

@@ -22,19 +22,25 @@ public sealed class ConstructibleObjectFilter : RecordFilter<IConstructibleObjec
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         var finishedFormKeys = new HashSet<FormKey>();
-        var byohListing = new RecordFilterListing(Byoh, record => record is IConstructibleObjectGetter constructible
-         && constructible.WorkbenchKeyword.TryResolve(_linkCacheProvider.LinkCache, out var keyword)
-         && keyword.EditorID is not null && keyword.EditorID.StartsWith(Byoh, StringComparison.OrdinalIgnoreCase));
+        var byohListing = new RecordFilterListing(
+            Byoh,
+            record => record is IConstructibleObjectGetter constructible
+             && constructible.WorkbenchKeyword.TryResolve(_linkCacheProvider.LinkCache, out var keyword)
+             && keyword.EditorID is not null && keyword.EditorID.StartsWith(Byoh, StringComparison.OrdinalIgnoreCase));
 
         return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IConstructibleObjectGetter>()
             .SelectWhere(constructible => {
-                if (finishedFormKeys.Contains(constructible.WorkbenchKeyword.FormKey)) return TryGet<RecordFilterListing>.Failure;
-                if (!constructible.WorkbenchKeyword.TryResolve(_linkCacheProvider.LinkCache, out var keyword)) return TryGet<RecordFilterListing>.Failure;
-                if (keyword.EditorID is null) return TryGet<RecordFilterListing>.Failure;
+                if (finishedFormKeys.Contains(constructible.WorkbenchKeyword.FormKey)
+                 || !constructible.WorkbenchKeyword.TryResolve(_linkCacheProvider.LinkCache, out var keyword)
+                 || keyword.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(keyword.FormKey);
 
-                var listing = new RecordFilterListing(keyword.EditorID, record => record is IConstructibleObjectGetter c && c.WorkbenchKeyword.FormKey == keyword.FormKey);
+                var listing = new RecordFilterListing(
+                    keyword.EditorID,
+                    record =>
+                        record is IConstructibleObjectGetter c
+                     && c.WorkbenchKeyword.FormKey == keyword.FormKey);
 
                 // BYOH specific filtering
                 if (keyword.EditorID.StartsWith(Byoh, StringComparison.OrdinalIgnoreCase)) {

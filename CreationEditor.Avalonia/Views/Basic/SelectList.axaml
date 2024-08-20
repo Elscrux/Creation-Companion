@@ -12,7 +12,7 @@
             <ControlTemplate>
                 <ScrollViewer MaxHeight="750">
                     <ItemsControl ItemsSource="{TemplateBinding ItemsSource}"
-                                   ItemTemplate="{TemplateBinding DataTemplate}">
+                                  ItemTemplate="{TemplateBinding DataTemplate}">
                         <ItemsControl.ContextFlyout>
                             <MenuFlyout>
                                 <MenuItem Header="Select All"

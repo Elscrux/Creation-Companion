@@ -20,9 +20,9 @@ public sealed class EditableRelation : ReactiveObject {
                 identifier.Type.InheritsFrom(typeof(IRelatableGetter)) ?
                     new EditableRelation {
                         TargetFormKey = identifier.FormKey,
-                        Reaction = CombatReaction.Neutral
+                        Reaction = CombatReaction.Neutral,
                     } : null,
-            _ => null
+            _ => null,
         };
     }
 }

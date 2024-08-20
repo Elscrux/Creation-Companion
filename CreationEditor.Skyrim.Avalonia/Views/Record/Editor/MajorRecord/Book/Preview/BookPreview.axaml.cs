@@ -74,7 +74,7 @@ public partial class BookPreview : ActivatableUserControl {
                 var scaleY = bounds.Height / BookBackground.Bounds.Height;
                 var scaleX = bounds.Width / BookBackground.Bounds.Width;
 
-                var scale = Math.Min((double) scaleX, scaleY) - 0.05;
+                var scale = Math.Min(scaleX, scaleY) - 0.05;
 
                 BookBackground.RenderTransform = new ScaleTransform(scale, scale);
             })
@@ -94,7 +94,11 @@ public partial class BookPreview : ActivatableUserControl {
 
         _currentLeftPage += up ? 2 : -2;
         leftPage.Margin = new Thickness(leftPage.Margin.Left, -_currentLeftPage * PageHeight, leftPage.Margin.Right, leftPage.Margin.Bottom);
-        rightPage.Margin = new Thickness(rightPage.Margin.Left, -(_currentLeftPage + 1) * PageHeight, rightPage.Margin.Right, rightPage.Margin.Bottom);
+        rightPage.Margin = new Thickness(
+            rightPage.Margin.Left,
+            -(_currentLeftPage + 1) * PageHeight,
+            rightPage.Margin.Right,
+            rightPage.Margin.Bottom);
 
         UpdateButtons();
     }

@@ -34,7 +34,7 @@ public sealed class HashFileSystemValidation(
             () => {
                 UpdateCache(fileSystemCacheData, invalidatedFiles, source);
                 fileSystemValidationSerialization.Serialize(fileSystemCacheData, source);
-        });
+            });
 
         async IAsyncEnumerable<string> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, string directoryPath, int level) {
             var nextLevel = level + 1;
@@ -75,7 +75,8 @@ public sealed class HashFileSystemValidation(
 
             async IAsyncEnumerable<string> DirectoryParse(string subDirectoryPath) {
                 var subDirectoryName = fileSystem.Path.GetFileName(subDirectoryPath);
-                var subDirectoryCache = hashDirectoryCache.SubDirectories.FirstOrDefault(d => AssetCompare.PathComparer.Equals(d.Name, subDirectoryName));
+                var subDirectoryCache = hashDirectoryCache.SubDirectories
+                    .FirstOrDefault(d => AssetCompare.PathComparer.Equals(d.Name, subDirectoryName));
 
                 if (subDirectoryCache is null) {
                     // No cache exists for this subdirectory, return all new files in this directory as invalid

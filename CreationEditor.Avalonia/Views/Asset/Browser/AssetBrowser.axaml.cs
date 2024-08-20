@@ -31,7 +31,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         if (e.Source is not Control { DataContext: AssetTreeItem asset } control) return;
 
         var contextFlyout = new MenuFlyout {
-            ItemsSource = ViewModel?.GetContextMenuItems(asset)
+            ItemsSource = ViewModel?.GetContextMenuItems(asset),
         };
 
         contextFlyout.ShowAt(control, true);

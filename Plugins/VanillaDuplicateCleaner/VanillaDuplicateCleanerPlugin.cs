@@ -4,6 +4,7 @@ using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Skyrim;
 using VanillaDuplicateCleaner.ViewModels;
+using VanillaDuplicateCleaner.Views;
 namespace VanillaDuplicateCleaner;
 
 public sealed class VanillaDuplicateCleanerPlugin(
@@ -17,7 +18,7 @@ public sealed class VanillaDuplicateCleanerPlugin(
     public string Description => "Cleans mods from vanilla duplicates.";
     public Guid Guid => new("2179f861-1934-41e7-b612-b80484542c2c");
 
-    public Control GetControl() => new Views.VanillaDuplicateCleanerView(vanillaDuplicateCleanerVMFactory());
+    public Control GetControl() => new VanillaDuplicateCleanerView(vanillaDuplicateCleanerVMFactory());
 
     public object GetIcon() => new SymbolIcon { Symbol = Symbol.Clear };
 }

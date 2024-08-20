@@ -153,7 +153,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
                 MaxDropDownHeight = 750,
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                SelectedItem = condition.Function
+                SelectedItem = condition.Function,
             };
 
             autoCompleteBox.WhenAnyValue(box => box.SelectedItem)
@@ -203,7 +203,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
                         EditableCondition.ExtendedRunOnType.Reference,
                         EditableCondition.ExtendedRunOnType.LinkedReference,
                         EditableCondition.ExtendedRunOnType.Player,
-                    ]
+                    ],
                 };
             })
             .ToObservableCollection(ActivatedDisposable);
@@ -220,7 +220,7 @@ public partial class ConditionsEditor : ActivatableUserControl {
                     IPackageGetter { OwnerQuest.IsNull: true } => ConditionConstants.PackageOnlyFunctions,
                     IPackageGetter => ConditionConstants.PackageOnlyFunctions.Concat(ConditionConstants.QuestOnlyFunctions),
                     ICameraPathGetter => ConditionConstants.CameraPathOnlyFunctions,
-                    _ => []
+                    _ => [],
                 };
             })
             .Select(additional => ConditionConstants.BaseFunctions.Concat(additional))

@@ -21,7 +21,7 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
 
         var promoteCommand = ReactiveCommand.Create<RecordListContext>(context => {
             var referenceWindow = new PromotionWindow {
-                DataContext = promoteToMasterVMFactory(context.SelectedRecords)
+                DataContext = promoteToMasterVMFactory(context.SelectedRecords),
             };
 
             referenceWindow.Show(mainWindow);
@@ -47,7 +47,7 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
                     "Promote to Master",
                     context,
                     Symbol.Up),
-                IsPrimary: true)
+                IsPrimary: true),
         ];
     }
 

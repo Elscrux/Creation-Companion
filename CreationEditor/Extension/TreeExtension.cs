@@ -1,7 +1,11 @@
 ﻿namespace CreationEditor;
 
 public static class TreeExtension {
-    public static IEnumerable<TLimit> GetAllChildren<T, TLimit>(this T root, Func<T, IEnumerable<T>?> childSelector, bool includeRoot = false) where TLimit : T {
+    public static IEnumerable<TLimit> GetAllChildren<T, TLimit>(
+        this T root,
+        Func<T, IEnumerable<T>?> childSelector,
+        bool includeRoot = false)
+        where TLimit : T {
         return root.GetAllChildren(childSelector, includeRoot).OfType<TLimit>();
     }
 
@@ -24,15 +28,27 @@ public static class TreeExtension {
         }
     }
 
-    public static IEnumerable<T> GetAllChildren<T>(this IEnumerable<T> rootEnumerable, Func<T, IEnumerable<T>?> childSelector, bool includeRoot = false) {
+    public static IEnumerable<T> GetAllChildren<T>(
+        this IEnumerable<T> rootEnumerable,
+        Func<T, IEnumerable<T>?> childSelector,
+        bool includeRoot = false) {
         return rootEnumerable.SelectMany(rootItem => GetAllChildren(rootItem, childSelector, includeRoot));
     }
 
-    public static IEnumerable<TLimit> GetChildren<T, TLimit>(this T root, Predicate<T> childPredicate, Func<T, IEnumerable<T>?> childSelector, bool includeRoot = false) where TLimit : T {
+    public static IEnumerable<TLimit> GetChildren<T, TLimit>(
+        this T root,
+        Predicate<T> childPredicate,
+        Func<T, IEnumerable<T>?> childSelector,
+        bool includeRoot = false)
+        where TLimit : T {
         return root.GetChildren(childPredicate, childSelector, includeRoot).OfType<TLimit>();
     }
 
-    public static IEnumerable<T> GetChildren<T>(this T root, Predicate<T> childPredicate, Func<T, IEnumerable<T>?> childSelector, bool includeRoot = false) {
+    public static IEnumerable<T> GetChildren<T>(
+        this T root,
+        Predicate<T> childPredicate,
+        Func<T, IEnumerable<T>?> childSelector,
+        bool includeRoot = false) {
         if (includeRoot) yield return root;
 
         var stack = new Stack<T>();
@@ -53,7 +69,11 @@ public static class TreeExtension {
         }
     }
 
-    public static IEnumerable<T> GetChildren<T>(this IEnumerable<T> rootEnumerable, Predicate<T> childPredicate, Func<T, IEnumerable<T>?> childSelector, bool includeRoot = false) {
+    public static IEnumerable<T> GetChildren<T>(
+        this IEnumerable<T> rootEnumerable,
+        Predicate<T> childPredicate,
+        Func<T, IEnumerable<T>?> childSelector,
+        bool includeRoot = false) {
         return rootEnumerable.SelectMany(rootItem => GetChildren(rootItem, childPredicate, childSelector, includeRoot));
     }
 }

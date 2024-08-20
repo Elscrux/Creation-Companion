@@ -17,19 +17,22 @@ public class FormKeyPicker : AFormKeyPicker {
         get => GetValue(MaxSearchBoxHeightProperty);
         set => SetValue(MaxSearchBoxHeightProperty, value);
     }
-    public static readonly StyledProperty<double> MaxSearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MaxSearchBoxHeight), 500d);
+    public static readonly StyledProperty<double> MaxSearchBoxHeightProperty =
+        AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MaxSearchBoxHeight), 500d);
 
     public double MinSearchBoxWidth {
         get => GetValue(MinSearchBoxWidthProperty);
         set => SetValue(MinSearchBoxWidthProperty, value);
     }
-    public static readonly StyledProperty<double> MinSearchBoxWidthProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MinSearchBoxWidth), 250d);
+    public static readonly StyledProperty<double> MinSearchBoxWidthProperty =
+        AvaloniaProperty.Register<FormKeyPicker, double>(nameof(MinSearchBoxWidth), 250d);
 
     public double SearchBoxHeight {
         get => GetValue(SearchBoxHeightProperty);
         set => SetValue(SearchBoxHeightProperty, value);
     }
-    public static readonly StyledProperty<double> SearchBoxHeightProperty = AvaloniaProperty.Register<FormKeyPicker, double>(nameof(SearchBoxHeight), double.NaN);
+    public static readonly StyledProperty<double> SearchBoxHeightProperty =
+        AvaloniaProperty.Register<FormKeyPicker, double>(nameof(SearchBoxHeight), double.NaN);
 
     public bool ShowFormKeyBox {
         get => GetValue(ShowFormKeyBoxProperty);
@@ -48,31 +51,36 @@ public class FormKeyPicker : AFormKeyPicker {
         dragger?.SetValue(FormLinkDragDrop.AllowDragDataGridProperty, true);
         SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
 
-        dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty, _ => {
-            if (LinkCache is null || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record)) return FormLinkInformation.Null;
+        dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty,
+            _ => {
+                if (LinkCache is null
+                 || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record))
+                    return FormLinkInformation.Null;
 
-            return FormLinkInformation.Factory(record);
-        });
+                return FormLinkInformation.Factory(record);
+            });
 
         SetValue(FormLinkDragDrop.SetFormLinkProperty, formLink => FormKey = formLink.FormKey);
 
-        SetValue(FormLinkDragDrop.CanSetFormLinkProperty, formLink => {
-            // FormLink type needs to be in scoped type
-            var selectedTypes = EnabledTypes(SelectableTypes).ToList();
-            if (!selectedTypes.AnyInheritsFrom(typeof(IMajorRecordGetter))
-             && !selectedTypes.AnyInheritsFrom(formLink.Type)) return false;
+        SetValue(
+            FormLinkDragDrop.CanSetFormLinkProperty,
+            formLink => {
+                // FormLink type needs to be in scoped type
+                var selectedTypes = EnabledTypes(SelectableTypes).ToList();
+                if (!selectedTypes.AnyInheritsFrom(typeof(IMajorRecordGetter))
+                 && !selectedTypes.AnyInheritsFrom(formLink.Type)) return false;
 
-            // FormKey must not be blacklisted
-            if (BlacklistFormKeys is not null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
+                // FormKey must not be blacklisted
+                if (BlacklistFormKeys is not null && BlacklistFormKeys.Contains(formLink.FormKey)) return false;
 
-            // FormKey must be resolved
-            if (LinkCache is null || !LinkCache.TryResolveIdentifier(formLink.FormKey, selectedTypes, out var editorId)) return false;
+                // FormKey must be resolved
+                if (LinkCache is null || !LinkCache.TryResolveIdentifier(formLink.FormKey, selectedTypes, out var editorId)) return false;
 
-            // Record needs to satisfy the filter
-            if (Filter is not null && !Filter(formLink.FormKey, editorId)) return false;
+                // Record needs to satisfy the filter
+                if (Filter is not null && !Filter(formLink.FormKey, editorId)) return false;
 
-            return true;
-        });
+                return true;
+            });
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e) {

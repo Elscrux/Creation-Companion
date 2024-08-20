@@ -2,5 +2,5 @@
 
 public enum ViewMode {
     Compact,
-    Normal
+    Normal,
 }

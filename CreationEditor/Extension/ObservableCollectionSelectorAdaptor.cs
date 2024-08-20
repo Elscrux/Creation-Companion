@@ -86,7 +86,10 @@ public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget>
     /// <param name="collection">The collection.</param>
     /// <param name="refreshThreshold">The refresh threshold.</param>
     /// <exception cref="System.ArgumentNullException">collection.</exception>
-    public ObservableCollectionSelectorAdaptor(Func<TObj, TKey, TTarget> selector, IObservableCollection<TTarget> collection, int refreshThreshold = 25) {
+    public ObservableCollectionSelectorAdaptor(
+        Func<TObj, TKey, TTarget> selector,
+        IObservableCollection<TTarget> collection,
+        int refreshThreshold = 25) {
         _selector = selector;
         _collection = collection ?? throw new ArgumentNullException(nameof(collection));
         _refreshThreshold = refreshThreshold;
@@ -106,7 +109,7 @@ public sealed class ObservableCollectionSelectorAdaptor<TObj, TKey, TTarget>
                     ChangeReason.Remove => ListChangeReason.Remove,
                     ChangeReason.Refresh => ListChangeReason.Refresh,
                     ChangeReason.Moved => ListChangeReason.Moved,
-                    _ => throw new InvalidOperationException()
+                    _ => throw new InvalidOperationException(),
                 },
                 _selector(change.Current, change.Key),
                 change.Previous.HasValue

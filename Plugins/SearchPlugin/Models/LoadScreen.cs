@@ -9,6 +9,8 @@ public class LoadScreen : TextSearcher<ISkyrimMod, ISkyrimModGetter, ILoadScreen
         yield return record.Description.String;
     }
     protected override void ReplaceText(ILoadScreen record, string oldText, string newText, StringComparison comparison) {
-        if (oldText.Equals(record.Description.String, comparison)) record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        if (oldText.Equals(record.Description.String, comparison)) {
+            record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        }
     }
 }

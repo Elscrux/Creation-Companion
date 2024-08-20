@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using CreationEditor.Services.Asset;
+﻿using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
@@ -17,7 +16,9 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TReference"></typeparam>
     /// <returns>Task to build the asset cache</returns>
-    public async Task<AssetReferenceCache<TSource, TReference>> BuildCache<TSource, TReference>(IAssetReferenceQuery<TSource, TReference> query, TSource source)
+    public async Task<AssetReferenceCache<TSource, TReference>> BuildCache<TSource, TReference>(
+        IAssetReferenceQuery<TSource, TReference> query,
+        TSource source)
         where TSource : notnull
         where TReference : notnull {
         if (query.AssetCaches.TryGetValue(source, out var refCache)) return refCache;
@@ -51,7 +52,8 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
 
         Dictionary<IAssetLinkGetter, HashSet<TReference>> CreateNewEntry() => new(AssetLinkEqualityComparer.Instance);
 
-        async Task<AssetReferenceCache<TSource, TReference>> TryParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
+        async Task<AssetReferenceCache<TSource, TReference>> TryParseCache(
+            IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
             if (assetReferenceCacheableQuery.Serialization.Validate(source, assetReferenceCacheableQuery)) {
                 // Cache is valid, deserialize it
                 return await ParseCache(assetReferenceCacheableQuery);
@@ -87,7 +89,9 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
         }
 
         Task<AssetReferenceCache<TSource, TReference>> ParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
-            if (assetReferenceCacheableQuery is not IAssetReferenceCacheableValidatableQuery<TSource, TReference> { CacheValidation: {} cacheValidation }) {
+            if (assetReferenceCacheableQuery is not IAssetReferenceCacheableValidatableQuery<TSource, TReference> {
+                CacheValidation: {} cacheValidation,
+            }) {
                 // No internal cache validation, just deserialize
                 logger.Here().Debug("Valid cache, no cache content validation needed for {Source}, deserializing cache", sourceName);
                 return Task.Run(() => assetReferenceCacheableQuery.Serialization.Deserialize(source, assetReferenceCacheableQuery));
@@ -97,7 +101,9 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             return ParseValidatableCache(assetReferenceCacheableQuery, cacheValidation);
         }
 
-        async Task<AssetReferenceCache<TSource, TReference>> ParseValidatableCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery, IInternalCacheValidation<TSource, TReference> cacheValidation) {
+        async Task<AssetReferenceCache<TSource, TReference>> ParseValidatableCache(
+            IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery,
+            IInternalCacheValidation<TSource, TReference> cacheValidation) {
             // Internal cache validation, parse invalidated assets and merge with deserialized cache
             var validationResult = await cacheValidation.GetInvalidatedContent(source);
 
@@ -117,7 +123,10 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             }
 
             // Otherwise, parse invalidated assets and merge with deserialized cache
-            logger.Here().Debug("Partly invalidated cache content for {Source}, parsing invalidated assets and using {ValidatedContentCount} validated assets", sourceName, validationResult.InvalidatedContent.Count);
+            logger.Here().Debug(
+                "Partly invalidated cache content for {Source}, parsing invalidated assets and using {ValidatedContentCount} validated assets",
+                sourceName,
+                validationResult.InvalidatedContent.Count);
             return await MergeCacheAndParsed(validationResult, deserializationTask, assetReferenceCacheableQuery);
         }
 

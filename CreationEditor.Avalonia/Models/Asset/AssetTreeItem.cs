@@ -52,7 +52,10 @@ public sealed class AssetTreeItem(
 
             return collection;
 
-            AssetTreeItem Selector(IAsset a) => new(fileSystem.Path.Combine(Path, fileSystem.Path.GetFileName(a.Path)), a, fileSystem, filterObservable);
+            AssetTreeItem Selector(IAsset a) {
+                var filePath = fileSystem.Path.Combine(Path, fileSystem.Path.GetFileName(a.Path));
+                return new AssetTreeItem(filePath, a, fileSystem, filterObservable);
+            }
         }
 
         return new ReadOnlyObservableCollection<AssetTreeItem>([]);

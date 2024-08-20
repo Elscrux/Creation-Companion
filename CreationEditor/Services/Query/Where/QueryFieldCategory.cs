@@ -2,5 +2,5 @@
 
 public enum QueryFieldCategory {
     Value,
-    Collection
+    Collection,
 }

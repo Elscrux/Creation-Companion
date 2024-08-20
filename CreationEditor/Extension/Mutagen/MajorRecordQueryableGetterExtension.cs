@@ -8,7 +8,7 @@ public static class MajorRecordQueryableGetterExtension {
             INamedGetter { Name: {} name } => name,
             IMajorRecordGetter { EditorID: {} editorID } => editorID,
             IFormKeyGetter formKeyGetter => formKeyGetter.FormKey.ToString(),
-            _ => recordQueryable.ToString()
+            _ => recordQueryable.ToString(),
         };
     }
 }

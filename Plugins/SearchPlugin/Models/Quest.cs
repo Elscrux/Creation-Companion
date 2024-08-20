@@ -19,15 +19,23 @@ public class Quest : TextSearcher<ISkyrimMod, ISkyrimModGetter, IQuest, IQuestGe
     }
 
     protected override void ReplaceText(IQuest record, string oldText, string newText, StringComparison comparison) {
-        if (oldText.Equals(record.Name?.String, comparison)) record.Name = new TranslatedString(TranslatedString.DefaultLanguage, newText);
-        if (oldText.Equals(record.Description?.String, comparison)) record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        if (oldText.Equals(record.Name?.String, comparison)) {
+            record.Name = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        }
+        if (oldText.Equals(record.Description?.String, comparison)) {
+            record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        }
 
         foreach (var objective in record.Objectives.Where(objective => oldText.Equals(objective.DisplayText?.String, comparison))) {
             objective.DisplayText = new TranslatedString(TranslatedString.DefaultLanguage, newText);
         }
 
-        foreach (var logEntry in from stage in record.Stages from logEntry in stage.LogEntries where oldText.Equals(logEntry.Entry?.String, comparison) select logEntry) {
-            logEntry.Entry = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        var questLogEntries = record.Stages
+            .SelectMany(x => x.LogEntries)
+            .Where(logEntry => oldText.Equals(logEntry.Entry?.String, comparison));
+
+        foreach (var questLogEntry in questLogEntries) {
+            questLogEntry.Entry = new TranslatedString(TranslatedString.DefaultLanguage, newText);
         }
     }
 }

@@ -37,7 +37,9 @@ public partial class PageHost : ActivatableUserControl {
         var tabIndexChanged = PageControl.GetObservable(TabIndexProperty);
         var tabAndPagesChanged = tabIndexChanged.CombineLatest(this.WhenAnyValue(x => x.Pages), (index, pages) => (Index: index, Pages: pages));
 
-        var canGoForward = tabAndPagesChanged.CombineLatest(this.WhenAnyValue(x => x.HasFinalButton), (x, hasFinalButton) => (x.Index, x.Pages, HasFinalButton: hasFinalButton))
+        var canGoForward = tabAndPagesChanged.CombineLatest(
+                this.WhenAnyValue(x => x.HasFinalButton),
+                (x, hasFinalButton) => (x.Index, x.Pages, HasFinalButton: hasFinalButton))
             .Select(x => {
                 if (x.Pages is null || (x.HasFinalButton ? x.Index : x.Index + 1) >= x.Pages.Count) return Observable.Return(false);
                 if (x.Pages[x.Index] is { OnNext: {} command }) return command.CanExecute;
@@ -47,7 +49,10 @@ public partial class PageHost : ActivatableUserControl {
             .Switch();
         NextButton.Command = ReactiveCommand.CreateFromTask(NextPage, canGoForward);
         NextButton[!ContentProperty] = tabAndPagesChanged
-            .Select(x => x.Pages?[x.Index].GetObservable(PageData.NextButtonTextProperty).Select(str => str ?? DefaultNextButtonName) ?? Observable.Return(DefaultNextButtonName))
+            .Select(x => x.Pages?[x.Index]
+                    .GetObservable(PageData.NextButtonTextProperty)
+                    .Select(str => str ?? DefaultNextButtonName)
+             ?? Observable.Return(DefaultNextButtonName))
             .Switch()
             .ToBinding();
 
@@ -74,7 +79,10 @@ public partial class PageHost : ActivatableUserControl {
         NextButton.Classes.Add(loadSpinnerClass);
 
         // If the page has a command, execute it
-        if ((HasFinalButton ? PageControl.TabIndex : PageControl.TabIndex + 1) < Pages.Count && Pages[PageControl.TabIndex] is { OnNext: {} command }) {
+        if ((HasFinalButton
+                ? PageControl.TabIndex
+                : PageControl.TabIndex + 1) < Pages.Count
+         && Pages[PageControl.TabIndex] is { OnNext: {} command }) {
             await command.Execute();
         }
 

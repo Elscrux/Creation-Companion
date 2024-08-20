@@ -29,7 +29,7 @@ public sealed class LimitPanAndZoomToSize : Behavior<global::Avalonia.Controls.P
 
         AssociatedObject.MinOffsetX = AssociatedObject.Bounds.Width * (1 - e.ZoomX);
         AssociatedObject.MinOffsetY = AssociatedObject.Bounds.Height * (1 - e.ZoomY);
-        
+
         // Snap to offset bounds
         var isOffsetXLessThanMin = AssociatedObject.OffsetX < AssociatedObject.MinOffsetX;
         var isOffsetYLessThanMin = AssociatedObject.OffsetY < AssociatedObject.MinOffsetY;

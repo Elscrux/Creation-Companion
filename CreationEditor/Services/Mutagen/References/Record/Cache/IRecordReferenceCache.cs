@@ -9,7 +9,6 @@ public interface IRecordReferenceCache {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="modOrder">list of mods to get references from, earlier items are prioritized</param>
     /// <returns>form links of references</returns>
-
     public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
         foreach (var modKey in modOrder.Select(x => x.ModKey)) {
             var modReferenceCache = GetModReferenceCache(modKey);
@@ -17,7 +16,9 @@ public interface IRecordReferenceCache {
 
             foreach (var reference in references) {
                 // Skip references that are overridden by another mod
-                var containingMod = modOrder.FirstOrDefault(m => GetModReferenceCache(m.ModKey) is {} cache && cache.FormKeys.Contains(reference.FormKey));
+                var containingMod = modOrder.FirstOrDefault(m =>
+                    GetModReferenceCache(m.ModKey) is {} cache
+                 && cache.FormKeys.Contains(reference.FormKey));
                 if (containingMod?.ModKey != modKey) continue;
 
                 yield return reference;

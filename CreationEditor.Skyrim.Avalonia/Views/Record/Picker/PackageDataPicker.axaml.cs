@@ -93,7 +93,7 @@ public partial class PackageDataPicker : ActivatableUserControl {
                             IPackageDataLocationGetter => RecordTypeConstants.LocationTypes,
                             IPackageDataTargetGetter => RecordTypeConstants.AllPlacedInterfaceTypes,
                             IPackageDataObjectListGetter => RecordTypeConstants.AllPlacedInterfaceTypes,
-                            _ => null
+                            _ => null,
                         };
                         return packageTypes is not null && packageTypes.AnyInheritsFromAny(types);
                     })
@@ -103,7 +103,10 @@ public partial class PackageDataPicker : ActivatableUserControl {
                             IPackageDataBoolGetter boolData => new PackageData(d.Key, valueName, "Bool", boolData.Data),
                             IPackageDataFloatGetter floatData => new PackageData(d.Key, valueName, "Float", floatData.Data),
                             IPackageDataIntGetter intData => new PackageData(d.Key, valueName, "Int", intData.Data),
-                            IPackageDataLocationGetter locationData => new PackageData(d.Key, valueName, "Location",
+                            IPackageDataLocationGetter locationData => new PackageData(
+                                d.Key,
+                                valueName,
+                                "Location",
                                 locationData.Location.Target switch {
                                     ILocationCellGetter cell => $"Cell: {cell.Link.GetEditorID(x.LinkCache)}",
                                     ILocationFallbackGetter fallback => fallback.Type,
@@ -111,12 +114,16 @@ public partial class PackageDataPicker : ActivatableUserControl {
                                     ILocationObjectIdGetter objectId => $"Object: {objectId.Link.GetEditorID(x.LinkCache)}",
                                     ILocationObjectTypeGetter objectType => $"Type: {objectType.Type}",
                                     ILocationTargetGetter target => $"Target: {target.Link.GetSelfOrBaseEditorID(x.LinkCache)}",
-                                    _ => throw new InvalidOperationException()
+                                    _ => throw new InvalidOperationException(),
                                 }),
-                            IPackageDataObjectListGetter objectListData => new PackageData(d.Key, valueName, "Object List", $"Radius: {objectListData.Data}"),
+                            IPackageDataObjectListGetter objectListData => new PackageData(
+                                d.Key,
+                                valueName,
+                                "Object List",
+                                $"Radius: {objectListData.Data}"),
                             IPackageDataTargetGetter targetData => new PackageData(d.Key, valueName, "Target", targetData.Target.CountOrDistance),
                             IPackageDataTopicGetter topicData => new PackageData(d.Key, valueName, "Topic", topicData.Topics.FirstOrDefault()),
-                            _ => throw new InvalidOperationException()
+                            _ => throw new InvalidOperationException(),
                         };
                     }).ToList();
             })

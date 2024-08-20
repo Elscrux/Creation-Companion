@@ -17,7 +17,8 @@ public static class ListExtension {
         return item;
     }
 
-    public static void ReplaceWith<T>(this IList<T> list, IEnumerable<T> newItems) where T : notnull {
+    public static void ReplaceWith<T>(this IList<T> list, IEnumerable<T> newItems)
+        where T : notnull {
         var counter = 0;
         using var enumerator = newItems.GetEnumerator();
         while (enumerator.MoveNext()) {
@@ -35,7 +36,8 @@ public static class ListExtension {
         }
     }
 
-    public static void RemoveRange<T>(this IList<T> source, int index, int count) where T : notnull {
+    public static void RemoveRange<T>(this IList<T> source, int index, int count)
+        where T : notnull {
         ArgumentNullException.ThrowIfNull(source);
 
         switch (source) {

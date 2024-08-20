@@ -22,13 +22,17 @@ public sealed class AcousticSpaceFilter : RecordFilter<IAcousticSpaceGetter> {
 
         return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IAcousticSpaceGetter>()
             .SelectWhere(acousticSpace => {
-                if (finishedFormKeys.Contains(acousticSpace.EnvironmentType.FormKey)) return TryGet<RecordFilterListing>.Failure;
-                if (!acousticSpace.EnvironmentType.TryResolve(_linkCacheProvider.LinkCache, out var reverbParameters)) return TryGet<RecordFilterListing>.Failure;
-                if (reverbParameters.EditorID is null) return TryGet<RecordFilterListing>.Failure;
+                if (finishedFormKeys.Contains(acousticSpace.EnvironmentType.FormKey)
+                 || !acousticSpace.EnvironmentType.TryResolve(_linkCacheProvider.LinkCache, out var reverbParameters)
+                 || reverbParameters.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(reverbParameters.FormKey);
 
-                return TryGet<RecordFilterListing>.Succeed(new RecordFilterListing(reverbParameters.EditorID, record => record is IAcousticSpaceGetter a && a.EnvironmentType.FormKey == reverbParameters.FormKey));
+                return TryGet<RecordFilterListing>.Succeed(new RecordFilterListing(
+                    reverbParameters.EditorID,
+                    record =>
+                        record is IAcousticSpaceGetter a
+                     && a.EnvironmentType.FormKey == reverbParameters.FormKey));
             });
     }
 }

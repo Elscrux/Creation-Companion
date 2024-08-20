@@ -197,11 +197,13 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         var canSetFormLink = GetCanSetFormLink(visual);
 
         // Show adorner when target has setter for form link
-        AdornerLayer.SetAdorner(visual, new Border {
-            BorderBrush = canSetFormLink is not null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
-            BorderThickness = new Thickness(2),
-            IsHitTestVisible = false,
-        });
+        AdornerLayer.SetAdorner(
+            visual,
+            new Border {
+                BorderBrush = canSetFormLink is not null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+                BorderThickness = new Thickness(2),
+                IsHitTestVisible = false,
+            });
     }
 
     private static void DragLeave(object? sender, DragEventArgs e) {

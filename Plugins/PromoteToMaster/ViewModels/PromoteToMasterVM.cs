@@ -63,8 +63,7 @@ public sealed class PromoteToMasterVM : ViewModel {
         EditMod.CanCreateNewMod = true;
         EditMod.Filter = MutableModsFilter;
 
-        var allModsSelected = Observable.CombineLatest(
-            InjectToMod.HasModSelected,
+        var allModsSelected = InjectToMod.HasModSelected.CombineLatest(
             InjectedRecordCreationMod.HasModSelected,
             EditMod.HasModSelected,
             (a, b, c) => a && b && c);
@@ -79,10 +78,11 @@ public sealed class PromoteToMasterVM : ViewModel {
         );
 
         Run = ReactiveCommand.CreateRunInBackground(() => {
-            Save(RemovePrefix is null
-                ? record => record.EditorID
-                : record => CalculateEditorID(record.EditorID, RemovePrefix, AddPrefix));
-        }, allModsSelected);
+                Save(RemovePrefix is null
+                    ? record => record.EditorID
+                    : record => CalculateEditorID(record.EditorID, RemovePrefix, AddPrefix));
+            },
+            allModsSelected);
     }
 
     private bool MutableModsFilter(IModKeyed mod) {

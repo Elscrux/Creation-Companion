@@ -11,7 +11,7 @@ public class KnockedStateEnum : IConditionValueEnums {
         KnockedOutLeadIn = 4,
         Queued = 5,
         GetUp = 6,
-        Down = 7
+        Down = 7,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<KnockedState>().Cast<Enum>().ToList();

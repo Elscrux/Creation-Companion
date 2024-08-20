@@ -19,8 +19,7 @@
                              IsTextCompletionEnabled="True"
                              FilterMode="ContainsOrdinal"
                              MaxDropDownHeight="750"
-                             ValueMemberBinding="{Binding Name, DataType=from:QueryFromItem}">
-            </AutoCompleteBox>
+                             ValueMemberBinding="{Binding Name, DataType=from:QueryFromItem}"/>
             <TextBlock Text=" records"/>
         </StackPanel>
 

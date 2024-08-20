@@ -52,7 +52,8 @@ public sealed class RecordReferenceQuery(
 
         return true;
     }
-    private string GetGameName(string cacheFilePath) => cacheFilePath.Split(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar)[^3];
+    private string GetGameName(string cacheFilePath) =>
+        cacheFilePath.Split(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar)[^3];
 
     public void Dispose() => _disposables.Dispose();
 
@@ -72,7 +73,10 @@ public sealed class RecordReferenceQuery(
             if (fileSystem.File.Exists(cacheFilePath)) {
                 // If cache file exists, try to load the cache
                 try {
-                    logger.Here().Verbose("Record Reference cache file found at {CacheFile}, trying to load the cache for {ModKey}", cacheFilePath, mod.ModKey);
+                    logger.Here().Verbose(
+                        "Record Reference cache file found at {CacheFile}, trying to load the cache for {ModKey}",
+                        cacheFilePath,
+                        mod.ModKey);
                     modReferenceCache = LoadReferenceCache(cacheFilePath);
                 } catch (Exception e) {
                     // Catch any issues while loading references

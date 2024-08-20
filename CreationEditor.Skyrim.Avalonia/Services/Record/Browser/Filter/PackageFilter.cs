@@ -20,6 +20,10 @@ public sealed class PackageFilter : RecordFilter<IPackageGetter> {
         return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IPackageGetter>()
             .Where(package => package.Type == Package.Types.PackageTemplate)
             .Where(template => template.EditorID is not null)
-            .Select(template => new RecordFilterListing(template.EditorID!, record => record is IPackageGetter package && package.PackageTemplate.FormKey == template.FormKey));
+            .Select(template => new RecordFilterListing(
+                template.EditorID!,
+                record =>
+                    record is IPackageGetter package
+                 && package.PackageTemplate.FormKey == template.FormKey));
     }
 }

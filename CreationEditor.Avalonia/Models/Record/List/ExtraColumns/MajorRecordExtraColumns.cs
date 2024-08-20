@@ -31,7 +31,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
                 Header = "References",
                 Binding = new Binding("References.Count", BindingMode.OneWay),
                 CanUserSort = true,
-                CustomSortComparer = ReferencedRecordComparers.ReferenceCountComparer
+                CustomSortComparer = ReferencedRecordComparers.ReferenceCountComparer,
             },
             200);
     }

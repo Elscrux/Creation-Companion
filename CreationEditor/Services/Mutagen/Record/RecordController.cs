@@ -73,8 +73,11 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         var group = mod.GetTopLevelGroup(type);
         var record = group.AddNew(mod.GetNextFormKey());
 
-        _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
-            record, type, mod.ModKey);
+        _logger.Here().Verbose(
+            "Creating new record {Record} of type {Type} in {Mod}",
+            record,
+            type,
+            mod.ModKey);
 
         _recordCreated.OnNext((record, mod));
 
@@ -93,8 +96,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         var group = mod.GetTopLevelGroup<TMajorRecord>();
         var record = group.AddNew(mod.GetNextFormKey());
 
-        _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}",
-            record, typeof(TMajorRecord), mod.ModKey);
+        _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}", record, typeof(TMajorRecord), mod.ModKey);
 
         _recordCreated.OnNext((record, mod));
 
@@ -109,8 +111,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         var resolveContext = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, record.Registration.GetterType);
         var duplicate = resolveContext.DuplicateIntoAsNewRecord(mod);
 
-        _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
-            duplicate, record, mod.ModKey);
+        _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}", duplicate, record, mod.ModKey);
 
         _recordCreated.OnNext((duplicate, mod));
 
@@ -119,18 +120,23 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-        where TMajorRecordGetter : class, IMajorRecordGetter => DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+        where TMajorRecordGetter : class, IMajorRecordGetter {
+        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+    }
+
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-        where TMajorRecordGetter : class, IMajorRecordGetter => DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+        where TMajorRecordGetter : class, IMajorRecordGetter {
+        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+    }
+
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var resolveContext = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
         var duplicate = resolveContext.DuplicateIntoAsNewRecord(mod);
 
-        _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}",
-            duplicate, record, mod.ModKey);
+        _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}", duplicate, record, mod.ModKey);
 
         _recordCreated.OnNext((duplicate, mod));
 
@@ -145,8 +151,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         var newOverride = GetOrAddOverride(record, mod);
         newOverride.IsDeleted = true;
 
-        _logger.Here().Verbose("Deleting record {Record} from {Mod}",
-            record, mod);
+        _logger.Here().Verbose("Deleting record {Record} from {Mod}", record, mod);
 
         _recordDeleted.OnNext((newOverride, mod));
     }
@@ -163,8 +168,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         var newOverride = GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, mod);
         newOverride.IsDeleted = true;
 
-        _logger.Here().Verbose("Deleting record {Record} from {Mod}",
-            record, mod);
+        _logger.Here().Verbose("Deleting record {Record} from {Mod}", record, mod);
 
         _recordDeleted.OnNext((newOverride, mod));
     }
@@ -178,8 +182,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         var newOverride = context.GetOrAddAsOverride(mod);
         if (context.ModKey != mod.ModKey) {
-            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
-                record, mod.ModKey);
+            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
 
             _recordChanged.OnNext((newOverride, mod));
         }
@@ -189,10 +192,16 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter => GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+        where TMajorRecordGetter : class, IMajorRecordGetter {
+        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+    }
+
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter => GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+        where TMajorRecordGetter : class, IMajorRecordGetter {
+        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+    }
+
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
@@ -200,8 +209,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         var newOverride = context.GetOrAddAsOverride(mod);
         if (context.ModKey != mod.ModKey) {
-            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}",
-                record, mod.ModKey);
+            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
 
             _recordChanged.OnNext((newOverride, mod));
         }
@@ -338,7 +346,11 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord) {
         ReplaceReferences(record, references, replacingRecord, _editorEnvironment.ActiveMod);
     }
-    public void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord, TMod mod) {
+    public void ReplaceReferences(
+        IMajorRecordGetter record,
+        IEnumerable<IFormLinkIdentifier> references,
+        IMajorRecordGetter replacingRecord,
+        TMod mod) {
         var remap = new Dictionary<FormKey, FormKey> { { record.FormKey, replacingRecord.FormKey } };
 
         foreach (var reference in references.ToArray()) {

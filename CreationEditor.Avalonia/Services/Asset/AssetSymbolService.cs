@@ -5,8 +5,7 @@ namespace CreationEditor.Avalonia.Services.Asset;
 public sealed class AssetSymbolService : IAssetSymbolService {
     private readonly Dictionary<string, Symbol> _fileExtensionSymbols = new();
 
-    public AssetSymbolService
-        (IAssetTypeProvider assetTypeProvider) {
+    public AssetSymbolService(IAssetTypeProvider assetTypeProvider) {
         foreach (var extension in assetTypeProvider.Texture.FileExtensions) {
             _fileExtensionSymbols.Add(extension, Symbol.Image);
         }

@@ -13,7 +13,10 @@ public static class RecordReferenceCacheMixIn {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="linkCache">link cache to get references from</param>
     /// <returns>form links of references</returns>
-    public static IEnumerable<IFormLinkIdentifier> GetReferences(this IRecordReferenceCache recordReferenceCache, FormKey formKey, ILinkCache linkCache) {
+    public static IEnumerable<IFormLinkIdentifier> GetReferences(
+        this IRecordReferenceCache recordReferenceCache,
+        FormKey formKey,
+        ILinkCache linkCache) {
         return recordReferenceCache.GetReferences(formKey, linkCache.PriorityOrder);
     }
 
@@ -24,7 +27,10 @@ public static class RecordReferenceCacheMixIn {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="environment">environment to get references from</param>
     /// <returns>form links of references</returns>
-    public static IEnumerable<IFormLinkIdentifier> GetReferences(this IRecordReferenceCache recordReferenceCache, FormKey formKey, IGameEnvironment environment) {
+    public static IEnumerable<IFormLinkIdentifier> GetReferences(
+        this IRecordReferenceCache recordReferenceCache,
+        FormKey formKey,
+        IGameEnvironment environment) {
         return recordReferenceCache.GetReferences(formKey, environment.LinkCache);
     }
 
@@ -36,7 +42,10 @@ public static class RecordReferenceCacheMixIn {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="editorEnvironment">editor environment to get references from</param>
     /// <returns>form links of references</returns>
-    public static IEnumerable<IFormLinkIdentifier> GetReferences(this IRecordReferenceCache recordReferenceCache, FormKey formKey, IEditorEnvironment editorEnvironment) {
+    public static IEnumerable<IFormLinkIdentifier> GetReferences(
+        this IRecordReferenceCache recordReferenceCache,
+        FormKey formKey,
+        IEditorEnvironment editorEnvironment) {
         return recordReferenceCache.GetReferences(formKey, editorEnvironment.LinkCache);
     }
 }

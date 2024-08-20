@@ -109,8 +109,7 @@
         <GridSplitter Grid.Row="3" Grid.Column="0"
                       Grid.ColumnSpan="5"
                       IsEnabled="{Binding BottomSide.ActiveTab, Converter={x:Static ObjectConverters.IsNotNull}}"
-                      Background="{DynamicResource SystemControlTransparentBrush}">
-        </GridSplitter>
+                      Background="{DynamicResource SystemControlTransparentBrush}"/>
 
         <view:SideDock Grid.Row="4" Grid.Column="0"
                        Grid.ColumnSpan="5"

@@ -36,7 +36,7 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
                 RecordActionGroup.Linking,
                 goToAsset,
                 context => {
-                    var dataRelativePath = ((context.SelectedRecords[0].Record as IModeledGetter)!).Model!.File.DataRelativePath;
+                    var dataRelativePath = (context.SelectedRecords[0].Record as IModeledGetter)!.Model!.File.DataRelativePath;
 
                     return menuItemProvider.Custom(
                         goToAsset,

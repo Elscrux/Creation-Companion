@@ -47,18 +47,20 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                 (linkCache, worldspaceFormKey) => (LinkCache: linkCache, WorldspaceFormKey: worldspaceFormKey))
             .ThrottleMedium()
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(y => {
-                _referencesDisposable.Clear();
+            .WrapInInProgressMarker(
+                x => x.Do(y => {
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
-                RecordCache.Edit(updater => {
-                    foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
-                        recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                    RecordCache.Clear();
+                    RecordCache.Edit(updater => {
+                        foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
+                            recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
 
-                        updater.AddOrUpdate(referencedRecord);
-                    }
-                });
-            }), out var isBusy)
+                            updater.AddOrUpdate(referencedRecord);
+                        }
+                    });
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

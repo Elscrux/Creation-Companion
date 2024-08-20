@@ -45,7 +45,8 @@ public static class InteropUtility {
         return result;
     }
 
-    public static unsafe T[] ToArray<T>(T* pointer, int count) where T : unmanaged {
+    public static unsafe T[] ToArray<T>(T* pointer, int count)
+        where T : unmanaged {
         var result = new T[count];
         for (var i = 0; i < count; i++) {
             result[i] = pointer[i];
@@ -54,7 +55,8 @@ public static class InteropUtility {
         return result;
     }
 
-    public static unsafe TManaged[] ToArray<TUnmanaged, TManaged>(TUnmanaged* pointer, int count, Func<TUnmanaged, TManaged> conv) where TUnmanaged : unmanaged {
+    public static unsafe TManaged[] ToArray<TUnmanaged, TManaged>(TUnmanaged* pointer, int count, Func<TUnmanaged, TManaged> conv)
+        where TUnmanaged : unmanaged {
         var result = new TManaged[count];
         for (var i = 0; i < count; i++) {
             result[i] = conv(pointer[i]);
@@ -63,7 +65,8 @@ public static class InteropUtility {
         return result;
     }
 
-    public static IntPtr ToUnmanagedMemory<T>(this IList<T> list) where T : notnull {
+    public static IntPtr ToUnmanagedMemory<T>(this IList<T> list)
+        where T : notnull {
         var sizeOf = Marshal.SizeOf<T>();
         var pointer = Marshal.AllocCoTaskMem(sizeOf * list.Count);
         for (var i = 0; i < list.Count; i++) {
@@ -73,7 +76,8 @@ public static class InteropUtility {
         return pointer;
     }
 
-    public static IDisposable ToUnmanagedMemory<T>(this IList<T> list, out IntPtr pointer) where T : notnull {
+    public static IDisposable ToUnmanagedMemory<T>(this IList<T> list, out IntPtr pointer)
+        where T : notnull {
         var sizeOf = Marshal.SizeOf<T>();
         pointer = Marshal.AllocCoTaskMem(sizeOf * list.Count);
         for (var i = 0; i < list.Count; i++) {

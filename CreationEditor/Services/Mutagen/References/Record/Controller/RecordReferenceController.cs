@@ -88,7 +88,9 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         return _referenceCache?.GetReferences(formKey, _editorEnvironment) ?? [];
     }
 
-    public IDisposable GetReferencedRecord<TMajorRecordGetter>(TMajorRecordGetter record, out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
+    public IDisposable GetReferencedRecord<TMajorRecordGetter>(
+        TMajorRecordGetter record,
+        out IReferencedRecord<TMajorRecordGetter> outReferencedRecord)
         where TMajorRecordGetter : IMajorRecordGetter {
         var references = _referenceCache?.GetReferences(record.FormKey, _editorEnvironment);
         outReferencedRecord = new ReferencedRecord<TMajorRecordGetter>(record, references);

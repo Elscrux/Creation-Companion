@@ -35,20 +35,22 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(linkCache => {
-                _referencesDisposable.Clear();
+            .WrapInInProgressMarker(
+                x => x.Do(linkCache => {
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
-                RecordCache.Edit(updater => {
-                    foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
-                        if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
+                    RecordCache.Clear();
+                    RecordCache.Edit(updater => {
+                        foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
+                            if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                        recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
 
-                        updater.AddOrUpdate(referencedRecord);
-                    }
-                });
-            }), out var isBusy)
+                            updater.AddOrUpdate(referencedRecord);
+                        }
+                    });
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

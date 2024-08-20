@@ -14,8 +14,8 @@ public sealed class InteropTest {
         Transform = new ReferenceTransform {
             Translation = new P3Float(1, 2, 3),
             Scale = new P3Float(2, 3, 3),
-            Rotations = new P3Float()
-        }
+            Rotations = new P3Float(),
+        },
     };
 
     public InteropTest() {

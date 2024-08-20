@@ -10,7 +10,9 @@ public sealed class EmptyRecordReferenceCacheFactory(ISpecimenBuilder builder) :
     private readonly RecordReferenceQuery _recordReferenceQuery = builder.Create<RecordReferenceQuery>();
 
     public Task<ImmutableRecordReferenceCache> GetImmutableRecordReferenceCache(IReadOnlyList<IModGetter> mods) {
-        return Task.FromResult(new ImmutableRecordReferenceCache(mods.ToDictionary(x => x.ModKey, _ => new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []))));
+        return Task.FromResult(new ImmutableRecordReferenceCache(
+            mods.ToDictionary(x => x.ModKey,
+                _ => new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []))));
     }
 
     public Task<ImmutableRecordReferenceCache> GetImmutableRecordReferenceCache(ImmutableRecordReferenceCache immutableRecordReferenceCache) {
@@ -26,7 +28,9 @@ public sealed class EmptyRecordReferenceCacheFactory(ISpecimenBuilder builder) :
                 x => _recordReferenceQuery.BuildReferenceCache(x))));
     }
 
-    public Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(IReadOnlyList<IMod> mutableMods, ImmutableRecordReferenceCache? immutableRecordReferenceCache = null) {
+    public Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(
+        IReadOnlyList<IMod> mutableMods,
+        ImmutableRecordReferenceCache? immutableRecordReferenceCache = null) {
         return Task.FromResult(new MutableRecordReferenceCache(mutableMods
                 .DistinctBy(x => x.ModKey)
                 .ToDictionary(

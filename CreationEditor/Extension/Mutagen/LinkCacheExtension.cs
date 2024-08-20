@@ -29,7 +29,9 @@ public static class LinkCacheExtension {
         return modKeys.Select(modKey => linkCache.ResolveMod(modKey)).NotNull();
     }
 
-    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(this ILinkCache<TModSetter, TModGetter> linkCache, IEnumerable<ModKey> modKeys)
+    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(
+        this ILinkCache<TModSetter, TModGetter> linkCache,
+        IEnumerable<ModKey> modKeys)
         where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
         where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
         return modKeys.Select(modKey => linkCache.ResolveMod(modKey)).NotNull();

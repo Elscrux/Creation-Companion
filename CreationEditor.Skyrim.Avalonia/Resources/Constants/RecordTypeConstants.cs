@@ -60,14 +60,14 @@ public static class RecordTypeConstants {
         typeof(ITalkingActivatorGetter),
         typeof(ITextureSetGetter),
         typeof(ITreeGetter),
-        typeof(IWeaponGetter)
+        typeof(IWeaponGetter),
     ];
 
     public static readonly Type[] PlaceableTypes = [
         typeof(INpcGetter),
         typeof(IProjectileGetter),
         typeof(IHazardGetter),
-        ..PlaceableObjectTypes
+        ..PlaceableObjectTypes,
     ];
 
     // Package

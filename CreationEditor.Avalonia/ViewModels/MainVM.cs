@@ -113,7 +113,7 @@ public sealed class MainVM : ViewModel {
                 Process.Start(new ProcessStartInfo {
                     FileName = gameFolder.FullName,
                     UseShellExecute = true,
-                    Verb = "open"
+                    Verb = "open",
                 });
             }
         });
@@ -122,7 +122,7 @@ public sealed class MainVM : ViewModel {
             Process.Start(new ProcessStartInfo {
                 FileName = editorEnvironment.GameEnvironment.DataFolderPath,
                 UseShellExecute = true,
-                Verb = "open"
+                Verb = "open",
             });
         });
 

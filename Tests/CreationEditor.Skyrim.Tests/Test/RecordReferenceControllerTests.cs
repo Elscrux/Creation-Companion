@@ -144,7 +144,7 @@ public sealed class RecordReferenceControllerTests {
 
         // Build the initial environment with the master mod
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
-        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem});
+        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
             .LoadOrder.SetImmutableMods([masterMod.ModKey])
             .ActiveMod.New("NewMod")

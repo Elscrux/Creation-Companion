@@ -7,7 +7,8 @@ namespace CreationEditor.Avalonia.Modules;
 
 public sealed class LoggingModule : Module {
     protected override void Load(ContainerBuilder builder) {
-        const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
+        const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}"
+          + " in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
 
         var logSink = new ReplayLogSink();
         builder.RegisterInstance(logSink)
@@ -30,7 +31,11 @@ public sealed class LoggingModule : Module {
 #endif
                 )
                 .WriteTo.Console(LogEventLevel.Verbose, outputTemplate)
-                .WriteTo.File(context.Resolve<ILogPathProvider>().RelativeLogFilePath("log.txt"), LogEventLevel.Verbose, outputTemplate, rollingInterval: RollingInterval.Day)
+                .WriteTo.File(
+                    context.Resolve<ILogPathProvider>().RelativeLogFilePath("log.txt"),
+                    LogEventLevel.Verbose,
+                    outputTemplate,
+                    rollingInterval: RollingInterval.Day)
                 .CreateLogger())
             .As<ILogger>()
             .SingleInstance();

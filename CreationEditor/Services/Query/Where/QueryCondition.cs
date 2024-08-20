@@ -100,7 +100,9 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
             .Select(CreateSummary);
     }
 
-    private static string CreateSummary(((IQueryField? Field, bool Negate, bool Or, IQueryCompareFunction? Function, object? CompareValue) Condition, IList<string> Summaries, QueryConditionState State) x) {
+    private static string CreateSummary(
+        ((IQueryField? Field, bool Negate, bool Or, IQueryCompareFunction? Function, object? CompareValue) Condition, IList<string> Summaries,
+            QueryConditionState State) x) {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(x.Condition.Field?.Name);
         if (x.Condition.Negate) {
@@ -141,7 +143,8 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
     public void RestoreMemento(QueryConditionMemento memento) {
         // Field
         FieldSelector.RestoreMemento(memento.FieldSelector);
-        SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator) ?? CompareFunctions.FirstOrDefault();
+        SelectedCompareFunction = CompareFunctions.FirstOrDefault(x => x.Operator == memento.SelectedFunctionOperator)
+         ?? CompareFunctions.FirstOrDefault();
 
         // Function and Compare Value
         ConditionState = new QueryConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type);

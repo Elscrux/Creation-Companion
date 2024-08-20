@@ -16,13 +16,11 @@ public static class SkyrimDefinitions {
 
     public static readonly ImmutableArray<AStoryManagerEvent> StoryManagerEvents
         = [
-            ..typeof(AStoryManagerEvent)
-                .GetAllSubClasses<AStoryManagerEvent>()
+            ..typeof(AStoryManagerEvent).GetAllSubClasses<AStoryManagerEvent>(),
         ];
 
     public static readonly ImmutableArray<IConditionValueEnums> ConditionValueEnums
         = [
-            ..typeof(IConditionValueEnums)
-                .GetAllSubClasses<IConditionValueEnums>()
+            ..typeof(IConditionValueEnums).GetAllSubClasses<IConditionValueEnums>(),
         ];
 }

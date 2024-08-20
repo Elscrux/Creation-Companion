@@ -88,117 +88,124 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                                 Text = groupInstance.Class is IMajorRecordQueryableGetter record ? record.GetName() : groupInstance.Class.ToString(),
                                 VerticalAlignment = VerticalAlignment.Center,
                             },
-                            _ => null
+                            _ => null,
                         }),
                         null,
-                        new GridLength(500, GridUnitType.Pixel), new TemplateColumnOptions<object> {
+                        new GridLength(500, GridUnitType.Pixel),
+                        new TemplateColumnOptions<object> {
                             IsTextSearchEnabled = true,
-                            TextSearchValueSelector = obj => obj is TextReference recordReferences ? recordReferences.Diff.New : null
+                            TextSearchValueSelector = obj => obj is TextReference recordReferences ? recordReferences.Diff.New : null,
                         }
                     ),
                     x => x switch {
                         GroupInstance groupInstance => groupInstance.Items,
-                        _ => null
+                        _ => null,
                     },
                     x => x is GroupInstance),
-                new TemplateColumn<object>("EditorID", new FuncDataTemplate<object>((obj, _) => {
-                    return obj switch {
-                        TextReference { Record: IMajorRecordGetter record } => new TextBlock {
-                            Text = record.EditorID,
-                            VerticalAlignment = VerticalAlignment.Center,
-                        },
-                        _ => null
-                    };
-                })),
-                new TemplateColumn<object>("FormKey", new FuncDataTemplate<object>((obj, _) => {
-                    return obj switch {
-                        TextReference { Record: IFormKeyGetter formKeyGetter } => new TextBlock {
-                            Text = formKeyGetter.FormKey.ToString(),
-                            VerticalAlignment = VerticalAlignment.Center,
-                        },
-                        _ => null
-                    };
-                })),
-                new TemplateColumn<object>(null, new FuncDataTemplate<object>((obj, _) => obj switch {
-                    TextReference recordReferences => new Button {
-                        DataContext = recordReferences,
-                        [!Visual.IsVisibleProperty] = recordReferences.Diff.IsDifferent.ToBinding(),
-                        Content = "Replace",
-                        Command = ReactiveCommand.CreateFromTask(async () => {
-                            await ReplaceRecordReferences(recordReferences);
-                            References.Remove(recordReferences);
-                        }),
-                    },
-                    GroupInstance groupInstance => new Button {
-                        DataContext = groupInstance,
-                        [!Visual.IsVisibleProperty] = groupInstance.Items
-                            .SelectWhenCollectionChanges(() => {
-                                return CheckRec(groupInstance.Items);
-
-                                // Check if any children have diffs
-                                IObservable<bool> CheckRec(IObservableCollection<object> objects) {
-                                    var collectionChanges = objects.WhenCollectionChanges();
-
-                                    if (objects.FirstOrDefault() is TextReference) {
-                                        return collectionChanges
-                                            .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
-                                            .Select(x => x.CombineLatest().Select(i => i.Any(b => b)))
-                                            .Switch();
-                                    }
-
-                                    return collectionChanges
-                                        .Select(_ => {
-                                            var observables = objects
-                                                .OfType<GroupInstance>()
-                                                .Select(x => CheckRec(x.Items));
-
-                                            return observables.CombineLatest().Select(i => i.Any(b => b));
-                                        })
-                                        .Switch();
-                                }
-                            })
-                            .ToBinding(),
-                        [!ContentControl.ContentProperty] = groupInstance.Items
-                            .SelectWhenCollectionChanges(() => {
-                                return CheckRec(groupInstance.Items);
-
-                                // Sum of children with diffs
-                                IObservable<int> CheckRec(IObservableCollection<object> objects) {
-                                    var collectionChanges = objects.WhenCollectionChanges();
-
-                                    if (objects.FirstOrDefault() is TextReference) {
-                                        return collectionChanges
-                                            .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
-                                            .Select(x => x.CombineLatest().Select(i => i.Count(b => b)))
-                                            .Switch();
-                                    }
-
-                                    return collectionChanges
-                                        .Select(_ => {
-                                            var observables = objects
-                                                .OfType<GroupInstance>()
-                                                .Select(x => CheckRec(x.Items));
-
-                                            return observables.CombineLatest().Select(i => i.Sum());
-                                        })
-                                        .Switch();
-                                }
-                            })
-                            .Select(count => $"Replace {count}")
-                            .ToBinding(),
-                        Command = ReactiveCommand.CreateFromTask(async () => {
-                            var recordReferencesList = groupInstance.GetItems<TextReference>().ToList();
-
-                            foreach (var recordReferences in recordReferencesList) {
+                new TemplateColumn<object>(
+                    "EditorID",
+                    new FuncDataTemplate<object>((obj, _) => {
+                        return obj switch {
+                            TextReference { Record: IMajorRecordGetter record } => new TextBlock {
+                                Text = record.EditorID,
+                                VerticalAlignment = VerticalAlignment.Center,
+                            },
+                            _ => null,
+                        };
+                    })),
+                new TemplateColumn<object>(
+                    "FormKey",
+                    new FuncDataTemplate<object>((obj, _) => {
+                        return obj switch {
+                            TextReference { Record: IFormKeyGetter formKeyGetter } => new TextBlock {
+                                Text = formKeyGetter.FormKey.ToString(),
+                                VerticalAlignment = VerticalAlignment.Center,
+                            },
+                            _ => null,
+                        };
+                    })),
+                new TemplateColumn<object>(
+                    null,
+                    new FuncDataTemplate<object>((obj, _) => obj switch {
+                        TextReference recordReferences => new Button {
+                            DataContext = recordReferences,
+                            [!Visual.IsVisibleProperty] = recordReferences.Diff.IsDifferent.ToBinding(),
+                            Content = "Replace",
+                            Command = ReactiveCommand.CreateFromTask(async () => {
                                 await ReplaceRecordReferences(recordReferences);
-                            }
+                                References.Remove(recordReferences);
+                            }),
+                        },
+                        GroupInstance groupInstance => new Button {
+                            DataContext = groupInstance,
+                            [!Visual.IsVisibleProperty] = groupInstance.Items
+                                .SelectWhenCollectionChanges(() => {
+                                    return CheckRec(groupInstance.Items);
 
-                            References.RemoveRange(recordReferencesList);
-                        }),
-                    },
-                    _ => null
-                }))
-            }
+                                    // Check if any children have diffs
+                                    IObservable<bool> CheckRec(IObservableCollection<object> objects) {
+                                        var collectionChanges = objects.WhenCollectionChanges();
+
+                                        if (objects.FirstOrDefault() is TextReference) {
+                                            return collectionChanges
+                                                .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
+                                                .Select(x => x.CombineLatest().Select(i => i.Any(b => b)))
+                                                .Switch();
+                                        }
+
+                                        return collectionChanges
+                                            .Select(_ => {
+                                                var observables = objects
+                                                    .OfType<GroupInstance>()
+                                                    .Select(x => CheckRec(x.Items));
+
+                                                return observables.CombineLatest().Select(i => i.Any(b => b));
+                                            })
+                                            .Switch();
+                                    }
+                                })
+                                .ToBinding(),
+                            [!ContentControl.ContentProperty] = groupInstance.Items
+                                .SelectWhenCollectionChanges(() => {
+                                    return CheckRec(groupInstance.Items);
+
+                                    // Sum of children with diffs
+                                    IObservable<int> CheckRec(IObservableCollection<object> objects) {
+                                        var collectionChanges = objects.WhenCollectionChanges();
+
+                                        if (objects.FirstOrDefault() is TextReference) {
+                                            return collectionChanges
+                                                .Select(_ => objects.OfType<TextReference>().Select(x => x.Diff.IsDifferent))
+                                                .Select(x => x.CombineLatest().Select(i => i.Count(b => b)))
+                                                .Switch();
+                                        }
+
+                                        return collectionChanges
+                                            .Select(_ => {
+                                                var observables = objects
+                                                    .OfType<GroupInstance>()
+                                                    .Select(x => CheckRec(x.Items));
+
+                                                return observables.CombineLatest().Select(i => i.Sum());
+                                            })
+                                            .Switch();
+                                    }
+                                })
+                                .Select(count => $"Replace {count}")
+                                .ToBinding(),
+                            Command = ReactiveCommand.CreateFromTask(async () => {
+                                var recordReferencesList = groupInstance.GetItems<TextReference>().ToList();
+
+                                foreach (var recordReferences in recordReferencesList) {
+                                    await ReplaceRecordReferences(recordReferences);
+                                }
+
+                                References.RemoveRange(recordReferencesList);
+                            }),
+                        },
+                        _ => null,
+                    })),
+            },
         };
     }
 

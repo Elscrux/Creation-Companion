@@ -16,7 +16,11 @@ namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 public sealed class EnumDataTemplate : ICustomConditionValueDataTemplate {
     public bool Match(Condition.Function function) => SkyrimDefinitions.ConditionValueEnums.Any(condition => condition.Match(function));
 
-    public IObservable<Control?> Build(ILinkCache linkCache, EditableCondition editableCondition, IConditionDataGetter data, IObservable<Unit>? conditionDataChanged) {
+    public IObservable<Control?> Build(
+        ILinkCache linkCache,
+        EditableCondition editableCondition,
+        IConditionDataGetter data,
+        IObservable<Unit>? conditionDataChanged) {
         var conditionValueEnum = SkyrimDefinitions.ConditionValueEnums.FirstOrDefault(condition => condition.Match(editableCondition.Function));
         if (conditionValueEnum is null) return Observable.Empty<Control?>();
 
@@ -29,7 +33,7 @@ public sealed class EnumDataTemplate : ICustomConditionValueDataTemplate {
                     (value, _) => (Enum?) Enum.ToObject(enumType, Convert.ToUInt32(value)),
                     (e, _) => Convert.ToSingle(e)
                 ),
-                Mode = BindingMode.TwoWay
+                Mode = BindingMode.TwoWay,
             },
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };

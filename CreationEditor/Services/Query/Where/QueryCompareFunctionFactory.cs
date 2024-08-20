@@ -49,7 +49,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                 new QueryCompareFunction<IEnumerable, object>(
                     "All Match",
                     (context, enumerable) => enumerable.Cast<object?>().All(item => Equals(item, context.CompareValue)),
-                    simpleListFieldOverride)
+                    simpleListFieldOverride),
             ],
             SimpleListAccepts<IEnumerable>,
             -50);
@@ -76,9 +76,10 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                     (enumerable, count) => enumerable.CountIsLessThan(count)),
                 new QueryCompareFunction<IEnumerable, int>(
                     "Count Greater Than",
-                    (enumerable, count) => enumerable.CountIsGreaterThan(count))
+                    (enumerable, count) => enumerable.CountIsGreaterThan(count)),
             ],
-            DictionaryAccepts, -10);
+            DictionaryAccepts,
+            -10);
 
         // List
         RegisterCompareFunction<IEnumerable>([
@@ -98,7 +99,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                     (enumerable, count) => enumerable.CountIsLessThan(count)),
                 new QueryCompareFunction<IEnumerable, int>(
                     "Count Greater Than",
-                    (enumerable, count) => enumerable.CountIsGreaterThan(count))
+                    (enumerable, count) => enumerable.CountIsGreaterThan(count)),
             ],
             -100);
 
@@ -151,7 +152,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction([
                 new QueryCompareFunction<Enum, Enum>(
                     "Equals",
-                    (e, flag) => e.HasFlag(flag))
+                    (e, flag) => e.HasFlag(flag)),
             ],
             type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() is not null,
             10);
@@ -159,7 +160,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         RegisterCompareFunction([
             new QueryCompareFunction<Enum, Enum>(
                 "Equals",
-                (e, other) => e.Equals(other))
+                (e, other) => e.Equals(other)),
         ]);
 
         // Bool
@@ -187,22 +188,24 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
 
     public static IEnumerable<IQueryCompareFunction> GetStringFunctions<T>(
         Func<Func<string, string, bool>, T, string, bool> translationFunction) {
-        yield return new QueryCompareFunction<T, string>("Equals", (a, b)
-            => translationFunction(StringComparer.OrdinalIgnoreCase.Equals, a, b));
-        yield return new QueryCompareFunction<T, string>("Contains", (a, b)
-            => translationFunction((x, y) => x.Contains(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new QueryCompareFunction<T, string>("Starts With", (a, b)
-            => translationFunction((x, y) => x.StartsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new QueryCompareFunction<T, string>("Ends With", (a, b)
-            => translationFunction((x, y) => x.EndsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
-        yield return new QueryCompareFunction<T, string>("Matches RegEx", (a, b)
-            => translationFunction((x, y) => {
-                try {
-                    return Regex.IsMatch(x, y);
-                } catch {
-                    return false;
-                }
-            }, a, b));
+        yield return new QueryCompareFunction<T, string>("Equals",
+            (a, b) => translationFunction(StringComparer.OrdinalIgnoreCase.Equals, a, b));
+        yield return new QueryCompareFunction<T, string>("Contains",
+            (a, b) => translationFunction((x, y) => x.Contains(y, StringComparison.OrdinalIgnoreCase), a, b));
+        yield return new QueryCompareFunction<T, string>("Starts With",
+            (a, b) => translationFunction((x, y) => x.StartsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
+        yield return new QueryCompareFunction<T, string>("Ends With",
+            (a, b) => translationFunction((x, y) => x.EndsWith(y, StringComparison.OrdinalIgnoreCase), a, b));
+        yield return new QueryCompareFunction<T, string>("Matches RegEx",
+            (a, b) => translationFunction((x, y) => {
+                    try {
+                        return Regex.IsMatch(x, y);
+                    } catch {
+                        return false;
+                    }
+                },
+                a,
+                b));
     }
 
     public static IEnumerable<QueryCompareFunction<T, T>> GetNumericFunctions<T>()

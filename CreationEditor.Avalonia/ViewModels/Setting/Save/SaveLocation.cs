@@ -2,5 +2,5 @@
 
 public enum SaveLocation {
     DataFolder,
-    Custom
+    Custom,
 }

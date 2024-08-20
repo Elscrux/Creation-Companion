@@ -9,7 +9,7 @@ namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 public enum BookTeaches {
     Nothing,
     Skill,
-    Spell
+    Spell,
 }
 
 public sealed class EditableBook : Book, INotifyPropertyChanged {
@@ -92,11 +92,11 @@ public sealed class EditableBook : Book, INotifyPropertyChanged {
         book.ObjectBounds = ObjectBounds;
         book.Teaches = TeachesOption switch {
             BookTeaches.Nothing => new BookTeachesNothing {
-                RawContent = uint.MaxValue
+                RawContent = uint.MaxValue,
             },
             BookTeaches.Skill => BookSkill,
             BookTeaches.Spell => BookSpell,
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 

@@ -96,8 +96,8 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
                     Opacity = 0.5,
                     Fill = (this as IDockPreview).Brush,
                     [Grid.RowProperty] = 1,
-                }
-            }
+                },
+            },
         };
         switch (dock) {
             case Dock.Top:

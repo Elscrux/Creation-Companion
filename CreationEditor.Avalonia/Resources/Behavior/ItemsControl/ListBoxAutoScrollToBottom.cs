@@ -5,7 +5,8 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class ListBoxAutoScrollToBottom : Behavior<ListBox>, IDisposable {
-    public static readonly StyledProperty<bool> ScrollingEnabledProperty = AvaloniaProperty.Register<ListBoxAutoScrollToBottom, bool>(nameof(ScrollingEnabled));
+    public static readonly StyledProperty<bool> ScrollingEnabledProperty =
+        AvaloniaProperty.Register<ListBoxAutoScrollToBottom, bool>(nameof(ScrollingEnabled));
 
     public bool ScrollingEnabled {
         get => GetValue(ScrollingEnabledProperty);

@@ -42,23 +42,24 @@ public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IRefe
                 (linkCache, idents) => (LinkCache: linkCache, Identifiers: idents))
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(w => w.Do(x => {
-                _referencesDisposable.Clear();
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
-                RecordCache.Edit(updater => {
-                    foreach (var identifier in x.Identifiers) {
-                        var formKey = identifier.FormKey;
-                        _recordTypes.Add(identifier.Type);
-                        if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                    RecordCache.Clear();
+                    RecordCache.Edit(updater => {
+                        foreach (var identifier in x.Identifiers) {
+                            var formKey = identifier.FormKey;
+                            _recordTypes.Add(identifier.Type);
+                            if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
+                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
-                            updater.AddOrUpdate(referencedRecord);
-                        } else {
-                            logger.Here().Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
+                                updater.AddOrUpdate(referencedRecord);
+                            } else {
+                                logger.Here().Error("Couldn't load form link {FormKey} - {Type}", formKey, identifier.Type);
+                            }
                         }
-                    }
-                });
-            }), out var isBusy)
+                    });
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

@@ -9,7 +9,7 @@ public class AttackStateEnum : IConditionValueEnums {
         Hit,
         NextAttack,
         FollowThrough,
-        Bash
+        Bash,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<AttackState>().Cast<Enum>().ToList();

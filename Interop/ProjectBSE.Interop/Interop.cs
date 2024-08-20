@@ -10,7 +10,9 @@ public static partial class Interop {
     [LibraryImport(DllName, EntryPoint = "initTGEditor", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     private static partial int InitTGEditor_Native(InitConfig config, string[] bsaFileNames, ulong count);
-    public static int InitTGEditor(InitConfig config, string[] bsaFileNames) => InitTGEditor_Native(config, bsaFileNames, (ulong) bsaFileNames.Length);
+    public static int InitTGEditor(InitConfig config, string[] bsaFileNames) {
+        return InitTGEditor_Native(config, bsaFileNames, (ulong) bsaFileNames.Length);
+    }
 
     [LibraryImport(DllName, EntryPoint = "getMainWindowHandle")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -46,7 +48,7 @@ public static partial class Interop {
                 Version = managed.Version,
                 AssetDirectory = Marshal.StringToCoTaskMemAnsi(managed.AssetDirectory),
                 SizeOfWindowHandles = (ulong) (managed.WindowHandles.Length * IntPtr.Size),
-                WindowHandles = Marshal.AllocHGlobal(managed.WindowHandles.Length * IntPtr.Size)
+                WindowHandles = Marshal.AllocHGlobal(managed.WindowHandles.Length * IntPtr.Size),
             };
             Marshal.Copy(managed.WindowHandles, 0, unmanaged.WindowHandles, managed.WindowHandles.Length);
             return unmanaged;
@@ -55,7 +57,8 @@ public static partial class Interop {
         public static InitConfig ConvertToManaged(InitConfigUnmanaged unmanaged) {
             var managed = new InitConfig {
                 Version = unmanaged.Version,
-                AssetDirectory = Marshal.PtrToStringAnsi(unmanaged.AssetDirectory) ?? throw new InvalidCastException("AssetDirectory could not be converted to string"),
+                AssetDirectory = Marshal.PtrToStringAnsi(unmanaged.AssetDirectory)
+                 ?? throw new InvalidCastException("AssetDirectory could not be converted to string"),
                 WindowHandles = new IntPtr[unmanaged.SizeOfWindowHandles / (ulong) IntPtr.Size],
                 FeatureSet = FeatureSetMarshaller.ConvertToManaged(unmanaged.FeatureSet),
             };
@@ -94,7 +97,7 @@ public static partial class Interop {
             return new FeatureSetUnmanaged {
                 WideLines = managed.WideLines,
                 AnisotropicFiltering = managed.AnisotropicFiltering,
-                MipMapLevels = managed.MipMapLevels
+                MipMapLevels = managed.MipMapLevels,
             };
         }
 
@@ -102,7 +105,7 @@ public static partial class Interop {
             return new FeatureSet {
                 WideLines = unmanaged.WideLines,
                 AnisotropicFiltering = unmanaged.AnisotropicFiltering,
-                MipMapLevels = unmanaged.MipMapLevels
+                MipMapLevels = unmanaged.MipMapLevels,
             };
         }
 

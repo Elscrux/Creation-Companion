@@ -135,7 +135,7 @@ public sealed class DockingManagerVM : DockContainerVM {
             Dock.Bottom => BottomSide,
             Dock.Left => LeftSide,
             Dock.Right => RightSide,
-            _ => throw new ArgumentOutOfRangeException(nameof(config))
+            _ => throw new ArgumentOutOfRangeException(nameof(config)),
         };
     }
 }

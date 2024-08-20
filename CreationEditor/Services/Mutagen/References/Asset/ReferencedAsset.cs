@@ -17,7 +17,10 @@ public sealed class ReferencedAsset : IReferencedAsset {
     public IObservable<int> ReferenceCount { get; }
 
     public ReferencedAsset(
-        IAssetLinkGetter assetLink, IEnumerable<IFormLinkGetter>? recordReferences, IEnumerable<DataRelativePath>? nifDirectoryReferences, IEnumerable<DataRelativePath>? nifArchiveReferences) {
+        IAssetLinkGetter assetLink,
+        IEnumerable<IFormLinkGetter>? recordReferences,
+        IEnumerable<DataRelativePath>? nifDirectoryReferences,
+        IEnumerable<DataRelativePath>? nifArchiveReferences) {
         AssetLink = assetLink;
 
         RecordReferences = recordReferences is null

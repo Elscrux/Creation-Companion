@@ -56,7 +56,7 @@ public sealed class ReferenceRemapperVM : ViewModel {
         return context switch {
             IReferencedRecord referencedRecord => referencedRecord,
             IEnumerable enumerable => enumerable.OfType<IReferencedRecord>().FirstOrDefault(),
-            _ => null
+            _ => null,
         };
     }
 

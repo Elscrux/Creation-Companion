@@ -59,7 +59,7 @@ public sealed class DockFactory(
             DockElement.AssetBrowser => dockingManagerService.TryGetControl<AssetBrowser>(),
             DockElement.ScriptEditor => dockingManagerService.TryGetControl<ScriptEditor>(),
             DockElement.Viewport => dockingManagerService.TryGetControl<IViewport>() as Control,
-            _ => throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null),
         };
     }
 
@@ -157,7 +157,7 @@ public sealed class DockFactory(
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
                         Header = "Viewport",
-                        CanClose = viewportFactory.IsMultiInstanceCapable
+                        CanClose = viewportFactory.IsMultiInstanceCapable,
                     },
                     Dock = Dock.Right,
                     DockMode = DockMode.Layout,

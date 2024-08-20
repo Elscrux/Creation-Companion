@@ -38,7 +38,12 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
         CastingType,
     }
 
-    protected override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, AGetVATSValueConditionData data, IList<Control> parameterControls) {
+    protected override void Apply(
+        IObservable<IMajorRecordGetter?> context,
+        IObservable<IQuestGetter?> questContext,
+        EditableCondition condition,
+        AGetVATSValueConditionData data,
+        IList<Control> parameterControls) {
         parameterControls.Clear();
         var comboBox = new ComboBox {
             DataContext = condition,
@@ -47,37 +52,39 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
             [ToolTip.TipProperty] = "Function",
         };
 
-        comboBox.AddHandler(SelectingItemsControl.SelectionChangedEvent, (_, args) => {
-            var vatsFunction = args.AddedItems.OfType<VatsFunction>().First();
-            ConditionData newData = vatsFunction switch {
-                VatsFunction.Action => new GetVATSValueActionConditionData(),
-                VatsFunction.CastingType => new GetVATSValueCastingTypeConditionData(),
-                VatsFunction.CripplePart => new GetVATSValueCripplePartConditionData(),
-                VatsFunction.CriticalEffect => new GetVATSValueCriticalEffectConditionData(),
-                VatsFunction.CriticalEffectOrList => new GetVATSValueCriticalEffectOrListConditionData(),
-                VatsFunction.DeliveryType => new GetVATSValueDeliveryTypeConditionData(),
-                VatsFunction.DismemberPart => new GetVATSValueDismemberPartConditionData(),
-                VatsFunction.ExplodePart => new GetVATSValueExplodePartConditionData(),
-                VatsFunction.IsCritical => new GetVATSValueIsCriticalConditionData(),
-                VatsFunction.IsFatal => new GetVATSValueIsFatalConditionData(),
-                VatsFunction.IsParalyzingPalm => new GetVATSValueIsParalyzingPalmConditionData(),
-                VatsFunction.IsStranger => new GetVATSValueIsStrangerConditionData(),
-                VatsFunction.IsSuccess => new GetVATSValueIsSuccessConditionData(),
-                VatsFunction.ProjectileType => new GetVATSValueProjectileTypeConditionData(),
-                VatsFunction.Target => new GetVATSValueTargetConditionData(),
-                VatsFunction.TargetOrList => new GetVATSValueTargetOrListConditionData(),
-                VatsFunction.TargetDistance => new GetVATSValueTargetDistanceConditionData(),
-                VatsFunction.TargetPart => new GetVATSValueTargetPartConditionData(),
-                VatsFunction.WeaponOrList => new GetVATSValueWeaponOrListConditionData(),
-                VatsFunction.WeaponType => new GetVATSValueWeaponTypeConditionData(),
-                VatsFunction.Weapon => new GetVATSValueWeaponConditionData(),
-                _ => throw new InvalidOperationException()
-            };
+        comboBox.AddHandler(
+            SelectingItemsControl.SelectionChangedEvent,
+            (_, args) => {
+                var vatsFunction = args.AddedItems.OfType<VatsFunction>().First();
+                ConditionData newData = vatsFunction switch {
+                    VatsFunction.Action => new GetVATSValueActionConditionData(),
+                    VatsFunction.CastingType => new GetVATSValueCastingTypeConditionData(),
+                    VatsFunction.CripplePart => new GetVATSValueCripplePartConditionData(),
+                    VatsFunction.CriticalEffect => new GetVATSValueCriticalEffectConditionData(),
+                    VatsFunction.CriticalEffectOrList => new GetVATSValueCriticalEffectOrListConditionData(),
+                    VatsFunction.DeliveryType => new GetVATSValueDeliveryTypeConditionData(),
+                    VatsFunction.DismemberPart => new GetVATSValueDismemberPartConditionData(),
+                    VatsFunction.ExplodePart => new GetVATSValueExplodePartConditionData(),
+                    VatsFunction.IsCritical => new GetVATSValueIsCriticalConditionData(),
+                    VatsFunction.IsFatal => new GetVATSValueIsFatalConditionData(),
+                    VatsFunction.IsParalyzingPalm => new GetVATSValueIsParalyzingPalmConditionData(),
+                    VatsFunction.IsStranger => new GetVATSValueIsStrangerConditionData(),
+                    VatsFunction.IsSuccess => new GetVATSValueIsSuccessConditionData(),
+                    VatsFunction.ProjectileType => new GetVATSValueProjectileTypeConditionData(),
+                    VatsFunction.Target => new GetVATSValueTargetConditionData(),
+                    VatsFunction.TargetOrList => new GetVATSValueTargetOrListConditionData(),
+                    VatsFunction.TargetDistance => new GetVATSValueTargetDistanceConditionData(),
+                    VatsFunction.TargetPart => new GetVATSValueTargetPartConditionData(),
+                    VatsFunction.WeaponOrList => new GetVATSValueWeaponOrListConditionData(),
+                    VatsFunction.WeaponType => new GetVATSValueWeaponTypeConditionData(),
+                    VatsFunction.Weapon => new GetVATSValueWeaponConditionData(),
+                    _ => throw new InvalidOperationException(),
+                };
 
-            if (condition.Data.GetType() == newData.GetType()) return;
+                if (condition.Data.GetType() == newData.GetType()) return;
 
-            condition.Data = newData;
-        });
+                condition.Data = newData;
+            });
         parameterControls.Add(comboBox);
 
         comboBox.SelectedItem = data switch {
@@ -102,7 +109,7 @@ public class GetVatsValueTemplate : CustomConditionDataTemplate<AGetVATSValueCon
             GetVATSValueWeaponOrListConditionData => VatsFunction.WeaponOrList,
             GetVATSValueWeaponTypeConditionData => VatsFunction.WeaponType,
             GetVATSValueWeaponConditionData => VatsFunction.Weapon,
-            _ => throw new ArgumentOutOfRangeException(nameof(data))
+            _ => throw new ArgumentOutOfRangeException(nameof(data)),
         };
 
         var type = condition.Data.GetType();

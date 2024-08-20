@@ -392,7 +392,7 @@ public static class ConditionExtension {
             Condition.Function.GetSKSEVersionBeta => new GetSKSEVersionBetaConditionData(),
             Condition.Function.GetSKSERelease => new GetSKSEReleaseConditionData(),
             Condition.Function.ClearInvalidRegistrations => new ClearInvalidRegistrationsConditionData(),
-            _ => throw new ArgumentOutOfRangeException(nameof(function), function, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(function), function, null),
         };
     }
 }

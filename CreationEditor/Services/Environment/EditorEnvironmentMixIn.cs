@@ -48,7 +48,9 @@ public static class EditorEnvironmentMixIn {
         return environment.LinkCache.ResolveMod(modKey);
     }
 
-    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment, IEnumerable<ModKey> modKeys)
+    public static IEnumerable<TModGetter> ResolveMods<TModSetter, TModGetter>(
+        this IEditorEnvironment<TModSetter, TModGetter> editorEnvironment,
+        IEnumerable<ModKey> modKeys)
         where TModSetter : class, IContextMod<TModSetter, TModGetter>, TModGetter
         where TModGetter : class, IContextGetterMod<TModSetter, TModGetter> {
         return editorEnvironment.LinkCache.ResolveMods(modKeys);

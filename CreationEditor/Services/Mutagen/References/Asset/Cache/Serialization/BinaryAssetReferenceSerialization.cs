@@ -107,7 +107,10 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
         return new AssetReferenceCache<TSource, TReference>(source, cache);
     }
 
-    public void Serialize(TSource source, IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery, AssetReferenceCache<TSource, TReference> cache) {
+    public void Serialize(
+        TSource source,
+        IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery,
+        AssetReferenceCache<TSource, TReference> cache) {
         // Prepare file structure
         var cacheFile = GetCacheFile(source, cacheableQuery);
         var info = fileSystem.FileInfo.New(cacheFile);
@@ -148,11 +151,16 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
 }
 
 public interface IBinaryAssetReferenceSerializationStrategy {
-    AssetReferenceCache<TSource, TReference> Deserialize<TSource, TReference>(IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery, BinaryReader reader)
+    AssetReferenceCache<TSource, TReference> Deserialize<TSource, TReference>(
+        IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery,
+        BinaryReader reader)
         where TReference : notnull
         where TSource : notnull;
 
-    void Serialize<TSource, TReference>(AssetReferenceCache<TSource, TReference> cache, IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery, BinaryWriter writer)
+    void Serialize<TSource, TReference>(
+        AssetReferenceCache<TSource, TReference> cache,
+        IAssetReferenceCacheableQuery<TSource, TReference> cacheableQuery,
+        BinaryWriter writer)
         where TReference : notnull
         where TSource : notnull;
 }

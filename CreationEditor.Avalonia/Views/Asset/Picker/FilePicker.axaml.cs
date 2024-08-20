@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Asset.Picker;
 
 public partial class FilePicker : UserControl {
@@ -60,7 +59,7 @@ public partial class FilePicker : UserControl {
             Title = Title,
             SuggestedStartLocation = _startFolder,
             SuggestedFileName = null,
-            FileTypeFilter = Filter
+            FileTypeFilter = Filter,
         };
 
         // Open dialog

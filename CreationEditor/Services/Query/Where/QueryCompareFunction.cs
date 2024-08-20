@@ -22,7 +22,7 @@ public sealed record QueryCompareFunction<TField, TCompareValue> : IQueryCompare
         _getField = queryFieldCategory switch {
             QueryFieldCategory.Value => ValueFields,
             QueryFieldCategory.Collection => CollectionFields,
-            _ => throw new ArgumentOutOfRangeException(nameof(queryFieldCategory), queryFieldCategory, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(queryFieldCategory), queryFieldCategory, null),
         };
     }
 

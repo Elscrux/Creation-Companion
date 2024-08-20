@@ -21,7 +21,7 @@ public sealed class CombatStyleFilter : SimpleRecordFilter<ICombatStyleGetter> {
             combatStyle.EquipmentScoreMultRanged,
             combatStyle.EquipmentScoreMultShout,
             combatStyle.EquipmentScoreMultStaff,
-            combatStyle.EquipmentScoreMultUnarmed
+            combatStyle.EquipmentScoreMultUnarmed,
         ];
 
         var found = false;

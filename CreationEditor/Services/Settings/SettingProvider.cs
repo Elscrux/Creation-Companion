@@ -23,7 +23,10 @@ public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
                 parent.Children.Add(setting);
             } else {
                 missingSetting++;
-                logger.Here().Warning("Setting {Name} couldn't be applied, because it's parent setting {Parent} couldn't be found", setting.Name, setting.Parent);
+                logger.Here().Warning(
+                    "Setting {Name} couldn't be applied, because it's parent setting {Parent} couldn't be found",
+                    setting.Name,
+                    setting.Parent);
             }
         }
 

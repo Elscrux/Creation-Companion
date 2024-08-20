@@ -36,16 +36,18 @@ public partial class Tab : UserControl, IDockPreview {
             Dock.Bottom => HorizontalAlignment.Left,
             Dock.Right => HorizontalAlignment.Right,
             Dock.Top => HorizontalAlignment.Right,
-            _ => throw new ArgumentOutOfRangeException(nameof(dock), dock, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(dock), dock, null),
         };
 
-        AdornerLayer.SetAdorner(this, new Rectangle {
-            Width = 20,
-            HorizontalAlignment = horizontalAlignment,
-            Fill = (this as IDockPreview).Brush,
-            IsHitTestVisible = false,
-            Opacity = 0.5
-        });
+        AdornerLayer.SetAdorner(
+            this,
+            new Rectangle {
+                Width = 20,
+                HorizontalAlignment = horizontalAlignment,
+                Fill = (this as IDockPreview).Brush,
+                IsHitTestVisible = false,
+                Opacity = 0.5,
+            });
     }
 
     private async void OnTabPointerReleased(object? sender, PointerReleasedEventArgs e) {

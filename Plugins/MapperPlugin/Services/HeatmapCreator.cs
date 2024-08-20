@@ -83,7 +83,11 @@ public sealed class HeatmapCreator {
         return new DrawingImage(mainGroup);
     }
 
-    public async Task CalculateSpots(IEnumerable<MarkingMapping> mappings, ILinkCache linkCache, IRecordReferenceController recordReferenceController, FormKey worldspace) {
+    public async Task CalculateSpots(
+        IEnumerable<MarkingMapping> mappings,
+        ILinkCache linkCache,
+        IRecordReferenceController recordReferenceController,
+        FormKey worldspace) {
         var spotsPerMapping = new Dictionary<MarkingMapping, MappingSpots>();
 
         foreach (var mapping in mappings.ToList()) {
@@ -138,8 +142,8 @@ public sealed class HeatmapCreator {
 
             Point Cluster(P3Float position) {
                 return new Point(
-                    position.X - (position.X % Clustering),
-                    position.Y - (position.Y % Clustering));
+                    position.X - position.X % Clustering,
+                    position.Y - position.Y % Clustering);
             }
         }
 
@@ -151,19 +155,19 @@ public sealed class HeatmapCreator {
         const int halfThickness = thickness / 2;
         mainGroup.Children.Add(new GeometryDrawing {
             Geometry = new LineGeometry(new Point(halfThickness, halfThickness), new Point(halfThickness, height - halfThickness)),
-            Pen = new Pen(Brushes.Transparent, thickness)
+            Pen = new Pen(Brushes.Transparent, thickness),
         });
         mainGroup.Children.Add(new GeometryDrawing {
             Geometry = new LineGeometry(new Point(width - halfThickness, halfThickness), new Point(width - halfThickness, height - halfThickness)),
-            Pen = new Pen(Brushes.Transparent, thickness)
+            Pen = new Pen(Brushes.Transparent, thickness),
         });
         mainGroup.Children.Add(new GeometryDrawing {
             Geometry = new LineGeometry(new Point(halfThickness, halfThickness), new Point(width - halfThickness, halfThickness)),
-            Pen = new Pen(Brushes.Transparent, thickness)
+            Pen = new Pen(Brushes.Transparent, thickness),
         });
         mainGroup.Children.Add(new GeometryDrawing {
             Geometry = new LineGeometry(new Point(halfThickness, height - halfThickness), new Point(width - halfThickness, height - halfThickness)),
-            Pen = new Pen(Brushes.Transparent, thickness)
+            Pen = new Pen(Brushes.Transparent, thickness),
         });
         return mainGroup;
     }

@@ -19,7 +19,7 @@ public sealed class QueryPluginVM : ViewModel {
     private readonly IMenuItemProvider _menuItemProvider;
 
     public Grid ColumnsGrid { get; } = new() {
-        ColumnDefinitions = [new ColumnDefinition()]
+        ColumnDefinitions = [new ColumnDefinition()],
     };
 
     public ReactiveCommand<Unit, Unit> AddColumn { get; }
@@ -153,7 +153,7 @@ public sealed class QueryPluginVM : ViewModel {
             _menuItemProvider.Save(SaveColumn, queryColumnVM),
             _menuItemProvider.Duplicate(DuplicateColumn, queryColumnVM),
             _menuItemProvider.Delete(DeleteColumn, queryColumnVM),
-            _menuItemProvider.Copy(CopyColumnText, queryColumnVM).Name("Copy Entries Text")
+            _menuItemProvider.Copy(CopyColumnText, queryColumnVM).Name("Copy Entries Text"),
         ];
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Services.Record.Provider;
@@ -42,29 +41,31 @@ public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlaced
 
         this.WhenAnyValue(x => x.CellFormKey)
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(_ => {
-                _referencesDisposable.Clear();
+            .WrapInInProgressMarker(
+                x => x.Do(_ => {
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
+                    RecordCache.Clear();
 
-                if (CellFormKey == FormKey.Null) return;
+                    if (CellFormKey == FormKey.Null) return;
 
-                // Add all references in the cell from all overrides of the cell of all cells.
-                // Starting with the most prioritized cell and keep track of which references have already been added to avoid duplicates.
-                HashSet<FormKey> refFormKeys = [];
-                foreach (var cell in linkCacheProvider.LinkCache.ResolveAll<ICellGetter>(CellFormKey)) {
-                    RecordCache.Edit(updater => {
-                        foreach (var record in cell.GetAllPlaced(linkCacheProvider.LinkCache)) {
-                            if (!refFormKeys.Add(record.FormKey)) continue;
+                    // Add all references in the cell from all overrides of the cell of all cells.
+                    // Starting with the most prioritized cell and keep track of which references have already been added to avoid duplicates.
+                    HashSet<FormKey> refFormKeys = [];
+                    foreach (var cell in linkCacheProvider.LinkCache.ResolveAll<ICellGetter>(CellFormKey)) {
+                        RecordCache.Edit(updater => {
+                            foreach (var record in cell.GetAllPlaced(linkCacheProvider.LinkCache)) {
+                                if (!refFormKeys.Add(record.FormKey)) continue;
 
-                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
-                            var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, linkCacheProvider.LinkCache);
+                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, linkCacheProvider.LinkCache);
 
-                            updater.AddOrUpdate(referencedPlacedRecord);
-                        }
-                    });
-                }
-            }), out var isBusy)
+                                updater.AddOrUpdate(referencedPlacedRecord);
+                            }
+                        });
+                    }
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

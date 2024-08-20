@@ -140,7 +140,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Command = command,
                 Icon = icon switch {
                     Symbol symbol => new SymbolIcon { Symbol = symbol },
-                    _ => icon
+                    _ => icon,
                 },
                 Header = customHeader,
             },

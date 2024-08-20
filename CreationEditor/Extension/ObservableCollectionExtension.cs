@@ -28,7 +28,8 @@ public static class ObservableCollectionExtension {
     public static ReadOnlyObservableCollection<TTarget> SelectObservableCollectionSync<TSource, TTarget>(
         this IObservableCollection<TSource> source,
         Func<TSource, TTarget> selector,
-        IDisposableDropoff disposable) where TTarget : notnull {
+        IDisposableDropoff disposable)
+        where TTarget : notnull {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(selector);
 
@@ -43,7 +44,11 @@ public static class ObservableCollectionExtension {
         return new ReadOnlyObservableCollection<TTarget>(internalCollection);
     }
 
-    public static ReadOnlyObservableCollection<T> Combine<T>(this IObservableCollection<T> lhs, IDisposableDropoff disposableDropoff, params IObservableCollection<T>[] rhsList) where T : notnull {
+    public static ReadOnlyObservableCollection<T> Combine<T>(
+        this IObservableCollection<T> lhs,
+        IDisposableDropoff disposableDropoff,
+        params IObservableCollection<T>[] rhsList)
+        where T : notnull {
         var internalCollection = new ObservableCollectionExtended<T>();
         foreach (var rhs in rhsList) {
             internalCollection.AddRange(rhs);
@@ -81,7 +86,10 @@ public static class ObservableCollectionExtension {
         return new ReadOnlyObservableCollection<T>(internalCollection);
     }
 
-    public static void Apply<T>(this ObservableCollection<T> source, NotifyCollectionChangedEventArgs change, IEqualityComparer<T>? equalityComparer = null)
+    public static void Apply<T>(
+        this ObservableCollection<T> source,
+        NotifyCollectionChangedEventArgs change,
+        IEqualityComparer<T>? equalityComparer = null)
         where T : notnull {
         var comparer = equalityComparer ?? EqualityComparer<T>.Default;
 
@@ -155,15 +163,19 @@ public static class ObservableCollectionExtension {
         if (smallestIndex is null) return;
 
         var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged", BindingFlags.NonPublic | BindingFlags.Instance, [typeof(NotifyCollectionChangedEventArgs)])!;
+        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged",
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            [typeof(NotifyCollectionChangedEventArgs)])!;
         propertyChanged.Invoke(collection, [new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count))]);
         propertyChanged.Invoke(collection, [new PropertyChangedEventArgs("Item[]")]);
         collectionChanged.Invoke(collection, [new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value)]);
     }
 
-    public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) => collection.ApplyOrder(collection.OrderBy(selector));
+    public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) =>
+        collection.ApplyOrder(collection.OrderBy(selector));
 
-    public static void Sort<T>(this IObservableCollection<T> collection) where T : IComparable => collection.ApplyOrder(collection.Order());
+    public static void Sort<T>(this IObservableCollection<T> collection)
+        where T : IComparable => collection.ApplyOrder(collection.Order());
 
     public static void ApplyOrder<T>(this IObservableCollection<T> collection, IOrderedEnumerable<T> order) {
         var sortedOrder = order.ToList();

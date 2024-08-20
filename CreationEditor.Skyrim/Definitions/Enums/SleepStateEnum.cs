@@ -7,7 +7,7 @@ public class SleepStateEnum : IConditionValueEnums {
         LoadingSleepingIdle = 1,
         GettingReadyToSleep = 2,
         IsSleeping = 3,
-        GettingReadyToWakeUp = 4
+        GettingReadyToWakeUp = 4,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<SleepState>().Cast<Enum>().ToList();

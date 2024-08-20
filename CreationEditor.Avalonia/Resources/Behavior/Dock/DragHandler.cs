@@ -17,7 +17,9 @@ public sealed class DragHandler(
     public void Register(Interactive element, object? identifier = null) {
         element.AddHandler(InputElement.PointerPressedEvent, Pressed, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         element.AddHandler(InputElement.PointerMovedEvent, Moved, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        element.AddHandler(InputElement.PointerReleasedEvent, Released, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        element.AddHandler(InputElement.PointerReleasedEvent,
+            Released,
+            RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
 
         if (identifier is not null) {
             _elementIdentifiers.TryAdd(element, identifier);

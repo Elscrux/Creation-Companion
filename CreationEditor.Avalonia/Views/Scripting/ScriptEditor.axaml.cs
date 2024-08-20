@@ -149,15 +149,19 @@ public partial class ScriptEditor : ActivatableUserControl {
             """);
 
         // Handle zooming
-        AddHandler(PointerWheelChangedEvent, (_, i) => {
-            if (i.KeyModifiers != KeyModifiers.Control) return;
+        AddHandler(
+            PointerWheelChangedEvent,
+            (_, i) => {
+                if (i.KeyModifiers != KeyModifiers.Control) return;
 
-            if (i.Delta.Y > 0) {
-                Editor.FontSize++;
-            } else {
-                Editor.FontSize = Editor.FontSize > 1 ? Editor.FontSize - 1 : 1;
-            }
-        }, RoutingStrategies.Bubble, true);
+                if (i.Delta.Y > 0) {
+                    Editor.FontSize++;
+                } else {
+                    Editor.FontSize = Editor.FontSize > 1 ? Editor.FontSize - 1 : 1;
+                }
+            },
+            RoutingStrategies.Bubble,
+            true);
     }
 
     public ScriptEditor(IScriptVM scriptVM) : this() {

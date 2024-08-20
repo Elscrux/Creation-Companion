@@ -66,7 +66,7 @@ public partial class ConditionValue : ActivatableUserControl {
                         VerticalAlignment = VerticalAlignment.Top,
                         HorizontalAlignment = HorizontalAlignment.Stretch,
                         ShowButtonSpinner = false,
-                        FormatString = "N4"
+                        FormatString = "N4",
                     };
                 } else {
                     _valueSubscription?.Dispose();

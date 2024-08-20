@@ -22,7 +22,7 @@ using ReactiveUI;
 using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
 
-public partial class App : Application {
+public class App : Application {
     public App() {
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnFirstChanceException;
     }

@@ -219,13 +219,18 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         return formKeyPicker;
     }
 
-    private Control DecorateWithSubstitutePickers(Control control, ConditionData data, string parameter, SubstituteUsageContext substituteUsageContext, IEnumerable<Type> types) {
+    private Control DecorateWithSubstitutePickers(
+        Control control,
+        ConditionData data,
+        string parameter,
+        SubstituteUsageContext substituteUsageContext,
+        IEnumerable<Type> types) {
         // Use specific types for package data functions otherwise use the types from the parameter
         var scopedTypes = (data switch {
             IGetWithinPackageLocationConditionDataGetter => RecordTypeConstants.PackageDataLocationTypes,
             IGetNumericPackageDataConditionDataGetter => RecordTypeConstants.PackageDataNumericTypes,
             IIsNullPackageDataConditionDataGetter => RecordTypeConstants.PackageDataTypes,
-            _ => types
+            _ => types,
         }).ToArray();
 
         // Index names based on convention 
@@ -249,7 +254,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                     new ColumnDefinition(new GridLength(24)),
                     new ColumnDefinition(new GridLength(24)),
                     new ColumnDefinition(),
-                }
+                },
             };
 
             var (usesAlias, aliasCheckBox, aliasPicker) = GetAliasPicker(0, 2);
@@ -269,7 +274,7 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 ColumnDefinitions = {
                     new ColumnDefinition(new GridLength(24)),
                     new ColumnDefinition(),
-                }
+                },
             };
 
             var (usesSubstitute, checkBox, picker) = useAliases
@@ -381,18 +386,31 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
                 PackageDataIndex = (sbyte?) value;
             }
 
-            SetupReactiveIndex(data, parameter, nameof(IConditionDataGetter.UseAliases), substituteUsageContext, x => x.UseAliases, x => x.AliasIndex);
-            SetupReactiveIndex(data, parameter, nameof(IConditionDataGetter.UsePackageData), substituteUsageContext, x => x.UsePackageData, x => x.PackageDataIndex);
+            SetupReactiveIndex(data,
+                parameter,
+                nameof(IConditionDataGetter.UseAliases),
+                substituteUsageContext,
+                x => x.UseAliases,
+                x => x.AliasIndex);
+            SetupReactiveIndex(data,
+                parameter,
+                nameof(IConditionDataGetter.UsePackageData),
+                substituteUsageContext,
+                x => x.UsePackageData,
+                x => x.PackageDataIndex);
         }
 
         private void SetupReactiveIndex<T>(
-            ConditionData data, string parameter,
+            ConditionData data,
+            string parameter,
             string useProperty,
             SubstituteUsageContext substituteUsageContext,
             Expression<Func<SubstituteUsageContext, bool>> useExpression,
             Expression<Func<IndexDataContext, T>> indexExpression) {
 
-            var setExpression = new Action<T>(index => data.TrySetProperty($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}", Convert.ToUInt32(Convert.ToInt32(index) < 0 ? 0 : index)));
+            var setExpression = new Action<T>(index => data.TrySetProperty(
+                $"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}",
+                Convert.ToUInt32(Convert.ToInt32(index) < 0 ? 0 : index)));
 
             var substituteUsedChanged = substituteUsageContext.WhenAnyValue(useExpression);
 

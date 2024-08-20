@@ -22,7 +22,7 @@ public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter
     [Reactive] public int FormVersion { get; set; }
     public IObservableCollection<ModKey> Masters { get; set; } = new ObservableCollectionExtended<ModKey>();
 
-    [Reactive] public ModInfo? ActiveModInfo { get; private set; }
+    [Reactive] public ModInfo? ActiveModInfo { get; set; }
 
     public ModInfo GetModInfo(ModKey modKey, ISkyrimModHeaderGetter modHeader) {
         return new ModInfo(

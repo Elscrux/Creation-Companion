@@ -100,32 +100,23 @@ public partial class QueryConditionsView : ActivatableUserControl {
                 new TemplateColumn<IQueryCondition>(
                     "Field",
                     new FuncDataTemplate<IQueryCondition>((condition, _) => {
-                        if (condition is null) return null;
-
+                        const string bindingName = $"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}";
                         return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             DataContext = condition,
-                            ItemTemplate = new FuncDataTemplate<IQueryField>((field, _) => {
-                                if (field is null) return null;
-
-                                return new TextBlock { Text = field.Name };
-                            }),
+                            ItemTemplate = new FuncDataTemplate<IQueryField>((field, _) => new TextBlock { Text = field.Name }),
                             ItemsSource = condition.FieldSelector.Fields,
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
+                            [!SelectingItemsControl.SelectedItemProperty] = new Binding(bindingName),
                         };
                     })),
                 new TemplateColumn<IQueryCondition>(
                     "Not",
-                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
-                        if (condition is null) return null;
-
-                        return new CheckBox {
-                            DataContext = condition,
-                            Classes = { "CheckmarkOnly" },
-                            VerticalAlignment = VerticalAlignment.Top,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IQueryCondition.Negate)),
-                        };
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => new CheckBox {
+                        DataContext = condition,
+                        Classes = { "CheckmarkOnly" },
+                        VerticalAlignment = VerticalAlignment.Top,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IQueryCondition.Negate)),
                     }),
                     options: new TemplateColumnOptions<IQueryCondition> {
                         CanUserResizeColumn = false,
@@ -133,26 +124,19 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     }),
                 new TemplateColumn<IQueryCondition>(
                     "Function",
-                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
-                        if (condition is null) return null;
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => new ComboBox {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        DataContext = condition,
+                        ItemTemplate = new FuncDataTemplate<IQueryCompareFunction>((function, _) => {
 
-                        return new ComboBox {
-                            HorizontalAlignment = HorizontalAlignment.Stretch,
-                            DataContext = condition,
-                            ItemTemplate = new FuncDataTemplate<IQueryCompareFunction>((function, _) => {
-                                if (function is null) return null;
-
-                                return new TextBlock { Text = function.Operator };
-                            }),
-                            ItemsSource = condition.CompareFunctions,
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(condition.SelectedCompareFunction)}"),
-                        };
+                            return new TextBlock { Text = function.Operator };
+                        }),
+                        ItemsSource = condition.CompareFunctions,
+                        [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(condition.SelectedCompareFunction)}"),
                     })),
                 new TemplateColumn<IQueryCondition>(
                     "Value",
                     new FuncDataTemplate<IQueryCondition>((condition, _) => {
-                        if (condition is null) return null;
-
                         var valueEditorTemplate = new QueryConditionFieldEditorTemplate {
                             [!QueryConditionFieldEditorTemplate.LinkCacheProperty] = this.GetObservable(LinkCacheProperty).ToBinding(),
                             [!QueryConditionFieldEditorTemplate.ConditionFactoryProperty] = this.GetObservable(ConditionFactoryProperty).ToBinding(),
@@ -167,19 +151,15 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     })),
                 new TemplateColumn<IQueryCondition>(
                     string.Empty,
-                    new FuncDataTemplate<IQueryCondition>((condition, _) => {
-                        if (condition is null) return null;
-
-                        return new ToggleButton {
-                            DataContext = condition,
-                            VerticalAlignment = VerticalAlignment.Top,
-                            HorizontalAlignment = HorizontalAlignment.Stretch,
-                            HorizontalContentAlignment = HorizontalAlignment.Center,
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IQueryCondition.IsOr)),
-                            [!ContentProperty] = condition.WhenAnyValue(x => x.IsOr).Select(x => x ? "Or" : "And").ToBinding(),
-                        };
+                    new FuncDataTemplate<IQueryCondition>((condition, _) => new ToggleButton {
+                        DataContext = condition,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        HorizontalContentAlignment = HorizontalAlignment.Center,
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(IQueryCondition.IsOr)),
+                        [!ContentProperty] = condition.WhenAnyValue(x => x.IsOr).Select(x => x ? "Or" : "And").ToBinding(),
                     })),
-            }
+            },
         };
     }
 }

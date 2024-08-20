@@ -36,19 +36,20 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                _referencesDisposable.Clear();
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
-                RecordCache.Edit(updater => {
-                    foreach (var type in Types) {
-                        foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
-                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                    RecordCache.Clear();
+                    RecordCache.Edit(updater => {
+                        foreach (var type in Types) {
+                            foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
+                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
-                            updater.AddOrUpdate(referencedRecord);
+                                updater.AddOrUpdate(referencedRecord);
+                            }
                         }
-                    }
-                });
-            }), out var isBusy)
+                    });
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

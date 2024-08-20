@@ -35,7 +35,7 @@ public class PackageTypeEnum : IConditionValueEnums {
         InGameDialogue = 28,
         Surface = 29,
         SearchForAttacker = 30,
-        AvoidPlayer = 31
+        AvoidPlayer = 31,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<PackageType>().Cast<Enum>().ToList();

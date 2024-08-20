@@ -19,7 +19,7 @@ public sealed class NewtonsoftJsonSuspensionDriver(
         Converters = {
             JsonConvertersMixIn.FormKey,
             JsonConvertersMixIn.ModKey,
-        }
+        },
     };
 
     public IObservable<Unit> InvalidateState() {
@@ -32,7 +32,8 @@ public sealed class NewtonsoftJsonSuspensionDriver(
         if (!fileSystem.File.Exists(stateFilePath)) return Observable.Throw<object>(new FileNotFoundException(stateFilePath));
 
         var lines = fileSystem.File.ReadAllText(stateFilePath);
-        var state = JsonConvert.DeserializeObject<object>(lines, _settings) ?? throw new InvalidDataException($"{stateFilePath} is not in valid format");
+        var state = JsonConvert.DeserializeObject<object>(lines, _settings)
+         ?? throw new InvalidDataException($"{stateFilePath} is not in valid format");
         return Observable.Return(state);
 
     }

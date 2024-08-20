@@ -65,7 +65,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
 
             var referenceBrowserVM = referenceBrowserFactory(referencedRecord, references);
             var referenceWindow = new ReferenceWindow(referencedRecord.Record) {
-                Content = new ReferenceBrowser(referenceBrowserVM)
+                Content = new ReferenceBrowser(referenceBrowserVM),
             };
 
             referenceWindow.Show(mainWindow);

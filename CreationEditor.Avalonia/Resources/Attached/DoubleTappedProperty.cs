@@ -12,7 +12,8 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
     /// Identifies the <seealso cref="CommandProperty"/> avalonia attached property.
     /// </summary>
     /// <value>Provide an <see cref="ICommand"/> derived object or binding.</value>
-    public static readonly AttachedProperty<ICommand> CommandProperty = AvaloniaProperty.RegisterAttached<DoubleTappedProperty, Interactive, ICommand>("Command");
+    public static readonly AttachedProperty<ICommand> CommandProperty =
+        AvaloniaProperty.RegisterAttached<DoubleTappedProperty, Interactive, ICommand>("Command");
 
     public static ICommand GetCommand(AvaloniaObject element) => element.GetValue(CommandProperty);
     public static void SetCommand(AvaloniaObject element, ICommand commandValue) => element.SetValue(CommandProperty, commandValue);
@@ -22,7 +23,8 @@ public sealed class DoubleTappedProperty : AvaloniaObject {
     /// Use this as the parameter for the <see cref="CommandProperty"/>.
     /// </summary>
     /// <value>Any value of type <see cref="object"/>.</value>
-    public static readonly AttachedProperty<object> CommandParameterProperty = AvaloniaProperty.RegisterAttached<DoubleTappedProperty, Interactive, object>("CommandParameter");
+    public static readonly AttachedProperty<object> CommandParameterProperty =
+        AvaloniaProperty.RegisterAttached<DoubleTappedProperty, Interactive, object>("CommandParameter");
 
     public static object GetCommandParameter(AvaloniaObject element) => element.GetValue(CommandParameterProperty);
     public static void SetCommandParameter(AvaloniaObject element, object parameter) => element.SetValue(CommandParameterProperty, parameter);

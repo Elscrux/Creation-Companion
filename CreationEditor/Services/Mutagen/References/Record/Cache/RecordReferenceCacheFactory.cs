@@ -19,7 +19,9 @@ public sealed class RecordReferenceCacheFactory(IRecordReferenceQuery recordRefe
         return new MutableRecordReferenceCache(mutableCaches, immutableRecordReferenceCache);
     }
 
-    public async Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(IReadOnlyList<IMod> mutableMods, ImmutableRecordReferenceCache? immutableRecordReferenceCache = null) {
+    public async Task<MutableRecordReferenceCache> GetMutableRecordReferenceCache(
+        IReadOnlyList<IMod> mutableMods,
+        ImmutableRecordReferenceCache? immutableRecordReferenceCache = null) {
         var mutableCaches = await GetMutableModReferenceCaches(mutableMods);
         var duplicateImmutableRecordReferenceCache =
             immutableRecordReferenceCache is null

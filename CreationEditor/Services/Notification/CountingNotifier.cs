@@ -5,12 +5,12 @@ public sealed class CountingNotifier : ANotifier, IDisposable {
     private int _currentStep;
 
     private readonly IDisposable _timerSubscription;
-    
+
     /// <inheritdoc cref="CountingNotifier(CreationEditor.Services.Notification.INotificationService,string,int)"/>
     /// <param name="timeSpan">Time span in which the current step will be reported</param>
     public CountingNotifier(INotificationService notificationService, string message, int count, TimeSpan timeSpan)
         : base(notificationService) {
-        
+
         _timerSubscription = Observable.Interval(timeSpan)
             .TakeWhile(_ => _currentStep < count)
             .Subscribe(_ => NotificationService.Notify(ID, message, _currentStep / count));
@@ -36,7 +36,11 @@ public sealed class CountingNotifier : ANotifier, IDisposable {
     /// counter.Stop()
     /// </code>
     /// </example>
-    public CountingNotifier(INotificationService notificationService, string message, int count) : this(notificationService, message, count, TimeSpan.FromMilliseconds(100)) {}
+    public CountingNotifier(INotificationService notificationService, string message, int count) : this(
+        notificationService,
+        message,
+        count,
+        TimeSpan.FromMilliseconds(100)) {}
 
     public void NextStep() => Interlocked.Increment(ref _currentStep);
 

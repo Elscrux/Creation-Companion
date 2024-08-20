@@ -67,9 +67,9 @@ public static class CellExtension {
             searchedCells.Add(currentCell.FormKey);
 
             foreach (var door in GetDoors(currentCell, linkCache)) {
-                if (door.TeleportDestination is null) continue;
-                if (!linkCache.TryResolveSimpleContext<IPlacedObjectGetter>(door.TeleportDestination.Door.FormKey, out var destinationContext)) continue;
-                if (destinationContext.Parent?.Record is not ICellGetter destinationCell) continue;
+                if (door.TeleportDestination is null
+                 || !linkCache.TryResolveSimpleContext<IPlacedObjectGetter>(door.TeleportDestination.Door.FormKey, out var destinationContext)
+                 || destinationContext.Parent?.Record is not ICellGetter destinationCell) continue;
 
                 if ((destinationCell.Flags & Cell.Flag.IsInteriorCell) == 0) {
                     yield return destinationContext.Record;

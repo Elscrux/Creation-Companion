@@ -21,7 +21,7 @@
             x:Name="PageControl"
             TabIndex="0">
             <TransitioningContentControl.PageTransition>
-                <PageSlide></PageSlide>
+                <PageSlide/>
             </TransitioningContentControl.PageTransition>
         </TransitioningContentControl>
     </DockPanel>

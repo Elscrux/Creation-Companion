@@ -128,7 +128,11 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
             .ObserveOnGui()
             .Do(_ => BusyTasks++)
             .ObserveOnTaskpool()
-            .DoTask(async worldspace => await HeatmapCreator.CalculateSpots(Mappings, LinkCacheProvider.LinkCache, recordReferenceController, worldspace))
+            .DoTask(async worldspace => await HeatmapCreator.CalculateSpots(
+                Mappings,
+                LinkCacheProvider.LinkCache,
+                recordReferenceController,
+                worldspace))
             .ObserveOnGui()
             .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
             .Do(_ => BusyTasks--)

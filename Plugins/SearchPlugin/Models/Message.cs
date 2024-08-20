@@ -10,6 +10,8 @@ public class Message : TextSearcher<ISkyrimMod, ISkyrimModGetter, IMessage, IMes
     }
 
     protected override void ReplaceText(IMessage record, string oldText, string newText, StringComparison comparison) {
-        if (oldText.Equals(record.Description.String, comparison)) record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        if (oldText.Equals(record.Description.String, comparison)) {
+            record.Description = new TranslatedString(TranslatedString.DefaultLanguage, newText);
+        }
     }
 }

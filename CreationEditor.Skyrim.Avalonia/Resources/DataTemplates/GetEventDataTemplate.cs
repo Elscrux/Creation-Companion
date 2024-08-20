@@ -22,7 +22,12 @@ namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataConditionData> {
     private readonly CompositeDisposable _disposable = new();
 
-    protected override void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, GetEventDataConditionData data, IList<Control> parameterControls) {
+    protected override void Apply(
+        IObservable<IMajorRecordGetter?> context,
+        IObservable<IQuestGetter?> questContext,
+        EditableCondition condition,
+        GetEventDataConditionData data,
+        IList<Control> parameterControls) {
         if (parameterControls is not [ComboBox functionBox, ComboBox, FormKeyPicker formKeyPicker]) return;
 
         var functionChanged = functionBox.GetObservable(SelectingItemsControl.SelectedItemProperty);
@@ -84,7 +89,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                         Converter = new ExtendedFuncValueConverter<GetEventDataConditionData.EventMember, Enum, object>(
                             (member, _) => (Enum) Enum.ToObject(enumType, Convert.ToUInt16(member)),
                             (e, _) => enumToEventMember(e)),
-                        Mode = BindingMode.TwoWay
+                        Mode = BindingMode.TwoWay,
                     },
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     [ToolTip.TipProperty] = path,

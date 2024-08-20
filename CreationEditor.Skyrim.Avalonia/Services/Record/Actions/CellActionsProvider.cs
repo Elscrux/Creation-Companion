@@ -37,7 +37,7 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
                 viewCommand,
                 context => menuItemProvider.View(viewCommand, context),
                 () => menuItemProvider.View(viewCommand).HotKey,
-                IsPrimary: true)
+                true),
         ];
     }
 

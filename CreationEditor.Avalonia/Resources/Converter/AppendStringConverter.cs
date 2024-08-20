@@ -33,13 +33,14 @@ public class AppendStringConverter : IValueConverter {
         return null;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Convert(value, targetType, parameter, culture);
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        Convert(value, targetType, parameter, culture);
 
     private string AddString(object? value) {
         var format = $"{value:G9}";
         return Append ? format + String : String + format;
     }
-    
+
     private string RemoveString(string value) {
         if (String is null) return value;
 

@@ -8,5 +8,5 @@ public enum BrowserScope {
     /// <summary>
     /// Only the active mod is evaluated
     /// </summary>
-    ActiveMod
+    ActiveMod,
 }

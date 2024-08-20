@@ -18,10 +18,14 @@ public sealed class DragDropExtended : AvaloniaObject {
 
     private static readonly DragHandler DragHandler = new(DragStart);
 
-    public static readonly AttachedProperty<bool> AllowDragProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrag");
-    public static readonly AttachedProperty<bool> AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrop");
-    public static readonly AttachedProperty<Func<object, bool>> CanDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, bool>>("CanDrop");
-    public static readonly AttachedProperty<Func<object, object?>> DropSelectorProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, object?>>("DropSelector");
+    public static readonly AttachedProperty<bool>
+        AllowDragProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrag");
+    public static readonly AttachedProperty<bool>
+        AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrop");
+    public static readonly AttachedProperty<Func<object, bool>> CanDropProperty =
+        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, bool>>("CanDrop");
+    public static readonly AttachedProperty<Func<object, object?>> DropSelectorProperty =
+        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, object?>>("DropSelector");
 
     public static bool GetAllowDrag(AvaloniaObject obj) => obj.GetValue(AllowDragProperty);
     public static void SetAllowDrag(AvaloniaObject obj, bool value) => obj.SetValue(AllowDragProperty, value);
@@ -137,18 +141,24 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (row is null) return;
 
         // Get old data
-        if (!GetData(row, e,
-            out var oldDataGrid, out var oldList,
-            out var newDataGrid, out var newList)) return;
+        if (!GetData(
+            row,
+            e,
+            out var oldDataGrid,
+            out var oldList,
+            out var newDataGrid,
+            out var newList)) return;
 
-        AdornerLayer.SetAdorner(row, new Rectangle {
-            Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
-                ? StandardBrushes.ValidBrush
-                : StandardBrushes.InvalidBrush,
-            Height = 2,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            IsHitTestVisible = false,
-        });
+        AdornerLayer.SetAdorner(
+            row,
+            new Rectangle {
+                Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
+                    ? StandardBrushes.ValidBrush
+                    : StandardBrushes.InvalidBrush,
+                Height = 2,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                IsHitTestVisible = false,
+            });
     }
 
     private static void DataGridDragLeave(object? sender, DragEventArgs e) {
@@ -164,9 +174,13 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not Border { Parent: DataGrid dataGrid }) return;
 
         var row = GetLastRow(dataGrid);
-        if (row is null || !GetData(row, e,
-            out var oldDataGrid, out var oldList,
-            out var newDataGrid, out var newList)) return;
+        if (row is null || !GetData(
+            row,
+            e,
+            out var oldDataGrid,
+            out var oldList,
+            out var newDataGrid,
+            out var newList)) return;
 
         AdornerLayer.SetAdorner(row, null);
 
@@ -212,19 +226,25 @@ public sealed class DragDropExtended : AvaloniaObject {
         if (sender is not DataGridRow row) return;
 
         // Get old data
-        if (!GetData(sender, e,
-            out var oldDataGrid, out var oldList,
-            out var newDataGrid, out var newList)) return;
+        if (!GetData(
+            sender,
+            e,
+            out var oldDataGrid,
+            out var oldList,
+            out var newDataGrid,
+            out var newList)) return;
 
         // Show adorner
-        AdornerLayer.SetAdorner(row, new Rectangle {
-            Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
-                ? StandardBrushes.ValidBrush
-                : StandardBrushes.InvalidBrush,
-            Height = 2,
-            VerticalAlignment = VerticalAlignment.Top,
-            IsHitTestVisible = false,
-        });
+        AdornerLayer.SetAdorner(
+            row,
+            new Rectangle {
+                Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
+                    ? StandardBrushes.ValidBrush
+                    : StandardBrushes.InvalidBrush,
+                Height = 2,
+                VerticalAlignment = VerticalAlignment.Top,
+                IsHitTestVisible = false,
+            });
 
         e.Handled = true;
     }
@@ -237,9 +257,13 @@ public sealed class DragDropExtended : AvaloniaObject {
     }
 
     private static void Drop(object? sender, DragEventArgs e) {
-        if (!GetData(sender, e,
-            out var oldDataGrid, out var oldList,
-            out var newDataGrid, out var newList)) return;
+        if (!GetData(
+            sender,
+            e,
+            out var oldDataGrid,
+            out var oldList,
+            out var newDataGrid,
+            out var newList)) return;
 
         if (sender is not DataGridRow { DataContext: not null } newRow) return;
 
@@ -339,8 +363,10 @@ public sealed class DragDropExtended : AvaloniaObject {
     }
 
     private static void SetNewSelection(
-        DataGrid newDataGrid, DataGrid oldDataGrid,
-        List<object> validItems, List<object> invalidItems) {
+        DataGrid newDataGrid,
+        DataGrid oldDataGrid,
+        List<object> validItems,
+        List<object> invalidItems) {
         newDataGrid.SelectedItems.Clear();
         foreach (var validItem in validItems) {
             newDataGrid.SelectedItems.Add(validItem);

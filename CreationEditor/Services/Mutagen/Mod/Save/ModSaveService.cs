@@ -40,7 +40,12 @@ public sealed class ModSaveService(
             // Try to save mod
             mod.WriteToBinary(filePath, binaryWriteParameters);
         } catch (Exception e) {
-            logger.Here().Warning(e, "Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}", mod.ModKey.FileName, filePath, e.Message);
+            logger.Here().Warning(
+                e,
+                "Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}",
+                mod.ModKey.FileName,
+                filePath,
+                e.Message);
             try {
                 // Save at backup location if failed once
                 filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
@@ -100,6 +105,7 @@ public sealed class ModSaveService(
         }
     }
 
-    private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) => fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
+    private string GetBackupFilePath(string backupLocation, string fileName, DateTime writeTime) =>
+        fileSystem.Path.Combine(backupLocation, $"{fileName}.{GetTimeFileName(writeTime)}.bak");
     private static string GetTimeFileName(DateTime dateTime) => dateTime.ToString("yyyy-MM-dd_HH-mm-ss");
 }

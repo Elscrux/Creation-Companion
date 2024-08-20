@@ -93,7 +93,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
             ActiveModBuilder.ActiveModMode.New => ModInstantiator<TMod>.Activator(
                 ActiveMod.ModKey,
                 _gameReleaseContext.Release),
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
 
         var environment = builder

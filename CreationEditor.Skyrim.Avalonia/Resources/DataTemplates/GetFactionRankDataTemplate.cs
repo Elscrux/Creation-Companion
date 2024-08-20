@@ -15,12 +15,16 @@ namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
 public sealed class GetFactionRankDataTemplate : ICustomConditionValueDataTemplate {
     private static readonly FuncDataTemplate<IRankGetter> RankDataTemplate = new((r, _) => new TextBlock {
-        Text = r?.Title?.GetName(s => s?.String) ?? r?.Number.ToString() ?? string.Empty
+        Text = r.Title?.GetName(s => s?.String) ?? r.Number.ToString() ?? string.Empty,
     });
 
     public bool Match(Condition.Function function) => function == Condition.Function.GetFactionRank;
 
-    public IObservable<Control?> Build(ILinkCache linkCache, EditableCondition editableCondition, IConditionDataGetter data, IObservable<Unit>? conditionDataChanged) {
+    public IObservable<Control?> Build(
+        ILinkCache linkCache,
+        EditableCondition editableCondition,
+        IConditionDataGetter data,
+        IObservable<Unit>? conditionDataChanged) {
         if (conditionDataChanged is null) return Observable.Empty<Control?>();
         if (data is not IGetFactionRankConditionDataGetter getFactionRank) return Observable.Empty<Control?>();
 
@@ -29,7 +33,7 @@ public sealed class GetFactionRankDataTemplate : ICustomConditionValueDataTempla
                 var faction = getFactionRank.Faction.Link.TryResolve(linkCache);
                 if (faction is null || faction.Ranks.Count == 0) {
                     return new TextBlock {
-                        Text = "No ranks available!"
+                        Text = "No ranks available!",
                     };
                 }
 
@@ -45,7 +49,7 @@ public sealed class GetFactionRankDataTemplate : ICustomConditionValueDataTempla
                             },
                             (rank, _) => rank is not null ? Convert.ToSingle(rank.Number) : 0
                         ),
-                        Mode = BindingMode.TwoWay
+                        Mode = BindingMode.TwoWay,
                     },
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                 };

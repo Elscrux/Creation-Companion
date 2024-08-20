@@ -36,17 +36,18 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
             .WrapInInProgressMarker(x => x.Do(linkCache => {
-                _referencesDisposable.Clear();
+                    _referencesDisposable.Clear();
 
-                RecordCache.Clear();
-                RecordCache.Edit(updater => {
-                    foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                        recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                    RecordCache.Clear();
+                    RecordCache.Edit(updater => {
+                        foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
+                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
-                        updater.AddOrUpdate(referencedRecord);
-                    }
-                });
-            }), out var isBusy)
+                            updater.AddOrUpdate(referencedRecord);
+                        }
+                    });
+                }),
+                out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 

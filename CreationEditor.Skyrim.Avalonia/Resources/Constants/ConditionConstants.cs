@@ -47,7 +47,7 @@ public static class ConditionConstants {
     ];
 
     public static readonly IEnumerable<Condition.Function> QuestAndStoryManagerOnlyFunctions = [
-        Condition.Function.GetEventData
+        Condition.Function.GetEventData,
     ];
 
     public static readonly IEnumerable<Condition.Function> PackageOnlyFunctions = [

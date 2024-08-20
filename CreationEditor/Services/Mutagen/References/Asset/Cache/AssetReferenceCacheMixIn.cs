@@ -9,7 +9,10 @@ public static class AssetReferenceCacheMixIn {
         return assetCaches.Any(x => x.HasAsset(asset));
     }
 
-    public static IEnumerable<IAssetLinkGetter> GetMissingAssets<TSource, TReference>(this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches, IEnumerable<AssetReferenceCache<TSource, TReference>> otherAssetCaches, IEnumerable<IAssetType> assetTypes)
+    public static IEnumerable<IAssetLinkGetter> GetMissingAssets<TSource, TReference>(
+        this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches,
+        IEnumerable<AssetReferenceCache<TSource, TReference>> otherAssetCaches,
+        IEnumerable<IAssetType> assetTypes)
         where TSource : notnull
         where TReference : notnull {
         var otherAssetCachesList = otherAssetCaches.ToList();
@@ -26,7 +29,9 @@ public static class AssetReferenceCacheMixIn {
         }
     }
 
-    public static IEnumerable<IAssetLinkGetter> GetAllAssets<TSource, TReference>(this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches, IEnumerable<IAssetType> assetTypes)
+    public static IEnumerable<IAssetLinkGetter> GetAllAssets<TSource, TReference>(
+        this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches,
+        IEnumerable<IAssetType> assetTypes)
         where TSource : notnull
         where TReference : notnull {
         var assetTypeList = assetTypes.ToList();
@@ -39,7 +44,9 @@ public static class AssetReferenceCacheMixIn {
         }
     }
 
-    public static IEnumerable<TReference> GetReferences<TSource, TReference>(this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches, IAssetLinkGetter assetLink)
+    public static IEnumerable<TReference> GetReferences<TSource, TReference>(
+        this IEnumerable<AssetReferenceCache<TSource, TReference>> assetCaches,
+        IAssetLinkGetter assetLink)
         where TSource : notnull
         where TReference : notnull {
         foreach (var assetCache in assetCaches.ToArray()) {

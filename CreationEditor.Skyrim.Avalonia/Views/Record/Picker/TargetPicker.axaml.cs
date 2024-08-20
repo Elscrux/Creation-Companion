@@ -104,7 +104,8 @@ public partial class TargetPicker : ActivatableUserControl {
         InitializeComponent();
     }
 
-    private static string GetEditorOrNone<T>(ILinkCache linkCache, FormKey formKey) where T : class, IMajorRecordQueryableGetter, IMajorRecordIdentifier {
+    private static string GetEditorOrNone<T>(ILinkCache linkCache, FormKey formKey)
+        where T : class, IMajorRecordQueryableGetter, IMajorRecordIdentifier {
         return linkCache.TryResolve<T>(formKey, out var record)
             ? record.EditorID ?? "No EditorID"
             : "None";
@@ -146,7 +147,15 @@ public partial class TargetPicker : ActivatableUserControl {
                 x => x.Keyword,
                 x => x.Object,
                 x => x.ObjectType,
-                (linkCache, type, cell, reference, placed, keyword, obj, objectType) => (LinkCache: linkCache, Type: type, Cell: cell, Reference: reference, Placed: placed, Keyword: keyword, Object: obj, ObjectType: objectType))
+                (linkCache, type, cell, reference, placed, keyword, obj, objectType) => (
+                    LinkCache: linkCache,
+                    Type: type,
+                    Cell: cell,
+                    Reference: reference,
+                    Placed: placed,
+                    Keyword: keyword,
+                    Object: obj,
+                    ObjectType: objectType))
             .ObserveOnTaskpool()
             .Select(x => x.Type switch {
                 TargetPickerType.Cell => $"Cell: {GetEditorOrNone<ICellGetter>(x.LinkCache, x.Cell)}",
@@ -159,7 +168,7 @@ public partial class TargetPicker : ActivatableUserControl {
                 TargetPickerType.Reference => "Reference: " + (x.Placed?.GetSelfOrBaseEditorID(x.LinkCache)
                  ?? x.Reference.ToLinkGetter<IPlacedGetter>().GetSelfOrBaseEditorID(x.LinkCache)
                  ?? "None"),
-                _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
+                _ => throw new ArgumentOutOfRangeException(nameof(x), x, null),
             });
 
         // Update the target to the selected type when the dialog closes
@@ -176,7 +185,7 @@ public partial class TargetPicker : ActivatableUserControl {
                     TargetPickerType.PackageStart => new LocationFallback { Type = LocationTargetRadius.LocationType.NearPackageStart },
                     TargetPickerType.EditorLocation => new LocationFallback { Type = LocationTargetRadius.LocationType.NearEditorLocation },
                     TargetPickerType.Reference => new LocationTarget { Link = new FormLink<IPlacedGetter>(Reference) },
-                    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
                 };
             })
             .DisposeWith(ActivatedDisposable);
@@ -201,9 +210,9 @@ public partial class TargetPicker : ActivatableUserControl {
                 LocationTargetRadius.LocationType.ObjectID => TargetPickerType.Object,
                 LocationTargetRadius.LocationType.ObjectType => TargetPickerType.ObjectType,
                 LocationTargetRadius.LocationType.LinkedReference => TargetPickerType.LinkedRef,
-                _ => throw new InvalidOperationException()
+                _ => throw new InvalidOperationException(),
             },
-            _ => throw new ArgumentOutOfRangeException(nameof(target))
+            _ => throw new ArgumentOutOfRangeException(nameof(target)),
 
         };
     }

@@ -93,7 +93,15 @@ public sealed class AssetDirectory : IAsset {
                 _assetReferenceController.RegisterCreation(asset);
                 Assets.AddOrUpdate(asset);
             } else {
-                var assetDirectory = new AssetDirectory(directoryInfo, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false);
+                var assetDirectory = new AssetDirectory(
+                    directoryInfo,
+                    _logger,
+                    _fileSystem,
+                    _dataDirectoryService,
+                    _assetReferenceController,
+                    _assetTypeService,
+                    _archiveService,
+                    false);
                 assetDirectory.DisposeWith(_disposables);
                 Assets.AddOrUpdate(assetDirectory);
             }
@@ -105,7 +113,10 @@ public sealed class AssetDirectory : IAsset {
     private void Remove(string path) {
         try {
             var fileName = _fileSystem.Path.GetFileName(path);
-            using var asset = Assets.Items.FirstOrDefault(asset => string.Equals(_fileSystem.Path.GetFileName(asset.Path), fileName, AssetCompare.PathComparison));
+            using var asset = Assets.Items.FirstOrDefault(asset => {
+                var assetName = _fileSystem.Path.GetFileName(asset.Path);
+                return string.Equals(assetName, fileName, AssetCompare.PathComparison);
+            });
             if (asset is null) return;
 
             Assets.Remove(asset);
@@ -128,11 +139,14 @@ public sealed class AssetDirectory : IAsset {
     private void Change(string path) {
         try {
             var fileName = _fileSystem.Path.GetFileName(path);
-            var asset = Assets.Items.FirstOrDefault(asset => string.Equals(_fileSystem.Path.GetFileName(asset.Path), fileName, AssetCompare.PathComparison));
-            if (asset is AssetFile file) {
-                var registerUpdate = _assetReferenceController.RegisterUpdate(file);
-                registerUpdate(file);
-            }
+            var asset = Assets.Items.FirstOrDefault(asset => {
+                var assetName = _fileSystem.Path.GetFileName(asset.Path);
+                return string.Equals(assetName, fileName, AssetCompare.PathComparison);
+            });
+            if (asset is not AssetFile file) return;
+
+            var registerUpdate = _assetReferenceController.RegisterUpdate(file);
+            registerUpdate(file);
         } catch (Exception) {
             Refresh();
         }
@@ -195,13 +209,33 @@ public sealed class AssetDirectory : IAsset {
         IEnumerable<IAsset> assets = [];
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
-                .Select(dirPath => addedDirectories.Add(dirPath.Name) ? new AssetDirectory(dirPath, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, false) : null)
+                .Select(dirPath => addedDirectories.Add(dirPath.Name)
+                    ? new AssetDirectory(
+                        dirPath,
+                        _logger,
+                        _fileSystem,
+                        _dataDirectoryService,
+                        _assetReferenceController,
+                        _assetTypeService,
+                        _archiveService,
+                        false)
+                    : null)
                 .NotNull());
         }
 
         assets = assets.Concat(_archiveService.GetSubdirectories(Path)
             .Select(dirPath => _fileSystem.DirectoryInfo.New(dirPath))
-            .Select(dirInfo => addedDirectories.Add(dirInfo.Name) ? new AssetDirectory(dirInfo, _logger, _fileSystem, _dataDirectoryService, _assetReferenceController, _assetTypeService, _archiveService, true) : null)
+            .Select(dirInfo => addedDirectories.Add(dirInfo.Name)
+                ? new AssetDirectory(
+                    dirInfo,
+                    _logger,
+                    _fileSystem,
+                    _dataDirectoryService,
+                    _assetReferenceController,
+                    _assetTypeService,
+                    _archiveService,
+                    true)
+                : null)
             .NotNull());
 
         var addedFiles = new HashSet<string>();
@@ -215,13 +249,14 @@ public sealed class AssetDirectory : IAsset {
                 .NotNull());
         }
 
-        assets = assets.Concat(_archiveService.GetFilesInDirectory(Directory.FullName)
+        assets = _archiveService.GetFilesInDirectory(Directory.FullName)
             .Where(IsFileRelevant)
             .Select(file => {
                 var asset = FileToAsset(file, true);
                 return addedFiles.Add(_fileSystem.Path.GetFileName(file)) ? asset : null;
             })
-            .NotNull())
+            .NotNull()
+            .Concat(assets)
             .ToList();
 
         Assets.Edit(updater => {

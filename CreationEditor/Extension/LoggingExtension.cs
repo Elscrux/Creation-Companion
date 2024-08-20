@@ -7,7 +7,8 @@ public static class LoggingExtension {
     private const string FilePath = "FilePath";
     private const string LineNumber = "LineNumber";
 
-    public static ILogger Here(this ILogger logger,
+    public static ILogger Here(
+        this ILogger logger,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0) {

@@ -18,7 +18,12 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
         _fileSystem = fileSystem;
 
         var baseDir = _fileSystem.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), CacheDirectory);
-        _cacheDirPath = subDirectories.Aggregate(baseDir, (cur, next) => _fileSystem.Path.Combine(cur, IllegalFileNameRegex().Replace(next, string.Empty)));
+        _cacheDirPath = subDirectories.Aggregate(
+            baseDir,
+            (cur, next) => {
+                var sanitizedName = IllegalFileNameRegex().Replace(next, string.Empty);
+                return _fileSystem.Path.Combine(cur, sanitizedName);
+            });
     }
 
     private string GetIdentifierPath(string[] identifiers) {
@@ -32,5 +37,8 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
         return path;
     }
 
-    public string CacheFile(params string[] identifiers) => _fileSystem.Path.Combine(GetIdentifierPath(identifiers), IllegalFileNameRegex().Replace($"{identifiers[^1]}.{CacheExtension}", string.Empty));
+    public string CacheFile(params string[] identifiers) {
+        var sanitizedName = IllegalFileNameRegex().Replace($"{identifiers[^1]}.{CacheExtension}", string.Empty);
+        return _fileSystem.Path.Combine(GetIdentifierPath(identifiers), sanitizedName);
+    }
 }

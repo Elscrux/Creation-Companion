@@ -20,10 +20,12 @@ namespace CreationEditor.Avalonia.Attached;
 public sealed class ListShortcuts : AvaloniaObject {
     private const string RemoveColumnTag = "ListShortcuts_RemoveColumn";
 
-    private static readonly MethodInfo TreeDataGridAddRemoveButtonMethodInfo = typeof(ListShortcuts).GetMethod(nameof(TreeDataGrid_AddRemoveButton), BindingFlags.Static | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo TreeDataGridAddRemoveButtonMethodInfo =
+        typeof(ListShortcuts).GetMethod(nameof(TreeDataGrid_AddRemoveButton), BindingFlags.Static | BindingFlags.NonPublic)!;
 
     public static readonly AttachedProperty<ICommand> AddProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
-    public static readonly AttachedProperty<ICommand> RemoveProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Remove");
+    public static readonly AttachedProperty<ICommand> RemoveProperty =
+        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Remove");
 
     public static ICommand GetAdd(AvaloniaObject element) => element.GetValue(AddProperty);
     public static void SetAdd(AvaloniaObject element, ICommand addValue) => element.SetValue(AddProperty, addValue);
@@ -55,7 +57,7 @@ public sealed class ListShortcuts : AvaloniaObject {
             var selectedItems = args.Sender switch {
                 DataGrid dataGrid => dataGrid.SelectedItems,
                 ListBox listBox => listBox.SelectedItems,
-                _ => null
+                _ => null,
             };
 
             HandleGesture(args, selectedItems, RemoveGesture, RemoveHeader, RemoveSymbol);
@@ -110,7 +112,7 @@ public sealed class ListShortcuts : AvaloniaObject {
             [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
                 RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
                     AncestorType = typeof(TRowType),
-                }
+                },
             },
             Content = new SymbolIcon { Symbol = Symbol.Delete },
             Foreground = Brushes.Red,
@@ -158,7 +160,12 @@ public sealed class ListShortcuts : AvaloniaObject {
         }
     }
 
-    private static void HandleGesture(AvaloniaPropertyChangedEventArgs<ICommand> args, IList? selectedItems, KeyGesture gesture, string header, Symbol menuIcon) {
+    private static void HandleGesture(
+        AvaloniaPropertyChangedEventArgs<ICommand> args,
+        IList? selectedItems,
+        KeyGesture gesture,
+        string header,
+        Symbol menuIcon) {
         if (args.Sender is not Control control) return;
 
         var newCommand = args.NewValue.GetValueOrDefault();
@@ -168,7 +175,7 @@ public sealed class ListShortcuts : AvaloniaObject {
             control.KeyBindings.Add(new KeyBinding {
                 Command = newCommand,
                 Gesture = gesture,
-                CommandParameter = selectedItems!
+                CommandParameter = selectedItems!,
             });
         } else {
             control.KeyBindings.RemoveWhere(keyBinding => ReferenceEquals(keyBinding.Gesture, gesture));
@@ -194,7 +201,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                 Icon = new SymbolIcon { Symbol = menuIcon },
                 Header = header,
                 Command = newCommand,
-                CommandParameter = selectedItems
+                CommandParameter = selectedItems,
             });
         } else {
             for (var i = list.Count - 1; i >= 0; i--) {

@@ -11,9 +11,19 @@ public abstract class CustomConditionDataTemplate<T> : ICustomConditionDataTempl
     public Type Type => typeof(T);
     public Func<ConditionData, string, string, IEnumerable<Type>, Control> GetFormKeyPicker { get; set; } = null!;
 
-    public void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, ConditionData data, IList<Control> parameterControls) {
+    public void Apply(
+        IObservable<IMajorRecordGetter?> context,
+        IObservable<IQuestGetter?> questContext,
+        EditableCondition condition,
+        ConditionData data,
+        IList<Control> parameterControls) {
         if (data is T t) Apply(context, questContext, condition, t, parameterControls);
     }
 
-    protected abstract void Apply(IObservable<IMajorRecordGetter?> context, IObservable<IQuestGetter?> questContext, EditableCondition condition, T data, IList<Control> parameterControls);
+    protected abstract void Apply(
+        IObservable<IMajorRecordGetter?> context,
+        IObservable<IQuestGetter?> questContext,
+        EditableCondition condition,
+        T data,
+        IList<Control> parameterControls);
 }

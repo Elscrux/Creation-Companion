@@ -50,7 +50,7 @@ public static partial class Interop {
                 TopRight = QuadrantMarshaller.ConvertToUnmanaged(managed.TopRight),
                 BottomRight = QuadrantMarshaller.ConvertToUnmanaged(managed.BottomRight),
                 TopLeft = QuadrantMarshaller.ConvertToUnmanaged(managed.TopLeft),
-                BottomLeft = QuadrantMarshaller.ConvertToUnmanaged(managed.BottomLeft)
+                BottomLeft = QuadrantMarshaller.ConvertToUnmanaged(managed.BottomLeft),
             };
         }
 
@@ -59,7 +59,7 @@ public static partial class Interop {
                 TopRight = QuadrantMarshaller.ConvertToManaged(unmanaged.TopRight),
                 BottomRight = QuadrantMarshaller.ConvertToManaged(unmanaged.BottomRight),
                 TopLeft = QuadrantMarshaller.ConvertToManaged(unmanaged.TopLeft),
-                BottomLeft = QuadrantMarshaller.ConvertToManaged(unmanaged.BottomLeft)
+                BottomLeft = QuadrantMarshaller.ConvertToManaged(unmanaged.BottomLeft),
             };
         }
 
@@ -89,13 +89,13 @@ public static partial class Interop {
     internal static class BaseLayerMarshaller {
         public static BaseLayerUnmanaged ConvertToUnmanaged(BaseLayer managed) {
             return new BaseLayerUnmanaged {
-                TextureSet = TextureSetMarshaller.ConvertToUnmanaged(managed.TextureSet)
+                TextureSet = TextureSetMarshaller.ConvertToUnmanaged(managed.TextureSet),
             };
         }
 
         public static BaseLayer ConvertToManaged(BaseLayerUnmanaged unmanaged) {
             return new BaseLayer {
-                TextureSet = TextureSetMarshaller.ConvertToManaged(unmanaged.TextureSet)
+                TextureSet = TextureSetMarshaller.ConvertToManaged(unmanaged.TextureSet),
             };
         }
 
@@ -132,7 +132,7 @@ public static partial class Interop {
             return new AlphaLayerUnmanaged {
                 TextureSet = TextureSetMarshaller.ConvertToUnmanaged(managed.TextureSet),
                 Data = managed.Data.ToUnmanagedMemory(),
-                DataLength = managed.DataLength
+                DataLength = managed.DataLength,
             };
         }
 
@@ -140,7 +140,7 @@ public static partial class Interop {
             return new AlphaLayer {
                 TextureSet = TextureSetMarshaller.ConvertToManaged(unmanaged.TextureSet),
                 Data = unmanaged.Data.ToArray<AlphaData>(unmanaged.DataLength),
-                DataLength = unmanaged.DataLength
+                DataLength = unmanaged.DataLength,
             };
         }
 
@@ -171,8 +171,10 @@ public static partial class Interop {
         public static unsafe QuadrantUnmanaged ConvertToUnmanaged(Quadrant managed) {
             return new QuadrantUnmanaged {
                 BaseLayer = BaseLayerMarshaller.ConvertToUnmanaged(managed.BaseLayer),
-                AlphaLayers = ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.AllocateContainerForUnmanagedElements(managed.AlphaLayers, out _),
-                AlphaLayersLength = (byte) managed.AlphaLayers.Length
+                AlphaLayers = ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.AllocateContainerForUnmanagedElements(
+                    managed.AlphaLayers,
+                    out _),
+                AlphaLayersLength = (byte) managed.AlphaLayers.Length,
             };
         }
 
@@ -225,7 +227,7 @@ public static partial class Interop {
                 PositionBegin = managed.PositionBegin,
                 NormalBegin = managed.NormalBegin,
                 ColorBegin = managed.ColorBegin,
-                CornerSets = CornerSetsMarshaller.ConvertToUnmanaged(managed.CornerSets)
+                CornerSets = CornerSetsMarshaller.ConvertToUnmanaged(managed.CornerSets),
             };
         }
 
@@ -237,7 +239,7 @@ public static partial class Interop {
                 PositionBegin = unmanaged.PositionBegin,
                 NormalBegin = unmanaged.NormalBegin,
                 ColorBegin = unmanaged.ColorBegin,
-                CornerSets = CornerSetsMarshaller.ConvertToManaged(unmanaged.CornerSets)
+                CornerSets = CornerSetsMarshaller.ConvertToManaged(unmanaged.CornerSets),
             };
         }
 

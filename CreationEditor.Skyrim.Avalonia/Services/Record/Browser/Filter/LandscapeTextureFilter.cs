@@ -22,13 +22,17 @@ public sealed class LandscapeTextureFilter : RecordFilter<ILandscapeTextureGette
 
         return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<ILandscapeTextureGetter>()
             .SelectWhere(landscapeTexture => {
-                if (finishedFormKeys.Contains(landscapeTexture.MaterialType.FormKey)) return TryGet<RecordFilterListing>.Failure;
-                if (!landscapeTexture.MaterialType.TryResolve(_linkCacheProvider.LinkCache, out var materialType)) return TryGet<RecordFilterListing>.Failure;
-                if (materialType.EditorID is null) return TryGet<RecordFilterListing>.Failure;
+                if (finishedFormKeys.Contains(landscapeTexture.MaterialType.FormKey)
+                 || !landscapeTexture.MaterialType.TryResolve(_linkCacheProvider.LinkCache, out var materialType)
+                 || materialType.EditorID is null) return TryGet<RecordFilterListing>.Failure;
 
                 finishedFormKeys.Add(materialType.FormKey);
 
-                return TryGet<RecordFilterListing>.Succeed(new RecordFilterListing(materialType.EditorID, record => record is ILandscapeTextureGetter l && l.MaterialType.FormKey == materialType.FormKey));
+                return TryGet<RecordFilterListing>.Succeed(new RecordFilterListing(
+                    materialType.EditorID,
+                    record =>
+                        record is ILandscapeTextureGetter l
+                     && l.MaterialType.FormKey == materialType.FormKey));
             });
     }
 }

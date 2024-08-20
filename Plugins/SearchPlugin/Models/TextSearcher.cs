@@ -27,14 +27,26 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
         }
     }
 
-    public void ReplaceTextReference(IMajorRecordQueryableGetter record, ILinkCache linkCache, IMod mod, string oldText, string newText, StringComparison comparison) {
+    public void ReplaceTextReference(
+        IMajorRecordQueryableGetter record,
+        ILinkCache linkCache,
+        IMod mod,
+        string oldText,
+        string newText,
+        StringComparison comparison) {
         if (linkCache is not ILinkCache<TMod, TModGetter> typedLinkCache) return;
         if (mod is not TMod typedMod) return;
 
         ReplaceTextReference(record, typedLinkCache, typedMod, oldText, newText, comparison);
     }
 
-    public void ReplaceTextReference(IMajorRecordQueryableGetter record, ILinkCache<TMod, TModGetter> linkCache, TMod mod, string oldText, string newText, StringComparison comparison) {
+    public void ReplaceTextReference(
+        IMajorRecordQueryableGetter record,
+        ILinkCache<TMod, TModGetter> linkCache,
+        TMod mod,
+        string oldText,
+        string newText,
+        StringComparison comparison) {
         if (record is not TMajorGetter) return;
         if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(((IMajorRecordIdentifier) record).FormKey, out var context)) return;
 

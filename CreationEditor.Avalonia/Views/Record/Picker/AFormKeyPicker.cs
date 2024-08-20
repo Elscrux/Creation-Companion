@@ -20,7 +20,6 @@ using DynamicData;
 using Loqui;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins.Masters;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
@@ -48,7 +47,8 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         get => GetValue(ScopedTypesProperty);
         set => SetValue(ScopedTypesProperty, value);
     }
-    public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
+    public static readonly StyledProperty<IEnumerable?> ScopedTypesProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, IEnumerable?>(nameof(ScopedTypes));
 
     /// <summary>
     /// todo too many scoped records break the observable filter flow
@@ -57,49 +57,57 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         get => GetValue(ScopedRecordsProperty);
         set => SetValue(ScopedRecordsProperty, value);
     }
-    public static readonly StyledProperty<IList<IMajorRecordGetter>?> ScopedRecordsProperty = AvaloniaProperty.Register<AFormKeyPicker, IList<IMajorRecordGetter>?>(nameof(ScopedRecords));
+    public static readonly StyledProperty<IList<IMajorRecordGetter>?> ScopedRecordsProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, IList<IMajorRecordGetter>?>(nameof(ScopedRecords));
 
     public ReadOnlyObservableCollection<TypeItem> SelectableTypes {
         get => GetValue(SelectableTypesProperty);
         set => SetValue(SelectableTypesProperty, value);
     }
-    public static readonly StyledProperty<ReadOnlyObservableCollection<TypeItem>> SelectableTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<TypeItem>>(nameof(SelectableTypes));
+    public static readonly StyledProperty<ReadOnlyObservableCollection<TypeItem>> SelectableTypesProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<TypeItem>>(nameof(SelectableTypes));
 
     public IObservable<bool> AnyTypeSelected {
         get => GetValue(AnyTypeSelectedProperty);
         set => SetValue(AnyTypeSelectedProperty, value);
     }
-    public static readonly StyledProperty<IObservable<bool>> AnyTypeSelectedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyTypeSelected));
+    public static readonly StyledProperty<IObservable<bool>> AnyTypeSelectedProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyTypeSelected));
 
     public ReadOnlyObservableCollection<ModItem> SelectableMods {
         get => GetValue(SelectableModsProperty);
         set => SetValue(SelectableModsProperty, value);
     }
-    public static readonly StyledProperty<ReadOnlyObservableCollection<ModItem>> SelectableModsProperty = AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<ModItem>>(nameof(SelectableMods));
+    public static readonly StyledProperty<ReadOnlyObservableCollection<ModItem>> SelectableModsProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ReadOnlyObservableCollection<ModItem>>(nameof(SelectableMods));
 
     public IObservable<bool> AnyModSelected {
         get => GetValue(AnyModSelectedProperty);
         set => SetValue(AnyModSelectedProperty, value);
     }
-    public static readonly StyledProperty<IObservable<bool>> AnyModSelectedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyModSelected));
+    public static readonly StyledProperty<IObservable<bool>> AnyModSelectedProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, IObservable<bool>>(nameof(AnyModSelected));
 
     public ICollection<FormKey>? BlacklistFormKeys {
         get => GetValue(BlacklistFormKeysProperty);
         set => SetValue(BlacklistFormKeysProperty, value);
     }
-    public static readonly StyledProperty<ICollection<FormKey>?> BlacklistFormKeysProperty = AvaloniaProperty.Register<AFormKeyPicker, ICollection<FormKey>?>(nameof(BlacklistFormKeys));
+    public static readonly StyledProperty<ICollection<FormKey>?> BlacklistFormKeysProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ICollection<FormKey>?>(nameof(BlacklistFormKeys));
 
     public Func<FormKey, string?, bool>? Filter {
         get => GetValue(FilterProperty);
         set => SetValue(FilterProperty, value);
     }
-    public static readonly StyledProperty<Func<FormKey, string?, bool>?> FilterProperty = AvaloniaProperty.Register<AFormKeyPicker, Func<FormKey, string?, bool>?>(nameof(Filter));
+    public static readonly StyledProperty<Func<FormKey, string?, bool>?> FilterProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, Func<FormKey, string?, bool>?>(nameof(Filter));
 
     public bool Found {
         get => GetValue(FoundProperty);
         set => SetValue(FoundProperty, value);
     }
-    public static readonly StyledProperty<bool> FoundProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(Found), defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<bool> FoundProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(Found), defaultBindingMode: BindingMode.TwoWay);
 
     public bool Processing {
         get => GetValue(ProcessingProperty);
@@ -111,31 +119,36 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         get => GetValue(FormKeyProperty);
         set => SetValue(FormKeyProperty, value);
     }
-    public static readonly StyledProperty<FormKey> FormKeyProperty = AvaloniaProperty.Register<AFormKeyPicker, FormKey>(nameof(FormKey), defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<FormKey> FormKeyProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, FormKey>(nameof(FormKey), defaultBindingMode: BindingMode.TwoWay);
 
     public FormLinkInformation FormLink {
         get => GetValue(FormLinkProperty);
         set => SetValue(FormLinkProperty, value);
     }
-    public static readonly StyledProperty<FormLinkInformation> FormLinkProperty = AvaloniaProperty.Register<AFormKeyPicker, FormLinkInformation>(nameof(FormLink), defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<FormLinkInformation> FormLinkProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, FormLinkInformation>(nameof(FormLink), defaultBindingMode: BindingMode.TwoWay);
 
     public string FormKeyStr {
         get => GetValue(FormKeyStrProperty);
         set => SetValue(FormKeyStrProperty, value);
     }
-    public static readonly StyledProperty<string> FormKeyStrProperty = AvaloniaProperty.Register<AFormKeyPicker, string>(nameof(FormKeyStr), string.Empty, defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<string> FormKeyStrProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, string>(nameof(FormKeyStr), string.Empty, defaultBindingMode: BindingMode.TwoWay);
 
     public string EditorID {
         get => GetValue(EditorIDProperty);
         set => SetValue(EditorIDProperty, value);
     }
-    public static readonly StyledProperty<string> EditorIDProperty = AvaloniaProperty.Register<AFormKeyPicker, string>(nameof(EditorID), string.Empty, defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<string> EditorIDProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, string>(nameof(EditorID), string.Empty, defaultBindingMode: BindingMode.TwoWay);
 
     public bool MissingMeansError {
         get => GetValue(MissingMeansErrorProperty);
         set => SetValue(MissingMeansErrorProperty, value);
     }
-    public static readonly StyledProperty<bool> MissingMeansErrorProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(MissingMeansError), true);
+    public static readonly StyledProperty<bool> MissingMeansErrorProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(MissingMeansError), true);
 
     public bool MissingMeansNull {
         get => GetValue(MissingMeansNullProperty);
@@ -148,27 +161,31 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         get => _status;
         protected set => SetAndRaise(StatusProperty, ref _status, value);
     }
-    public static readonly DirectProperty<AFormKeyPicker, StatusIndicatorState> StatusProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, StatusIndicatorState>(nameof(StatusProperty), picker => picker.Status);
+    public static readonly DirectProperty<AFormKeyPicker, StatusIndicatorState> StatusProperty =
+        AvaloniaProperty.RegisterDirect<AFormKeyPicker, StatusIndicatorState>(nameof(StatusProperty), picker => picker.Status);
 
     private string _statusString = string.Empty;
     public string StatusString {
         get => _statusString;
         protected set => SetAndRaise(StatusStringProperty, ref _statusString, value);
     }
-    public static readonly DirectProperty<AFormKeyPicker, string> StatusStringProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, string>(nameof(StatusString), picker => picker.StatusString);
+    public static readonly DirectProperty<AFormKeyPicker, string> StatusStringProperty =
+        AvaloniaProperty.RegisterDirect<AFormKeyPicker, string>(nameof(StatusString), picker => picker.StatusString);
 
     public ICommand PickerClickCommand {
         get => GetValue(PickerClickCommandProperty);
         set => SetValue(PickerClickCommandProperty, value);
     }
-    public static readonly StyledProperty<ICommand> PickerClickCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(PickerClickCommand), defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<ICommand> PickerClickCommandProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(PickerClickCommand), defaultBindingMode: BindingMode.TwoWay);
 
     private readonly Subject<FormKey> _formKeyChanged = new();
     public IObservable<FormKey> FormKeyChanged {
         get => GetValue(FormKeyChangedProperty);
         set => SetValue(FormKeyChangedProperty, value);
     }
-    public static readonly StyledProperty<IObservable<FormKey>> FormKeyChangedProperty = AvaloniaProperty.Register<AFormKeyPicker, IObservable<FormKey>>(nameof(FormKeyChanged), defaultBindingMode: BindingMode.OneWayToSource);
+    public static readonly StyledProperty<IObservable<FormKey>> FormKeyChangedProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, IObservable<FormKey>>(nameof(FormKeyChanged), defaultBindingMode: BindingMode.OneWayToSource);
 
     public bool InSearchMode {
         get => GetValue(InSearchModeProperty);
@@ -183,13 +200,15 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             SetAndRaise(SearchModeProperty, ref _searchMode, value);
             InSearchMode = _searchMode switch {
                 FormKeyPickerSearchMode.None => false,
-                _ => true
+                _ => true,
             };
         }
     }
-    public static readonly DirectProperty<AFormKeyPicker, FormKeyPickerSearchMode> SearchModeProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, FormKeyPickerSearchMode>(nameof(SearchMode), picker => picker.SearchMode);
+    public static readonly DirectProperty<AFormKeyPicker, FormKeyPickerSearchMode> SearchModeProperty =
+        AvaloniaProperty.RegisterDirect<AFormKeyPicker, FormKeyPickerSearchMode>(nameof(SearchMode), picker => picker.SearchMode);
 
-    public static readonly StyledProperty<bool> CollectingRecordsProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(CollectingRecords));
+    public static readonly StyledProperty<bool>
+        CollectingRecordsProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(CollectingRecords));
 
     public bool CollectingRecords {
         get => GetValue(CollectingRecordsProperty);
@@ -201,62 +220,73 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         get => GetValue(ProcessingSpinnerForegroundProperty);
         set => SetValue(ProcessingSpinnerForegroundProperty, value);
     }
-    public static readonly StyledProperty<Brush> ProcessingSpinnerForegroundProperty = AvaloniaProperty.Register<AFormKeyPicker, Brush>(nameof(ProcessingSpinnerForeground), new SolidColorBrush(Color.FromArgb(255, 0, 255, 255)));
+    public static readonly StyledProperty<Brush> ProcessingSpinnerForegroundProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, Brush>(nameof(ProcessingSpinnerForeground), new SolidColorBrush(Color.FromArgb(255, 0, 255, 255)));
 
     public Color ProcessingSpinnerGlow {
         get => GetValue(ProcessingSpinnerGlowProperty);
         set => SetValue(ProcessingSpinnerGlowProperty, value);
     }
-    public static readonly StyledProperty<Color> ProcessingSpinnerGlowProperty = AvaloniaProperty.Register<AFormKeyPicker, Color>(nameof(ProcessingSpinnerGlow), Color.FromArgb(255, 0, 255, 255));
+    public static readonly StyledProperty<Color> ProcessingSpinnerGlowProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, Color>(nameof(ProcessingSpinnerGlow), Color.FromArgb(255, 0, 255, 255));
 
     public ISolidColorBrush ErrorBrush {
         get => GetValue(ErrorBrushProperty);
         set => SetValue(ErrorBrushProperty, value);
     }
-    public static readonly StyledProperty<ISolidColorBrush> ErrorBrushProperty = AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(ErrorBrush), Brushes.IndianRed);
+    public static readonly StyledProperty<ISolidColorBrush> ErrorBrushProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(ErrorBrush), Brushes.IndianRed);
 
     public ISolidColorBrush SuccessBrush {
         get => GetValue(SuccessBrushProperty);
         set => SetValue(SuccessBrushProperty, value);
     }
-    public static readonly StyledProperty<ISolidColorBrush> SuccessBrushProperty = AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(SuccessBrush), Brushes.ForestGreen);
+    public static readonly StyledProperty<ISolidColorBrush> SuccessBrushProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(SuccessBrush), Brushes.ForestGreen);
 
     public ISolidColorBrush PassiveBrush {
         get => GetValue(PassiveBrushProperty);
         set => SetValue(PassiveBrushProperty, value);
     }
-    public static readonly StyledProperty<ISolidColorBrush> PassiveBrushProperty = AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(PassiveBrush), Brushes.Orange);
+    public static readonly StyledProperty<ISolidColorBrush> PassiveBrushProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(PassiveBrush), Brushes.Orange);
 
     public bool AllowsSearchMode {
         get => GetValue(AllowsSearchModeProperty);
         set => SetValue(AllowsSearchModeProperty, value);
     }
-    public static readonly StyledProperty<bool> AllowsSearchModeProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(AllowsSearchMode), true, defaultBindingMode: BindingMode.TwoWay);
+    public static readonly StyledProperty<bool> AllowsSearchModeProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(AllowsSearchMode), true, defaultBindingMode: BindingMode.TwoWay);
 
     private IList? _applicableEditorIDs;
     public IList? ApplicableEditorIDs {
         get => _applicableEditorIDs;
         protected set => SetAndRaise(ApplicableEditorIDsProperty, ref _applicableEditorIDs, value);
     }
-    public static readonly DirectProperty<AFormKeyPicker, IList?> ApplicableEditorIDsProperty = AvaloniaProperty.RegisterDirect<AFormKeyPicker, IList?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);
+    public static readonly DirectProperty<AFormKeyPicker, IList?> ApplicableEditorIDsProperty =
+        AvaloniaProperty.RegisterDirect<AFormKeyPicker, IList?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);
 
     public Func<IMajorRecordIdentifier, ILinkCache?, string?> NameSelector {
         get => GetValue(NameSelectorProperty);
         set => SetValue(NameSelectorProperty, value);
     }
-    public static readonly StyledProperty<Func<IMajorRecordIdentifier, ILinkCache?, string?>> NameSelectorProperty = AvaloniaProperty.Register<AFormKeyPicker, Func<IMajorRecordIdentifier, ILinkCache?, string?>>(nameof(NameSelector), (record, _) => record.EditorID);
+    public static readonly StyledProperty<Func<IMajorRecordIdentifier, ILinkCache?, string?>> NameSelectorProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, Func<IMajorRecordIdentifier, ILinkCache?, string?>>(nameof(NameSelector),
+            (record, _) => record.EditorID);
 
     public bool ViewingAllowedTypes {
         get => GetValue(ViewingAllowedTypesProperty);
         set => SetValue(ViewingAllowedTypesProperty, value);
     }
-    public static readonly StyledProperty<bool> ViewingAllowedTypesProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(ViewingAllowedTypes));
+    public static readonly StyledProperty<bool> ViewingAllowedTypesProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(ViewingAllowedTypes));
 
     public ICommand ToggleViewAllowedTypesCommand {
         get => GetValue(ViewAllowedTypesCommandProperty);
         set => SetValue(ViewAllowedTypesCommandProperty, value);
     }
-    public static readonly StyledProperty<ICommand> ViewAllowedTypesCommandProperty = AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(ToggleViewAllowedTypesCommand));
+    public static readonly StyledProperty<ICommand> ViewAllowedTypesCommandProperty =
+        AvaloniaProperty.Register<AFormKeyPicker, ICommand>(nameof(ToggleViewAllowedTypesCommand));
 
     public ICommand Clear {
         get => GetValue(ClearProperty);
@@ -639,81 +669,79 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         ApplicableEditorIDs = this.WhenAnyValue(x => x.LinkCache)
             .WrapInInProgressMarker(observable => observable
-                .ThrottleMedium()
-                .CombineLatest(
-                    selectedModsChanged,
-                    selectedTypesChanged,
-                    scopedRecordsChanged,
-                    (linkCache, selectedMods, enabledTypes, scopedRecords)
-                        => (LinkCache: linkCache,
-                            SelectedMods: selectedMods,
-                            Types: enabledTypes,
-                            ScopedRecords: scopedRecords))
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(x => {
-                    var enabledTypes = EnabledTypes(x.Types).ToArray();
-                    if (enabledTypes is []) return Observable.Empty<IMajorRecordIdentifier>();
-
-                    if (x.ScopedRecords is not null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
-
-                    return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
-                        try {
-                            if (x.LinkCache is null) return Task.CompletedTask;
-
-                            foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
-                                if (cancel.IsCancellationRequested) return Task.CompletedTask;
-
-                                if (x.SelectedMods.Where(modItem => modItem.IsSelected).All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
-
-                                obs.OnNext(item);
-                            }
-                        } catch (Exception ex) {
-                            obs.OnError(ex);
-                        }
-                        obs.OnCompleted();
-                        return Task.CompletedTask;
-                    });
-                })
-                .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifier>())
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Select(x => x.ToObservableChangeSet())
-                .Switch()
-                .ObserveOnGui()
-                .Filter(Observable.CombineLatest(
-                        this.WhenAnyValue(x => x.SearchMode)
-                            .DistinctUntilChanged(),
-                        this.WhenAnyValue(x => x.LinkCache),
-                        (searchMode, cache) => (SearchMode: searchMode, Cache: cache))
+                    .ThrottleMedium()
+                    .CombineLatest(
+                        selectedModsChanged,
+                        selectedTypesChanged,
+                        scopedRecordsChanged,
+                        (linkCache, selectedMods, enabledTypes, scopedRecords)
+                            => (LinkCache: linkCache,
+                                SelectedMods: selectedMods,
+                                Types: enabledTypes,
+                                ScopedRecords: scopedRecords))
+                    .ObserveOn(RxApp.TaskpoolScheduler)
                     .Select(x => {
-                        switch (x.SearchMode) {
-                            case FormKeyPickerSearchMode.None:
-                                return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
-                            case FormKeyPickerSearchMode.EditorID:
-                                return Observable.CombineLatest(
-                                        this.WhenAnyValue(p => p.LinkCache),
-                                        this.WhenAnyValue(p => p.EditorID),
-                                        this.WhenAnyValue(p => p.BlacklistFormKeys),
-                                        this.WhenAnyValue(p => p.Filter),
-                                        this.WhenAnyValue(p => p.NameSelector),
-                                        (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
-                                            => (LinkCache: linkCache,
-                                                EditorID: editorId,
-                                                BlacklistFormKeys: blacklistFormKeys,
-                                                Filter: filter,
-                                                NameSelector: nameSelector))
-                                    .ThrottleMedium()
-                                    .ObserveOn(RxApp.TaskpoolScheduler)
-                                    .Select(data => {
-                                        return new Func<IMajorRecordIdentifier, bool>(ident => {
-                                            if (data.Filter is not null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
-                                            if (data.BlacklistFormKeys is not null && data.BlacklistFormKeys.Contains(ident.FormKey)) return false;
-                                            if (data.EditorID.IsNullOrWhitespace()) return true;
+                        var enabledTypes = EnabledTypes(x.Types).ToArray();
+                        if (enabledTypes is []) return Observable.Empty<IMajorRecordIdentifier>();
 
-                                            var editorID = data.NameSelector is null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
-                                            return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
+                        if (x.ScopedRecords is not null) return x.ScopedRecords.Where(r => r.Type.InheritsFromAny(enabledTypes)).ToObservable();
+
+                        return Observable.Create<IMajorRecordIdentifier>((obs, cancel) => {
+                            try {
+                                if (x.LinkCache is null) return Task.CompletedTask;
+
+                                foreach (var item in x.LinkCache.AllIdentifiers(enabledTypes, cancel)) {
+                                    if (cancel.IsCancellationRequested) return Task.CompletedTask;
+
+                                    if (x.SelectedMods.Where(modItem => modItem.IsSelected)
+                                        .All(modItem => modItem.ModKey != item.FormKey.ModKey)) continue;
+
+                                    obs.OnNext(item);
+                                }
+                            } catch (Exception ex) {
+                                obs.OnError(ex);
+                            }
+                            obs.OnCompleted();
+                            return Task.CompletedTask;
+                        });
+                    })
+                    .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifier>())
+                    .ObserveOn(RxApp.TaskpoolScheduler)
+                    .Select(x => x.ToObservableChangeSet())
+                    .Switch()
+                    .ObserveOnGui()
+                    .Filter(this.WhenAnyValue(x => x.SearchMode)
+                        .DistinctUntilChanged().CombineLatest(this.WhenAnyValue(x => x.LinkCache),
+                            (searchMode, cache) => (SearchMode: searchMode, Cache: cache))
+                        .Select(x => {
+                            switch (x.SearchMode) {
+                                case FormKeyPickerSearchMode.None:
+                                    return Observable.Return<Func<IMajorRecordIdentifier, bool>>(_ => false);
+                                case FormKeyPickerSearchMode.EditorID:
+                                    return this.WhenAnyValue(p => p.LinkCache).CombineLatest(this.WhenAnyValue(p => p.EditorID),
+                                            this.WhenAnyValue(p => p.BlacklistFormKeys),
+                                            this.WhenAnyValue(p => p.Filter),
+                                            this.WhenAnyValue(p => p.NameSelector),
+                                            (linkCache, editorId, blacklistFormKeys, filter, nameSelector)
+                                                => (LinkCache: linkCache,
+                                                    EditorID: editorId,
+                                                    BlacklistFormKeys: blacklistFormKeys,
+                                                    Filter: filter,
+                                                    NameSelector: nameSelector))
+                                        .ThrottleMedium()
+                                        .ObserveOn(RxApp.TaskpoolScheduler)
+                                        .Select(data => {
+                                            return new Func<IMajorRecordIdentifier, bool>(ident => {
+                                                if (data.Filter is not null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
+                                                if (data.BlacklistFormKeys is not null && data.BlacklistFormKeys.Contains(ident.FormKey))
+                                                    return false;
+                                                if (data.EditorID.IsNullOrWhitespace()) return true;
+
+                                                var editorID = data.NameSelector is null ? ident.EditorID : data.NameSelector(ident, data.LinkCache);
+                                                return !editorID.IsNullOrWhitespace() && editorID.ContainsInsensitive(data.EditorID);
+                                            });
                                         });
-                                    });
-                            case FormKeyPickerSearchMode.FormKey:
+                                case FormKeyPickerSearchMode.FormKey:
                                 // todo update based on https://github.com/Mutagen-Modding/Mutagen/blob/dev/Mutagen.Bethesda.WPF/Plugins/AFormKeyPicker.cs
                                 // var modKeyToId = x.Cache?.ListedOrder
                                 //         .Select((mod, index) => (Mod: mod, Index: (byte) index))
@@ -736,12 +764,13 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                 //         var formID = new FormID(new ModIndex(index), fk.ID);
                                 //         return formID.Raw == term.ID.Value.Raw;
                                 //     });
-                            default:
-                                throw new InvalidOperationException();
-                        }
-                    })
-                    .Switch())
-                .Sort(RecordComparers.EditorIDComparer), out var collectingRecords)
+                                default:
+                                    throw new InvalidOperationException();
+                            }
+                        })
+                        .Switch())
+                    .Sort(RecordComparers.EditorIDComparer),
+                out var collectingRecords)
             .ToObservableCollection(x => new RecordNamePair(x, NameSelector(x, LinkCache)), ActivatedDisposable);
 
         collectingRecords

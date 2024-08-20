@@ -62,7 +62,7 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
         LinkCache = Scope switch {
             BrowserScope.Environment => _editorEnvironment.LinkCache,
             BrowserScope.ActiveMod => _editorEnvironment.ActiveModLinkCache,
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 }

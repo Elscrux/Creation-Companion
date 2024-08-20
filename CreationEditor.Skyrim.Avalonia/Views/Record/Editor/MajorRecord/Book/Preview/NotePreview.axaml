@@ -11,13 +11,13 @@
                 CornerRadius="16"
                 Height="{x:Static preview:NotePreview.NoteHeight}"
                 Width="{x:Static preview:NotePreview.NoteWidth}">
-                <ScrollViewer Margin="{x:Static preview:NotePreview.NoteMargins}">
-                    <StackPanel
-                        x:Name="Page"
-                        VerticalAlignment="Top"
-                        Height="{x:Static preview:NotePreview.PageHeight}"
-                        Width="{x:Static preview:NotePreview.PageWidth}"/>
-                </ScrollViewer>
+            <ScrollViewer Margin="{x:Static preview:NotePreview.NoteMargins}">
+                <StackPanel
+                    x:Name="Page"
+                    VerticalAlignment="Top"
+                    Height="{x:Static preview:NotePreview.PageHeight}"
+                    Width="{x:Static preview:NotePreview.PageWidth}"/>
+            </ScrollViewer>
         </Border>
 
         <StackPanel Orientation="Horizontal"

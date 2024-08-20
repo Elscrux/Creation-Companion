@@ -7,7 +7,7 @@ public class MovementDirectionEnum : IConditionValueEnums {
         Forward,
         Right,
         Back,
-        Left
+        Left,
     }
 
     public IList<Enum> Enums { get; } = Enum.GetValues<MovementDirection>().Cast<Enum>().ToList();

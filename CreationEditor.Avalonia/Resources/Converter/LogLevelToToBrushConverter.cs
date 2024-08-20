@@ -22,7 +22,7 @@ public sealed class LogLevelToToBrushConverter : IValueConverter {
             LogEventLevel.Warning => WarningBrush,
             LogEventLevel.Error => ErrorBrush,
             LogEventLevel.Fatal => FatalBrush,
-            _ => null
+            _ => null,
         };
     }
 

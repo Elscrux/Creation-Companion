@@ -12,15 +12,17 @@ public sealed class SkyrimRecordBrowserGroupProvider(
 
     public List<RecordTypeGroup> GetRecordGroups() {
         return [
-            new RecordTypeGroup("Actors", [
+            new RecordTypeGroup("Actors",
+            [
                 recordTypeListingFactory(INpcGetter.StaticRegistration, null),
                 recordTypeListingFactory(IActionRecordGetter.StaticRegistration, null),
                 recordTypeListingFactory(IBodyPartDataGetter.StaticRegistration, null),
                 recordTypeListingFactory(ILeveledNpcGetter.StaticRegistration, null),
                 recordTypeListingFactory(IPerkGetter.StaticRegistration, null),
-                recordTypeListingFactory(ITalkingActivatorGetter.StaticRegistration, null)
+                recordTypeListingFactory(ITalkingActivatorGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Audio", [
+            new RecordTypeGroup("Audio",
+            [
                 recordTypeListingFactory(IAcousticSpaceGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMusicTrackGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMusicTypeGetter.StaticRegistration, null),
@@ -28,9 +30,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(ISoundCategoryGetter.StaticRegistration, null),
                 recordTypeListingFactory(ISoundDescriptorGetter.StaticRegistration, null),
                 recordTypeListingFactory(ISoundMarkerGetter.StaticRegistration, null),
-                recordTypeListingFactory(ISoundOutputModelGetter.StaticRegistration, null)
+                recordTypeListingFactory(ISoundOutputModelGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Character", [
+            new RecordTypeGroup("Character",
+            [
                 recordTypeListingFactory(IAssociationTypeGetter.StaticRegistration, null),
                 recordTypeListingFactory(IClassGetter.StaticRegistration, null),
                 recordTypeListingFactory(IEquipTypeGetter.StaticRegistration, null),
@@ -42,9 +45,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(IRaceGetter.StaticRegistration, null),
                 recordTypeListingFactory(IRelationshipGetter.StaticRegistration, null),
                 recordTypeListingFactory(IStoryManagerEventNodeGetter.StaticRegistration, "Story Manager"),
-                recordTypeListingFactory(IVoiceTypeGetter.StaticRegistration, null)
+                recordTypeListingFactory(IVoiceTypeGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Items", [
+            new RecordTypeGroup("Items",
+            [
                 recordTypeListingFactory(IAmmunitionGetter.StaticRegistration, null),
                 recordTypeListingFactory(IArmorGetter.StaticRegistration, null),
                 recordTypeListingFactory(IArmorAddonGetter.StaticRegistration, null),
@@ -56,9 +60,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(IMiscItemGetter.StaticRegistration, null),
                 recordTypeListingFactory(IOutfitGetter.StaticRegistration, null),
                 recordTypeListingFactory(ISoulGemGetter.StaticRegistration, null),
-                recordTypeListingFactory(IWeaponGetter.StaticRegistration, null)
+                recordTypeListingFactory(IWeaponGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Magic", [
+            new RecordTypeGroup("Magic",
+            [
                 recordTypeListingFactory(IDualCastDataGetter.StaticRegistration, null),
                 recordTypeListingFactory(IObjectEffectGetter.StaticRegistration, "Enchantment"),
                 recordTypeListingFactory(ILeveledSpellGetter.StaticRegistration, null),
@@ -67,9 +72,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(IScrollGetter.StaticRegistration, null),
                 recordTypeListingFactory(IShoutGetter.StaticRegistration, null),
                 recordTypeListingFactory(ISpellGetter.StaticRegistration, null),
-                recordTypeListingFactory(IWordOfPowerGetter.StaticRegistration, null)
+                recordTypeListingFactory(IWordOfPowerGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Miscellaneous", [
+            new RecordTypeGroup("Miscellaneous",
+            [
                 recordTypeListingFactory(IAnimatedObjectGetter.StaticRegistration, null),
                 recordTypeListingFactory(IArtObjectGetter.StaticRegistration, null),
                 recordTypeListingFactory(ICollisionLayerGetter.StaticRegistration, null),
@@ -82,9 +88,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(ILoadScreenGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMaterialObjectGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMessageGetter.StaticRegistration, null),
-                recordTypeListingFactory(ITextureSetGetter.StaticRegistration, null)
+                recordTypeListingFactory(ITextureSetGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("Special Effects", [
+            new RecordTypeGroup("Special Effects",
+            [
                 recordTypeListingFactory(IAddonNodeGetter.StaticRegistration, null),
                 recordTypeListingFactory(ICameraShotGetter.StaticRegistration, null),
                 recordTypeListingFactory(IDebrisGetter.StaticRegistration, null),
@@ -99,9 +106,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(IImpactDataSetGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMaterialTypeGetter.StaticRegistration, null),
                 recordTypeListingFactory(IProjectileGetter.StaticRegistration, null),
-                recordTypeListingFactory(IVolumetricLightingGetter.StaticRegistration, null)
+                recordTypeListingFactory(IVolumetricLightingGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("World Data", [
+            new RecordTypeGroup("World Data",
+            [
                 recordTypeListingFactory(IClimateGetter.StaticRegistration, null),
                 recordTypeListingFactory(IEncounterZoneGetter.StaticRegistration, null),
                 recordTypeListingFactory(ILightingTemplateGetter.StaticRegistration, null),
@@ -110,9 +118,10 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(IShaderParticleGeometryGetter.StaticRegistration, null),
                 recordTypeListingFactory(IVisualEffectGetter.StaticRegistration, null),
                 recordTypeListingFactory(IWaterGetter.StaticRegistration, null),
-                recordTypeListingFactory(IWeatherGetter.StaticRegistration, null)
+                recordTypeListingFactory(IWeatherGetter.StaticRegistration, null),
             ]),
-            new RecordTypeGroup("World Objects", [
+            new RecordTypeGroup("World Objects",
+            [
                 recordTypeListingFactory(IActivatorGetter.StaticRegistration, null),
                 recordTypeListingFactory(IContainerGetter.StaticRegistration, null),
                 recordTypeListingFactory(IDoorGetter.StaticRegistration, null),
@@ -123,8 +132,8 @@ public sealed class SkyrimRecordBrowserGroupProvider(
                 recordTypeListingFactory(ILightGetter.StaticRegistration, null),
                 recordTypeListingFactory(IMoveableStaticGetter.StaticRegistration, null),
                 recordTypeListingFactory(IStaticGetter.StaticRegistration, null),
-                recordTypeListingFactory(ITreeGetter.StaticRegistration, null)
-            ])
+                recordTypeListingFactory(ITreeGetter.StaticRegistration, null),
+            ]),
 
         ];
     }
