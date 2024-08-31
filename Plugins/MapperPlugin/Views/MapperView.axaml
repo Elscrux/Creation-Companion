@@ -46,7 +46,7 @@
                     ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
                     LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
 
-                <asset:FilePicker
+                <asset:TextFilePicker
                     Grid.Column="2"
                     IsVisible="{Binding !WorldspaceFormKey.IsNull}"
                     Watermark="Select Map"

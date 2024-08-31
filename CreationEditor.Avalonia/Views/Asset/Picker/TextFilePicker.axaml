@@ -1,0 +1,52 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:CreationEditor.Avalonia.Views.Asset.Picker"
+        xmlns:controls1="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+    <Design.PreviewWith>
+        <controls:TextFilePicker/>
+    </Design.PreviewWith>
+
+    <Style Selector="controls|TextFilePicker">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="*,Auto,Auto"
+                      MaxHeight="27">
+                    <Border Grid.Column="0"
+                            x:Name="Border"
+                            BorderThickness="1,1,0,1"
+                            BorderBrush="{DynamicResource ButtonBorderBrush}"
+                            CornerRadius="4,0,0,4"
+                            VerticalAlignment="Center">
+                        <Grid MaxWidth="{ReflectionBinding #Border.Bounds.Width}">
+                            <TextBlock
+                                IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
+                                Text="{TemplateBinding Watermark}"
+                                Padding="4"/>
+
+                            <TextBox
+                                IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                IsEnabled="{TemplateBinding AllowTextEdit}"
+                                Text="{TemplateBinding FilePath}"
+                                Watermark="{TemplateBinding Watermark}"
+                                TextBlock.TextTrimming="{x:Static TextTrimming.CharacterEllipsis}"
+                                ToolTip.Tip="{TemplateBinding FilePath}"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            BorderBrush="{DynamicResource ButtonBorderBrush}"
+                            BorderThickness="0.5"/>
+
+                    <Button Grid.Column="2" Command="{TemplateBinding Pick}"
+                            BorderThickness="0,1,1,1"
+                            CornerRadius="0,4,4,0"
+                            VerticalAlignment="Center">
+                        <controls1:SymbolIcon
+                            Symbol="Folder"
+                            ToolTip.Tip="Open"/>
+                    </Button>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>
