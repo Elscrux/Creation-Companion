@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.ReactiveUI;
+using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;
 
@@ -20,7 +21,7 @@ public partial class LayoutDock : ReactiveUserControl<LayoutDockVM>, IDockPrevie
         var border = new Border {
             IsHitTestVisible = false,
             Opacity = 0.5,
-            BorderBrush = (this as IDockPreview).Brush,
+            BorderBrush = StandardBrushes.ValidBrush,
             BorderThickness = new Thickness(
                 dock == Dock.Left ? PreviewOutlineThickness : 0,
                 dock == Dock.Top ? PreviewOutlineThickness : 0,

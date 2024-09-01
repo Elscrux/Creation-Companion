@@ -7,6 +7,7 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
+using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
@@ -94,7 +95,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
                 new Rectangle {
                     IsHitTestVisible = false,
                     Opacity = 0.5,
-                    Fill = (this as IDockPreview).Brush,
+                    Fill = StandardBrushes.ValidBrush,
                     [Grid.RowProperty] = 1,
                 },
             },

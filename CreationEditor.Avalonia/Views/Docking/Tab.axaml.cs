@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Layout;
+using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;
@@ -44,7 +45,7 @@ public partial class Tab : UserControl, IDockPreview {
             new Rectangle {
                 Width = 20,
                 HorizontalAlignment = horizontalAlignment,
-                Fill = (this as IDockPreview).Brush,
+                Fill = StandardBrushes.ValidBrush,
                 IsHitTestVisible = false,
                 Opacity = 0.5,
             });

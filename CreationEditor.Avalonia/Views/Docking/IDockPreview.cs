@@ -2,21 +2,14 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
-using Avalonia.Media;
+using CreationEditor.Avalonia.Constants;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 public interface IDockPreview {
-    public IBrush? Brush =>
-        Application.Current is not null
-     && Application.Current.TryFindResource("SystemAccentColor", out var obj)
-     && obj is Color color
-            ? new SolidColorBrush(color)
-            : null;
-
     public void ShowPreview(Dock dock) {
         AdornerLayer.SetAdorner((Visual) this,
             new Rectangle {
-                Fill = Brush,
+                Fill = StandardBrushes.ValidBrush,
                 IsHitTestVisible = false,
                 Opacity = 0.5,
             });
