@@ -15,7 +15,7 @@ namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
 public sealed class GetFactionRankDataTemplate : ICustomConditionValueDataTemplate {
     private static readonly FuncDataTemplate<IRankGetter> RankDataTemplate = new((r, _) => new TextBlock {
-        Text = r.Title?.GetName(s => s?.String) ?? r.Number.ToString() ?? string.Empty,
+        Text = r?.Title?.GetName(s => s?.String) ?? r?.Number.ToString() ?? string.Empty,
     });
 
     public bool Match(Condition.Function function) => function == Condition.Function.GetFactionRank;

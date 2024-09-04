@@ -148,6 +148,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     new TemplateColumn<AssetTreeItem>(
                         "Name",
                         new FuncDataTemplate<AssetTreeItem>((asset, _) => {
+                            if (asset is null) return null;
+
                             // Name
                             var textBlock = new TextBlock {
                                 Text = _fileSystem.Path.GetFileName(asset.Path),
@@ -211,7 +213,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 new TemplateColumn<AssetTreeItem>(
                     "Count",
                     new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                        if (asset.Asset is AssetDirectory) return null;
+                        if (asset is null || asset.Asset is AssetDirectory) return null;
 
                         return new TextBlock {
                             Text = asset.GetReferencedAssets()
@@ -237,7 +239,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 new TemplateColumn<AssetTreeItem>(
                     "Flags",
                     new FuncDataTemplate<AssetTreeItem>((asset, _) => {
-                        if (asset.Asset is not AssetFile assetFile
+                        if (asset?.Asset is not AssetFile assetFile
                          || assetFile.ReferencedAsset.AssetLink.Type != SkyrimModelAssetType.Instance) return null;
 
                         // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
