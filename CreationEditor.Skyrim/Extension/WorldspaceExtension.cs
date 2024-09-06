@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace CreationEditor.Skyrim;
 
 public static class WorldspaceExtension {
@@ -18,5 +19,19 @@ public static class WorldspaceExtension {
         return linkCache.ResolveAll<IWorldspaceGetter>(worldspaceFormKey)
             .SelectMany(worldspace => worldspace.EnumerateCells())
             .DistinctBy(x => x.FormKey);
+    }
+
+    public static ICellGetter? GetCell(this ILinkCache linkCache, FormKey worldspaceFormKey, P2Int cellCoordinates) {
+        foreach (var worldspace in linkCache.ResolveAll<IWorldspaceGetter>(worldspaceFormKey)) {
+            foreach (var cell in worldspace.EnumerateCells()) {
+                if (cell.Grid is null) continue;
+
+                if (cell.Grid.Point == cellCoordinates) {
+                    return cell;
+                }
+            }
+        }
+
+        return null;
     }
 }
