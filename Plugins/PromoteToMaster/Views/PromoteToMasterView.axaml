@@ -18,29 +18,23 @@
                 <basic:PageData.DataTemplate>
                     <DataTemplate DataType="viewModels:PromoteToMasterVM">
                         <StackPanel Spacing="15">
-                            <StackPanel Spacing="5"
-                                        ToolTip.Tip="New records will be created with a form key of this record.">
-                                <TextBlock Text="Inject records into:"
-                                           Classes="h3"/>
+                            <basic:LabeledContentControl
+                                Header="Inject records into"
+                                HeaderToolTip="New records will be created with records that are labeled to come from this mod.">
                                 <mod:ModPicker DataContext="{Binding InjectToMod}"/>
-                            </StackPanel>
+                            </basic:LabeledContentControl>
 
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="Create injected records in:"
-                                           Classes="h3"/>
+                            <basic:LabeledContentControl
+                                Header="Create injected records in">
                                 <mod:ModPicker DataContext="{Binding InjectedRecordCreationMod}"/>
-                            </StackPanel>
+                            </basic:LabeledContentControl>
 
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="Replace references in:"
-                                           Classes="h3"/>
+                            <basic:LabeledContentControl Header="Replace references in">
                                 <mod:ModPicker x:Name="Test"
                                                DataContext="{Binding EditMod}"/>
-                            </StackPanel>
+                            </basic:LabeledContentControl>
 
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="Change Prefix:"
-                                           Classes="h3"/>
+                            <basic:LabeledContentControl Header="Change Prefix">
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="10">
                                     <TextBox Text="{Binding RemovePrefix}"
@@ -49,16 +43,14 @@
                                     <TextBox Text="{Binding AddPrefix}"
                                              Watermark="New"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </basic:LabeledContentControl>
 
-                            <StackPanel
-                                ToolTip.Tip="Records that are referenced by other records will be deleted instead of being marked for deletion in the editor id. The references will be updated to the new record in any case.">
-                                <TextBlock Text="Force delete old record:"
-                                           Classes="h3"/>
-
+                            <basic:LabeledContentControl
+                                Header="Force delete old records"
+                                HeaderToolTip="Records that are referenced by other records will be deleted instead of being marked for deletion in the editor id. The references will be updated to the new record in any case.">
                                 <CheckBox IsChecked="{Binding ForceDelete}"
                                           Classes="CheckmarkOnly"/>
-                            </StackPanel>
+                            </basic:LabeledContentControl>
                         </StackPanel>
                     </DataTemplate>
                 </basic:PageData.DataTemplate>
