@@ -1,0 +1,88 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
+        xmlns:generic="clr-namespace:System.Collections.Generic;assembly=System.Collections"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    <Design.PreviewWith>
+        <basic:MultiButton Height="250" Width="500">
+            <basic:MultiButton.ItemsSource>
+                <generic:List x:TypeArguments="system:String">
+                    <system:String>ABC</system:String>
+                    <system:String>123</system:String>
+                    <system:String>DEF</system:String>
+                </generic:List>
+            </basic:MultiButton.ItemsSource>
+        </basic:MultiButton>
+    </Design.PreviewWith>
+
+    <Style Selector="basic|MultiButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ItemsControl
+                    x:Name="PART_ItemsControl"
+                    ItemsSource="{TemplateBinding ItemsSource}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    CornerRadius="5"
+                    Padding="1"
+                    BorderThickness="{DynamicResource ButtonBorderThemeThickness}"
+                    BorderBrush="{DynamicResource ButtonBorderBrush}"
+                    Background="{DynamicResource ButtonBackground}">
+                    <ItemsControl.Styles>
+                        <Style Selector="ItemsControl ContentPresenter ListBoxItem">
+                            <Setter Property="CornerRadius" Value="0"/>
+                        </Style>
+                        <Style Selector="ItemsControl ContentPresenter:nth-child(1) ListBoxItem">
+                            <Setter Property="CornerRadius" Value="4, 0, 0, 4"/>
+                        </Style>
+                        <Style Selector="ItemsControl ContentPresenter:nth-last-child(1) ListBoxItem">
+                            <Setter Property="CornerRadius" Value="0, 4, 4, 0"/>
+                        </Style>
+                    </ItemsControl.Styles>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="1"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ListBoxItem BorderBrush="{DynamicResource ButtonBorderBrush}"
+                                         BorderThickness="{DynamicResource ButtonBorderThemeThickness}"
+                                         Background="{DynamicResource ButtonBackground}"
+                                         Content="{Binding}"
+                                         Padding="5">
+                                <ListBoxItem.Styles>
+                                    <Style Selector="ListBoxItem">
+                                        <Setter Property="Template">
+                                            <ControlTemplate>
+                                                <ContentPresenter
+                                                    x:Name="PART_ContentPresenter"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                    Content="{TemplateBinding Content}"
+                                                    Padding="{TemplateBinding Padding}"
+                                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                                    Margin="{TemplateBinding Margin}" />
+                                            </ControlTemplate>
+                                        </Setter>
+                                    </Style>
+                                    <Style Selector="ListBoxItem:selected ContentPresenter">
+                                        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+                                    </Style>
+                                </ListBoxItem.Styles>
+                            </ListBoxItem>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>
