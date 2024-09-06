@@ -1,12 +1,12 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveService(
+    IEditorEnvironment editorEnvironment,
     ILinkCacheProvider linkCacheProvider,
     IModSaveLocationProvider modSaveLocationProvider,
     IFileSystem fileSystem,
@@ -17,15 +17,8 @@ public sealed class ModSaveService(
     public void SaveMod(IMod mod) {
         if (mod.ModKey == ModKey.Null) return;
 
+        logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         var filePath = modSaveLocationProvider.GetSaveLocation(mod);
-
-        // todo add options for localization export!
-        var binaryWriteParameters = new BinaryWriteParameters {
-            FileSystem = fileSystem,
-            StringsWriter = null,
-            TargetLanguageOverride = null,
-            Encodings = null,
-        };
 
         savePipeline.Execute(linkCacheProvider.LinkCache, mod);
 
@@ -35,10 +28,9 @@ public sealed class ModSaveService(
             return;
         }
 
-        logger.Here().Information("Saving mod {ModName}", mod.ModKey.FileName);
         try {
             // Try to save mod
-            mod.WriteToBinary(filePath, binaryWriteParameters);
+            Write(mod, filePath);
         } catch (Exception e) {
             logger.Here().Warning(
                 e,
@@ -49,11 +41,27 @@ public sealed class ModSaveService(
             try {
                 // Save at backup location if failed once
                 filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
-                mod.WriteToBinary(filePath, binaryWriteParameters);
+                Write(mod, filePath);
             } catch (Exception e2) {
                 logger.Here().Warning(e2, "Failed to save mod {ModName} at {FilePath}: {Exception}", mod.ModKey.FileName, filePath, e2.Message);
             }
         }
+
+        logger.Here().Information("Finished saving mod {ModName}", mod.ModKey.FileName);
+    }
+
+    private void Write(IMod mod, string filePath) {
+        mod.BeginWrite
+            .WithLoadOrder(editorEnvironment.GameEnvironment.LoadOrder.Keys)
+            .WithDataFolder(editorEnvironment.GameEnvironment.DataFolderPath)
+            .ToPath(filePath)
+            .WithFileSystem(fileSystem)
+            .WithAllParentMasters()
+            // todo add options for localization export!
+            // .WithStringsWriter()
+            // .WithTargetLanguage()
+            // .WithEmbeddedEncodings()
+            .Write();
     }
 
     public void BackupMod(IMod mod, int limit = -1) {
