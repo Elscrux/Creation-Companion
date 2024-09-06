@@ -9,4 +9,8 @@ public static class ColorExtension {
             (byte) random.Next(0, 256),
             (byte) random.Next(0, 256));
     }
+
+    public static System.Drawing.Color ToSystemDrawingsColor(this Color color) {
+        return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
 }
