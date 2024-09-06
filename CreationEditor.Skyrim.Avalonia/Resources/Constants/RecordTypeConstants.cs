@@ -11,6 +11,7 @@ public static class RecordTypeConstants {
     public static readonly IEnumerable<Type> LocationTypes = typeof(ILocationGetter).AsEnumerable();
     public static readonly IEnumerable<Type> FormListTypes = typeof(IFormListGetter).AsEnumerable();
     public static readonly IEnumerable<Type> WorldspaceTypes = typeof(IWorldspaceGetter).AsEnumerable();
+    public static readonly IEnumerable<Type> WaterTypes = typeof(IWaterGetter).AsEnumerable();
     public static readonly IEnumerable<Type> CellTypes = typeof(ICellGetter).AsEnumerable();
     public static readonly IEnumerable<Type> GlobalVariableTypes = typeof(IGlobalGetter).AsEnumerable();
     public static readonly IEnumerable<Type> KeywordTypes = typeof(IKeywordGetter).AsEnumerable();

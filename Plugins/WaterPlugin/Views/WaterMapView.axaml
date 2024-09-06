@@ -1,0 +1,196 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:asset="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:WaterPlugin.ViewModels"
+             xmlns:viewConstants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants;assembly=Creation Companion"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
+             xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="800"
+             x:Class="WaterPlugin.Views.WaterMapView"
+             x:CompileBindings="True" x:DataType="viewModels:WaterMapVM"
+             x:Name="View">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollViewer DockPanel.Dock="Top">
+            <Grid RowDefinitions="Auto,5,*">
+                <StackPanel Grid.Row="0" Spacing="5">
+                    <basic:LabeledContentControl Header="Reflectivity Amount">
+                        <NumericUpDown
+                            x:Name="ReflectivityAmount"
+                            Value="{Binding ReflectivityAmount}"
+                            Minimum="0" Maximum="1" Increment="0.01"/>
+                    </basic:LabeledContentControl>
+
+                    <basic:LabeledContentControl Header="Reflection Magnitude">
+                        <NumericUpDown
+                            x:Name="ReflectionMagnitude"
+                            Value="{Binding ReflectionMagnitude}"
+                            Minimum="0" Maximum="1" Increment="0.01"/>
+                    </basic:LabeledContentControl>
+
+                    <basic:LabeledContentControl Header="Worldspace">
+                        <picker:FormKeyPicker
+                            VerticalAlignment="Center"
+                            FormKey="{Binding WorldspaceFormKey}"
+                            ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
+                            LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
+                    </basic:LabeledContentControl>
+
+                    <TabControl
+                        IsVisible="{ReflectionBinding #View.ViewModel.WorldspaceFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
+                        <TabItem
+                            Header="Shallow Water"
+                            ToolTip.Tip="Select the map for shallow water."
+                            Content="{Binding ShallowWaterMap}"/>
+                        <TabItem
+                            Header="Deep Water"
+                            ToolTip.Tip="Select the map for deep water."
+                            Content="{Binding DeepWaterMap}"/>
+                        <TabItem
+                            Header="Reflection"
+                            ToolTip.Tip="Select the map for reflection colors."
+                            Content="{Binding ReflectionMap}"/>
+                        <TabItem
+                            Header="Preset"
+                            ToolTip.Tip="Select the map for preset water that determines additional water properties. Add preset colors and corresponding water types in the presets list."
+                            Content="{Binding PresetMap}"/>
+
+                        <TabControl.ContentTemplate>
+                            <DataTemplate DataType="viewModels:ImageSelectionVM">
+                                <Grid
+                                    HorizontalAlignment="Stretch"
+                                    RowDefinitions="Auto,Auto,*,Auto,Auto"
+                                    ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                               Text="{ReflectionBinding #View.ViewModel.LeftCell}"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2"
+                                               Text="{ReflectionBinding #View.ViewModel.RightCell}"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3"
+                                               Text="{ReflectionBinding #View.ViewModel.TopCell}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="3"
+                                               Text="{ReflectionBinding #View.ViewModel.BottomCell}"
+                                               HorizontalAlignment="Center"/>
+
+                                    <controls:RangeSlider
+                                        ToolTip.Tip="Select the range of cells in the worldspace that the maps are covering in the horizontal direction."
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        ShowValueToolTip="True"
+                                        ToolTipStringFormat="N0"
+                                        MinWidth="250"
+                                        Minimum="-128" Maximum="128"
+                                        MinimumRange="1"
+                                        StepFrequency="1"
+                                        RangeStart="{ReflectionBinding #View.ViewModel.LeftCell, Mode=TwoWay}"
+                                        RangeEnd="{ReflectionBinding #View.ViewModel.RightCell, Mode=TwoWay}"/>
+
+                                    <LayoutTransformControl
+                                        Grid.Column="3"
+                                        Grid.Row="2"
+                                        VerticalAlignment="Stretch">
+                                        <LayoutTransformControl.LayoutTransform>
+                                            <RotateTransform Angle="-90"/>
+                                        </LayoutTransformControl.LayoutTransform>
+
+                                        <controls:RangeSlider
+                                            ToolTip.Tip="Select the range of cells in the worldspace that the maps are covering in the vertical direction."
+                                            ShowValueToolTip="True"
+                                            ToolTipStringFormat="N0"
+                                            MinWidth="250"
+                                            Minimum="-128" Maximum="128"
+                                            MinimumRange="1"
+                                            StepFrequency="1"
+                                            RangeStart="{ReflectionBinding #View.ViewModel.BottomCell, Mode=TwoWay}"
+                                            RangeEnd="{ReflectionBinding #View.ViewModel.TopCell, Mode=TwoWay}"/>
+                                    </LayoutTransformControl>
+
+                                    <Border
+                                        Grid.Column="0" Grid.ColumnSpan="3"
+                                        Grid.Row="1" Grid.RowSpan="3"
+                                        Margin="5"
+                                        BorderThickness="5"
+                                        BorderBrush="{DynamicResource SystemAccentColor}"
+                                        CornerRadius="5">
+                                        <Grid>
+                                            <Image Source="{Binding Source}"/>
+
+                                            <asset:IconFilePicker
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                FontSize="64"
+                                                ShowIcon="{Binding Source, Converter={x:Static ObjectConverters.IsNull}}"
+                                                FilePath="{Binding FilePath, Mode=TwoWay}"
+                                                Margin="5"
+                                                Filter="{x:Static viewConstants:StandardFileTypes.ImageAll}"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
+                </StackPanel>
+
+                <basic:LabeledContentControl
+                    Grid.Row="2"
+                    Header="Presets"
+                    HeaderToolTip="Add preset colors matching colors the preset map with corresponding water types to determine additional water properties.">
+                    <DataGrid
+                        ItemsSource="{Binding Presets}"
+                        MinHeight="200"
+                        MaxHeight="500"
+                        CanUserReorderColumns="False"
+                        CanUserResizeColumns="True"
+                        AutoGenerateColumns="False"
+                        Classes="NoCellSelection Medium Mutable">
+                        <attached:ListShortcuts.Add>
+                            <command:AddElement
+                                x:TypeArguments="viewModels:PresetVM"
+                                List="{Binding Presets}"/>
+                        </attached:ListShortcuts.Add>
+
+                        <attached:ListShortcuts.Remove>
+                            <command:RemoveElement
+                                x:TypeArguments="viewModels:PresetVM"
+                                List="{Binding Presets}"/>
+                        </attached:ListShortcuts.Remove>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Color">
+                                <DataTemplate DataType="viewModels:PresetVM">
+                                    <controls:ColorPickerButton
+                                        Color="{Binding Color}"
+                                        IsAlphaEnabled="False"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Water">
+                                <DataTemplate DataType="viewModels:PresetVM">
+                                    <picker:FormKeyPicker
+                                        FormKey="{Binding WaterType}"
+                                        ScopedTypes="{x:Static constants:RecordTypeConstants.WaterTypes}"
+                                        LinkCache="{ReflectionBinding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </basic:LabeledContentControl>
+            </Grid>
+        </ScrollViewer>
+
+        <Button Grid.Row="1"
+                DockPanel.Dock="Bottom"
+                Content="Generate"
+                Command="{Binding Generate}"
+                HorizontalAlignment="Stretch"
+                Margin="5"/>
+    </Grid>
+</UserControl>
