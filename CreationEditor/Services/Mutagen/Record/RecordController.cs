@@ -121,16 +121,16 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
     }
 
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
     }
 
-    public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, TMod mod)
+    public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var resolveContext = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
@@ -158,11 +158,11 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+        where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
-    public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, TMod mod)
+        where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
+    public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var newOverride = GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, mod);
@@ -193,16 +193,16 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, _editorEnvironment.ActiveMod);
+        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
     }
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, CastOrThrow<TMod>(mod));
+        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
     }
 
-    public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, TMod mod)
+    public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var context = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
