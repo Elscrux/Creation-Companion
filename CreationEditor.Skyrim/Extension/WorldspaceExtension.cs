@@ -15,14 +15,8 @@ public static class WorldspaceExtension {
     }
 
     public static IEnumerable<ICellGetter> EnumerateAllCells(this ILinkCache linkCache, FormKey worldspaceFormKey) {
-        var visitedCells = new HashSet<FormKey>();
-
-        foreach (var worldspace in linkCache.ResolveAll<IWorldspaceGetter>(worldspaceFormKey)) {
-            foreach (var cell in worldspace.EnumerateCells()) {
-                if (visitedCells.Add(cell.FormKey)) {
-                    yield return cell;
-                }
-            }
-        }
+        return linkCache.ResolveAll<IWorldspaceGetter>(worldspaceFormKey)
+            .SelectMany(worldspace => worldspace.EnumerateCells())
+            .DistinctBy(x => x.FormKey);
     }
 }
