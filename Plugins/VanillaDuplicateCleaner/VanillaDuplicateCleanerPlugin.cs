@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
@@ -20,5 +21,7 @@ public sealed class VanillaDuplicateCleanerPlugin(
 
     public Control GetControl() => new VanillaDuplicateCleanerView(vanillaDuplicateCleanerVMFactory());
 
+    public DockMode DockMode { get; set; } = DockMode.Document;
+    public Dock Dock { get; set; }
     public object GetIcon() => new SymbolIcon { Symbol = Symbol.Clear };
 }

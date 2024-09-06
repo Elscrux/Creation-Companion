@@ -102,8 +102,8 @@ public sealed class MainVM : ViewModel {
                 plugin.GetControl(),
                 new DockConfig {
                     DockInfo = new DockInfo { Header = plugin.Name },
-                    DockMode = DockMode.Side,
-                    Dock = Dock.Top,
+                    DockMode = plugin.DockMode,
+                    Dock = plugin.Dock,
                 });
         });
 

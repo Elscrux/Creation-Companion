@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using FluentAvalonia.UI.Controls;
 using MapperPlugin.ViewModels;
@@ -14,5 +15,7 @@ public sealed class MapperPlugin(
     public Guid Guid => new("f75e5cda-7bdd-42c2-b777-eac180442416");
 
     public Control GetControl() => new MapperView(mapperVM());
+    public DockMode DockMode { get; set; } = DockMode.Document;
+    public Dock Dock { get; set; }
     public object GetIcon() => new SymbolIcon { Symbol = Symbol.Map };
 }

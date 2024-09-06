@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
@@ -21,6 +22,8 @@ public sealed class SearchPlugin<TMod, TModGetter>(
     public string Description => "Search and replace text.";
     public Guid Guid => new("3134c266-5eb1-4671-a42b-9f6b1199b9e5");
     public KeyGesture KeyGesture => new(Key.F, KeyModifiers.Control);
+    public DockMode DockMode { get; set; } = DockMode.Side;
+    public Dock Dock { get; set; } = Dock.Top;
 
     public Control GetControl() => new TextSearchView(textSearchVMFactory());
 
