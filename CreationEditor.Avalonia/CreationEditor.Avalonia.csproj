@@ -125,10 +125,6 @@
         <Compile Update="Services\Asset\AssetSymbolService.cs">
           <DependentUpon>IAssetSymbolService.cs</DependentUpon>
         </Compile>
-        <Compile Update="Views\Asset\Picker\FilePicker.axaml.cs">
-          <DependentUpon>FilePicker.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
 </Project>
