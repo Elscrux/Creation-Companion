@@ -65,6 +65,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
         // Controller
         builder.RegisterType<RecordController<TMod, TModGetter>>()
+            .AsSelf()
             .As<IRecordController>()
             .SingleInstance();
 
