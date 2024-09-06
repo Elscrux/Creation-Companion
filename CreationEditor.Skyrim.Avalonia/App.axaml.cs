@@ -16,6 +16,7 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Modules;
+using HotAvalonia;
 using Mutagen.Bethesda.Autofac;
 using Noggog;
 using ReactiveUI;
@@ -35,6 +36,7 @@ public class App : Application {
     }
 
     public override void Initialize() {
+        this.EnableHotReload();
         AvaloniaXamlLoader.Load(this);
     }
 

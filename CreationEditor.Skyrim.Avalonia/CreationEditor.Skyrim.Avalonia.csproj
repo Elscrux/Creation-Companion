@@ -10,10 +10,17 @@
         <RootNamespace>CreationEditor.Skyrim.Avalonia</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Mutagen.Bethesda.Autofac" Version="0.46.0.1-nightly-20240819-095701" />
         <PackageReference Include="ReactiveUI" Version="20.1.1" />
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="Avalonia.Markup.Xaml.Loader" Version="11.1.3" />
+        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" Version="1.1.1" />
+        <PackageReference Include="HotAvalonia.Extensions" Version="1.1.1" />
     </ItemGroup>
 
     <ItemGroup>
