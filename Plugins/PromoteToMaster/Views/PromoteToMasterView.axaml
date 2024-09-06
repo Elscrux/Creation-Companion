@@ -69,13 +69,16 @@
                             NextButtonText="Confirm">
                 <basic:PageData.DataTemplate>
                     <DataTemplate DataType="viewModels:PromoteToMasterVM">
-                        <StackPanel Spacing="10">
-                            <TextBlock Text="Do you really want to continue?"
+                        <Grid RowDefinitions="Auto,10,Auto,10,*">
+                            <TextBlock Grid.Row="0"
+                                       Text="Do you really want to continue?"
                                        Classes="h2"/>
 
-                            <TextBlock Text="These records will be affected:"/>
+                            <TextBlock Grid.Row="2"
+                                       Text="These records will be affected:"/>
 
-                            <DataGrid x:Name="RecordGrid"
+                            <DataGrid Grid.Row="4"
+                                      x:Name="RecordGrid"
                                       Background="{DynamicResource SystemControlTransparentBrush}"
                                       ItemsSource="{Binding RecordPromotionChanges}"
                                       CanUserSortColumns="True"
@@ -94,7 +97,7 @@
                                                         x:DataType="viewModels:RecordPromotionChange"/>
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </StackPanel>
+                        </Grid>
                     </DataTemplate>
                 </basic:PageData.DataTemplate>
             </basic:PageData>
