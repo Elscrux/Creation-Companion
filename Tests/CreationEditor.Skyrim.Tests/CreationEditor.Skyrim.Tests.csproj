@@ -20,7 +20,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Mutagen.Bethesda.Testing" Version="0.46.0.1-nightly-20240819-095701" />
+        <PackageReference Include="Mutagen.Bethesda.Testing" Version="0.46.0.1-nightly-20240907-095369" />
     </ItemGroup>
 
     <ItemGroup>
