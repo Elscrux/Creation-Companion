@@ -16,8 +16,8 @@
              x:Class="WaterPlugin.Views.WaterMapView"
              x:CompileBindings="True" x:DataType="viewModels:WaterMapVM"
              x:Name="View">
-    <Grid RowDefinitions="*,Auto">
-        <ScrollViewer DockPanel.Dock="Top">
+    <Grid RowDefinitions="*,Auto" Margin="5">
+        <ScrollViewer Grid.Row="0">
             <Grid RowDefinitions="Auto,5,*">
                 <StackPanel Grid.Row="0" Spacing="5">
                     <basic:LabeledContentControl Header="Reflectivity Amount">
@@ -190,7 +190,6 @@
                 DockPanel.Dock="Bottom"
                 Content="Generate"
                 Command="{Binding Generate}"
-                HorizontalAlignment="Stretch"
-                Margin="5"/>
+                HorizontalAlignment="Stretch"/>
     </Grid>
 </UserControl>
