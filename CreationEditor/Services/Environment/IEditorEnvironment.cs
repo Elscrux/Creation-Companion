@@ -5,6 +5,8 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
 public interface IEditorEnvironment : ILinkCacheProvider {
+    public const float DefaultModVersion = 1.7f;
+
     /// <summary>
     /// Game environment for the editor
     /// </summary>

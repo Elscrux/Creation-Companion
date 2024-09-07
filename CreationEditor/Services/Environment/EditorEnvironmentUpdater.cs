@@ -77,7 +77,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         }
 
         foreach (var newMutableMod in LoadOrder.NewMutableMods) {
-            var newMod = ModInstantiator<TMod>.Activator(newMutableMod, _gameReleaseContext.Release);
+            var newMod = ModInstantiator<TMod>.Activator(newMutableMod, _gameReleaseContext.Release, IEditorEnvironment.DefaultModVersion);
             builder = builder.WithOutputMod(newMod, OutputModTrimming.Self);
         }
 
@@ -92,7 +92,8 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
                 ),
             ActiveModBuilder.ActiveModMode.New => ModInstantiator<TMod>.Activator(
                 ActiveMod.ModKey,
-                _gameReleaseContext.Release),
+                _gameReleaseContext.Release,
+                IEditorEnvironment.DefaultModVersion),
             _ => throw new InvalidOperationException(),
         };
 
