@@ -52,9 +52,9 @@ public sealed class ModSaveService(
 
     private void Write(IMod mod, string filePath) {
         mod.BeginWrite
-            .WithLoadOrder(editorEnvironment.GameEnvironment.LoadOrder.Keys)
-            .WithDataFolder(editorEnvironment.GameEnvironment.DataFolderPath)
             .ToPath(filePath)
+            .WithLoadOrder(editorEnvironment.GameEnvironment.LoadOrder)
+            .WithDataFolder(editorEnvironment.GameEnvironment.DataFolderPath)
             .WithFileSystem(fileSystem)
             .WithAllParentMasters()
             // todo add options for localization export!

@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.46.0.1-nightly-20240907-095369" />
+      <PackageReference Include="Mutagen.Bethesda.Skyrim" Version="0.46.0.1-nightly-20240916-072006" />
       <PackageReference Include="ReactiveUI" Version="20.1.1" />
       <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     </ItemGroup>
