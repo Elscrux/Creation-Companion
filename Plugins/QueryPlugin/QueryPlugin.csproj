@@ -1,12 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>preview</LangVersion>
-    </PropertyGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
       <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj" />
