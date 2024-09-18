@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using Avalonia;
 using CreationEditor.Avalonia.Views;
 using Mutagen.Bethesda.Plugins;

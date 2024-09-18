@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
+﻿using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 

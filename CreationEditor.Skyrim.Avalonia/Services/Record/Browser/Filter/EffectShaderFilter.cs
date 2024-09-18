@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CreationEditor.Avalonia.Services.Record.Browser.Filter;
+﻿using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 

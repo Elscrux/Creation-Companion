@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using DynamicData.Binding;

@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using AvaloniaEdit.Utils;
 namespace CreationEditor.Avalonia.Views.Basic;
 
 [TemplatePart(LabelPart, typeof(TextBlock))]

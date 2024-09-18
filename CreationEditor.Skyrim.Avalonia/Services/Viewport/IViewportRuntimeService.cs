@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Viewport;
 

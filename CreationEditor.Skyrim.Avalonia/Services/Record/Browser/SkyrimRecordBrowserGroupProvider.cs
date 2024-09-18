@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CreationEditor.Avalonia.Models.Record.Browser;
+﻿using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using Loqui;
 using Mutagen.Bethesda.Skyrim;

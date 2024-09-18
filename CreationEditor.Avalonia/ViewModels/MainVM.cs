@@ -2,7 +2,6 @@
 using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
-using Avalonia.Controls;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services;

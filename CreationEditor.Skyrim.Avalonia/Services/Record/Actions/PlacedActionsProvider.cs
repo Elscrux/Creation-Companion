@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CreationEditor.Avalonia.Services.Avalonia;
+﻿using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Services.Environment;

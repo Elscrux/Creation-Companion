@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CreationEditor.Services.Asset;
+﻿using CreationEditor.Services.Asset;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Skyrim.Assets;

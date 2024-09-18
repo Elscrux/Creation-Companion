@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Linq;
 using System.Reactive;
 using CreationEditor.Avalonia.ViewModels;
 using Mutagen.Bethesda.Plugins.Records;

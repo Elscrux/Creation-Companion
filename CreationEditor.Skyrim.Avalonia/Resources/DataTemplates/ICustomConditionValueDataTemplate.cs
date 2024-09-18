@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using Mutagen.Bethesda.Plugins.Cache;

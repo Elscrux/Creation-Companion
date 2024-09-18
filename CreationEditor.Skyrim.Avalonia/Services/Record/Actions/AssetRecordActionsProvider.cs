@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;

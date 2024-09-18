@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Skyrim;

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
+﻿using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;

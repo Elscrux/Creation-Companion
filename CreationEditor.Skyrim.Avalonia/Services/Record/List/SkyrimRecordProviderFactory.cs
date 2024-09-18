@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Autofac;
+﻿using Autofac;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Services.Filter;
 using Mutagen.Bethesda.Plugins;
