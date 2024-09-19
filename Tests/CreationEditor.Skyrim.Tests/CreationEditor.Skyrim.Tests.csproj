@@ -10,17 +10,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0-release-24373-02" />
-        <PackageReference Include="xunit" Version="2.9.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0-pre.24">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.2">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Mutagen.Bethesda.Testing" Version="0.46.0.1-nightly-20240916-072006" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Mutagen.Bethesda.Testing" />
     </ItemGroup>
 
     <ItemGroup>

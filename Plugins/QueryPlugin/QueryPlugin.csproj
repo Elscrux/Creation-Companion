@@ -6,8 +6,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ReactiveUI" Version="20.1.1" />
-      <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+      <PackageReference Include="ReactiveUI" />
+      <PackageReference Include="ReactiveUI.Fody" />
     </ItemGroup>
 
     <Target Name="CopyPlugin" AfterTargets="Build">
