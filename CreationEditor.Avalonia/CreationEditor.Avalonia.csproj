@@ -26,7 +26,7 @@
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.Fody" />
-        <PackageReference Include="ReactiveUI.Validation" Version="4.0.9" />
+        <PackageReference Include="ReactiveUI.Validation" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     </ItemGroup>

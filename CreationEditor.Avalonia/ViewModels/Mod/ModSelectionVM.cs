@@ -22,6 +22,7 @@ using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
@@ -203,9 +204,10 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
             .DisposeWith(this);
 
         CanLoad = AnyModsLoaded;
-        // todo add back in when ReactiveUI.Validation is updated
-        // CanLoad = ModCreationVM.IsValid().CombineLatest(AnyModsLoaded, AnyModsActive,
-        //     (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
+        CanLoad = ModCreationVM.IsValid().CombineLatest(
+            AnyModsLoaded,
+            AnyModsActive,
+            (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
     /// <summary>

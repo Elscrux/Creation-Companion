@@ -3,11 +3,11 @@ using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Validation.Helpers;
 namespace CreationEditor.Avalonia.ViewModels;
 
 // Adapted from Noggog.WPF
-public abstract class ValidatableViewModel : ReactiveObject, IActivatableViewModel, IDisposableDropoff {
-    // tod change to ReactiveValidationObject when ReactiveUI.Validation is updated
+public abstract class ValidatableViewModel : ReactiveValidationObject, IActivatableViewModel, IDisposableDropoff {
     protected readonly IDisposableBucket ActivatedDisposable = new DisposableBucket();
     private readonly Lazy<CompositeDisposable> _compositeDisposable = new();
     public ViewModelActivator Activator { get; } = new();

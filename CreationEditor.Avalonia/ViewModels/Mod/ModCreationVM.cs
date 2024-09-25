@@ -7,6 +7,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed class ModCreationVM : ValidatableViewModel {
@@ -43,22 +44,20 @@ public sealed class ModCreationVM : ValidatableViewModel {
             var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNameWatermark, NewModType) : new ModKey(NewModName, NewModType);
             NewModName = null;
             return editorEnvironment.AddNewMutableMod(modKey);
-        });
-        // todo add back in when ReactiveUI.Validation is updated
-        // }, this.IsValid());
+        }, this.IsValid());
 
-        // this.ValidationRule(
-        //     x => x.NewModName,
-        //     NameIsFree,
-        //     "Name is already taken");
-        //
-        // this.ValidationRule(
-        //     x => x.NewModName,
-        //     name => string.IsNullOrWhiteSpace(name) || name.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars()) == -1,
-        //     name => {
-        //         var index = name!.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars());
-        //         return $"Name contains invalid character {name[index]}";
-        //     });
+        this.ValidationRule(
+            x => x.NewModName,
+            NameIsFree,
+            "Name is already taken");
+
+        this.ValidationRule(
+            x => x.NewModName,
+            name => string.IsNullOrWhiteSpace(name) || name.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars()) == -1,
+            name => {
+                var index = name!.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars());
+                return $"Name contains invalid character {name[index]}";
+            });
     }
 
     private string GetNewWatermark(IReadOnlyList<ModKey> loadOrder) {
