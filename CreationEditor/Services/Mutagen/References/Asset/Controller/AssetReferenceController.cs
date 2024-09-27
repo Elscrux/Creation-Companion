@@ -85,7 +85,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
-            .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences))
+            .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences).FireAndForget(
+                e => logger.Here().Error(e, "Failed to load Asset References {Exception}", e.Message)))
             .DisposeWith(_disposables);
 
         Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences))
