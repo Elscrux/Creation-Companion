@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Loqui;
 using Mutagen.Bethesda;
@@ -9,7 +10,7 @@ namespace CreationEditor.Services.Mutagen.Type;
 public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     private const string BaseNamespace = "Mutagen.Bethesda.";
 
-    private readonly Dictionary<string, System.Type> _typeCache = new();
+    private readonly ConcurrentDictionary<string, System.Type> _typeCache = new();
 
     public System.Type GetType(string gameName, string typeName) {
         var name = $"{gameName}.{typeName}";
