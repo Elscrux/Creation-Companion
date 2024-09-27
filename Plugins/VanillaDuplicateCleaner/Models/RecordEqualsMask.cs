@@ -15,17 +15,17 @@ internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
         var hashCode = HashCode.Combine(
             Record.EditorID?
                 .ToLower()
-                .TrimStart("x")
-                .TrimStart("bsk")
-                .TrimStart("bsm")
-                .TrimStart("bsh")
-                .TrimStart("rtm")
-                .TrimStart("byoh")
-                .TrimStart("dlc1")
-                .TrimStart("dlc01")
-                .TrimStart("dlc2")
-                .TrimStart("dlc02")
-                .TrimStart("db"));
+                .TrimStart("x", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("bsk", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("bsm", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("bsh", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("rtm", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("byoh", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("dlc1", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("dlc01", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("dlc2", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("dlc02", StringComparison.OrdinalIgnoreCase)
+                .TrimStart("db", StringComparison.OrdinalIgnoreCase));
 
         // Check modeled
         if (Record is IModeledGetter { Model: {} model }) {
@@ -34,15 +34,15 @@ internal sealed record RecordEqualsMask(IMajorRecordGetter Record) {
                 model.File.GivenPath
                     .ToLower()
                     .Replace('/', '\\')
-                    .TrimStart("meshes\\")
-                    .TrimStart("bstamriel\\")
-                    .TrimStart("bsmorrowind\\")
-                    .TrimStart("bscyrodiil\\")
-                    .TrimStart("bshighrock\\")
-                    .TrimStart("bshammerfell\\")
-                    .TrimStart("_byoh\\")
-                    .TrimStart("dlc01\\")
-                    .TrimStart("dlc02\\"),
+                    .TrimStart("meshes\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("bstamriel\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("bsmorrowind\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("bscyrodiil\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("bshighrock\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("bshammerfell\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("_byoh\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("dlc01\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimStart("dlc02\\", StringComparison.OrdinalIgnoreCase),
                 model.AlternateTextures?.Count,
                 model.AlternateTextures?.Select(x => HashCode.Combine(x.Name, x.NewTexture.FormKey.ID, x.Index)));
         }
