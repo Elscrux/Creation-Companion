@@ -6,29 +6,29 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.1.3" />
-        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.1.0" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.3" />
-        <PackageReference Include="Avalonia.Controls.PanAndZoom" Version="11.1.0.1" />
-        <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.10" />
-        <PackageReference Include="Avalonia.HtmlRenderer" Version="11.0.0" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.1.3" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.1.3" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.3" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.3" />
-        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.1.0" />
-        <PackageReference Include="AvaloniaEdit.TextMate" Version="11.1.0" />
-        <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.8" />
-        <PackageReference Include="FluentAvaloniaUI" Version="2.1.0" />
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.63" />
-        <PackageReference Include="MessageBox.Avalonia" Version="3.1.6" />
-        <PackageReference Include="Noggog.Autofac" Version="2.65.0-nightly-20240727-092271" />
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" />
+        <PackageReference Include="Avalonia.Controls.PanAndZoom" />
+        <PackageReference Include="Avalonia.Controls.TreeDataGrid" />
+        <PackageReference Include="Avalonia.HtmlRenderer" />
+        <PackageReference Include="Avalonia.Desktop" />
+        <PackageReference Include="Avalonia.Diagnostics" />
+        <PackageReference Include="Avalonia.ReactiveUI" />
+        <PackageReference Include="Avalonia.Themes.Fluent" />
+        <PackageReference Include="Avalonia.Xaml.Behaviors" />
+        <PackageReference Include="AvaloniaEdit.TextMate" />
+        <PackageReference Include="Deadpikle.AvaloniaProgressRing" />
+        <PackageReference Include="FluentAvaloniaUI" />
+        <PackageReference Include="HtmlAgilityPack" />
+        <PackageReference Include="MessageBox.Avalonia" />
+        <PackageReference Include="Noggog.Autofac" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.Fody" />
         <PackageReference Include="ReactiveUI.Validation" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+        <PackageReference Include="Serilog.Sinks.File" />
     </ItemGroup>
 
     <ItemGroup>

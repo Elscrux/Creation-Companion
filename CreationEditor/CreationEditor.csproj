@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.0.0" />
+        <PackageReference Include="Autofac" />
         <PackageReference Include="Mutagen.Bethesda.Core" />
         <PackageReference Include="Mutagen.Bethesda.Json" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="niflysharp" Version="1.3.0" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="niflysharp" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.Fody" />
-        <PackageReference Include="Serilog" Version="4.0.2-dev-02220" />
-        <PackageReference Include="System.IO.Hashing" Version="9.0.0-preview.7.24405.7" />
+        <PackageReference Include="Serilog" />
+        <PackageReference Include="System.IO.Hashing" />
     </ItemGroup>
 
     <ItemGroup>

@@ -15,9 +15,9 @@
         <PackageReference Include="Mutagen.Bethesda.Autofac" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.Fody" />
-        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="Avalonia.Markup.Xaml.Loader" Version="11.1.3" />
-        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" Version="1.1.1" />
-        <PackageReference Include="HotAvalonia.Extensions" Version="1.1.1" />
+        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="Avalonia.Markup.Xaml.Loader" />
+        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" />
+        <PackageReference Include="HotAvalonia.Extensions" />
     </ItemGroup>
 
     <ItemGroup>
