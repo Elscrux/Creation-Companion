@@ -12,7 +12,7 @@ public static class SkyrimRecordComparers {
 
     public static readonly FuncSelectorComparer<IReferencedRecord, IModeledGetter> ModeledComparer
         = new(referencedRecord => referencedRecord.Record as IModeledGetter,
-            (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Model?.File.DataRelativePath, y.Model?.File.DataRelativePath));
+            (x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.Model?.File.DataRelativePath.Path, y.Model?.File.DataRelativePath.Path));
 
     public static readonly FuncSelectorComparer<IReferencedRecord, ICellGetter> CellGridComparer
         = new(referencedRecord => referencedRecord.Record as ICellGetter,
