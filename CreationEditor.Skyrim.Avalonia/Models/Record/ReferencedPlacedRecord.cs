@@ -10,7 +10,7 @@ namespace CreationEditor.Skyrim.Avalonia.Models.Record;
 public sealed class ReferencedPlacedRecord : ReactiveObject, IReferencedRecord<IPlacedGetter> {
     private readonly IReferencedRecord<IPlacedGetter> _referencedRecord;
 
-    public IMajorRecordIdentifier? Base { get; }
+    public IMajorRecordIdentifierGetter? Base { get; }
 
     public ReferencedPlacedRecord(IReferencedRecord<IPlacedGetter> referencedRecord, ILinkCache linkCache) {
         _referencedRecord = referencedRecord;

@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Comparer;
 
 public static class RecordComparers {
-    public static readonly FuncComparer<IMajorRecordIdentifier> FormKeyComparer
+    public static readonly FuncComparer<IMajorRecordIdentifierGetter> FormKeyComparer
         = new((x, y) => {
             var modKeyCompare = StringComparer.OrdinalIgnoreCase.Compare(x.FormKey.ModKey.Name, y.FormKey.ModKey.Name);
             if (modKeyCompare != 0) return modKeyCompare;
@@ -12,7 +12,7 @@ public static class RecordComparers {
             return StringComparer.OrdinalIgnoreCase.Compare(x.FormKey.ID, y.FormKey.ID);
         });
 
-    public static readonly FuncComparer<IMajorRecordIdentifier> EditorIDComparer
+    public static readonly FuncComparer<IMajorRecordIdentifierGetter> EditorIDComparer
         = new((x, y) => {
             var xEditorID = x.EditorID;
             var yEditorID = y.EditorID;
@@ -32,7 +32,7 @@ public static class RecordComparers {
             return FormKeyComparer.Compare(x, y);
         });
 
-    public static readonly FuncSelectorComparer<IMajorRecordIdentifier, INamedRequiredGetter> NamedRequiredComparer
+    public static readonly FuncSelectorComparer<IMajorRecordIdentifierGetter, INamedRequiredGetter> NamedRequiredComparer
         = new(referencedRecord => referencedRecord as INamedRequiredGetter,
             (x, y) => {
                 var xName = x.Name;

@@ -31,11 +31,11 @@ public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     public bool Filter(IMajorRecordGetter record) {
         if (record.IsDeleted) return false;
 
-        return Filter(record as IMajorRecordIdentifier)
+        return Filter(record as IMajorRecordIdentifierGetter)
          && (CustomFilter is null || CustomFilter(record));
     }
 
-    public bool Filter(IMajorRecordIdentifier record) {
+    public bool Filter(IMajorRecordIdentifierGetter record) {
         if (!ModScopeProvider.SelectedModKeys.Contains(record.FormKey.ModKey)) return false;
         if (SearchTerm.IsNullOrEmpty()) return true;
 

@@ -6,7 +6,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Mutagen.References.Record;
 
 public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
-    where TMajorRecordGetter : IMajorRecordIdentifier {
+    where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
     [Reactive] public TMajorRecordGetter Record { get; set; }
     public IObservableCollection<IFormLinkIdentifier> References { get; }

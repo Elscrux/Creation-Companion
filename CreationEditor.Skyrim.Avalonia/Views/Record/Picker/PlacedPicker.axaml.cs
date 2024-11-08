@@ -37,11 +37,11 @@ public partial class PlacedPicker : ActivatableUserControl {
     public static readonly StyledProperty<IPlacedGetter?> ResolvedPlacedProperty
         = AvaloniaProperty.Register<PlacedPicker, IPlacedGetter?>(nameof(ResolvedPlaced));
 
-    public static readonly StyledProperty<Func<IMajorRecordIdentifier, ILinkCache?, string?>> PlacedNameSelectorProperty
-        = AvaloniaProperty.Register<PlacedPicker, Func<IMajorRecordIdentifier, ILinkCache?, string?>>(nameof(PlacedNameSelector));
+    public static readonly StyledProperty<Func<IMajorRecordIdentifierGetter, ILinkCache?, string?>> PlacedNameSelectorProperty
+        = AvaloniaProperty.Register<PlacedPicker, Func<IMajorRecordIdentifierGetter, ILinkCache?, string?>>(nameof(PlacedNameSelector));
 
-    public static readonly StyledProperty<Func<IMajorRecordIdentifier, ILinkCache?, string?>> CellNameSelectorProperty
-        = AvaloniaProperty.Register<PlacedPicker, Func<IMajorRecordIdentifier, ILinkCache?, string?>>(nameof(CellNameSelector));
+    public static readonly StyledProperty<Func<IMajorRecordIdentifierGetter, ILinkCache?, string?>> CellNameSelectorProperty
+        = AvaloniaProperty.Register<PlacedPicker, Func<IMajorRecordIdentifierGetter, ILinkCache?, string?>>(nameof(CellNameSelector));
 
     public static readonly StyledProperty<Func<IPlacedGetter, bool>> FilterProperty
         = AvaloniaProperty.Register<PlacedPicker, Func<IPlacedGetter, bool>>(nameof(Filter), _ => true);
@@ -84,12 +84,12 @@ public partial class PlacedPicker : ActivatableUserControl {
         set => SetValue(ResolvedPlacedProperty, value);
     }
 
-    public Func<IMajorRecordIdentifier, ILinkCache?, string?> PlacedNameSelector {
+    public Func<IMajorRecordIdentifierGetter, ILinkCache?, string?> PlacedNameSelector {
         get => GetValue(PlacedNameSelectorProperty);
         set => SetValue(PlacedNameSelectorProperty, value);
     }
 
-    public Func<IMajorRecordIdentifier, ILinkCache?, string?> CellNameSelector {
+    public Func<IMajorRecordIdentifierGetter, ILinkCache?, string?> CellNameSelector {
         get => GetValue(CellNameSelectorProperty);
         set => SetValue(CellNameSelectorProperty, value);
     }

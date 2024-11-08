@@ -10,7 +10,7 @@ public interface IReferencedRecord : IReferencedRecordIdentifier {
 }
 
 public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord, IEquatable<IReferencedRecord<TMajorRecordGetter>>
-    where TMajorRecordGetter : IMajorRecordIdentifier {
+    where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
     new TMajorRecordGetter Record { get; set; }
 
@@ -21,7 +21,7 @@ public interface IReferencedRecord<TMajorRecordGetter> : IReferencedRecord, IEqu
         }
     }
 
-    IMajorRecordIdentifier IReferencedRecordIdentifier.Record {
+    IMajorRecordIdentifierGetter IReferencedRecordIdentifier.Record {
         get => Record;
         set {
             if (value is TMajorRecordGetter tMajor) Record = tMajor;

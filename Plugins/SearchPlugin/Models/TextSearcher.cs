@@ -48,7 +48,7 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
         string newText,
         StringComparison comparison) {
         if (record is not TMajorGetter) return;
-        if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(((IMajorRecordIdentifier) record).FormKey, out var context)) return;
+        if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(((IMajorRecordIdentifierGetter) record).FormKey, out var context)) return;
 
         var overrideRecord = context.GetOrAddAsOverride(mod);
         if (record is IDialogTopicGetter topic) {
