@@ -14,6 +14,7 @@ using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
 using Noggog;
 using ReactiveUI;
+using Action = System.Action;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable {

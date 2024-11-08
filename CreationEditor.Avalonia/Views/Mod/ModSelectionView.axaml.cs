@@ -19,19 +19,22 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
     protected override void OnLoaded(RoutedEventArgs e) {
         base.OnLoaded(e);
 
-        if (DataContext is ModSelectionVM modSelectionVM) {
-            if (modSelectionVM.MissingPluginsFile) {
-                var messageBox = MessageBoxManager.GetMessageBoxStandard(
-                    "Warning",
-                    $"Make sure {modSelectionVM.PluginsFilePath} exists.",
-                    ButtonEnum.Ok,
-                    Icon.Warning,
-                    WindowStartupLocation.CenterOwner);
+        if (DataContext is not ModSelectionVM modSelectionVM) return;
 
-                messageBox.ShowWindowDialogAsync(this.FindLogicalAncestorOfType<Window>());
-            }
+        var window = this.FindLogicalAncestorOfType<Window>();
+        if (window is null) return;
 
-            modSelectionVM.RefreshListings();
+        if (modSelectionVM.MissingPluginsFile) {
+            var messageBox = MessageBoxManager.GetMessageBoxStandard(
+                "Warning",
+                $"Make sure {modSelectionVM.PluginsFilePath} exists.",
+                ButtonEnum.Ok,
+                Icon.Warning,
+                WindowStartupLocation.CenterOwner);
+
+            messageBox.ShowWindowDialogAsync(window);
         }
+
+        modSelectionVM.RefreshListings();
     }
 }
