@@ -39,8 +39,8 @@ public sealed class DragDropExtended : AvaloniaObject {
     public static Func<object, object?> GetDropSelector(AvaloniaObject obj) => obj.GetValue(DropSelectorProperty);
     public static void SetDropSelector(AvaloniaObject obj, Func<object, object?> value) => obj.SetValue(DropSelectorProperty, value);
 
-    private static Func<object, bool> GetCanDropOrDefault(DataGrid dataGrid) => GetCanDrop(dataGrid) ?? (_ => true);
-    private static Func<object, object?> GetDropSelectorOrDefault(DataGrid dataGrid) => GetDropSelector(dataGrid) ?? (obj => obj);
+    private static Func<object, bool> GetCanDropOrDefault(DataGrid dataGrid) => GetCanDrop(dataGrid);
+    private static Func<object, object?> GetDropSelectorOrDefault(DataGrid dataGrid) => GetDropSelector(dataGrid);
 
     static DragDropExtended() {
         AllowDragProperty.Changed
@@ -280,7 +280,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         }
 
         // Add new items
-        var newIndex = newRow.GetIndex();
+        var newIndex = newRow.Index;
         if (newIndex > newList.Count) return;
 
         var offset = 0;
@@ -341,7 +341,7 @@ public sealed class DragDropExtended : AvaloniaObject {
 
         return presenter?.Children
             .OfType<DataGridRow>()
-            .MaxBy(row => row.GetIndex());
+            .MaxBy(row => row.Index);
     }
 
     private static void GetItems(DataGrid oldDataGrid, DataGrid newDataGrid, out List<object> validItems, out List<object> invalidItems) {

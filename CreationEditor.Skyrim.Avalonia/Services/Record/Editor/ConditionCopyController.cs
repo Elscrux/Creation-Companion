@@ -6,7 +6,7 @@ using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 
 public sealed class ConditionCopyPasteController : ReactiveObject, IConditionCopyPasteController {
-    private IList<ICondition> _copiedConditions = new List<ICondition>();
+    private List<ICondition> _copiedConditions = [];
 
     [Reactive] public bool CanPaste { get; private set; }
 
