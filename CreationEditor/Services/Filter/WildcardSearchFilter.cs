@@ -3,15 +3,19 @@
 public sealed class WildcardSearchFilter : ISearchFilter {
     private const char SplitChar = '*';
 
-    public bool Filter(string searchWord, string searchTerm) {
+    public bool Filter(string content, string searchTerm) {
         if (string.IsNullOrWhiteSpace(searchTerm)) return true;
 
-        var index = 0;
-        foreach (var term in searchTerm.Trim().Split(SplitChar)) {
-            var indexOf = searchWord[index..].IndexOf(term, StringComparison.OrdinalIgnoreCase);
-            if (indexOf == -1) return false;
+        var contentSpan = content.AsSpan();
+        var searchTermSpan = searchTerm.AsSpan();
 
-            index = indexOf;
+        var contentIndex = 0;
+        foreach (var termRange in searchTermSpan.Trim().Split(SplitChar)) {
+            var term = searchTermSpan[termRange];
+            var indexOfTermInContent = contentSpan[contentIndex..].IndexOf(term, StringComparison.OrdinalIgnoreCase);
+            if (indexOfTermInContent == -1) return false;
+
+            contentIndex = indexOfTermInContent;
         }
 
         return true;

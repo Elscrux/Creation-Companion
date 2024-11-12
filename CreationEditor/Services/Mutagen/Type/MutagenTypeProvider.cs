@@ -56,7 +56,9 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public string GetTypeName(IMajorRecordGetter record) {
-        return record.Registration.ClassType.FullName!.Split('.')[^1];
+        var span = record.Registration.ClassType.FullName!.AsSpan();
+        var lastIndexOfDot = span.LastIndexOf('.');
+        return span[(lastIndexOfDot + 1)..].ToString();
     }
 
     public string GetTypeName(IFormLinkIdentifier formLinkIdentifier) {
