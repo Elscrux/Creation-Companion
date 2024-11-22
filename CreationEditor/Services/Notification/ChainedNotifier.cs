@@ -25,6 +25,6 @@ public sealed class ChainedNotifier : ANotifier, IDisposable {
     }
 
     public void Dispose() {
-        _stepEnumerator?.Dispose();
+        _stepEnumerator.Dispose();
     }
 }

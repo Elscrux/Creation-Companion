@@ -111,9 +111,10 @@ public class DockDropBehavior : Behavior<Control> {
         if (!ReferenceEquals(source.FindAncestorOfType<IDockPreview>(), AssociatedObject)) return false;
 
         // Check drag data
-        if (e.Data?.Contains(nameof(DockDragData)) is not true) return false;
+        if (e.Data is null) return false;
+        if (!e.Data.Contains(nameof(DockDragData))) return false;
 
-        var data = e.Data?.Get(nameof(DockDragData));
+        var data = e.Data.Get(nameof(DockDragData));
         if (data is not DockDragData dragData) return false;
 
         // Don't allow to drop on ourselves

@@ -57,7 +57,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             AssetLinkEqualityComparer.Instance);
 
     private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = [];
-    private AssetReferenceCache<string, DataRelativePath> _nifDirectoryAssetReferenceCache = null!;
+    private AssetReferenceCache<string, DataRelativePath>? _nifDirectoryAssetReferenceCache;
     private readonly List<AssetReferenceCache<string, DataRelativePath>> _nifArchiveAssetCaches = [];
 
     private int _loadingProcesses;
@@ -195,9 +195,9 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
-        var modReferences = _modAssetCaches?.GetReferences(asset);
+        var modReferences = _modAssetCaches.GetReferences(asset);
         var nifDirectoryReferences = _nifDirectoryAssetReferenceCache?.GetReferences(asset);
-        var nifArchiveReferences = _nifArchiveAssetCaches?.GetReferences(asset);
+        var nifArchiveReferences = _nifArchiveAssetCaches.GetReferences(asset);
         referencedAsset = new ReferencedAsset(asset, modReferences, nifDirectoryReferences, nifArchiveReferences);
 
         var pluginDisposable = _modAssetReferenceManager.Register(referencedAsset);
@@ -258,7 +258,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private void AddAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
         foreach (var added in references) {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetReferenceCache.AddReference(added, dataRelativePath);
+            _nifDirectoryAssetReferenceCache?.AddReference(added, dataRelativePath);
 
             var change = new Change<DataRelativePath>(ListChangeReason.Add, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(added, change);
@@ -268,7 +268,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private void RemoveAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
         foreach (var removed in references) {
             var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetReferenceCache.RemoveReference(removed, dataRelativePath);
+            _nifDirectoryAssetReferenceCache?.RemoveReference(removed, dataRelativePath);
 
             var change = new Change<DataRelativePath>(ListChangeReason.Remove, dataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(removed, change);

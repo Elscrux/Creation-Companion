@@ -23,8 +23,8 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
     public ReactiveCommand<Unit, Unit> Save { get; }
 
     public Func<IPlacedGetter, bool> ChestFilter { get; }
-    public RelationEditorVM RelationEditorVM { get; set; } = null!;
-    public RankEditorVM RankEditorVM { get; set; } = null!;
+    public RelationEditorVM? RelationEditorVM { get; set; }
+    public RankEditorVM? RankEditorVM { get; set; }
     public ILinkCacheProvider LinkCacheProvider { get; }
     public IConditionCopyPasteController ConditionsCopyPasteController { get; }
 

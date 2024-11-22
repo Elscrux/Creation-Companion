@@ -40,7 +40,7 @@ public sealed class DataGridTextSearchBehavior : Behavior<DataGrid> {
 
         _currentSearch += e.KeySymbol;
 
-        var target = TextSearchValueSelector?.Invoke(_currentSearch);
+        var target = TextSearchValueSelector.Invoke(_currentSearch);
         if (target is null) return;
 
         AssociatedObject.SelectedItem = target;
