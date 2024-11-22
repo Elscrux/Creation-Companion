@@ -5,5 +5,5 @@ public interface IExtraColumnProvider {
     /// <summary>
     /// Extra columns per type
     /// </summary>
-    public IReadOnlyDictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
+    IReadOnlyDictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
 }

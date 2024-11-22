@@ -193,7 +193,7 @@ public interface IRecordController {
     /// <param name="recordReferenceController">Record reference controller to update references</param>
     /// <param name="forceDelete">If true, the record will be deleted even if it is referenced by other records</param>
     /// <returns>True if the record was marked for deletion, false if it was not possible to delete the record</returns>
-    public bool MarkForDeletion(IMajorRecordGetter record, IMod mod, IRecordReferenceController recordReferenceController, bool forceDelete = false);
+    bool MarkForDeletion(IMajorRecordGetter record, IMod mod, IRecordReferenceController recordReferenceController, bool forceDelete = false);
 
     /// <summary>
     /// Marks a record for deletion in the given mod.

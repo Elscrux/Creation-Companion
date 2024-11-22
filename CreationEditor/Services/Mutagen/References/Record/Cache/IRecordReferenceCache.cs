@@ -9,7 +9,7 @@ public interface IRecordReferenceCache {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="modOrder">list of mods to get references from, earlier items are prioritized</param>
     /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
+    IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IReadOnlyList<IModGetter> modOrder) {
         foreach (var modKey in modOrder.Select(x => x.ModKey)) {
             var modReferenceCache = GetModReferenceCache(modKey);
             if (modReferenceCache is null || !modReferenceCache.Cache.TryGetValue(formKey, out var references)) continue;
@@ -32,7 +32,7 @@ public interface IRecordReferenceCache {
     /// <param name="formKey">form key to search references for</param>
     /// <param name="mod">mod to get references from</param>
     /// <returns>form links of references</returns>
-    public IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod) {
+    IEnumerable<IFormLinkIdentifier> GetReferences(FormKey formKey, IModGetter mod) {
         if (GetModReferenceCache(mod.ModKey) is not {} cache
          || !cache.Cache.TryGetValue(formKey, out var references)) yield break;
 

@@ -5,12 +5,12 @@ using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
 public interface ICellBrowserVM : IDisposableDropoff {
-    public InteriorCellsVM InteriorCellsVM { get; }
-    public ExteriorCellsVM ExteriorCellsVM { get; }
-    public PlacedListVM PlacedListVM { get; }
+    InteriorCellsVM InteriorCellsVM { get; }
+    ExteriorCellsVM ExteriorCellsVM { get; }
+    PlacedListVM PlacedListVM { get; }
 
-    public int SelectedTab { get; set; }
+    int SelectedTab { get; set; }
 
-    public bool ShowPlaced { get; set; }
-    public ReactiveCommand<Unit, Unit> TogglePlaced { get; }
+    bool ShowPlaced { get; set; }
+    ReactiveCommand<Unit, Unit> TogglePlaced { get; }
 }

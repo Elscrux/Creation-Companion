@@ -26,7 +26,7 @@ public interface IRecordProvider : IDisposable {
 
 public interface IRecordProvider<TReferenced> : IRecordProvider
     where TReferenced : IReferencedRecord {
-    public static readonly Func<IRecordBrowserSettings, IObservable<Func<TReferenced, bool>>> DefaultFilter = recordBrowserSettingsVM =>
+    static readonly Func<IRecordBrowserSettings, IObservable<Func<TReferenced, bool>>> DefaultFilter = recordBrowserSettingsVM =>
         recordBrowserSettingsVM.SettingsChanged
             .ThrottleMedium()
             .StartWith(Unit.Default)

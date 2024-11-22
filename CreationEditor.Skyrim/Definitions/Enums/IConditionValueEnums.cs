@@ -2,6 +2,6 @@
 namespace CreationEditor.Skyrim.Definitions.Enums;
 
 public interface IConditionValueEnums {
-    public IList<Enum> Enums { get; }
-    public bool Match(Condition.Function function);
+    IList<Enum> Enums { get; }
+    bool Match(Condition.Function function);
 }

@@ -8,12 +8,12 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public interface IRecordBrowserVM : IDisposableDropoff {
-    public IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
+    IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 
-    public ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
-    public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
-    public ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
+    ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
+    ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
+    ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
 
-    public IRecordListVM? RecordListVM { get; set; }
-    public IRecordBrowserSettings RecordBrowserSettings { get; }
+    IRecordListVM? RecordListVM { get; set; }
+    IRecordBrowserSettings RecordBrowserSettings { get; }
 }

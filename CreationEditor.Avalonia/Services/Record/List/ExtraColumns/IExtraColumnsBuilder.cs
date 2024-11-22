@@ -9,14 +9,14 @@ public interface IExtraColumnsBuilder {
     /// </summary>
     /// <param name="recordType">Type to add columns for</param>
     /// <returns>This instance for builder pattern</returns>
-    public IExtraColumnsBuilder AddRecordType(Type recordType);
+    IExtraColumnsBuilder AddRecordType(Type recordType);
 
     /// <summary>
     /// Adds all columns for the given record type and its interfaces.
     /// </summary>
     /// <typeparam name="TRecord">Type to add columns for</typeparam>
     /// <returns>This instance for builder pattern</returns>
-    public IExtraColumnsBuilder AddRecordType<TRecord>()
+    IExtraColumnsBuilder AddRecordType<TRecord>()
         where TRecord : IMajorRecordQueryableGetter;
 
     /// <summary>
@@ -24,19 +24,19 @@ public interface IExtraColumnsBuilder {
     /// </summary>
     /// <param name="columnType">Type to add columns for, extending IUntypedExtraColumns</param>
     /// <returns>This instance for builder pattern</returns>
-    public IExtraColumnsBuilder AddColumnType(Type columnType);
+    IExtraColumnsBuilder AddColumnType(Type columnType);
 
     /// <summary>
     /// Adds all columns for the given column type.
     /// </summary>
     /// <typeparam name="TExtraColumns"></typeparam>
     /// <returns>This instance for builder pattern</returns>
-    public IExtraColumnsBuilder AddColumnType<TExtraColumns>()
+    IExtraColumnsBuilder AddColumnType<TExtraColumns>()
         where TExtraColumns : IUntypedExtraColumns;
 
     /// <summary>
     /// Build the extra columns.
     /// </summary>
     /// <returns>Enumerable of extra columns</returns>
-    public IEnumerable<DataGridColumn> Build();
+    IEnumerable<DataGridColumn> Build();
 }

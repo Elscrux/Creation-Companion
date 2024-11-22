@@ -6,7 +6,7 @@ using CreationEditor.Avalonia.Constants;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 public interface IDockPreview {
-    public void ShowPreview(Dock dock) {
+    void ShowPreview(Dock dock) {
         AdornerLayer.SetAdorner((Visual) this,
             new Rectangle {
                 Fill = StandardBrushes.ValidBrush,
@@ -15,7 +15,7 @@ public interface IDockPreview {
             });
     }
 
-    public void HidePreview() {
+    void HidePreview() {
         AdornerLayer.SetAdorner((Visual) this, null);
     }
 }

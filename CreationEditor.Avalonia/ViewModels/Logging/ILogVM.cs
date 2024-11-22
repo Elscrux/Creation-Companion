@@ -7,12 +7,12 @@ using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
 public interface ILogVM : IDisposableDropoff {
-    public IObservableCollection<ILogItem> LogItems { get; }
-    public Dictionary<LogEventLevel, bool> LevelsVisibility { get; }
+    IObservableCollection<ILogItem> LogItems { get; }
+    Dictionary<LogEventLevel, bool> LevelsVisibility { get; }
 
-    public ReactiveCommand<Unit, Unit> Clear { get; }
-    public ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }
-    public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
+    ReactiveCommand<Unit, Unit> Clear { get; }
+    ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }
+    ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
 
-    public bool AutoScroll { get; set; }
+    bool AutoScroll { get; set; }
 }

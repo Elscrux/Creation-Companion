@@ -5,14 +5,14 @@ public interface IPlugin : IPluginDefinition {
     /// <summary>
     /// Called when the plugin is registered. Run startup code here.
     /// </summary>
-    public void OnRegistered() {
+    void OnRegistered() {
         // Can be run by plugins
     }
 
     /// <summary>
     /// Called when the plugin is unregistered. Run cleanup code here.
     /// </summary>
-    public void OnUnregistered() {
+    void OnUnregistered() {
         // Can be run by plugins
     }
 }

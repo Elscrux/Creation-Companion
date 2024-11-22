@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
 public interface IEditorEnvironment : ILinkCacheProvider {
-    public const float DefaultModVersion = 1.7f;
+    const float DefaultModVersion = 1.7f;
 
     /// <summary>
     /// Game environment for the editor
@@ -41,9 +41,9 @@ public interface IEditorEnvironment<TMod, TModGetter> : IEditorEnvironment
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     public IGameEnvironment<TMod, TModGetter> Environment { get; protected set; }
-    public new ILinkCache<TMod, TModGetter> LinkCache => Environment.LinkCache;
+    new ILinkCache<TMod, TModGetter> LinkCache => Environment.LinkCache;
 
     public new TMod ActiveMod { get; protected set; }
-    public new IReadOnlyList<TMod> MutableMods { get; }
+    new IReadOnlyList<TMod> MutableMods { get; }
     public new ILinkCache<TMod, TModGetter> ActiveModLinkCache { get; protected set; }
 }

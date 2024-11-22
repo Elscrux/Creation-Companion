@@ -3,5 +3,5 @@ using Serilog.Core;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
 public interface IObservableLogSink : ILogEventSink {
-    public IObservable<ILogItem> LogAdded { get; }
+    IObservable<ILogItem> LogAdded { get; }
 }

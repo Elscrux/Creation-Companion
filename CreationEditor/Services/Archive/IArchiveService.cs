@@ -46,7 +46,7 @@ public interface IArchiveService : IDisposable {
     /// <summary>
     /// Names of archives ordered by their priority from low to high priority.
     /// </summary>
-    public IReadOnlyList<string> Archives { get; }
+    IReadOnlyList<string> Archives { get; }
 
     /// <summary>
     /// Emits the name of a newly created archives.

@@ -5,9 +5,9 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
 public interface ICustomConditionDataTemplate {
-    public Type Type { get; }
-    public Func<ConditionData, string, string, IEnumerable<Type>, Control> GetFormKeyPicker { get; set; }
-    public void Apply(
+    Type Type { get; }
+    Func<ConditionData, string, string, IEnumerable<Type>, Control> GetFormKeyPicker { get; set; }
+    void Apply(
         IObservable<IMajorRecordGetter?> context,
         IObservable<IQuestGetter?> questContext,
         EditableCondition condition,

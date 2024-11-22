@@ -3,9 +3,9 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
 public interface IRecordFilterBuilder {
-    public IRecordFilterBuilder AddRecordType(Type type);
-    public IRecordFilterBuilder AddRecordType<TRecord>()
+    IRecordFilterBuilder AddRecordType(Type type);
+    IRecordFilterBuilder AddRecordType<TRecord>()
         where TRecord : IMajorRecordQueryableGetter;
 
-    public IEnumerable<RecordFilterListing> Build();
+    IEnumerable<RecordFilterListing> Build();
 }

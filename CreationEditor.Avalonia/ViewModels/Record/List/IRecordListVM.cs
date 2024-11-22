@@ -12,7 +12,7 @@ public interface IRecordListVM : IDisposableDropoff {
     IEnumerable? Records { get; }
     IReferencedRecord? SelectedRecord { get; set; }
 
-    public ReactiveCommand<RecordListContext, Unit> PrimaryCommand { get; }
+    ReactiveCommand<RecordListContext, Unit> PrimaryCommand { get; }
 
     IObservableCollection<DataGridColumn> Columns { get; }
 

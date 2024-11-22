@@ -6,8 +6,8 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
 public interface ICustomConditionValueDataTemplate {
-    public bool Match(Condition.Function function);
-    public IObservable<Control?> Build(
+    bool Match(Condition.Function function);
+    IObservable<Control?> Build(
         ILinkCache linkCache,
         EditableCondition editableCondition,
         IConditionDataGetter data,

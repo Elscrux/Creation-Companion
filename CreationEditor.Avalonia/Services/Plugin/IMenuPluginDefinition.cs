@@ -5,11 +5,11 @@ using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.Services.Plugin;
 
 public interface IMenuPluginDefinition : IVisualPluginDefinition {
-    public KeyGesture? KeyGesture => null;
+    KeyGesture? KeyGesture => null;
     DockMode DockMode { get; set; }
     Dock Dock { get; set; }
-    public object? GetIcon();
+    object? GetIcon();
 
-    public static readonly FuncValueConverter<IMenuPluginDefinition, object?> ToIcon
+    static readonly FuncValueConverter<IMenuPluginDefinition, object?> ToIcon
         = new(plugin => plugin?.GetIcon());
 }

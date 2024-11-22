@@ -21,7 +21,7 @@ public interface IQueryRunner : IReactiveObject, IMementoProvider<QueryRunnerMem
     IQueryFrom QueryFrom { get; }
     IObservableCollection<IQueryCondition> QueryConditions { get; }
     IQueryFieldSelector FieldSelector { get; }
-    public IQueryFieldSelector OrderBySelector { get; }
+    IQueryFieldSelector OrderBySelector { get; }
 
     IObservable<Unit> SettingsChanged { get; }
     IObservable<string> Summary { get; }
