@@ -11,7 +11,7 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
     where TIdentifier : notnull
     where TReference : notnull {
 
-    private readonly object _lockObject = new();
+    private readonly Lock _lockObject = new();
     private readonly ConcurrentDictionary<TIdentifier, ConcurrentDictionary<ReferenceSubscription, byte>> _identifierSubscriptions = new(comparer);
 
     public IDisposable Register(TSubscriber subscriber) {

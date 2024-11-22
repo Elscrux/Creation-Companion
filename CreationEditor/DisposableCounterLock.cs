@@ -1,7 +1,7 @@
 ﻿namespace CreationEditor;
 
 public sealed class DisposableCounterLock(Action freeAction) {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private uint _counter;
 
     /// <summary>
