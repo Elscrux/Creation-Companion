@@ -17,12 +17,12 @@ public sealed class AvaloniaTextMateRegistryOptions : IRegistryOptions {
     private readonly List<GrammarDefinition> _availableGrammarDefinitions = [];
     private readonly List<IRawGrammar> _availableGrammars = [];
 
-    public AvaloniaTextMateRegistryOptions(ThemeName defaultTheme, params string[] grammars) {
+    public AvaloniaTextMateRegistryOptions(ThemeName defaultTheme, params IEnumerable<string> grammars) {
         _defaultTheme = defaultTheme;
         InitGrammars(grammars);
     }
 
-    private void InitGrammars(params string[] grammars) {
+    private void InitGrammars(params IEnumerable<string> grammars) {
         var definitionOptions = new JsonSerializerOptions {
             DefaultIgnoreCondition = JsonIgnoreCondition.Never,
             IgnoreReadOnlyFields = false,

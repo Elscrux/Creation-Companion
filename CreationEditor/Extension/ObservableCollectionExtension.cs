@@ -47,7 +47,7 @@ public static class ObservableCollectionExtension {
     public static ReadOnlyObservableCollection<T> Combine<T>(
         this IObservableCollection<T> lhs,
         IDisposableDropoff disposableDropoff,
-        params IObservableCollection<T>[] rhsList)
+        params IReadOnlyList<IObservableCollection<T>> rhsList)
         where T : notnull {
         var internalCollection = new ObservableCollectionExtended<T>();
         foreach (var rhs in rhsList) {

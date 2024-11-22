@@ -31,19 +31,19 @@ public static class TypeExtension {
     /// <param name="type">Types that inherits</param>
     /// <param name="parentTypes">Parent types</param>
     /// <returns>true if any inherits</returns>
-    public static bool InheritsFromAny(this Type type, params Type[] parentTypes) {
-        return parentTypes.Exists(parentType => type.InheritsFrom(parentType));
+    public static bool InheritsFromAny(this Type type, params IEnumerable<Type> parentTypes) {
+        return parentTypes.Any(parentType => type.InheritsFrom(parentType));
     }
 
     /// <summary>
-    /// Returns it the calling type inherits from all of the types in the parameter enumerable.
+    /// Returns it the calling type inherits from all the types in the parameter enumerable.
     /// Any 1 : N
     /// </summary>
     /// <param name="type">Types that inherits</param>
     /// <param name="parentTypes">Parent types</param>
     /// <returns>true if any inherits</returns>
-    public static bool InheritsFromAll(this Type type, params Type[] parentTypes) {
-        return parentTypes.TrueForAll(parentType => type.InheritsFrom(parentType));
+    public static bool InheritsFromAll(this Type type, params IEnumerable<Type> parentTypes) {
+        return parentTypes.All(parentType => type.InheritsFrom(parentType));
     }
 
     /// <summary>

@@ -17,7 +17,7 @@ public sealed class GroupCollection<T> : IDisposable {
 
     public IObservableCollection<object> Items => _topLevelGroup.Items;
 
-    public GroupCollection(IObservableCollection<T> source, params Group<T>[] groups) {
+    public GroupCollection(IObservableCollection<T> source, params IEnumerable<Group<T>> groups) {
         _topLevelGroup = new GroupInstance(null!, new ObservableCollectionExtended<object>(source.OfType<object>()));
 
         foreach (var group in groups) {
