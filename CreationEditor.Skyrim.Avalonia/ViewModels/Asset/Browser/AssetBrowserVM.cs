@@ -425,7 +425,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             Children = {
                 draggedAssets.Length > 1
                     ? new TextBlock {
-                        Inlines = new InlineCollection {
+                        Inlines = [
                             new Run("Move "),
                             new Run(draggedAssets.Length.ToString()) {
                                 Foreground = StandardBrushes.ValidBrush,
@@ -438,11 +438,11 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             new Run(relativeDstDirectory) {
                                 Foreground = StandardBrushes.ValidBrush,
                             },
-                        },
+                        ],
                         FontSize = 14,
                     }
                     : new TextBlock {
-                        Inlines = new InlineCollection {
+                        Inlines = [
                             new Run("Move "),
                             new Run(GetRootRelativePath(firstDraggedAsset.Path)) {
                                 Foreground = StandardBrushes.ValidBrush,
@@ -451,7 +451,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             new Run(relativeDstDirectory) {
                                 Foreground = StandardBrushes.ValidBrush,
                             },
-                        },
+                        ],
                         FontSize = 14,
                     },
             },

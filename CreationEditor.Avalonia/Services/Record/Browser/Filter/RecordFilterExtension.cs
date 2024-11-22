@@ -66,7 +66,7 @@ public static class RecordFilterExtension {
         return elements.GetRecursiveListings(
             t => {
                 var selector = stringSelector(t);
-                return selector is not null ? selector.AsEnumerable() : Enumerable.Empty<string>();
+                return selector is not null ? selector.AsEnumerable() : [];
             },
             separator);
     }

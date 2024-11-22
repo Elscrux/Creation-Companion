@@ -179,7 +179,7 @@ public sealed class BsaArchiveService : IArchiveService {
         foreach (var (archivePath, reader) in _archives) {
             // Compile directories in archive
             if (!_archiveDirectories.TryGetValue(archivePath, out var directories)) {
-                directories = new List<ArchiveDirectory>();
+                directories = [];
 
                 foreach (var file in reader.Files) {
                     var dirName = _fileSystem.Path.GetDirectoryName(file.Path);
