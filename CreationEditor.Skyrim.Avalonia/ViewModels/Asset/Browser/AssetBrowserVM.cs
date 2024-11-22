@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -59,8 +60,8 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly ISearchFilter _searchFilter;
     private readonly string _root;
 
-    private AssetDirectory? _dataDirectory;
-    public AssetDirectory DataDirectory => _dataDirectory ??= _assetProvider.GetAssetContainer(_dataDirectoryProvider.Path);
+    [field: AllowNull, MaybeNull]
+    public AssetDirectory DataDirectory => field ??= _assetProvider.GetAssetContainer(_dataDirectoryProvider.Path);
 
     [Reactive] public string SearchText { get; set; } = string.Empty;
     [Reactive] public bool ShowBsaAssets { get; set; }

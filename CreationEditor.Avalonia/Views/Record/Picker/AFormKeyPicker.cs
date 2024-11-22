@@ -156,19 +156,18 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     }
     public static readonly StyledProperty<bool> MissingMeansNullProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(MissingMeansNull));
 
-    private StatusIndicatorState _status;
     public StatusIndicatorState Status {
-        get => _status;
-        protected set => SetAndRaise(StatusProperty, ref _status, value);
+        get;
+        protected set => SetAndRaise(StatusProperty, ref field, value);
     }
     public static readonly DirectProperty<AFormKeyPicker, StatusIndicatorState> StatusProperty =
         AvaloniaProperty.RegisterDirect<AFormKeyPicker, StatusIndicatorState>(nameof(StatusProperty), picker => picker.Status);
 
-    private string _statusString = string.Empty;
     public string StatusString {
-        get => _statusString;
-        protected set => SetAndRaise(StatusStringProperty, ref _statusString, value);
-    }
+        get;
+        protected set => SetAndRaise(StatusStringProperty, ref field, value);
+    } = string.Empty;
+
     public static readonly DirectProperty<AFormKeyPicker, string> StatusStringProperty =
         AvaloniaProperty.RegisterDirect<AFormKeyPicker, string>(nameof(StatusString), picker => picker.StatusString);
 
@@ -193,17 +192,16 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     }
     public static readonly StyledProperty<bool> InSearchModeProperty = AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(InSearchMode));
 
-    private FormKeyPickerSearchMode _searchMode = FormKeyPickerSearchMode.None;
     public FormKeyPickerSearchMode SearchMode {
-        get => _searchMode;
+        get;
         protected set {
-            SetAndRaise(SearchModeProperty, ref _searchMode, value);
-            InSearchMode = _searchMode switch {
+            SetAndRaise(SearchModeProperty, ref field, value);
+            InSearchMode = field switch {
                 FormKeyPickerSearchMode.None => false,
                 _ => true,
             };
         }
-    }
+    } = FormKeyPickerSearchMode.None;
     public static readonly DirectProperty<AFormKeyPicker, FormKeyPickerSearchMode> SearchModeProperty =
         AvaloniaProperty.RegisterDirect<AFormKeyPicker, FormKeyPickerSearchMode>(nameof(SearchMode), picker => picker.SearchMode);
 
@@ -258,10 +256,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     public static readonly StyledProperty<bool> AllowsSearchModeProperty =
         AvaloniaProperty.Register<AFormKeyPicker, bool>(nameof(AllowsSearchMode), true, defaultBindingMode: BindingMode.TwoWay);
 
-    private IList? _applicableEditorIDs;
     public IList? ApplicableEditorIDs {
-        get => _applicableEditorIDs;
-        protected set => SetAndRaise(ApplicableEditorIDsProperty, ref _applicableEditorIDs, value);
+        get;
+        protected set => SetAndRaise(ApplicableEditorIDsProperty, ref field, value);
     }
     public static readonly DirectProperty<AFormKeyPicker, IList?> ApplicableEditorIDsProperty =
         AvaloniaProperty.RegisterDirect<AFormKeyPicker, IList?>(nameof(ApplicableEditorIDs), picker => picker.ApplicableEditorIDs);

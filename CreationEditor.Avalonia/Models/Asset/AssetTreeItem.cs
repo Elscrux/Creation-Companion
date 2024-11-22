@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Comparer;
@@ -26,8 +27,8 @@ public sealed class AssetTreeItem(
     public bool IsVirtual => Asset.IsVirtual;
     public IEnumerable<IReferencedAsset> GetReferencedAssets() => Asset.GetReferencedAssets();
 
-    public ReadOnlyObservableCollection<AssetTreeItem> Children => _children ??= LoadChildren();
-    private ReadOnlyObservableCollection<AssetTreeItem>? _children;
+    [field: AllowNull, MaybeNull]
+    public ReadOnlyObservableCollection<AssetTreeItem> Children => field ??= LoadChildren();
 
     private ReadOnlyObservableCollection<AssetTreeItem> LoadChildren() {
         if (Asset is AssetDirectory assetDirectory) {

@@ -31,11 +31,10 @@ public sealed class EditableBook : Book, INotifyPropertyChanged {
         }
     }
 
-    private BookTeaches _teachesOption;
     public BookTeaches TeachesOption {
-        get => _teachesOption;
+        get;
         set {
-            _teachesOption = value;
+            field = value;
             OnPropertyChanged();
         }
     }

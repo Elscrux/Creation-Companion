@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
@@ -15,23 +16,26 @@ public sealed class RecordReference(
 
     private readonly DisposableBucket _disposables = new();
 
-    private IMajorRecordGetter? _record;
-    public IMajorRecordGetter Record => _record
-        ??= linkCacheProvider.LinkCache.TryResolve(formLinkIdentifier, out var record)
-            ? record
-            : throw new ArgumentException(nameof(formLinkIdentifier));
+    [field: MaybeNull]
+    public IMajorRecordGetter Record {
+        get {
+            return field ??= linkCacheProvider.LinkCache.TryResolve(formLinkIdentifier, out var record)
+                ? record
+                : throw new ArgumentException(nameof(formLinkIdentifier));
+        }
+    }
 
-    private IReferencedRecord? _referencedRecord;
+    [field: AllowNull, MaybeNull]
     public IReferencedRecord ReferencedRecord {
         get {
-            if (_referencedRecord is null) {
+            if (field is null) {
                 recordReferenceController
                     .GetReferencedRecord(Record, out var referencedRecord)
                     .DisposeWith(_disposables);
 
-                _referencedRecord = referencedRecord;
+                field = referencedRecord;
             }
-            return _referencedRecord;
+            return field;
         }
     }
 

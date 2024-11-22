@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Asset;
@@ -110,17 +111,17 @@ public sealed class AssetReference : IReference, IDisposable {
         }
     }
 
-    private IReferencedAsset? _referencedAsset;
+    [field: AllowNull, MaybeNull]
     public IReferencedAsset ReferencedAsset {
         get {
-            if (_referencedAsset is null) {
+            if (field is null) {
                 _assetReferenceController
                     .GetReferencedAsset(Asset, out var referencedAsset)
                     .DisposeWith(_disposables);
 
-                _referencedAsset = referencedAsset;
+                field = referencedAsset;
             }
-            return _referencedAsset;
+            return field;
         }
     }
 
