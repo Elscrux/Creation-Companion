@@ -7,7 +7,7 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
     private const string CacheExtension = "cache";
 
     [GeneratedRegex("[\\/:*?\"<>|]")]
-    private static partial Regex IllegalFileNameRegex();
+    private static partial Regex IllegalFileNameRegex { get; }
 
     private readonly IFileSystem _fileSystem;
     private readonly string _cacheDirPath;
@@ -21,7 +21,7 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
         _cacheDirPath = subDirectories.Aggregate(
             baseDir,
             (cur, next) => {
-                var sanitizedName = IllegalFileNameRegex().Replace(next, string.Empty);
+                var sanitizedName = IllegalFileNameRegex.Replace(next, string.Empty);
                 return _fileSystem.Path.Combine(cur, sanitizedName);
             });
     }
@@ -31,14 +31,14 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
 
         var path = _cacheDirPath;
         for (var i = 0; i < identifiers.Length - 1; i++) {
-            path = _fileSystem.Path.Combine(path, IllegalFileNameRegex().Replace(identifiers[i], string.Empty));
+            path = _fileSystem.Path.Combine(path, IllegalFileNameRegex.Replace(identifiers[i], string.Empty));
         }
 
         return path;
     }
 
     public string CacheFile(params string[] identifiers) {
-        var sanitizedName = IllegalFileNameRegex().Replace($"{identifiers[^1]}.{CacheExtension}", string.Empty);
+        var sanitizedName = IllegalFileNameRegex.Replace($"{identifiers[^1]}.{CacheExtension}", string.Empty);
         return _fileSystem.Path.Combine(GetIdentifierPath(identifiers), sanitizedName);
     }
 }
