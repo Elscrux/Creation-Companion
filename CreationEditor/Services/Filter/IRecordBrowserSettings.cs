@@ -40,6 +40,5 @@ public interface IRecordBrowserSettings {
     /// </summary>
     /// <param name="record">Record identifier to filter</param>
     /// <returns>true if the record passed the filter, false if it was filtered out</returns>
-    bool Filter(IMajorRecordIdentifierGetter
-        record);
+    bool Filter(IMajorRecordIdentifierGetter record);
 }

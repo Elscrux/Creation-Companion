@@ -70,7 +70,7 @@
                                                     VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                                                     HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                     CornerRadius="{TemplateBinding CornerRadius}"
-                                                    Margin="{TemplateBinding Margin}" />
+                                                    Margin="{TemplateBinding Margin}"/>
                                             </ControlTemplate>
                                         </Setter>
                                     </Style>

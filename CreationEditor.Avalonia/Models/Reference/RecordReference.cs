@@ -48,7 +48,7 @@ public sealed class RecordReference(
     private ReadOnlyObservableCollection<IReference> LoadChildren() {
         return ReferencedRecord.References
             .SelectObservableCollectionSync(
-                identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController) as IReference,
+                IReference (identifier) => new RecordReference(identifier, linkCacheProvider, recordReferenceController),
                 _disposables);
     }
 

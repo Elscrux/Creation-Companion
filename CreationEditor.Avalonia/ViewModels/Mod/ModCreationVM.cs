@@ -41,10 +41,13 @@ public sealed class ModCreationVM : ValidatableViewModel {
             .DisposeWith(this);
 
         CreateModCommand = ReactiveCommand.Create(() => {
-            var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNameWatermark, NewModType) : new ModKey(NewModName, NewModType);
-            NewModName = null;
-            return editorEnvironment.AddNewMutableMod(modKey);
-        }, this.IsValid());
+                var modKey = string.IsNullOrWhiteSpace(NewModName)
+                    ? new ModKey(ModNameWatermark, NewModType)
+                    : new ModKey(NewModName, NewModType);
+                NewModName = null;
+                return editorEnvironment.AddNewMutableMod(modKey);
+            },
+            this.IsValid());
 
         this.ValidationRule(
             x => x.NewModName,

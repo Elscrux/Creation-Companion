@@ -38,11 +38,8 @@ public class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeCo
             case PlatformID.WinCE:
                 return new PlatformHandle(windowHandle, descriptor);
             case PlatformID.Unix:
-                break;
             case PlatformID.Xbox:
-                break;
             case PlatformID.MacOSX:
-                break;
             case PlatformID.Other:
                 break;
             default:
@@ -58,13 +55,9 @@ public class WindowHandleHost(IntPtr windowHandle, string descriptor) : NativeCo
             case PlatformID.Win32Windows:
             case PlatformID.Win32NT:
             case PlatformID.WinCE:
-                break;
             case PlatformID.Unix:
-                break;
             case PlatformID.Xbox:
-                break;
             case PlatformID.MacOSX:
-                break;
             case PlatformID.Other:
                 break;
             default:

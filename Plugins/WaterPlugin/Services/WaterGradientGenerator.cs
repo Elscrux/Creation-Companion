@@ -109,7 +109,7 @@ public sealed class WaterGradientGenerator(
             var reflection = reflectionColor.ToSystemDrawingColor();
 
             var hashAlgorithm = new XxHash3();
-            hashAlgorithm.Append(string.Join("_", waterWeights.Select(x => (x.Key.FormKey.ToString() + x.Value))).ToBytes());
+            hashAlgorithm.Append(string.Join("_", waterWeights.Select(x => x.Key.FormKey.ToString() + x.Value)).ToBytes());
             var hash = hashAlgorithm.GetCurrentHash();
 
             var editorId = $"{worldspace.EditorID}Water"

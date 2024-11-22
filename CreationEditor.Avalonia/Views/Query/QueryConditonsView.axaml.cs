@@ -111,7 +111,8 @@ public partial class QueryConditionsView : ActivatableUserControl {
                                 return new TextBlock { Text = field.Name };
                             }),
                             ItemsSource = condition.FieldSelector.Fields,
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
+                            [!SelectingItemsControl.SelectedItemProperty] =
+                                new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };
                     })),
                 new TemplateColumn<IQueryCondition>(
@@ -179,7 +180,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
                             [!ContentProperty] = condition.WhenAnyValue(x => x.IsOr).Select(x => x ? "Or" : "And").ToBinding(),
                         };
                     })),
-            }
+            },
         };
     }
 }
