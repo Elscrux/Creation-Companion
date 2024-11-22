@@ -263,7 +263,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         var src = new CancellationTokenSource().DisposeWith(this);
         var cancellationToken = src.Token;
-        Task.Run(() => UpdateAssetContentsAsync(assetProvider, cancellationToken, filter), cancellationToken);
+        Task.Run(() => UpdateAssetContentsAsync(assetProvider, filter, cancellationToken), cancellationToken);
 
         Undo = ReactiveCommand.Create(() => _assetController.Undo());
         Redo = ReactiveCommand.Create(() => _assetController.Redo());
@@ -311,7 +311,7 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             asset => dockFactory.Open(DockElement.AssetBrowser, parameter: asset.Path));
     }
 
-    private void UpdateAssetContentsAsync(IAssetProvider assetProvider, CancellationToken cancellationToken, IObservable<Func<IAsset, bool>> filter) {
+    private void UpdateAssetContentsAsync(IAssetProvider assetProvider, IObservable<Func<IAsset, bool>> filter, CancellationToken cancellationToken) {
         Dispatcher.UIThread.Post(() => IsBusyLoadingAssets = true);
         var assetContainer = assetProvider.GetAssetContainer(_root, cancellationToken);
         var rootTree = new AssetTreeItem(_root, assetContainer, _fileSystem, filter);
