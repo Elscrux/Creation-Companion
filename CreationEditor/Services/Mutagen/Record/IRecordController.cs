@@ -229,7 +229,7 @@ public interface IRecordController {
     /// </summary>
     /// <param name="record">Record which updates are registered for</param>
     /// <param name="updateAction">An action that must update to the given record</param>
-    void RegisterUpdate(IMajorRecordGetter record, Action updateAction);
+    void RegisterUpdate(IMajorRecord record, Action updateAction);
 
     /// <summary>
     /// Registers updates to a given record in the given mod. The update must be executed in the passed action.
@@ -237,7 +237,7 @@ public interface IRecordController {
     /// <param name="record">Record which updates are registered for</param>
     /// <param name="mod">Mod to register the update for</param>
     /// <param name="updateAction">An action that must update to the given record</param>
-    void RegisterUpdate(IMajorRecordGetter record, IMod mod, Action updateAction);
+    void RegisterUpdate(IMajorRecord record, IMod mod, Action updateAction);
     #endregion
 
     /// <summary>

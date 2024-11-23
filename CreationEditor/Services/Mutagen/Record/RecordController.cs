@@ -363,15 +363,15 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     #endregion
 
     #region RegisterUpdate
-    public void RegisterUpdate(IMajorRecordGetter record, Action updateAction) => RegisterUpdate(record, _editorEnvironment.ActiveMod, updateAction);
-    public void RegisterUpdate(IMajorRecordGetter record, IMod mod, Action updateAction) {
+    public void RegisterUpdate(IMajorRecord record, Action updateAction) => RegisterUpdate(record, _editorEnvironment.ActiveMod, updateAction);
+    public void RegisterUpdate(IMajorRecord record, IMod mod, Action updateAction) {
         if (mod is TMod modT) {
             RegisterUpdate(record, modT, updateAction);
         } else {
             throw new ArgumentException("Mod is not of the correct type", nameof(mod));
         }
     }
-    public void RegisterUpdate(IMajorRecordGetter record, TMod mod, Action updateAction) {
+    public void RegisterUpdate(IMajorRecord record, TMod mod, Action updateAction) {
         // Notify pre update
         var pair = (record, mod);
         _recordChangedDiff.OnNext(new UpdateAction<RecordModPair>(pair, updateAction));
