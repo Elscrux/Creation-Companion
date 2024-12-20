@@ -44,7 +44,7 @@ public sealed class FactionEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesd
         };
 
         Save = ReactiveCommand.Create(() => {
-            recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));
+            recordController.RegisterUpdate(Record, () => Record.DeepCopyIn(EditableRecord));
 
             recordEditorController.CloseEditor(Record);
         });

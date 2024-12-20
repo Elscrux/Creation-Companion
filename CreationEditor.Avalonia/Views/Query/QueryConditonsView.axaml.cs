@@ -110,7 +110,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = condition.FieldSelector.Fields,
+                            // ItemsSource = condition.FieldSelector.Fields,
                             [!SelectingItemsControl.SelectedItemProperty] =
                                 new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };

@@ -55,6 +55,10 @@
       <Compile Update="Resources\DataTemplates\EnumDataTemplate.cs">
         <DependentUpon>ICustomConditionValueDataTemplate.cs</DependentUpon>
       </Compile>
+      <Compile Update="Views\Record\Editor\MajorRecord\Placed\PropertyGroup.axaml.cs">
+        <DependentUpon>PropertyGroup.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <PropertyGroup>

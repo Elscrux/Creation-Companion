@@ -68,6 +68,8 @@ public static class RecordTypeConstants {
         ..PlaceableObjectTypes,
     ];
 
+    public static readonly Type[] PlacedNpcTypes = [typeof(IPlacedNpcGetter)];
+
     // Package
     public static readonly IReadOnlyList<Type> PackageDataNumericTypes = [typeof(bool), typeof(float), typeof(int)];
     public static readonly IReadOnlyList<Type> PackageDataLocationTypes = LocationTypes.Concat(AllPlacedInterfaceTypes).ToArray();

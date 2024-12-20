@@ -6,7 +6,6 @@ public sealed record QueryFieldSelectorMemento(QueryFieldMemento? SelectedField,
 
 public interface IQueryFieldSelector : IMementoProvider<QueryFieldSelectorMemento> {
     IQueryField? SelectedField { get; set; }
-    IObservableCollection<IQueryField> Fields { get; }
 
     Type? RecordType { get; set; }
 }

@@ -115,6 +115,7 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         get => (Flags & FactionFlag.CrimeGoldUseDefaults) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.CrimeGoldUseDefaults, value);
+            CrimeValues = GetDefaultCrimeValues();
             OnPropertyChanged();
         }
     }

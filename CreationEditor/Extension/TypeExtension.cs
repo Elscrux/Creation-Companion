@@ -1,4 +1,5 @@
-﻿using Noggog;
+﻿using System.Reflection;
+using Noggog;
 namespace CreationEditor;
 
 public static class TypeExtension {
@@ -81,5 +82,50 @@ public static class TypeExtension {
 
     public static IEnumerable<T> GetAllSubClasses<T>() {
         return GetAllSubClasses<T>(typeof(T));
+    }
+
+    private static readonly string[] BlacklistedNames = [
+        "BinaryWriteTranslator",
+        "Registration",
+        "StaticRegistration",
+        "FormVersion",
+    ];
+
+    private static readonly Type[] BlacklistedTypes = [
+        typeof(Type),
+    ];
+
+    /// <summary>
+    /// Returns all the properties of the type.
+    /// </summary>
+    /// <param name="type">Type to get properties from</param>
+    /// <returns>Properties of the type</returns>
+    public static IEnumerable<PropertyInfo> GetAllPropertyInfos(this Type? type) {
+        if (type is null) return [];
+
+        if (!type.IsInterface) {
+            return GetQueryFields(type);
+        }
+
+        // If the record type is an interface, we need to get the fields from all the interfaces it inherits from.
+        var dictionary = new Dictionary<string, PropertyInfo>();
+        var typeQueue = new Queue<Type>();
+        typeQueue.Enqueue(type);
+
+        while (typeQueue.Count != 0) {
+            var t = typeQueue.Dequeue();
+            foreach (var queryField in GetQueryFields(t)) {
+                dictionary.TryAdd(queryField.Name, queryField);
+            }
+
+            foreach (var @interface in t.GetInterfaces()) {
+                typeQueue.Enqueue(@interface);
+            }
+        }
+
+        return dictionary.Values.OrderBy(field => field.Name);
+
+        IEnumerable<PropertyInfo> GetQueryFields(Type t) => t.GetProperties()
+            .Where(p => !BlacklistedNames.Contains(p.Name) && !BlacklistedTypes.Contains(p.PropertyType));
     }
 }

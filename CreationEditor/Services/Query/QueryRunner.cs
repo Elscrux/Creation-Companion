@@ -8,15 +8,14 @@ using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query;
 
-public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
+public sealed class QueryRunner : IQueryRunner, IDisposable {
     private readonly DisposableBucket _disposables = new();
     private readonly IQueryConditionFactory _queryConditionFactory;
 
     public Guid Id { get; private set; } = Guid.NewGuid();
-    [Reactive] public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();

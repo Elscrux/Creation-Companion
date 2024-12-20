@@ -8,7 +8,7 @@ public sealed record TextReference(
     TextDiff Diff) {
 
     public override string? ToString() {
-        return Record.GetName();
+        return Record.GetHumanReadableName();
     }
 
     public bool Equals(TextReference? other) {

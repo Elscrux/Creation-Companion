@@ -1,0 +1,30 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:select="clr-namespace:CreationEditor.Services.Query.Select;assembly=CreationEditor"
+             xmlns:avalonia="clr-namespace:CreationEditor.Avalonia"
+             xmlns:query="clr-namespace:CreationEditor.Avalonia.Views.Query"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+             x:Class="CreationEditor.Avalonia.Views.Query.QueryFieldPicker"
+             x:CompileBindings="True" x:DataType="select:ReflectionQueryField"
+             x:Name="Control">
+    <UserControl.Resources>
+        <avalonia:TypeQueryFieldsExtractor x:Key="Extractor"/>
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal">
+        <ComboBox ItemsSource="{Binding Type, Converter={StaticResource Extractor}}"/>
+
+        <ContentPresenter
+            IsVisible="{ReflectionBinding #Control.DataContext.NestedField, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ContentPresenter.Styles>
+                <Style Selector="ContentPresenter[IsVisible=True]">
+                    <Setter Property="Content">
+                        <query:QueryFieldPicker DataContext="{Binding NestedField}"/>
+                    </Setter>
+                </Style>
+            </ContentPresenter.Styles>
+        </ContentPresenter>
+    </StackPanel>
+</UserControl>
