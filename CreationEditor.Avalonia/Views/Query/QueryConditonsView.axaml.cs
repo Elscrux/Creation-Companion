@@ -8,6 +8,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.DataTemplates;
 using CreationEditor.Services.Query.Select;
 using CreationEditor.Services.Query.Where;
@@ -110,7 +111,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = condition.FieldSelector.Fields,
+                            ItemsSource = TypeQueryFieldsExtractor.Convert(condition.FieldSelector.RecordType),
                             [!SelectingItemsControl.SelectedItemProperty] =
                                 new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };

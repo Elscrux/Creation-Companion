@@ -13,7 +13,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
     private readonly DisposableBucket _disposables = new();
 
     [Reactive] public QueryConditionState ConditionState { get; set; }
-    public IQueryFieldSelector FieldSelector { get; } = new ReflectionQueryFieldSelector();
+    public IQueryFieldSelector FieldSelector { get; }
 
     public IObservableCollection<IQueryCompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<IQueryCompareFunction>();
     [Reactive] public IQueryCompareFunction? SelectedCompareFunction { get; set; }
@@ -35,7 +35,7 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         IQueryCompareFunctionFactory queryCompareFunctionFactory,
         Type? recordType = null) {
         _queryConditionFactory = queryConditionFactory;
-        FieldSelector.RecordType = recordType;
+        FieldSelector = new ReflectionQueryFieldSelector { RecordType = recordType };
         ConditionState = new QueryConditionState(SelectedCompareFunction, FieldSelector.SelectedField?.Type, _queryConditionFactory);
 
         var conditionStateChanges = this.WhenAnyValue(x => x.ConditionState);

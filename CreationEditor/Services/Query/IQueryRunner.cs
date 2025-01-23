@@ -4,7 +4,6 @@ using CreationEditor.Services.Query.From;
 using CreationEditor.Services.Query.Select;
 using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
-using ReactiveUI;
 namespace CreationEditor.Services.Query;
 
 public sealed record QueryRunnerMemento(
@@ -12,16 +11,16 @@ public sealed record QueryRunnerMemento(
     string Name,
     QueryFromMemento QueryFrom,
     List<QueryConditionMemento> QueryConditions,
-    QueryFieldSelectorMemento OrderBySelector,
-    QueryFieldSelectorMemento FieldSelector);
+    QueryFieldSelectorCollectionMemento OrderBySelector,
+    QueryFieldSelectorCollectionMemento FieldSelector);
 
-public interface IQueryRunner : IReactiveObject, IMementoProvider<QueryRunnerMemento> {
+public interface IQueryRunner : IMementoProvider<QueryRunnerMemento> {
     Guid Id { get; }
     string Name { get; set; }
     IQueryFrom QueryFrom { get; }
     IObservableCollection<IQueryCondition> QueryConditions { get; }
-    IQueryFieldSelector FieldSelector { get; }
-    IQueryFieldSelector OrderBySelector { get; }
+    IQueryFieldSelectorCollection FieldSelector { get; }
+    IQueryFieldSelectorCollection OrderBySelector { get; }
 
     IObservable<Unit> SettingsChanged { get; }
     IObservable<string> Summary { get; }

@@ -8,20 +8,19 @@ using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Services.Query;
 
-public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
+public sealed class QueryRunner : IQueryRunner, IDisposable {
     private readonly DisposableBucket _disposables = new();
     private readonly IQueryConditionFactory _queryConditionFactory;
 
     public Guid Id { get; private set; } = Guid.NewGuid();
-    [Reactive] public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
-    public IQueryFieldSelector OrderBySelector { get; } = new ReflectionQueryFieldSelector();
-    public IQueryFieldSelector FieldSelector { get; } = new ReflectionQueryFieldSelector();
+    public IQueryFieldSelectorCollection OrderBySelector { get; } = new QueryFieldSelectorCollection();
+    public IQueryFieldSelectorCollection FieldSelector { get; } = new QueryFieldSelectorCollection();
 
     public IObservable<Unit> SettingsChanged { get; }
     public IObservable<string> Summary { get; }
@@ -46,11 +45,11 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
             .Switch()
             .Merge(observeCollectionChanges.Unit());
 
-        var selectionChanged = this.WhenAnyValue(
-            x => x.QueryFrom.SelectedItem,
-            x => x.OrderBySelector.SelectedField,
-            x => x.FieldSelector.SelectedField,
-            (from, orderBy, select) => (From: from, OrderBy: orderBy, Select: select));
+        var selectionChanged = this.WhenAnyValue(x => x.QueryFrom.SelectedItem)
+                .CombineLatest(
+                    OrderBySelector.SelectionChanged,
+                    FieldSelector.SelectionChanged,
+                    (from, orderBy, select) => (From: from, OrderBy: orderBy, Select: select));
 
         SettingsChanged = conditionChanges
             .Merge(selectionChanged.Unit())
@@ -62,38 +61,38 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
                 .CombineLatest()
                 .StartWith(Array.Empty<string>()))
             .Switch()
-            .CombineLatest(selectionChanged, (conditions, query) => (Conditions: conditions, Query: query))
+            .CombineLatest(selectionChanged, (conditions, _) => conditions)
             .ThrottleMedium()
             .Select(CreateSummary);
 
         this.WhenAnyValue(x => x.QueryFrom.SelectedItem)
             .NotNull()
             .Subscribe(item => {
-                FieldSelector.RecordType = item.Type;
-                OrderBySelector.RecordType = item.Type;
+                FieldSelector.SetRootType(item.Type);
+                OrderBySelector.SetRootType(item.Type);
                 QueryConditions.Clear();
             })
             .DisposeWith(_disposables);
     }
 
-    private string CreateSummary((IList<string> Conditions, (QueryFromItem? From, IQueryField? OrderBy, IQueryField? Select) Query) x) {
+    private string CreateSummary(IList<string> conditions) {
         var builder = new StringBuilder();
 
-        builder.AppendLine($"From {x.Query.From?.Name ?? "None"}");
+        builder.AppendLine($"From {QueryFrom.SelectedItem?.Name ?? "None"}");
 
-        if (EnableConditions && x.Conditions.Any()) {
+        if (EnableConditions && conditions.Any()) {
             builder.AppendLine("Where");
-            foreach (var condition in x.Conditions) {
+            foreach (var condition in conditions) {
                 builder.AppendLine(condition);
             }
         }
 
         if (EnableOrderBy) {
-            builder.AppendLine($"Order By {x.Query.OrderBy?.Name ?? "None"}");
+            builder.AppendLine($"Order By {OrderBySelector.GetFieldName()}");
         }
 
         if (EnableSelect) {
-            builder.AppendLine($"Select {x.Query.Select?.Name ?? "None"}");
+            builder.AppendLine($"Select {FieldSelector.GetFieldName()}");
         }
 
         return builder.ToString();
@@ -109,13 +108,13 @@ public sealed class QueryRunner : ReactiveObject, IQueryRunner, IDisposable {
         }
 
         // Order By
-        if (EnableOrderBy && OrderBySelector.SelectedField is not null) {
-            records = records.OrderBy(record => OrderBySelector.SelectedField.GetValue(record));
+        if (EnableOrderBy) {
+            records = records.OrderBy(record => OrderBySelector.GetValue(record));
         }
 
         // Select
-        return EnableSelect && FieldSelector.SelectedField is not null
-            ? records.Select(record => FieldSelector.SelectedField.GetValue(record))
+        return EnableSelect
+            ? records.Select(record => FieldSelector.GetValue(record))
             : records;
     }
 
