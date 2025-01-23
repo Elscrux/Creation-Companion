@@ -85,7 +85,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
                                 AcceptsReturn = true,
                             },
                             GroupInstance groupInstance => new TextBlock {
-                                Text = groupInstance.Class is IMajorRecordQueryableGetter record ? record.GetName() : groupInstance.Class.ToString(),
+                                Text = groupInstance.Class is IMajorRecordQueryableGetter record ? record.GetHumanReadableName() : groupInstance.Class.ToString(),
                                 VerticalAlignment = VerticalAlignment.Center,
                             },
                             _ => null,
