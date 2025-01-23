@@ -40,6 +40,19 @@ public interface IRecordController {
     TMajorRecord CreateRecord<TMajorRecord, TMajorRecordGetter>(IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter;
+
+    /// <summary>
+    /// Create passed record in the active mod.
+    /// </summary>
+    /// <param name="record">Record that is created</param>
+    IMajorRecord CreateRecord(IMajorRecord record);
+
+    /// <summary>
+    /// Create passed record in the given mod.
+    /// </summary>
+    /// <param name="record">Record that is created</param>
+    /// <param name="mod">Mod to get the override for</param>
+    IMajorRecord CreateRecord(IMajorRecord record, IMod mod);
     #endregion
 
     #region DuplicateRecord

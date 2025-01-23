@@ -102,6 +102,20 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         return record;
     }
+
+    public IMajorRecord CreateRecord(IMajorRecord record) => CreateRecord(record, _editorEnvironment.ActiveMod);
+    public IMajorRecord CreateRecord(IMajorRecord record, IMod mod) {
+        if (record.FormKey.ModKey != mod.ModKey) throw new ArgumentException("Record is not from the same mod", nameof(record));
+
+        var group = mod.GetTopLevelGroup(record.Registration.GetterType);
+        group.AddUntyped(record);
+        
+        _logger.Here().Verbose("Adding new record {Record} in {Mod}", record, mod.ModKey);
+
+        _recordCreated.OnNext((record, mod));
+        
+        return record;
+    }
     #endregion
 
     #region DuplicateRecord
