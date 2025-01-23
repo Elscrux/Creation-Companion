@@ -13,9 +13,11 @@
                 x:Key="Spinner"
                 Width="20" Height="20"/>
         </Button.Resources>
-        <Binding Path="#Editor.ButtonText^"
-                 TargetNullValue="{StaticResource Spinner}"
-                 FallbackValue="{StaticResource Spinner}"/>
+        <Button.Content>
+            <Binding Path="#Editor.ButtonText^"
+                     TargetNullValue="{StaticResource Spinner}"
+                     FallbackValue="{StaticResource Spinner}"/>
+        </Button.Content>
         <Button.Flyout>
             <Flyout IsOpen="{Binding #Editor.IsOpen, Mode=OneWayToSource}">
                 <picker:PlacedPicker
