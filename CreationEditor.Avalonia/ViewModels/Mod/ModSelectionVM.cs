@@ -183,7 +183,8 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
                 if (SelectedMod is null) return;
 
                 SelectedMod.IsActive = !SelectedMod.IsActive;
-            });
+            })
+            .DisposeWith(this);
 
         ToggleSelection = ReactiveCommand.Create(
             canExecute: selectedModValid,
@@ -191,7 +192,8 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
                 if (SelectedMod is null) return;
 
                 SelectedMod.IsSelected = !SelectedMod.IsSelected;
-            });
+            })
+            .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()

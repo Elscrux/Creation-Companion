@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
@@ -52,7 +53,8 @@ public sealed class DockedItemVM : ViewModel, IDockedItem {
                 DockParent.Remove(this);
 
                 return oneTimeSubscription;
-            });
+            })
+            .DisposeWith(this);
     }
 
     private void CheckRemoved(object? o, LogicalTreeAttachmentEventArgs logicalTreeAttachmentEventArgs) => CheckRemoved();
