@@ -74,29 +74,6 @@ public sealed class EditableBook : Book, INotifyPropertyChanged {
         }
     }
 
-    public void CopyTo(Book book) {
-        book.EditorID = EditorID;
-        book.Name = Name;
-        book.Flags = Flags;
-        book.Description = Description is null || Description.All(x => string.IsNullOrEmpty(x.Value)) ? null : Description;
-        book.Value = Value;
-        book.Weight = Weight;
-        book.Keywords = Keywords;
-        book.BookText = BookText;
-        book.Destructible = Destructible;
-        book.InventoryArt = InventoryArt;
-        book.VirtualMachineAdapter = VirtualMachineAdapter;
-        book.ObjectBounds = ObjectBounds;
-        book.Teaches = TeachesOption switch {
-            BookTeaches.Nothing => new BookTeachesNothing {
-                RawContent = uint.MaxValue,
-            },
-            BookTeaches.Skill => BookSkill,
-            BookTeaches.Spell => BookSpell,
-            _ => throw new InvalidOperationException(),
-        };
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

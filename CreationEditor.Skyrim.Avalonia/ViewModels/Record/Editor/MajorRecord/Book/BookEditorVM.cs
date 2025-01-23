@@ -81,7 +81,7 @@ public sealed class BookEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesda.S
 
             EditableRecord.InventoryArt.FormKey = InventoryArt;
 
-            recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));
+            recordController.RegisterUpdate(Record, () => Record.DeepCopyIn(EditableRecord));
 
             recordEditorController.CloseEditor(Record);
         });

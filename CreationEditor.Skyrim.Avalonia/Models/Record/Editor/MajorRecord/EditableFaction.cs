@@ -155,32 +155,6 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
             : new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)));
     }
 
-    public void CopyTo(Faction faction) {
-        faction.EditorID = EditorID;
-        faction.Name = Name;
-        faction.Flags = Flags;
-        faction.Relations.ReplaceWith(Relations
-            .Where(r => !r.TargetFormKey.IsNull)
-            .Select(r => r.ToRelation()));
-
-        for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
-        faction.Ranks.ReplaceWith(Ranks);
-
-        faction.CrimeValues = CrimeGoldUseDefaults ? GetDefaultCrimeValues() : CrimeValues;
-        faction.JailOutfit = JailOutfit;
-        faction.SharedCrimeFactionList = SharedCrimeFactionList;
-        faction.ExteriorJailMarker = ExteriorJailMarker;
-        faction.FollowerWaitMarker = FollowerWaitMarker;
-        faction.PlayerInventoryContainer = PlayerInventoryContainer;
-        faction.StolenGoodsContainer = StolenGoodsContainer;
-
-        faction.VendorValues = VendorValues;
-        faction.VendorLocation = VendorLocation;
-        faction.VendorBuySellList = VendorBuySellList;
-        faction.MerchantContainer = MerchantContainer;
-        faction.Conditions = Conditions.Select(c => c.ToCondition()).ToExtendedList();
-    }
-
     private static CrimeValues GetDefaultCrimeValues() {
         return new CrimeValues {
             Arrest = true,
