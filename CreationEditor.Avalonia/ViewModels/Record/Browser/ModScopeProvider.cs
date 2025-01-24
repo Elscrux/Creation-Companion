@@ -4,8 +4,8 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
+using CreationEditor.Services.Mutagen.Mod;
 using DynamicData;
-using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -20,7 +20,7 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
     [Reactive] public ILinkCache LinkCache { get; private set; }
     [Reactive] public BrowserScope Scope { get; set; }
 
-    private ReadOnlyObservableCollection<ModItem> Mods { get; }
+    public ReadOnlyObservableCollection<ISelectableModKey> Mods { get; }
 
     private readonly IObservableCache<IModGetter, ModKey> _selectedMods;
     public IEnumerable<ModKey> SelectedModKeys => _selectedMods.Keys;
@@ -35,14 +35,16 @@ public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
 
         LinkCacheChanged = this.WhenAnyValue(x => x.LinkCache);
 
-        Mods = LinkCacheChanged
+        var modsChangeSet = LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
-            .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true })
+            .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true });
+
+        Mods = modsChangeSet
+            .Transform(ISelectableModKey (modItem) => modItem)
             .ToObservableCollection(this);
 
-        _selectedMods = Mods
-            .ToObservableChangeSet()
+        _selectedMods = modsChangeSet
             .AutoRefresh(mod => mod.IsSelected)
             .Filter(mod => mod.IsSelected)
             .Transform(x => LinkCache.GetMod(x.ModKey))

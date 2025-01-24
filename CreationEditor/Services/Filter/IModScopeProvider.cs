@@ -1,4 +1,6 @@
-﻿using System.Reactive;
+﻿using System.Collections.ObjectModel;
+using System.Reactive;
+using CreationEditor.Services.Mutagen.Mod;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -17,6 +19,11 @@ public interface IModScopeProvider {
     /// Link cache to use for the scope 
     /// </summary>
     ILinkCache LinkCache { get; }
+
+    /// <summary>
+    /// All Mods in the scope
+    /// </summary>
+    ReadOnlyObservableCollection<ISelectableModKey> Mods { get; }
 
     /// <summary>
     /// Selected mod keys in the scope
