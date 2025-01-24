@@ -14,7 +14,7 @@
              xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="800"
              x:Class="WaterPlugin.Views.WaterMapView"
-             x:CompileBindings="True" x:DataType="viewModels:WaterMapVM"
+             x:DataType="viewModels:WaterMapVM"
              x:Name="View">
     <Grid RowDefinitions="*,Auto" Margin="5">
         <ScrollViewer Grid.Row="0">

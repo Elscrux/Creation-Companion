@@ -5,7 +5,7 @@
              xmlns:setting="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting"
              xmlns:settings="clr-namespace:CreationEditor.Services.Settings;assembly=CreationEditor"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:CompileBindings="True" x:DataType="setting:ISettingsVM"
+             x:DataType="setting:ISettingsVM"
              x:Class="CreationEditor.Avalonia.Views.Setting.SettingsView">
     <Grid>
         <Grid.ColumnDefinitions>

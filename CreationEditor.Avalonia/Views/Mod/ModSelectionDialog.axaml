@@ -6,7 +6,7 @@
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
     xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
     d:DesignHeight="1080" d:DesignWidth="1920"
-    x:CompileBindings="True" x:DataType="vm:ModSelectionVM"
+    x:DataType="vm:ModSelectionVM"
     x:Name="Popup">
     <UserControl.Effect>
         <DropShadowEffect

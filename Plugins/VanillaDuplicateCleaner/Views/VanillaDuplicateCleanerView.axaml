@@ -10,7 +10,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="VanillaDuplicateCleaner.Views.VanillaDuplicateCleanerView"
              x:Name="Control"
-             x:DataType="viewModels:VanillaDuplicateCleanerVM" x:CompileBindings="True">
+             x:DataType="viewModels:VanillaDuplicateCleanerVM">
     <Grid>
         <ScrollViewer IsEnabled="{Binding !IsBusy}">
             <StackPanel Spacing="5">

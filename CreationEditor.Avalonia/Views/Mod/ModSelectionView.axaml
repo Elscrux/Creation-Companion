@@ -10,7 +10,7 @@
     xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
     x:Name="Selection"
     d:DesignHeight="500" d:DesignWidth="750"
-    x:CompileBindings="True" x:DataType="mod:IModSelectionVM">
+    x:DataType="mod:IModSelectionVM">
     <Design.DataContext>
         <mod:DesignModSelectionVM/>
     </Design.DataContext>

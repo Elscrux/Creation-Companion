@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Kernel"
-             x:CompileBindings="True" x:DataType="mod:IModGetterVM"
+             x:DataType="mod:IModGetterVM"
              d:DesignHeight="500" d:DesignWidth="500"
              IsEnabled="False">
     <UserControl.Styles>

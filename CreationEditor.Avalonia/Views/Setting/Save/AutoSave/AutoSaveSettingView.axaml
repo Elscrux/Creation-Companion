@@ -5,7 +5,7 @@
              xmlns:autoSave="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Save.AutoSave"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Setting.Save.AutoSave.AutoSaveSettingView"
-             x:CompileBindings="True" x:DataType="autoSave:AutoSaveSettingVM">
+             x:DataType="autoSave:AutoSaveSettingVM">
     <StackPanel Spacing="5">
         <TextBlock Text="Auto Save on:"/>
 

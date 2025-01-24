@@ -7,7 +7,7 @@
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:CompileBindings="True" x:DataType="vm:SideDockVM"
+             x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDockRight"
              x:Name="Dock"
              Background="{DynamicResource SystemControlTransparentBrush}">

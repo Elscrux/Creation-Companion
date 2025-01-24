@@ -9,7 +9,7 @@
              xmlns:asset="clr-namespace:CreationEditor.Avalonia.Models.Asset"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
-             x:CompileBindings="True" x:DataType="browser:IAssetBrowserVM">
+             x:DataType="browser:IAssetBrowserVM">
     <UserControl.KeyBindings>
         <KeyBinding
             Gesture="Ctrl+Z"

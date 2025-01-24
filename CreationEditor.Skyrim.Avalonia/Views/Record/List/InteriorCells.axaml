@@ -6,7 +6,7 @@
              xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.InteriorCells"
-             x:CompileBindings="True" x:DataType="list:InteriorCellsVM"
+             x:DataType="list:InteriorCellsVM"
              x:Name="Control">
     <Grid RowDefinitions="Auto,*">
         <record:RecordBrowserSettingsView

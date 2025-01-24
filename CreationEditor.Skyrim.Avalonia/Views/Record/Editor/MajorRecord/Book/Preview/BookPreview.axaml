@@ -6,7 +6,7 @@
              xmlns:preview="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview.BookPreview"
-             x:CompileBindings="True" x:DataType="book:BookEditorVM"
+             x:DataType="book:BookEditorVM"
              x:Name="Preview">
     <Grid x:Name="Grid">
         <Border x:Name="BookBackground"
