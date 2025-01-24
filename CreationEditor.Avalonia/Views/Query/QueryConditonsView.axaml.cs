@@ -8,8 +8,8 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
-using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.DataTemplates;
+using CreationEditor.Services.Query;
 using CreationEditor.Services.Query.Select;
 using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
@@ -103,6 +103,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
                     new FuncDataTemplate<IQueryCondition>((condition, _) => {
                         if (condition is null) return null;
 
+                        var queryFieldProvider = new ReflectionIQueryFieldProvider();
                         return new ComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             DataContext = condition,
@@ -111,7 +112,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = TypeQueryFieldsExtractor.ConvertWithoutFilter(condition.FieldSelector.RecordType),
+                            ItemsSource = queryFieldProvider.FromType(condition.FieldSelector.RecordType),
                             [!SelectingItemsControl.SelectedItemProperty] =
                                 new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };

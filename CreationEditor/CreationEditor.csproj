@@ -206,5 +206,8 @@
         <Compile Update="Services\Query\Select\QueryFieldSelectorCollection.cs">
           <DependentUpon>IQueryFieldSelectorCollection.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Query\ReflectionIQueryFieldProvider.cs">
+          <DependentUpon>IQueryFieldProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

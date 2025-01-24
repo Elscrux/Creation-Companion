@@ -11,17 +11,18 @@ using ReactiveUI;
 namespace CreationEditor.Services.Query;
 
 public sealed class QueryRunner : IQueryRunner, IDisposable {
+    private static readonly IReadOnlyList<Type> BlacklistedOrderTypes = [typeof(bool)];
+
     private readonly DisposableBucket _disposables = new();
     private readonly IQueryConditionFactory _queryConditionFactory;
+    private readonly IQueryFieldProvider _queryFieldProvider = new ReflectionIQueryFieldProvider();
 
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
-    public IQueryFieldSelectorCollection OrderBySelector { get; } = new QueryFieldSelectorCollection {
-        SelectorFilter = field => field.Type.InheritsFromOpenGeneric(typeof(IComparable<>))
-    };
+    public IQueryFieldSelectorCollection OrderBySelector { get; }
     public IQueryFieldSelectorCollection FieldSelector { get; } = new QueryFieldSelectorCollection();
 
     public IObservable<Unit> SettingsChanged { get; }
@@ -36,6 +37,31 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         IQueryFromFactory queryFromFactory,
         IQueryConditionFactory queryConditionFactory) {
         _queryConditionFactory = queryConditionFactory;
+        OrderBySelector = new QueryFieldSelectorCollection {
+            SelectorFilter = field => {
+                // Only allow fields whose types inherit from IComparable<T>
+                // or have nested fields that inherit from IComparable<T>
+                var remainingTypes = new Queue<Type>([field.Type]);
+                var processedTypes = new HashSet<Type>();
+
+                while (remainingTypes.Any()) {
+                    var currentType = remainingTypes.Dequeue();
+                    if (processedTypes.Contains(currentType)) continue;
+                    if (BlacklistedOrderTypes.Contains(currentType)) continue;
+
+                    if (currentType.InheritsFromOpenGeneric(typeof(IComparable<>))) {
+                        return true;
+                    }
+
+                    processedTypes.Add(currentType);
+
+                    var queryFields = _queryFieldProvider.FromType(currentType);
+                    remainingTypes.Enqueue(queryFields.Select(x => x.Type));
+                }
+
+                return false;
+            }
+        };
 
         QueryFrom = queryFromFactory.CreateFromRecordType();
 
