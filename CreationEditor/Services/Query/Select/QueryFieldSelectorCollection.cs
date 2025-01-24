@@ -17,6 +17,7 @@ public sealed class QueryFieldSelectorCollection : ReactiveObject, IQueryFieldSe
     private readonly Subject<Unit> _selectionChanged = new();
     public IObservable<Unit> SelectionChanged => _selectionChanged;
     public ReactiveCommand<Unit, Unit> AddNextSelector { get; }
+    public Func<IQueryField, bool>? SelectorFilter { get; set; }
 
     public QueryFieldSelectorCollection() {
         var selectionChanges = _selectors.ToObservableChangeSet()

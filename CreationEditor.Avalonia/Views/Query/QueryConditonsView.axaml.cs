@@ -111,7 +111,7 @@ public partial class QueryConditionsView : ActivatableUserControl {
 
                                 return new TextBlock { Text = field.Name };
                             }),
-                            ItemsSource = TypeQueryFieldsExtractor.Convert(condition.FieldSelector.RecordType),
+                            ItemsSource = TypeQueryFieldsExtractor.ConvertWithoutFilter(condition.FieldSelector.RecordType),
                             [!SelectingItemsControl.SelectedItemProperty] =
                                 new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),
                         };

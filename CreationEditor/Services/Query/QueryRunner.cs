@@ -19,7 +19,9 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
     public IQueryFrom QueryFrom { get; }
     public IObservableCollection<IQueryCondition> QueryConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
-    public IQueryFieldSelectorCollection OrderBySelector { get; } = new QueryFieldSelectorCollection();
+    public IQueryFieldSelectorCollection OrderBySelector { get; } = new QueryFieldSelectorCollection {
+        SelectorFilter = field => field.Type.InheritsFromOpenGeneric(typeof(IComparable<>))
+    };
     public IQueryFieldSelectorCollection FieldSelector { get; } = new QueryFieldSelectorCollection();
 
     public IObservable<Unit> SettingsChanged { get; }
