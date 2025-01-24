@@ -6,5 +6,6 @@
         <LangVersion>preview</LangVersion>
         <WarningsAsErrors>nullable</WarningsAsErrors>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 </Project>

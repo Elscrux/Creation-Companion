@@ -5,8 +5,10 @@
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Docking.LayoutDock"
+             x:DataType="docking:LayoutDockVM"
              Background="{DynamicResource SystemControlTransparentBrush}">
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>

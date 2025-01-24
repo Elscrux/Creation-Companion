@@ -159,14 +159,14 @@
 
             <DataGridTemplateColumn Header="Data">
                 <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition">
+                    <DataTemplate DataType="model:EditableCondition" x:DataType="model:EditableCondition">
                         <ContentControl x:Name="VariablesContainer"
                                         Content="{Binding Data}"
                                         HorizontalAlignment="Stretch">
                             <ContentControl.ContentTemplate>
                                 <dataTemplates:ConditionDataTemplate
-                                    Condition="{Binding}"
-                                    ValueChanged="{Binding DataChanged, Mode=TwoWay}"
+                                    Condition="{ReflectionBinding}"
+                                    ValueChanged="{ReflectionBinding DataChanged, Mode=TwoWay}"
                                     Context="{Binding #Editor.Context}"
                                     QuestContext="{Binding #Editor.QuestContext}"
                                     LinkCache="{Binding #Editor.LinkCache}"/>

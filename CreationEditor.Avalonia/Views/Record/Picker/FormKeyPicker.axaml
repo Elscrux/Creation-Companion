@@ -80,7 +80,7 @@
                                 VerticalAlignment="Center">
                             <Button.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <ReflectionBinding Path="$parent.IsPointerOver"/>
                                     <TemplateBinding Property="Found"/>
                                 </MultiBinding>
                             </Button.IsVisible>
@@ -99,7 +99,7 @@
                                 VerticalAlignment="Center">
                             <Button.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                    <Binding Path="$parent.IsPointerOver"/>
+                                    <ReflectionBinding Path="$parent.IsPointerOver"/>
                                     <TemplateBinding Property="Found"/>
                                 </MultiBinding>
                             </Button.IsVisible>
