@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -61,10 +60,13 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
 
                 // Get the event definition
                 var storyManagerEvent = SkyrimDefinitions.StoryManagerEvents.FirstOrDefault(e => e.Type == quest.Event.Value.TypeInt);
-                if (storyManagerEvent is null || storyManagerEvent.NonReferenceEnums.Count == 0) return;
+                if (storyManagerEvent is null) return;
+
+                var nonReferenceEnums = storyManagerEvent.NonReferenceEnums.ToList();
+                if (nonReferenceEnums.Count == 0) return;
 
                 // Initialize the member to the first valid value if it's not set
-                var firstValue = storyManagerEvent.NonReferenceEnums[0];
+                var firstValue = nonReferenceEnums[0];
                 if (data.Member == GetEventDataConditionData.EventMember.None) {
                     data.Member = (GetEventDataConditionData.EventMember) firstValue;
                 }
@@ -81,7 +83,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                 var enumType = firstValue.GetType();
                 var box = new ComboBox {
                     DataContext = data,
-                    ItemsSource = storyManagerEvent.NonReferenceEnums as IList,
+                    ItemsSource = nonReferenceEnums,
                     [!SelectingItemsControl.SelectedItemProperty] = new Binding(path) {
                         Converter = new ExtendedFuncValueConverter<GetEventDataConditionData.EventMember, Enum, object>(
                             (member, _) => (Enum) Enum.ToObject(enumType, Convert.ToUInt16(member)),
