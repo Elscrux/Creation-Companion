@@ -10,16 +10,9 @@ using Activator = Mutagen.Bethesda.Skyrim.Activator;
 using Location = Mutagen.Bethesda.Skyrim.Location;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 
-public sealed class SkyrimRecordEditorFactory : IRecordEditorFactory {
-    private readonly ILifetimeScope _lifetimeScope;
-
-    public SkyrimRecordEditorFactory(
-        ILifetimeScope lifetimeScope) {
-        _lifetimeScope = lifetimeScope;
-    }
-
+public sealed class SkyrimRecordEditorFactory(ILifetimeScope lifetimeScope) : IRecordEditorFactory {
     public bool FromType(IMajorRecord record, [MaybeNullWhen(false)] out Control control, [MaybeNullWhen(false)] out IRecordEditorVM recordEditorVm) {
-        var newScope = _lifetimeScope.BeginLifetimeScope();
+        var newScope = lifetimeScope.BeginLifetimeScope();
         switch (record) {
             case Npc npc: {
                 if (newScope.TryResolve<IRecordEditorVM<Npc, INpcGetter>>(out var editor)) {
