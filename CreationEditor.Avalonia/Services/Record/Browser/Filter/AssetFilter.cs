@@ -5,23 +5,13 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Avalonia.Services.Record.Browser.Filter;
 
-public abstract class AssetFilter<T> : IRecordFilter {
-    private readonly ILinkCacheProvider _linkCacheProvider;
-    private readonly IFileSystem _fileSystem;
-
+public abstract class AssetFilter<T>(ILinkCacheProvider linkCacheProvider, IFileSystem fileSystem) : IRecordFilter {
     public Type Type => typeof(T);
 
-    protected AssetFilter(
-        ILinkCacheProvider linkCacheProvider,
-        IFileSystem fileSystem) {
-        _linkCacheProvider = linkCacheProvider;
-        _fileSystem = fileSystem;
-    }
-
     public IEnumerable<RecordFilterListing> GetListings(Type type) {
-        var recordFilterListings = _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides(type)
+        var recordFilterListings = linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides(type)
             .OfType<T>()
-            .GetRecursiveListings(GetPaths, _fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar)
+            .GetRecursiveListings(GetPaths, fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar)
             .ToList();
 
         // Trim standalone folders
