@@ -36,7 +36,11 @@ public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         RecordBrowserSettings = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
 
-        SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => group.Activate());
+        SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => {
+            if (group is null) return;
+
+            group.Activate();
+        });
 
         SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
             var recordType = recordTypeListing.Registration.GetterType;
