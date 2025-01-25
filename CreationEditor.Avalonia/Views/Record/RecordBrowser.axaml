@@ -41,7 +41,7 @@
                                     </DataTriggerBehavior.Value>
 
                                     <InvokeCommandAction
-                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordTypeGroup}"
+                                        Command="{Binding #Browser.ViewModel.SelectRecordTypeGroup}"
                                         CommandParameter="{Binding}"/>
                                 </DataTriggerBehavior>
                             </Interaction.Behaviors>

@@ -78,15 +78,15 @@
                     <KeyBinding
                         Gesture="Ctrl+R"
                         Command="{Binding OpenReferences}"
-                        CommandParameter="{ReflectionBinding #AssetTree.RowSelection.SelectedItem}"/>
+                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItem}"/>
                     <KeyBinding
                         Gesture="F2"
                         Command="{Binding Rename}"
-                        CommandParameter="{ReflectionBinding #AssetTree.RowSelection.SelectedItem}"/>
+                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItem}"/>
                     <KeyBinding
                         Gesture="Delete"
                         Command="{Binding Delete}"
-                        CommandParameter="{ReflectionBinding #AssetTree.RowSelection.SelectedItems}"/>
+                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItems}"/>
                 </TreeDataGrid.KeyBindings>
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>

@@ -88,7 +88,7 @@
 
             <StackPanel Grid.Row="2"
                         Margin="5"
-                        IsVisible="{ReflectionBinding !#Selection.ViewModel.AnyModsActive^}">
+                        IsVisible="{Binding !#Selection.ViewModel.AnyModsActive^}">
                 <Label Content="Create a New Mod"/>
                 <view:ModCreation
                     VerticalAlignment="Center"

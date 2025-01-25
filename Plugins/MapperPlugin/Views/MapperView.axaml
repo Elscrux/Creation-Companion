@@ -198,12 +198,12 @@
                                                 <Button
                                                     HorizontalAlignment="Stretch"
                                                     Content="{Binding Name}"
-                                                    Command="{ReflectionBinding #View.ViewModel.LoadMap}"
+                                                    Command="{Binding #View.ViewModel.LoadMap}"
                                                     CommandParameter="{Binding Id}"/>
 
                                                 <Button HorizontalAlignment="Right"
                                                         VerticalAlignment="Stretch"
-                                                        Command="{ReflectionBinding #View.ViewModel.DeleteMap}"
+                                                        Command="{Binding #View.ViewModel.DeleteMap}"
                                                         CommandParameter="{Binding}">
                                                     <controls:SymbolIcon
                                                         Symbol="Delete"
@@ -266,7 +266,7 @@
                                     VerticalAlignment="Center"
                                     FormLink="{Binding Record}"
                                     ScopedTypes="{x:Static constants:RecordTypeConstants.PlaceableTypes}"
-                                    LinkCache="{ReflectionBinding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                                    LinkCache="{Binding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
 
                                 <StackPanel Orientation="Horizontal"
                                             IsVisible="{Binding UseQuery}"

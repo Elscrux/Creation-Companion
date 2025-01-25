@@ -17,7 +17,7 @@
                             BorderBrush="{DynamicResource ButtonBorderBrush}"
                             CornerRadius="4,0,0,4"
                             VerticalAlignment="Center">
-                        <Grid MaxWidth="{ReflectionBinding #Border.Bounds.Width}">
+                        <Grid MaxWidth="{Binding #Border.Bounds.Width}">
                             <TextBlock
                                 IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
                                 Text="{TemplateBinding Watermark}"

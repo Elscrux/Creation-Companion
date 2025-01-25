@@ -22,7 +22,7 @@
                 <Interaction.Behaviors>
                     <EventTriggerBehavior EventName="PointerReleased">
                         <InvokeCommandAction
-                            Command="{ReflectionBinding #Control.DockContainer.Activate}"
+                            Command="{Binding #Control.DockContainer.Activate}"
                             CommandParameter="{Binding Path=#Control.DockedItem}"/>
                     </EventTriggerBehavior>
                 </Interaction.Behaviors>

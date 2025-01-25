@@ -43,7 +43,7 @@
                     </basic:LabeledContentControl>
 
                     <TabControl
-                        IsVisible="{ReflectionBinding #View.ViewModel.WorldspaceFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
+                        IsVisible="{Binding #View.ViewModel.WorldspaceFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
                         <TabItem
                             Header="Shallow Water"
                             ToolTip.Tip="Select the map for shallow water."
@@ -68,16 +68,16 @@
                                     RowDefinitions="Auto,Auto,*,Auto,Auto"
                                     ColumnDefinitions="Auto,*,Auto,Auto">
                                     <TextBlock Grid.Row="0" Grid.Column="0"
-                                               Text="{ReflectionBinding #View.ViewModel.LeftCell}"
+                                               Text="{Binding #View.ViewModel.LeftCell}"
                                                VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="0" Grid.Column="2"
-                                               Text="{ReflectionBinding #View.ViewModel.RightCell}"
+                                               Text="{Binding #View.ViewModel.RightCell}"
                                                VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="1" Grid.Column="3"
-                                               Text="{ReflectionBinding #View.ViewModel.TopCell}"
+                                               Text="{Binding #View.ViewModel.TopCell}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Grid.Row="3" Grid.Column="3"
-                                               Text="{ReflectionBinding #View.ViewModel.BottomCell}"
+                                               Text="{Binding #View.ViewModel.BottomCell}"
                                                HorizontalAlignment="Center"/>
 
                                     <controls:RangeSlider
@@ -90,8 +90,8 @@
                                         Minimum="-128" Maximum="128"
                                         MinimumRange="1"
                                         StepFrequency="1"
-                                        RangeStart="{ReflectionBinding #View.ViewModel.LeftCell, Mode=TwoWay}"
-                                        RangeEnd="{ReflectionBinding #View.ViewModel.RightCell, Mode=TwoWay}"/>
+                                        RangeStart="{Binding #View.ViewModel.LeftCell, Mode=TwoWay}"
+                                        RangeEnd="{Binding #View.ViewModel.RightCell, Mode=TwoWay}"/>
 
                                     <LayoutTransformControl
                                         Grid.Column="3"
@@ -109,8 +109,8 @@
                                             Minimum="-128" Maximum="128"
                                             MinimumRange="1"
                                             StepFrequency="1"
-                                            RangeStart="{ReflectionBinding #View.ViewModel.BottomCell, Mode=TwoWay}"
-                                            RangeEnd="{ReflectionBinding #View.ViewModel.TopCell, Mode=TwoWay}"/>
+                                            RangeStart="{Binding #View.ViewModel.BottomCell, Mode=TwoWay}"
+                                            RangeEnd="{Binding #View.ViewModel.TopCell, Mode=TwoWay}"/>
                                     </LayoutTransformControl>
 
                                     <Border
@@ -177,7 +177,7 @@
                                     <picker:FormKeyPicker
                                         FormKey="{Binding WaterType}"
                                         ScopedTypes="{x:Static constants:RecordTypeConstants.WaterTypes}"
-                                        LinkCache="{ReflectionBinding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                                        LinkCache="{Binding #View.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>

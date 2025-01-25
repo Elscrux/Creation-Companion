@@ -64,7 +64,7 @@
                                     <CheckBox Classes="LogLevelColor"
                                               IsChecked="{Binding Converter={StaticResource LevelVisibilityConverter}}"
                                               Content="{Binding Converter={x:Static converter:EnumConverters.ToString}}"
-                                              Command="{ReflectionBinding #Log.ViewModel.ToggleEvent}"
+                                              Command="{Binding #Log.ViewModel.ToggleEvent}"
                                               CommandParameter="{Binding}">
                                         <CheckBox.Styles>
                                             <Style

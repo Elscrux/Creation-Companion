@@ -16,5 +16,5 @@
             CommandParameter="{Binding #Window}"/>
     </windowing:AppWindow.KeyBindings>
 
-    <reference:ReferenceBrowser DataContext="{ReflectionBinding #Window.ReferenceBrowserVM}"/>
+    <reference:ReferenceBrowser DataContext="{Binding #Window.ReferenceBrowserVM}"/>
 </windowing:AppWindow>
