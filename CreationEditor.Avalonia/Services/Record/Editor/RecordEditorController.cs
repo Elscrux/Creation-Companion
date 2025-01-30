@@ -61,7 +61,7 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
             _dockingManagerService.RemoveControl(editorControl.Control);
 
-            RemoveEditorCache(editorControl.Control);
+            RemoveFromEditorCache(editorControl.Control);
         }
     }
 
@@ -69,17 +69,17 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
         foreach (var control in _openRecordEditors.Values.Select(x => x.Control)) {
             _dockingManagerService.RemoveControl(control);
 
-            RemoveEditorCache(control);
+            RemoveFromEditorCache(control);
         }
 
         _openRecordEditors.Clear();
     }
 
     private void OnClosed(IDockedItem dockedItem) {
-        RemoveEditorCache(dockedItem.Control);
+        RemoveFromEditorCache(dockedItem.Control);
     }
 
-    private void RemoveEditorCache(Control editor) {
+    private void RemoveFromEditorCache(Control editor) {
         var editorsToRemove = _openRecordEditors
             .Where(x => ReferenceEquals(x.Value.Control, editor))
             .ToList();
