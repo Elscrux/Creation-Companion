@@ -25,21 +25,21 @@
                     Label="Save"
                     IsCompact="False"
                     IsVisible="True"
-                    Command="{Binding Save}"/>
+                    Command="{Binding Core.Save}"/>
             </controls:CommandBar.PrimaryCommands>
         </controls:CommandBar>
 
         <StackPanel Grid.Column="0" Grid.Row="1">
             <HeaderedContentControl Margin="5"
                                     Header="EditorID">
-                <TextBox Text="{Binding EditableRecord.EditorID}"
+                <TextBox Text="{Binding Core.EditableRecord.EditorID}"
                          Width="400"
                          HorizontalAlignment="Left"/>
             </HeaderedContentControl>
 
             <HeaderedContentControl Margin="5"
                                     Header="Name">
-                <TextBox Text="{Binding EditableRecord.NameStr}"
+                <TextBox Text="{Binding Core.EditableRecord.NameStr}"
                          Width="400"
                          HorizontalAlignment="Left"/>
             </HeaderedContentControl>
@@ -55,17 +55,17 @@
                                     Header="Teaches">
                 <StackPanel Spacing="10">
                     <ComboBox ItemsSource="{x:Static majorRecord:EditableBook.BookTeachesValues}"
-                              SelectedItem="{Binding EditableRecord.TeachesOption}"/>
+                              SelectedItem="{Binding Core.EditableRecord.TeachesOption}"/>
 
                     <ComboBox ItemsSource="{x:Static constants:EnumConstants.Skills}"
-                              SelectedItem="{Binding EditableRecord.Skill}"
-                              IsVisible="{Binding EditableRecord.TeachesOption, Converter={x:Static converter:EnumConverters.Equals}, ConverterParameter={x:Static majorRecord:BookTeaches.Skill}}"/>
+                              SelectedItem="{Binding Core.EditableRecord.Skill}"
+                              IsVisible="{Binding Core.EditableRecord.TeachesOption, Converter={x:Static converter:EnumConverters.Equals}, ConverterParameter={x:Static majorRecord:BookTeaches.Skill}}"/>
 
                     <picker:FormKeyPicker
-                        FormKey="{Binding EditableRecord.BookSpell.Spell.FormKey}"
+                        FormKey="{Binding Core.EditableRecord.BookSpell.Spell.FormKey}"
                         ScopedTypes="{x:Static constants:RecordTypeConstants.SpellTypes}"
-                        LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCacheProvider.LinkCacheChanged^}"
-                        IsVisible="{Binding EditableRecord.TeachesOption, Converter={x:Static converter:EnumConverters.Equals}, ConverterParameter={x:Static majorRecord:BookTeaches.Spell}}"/>
+                        LinkCache="{Binding #Editor.ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"
+                        IsVisible="{Binding Core.EditableRecord.TeachesOption, Converter={x:Static converter:EnumConverters.Equals}, ConverterParameter={x:Static majorRecord:BookTeaches.Spell}}"/>
                 </StackPanel>
             </HeaderedContentControl>
 
@@ -80,23 +80,23 @@
                 <picker:FormKeyPicker
                     FormKey="{Binding InventoryArt}"
                     ScopedTypes="{x:Static constants:RecordTypeConstants.StaticTypes}"
-                    LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                    LinkCache="{Binding #Editor.ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"/>
             </HeaderedContentControl>
 
             <HeaderedContentControl Margin="5"
                                     Header="Pickup Sound">
                 <picker:FormKeyPicker
-                    FormKey="{Binding EditableRecord.PickUpSound.FormKey}"
+                    FormKey="{Binding Core.EditableRecord.PickUpSound.FormKey}"
                     ScopedTypes="{x:Static constants:RecordTypeConstants.SoundDescriptorTypes}"
-                    LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                    LinkCache="{Binding #Editor.ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"/>
             </HeaderedContentControl>
 
             <HeaderedContentControl Margin="5"
                                     Header="Putdown Sound">
                 <picker:FormKeyPicker
-                    FormKey="{Binding EditableRecord.PutDownSound.FormKey}"
+                    FormKey="{Binding Core.EditableRecord.PutDownSound.FormKey}"
                     ScopedTypes="{x:Static constants:RecordTypeConstants.SoundDescriptorTypes}"
-                    LinkCache="{ReflectionBinding #Editor.ViewModel.LinkCacheProvider.LinkCacheChanged^}"/>
+                    LinkCache="{Binding #Editor.ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"/>
             </HeaderedContentControl>
 
             <CheckBox Content="Can't be Taken"/>

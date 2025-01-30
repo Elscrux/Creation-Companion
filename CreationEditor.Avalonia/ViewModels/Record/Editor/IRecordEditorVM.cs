@@ -1,19 +1,11 @@
-﻿using System.Reactive;
-using Avalonia.Controls;
+﻿using CreationEditor.Avalonia.Services.Record.Editor;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
-using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Record.Editor;
 
-public interface IRecordEditorVM : IDisposableDropoff {
-    IMajorRecordGetter Record { get; }
-
-    ReactiveCommand<Unit, Unit> Save { get; }
+public interface IRecordEditorVM {
+    IRecordEditorCore Core { get; }
 }
 
-public interface IRecordEditorVM<TMajorRecord, TMajorRecordGetter> : ISubRecordEditorVM<TMajorRecord>
+public interface IRecordEditorVM<TMajorRecord, TMajorRecordGetter> : IRecordEditorVM
     where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-    where TMajorRecordGetter : class, IMajorRecordGetter {
-
-    Control CreateControl(TMajorRecord record);
-}
+    where TMajorRecordGetter : class, IMajorRecordGetter;

@@ -19,12 +19,12 @@ public sealed class RankEditorVM : ViewModel {
         FactionEditorVM = factionEditorVM;
 
         AddRank = ReactiveCommand.Create(() => {
-            FactionEditorVM.EditableRecord.Ranks.Add(new Rank { Title = new GenderedItem<TranslatedString?>(string.Empty, string.Empty) });
+            FactionEditorVM.Core.EditableRecord.Ranks.Add(new Rank { Title = new GenderedItem<TranslatedString?>(string.Empty, string.Empty) });
         });
 
         RemoveRank = ReactiveCommand.Create<IList>(ranks => {
             foreach (var rank in ranks.OfType<Rank>().ToList()) {
-                FactionEditorVM.EditableRecord.Ranks.Remove(rank);
+                FactionEditorVM.Core.EditableRecord.Ranks.Remove(rank);
             }
         });
     }

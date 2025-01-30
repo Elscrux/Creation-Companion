@@ -95,7 +95,7 @@ public sealed class EditableCondition : ReactiveObject {
             .DisposeWith(_disposable);
     }
 
-    public EditableCondition(ICondition parent) : this() {
+    public EditableCondition(IConditionGetter parent) : this() {
         var value = FunctionProperty?.GetValue(parent.Data);
         if (value is Condition.Function function) Function = function;
 
@@ -110,7 +110,7 @@ public sealed class EditableCondition : ReactiveObject {
                 break;
         }
 
-        Data = parent.Data;
+        Data = parent.Data.DeepCopy();
         ReferenceLink = new FormLink<IPlacedGetter>(Data.Reference.FormKey);
 
         if (Data.Reference.FormKey == Mutagen.Bethesda.FormKeys.SkyrimSE.Skyrim.PlayerRef.FormKey

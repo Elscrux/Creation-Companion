@@ -3,11 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:view="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction"
-             xmlns:vm="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             x:DataType="vm:FactionEditorVM"
+             xmlns:faction="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             x:DataType="faction:FactionEditorVM"
              d:DesignHeight="900" d:DesignWidth="900"
              x:Name="Editor">
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding Core.Undo}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding Core.Redo}"/>
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding Core.Redo}"/>
+    </UserControl.KeyBindings>
+
     <Grid RowDefinitions="40,65,*">
         <controls:CommandBar DefaultLabelPosition="Right">
             <controls:CommandBar.PrimaryCommands>
@@ -16,7 +23,7 @@
                     Label="Save"
                     IsCompact="False"
                     IsVisible="True"
-                    Command="{Binding Save}"/>
+                    Command="{Binding Core.Save}"/>
             </controls:CommandBar.PrimaryCommands>
         </controls:CommandBar>
 
@@ -24,14 +31,14 @@
                     Orientation="Horizontal">
             <HeaderedContentControl Margin="5"
                                     Header="EditorID">
-                <TextBox Text="{Binding EditableRecord.EditorID}"
+                <TextBox Text="{Binding Core.EditableRecord.EditorID}"
                          Width="400"
                          HorizontalAlignment="Left"/>
             </HeaderedContentControl>
 
             <HeaderedContentControl Margin="5"
                                     Header="Name">
-                <TextBox Text="{Binding EditableRecord.NameStr}"
+                <TextBox Text="{Binding Core.EditableRecord.NameStr}"
                          Width="400"
                          HorizontalAlignment="Left"/>
             </HeaderedContentControl>
@@ -43,19 +50,19 @@
                     <StackPanel Grid.Row="0"
                                 Orientation="Horizontal">
                         <CheckBox Content="Hidden from PC"
-                                  IsChecked="{Binding EditableRecord.HiddenFromPc}"
+                                  IsChecked="{Binding Core.EditableRecord.HiddenFromPc}"
                                   Margin="5"
                                   ToolTip.Tip="MISSING EXPLANATION"/>
 
                         <CheckBox Content="Special Combat"
                                   ToolTip.Tip="MISSING EXPLANATION"
-                                  IsChecked="{Binding EditableRecord.SpecialCombat}"
+                                  IsChecked="{Binding Core.EditableRecord.SpecialCombat}"
                                   Margin="5"/>
 
                         <CheckBox
                             Content="Can Be Owner"
                             ToolTip.Tip="If checked, the faction can be selected as owner of interiors cells, items or placed objects"
-                            IsChecked="{Binding EditableRecord.CanBeOwner}"
+                            IsChecked="{Binding Core.EditableRecord.CanBeOwner}"
                             Margin="5"/>
                     </StackPanel>
 

@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CreationEditor.Avalonia.Models.Mod.Editor;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using DynamicData.Binding;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 
-public sealed class EditableFaction : Faction, INotifyPropertyChanged {
+public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
     public new ObservableCollectionExtended<EditableRelation> Relations { get; set; }
     public new ObservableCollectionExtended<Rank> Ranks { get; set; }
     public new ObservableCollectionExtended<EditableCondition> Conditions { get; set; }
@@ -128,37 +130,43 @@ public sealed class EditableFaction : Faction, INotifyPropertyChanged {
         }
     }
 
-    public EditableFaction(IFaction parent) {
-        EditorID = parent.EditorID;
-        Name = parent.Name;
+    public EditableFaction(IFactionGetter parent) {
         FormKey = parent.FormKey;
-        Flags = parent.Flags;
+        this.DeepCopyIn(parent);
         Relations = new ObservableCollectionExtended<EditableRelation>(parent.Relations.Select(r => new EditableRelation {
             Reaction = r.Reaction, TargetFormKey = r.Target.FormKey,
         }));
-        Ranks = new ObservableCollectionExtended<Rank>(parent.Ranks);
 
-        CrimeValues = parent.CrimeValues ?? GetDefaultCrimeValues();
-        JailOutfit = parent.JailOutfit;
-        SharedCrimeFactionList = parent.SharedCrimeFactionList;
-        ExteriorJailMarker = parent.ExteriorJailMarker;
-        FollowerWaitMarker = parent.FollowerWaitMarker;
-        PlayerInventoryContainer = parent.PlayerInventoryContainer;
-        StolenGoodsContainer = parent.StolenGoodsContainer;
+        Ranks = new ObservableCollectionExtended<Rank>(parent.Ranks.Select(r => r.DeepCopy()));
 
-        VendorValues = parent.VendorValues ?? new VendorValues { StartHour = 0, EndHour = 24 };
-        VendorLocation = parent.VendorLocation ?? new LocationTargetRadius();
-        VendorBuySellList = parent.VendorBuySellList;
-        MerchantContainer = parent.MerchantContainer;
+        CrimeValues = parent.CrimeValues?.DeepCopy() ?? GetDefaultCrimeValues();
+
+        VendorValues = parent.VendorValues?.DeepCopy() ?? new VendorValues();
+        VendorLocation = parent.VendorLocation?.DeepCopy() ?? new LocationTargetRadius();
         Conditions = parent.Conditions is null
             ? []
             : new ObservableCollectionExtended<EditableCondition>(parent.Conditions.Select(c => new EditableCondition(c)));
     }
 
-    private static CrimeValues GetDefaultCrimeValues() {
+    public void CopyTo(Faction faction) {
+        faction.DeepCopyIn(this);
+        faction.Relations.ReplaceWith(Relations
+            .Where(r => !r.TargetFormKey.IsNull)
+            .Select(r => r.ToRelation()));
+
+        for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
+        faction.Ranks.ReplaceWith(Ranks);
+
+        faction.CrimeValues = CrimeGoldUseDefaults ? GetDefaultCrimeValues() : CrimeValues;
+
+        faction.VendorValues = VendorValues;
+        faction.Conditions = Conditions.Select(c => c.ToCondition()).ToExtendedList();
+    }
+
+    private CrimeValues GetDefaultCrimeValues() {
         return new CrimeValues {
-            Arrest = true,
-            AttackOnSight = true,
+            Arrest = CrimeValues.Arrest,
+            AttackOnSight = CrimeValues.AttackOnSight,
             Murder = 1000,
             Assault = 40,
             Pickpocket = 25,

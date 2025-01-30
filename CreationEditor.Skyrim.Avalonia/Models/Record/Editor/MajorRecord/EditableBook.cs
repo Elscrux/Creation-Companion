@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CreationEditor.Avalonia.Models.Mod.Editor;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
@@ -10,7 +12,7 @@ public enum BookTeaches {
     Spell,
 }
 
-public sealed class EditableBook : Book, INotifyPropertyChanged {
+public sealed class EditableBook : Book, IEditableRecord<Book> {
     public static BookTeaches[] BookTeachesValues { get; } = Enum.GetValues<BookTeaches>();
 
     public override string? EditorID { get; set; }
@@ -42,20 +44,10 @@ public sealed class EditableBook : Book, INotifyPropertyChanged {
     public BookSkill BookSkill { get; } = new();
     public BookSpell BookSpell { get; } = new();
 
-    public EditableBook(IBook parent) {
-        EditorID = parent.EditorID;
-        Name = parent.Name;
+    public EditableBook(IBookGetter parent) {
         FormKey = parent.FormKey;
-        Flags = parent.Flags;
-        Description = parent.Description;
-        Value = parent.Value;
-        Weight = parent.Weight;
-        Keywords = parent.Keywords;
-        BookText = parent.BookText;
-        Destructible = parent.Destructible;
-        InventoryArt = parent.InventoryArt;
-        VirtualMachineAdapter = parent.VirtualMachineAdapter;
-        ObjectBounds = parent.ObjectBounds;
+        this.DeepCopyIn(parent);
+
         switch (parent.Teaches) {
             case BookSkill bookSkill:
                 TeachesOption = BookTeaches.Skill;
@@ -72,6 +64,19 @@ public sealed class EditableBook : Book, INotifyPropertyChanged {
             default:
                 throw new InvalidOperationException();
         }
+    }
+
+    public void CopyTo(Book book) {
+        book.DeepCopyIn(this);
+        book.Description = Description is null || Description.All(x => string.IsNullOrEmpty(x.Value)) ? null : Description;
+        book.Teaches = TeachesOption switch {
+            BookTeaches.Nothing => new BookTeachesNothing {
+                RawContent = uint.MaxValue,
+            },
+            BookTeaches.Skill => BookSkill,
+            BookTeaches.Spell => BookSpell,
+            _ => throw new InvalidOperationException(),
+        };
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

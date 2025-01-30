@@ -19,10 +19,10 @@
             <HeaderedContentControl.Header>
                 <CheckBox Content="Vendor"
                           ToolTip.Tip="Allows you to specify bounty amounts allocated for specific crimes. "
-                          IsChecked="{Binding EditableRecord.Vendor}"/>
+                          IsChecked="{Binding Core.EditableRecord.Vendor}"/>
             </HeaderedContentControl.Header>
 
-            <StackPanel IsEnabled="{Binding EditableRecord.Vendor}">
+            <StackPanel IsEnabled="{Binding Core.EditableRecord.Vendor}">
                 <Grid ColumnDefinitions="*,*">
                     <StackPanel Grid.Column="0">
                         <HeaderedContentControl Classes="GroupBoxStretch"
@@ -30,9 +30,9 @@
                                                 Header="Vendor Chest"
                                                 ToolTip.Tip="Sets what container the merchant will sell goods from. Note that a vendor will not sell items in this container unless they also match the vendor's buy/sell list.">
                             <picker:PlacedPickerButton
-                                Placed="{Binding EditableRecord.MerchantContainer}"
+                                Placed="{Binding Core.EditableRecord.MerchantContainer}"
                                 Filter="{Binding ChestFilter}"
-                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
+                                LinkCache="{Binding Core.LinkCacheProvider.LinkCacheChanged^}"/>
                         </HeaderedContentControl>
 
                         <HeaderedContentControl Classes="GroupBoxStretch"
@@ -43,8 +43,8 @@
                                                         Header="Location"
                                                         ToolTip.Tip="Used to set where the vendor needs to be to sell goods.">
                                     <picker:TargetPicker
-                                        Target="{Binding EditableRecord.VendorLocation.Target, Mode=TwoWay}"
-                                        LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}">
+                                        Target="{Binding Core.EditableRecord.VendorLocation.Target, Mode=TwoWay}"
+                                        LinkCache="{Binding Core.LinkCacheProvider.LinkCacheChanged^}">
                                         <picker:TargetPicker.Types>
                                             <generic:List x:TypeArguments="picker:TargetPickerType">
                                                 <picker:TargetPickerType>Cell</picker:TargetPickerType>
@@ -61,7 +61,7 @@
                                 <HeaderedContentControl Margin="5"
                                                         Header="Radius"
                                                         ToolTip.Tip="How close the merchant needs to be to the set location.">
-                                    <NumericUpDown Value="{Binding EditableRecord.VendorValues.Radius}"
+                                    <NumericUpDown Value="{Binding Core.EditableRecord.VendorValues.Radius}"
                                                    Minimum="0"
                                                    Maximum="65535"
                                                    FormatString="N0"/>
@@ -83,23 +83,23 @@
                                 Header="List"
                                 ToolTip.Tip="The merchant will buy and sell any items which are tagged with keywords contained in this list.">
                                 <picker1:FormKeyPicker
-                                    FormKey="{Binding EditableRecord.VendorBuySellList.FormKey}"
+                                    FormKey="{Binding Core.EditableRecord.VendorBuySellList.FormKey}"
                                     ScopedTypes="{x:Static constants:RecordTypeConstants.FormListTypes}"
-                                    LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
+                                    LinkCache="{Binding Core.LinkCacheProvider.LinkCacheChanged^}"/>
                             </HeaderedContentControl>
 
                             <CheckBox Grid.Column="0" Grid.Row="1"
                                       VerticalAlignment="Top"
                                       Content="Only Buy Stolen Items"
                                       ToolTip.Tip="Sets this vendor up to only pay for stolen items the player wants to fence."
-                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      IsChecked="{Binding Core.EditableRecord.VendorValues.OnlyBuysStolenItems}"
                                       Margin="5"/>
 
                             <CheckBox Grid.Column="1" Grid.Row="1"
                                       VerticalAlignment="Top"
                                       Content="Treat as Blacklist"
                                       ToolTip.Tip="The merchant will buy/sell all items NOT flagged with the keyword(s) in the selected list."
-                                      IsChecked="{Binding EditableRecord.VendorValues.NotSellBuy}"
+                                      IsChecked="{Binding Core.EditableRecord.VendorValues.NotSellBuy}"
                                       Margin="5"/>
                         </Grid>
                     </HeaderedContentControl>
@@ -119,8 +119,8 @@
                                     Minimum="0" Maximum="24"
                                     MinimumRange="1"
                                     StepFrequency="1"
-                                    RangeStart="{Binding EditableRecord.VendorValues.StartHour}"
-                                    RangeEnd="{Binding EditableRecord.VendorValues.EndHour}"/>
+                                    RangeStart="{Binding Core.EditableRecord.VendorValues.StartHour}"
+                                    RangeEnd="{Binding Core.EditableRecord.VendorValues.EndHour}"/>
                             </StackPanel>
                         </HeaderedContentControl>
 
@@ -133,8 +133,8 @@
 
                             <view:ConditionsEditor
                                 Height="500"
-                                Conditions="{Binding EditableRecord.Conditions}"
-                                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"
+                                Conditions="{Binding Core.EditableRecord.Conditions}"
+                                LinkCache="{Binding Core.LinkCacheProvider.LinkCacheChanged^}"
                                 CopyPasteController="{Binding ConditionsCopyPasteController}"/>
                         </HeaderedContentControl>
                     </StackPanel>

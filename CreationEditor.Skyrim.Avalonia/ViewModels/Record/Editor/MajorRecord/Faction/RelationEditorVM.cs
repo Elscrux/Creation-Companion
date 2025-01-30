@@ -21,17 +21,17 @@ public sealed class RelationEditorVM : ViewModel {
     public RelationEditorVM(FactionEditorVM factionEditorVM) {
         FactionEditorVM = factionEditorVM;
 
-        BlacklistedFormKeys = FactionEditorVM.EditableRecord.Relations
+        BlacklistedFormKeys = FactionEditorVM.Core.EditableRecord.Relations
             .SelectObservableCollection(x => x.TargetFormKey, this);
 
         AddRelation = ReactiveCommand.Create(() => {
             var relation = new EditableRelation { Reaction = CombatReaction.Neutral };
-            FactionEditorVM.EditableRecord.Relations.Add(relation);
+            FactionEditorVM.Core.EditableRecord.Relations.Add(relation);
         });
 
         RemoveRelation = ReactiveCommand.Create<IList>(relations => {
             foreach (var relation in relations.OfType<EditableRelation>().ToList()) {
-                FactionEditorVM.EditableRecord.Relations.Remove(relation);
+                FactionEditorVM.Core.EditableRecord.Relations.Remove(relation);
             }
         });
     }

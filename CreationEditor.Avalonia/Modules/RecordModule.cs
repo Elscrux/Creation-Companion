@@ -4,6 +4,7 @@ using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.Provider;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Query;
@@ -57,11 +58,27 @@ public sealed class RecordModule : Module {
             .As<IRecordEditorController>()
             .SingleInstance();
 
+        builder.RegisterGeneric(typeof(RecordEditorCore<,,>))
+            .As(typeof(IRecordEditorCore<,,>))
+            .AsSelf();
+
+        builder.RegisterGeneric(typeof(RecordEditorHistory<,,>))
+            .AsSelf();
+
+        builder.RegisterGeneric(typeof(RecordEditorValidator<,,>))
+            .AsSelf();
+
         // Record Provider
         builder.RegisterType<RecordTypeProvider>()
             .AsSelf();
 
         builder.RegisterType<RecordIdentifiersProvider>()
             .AsSelf();
+
+        // Record Validator
+        builder.RegisterType<DebugRecordValidator>()
+            .As<IRecordValidator>()
+            .AsSelf()
+            .SingleInstance();
     }
 }

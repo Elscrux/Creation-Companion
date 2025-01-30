@@ -6,7 +6,9 @@ using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.TextMate;
+using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Book;
+using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 using TextMateSharp.Grammars;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book;
@@ -29,11 +31,9 @@ public partial class BookEditor : ReactiveUserControl<BookEditorVM> {
 
                     vm.WhenAnyValue(x => x.Language)
                         .Subscribe(_ => {
-                            if (vm.EditableRecord is null) return;
-
-                            TextEditor.Document.Text = vm.EditableRecord.BookText.TryLookup(vm.Language, out var bookText)
+                            TextEditor.Document.Text = vm.Core.EditableRecord.BookText.TryLookup(vm.Language, out var bookText)
                                 ? bookText
-                                : vm.EditableRecord.BookText;
+                                : vm.Core.EditableRecord.BookText;
                         })
                         .DisposeWith(disposable);
 
@@ -46,7 +46,7 @@ public partial class BookEditor : ReactiveUserControl<BookEditorVM> {
         });
     }
 
-    public BookEditor(BookEditorVM vm) : this() {
+    public BookEditor(IRecordEditorVM<Mutagen.Bethesda.Skyrim.Book, IBookGetter> vm) : this() {
         DataContext = vm;
     }
 

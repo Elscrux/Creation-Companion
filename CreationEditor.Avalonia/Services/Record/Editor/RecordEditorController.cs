@@ -85,7 +85,7 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
             .ToList();
 
         foreach (var (formKey, editorControl) in editorsToRemove) {
-            editorControl.EditorVM.Save.Execute();
+            editorControl.EditorVM.Core.Save.Execute();
 
             _openRecordEditors.Remove(formKey);
         }
