@@ -36,7 +36,6 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
             recordEditorController.OpenEditor(newRecord);
         });
 
-
         var editCommand = ReactiveCommand.Create<RecordListContext>(context => {
             foreach (var referencedRecord in context.SelectedRecords) {
                 var newOverride = recordController.GetOrAddOverride(referencedRecord.Record);
