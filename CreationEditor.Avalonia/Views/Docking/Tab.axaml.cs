@@ -55,8 +55,12 @@ public partial class Tab : UserControl, IDockPreview {
         if (sender is not Control control) return;
 
         var currentPoint = e.GetCurrentPoint(control);
-        if (currentPoint.Properties.PointerUpdateKind != PointerUpdateKind.MiddleButtonReleased) return;
-
-        await DockedItem.Close.Execute();
+        if (currentPoint.Properties.PointerUpdateKind == PointerUpdateKind.MiddleButtonReleased) {
+            await DockedItem.Close.Execute();
+        } else {
+            if (DockContainer is not null) {
+                await DockContainer.Activate.Execute(DockedItem);
+            }
+        }
     }
 }

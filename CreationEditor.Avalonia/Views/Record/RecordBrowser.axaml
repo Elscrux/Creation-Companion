@@ -30,7 +30,8 @@
                       Classes="Compact">
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="model:RecordTypeGroup" ItemsSource="{Binding RecordTypes}">
-                        <TextBlock Text="{Binding GroupName}">
+                        <TextBlock Text="{Binding GroupName}"
+                                   Background="{StaticResource SystemControlTransparentBrush}">
                             <Interaction.Behaviors>
                                 <!-- todo remove one behavior when bug is fixed that requires to set the expanded state twice -->
                                 <ToggleIsExpandedOnDoubleTappedBehavior/>
@@ -50,6 +51,7 @@
 
                     <TreeDataTemplate DataType="model:RecordTypeListing" ItemsSource="{Binding RecordFilters}">
                         <TextBlock Text="{Binding DisplayName}"
+                                   Background="{StaticResource SystemControlTransparentBrush}"
                                    Padding="0, 2"
                                    FontSize="12">
                             <Interaction.Behaviors>
@@ -70,6 +72,7 @@
 
                     <TreeDataTemplate DataType="model:RecordFilterListing" ItemsSource="{Binding RecordFilters}">
                         <TextBlock Text="{Binding DisplayName}"
+                                   Background="{StaticResource SystemControlTransparentBrush}"
                                    Padding="0"
                                    FontSize="12">
                             <Interaction.Behaviors>
