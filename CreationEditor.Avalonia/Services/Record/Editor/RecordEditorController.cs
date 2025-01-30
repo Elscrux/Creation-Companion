@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Disposables;
-using Autofac;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
@@ -14,7 +13,6 @@ using EditorControl = (Control Control, IRecordEditorVM EditorVM);
 public sealed class RecordEditorController : IRecordEditorController, IDisposable {
     private readonly CompositeDisposable _disposable = new();
     private readonly ILogger _logger;
-    private readonly ILifetimeScope _lifetimeScope;
     private readonly IDockingManagerService _dockingManagerService;
     private readonly IRecordEditorFactory _recordEditorFactory;
 
@@ -22,11 +20,9 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
 
     public RecordEditorController(
         ILogger logger,
-        ILifetimeScope lifetimeScope,
         IDockingManagerService dockingManagerService,
         IRecordEditorFactory recordEditorFactory) {
         _logger = logger;
-        _lifetimeScope = lifetimeScope.DisposeWith(_disposable);
         _dockingManagerService = dockingManagerService;
         _recordEditorFactory = recordEditorFactory;
 
@@ -36,35 +32,6 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
     }
 
     public bool AnyEditorsOpen() => _openRecordEditors.Count > 0;
-
-    public void OpenEditor<TMajorRecord, TMajorRecordGetter>(TMajorRecord record)
-        where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-        where TMajorRecordGetter : class, IMajorRecordGetter {
-
-        if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
-            // Select editor as active
-            _dockingManagerService.Focus(editorControl.Control);
-        } else {
-            // Open new editor
-            if (_lifetimeScope.TryResolve<IRecordEditorVM<TMajorRecord, TMajorRecordGetter>>(out var recordEditorVM)) {
-                var control = recordEditorVM.CreateControl(record);
-
-                _dockingManagerService.AddControl(
-                    control,
-                    new DockConfig {
-                        DockInfo = new DockInfo {
-                            Header = record.EditorID ?? record.FormKey.ToString(),
-                        },
-                        Dock = Dock.Right,
-                        DockMode = DockMode.Document,
-                        GridSize = new GridLength(2, GridUnitType.Star),
-                    });
-                _openRecordEditors.Add(record.FormKey, new EditorControl(control, recordEditorVM));
-            } else {
-                _logger.Here().Warning("Cannot open record editor of type {Type} because no such editor is available", typeof(TMajorRecord));
-            }
-        }
-    }
 
     public void OpenEditor(IMajorRecord record) {
         if (_openRecordEditors.TryGetValue(record.FormKey, out var editorControl)) {
