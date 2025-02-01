@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Models.Settings.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
+using DynamicData.Binding;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
@@ -22,6 +23,8 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public Type? Parent => null;
     public List<ISetting> Children { get; } = [];
 
+    public IObservableCollection<StartupDock> Docks { get; }
+
     public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
     public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }
 
@@ -34,12 +37,13 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
         _dockFactory = dockFactory;
 
         Settings = settingImporter.Import(this) ?? StartupDocksSetting.Default;
+        Docks = new ObservableCollectionExtended<StartupDock>(Settings.Docks);
 
-        AddStartupDock = ReactiveCommand.Create(() => Settings.Docks.Add(new StartupDock()));
+        AddStartupDock = ReactiveCommand.Create(() => Docks.Add(new StartupDock()));
 
         RemoveStartupDock = ReactiveCommand.Create<IList>(removeDocks => {
             foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
-                Settings.Docks.Remove(removeDock);
+                Docks.Remove(removeDock);
             }
         });
     }
@@ -51,7 +55,7 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public void PreStartup() {}
 
     public void PostStartupAsync(CancellationToken token) => Dispatcher.UIThread.Post(() => {
-        foreach (var startupDock in Settings.Docks) {
+        foreach (var startupDock in Docks) {
             Start(startupDock);
         }
     });
@@ -59,6 +63,6 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
     public void OnExit() {}
 
     public void Apply() {
-        // Nothing to do on this runtime
+        Settings.Docks.ReplaceWith(Docks);
     }
 }

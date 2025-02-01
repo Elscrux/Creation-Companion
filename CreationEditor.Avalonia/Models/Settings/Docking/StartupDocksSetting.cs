@@ -6,23 +6,23 @@ using Newtonsoft.Json;
 namespace CreationEditor.Avalonia.Models.Settings.Docking;
 
 public sealed class StartupDocksSetting(IList<StartupDock> docks) : ISettingModel {
-    public static readonly StartupDocksSetting Default = new(new ObservableCollectionExtended<StartupDock> {
-        new() {
+    public static readonly StartupDocksSetting Default = new([
+        new StartupDock {
             DockElement = DockElement.RecordBrowser,
             DockMode = DockMode.Side,
             Dock = Dock.Left,
         },
-        new() {
+        new StartupDock {
             DockElement = DockElement.CellBrowser,
             DockMode = DockMode.Side,
             Dock = Dock.Right,
         },
-        new() {
+        new StartupDock {
             DockElement = DockElement.Log,
             DockMode = DockMode.Side,
             Dock = Dock.Bottom,
         },
-    });
+    ]);
 
     [JsonProperty] public IList<StartupDock> Docks { get; } = docks;
 }
