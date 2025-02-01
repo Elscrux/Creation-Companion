@@ -4,13 +4,13 @@ using Avalonia;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using Noggog;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
 /// <summary>
 /// Root for a docking system. Contains four side docks in every direction and a layout to customize the view.
 /// </summary>
-public sealed class DockingManagerVM : DockContainerVM {
+public sealed partial class DockingManagerVM : DockContainerVM {
     public object EditLock { get; } = new();
     public DisposableCounterLock CleanUpLock { get; }
 
@@ -24,11 +24,11 @@ public sealed class DockingManagerVM : DockContainerVM {
 
 
     public LayoutDockVM Layout { get; }
-    [Reactive] public Size LayoutSize { get; set; }
-    [Reactive] public double LayoutHeight { get; set; }
-    [Reactive] public double LayoutWidth { get; set; }
-    [Reactive] public double LayoutMinHeight { get; set; }
-    [Reactive] public double LayoutMinWidth { get; set; }
+    [Reactive] public partial Size LayoutSize { get; set; }
+    [Reactive] public partial double LayoutHeight { get; set; }
+    [Reactive] public partial double LayoutWidth { get; set; }
+    [Reactive] public partial double LayoutMinHeight { get; set; }
+    [Reactive] public partial double LayoutMinWidth { get; set; }
 
     public SideDockVM TopSide { get; }
     public SideDockVM BottomSide { get; }

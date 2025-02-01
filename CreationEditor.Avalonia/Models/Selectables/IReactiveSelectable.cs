@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using Noggog;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Selectables;
 
 public interface IReactiveSelectable : ISelected, INotifyPropertyChanged {

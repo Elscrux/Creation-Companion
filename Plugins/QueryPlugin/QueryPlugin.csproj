@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="ReactiveUI" />
-      <PackageReference Include="ReactiveUI.Fody" />
+      <PackageReference Include="ReactiveUI.SourceGenerators" />
     </ItemGroup>
 
     <Target Name="CopyPlugin" AfterTargets="Build">

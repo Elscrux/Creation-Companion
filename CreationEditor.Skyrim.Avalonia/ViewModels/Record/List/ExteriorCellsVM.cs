@@ -11,16 +11,16 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 
-public sealed class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
+public sealed partial class ExteriorCellsVM : ViewModel, ICellLoadStrategy {
     public ILinkCacheProvider LinkCacheProvider { get; }
     private readonly IViewportRuntimeService _viewportRuntimeService;
     public ExteriorCellsProvider ExteriorCellsProvider { get; }
 
-    [Reactive] public int GridXValue { get; set; }
-    [Reactive] public int GridYValue { get; set; }
+    [Reactive] public partial int GridXValue { get; set; }
+    [Reactive] public partial int GridYValue { get; set; }
 
     public IRecordListVM RecordListVM { get; }
 

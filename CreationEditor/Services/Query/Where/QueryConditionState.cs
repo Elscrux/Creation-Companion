@@ -2,14 +2,14 @@
 using System.Text;
 using DynamicData.Binding;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class QueryConditionState : ReactiveObject {
+public sealed partial class QueryConditionState : ReactiveObject {
     private readonly IQueryCompareFunction? _selectedCompareFunction;
     private readonly Type? _underlyingType;
 
-    [Reactive] public object? CompareValue { get; set; }
+    [Reactive] public partial object? CompareValue { get; set; }
     public IObservableCollection<IQueryCondition> SubConditions { get; } = new ObservableCollectionExtended<IQueryCondition>();
 
     /// <summary>

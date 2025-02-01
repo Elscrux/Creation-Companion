@@ -12,33 +12,33 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using Serilog;
 using WaterPlugin.Services;
 namespace WaterPlugin.ViewModels;
 
-public sealed class WaterMapVM : ViewModel {
+public sealed partial class WaterMapVM : ViewModel {
     private readonly WaterGradientGenerator _generator;
     private readonly ILogger _logger;
     public ILinkCacheProvider LinkCacheProvider { get; }
 
-    [Reactive] public FormKey WorldspaceFormKey { get; set; }
+    [Reactive] public partial FormKey WorldspaceFormKey { get; set; }
 
     public ImageSelectionVM ShallowWaterMap { get; } = new();
     public ImageSelectionVM DeepWaterMap { get; } = new();
     public ImageSelectionVM ReflectionMap { get; } = new();
     public ImageSelectionVM PresetMap { get; } = new();
 
-    [Reactive] public int TopCell { get; set; } = 64;
-    [Reactive] public int BottomCell { get; set; } = -64;
-    [Reactive] public int LeftCell { get; set; } = -64;
-    [Reactive] public int RightCell { get; set; } = 64;
+    [Reactive] public partial int TopCell { get; set; }
+    [Reactive] public partial int BottomCell { get; set; }
+    [Reactive] public partial int LeftCell { get; set; }
+    [Reactive] public partial int RightCell { get; set; }
 
     public ObservableCollectionExtended<PresetVM> Presets { get; } = [];
 
     public ReactiveCommand<Unit, Unit> Generate { get; }
-    [Reactive] public float ReflectivityAmount { get; set; } = 0.3f;
-    [Reactive] public float ReflectionMagnitude { get; set; } = 0.3f;
+    [Reactive] public partial float ReflectivityAmount { get; set; }
+    [Reactive] public partial float ReflectionMagnitude { get; set; }
 
     public WaterMapVM(
         WaterGradientGenerator generator,
@@ -46,6 +46,12 @@ public sealed class WaterMapVM : ViewModel {
         ILogger logger) {
         _generator = generator;
         _logger = logger;
+        TopCell = 64;
+        BottomCell = -64;
+        LeftCell = -64;
+        RightCell = 64;
+        ReflectivityAmount = 0.3f;
+        ReflectionMagnitude = 0.3f;
         LinkCacheProvider = linkCacheProvider;
 
         // A worldspace must be selected
@@ -100,14 +106,18 @@ public sealed class WaterMapVM : ViewModel {
     }
 }
 
-public sealed class PresetVM : ViewModel {
-    [Reactive] public Color Color { get; set; } = Colors.White;
-    [Reactive] public FormKey WaterType { get; set; }
+public sealed partial class PresetVM : ViewModel {
+    [Reactive] public partial Color Color { get; set; }
+    [Reactive] public partial FormKey WaterType { get; set; }
+
+    public PresetVM() {
+        Color = Colors.White;
+    }
 }
 
-public sealed class ImageSelectionVM : ViewModel {
-    [Reactive] public Bitmap? Source { get; set; }
-    [Reactive] public string? FilePath { get; set; }
+public sealed partial class ImageSelectionVM : ViewModel {
+    [Reactive] public partial Bitmap? Source { get; set; }
+    [Reactive] public partial string? FilePath { get; set; }
 
     public ImageSelectionVM() {
         this.WhenAnyValue(x => x.FilePath)

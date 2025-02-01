@@ -12,18 +12,18 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
+public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     public IEnumerable<Type> RecordTypes { get; } = [typeof(ICellGetter)];
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
-    [Reactive] public FormKey WorldspaceFormKey { get; set; }
-    [Reactive] public bool ShowWildernessCells { get; set; } = true;
+    [Reactive] public partial FormKey WorldspaceFormKey { get; set; }
+    [Reactive] public partial bool ShowWildernessCells { get; set; }
 
     public IObservable<Func<IReferencedRecord, bool>> Filter { get; }
     public IObservable<bool> IsBusy { get; }
@@ -34,6 +34,7 @@ public sealed class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
         IRecordController recordController,
         IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
+        ShowWildernessCells = true;
         Filter = RecordBrowserSettings.SettingsChanged
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(

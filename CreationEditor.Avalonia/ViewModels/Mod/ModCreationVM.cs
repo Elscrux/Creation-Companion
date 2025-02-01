@@ -6,21 +6,21 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class ModCreationVM : ValidatableViewModel {
+public sealed partial class ModCreationVM : ValidatableViewModel {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
 
     private const string WatermarkBase = "NewMod";
     private static string WatermarkName(int index) => $"{WatermarkBase} ({index})";
-    [Reactive] public string ModNameWatermark { get; set; }
+    [Reactive] public partial string ModNameWatermark { get; set; }
 
-    [Reactive] public string? NewModName { get; set; }
-    [Reactive] public ModType NewModType { get; set; } = ModType.Plugin;
+    [Reactive] public partial string? NewModName { get; set; }
+    [Reactive] public partial ModType NewModType { get; set; }
 
     public string ModNameOrBackup => NewModName ?? ModNameWatermark;
     public ModKey? NewModKey => new ModKey(ModNameOrBackup, NewModType);
@@ -34,6 +34,8 @@ public sealed class ModCreationVM : ValidatableViewModel {
         _editorEnvironment = editorEnvironment;
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
+
+        NewModType = ModType.Plugin;
 
         ModNameWatermark = GetNewWatermark(_editorEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
         editorEnvironment.LoadOrderChanged

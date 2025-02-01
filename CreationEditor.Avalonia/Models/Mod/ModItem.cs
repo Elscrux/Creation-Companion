@@ -2,10 +2,10 @@
 using CreationEditor.Services.Mutagen.Mod;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public class ModItem(ModKey modKey) : ReactiveObject, ISelectableModKey, IReactiveSelectable {
-    [Reactive] public bool IsSelected { get; set; }
+public partial class ModItem(ModKey modKey) : ReactiveObject, ISelectableModKey, IReactiveSelectable {
+    [Reactive] public partial bool IsSelected { get; set; }
     public ModKey ModKey { get; } = modKey;
 }

@@ -2,13 +2,13 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Mutagen.References.Record;
 
-public sealed class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
+public sealed partial class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
     where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
-    [Reactive] public TMajorRecordGetter Record { get; set; }
+    [Reactive] public partial TMajorRecordGetter Record { get; set; }
     public IObservableCollection<IFormLinkIdentifier> References { get; }
 
     public ReferencedRecord(

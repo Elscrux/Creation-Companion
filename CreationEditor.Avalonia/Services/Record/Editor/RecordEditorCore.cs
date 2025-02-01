@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
 public enum RecordUpdateReason {
@@ -60,7 +60,7 @@ public class EditableRecordConverter<TEditableRecord, TMajorRecord, TMajorRecord
     public TEditableRecord ConvertToEditable(TMajorRecordGetter majorRecord) => convertToEditable(majorRecord);
 }
 
-public sealed class RecordEditorCore<TEditableRecord, TMajorRecord, TMajorRecordGetter>
+public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMajorRecordGetter>
     : ViewModel, IRecordEditorCore<TEditableRecord, TMajorRecord, TMajorRecordGetter>
     where TEditableRecord : class, IEditableRecord<TMajorRecord>, TMajorRecord
     where TMajorRecord : class, IMajorRecordInternal, TMajorRecordGetter
@@ -71,7 +71,7 @@ public sealed class RecordEditorCore<TEditableRecord, TMajorRecord, TMajorRecord
     public ILinkCacheProvider LinkCacheProvider { get; }
 
     public TMajorRecord Record { get; set; }
-    [Reactive] public TEditableRecord EditableRecord { get; set; }
+    [Reactive] public partial TEditableRecord EditableRecord { get; set; }
 
     private readonly Subject<RecordUpdate<TMajorRecordGetter>> _recordChanged = new();
     public IObservable<RecordUpdate<TMajorRecordGetter>> RecordChanged => _recordChanged;

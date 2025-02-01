@@ -9,14 +9,14 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
-public sealed class RecordListVM : ViewModel, IRecordListVM {
+public sealed partial class RecordListVM : ViewModel, IRecordListVM {
     public IEnumerable? Records { get; }
 
     public IRecordProvider RecordProvider { get; }
-    [Reactive] public IReferencedRecord? SelectedRecord { get; set; }
+    [Reactive] public partial IReferencedRecord? SelectedRecord { get; set; }
     public IRecordContextMenuProvider RecordContextMenuProvider { get; }
     public ReactiveCommand<RecordListContext, Unit> PrimaryCommand { get; }
 

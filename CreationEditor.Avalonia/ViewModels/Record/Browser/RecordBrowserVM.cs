@@ -8,15 +8,15 @@ using CreationEditor.Services.Filter;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public sealed class RecordBrowserVM : ViewModel, IRecordBrowserVM {
+public sealed partial class RecordBrowserVM : ViewModel, IRecordBrowserVM {
     private readonly Func<IExtraColumnsBuilder> _extraColumnsBuilderFactory;
     private readonly IRecordListVMBuilder _recordListVMBuilder;
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
-    [Reactive] public IRecordListVM? RecordListVM { get; set; }
+    [Reactive] public partial IRecordListVM? RecordListVM { get; set; }
 
     public IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 

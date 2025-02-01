@@ -21,32 +21,32 @@ using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using Serilog;
 namespace MapperPlugin.ViewModels;
 
-public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
+public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
     private readonly Func<QueryVM> _queryVMFactory;
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
 
     public HeatmapCreator HeatmapCreator { get; }
 
-    [Reactive] public int BusyTasks { get; set; }
+    [Reactive] public partial int BusyTasks { get; set; }
 
     public ILinkCacheProvider LinkCacheProvider { get; }
 
-    [Reactive] public FormKey WorldspaceFormKey { get; set; }
+    [Reactive] public partial FormKey WorldspaceFormKey { get; set; }
 
-    [Reactive] public int TopCell { get; set; } = 64;
-    [Reactive] public int BottomCell { get; set; } = -64;
-    [Reactive] public int LeftCell { get; set; } = -64;
-    [Reactive] public int RightCell { get; set; } = 64;
+    [Reactive] public partial int TopCell { get; set; }
+    [Reactive] public partial int BottomCell { get; set; }
+    [Reactive] public partial int LeftCell { get; set; }
+    [Reactive] public partial int RightCell { get; set; }
 
-    [Reactive] public int MarkingSize { get; set; } = 10;
+    [Reactive] public partial int MarkingSize { get; set; }
 
-    [Reactive] public DrawingImage? DrawingsImage { get; set; }
-    [Reactive] public IImage? ImageSource { get; set; }
-    [Reactive] public string? ImageFilePath { get; set; }
+    [Reactive] public partial DrawingImage? DrawingsImage { get; set; }
+    [Reactive] public partial IImage? ImageSource { get; set; }
+    [Reactive] public partial string? ImageFilePath { get; set; }
 
     public IObservableCollection<MarkingMapping> Mappings { get; }
 
@@ -69,6 +69,11 @@ public sealed class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
         HeatmapCreator = new HeatmapCreator();
         LinkCacheProvider = linkCacheProvider;
         var stateRepository = stateRepositoryFactory("Heatmap");
+        TopCell = 64;
+        BottomCell = -64;
+        LeftCell = -64;
+        RightCell = 64;
+        MarkingSize = 10;
         SavedMaps.AddRange(stateRepository.LoadAllStateIdentifiers());
 
         var registrationsByGetterType = mutagenTypeProvider

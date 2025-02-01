@@ -1,7 +1,7 @@
 ﻿using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class AutoSaveSettings : ReactiveObject, ISettingModel {

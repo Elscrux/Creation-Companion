@@ -2,12 +2,12 @@
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 
-public sealed class EditableRelation : ReactiveObject {
-    [Reactive] public FormKey TargetFormKey { get; set; }
-    [Reactive] public CombatReaction Reaction { get; set; }
+public sealed partial class EditableRelation : ReactiveObject {
+    [Reactive] public partial FormKey TargetFormKey { get; set; }
+    [Reactive] public partial CombatReaction Reaction { get; set; }
 
     public Relation ToRelation() {
         return new Relation { Reaction = Reaction, Target = new FormLink<IRelatableGetter>(TargetFormKey) };

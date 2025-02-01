@@ -1,8 +1,8 @@
 ﻿using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Selectables;
 
-public sealed class TypeItem(Type type, bool isSelected = true) : ReactiveObject, IReactiveSelectable {
-    [Reactive] public bool IsSelected { get; set; } = isSelected;
-    public Type Type { get; } = type;
+public sealed partial class TypeItem : ReactiveObject, IReactiveSelectable {
+    [Reactive] public partial bool IsSelected { get; set; }
+    public required Type Type { get; init; }
 }

@@ -16,18 +16,18 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using VanillaDuplicateCleaner.Models;
 namespace VanillaDuplicateCleaner.ViewModels;
 
-public sealed class VanillaDuplicateCleanerVM : ViewModel {
+public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
     private readonly IRecordController _recordController;
     public IRecordReferenceController RecordReferenceController { get; }
     public SingleModPickerVM ModPickerVM { get; }
     public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
 
-    [Reactive] public bool IsBusy { get; set; }
+    [Reactive] public partial bool IsBusy { get; set; }
 
     public ReactiveCommand<ModKey, Unit> Run { get; }
 
@@ -47,7 +47,7 @@ public sealed class VanillaDuplicateCleanerVM : ViewModel {
                 if (mod is null || mod.ModKey.IsNull) {
                     Records.Clear();
                 } else {
-                    Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff(diff)));
+                    Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff { RecordDiff = diff }));
                 }
             });
 

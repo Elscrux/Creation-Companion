@@ -4,13 +4,13 @@ using CreationEditor.Services.Query.Select;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.From;
 
-public sealed class QueryFromRecordType : ReactiveObject, IQueryFrom {
+public sealed partial class QueryFromRecordType : ReactiveObject, IQueryFrom {
     private readonly IModScopeProvider _modScopeProvider;
 
-    [Reactive] public QueryFromItem? SelectedItem { get; set; }
+    [Reactive] public partial QueryFromItem? SelectedItem { get; set; }
     public IList<QueryFromItem> Items { get; }
 
     public QueryFromRecordType(

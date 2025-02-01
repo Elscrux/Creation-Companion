@@ -1,9 +1,9 @@
 ﻿using CreationEditor.Avalonia.Models.Selectables;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace SearchPlugin.Models;
 
-public sealed class SelectableSearcher(ITextSearcherDefinition searcher) : ReactiveObject, IReactiveSelectable {
-    public ITextSearcherDefinition Searcher { get; } = searcher;
-    [Reactive] public bool IsSelected { get; set; } = true;
+public sealed partial class SelectableSearcher : ReactiveObject, IReactiveSelectable {
+    public required ITextSearcherDefinition Searcher { get; init; }
+    [Reactive] public partial bool IsSelected { get; set; }
 }

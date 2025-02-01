@@ -8,12 +8,12 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class MultiModPickerVM : ViewModel, IModPickerVM {
-    [Reactive] public string ModSearchText { get; set; } = string.Empty;
-    [Reactive] public Func<OrderedModItem, bool>? Filter { get; set; }
+public sealed partial class MultiModPickerVM : ViewModel, IModPickerVM {
+    [Reactive] public partial string ModSearchText { get; set; }
+    [Reactive] public partial Func<OrderedModItem, bool>? Filter { get; set; }
 
     public ReadOnlyObservableCollection<OrderedModItem> Mods { get; }
     public IObservable<IReadOnlyCollection<OrderedModItem>> SelectedMods { get; }
@@ -22,6 +22,7 @@ public sealed class MultiModPickerVM : ViewModel, IModPickerVM {
         ILinkCacheProvider linkCacheProvider,
         ISearchFilter searchFilter) {
 
+        ModSearchText = string.Empty;
         Mods = linkCacheProvider.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()

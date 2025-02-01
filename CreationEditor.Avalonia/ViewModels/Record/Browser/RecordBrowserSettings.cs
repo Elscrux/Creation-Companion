@@ -4,15 +4,15 @@ using CreationEditor.Services.Filter;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
+public sealed partial class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     public ISearchFilter SearchFilter { get; }
     public IModScopeProvider ModScopeProvider { get; }
 
-    [Reactive] public string SearchTerm { get; set; } = string.Empty;
-    [Reactive] public Func<IMajorRecordGetter, bool>? CustomFilter { get; set; }
+    [Reactive] public partial string SearchTerm { get; set; }
+    [Reactive] public partial Func<IMajorRecordGetter, bool>? CustomFilter { get; set; }
 
     public IObservable<Unit> SettingsChanged { get; }
 
@@ -22,6 +22,7 @@ public sealed class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
         SearchFilter = searchFilter;
         ModScopeProvider = modScopeProvider;
 
+        SearchTerm = string.Empty;
         SettingsChanged = Observable.Merge(
             ModScopeProvider.ScopeChanged.Unit(),
             this.WhenAnyValue(x => x.CustomFilter).Unit(),

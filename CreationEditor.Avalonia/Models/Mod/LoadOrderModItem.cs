@@ -2,19 +2,19 @@
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public sealed class LoadOrderModItem : ReactiveObject, IReactiveSelectable, IModKeyed, IDisposableDropoff {
+public sealed partial class LoadOrderModItem : ReactiveObject, IReactiveSelectable, IModKeyed, IDisposableDropoff {
     private readonly DisposableBucket _disposables = new();
 
     public uint LoadOrderIndex { get; }
     public ModInfo ModInfo { get; }
     public ModKey ModKey => ModInfo.ModKey;
 
-    [Reactive] public bool IsSelected { get; set; }
-    [Reactive] public bool IsActive { get; set; }
-    [Reactive] public bool MastersValid { get; set; }
+    [Reactive] public partial bool IsSelected { get; set; }
+    [Reactive] public partial bool IsActive { get; set; }
+    [Reactive] public partial bool MastersValid { get; set; }
 
     public LoadOrderModItem(ModInfo modInfo, bool mastersValid, uint loadOrderIndex) {
         ModInfo = modInfo;

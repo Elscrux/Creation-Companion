@@ -4,11 +4,11 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Query;
 using DynamicData.Binding;
 using Noggog;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace QueryPlugin.ViewModels;
 
-public sealed class QueryColumnVM : ViewModel {
-    [Reactive] public IList<MenuItem>? MenuItems { get; set; }
+public sealed partial class QueryColumnVM : ViewModel {
+    [Reactive] public partial IList<MenuItem>? MenuItems { get; set; }
 
     public IObservableCollection<object?> QueriedFields { get; } = new ObservableCollectionExtended<object?>();
     public QueryVM QueryVM { get; }

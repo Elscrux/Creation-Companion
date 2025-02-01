@@ -8,23 +8,23 @@ using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
-public sealed class DockedItemVM : ViewModel, IDockedItem {
+public sealed partial class DockedItemVM : ViewModel, IDockedItem {
     public Guid Id { get; }
 
     public Control Control { get; }
 
     public DockContainerVM DockParent { get; set; } = null!;
 
-    [Reactive] public string? Header { get; set; }
-    [Reactive] public IconSource? IconSource { get; set; }
+    [Reactive] public partial string? Header { get; set; }
+    [Reactive] public partial IconSource? IconSource { get; set; }
     public double? Size { get; set; }
 
-    [Reactive] public bool IsSelected { get; set; }
+    [Reactive] public partial bool IsSelected { get; set; }
 
-    [Reactive] public bool CanClose { get; set; }
+    [Reactive] public partial bool CanClose { get; set; }
     public ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
 
     public DisposableCounterLock RemovalLock { get; }

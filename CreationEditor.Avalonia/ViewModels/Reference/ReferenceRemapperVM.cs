@@ -8,10 +8,10 @@ using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
-public sealed class ReferenceRemapperVM : ViewModel {
+public sealed partial class ReferenceRemapperVM : ViewModel {
     public ILinkCacheProvider LinkCacheProvider { get; }
     public object? Context { get; }
     public IReferencedRecord? ReferencedRecordContext { get; }
@@ -20,7 +20,7 @@ public sealed class ReferenceRemapperVM : ViewModel {
     public Type? ContextType { get; }
     public IList<Type>? ScopedTypes { get; }
 
-    [Reactive] public bool IsRemapping { get; set; }
+    [Reactive] public partial bool IsRemapping { get; set; }
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
     public ReactiveCommand<FormKey, Unit> RemapReferences { get; }

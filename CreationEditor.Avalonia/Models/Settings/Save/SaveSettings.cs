@@ -2,7 +2,7 @@
 using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Settings.Save;
 
 public sealed class SaveSettings : ReactiveObject, ISettingModel {

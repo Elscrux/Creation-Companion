@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="ReactiveUI" />
-      <PackageReference Include="ReactiveUI.Fody" />
+      <PackageReference Include="ReactiveUI.SourceGenerators" />
     </ItemGroup>
 
     <ItemGroup>

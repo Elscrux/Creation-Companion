@@ -1,13 +1,13 @@
 ﻿using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.Select;
 
-public sealed class ReflectionQueryFieldSelector : ReactiveObject, IQueryFieldSelector, IDisposable {
+public sealed partial class ReflectionQueryFieldSelector : ReactiveObject, IQueryFieldSelector, IDisposable {
     private readonly DisposableBucket _disposables = new();
 
-    [Reactive] public Type? RecordType { get; set; }
-    [Reactive] public IQueryField? SelectedField { get; set; }
+    [Reactive] public partial Type? RecordType { get; set; }
+    [Reactive] public partial IQueryField? SelectedField { get; set; }
 
     public ReflectionQueryFieldSelector() {
         this.WhenAnyValue(x => x.RecordType)

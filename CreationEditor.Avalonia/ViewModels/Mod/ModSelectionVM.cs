@@ -21,11 +21,11 @@ using Mutagen.Bethesda.Plugins.Binary.Streams;
 using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
+public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     public static readonly IReadOnlyList<ModType> ModTypes = Enum.GetValues<ModType>();
 
     private readonly IEditorEnvironment _editorEnvironment;
@@ -33,9 +33,9 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
     private readonly ReadOnlyObservableCollection<LoadOrderModItem> _mods;
     public IObservableCollection<LoadOrderModItem> DisplayedMods { get; }
 
-    [Reactive] public string ModSearchText { get; set; } = string.Empty;
+    [Reactive] public partial string ModSearchText { get; set; }
 
-    [Reactive] public LoadOrderModItem? SelectedMod { get; set; }
+    [Reactive] public partial LoadOrderModItem? SelectedMod { get; set; }
     private readonly MainWindow _mainWindow;
     private readonly IRecordEditorController _recordEditorController;
     private readonly IModSaveService _modSaveService;
@@ -78,6 +78,7 @@ public sealed class ModSelectionVM : ViewModel, IModSelectionVM {
         var release = gameReleaseContext.Release;
         PluginsFilePath = listingsPathProvider.Get(release);
         MissingPluginsFile = !fileSystem.File.Exists(PluginsFilePath);
+        ModSearchText = string.Empty;
 
         var directoryPath = dataDirectoryProvider.Path;
 

@@ -317,7 +317,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         SelectableTypes = this.WhenAnyValue(x => x.ScopedTypes)
             .Select(x => GetMajorTypes(x).AsObservableChangeSet())
             .Switch()
-            .ToObservableCollection(x => new TypeItem(x), ActivatedDisposable);
+            .ToObservableCollection(x => new TypeItem { Type = x, IsSelected = true }, ActivatedDisposable);
 
         var selectedTypesChanged = this.WhenAnyValue(x => x.SelectableTypes)
             .CombineLatest(SelectableTypes.SelectionChanged().StartWith(Unit.Default), (types, _) => types);

@@ -19,10 +19,10 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Resources.DataTemplates;
 
-public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisposable {
+public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisposable {
     private readonly CompositeDisposable _disposable = new();
 
     public static readonly StyledProperty<ILinkCache> LinkCacheProperty
@@ -346,11 +346,11 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         }
     }
 
-    public sealed class SubstituteUsageContext : ReactiveObject, IDisposable {
+    public sealed partial class SubstituteUsageContext : ReactiveObject, IDisposable {
         private readonly CompositeDisposable _disposable = new();
 
-        [Reactive] public bool UseAliases { get; set; }
-        [Reactive] public bool UsePackageData { get; set; }
+        [Reactive] public partial bool UseAliases { get; set; }
+        [Reactive] public partial bool UsePackageData { get; set; }
 
         public SubstituteUsageContext(ConditionData data) {
             UseAliases = data.UseAliases;
@@ -370,11 +370,11 @@ public sealed class ConditionDataTemplate : AvaloniaObject, IDataTemplate, IDisp
         public void Dispose() => _disposable.Dispose();
     }
 
-    public sealed class IndexDataContext : ReactiveObject, IDisposable {
+    public sealed partial class IndexDataContext : ReactiveObject, IDisposable {
         private readonly CompositeDisposable _disposable = new();
 
-        [Reactive] public uint? AliasIndex { get; set; }
-        [Reactive] public sbyte? PackageDataIndex { get; set; }
+        [Reactive] public partial uint? AliasIndex { get; set; }
+        [Reactive] public partial sbyte? PackageDataIndex { get; set; }
 
         public IndexDataContext(ConditionData data, SubstituteUsageContext substituteUsageContext, string parameter) {
             if (data.UseAliases && data.TryGetProperty<uint?>($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}", out var value)) {

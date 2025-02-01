@@ -2,14 +2,14 @@
 using CreationEditor.Services.Settings;
 using DynamicData.Binding;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
-public sealed class SettingsVM : ViewModel, ISettingsVM {
+public sealed partial class SettingsVM : ViewModel, ISettingsVM {
     public IEnumerable<ISetting> RootSettings => ObservableSettings;
     private IObservableCollection<ISetting> ObservableSettings { get; }
 
-    [Reactive] public ISetting? SelectedSetting { get; set; }
+    [Reactive] public partial ISetting? SelectedSetting { get; set; }
 
     public ReactiveCommand<Unit, Unit> Save { get; }
 

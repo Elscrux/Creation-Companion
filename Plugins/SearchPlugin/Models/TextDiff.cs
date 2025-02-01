@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Linq;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace SearchPlugin.Models;
 
-public sealed class TextDiff : ReactiveObject {
+public sealed partial class TextDiff : ReactiveObject {
     public TextDiff(string old, string @new) {
         Old = old;
         New = @new;
@@ -13,7 +13,7 @@ public sealed class TextDiff : ReactiveObject {
     }
 
     public string Old { get; }
-    [Reactive] public string New { get; set; }
+    [Reactive] public partial string New { get; set; }
 
     public IObservable<bool> IsDifferent { get; }
 }

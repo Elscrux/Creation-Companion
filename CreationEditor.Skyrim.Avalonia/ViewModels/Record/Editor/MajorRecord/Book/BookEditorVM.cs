@@ -9,19 +9,19 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Book;
 
-public sealed class BookEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesda.Skyrim.Book, IBookGetter> {
+public sealed partial class BookEditorVM : ViewModel, IRecordEditorVM<Mutagen.Bethesda.Skyrim.Book, IBookGetter> {
     private readonly Func<HtmlConverterOptions, HtmlConverter> _htmlConverterFactory;
 
     IRecordEditorCore IRecordEditorVM.Core => Core;
     public IRecordEditorCore<EditableBook, Mutagen.Bethesda.Skyrim.Book, IBookGetter> Core { get; }
 
-    [Reactive] public Language Language { get; set; }
-    [Reactive] public string? BookText { get; set; }
-    [Reactive] public string? Description { get; set; }
-    [Reactive] public FormKey InventoryArt { get; set; }
+    [Reactive] public partial Language Language { get; set; }
+    [Reactive] public partial string? BookText { get; set; }
+    [Reactive] public partial string? Description { get; set; }
+    [Reactive] public partial FormKey InventoryArt { get; set; }
 
     public IObservable<bool> IsNote { get; }
 

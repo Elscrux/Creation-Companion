@@ -15,17 +15,17 @@ using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
-public sealed class ReferenceBrowserVM : ViewModel {
+public sealed partial class ReferenceBrowserVM : ViewModel {
     private readonly IMenuItemProvider _menuItemProvider;
 
     public object? Context { get; }
     public ReferenceRemapperVM? ReferenceRemapperVM { get; }
 
-    [Reactive] public bool ShowTree { get; set; }
-    [Reactive] public ITreeDataGridSource<IReference> ReferenceSource { get; set; }
+    [Reactive] public partial bool ShowTree { get; set; }
+    [Reactive] public partial ITreeDataGridSource<IReference> ReferenceSource { get; set; }
 
     public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> EditRecord { get; }
     public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DuplicateRecord { get; }

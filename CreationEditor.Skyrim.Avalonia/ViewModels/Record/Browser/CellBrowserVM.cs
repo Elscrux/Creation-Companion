@@ -5,16 +5,16 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 
-public sealed class CellBrowserVM : ViewModel, ICellBrowserVM {
+public sealed partial class CellBrowserVM : ViewModel, ICellBrowserVM {
     public InteriorCellsVM InteriorCellsVM { get; }
     public ExteriorCellsVM ExteriorCellsVM { get; }
     public PlacedListVM PlacedListVM { get; }
 
-    [Reactive] public int SelectedTab { get; set; }
-    [Reactive] public bool ShowPlaced { get; set; }
+    [Reactive] public partial int SelectedTab { get; set; }
+    [Reactive] public partial bool ShowPlaced { get; set; }
 
     public ReactiveCommand<Unit, Unit> TogglePlaced { get; }
 

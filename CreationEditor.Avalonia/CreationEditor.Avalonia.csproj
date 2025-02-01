@@ -25,7 +25,7 @@
         <PackageReference Include="Noggog.Autofac" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
-        <PackageReference Include="ReactiveUI.Fody" />
+        <PackageReference Include="ReactiveUI.SourceGenerators" />
         <PackageReference Include="ReactiveUI.Validation" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />

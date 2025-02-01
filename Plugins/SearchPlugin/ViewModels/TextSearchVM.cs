@@ -19,11 +19,11 @@ using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using SearchPlugin.Models;
 namespace SearchPlugin.ViewModels;
 
-public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
+public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
     where TModGetter : class, IContextGetterMod<TMod, TModGetter>
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter> {
     private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
@@ -40,11 +40,11 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
 
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
 
-    [Reactive] public string? SearchText { get; set; }
-    [Reactive] public string? ReplaceText { get; set; }
-    [Reactive] public bool Replace { get; set; }
-    [Reactive] public bool CaseSensitive { get; set; }
-    [Reactive] public bool IsBusy { get; set; }
+    [Reactive] public partial string? SearchText { get; set; }
+    [Reactive] public partial string? ReplaceText { get; set; }
+    [Reactive] public partial bool Replace { get; set; }
+    [Reactive] public partial bool CaseSensitive { get; set; }
+    [Reactive] public partial bool IsBusy { get; set; }
 
     public StringComparison ComparisonType => CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
@@ -55,7 +55,7 @@ public sealed class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSearchVM
         Searchers = new ObservableCollectionExtended<SelectableSearcher>(
             typeof(ITextSearcher<TMod, TModGetter>)
                 .GetAllSubClasses<ITextSearcher<TMod, TModGetter>>()
-                .Select(searcher => new SelectableSearcher(searcher)));
+                .Select(searcher => new SelectableSearcher { Searcher = searcher, IsSelected = true }));
 
         Mods = _editorEnvironment.LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())

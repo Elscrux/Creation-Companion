@@ -5,18 +5,18 @@ using CreationEditor.Services.Query.Select;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.Where;
 
-public sealed class QueryCondition : ReactiveObject, IQueryCondition {
+public sealed partial class QueryCondition : ReactiveObject, IQueryCondition {
     private readonly IQueryConditionFactory _queryConditionFactory;
     private readonly DisposableBucket _disposables = new();
 
-    [Reactive] public QueryConditionState ConditionState { get; set; }
+    [Reactive] public partial QueryConditionState ConditionState { get; set; }
     public IQueryFieldSelector FieldSelector { get; }
 
     public IObservableCollection<IQueryCompareFunction> CompareFunctions { get; } = new ObservableCollectionExtended<IQueryCompareFunction>();
-    [Reactive] public IQueryCompareFunction? SelectedCompareFunction { get; set; }
+    [Reactive] public partial IQueryCompareFunction? SelectedCompareFunction { get; set; }
 
     public IObservableCollection<IQueryCondition> SubConditions => ConditionState.SubConditions;
     public object? CompareValue {
@@ -24,8 +24,8 @@ public sealed class QueryCondition : ReactiveObject, IQueryCondition {
         set => ConditionState.CompareValue = value;
     }
 
-    [Reactive] public bool IsOr { get; set; }
-    [Reactive] public bool Negate { get; set; }
+    [Reactive] public partial bool IsOr { get; set; }
+    [Reactive] public partial bool Negate { get; set; }
 
     public IObservable<Unit> ConditionChanged { get; }
     public IObservable<string> Summary { get; }

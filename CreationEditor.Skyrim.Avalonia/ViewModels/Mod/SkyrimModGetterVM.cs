@@ -6,21 +6,28 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Streams;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 
-public sealed class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
-    [Reactive] public bool IsReadOnly { get; set; } = true;
+public sealed partial class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimModGetter> {
+    [Reactive] public partial bool IsReadOnly { get; set; }
 
-    [Reactive] public string Name { get; set; } = string.Empty;
-    [Reactive] public ModType Type { get; set; }
-    [Reactive] public string Author { get; set; } = string.Empty;
-    [Reactive] public string Description { get; set; } = string.Empty;
-    [Reactive] public bool Localization { get; set; }
-    [Reactive] public int FormVersion { get; set; }
+    [Reactive] public partial string Name { get; set; }
+    [Reactive] public partial ModType Type { get; set; }
+    [Reactive] public partial string Author { get; set; }
+    [Reactive] public partial string Description { get; set; }
+    [Reactive] public partial bool Localization { get; set; }
+    [Reactive] public partial int FormVersion { get; set; }
     public IObservableCollection<ModKey> Masters { get; set; } = new ObservableCollectionExtended<ModKey>();
 
-    [Reactive] public ModInfo? ActiveModInfo { get; set; }
+    [Reactive] public partial ModInfo? ActiveModInfo { get; set; }
+
+    public SkyrimModGetterVM() {
+        IsReadOnly = true;
+        Name = string.Empty;
+        Author = string.Empty;
+        Description = string.Empty;
+    }
 
     public ModInfo GetModInfo(ModKey modKey, ISkyrimModHeaderGetter modHeader) {
         return new ModInfo(

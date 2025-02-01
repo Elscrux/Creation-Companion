@@ -2,13 +2,13 @@
 using DynamicData;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 
-public sealed class ConditionCopyPasteController : ReactiveObject, IConditionCopyPasteController {
+public sealed partial class ConditionCopyPasteController : ReactiveObject, IConditionCopyPasteController {
     private List<ICondition> _copiedConditions = [];
 
-    [Reactive] public bool CanPaste { get; private set; }
+    [Reactive] public partial bool CanPaste { get; private set; }
 
     public void Copy(IEnumerable<ICondition> conditions) {
         _copiedConditions = conditions.ToList();

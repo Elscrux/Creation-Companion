@@ -11,14 +11,14 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public sealed class ModScopeProvider : ViewModel, IModScopeProvider {
+public sealed partial class ModScopeProvider : ViewModel, IModScopeProvider {
     private readonly IEditorEnvironment _editorEnvironment;
 
-    [Reactive] public ILinkCache LinkCache { get; private set; }
-    [Reactive] public BrowserScope Scope { get; set; }
+    [Reactive] public partial ILinkCache LinkCache { get; private set; }
+    [Reactive] public partial BrowserScope Scope { get; set; }
 
     public ReadOnlyObservableCollection<ISelectableModKey> Mods { get; }
 

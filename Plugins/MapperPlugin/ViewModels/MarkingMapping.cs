@@ -9,14 +9,29 @@ using MapperPlugin.Model;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace MapperPlugin.ViewModels;
 
-public sealed class MarkingMapping : ReactiveObject, IMementoProvider<MarkingMappingMemento> {
+public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<MarkingMappingMemento> {
     private const uint MaxAutomaticUpdateSize = 10;
     private readonly Subject<Unit> _forceUpdates = new();
 
+    [Reactive] public partial bool NeedsForceUpdate { get; set; }
+    [Reactive] public partial bool Enable { get; set; }
+    [Reactive] public partial bool UseQuery { get; set; }
+    [Reactive] public partial bool UseRandomColorsInQuery { get; set; }
+    public QueryVM QueryVM { get; set; }
+    [Reactive] public partial IFormLinkGetter Record { get; set; }
+    [Reactive] public partial Color Color { get; set; }
+    [Reactive] public partial float Size { get; set; }
+
+    public IObservable<Unit> LogicalUpdates { get; }
+    public IObservable<Unit> VisualUpdates { get; }
+
     public MarkingMapping(QueryVM queryVM) {
+        Enable = true;
+        Size = 1;
+        Record = FormLinkInformation.Null;
         QueryVM = queryVM;
 
         LogicalUpdates = this.WhenAnyValue(x => x.UseQuery)
@@ -46,18 +61,6 @@ public sealed class MarkingMapping : ReactiveObject, IMementoProvider<MarkingMap
                 x => x.Size)
             .Unit();
     }
-
-    [Reactive] public bool NeedsForceUpdate { get; set; }
-    [Reactive] public bool Enable { get; set; } = true;
-    [Reactive] public bool UseQuery { get; set; }
-    [Reactive] public bool UseRandomColorsInQuery { get; set; }
-    public QueryVM QueryVM { get; set; }
-    [Reactive] public IFormLinkGetter Record { get; set; } = FormLinkInformation.Null;
-    [Reactive] public Color Color { get; set; }
-    [Reactive] public float Size { get; set; } = 1;
-
-    public IObservable<Unit> LogicalUpdates { get; }
-    public IObservable<Unit> VisualUpdates { get; }
 
     public void ForceUpdate() {
         NeedsForceUpdate = false;

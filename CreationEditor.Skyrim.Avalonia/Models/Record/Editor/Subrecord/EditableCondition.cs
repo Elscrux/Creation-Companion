@@ -5,10 +5,10 @@ using System.Reflection;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 
-public sealed class EditableCondition : ReactiveObject {
+public sealed partial class EditableCondition : ReactiveObject {
     public enum ExtendedRunOnType {
         Subject,
         Target,
@@ -25,26 +25,26 @@ public sealed class EditableCondition : ReactiveObject {
 
     private readonly CompositeDisposable _disposable = new();
 
-    [Reactive] public ExtendedRunOnType RunOnType { get; set; }
-    [Reactive] public FormLink<IPlacedGetter> ReferenceLink { get; set; } = new();
+    [Reactive] public partial ExtendedRunOnType RunOnType { get; set; }
+    [Reactive] public partial FormLink<IPlacedGetter> ReferenceLink { get; set; }
 
-    [Reactive] public Condition.Function Function { get; set; }
-    [Reactive] public ConditionData Data { get; set; }
-    [Reactive] public IObservable<Unit>? DataChanged { get; set; }
+    [Reactive] public partial Condition.Function Function { get; set; }
+    [Reactive] public partial ConditionData Data { get; set; }
+    [Reactive] public partial IObservable<Unit>? DataChanged { get; set; }
 
-    [Reactive] public CompareOperator CompareOperator { get; set; }
+    [Reactive] public partial CompareOperator CompareOperator { get; set; }
 
-    [Reactive] public FormKey GlobalValue { get; set; }
-    [Reactive] public float FloatValue { get; set; }
+    [Reactive] public partial FormKey GlobalValue { get; set; }
+    [Reactive] public partial float FloatValue { get; set; }
 
-    [Reactive] public bool UseGlobal { get; set; }
+    [Reactive] public partial bool UseGlobal { get; set; }
 
-    [Reactive] public bool Or { get; set; }
-    [Reactive] public bool SwapSubjectAndTarget { get; set; }
+    [Reactive] public partial bool Or { get; set; }
+    [Reactive] public partial bool SwapSubjectAndTarget { get; set; }
 
-    [Reactive] public int QuestAlias { get; set; }
-    [Reactive] public sbyte PackageData { get; set; }
-    [Reactive] public Enum? EventData { get; set; }
+    [Reactive] public partial int QuestAlias { get; set; }
+    [Reactive] public partial sbyte PackageData { get; set; }
+    [Reactive] public partial Enum? EventData { get; set; }
 
     public IObservable<bool>? ShowMoreRunOn { get; }
     public IObservable<bool>? ShowReference { get; }
@@ -53,6 +53,7 @@ public sealed class EditableCondition : ReactiveObject {
     public IObservable<bool>? ShowEventData { get; }
 
     public EditableCondition() {
+        ReferenceLink = new FormLink<IPlacedGetter>();
         Data = new GetIsIDConditionData();
         Function = Condition.Function.GetIsID;
         RunOnType = ExtendedRunOnType.Subject;

@@ -1,8 +1,8 @@
 ﻿using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Selectables;
 
-public class Selectable<T>(T value, bool isSelected = true) : ReactiveObject, IReactiveSelectable {
-    [Reactive] public bool IsSelected { get; set; } = isSelected;
-    public T Value { get; } = value;
+public partial class Selectable<T> : ReactiveObject, IReactiveSelectable {
+    [Reactive] public partial bool IsSelected { get; set; }
+    public required T Value { get; init; }
 }

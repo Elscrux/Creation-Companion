@@ -10,7 +10,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="docking:StartupDocksSettingVM"
              x:Class="CreationEditor.Avalonia.Views.Setting.Docking.StartupDocksSettingView">
-    <DataGrid ItemsSource="{Binding Settings.Docks}"
+    <DataGrid ItemsSource="{Binding Docks}"
               Background="{DynamicResource SystemControlTransparentBrush}"
               GridLinesVisibility="Horizontal"
               attached:ListShortcuts.Add="{Binding AddStartupDock}"

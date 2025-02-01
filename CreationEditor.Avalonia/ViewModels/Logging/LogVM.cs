@@ -5,11 +5,11 @@ using DynamicData;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using Serilog.Events;
 namespace CreationEditor.Avalonia.ViewModels.Logging;
 
-public sealed class LogVM : ViewModel, ILogVM {
+public sealed partial class LogVM : ViewModel, ILogVM {
     public static readonly IReadOnlyList<LogEventLevel> LogLevels = Enum.GetValues<LogEventLevel>();
 
     public Dictionary<LogEventLevel, bool> LevelsVisibility { get; } = LogLevels.ToDictionary(x => x, _ => true);
@@ -24,12 +24,12 @@ public sealed class LogVM : ViewModel, ILogVM {
     public ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }
     public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
 
-    [Reactive] public bool AutoScroll { get; set; } = true;
+    [Reactive] public partial bool AutoScroll { get; set; }
 
     private readonly SourceCache<ILogItem, Guid> _logAddedCache = new(item => item.Id);
 
-    public LogVM(
-        IObservableLogSink observableLogSink) {
+    public LogVM(IObservableLogSink observableLogSink) {
+        AutoScroll = true;
 
         observableLogSink.LogAdded
             .Subscribe(log => _logAddedCache.AddOrUpdate(log))

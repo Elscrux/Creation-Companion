@@ -9,14 +9,14 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Record.Provider;
 
-public sealed class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
+public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvider<IReferencedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
-    [Reactive] public IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
+    [Reactive] public partial IEnumerable<IFormLinkIdentifier> Identifiers { get; set; }
     public IEnumerable<Type> RecordTypes => _recordTypes;
     private readonly HashSet<Type> _recordTypes = [];
     public IRecordBrowserSettings RecordBrowserSettings { get; }

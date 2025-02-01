@@ -1,17 +1,17 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
-public abstract class DockContainerVM : ViewModel, IDockObject {
+public abstract partial class DockContainerVM : ViewModel, IDockObject {
     public abstract IEnumerable<IDockObject> Children { get; }
     public IEnumerable<DockContainerVM> ContainerChildren => Children.OfType<DockContainerVM>();
     public virtual int ChildrenCount => Children.Count();
 
     public DockContainerVM? DockParent { get; set; }
 
-    [Reactive] public bool InEditMode { get; set; }
+    [Reactive] public partial bool InEditMode { get; set; }
 
     public IEnumerable<IDockObject> IterateAllChildren() {
         foreach (var child in Children) {

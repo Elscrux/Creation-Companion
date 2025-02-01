@@ -7,24 +7,25 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public sealed class SingleModPickerVM : ViewModel, IModPickerVM {
+public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
     public ModCreationVM ModCreationVM { get; }
 
-    [Reactive] public Func<OrderedModItem, bool>? Filter { get; set; }
+    [Reactive] public partial Func<OrderedModItem, bool>? Filter { get; set; }
 
     public ReadOnlyObservableCollection<OrderedModItem> Mods { get; }
 
-    [Reactive] public OrderedModItem? SelectedMod { get; set; }
-    [Reactive] public string SelectionText { get; set; } = string.Empty;
+    [Reactive] public partial OrderedModItem? SelectedMod { get; set; }
+    [Reactive] public partial string SelectionText { get; set; }
 
-    [Reactive] public bool CanCreateNewMod { get; set; }
+    [Reactive] public partial bool CanCreateNewMod { get; set; }
 
     public IObservable<bool> HasModSelected { get; }
 
     public SingleModPickerVM(ILinkCacheProvider linkCacheProvider, ModCreationVM modCreationVM) {
+        SelectionText = string.Empty;
         ModCreationVM = modCreationVM;
 
         Mods = linkCacheProvider.LinkCacheChanged

@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Docking;
 
 public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {

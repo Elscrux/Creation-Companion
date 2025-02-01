@@ -1,12 +1,13 @@
 ﻿using Avalonia.Media;
 using CreationEditor.Avalonia.Services.Avalonia;
 using FluentAvalonia.UI.Windowing;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Views.Startup;
 
-public sealed class StartupSplashScreen : IApplicationSplashScreen {
+public sealed partial class StartupSplashScreen : ReactiveObject, IApplicationSplashScreen {
     public string AppName => "Creation Companion";
-    [Reactive] public IImage AppIcon { get; set; }
+    [Reactive] public partial IImage AppIcon { get; set; }
     public object SplashScreenContent { get; }
     public int MinimumShowTime => 0;
 

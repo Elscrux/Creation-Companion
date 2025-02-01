@@ -14,10 +14,10 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace PromoteToMaster.ViewModels;
 
-public sealed class PromoteToMasterVM : ViewModel {
+public sealed partial class PromoteToMasterVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
 
     public IReadOnlyList<IReferencedRecord> RecordsToPromote { get; }
@@ -30,10 +30,10 @@ public sealed class PromoteToMasterVM : ViewModel {
 
     public IObservableCollection<RecordPromotionChange> RecordPromotionChanges { get; } = new ObservableCollectionExtended<RecordPromotionChange>();
 
-    [Reactive] public string? RemovePrefix { get; set; }
-    [Reactive] public string? AddPrefix { get; set; }
+    [Reactive] public partial string? RemovePrefix { get; set; }
+    [Reactive] public partial string? AddPrefix { get; set; }
 
-    [Reactive] public bool ForceDelete { get; set; }
+    [Reactive] public partial bool ForceDelete { get; set; }
 
     public ReactiveCommand<Unit, Unit> SettingsConfirmed { get; }
     public ReactiveCommand<Unit, Unit> Run { get; }

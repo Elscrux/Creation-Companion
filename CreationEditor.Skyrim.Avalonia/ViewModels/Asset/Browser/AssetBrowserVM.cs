@@ -41,10 +41,10 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
-public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
+public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly Func<object?, IReference[], ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
@@ -63,13 +63,13 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [field: AllowNull, MaybeNull]
     public AssetDirectory DataDirectory => field ??= _assetProvider.GetAssetContainer(_dataDirectoryProvider.Path);
 
-    [Reactive] public string SearchText { get; set; } = string.Empty;
-    [Reactive] public bool ShowBsaAssets { get; set; }
-    [Reactive] public bool ShowEmptyDirectories { get; set; }
-    [Reactive] public bool ShowOnlyOrphaned { get; set; }
+    [Reactive] public partial string SearchText { get; set; }
+    [Reactive] public partial bool ShowBsaAssets { get; set; }
+    [Reactive] public partial bool ShowEmptyDirectories { get; set; }
+    [Reactive] public partial bool ShowOnlyOrphaned { get; set; }
 
-    [Reactive] public bool IsBusyLoadingAssets { get; set; } = true;
-    [Reactive] public bool IsBusyLoadingReferences { get; set; } = true;
+    [Reactive] public partial bool IsBusyLoadingAssets { get; set; }
+    [Reactive] public partial bool IsBusyLoadingReferences { get; set; }
 
     public ReactiveCommand<string, Unit> MoveTo { get; }
 
@@ -118,6 +118,10 @@ public sealed class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _assetProvider = assetProvider;
         _searchFilter = searchFilter;
         _root = root;
+
+        SearchText = string.Empty;
+        IsBusyLoadingAssets = true;
+        IsBusyLoadingReferences = true;
 
         _assetReferenceController.IsLoading
             .ObserveOnGui()

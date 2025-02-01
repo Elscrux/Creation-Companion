@@ -13,15 +13,15 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
-public sealed class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
+public sealed partial class PlacedProvider : ViewModel, IRecordProvider<ReferencedPlacedRecord> {
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     public IEnumerable<Type> RecordTypes { get; } = [typeof(IPlacedGetter)];
-    [Reactive] public FormKey CellFormKey { get; set; }
+    [Reactive] public partial FormKey CellFormKey { get; set; }
 
     public SourceCache<IReferencedRecord, FormKey> RecordCache { get; } = new(x => x.Record.FormKey);
 
