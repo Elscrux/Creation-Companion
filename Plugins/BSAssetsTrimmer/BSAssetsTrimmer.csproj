@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CreationEditor.Avalonia\CreationEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
+        <ProjectReference Include="..\..\CreationEditor\CreationEditor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ReactiveUI" />
+        <PackageReference Include="ReactiveUI.SourceGenerators" />
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
+    </Target>
+</Project>

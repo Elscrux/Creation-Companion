@@ -1,0 +1,58 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:viewModels="clr-namespace:BSAssetsTrimmer.ViewModels"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BSAssetsTrimmer.Views.BSAssetsTrimmerView"
+             x:Name="Control"
+             x:DataType="viewModels:BSAssetsTrimmerVM">
+    <Grid>
+        <ScrollViewer IsEnabled="{Binding !IsBusy}">
+            <ScrollViewer.Resources>
+                <converter:ReturnParameterIfTrueConverter
+                    x:Key="IfTrueConverter"
+                    x:TypeArguments="system:Double"
+                    DefaultValue="5"/>
+            </ScrollViewer.Resources>
+            <ScrollViewer.Effect>
+                <BlurEffect
+                    Radius="{Binding !IsBusy,
+                                                 Converter={StaticResource IfTrueConverter},
+                                                 ConverterParameter=0}"/>
+            </ScrollViewer.Effect>
+
+            <StackPanel Spacing="5" Margin="5">
+                <TextBlock Text="Select Project Plugins that BSAssets should include"/>
+
+                <mod:ModPicker
+                    DataContext="{Binding ModPickerVM}"
+                    MaxHeight="500"/>
+
+                <StackPanel>
+                    <avaloniaProgressRing:ProgressRing
+                        ToolTip.Tip="Loading References"
+                        HorizontalAlignment="Left"
+                        IsVisible="{Binding RecordReferenceController.IsLoading^}"
+                        Foreground="{DynamicResource SystemAccentColor}"
+                        Width="20" Height="20"/>
+
+                    <Button
+                        Content="Run"
+                        Command="{Binding Run}"
+                        IsVisible="{Binding !RecordReferenceController.IsLoading^}"
+                        IsEnabled="{Binding !!ModPickerVM.SelectedMods^.Count}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <avaloniaProgressRing:ProgressRing
+            IsActive="{Binding IsBusy}"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            Width="100" Height="100"/>
+    </Grid>
+</UserControl>
