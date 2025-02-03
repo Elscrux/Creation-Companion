@@ -128,13 +128,13 @@ public sealed partial class EditableCondition : ReactiveObject {
 
         switch (Data.RunOnType) {
             case Condition.RunOnType.QuestAlias:
-                QuestAlias = Data.Unknown3;
+                QuestAlias = Data.RunOnTypeIndex;
                 break;
             case Condition.RunOnType.PackageData:
-                PackageData = (sbyte) Data.Unknown3;
+                PackageData = (sbyte) Data.RunOnTypeIndex;
                 break;
             case Condition.RunOnType.EventData:
-                EventData = (GetEventDataConditionData.EventMember) Data.Unknown3;
+                EventData = (GetEventDataConditionData.EventMember) Data.RunOnTypeIndex;
                 break;
         }
     }
@@ -155,7 +155,7 @@ public sealed partial class EditableCondition : ReactiveObject {
 
         condition.CompareOperator = CompareOperator;
 
-        condition.Data.Unknown3 = RunOnType switch {
+        condition.Data.RunOnTypeIndex = RunOnType switch {
             ExtendedRunOnType.QuestAlias => QuestAlias,
             ExtendedRunOnType.PackageData => PackageData,
             ExtendedRunOnType.EventData => Convert.ToInt32(EventData),

@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Hashing;
+using System.Text;
 using Avalonia.Platform;
 using CreationEditor;
 using CreationEditor.Avalonia;
@@ -109,7 +110,8 @@ public sealed class WaterGradientGenerator(
             var reflection = reflectionColor.ToSystemDrawingColor();
 
             var hashAlgorithm = new XxHash3();
-            hashAlgorithm.Append(string.Join("_", waterWeights.Select(x => x.Key.FormKey.ToString() + x.Value)).ToBytes());
+            var weights = string.Join("_", waterWeights.Select(x => x.Key.FormKey.ToString() + x.Value));
+            hashAlgorithm.Append(Encoding.UTF8.GetBytes(weights));
             var hash = hashAlgorithm.GetCurrentHash();
 
             var editorId = $"{worldspace.EditorID}Water"
