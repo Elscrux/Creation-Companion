@@ -103,10 +103,10 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         if (_referenceCache is null) return _ => {};
 
         // Collect the references before the update
-        var before = old.Record.EnumerateFormLinks().Select(x => x.FormKey).ToHashSet();
+        var before = GetLinks(old.Record).ToHashSet();
 
         return updated => {
-            var after = updated.Record.EnumerateFormLinks().Select(x => x.FormKey).ToHashSet();
+            var after = GetLinks(updated.Record).ToHashSet();
 
             // Calculate the diff
             var removedReferences = before.Except(after);
@@ -129,7 +129,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         }
 
         _referenceCache.AddRecord(pair.Mod, pair.Record);
-        AddRecordReferences(_referenceCache, pair.Record, pair.Mod, pair.Record.EnumerateFormLinks().Select(x => x.FormKey));
+        AddRecordReferences(_referenceCache, pair.Record, pair.Mod, GetLinks(pair.Record));
     }
 
     public void RegisterDeletion(RecordModPair pair) {
@@ -138,7 +138,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             return;
         }
 
-        RemoveRecordReferences(_referenceCache, pair.Record, pair.Mod, pair.Record.EnumerateFormLinks().Select(x => x.FormKey));
+        RemoveRecordReferences(_referenceCache, pair.Record, pair.Mod, GetLinks(pair.Record));
     }
 
     private void AddRecordReferences(MutableRecordReferenceCache cache, IMajorRecordGetter record, IMod mod, IEnumerable<FormKey> references) {
@@ -157,5 +157,9 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
             var change = new Change<IFormLinkIdentifier>(ListChangeReason.Remove, record);
             _referenceSubscriptionManager.Update(reference, change);
         }
+    }
+
+    private static IEnumerable<FormKey> GetLinks(IMajorRecordGetter record) {
+        return record.EnumerateFormLinks().Where(x => !x.IsNull).Select(x => x.FormKey);
     }
 }
