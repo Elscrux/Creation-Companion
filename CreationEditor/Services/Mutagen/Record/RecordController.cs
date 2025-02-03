@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.Type;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -13,6 +14,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     private readonly ILogger _logger;
+    private readonly IMutagenTypeProvider _mutagenTypeProvider;
     private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
 
     private IObservable<IMajorRecordGetter> OnlyActiveMod(IObservable<RecordModPair> observable) {
@@ -51,8 +53,10 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public RecordController(
         ILogger logger,
+        IMutagenTypeProvider mutagenTypeProvider,
         IEditorEnvironment<TMod, TModGetter> editorEnvironment) {
         _logger = logger;
+        _mutagenTypeProvider = mutagenTypeProvider;
         _editorEnvironment = editorEnvironment;
         RecordChangedDiff = new JoinedObservable<RecordModPair>(_recordChangedDiff);
 
@@ -189,6 +193,20 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     #endregion
 
     #region GetOrAddOverride
+    public IMajorRecord GetOrAddOverride(IFormLinkIdentifier record) => GetOrAddOverride(record, _editorEnvironment.ActiveMod);
+    public IMajorRecord GetOrAddOverride(IFormLinkIdentifier record, IMod mod) => GetOrAddOverride(record, CastOrThrow<TMod>(mod));
+    public IMajorRecord GetOrAddOverride(IFormLinkIdentifier record, TMod mod) {
+        var context = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, _mutagenTypeProvider.GetRecordGetterType(record.Type));
+
+        var newOverride = context.GetOrAddAsOverride(mod);
+        if (context.ModKey != mod.ModKey) {
+            _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
+
+            _recordChanged.OnNext((newOverride, mod));
+        }
+
+        return newOverride;
+    }
     public IMajorRecord GetOrAddOverride(IMajorRecordGetter record) => GetOrAddOverride(record, _editorEnvironment.ActiveMod);
     public IMajorRecord GetOrAddOverride(IMajorRecordGetter record, IMod mod) => GetOrAddOverride(record, CastOrThrow<TMod>(mod));
     public IMajorRecord GetOrAddOverride(IMajorRecordGetter record, TMod mod) {

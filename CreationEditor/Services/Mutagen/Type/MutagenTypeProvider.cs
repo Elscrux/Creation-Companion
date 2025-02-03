@@ -93,10 +93,18 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public System.Type GetRecordGetterType(System.Type type) {
-        var lastIndexOfDot = type.FullName!.LastIndexOf('.') + 1;
-        var getterTypeName = type.FullName[..lastIndexOfDot] + "I" + type.FullName[lastIndexOfDot..] + "Getter";
+        if (type.Name.EndsWith("Getter")) return type;
 
-        var registration = LoquiRegistration.GetRegisterByFullName(getterTypeName);
-        return registration!.GetterType;
+        var nameSpan = type.FullName.AsSpan();
+        var lastIndexOfDot = nameSpan.LastIndexOf('.') + 1;
+        var namespacePart = nameSpan[..lastIndexOfDot];
+        var typePart = nameSpan[lastIndexOfDot..];
+        var getterTypeName = typePart.StartsWith('I')
+            ? namespacePart.ToString() + typePart.ToString() + "Getter"
+            : namespacePart.ToString() + "I" + typePart.ToString() + "Getter";
+
+        var registration = LoquiRegistration.GetRegisterByFullName(getterTypeName)
+         ?? throw new ArgumentException("Cannot find getter type for " + type.FullName, nameof(type));
+        return registration.GetterType;
     }
 }

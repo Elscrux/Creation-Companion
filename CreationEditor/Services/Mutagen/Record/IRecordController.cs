@@ -141,6 +141,21 @@ public interface IRecordController {
     /// </summary>
     /// <param name="record">Record to get an override for</param>
     /// <returns>Overwrite of the given record in the active mod</returns>
+    IMajorRecord GetOrAddOverride(IFormLinkIdentifier record);
+
+    /// <summary>
+    /// Creates an override of an existing record in the given mod if it doesn't exist yet.
+    /// </summary>
+    /// <param name="record">Record to get an override for</param>
+    /// <param name="mod">Mod to get the override for</param>
+    /// <returns>Overwrite of the given record in the active mod</returns>
+    IMajorRecord GetOrAddOverride(IFormLinkIdentifier record, IMod mod);
+
+    /// <summary>
+    /// Creates an override of an existing record in the active mod if it doesn't exist yet.
+    /// </summary>
+    /// <param name="record">Record to get an override for</param>
+    /// <returns>Overwrite of the given record in the active mod</returns>
     IMajorRecord GetOrAddOverride(IMajorRecordGetter record);
 
     /// <summary>
