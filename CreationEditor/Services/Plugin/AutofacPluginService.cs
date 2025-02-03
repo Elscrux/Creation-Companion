@@ -1,44 +1,68 @@
 ﻿using System.Reactive.Subjects;
 using System.Reflection;
 using Autofac;
+using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Plugin;
 
-public sealed class AutofacPluginService<TMod, TModGetter>(
-    IPluginAssemblyProvider pluginAssemblyProvider,
-    ILogger logger,
-    ILifetimeScope lifetimeScope)
-    : IPluginService, IDisposable
+public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDisposable
     where TMod : class, IContextMod<TMod, TModGetter>, TModGetter
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
 
+    private readonly IPluginAssemblyProvider _pluginAssemblyProvider;
+    private readonly ILogger _logger;
+    private readonly ILifetimeScope _lifetimeScope;
+
+    private readonly IDisposableDropoff _disposables = new DisposableBucket();
     private readonly List<ILifetimeScope> _pluginScopes = [];
     private readonly PluginContext _pluginContext = new(new Version(1, 0));
-    private readonly List<IPlugin> _plugins = [];
+    private readonly List<IPlugin> _registeredPlugins = [];
+    private List<IPlugin> _loadedPlugins = [];
 
-    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsLoaded = new();
-    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsLoaded => _pluginsLoaded;
+    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsRegistered = new();
+    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsRegistered => _pluginsRegistered;
 
-    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsUnloaded = new();
-    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnloaded => _pluginsUnloaded;
+    private readonly Subject<IReadOnlyList<IPluginDefinition>> _pluginsUnregistered = new();
+    public IObservable<IReadOnlyList<IPluginDefinition>> PluginsUnregistered => _pluginsUnregistered;
+
+    public AutofacPluginService(IPluginAssemblyProvider pluginAssemblyProvider,
+        IEditorEnvironment editorEnvironment,
+        ILogger logger,
+        ILifetimeScope lifetimeScope) {
+        _pluginAssemblyProvider = pluginAssemblyProvider;
+        _logger = logger;
+        _lifetimeScope = lifetimeScope;
+
+        editorEnvironment.LoadOrderChanged
+            .Subscribe(_ => UpdatePluginRegistration())
+            .DisposeWith(_disposables);
+    }
 
     public void ReloadPlugins() {
-        UnregisterPlugins();
+        UnregisterAllPlugins();
 
-        var newPlugins = GetPlugins();
+        _loadedPlugins = GetPlugins();
 
+        RegisterPlugins(_loadedPlugins);
+    }
+
+    public void UpdatePluginRegistration() {
+        var stalePlugins = _registeredPlugins.Where(p => !p.CanRegister()).ToList();
+        UnregisterPlugins(stalePlugins);
+
+        var newPlugins = _loadedPlugins.Except(_registeredPlugins).Where(p => p.CanRegister()).ToList();
         RegisterPlugins(newPlugins);
     }
 
     private List<IPlugin> GetPlugins() {
-        return pluginAssemblyProvider.GetAssemblies()
+        return _pluginAssemblyProvider.GetAssemblies()
             .SelectMany(assembly => {
                 var plugins = CreatePlugins(assembly).ToList();
 
                 if (plugins.Count == 0) {
-                    logger.Here().Warning(
+                    _logger.Here().Warning(
                         "No plugins found in {Assembly} because none of the assembly's types implement {PluginType}",
                         assembly,
                         nameof(IPlugin));
@@ -50,7 +74,7 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
     }
 
     private IEnumerable<IPlugin> CreatePlugins(Assembly assembly) {
-        var pluginScope = lifetimeScope.BeginLifetimeScope(c => {
+        var pluginScope = _lifetimeScope.BeginLifetimeScope(c => {
             c.RegisterAssemblyModules(assembly);
             c.RegisterInstance(_pluginContext)
                 .AsSelf();
@@ -72,31 +96,51 @@ public sealed class AutofacPluginService<TMod, TModGetter>(
     }
 
     private void RegisterPlugins(IReadOnlyList<IPlugin> plugins) {
-        _plugins.AddRange(plugins);
+        var newPlugins = plugins
+            .Except(_registeredPlugins)
+            .Where(p => p.CanRegister())
+            .ToList();
 
-        foreach (var plugin in _plugins.OfType<IPlugin>()) {
+        _registeredPlugins.AddRange(newPlugins);
+
+        foreach (var plugin in newPlugins) {
             plugin.OnRegistered();
         }
 
-        _pluginsLoaded.OnNext(plugins);
+        _pluginsRegistered.OnNext(newPlugins);
     }
 
-    private void UnregisterPlugins() {
-        if (_plugins.Count == 0) return;
+    private void UnregisterAllPlugins() {
+        if (_registeredPlugins.Count == 0) return;
 
-        foreach (var plugin in _plugins.OfType<IPlugin>()) {
+        foreach (var plugin in _registeredPlugins) {
             plugin.OnUnregistered();
         }
 
-        _pluginsUnloaded.OnNext(_plugins);
+        _pluginsUnregistered.OnNext(_registeredPlugins);
 
-        _plugins.Clear();
+        _registeredPlugins.Clear();
+    }
+
+    private void UnregisterPlugins(IReadOnlyList<IPlugin> plugins) {
+        if (_registeredPlugins.Count == 0) return;
+
+        plugins = plugins.Intersect(_registeredPlugins).ToList();
+
+        foreach (var plugin in plugins) {
+            plugin.OnUnregistered();
+        }
+
+        _pluginsUnregistered.OnNext(plugins);
+
+        _registeredPlugins.Remove(plugins);
     }
 
     public void Dispose() {
-        UnregisterPlugins();
+        UnregisterAllPlugins();
 
-        lifetimeScope.Dispose();
+        _lifetimeScope.Dispose();
+        _disposables.Dispose();
         foreach (var pluginScope in _pluginScopes) {
             pluginScope.Dispose();
         }

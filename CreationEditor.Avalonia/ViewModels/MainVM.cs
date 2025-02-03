@@ -90,7 +90,7 @@ public sealed class MainVM : ViewModel {
         PluginService = pluginService;
         mainWindow.SplashScreen = splashScreen;
 
-        PluginService?.PluginsLoaded
+        PluginService?.PluginsRegistered
             .Subscribe(newPlugins => {
                 MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>());
             })

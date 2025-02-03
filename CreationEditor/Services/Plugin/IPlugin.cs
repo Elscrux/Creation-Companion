@@ -3,6 +3,14 @@ namespace CreationEditor.Services.Plugin;
 
 public interface IPlugin : IPluginDefinition {
     /// <summary>
+    /// Called to determine if the plugin can be registered.
+    /// </summary>
+    bool CanRegister() {
+        // Can be overridden by plugins
+        return true;
+    }
+
+    /// <summary>
     /// Called when the plugin is registered. Run startup code here.
     /// </summary>
     void OnRegistered() {
