@@ -56,18 +56,18 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public string GetTypeName(IMajorRecordGetter record) {
-        var span = record.Registration.ClassType.FullName!.AsSpan();
+        var span = record.Registration.ClassType.FullName.AsSpan();
         var lastIndexOfDot = span.LastIndexOf('.');
         return span[(lastIndexOfDot + 1)..].ToString();
     }
 
     public string GetTypeName(IFormLinkIdentifier formLinkIdentifier) {
         // Selecting the type name from the full name
-        var fullName = formLinkIdentifier.Type.FullName;
-        var startIndex = fullName!.LastIndexOf('.') + 2;
+        var fullName = formLinkIdentifier.Type.FullName.AsSpan();
+        var startIndex = fullName.LastIndexOf('.') + 2;
 
         // Cutting of the "Getter" part of the type name
-        return fullName[startIndex..^6];
+        return fullName[startIndex..^6].ToString();
     }
 
     public IEnumerable<System.Type> GetRecordClassTypes(GameRelease gameRelease) {
