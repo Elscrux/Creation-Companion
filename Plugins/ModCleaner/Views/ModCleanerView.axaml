@@ -4,13 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:viewModels="clr-namespace:BSAssetsTrimmer.ViewModels"
+             xmlns:viewModels="clr-namespace:ModCleaner.ViewModels"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="BSAssetsTrimmer.Views.BSAssetsTrimmerView"
+             x:Class="ModCleaner.Views.ModCleanerView"
              x:Name="Control"
-             x:DataType="viewModels:BSAssetsTrimmerVM">
+             x:DataType="viewModels:ModCleanerVM">
     <Grid>
         <ScrollViewer IsEnabled="{Binding !IsBusy}">
             <ScrollViewer.Resources>
@@ -27,10 +27,16 @@
             </ScrollViewer.Effect>
 
             <StackPanel Spacing="5" Margin="5">
-                <TextBlock Text="Select Project Plugins that BSAssets should include"/>
+                <TextBlock Text="Select mod to clean"/>
 
                 <mod:ModPicker
-                    DataContext="{Binding ModPickerVM}"
+                    DataContext="{Binding CleaningModPickerVM}"
+                    MaxHeight="500"/>
+
+                <TextBlock Text="Select dependent mods that should be considered in the cleaning process - usually that should be all mods listed here"/>
+
+                <mod:ModPicker
+                    DataContext="{Binding DependenciesModPickerVM}"
                     MaxHeight="500"/>
 
                 <StackPanel>
@@ -45,7 +51,7 @@
                         Content="Run"
                         Command="{Binding Run}"
                         IsVisible="{Binding !RecordReferenceController.IsLoading^}"
-                        IsEnabled="{Binding !!ModPickerVM.SelectedMods^.Count}"/>
+                        IsEnabled="{Binding !!CleaningModPickerVM.HasModSelected^}"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

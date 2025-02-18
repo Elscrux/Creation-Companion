@@ -1,18 +1,18 @@
 ﻿using Autofac;
-using BSAssetsTrimmer.ViewModels;
-namespace BSAssetsTrimmer;
+using ModCleaner.ViewModels;
+namespace ModCleaner;
 
 public class ModCleanerModule : Module {
     protected override void Load(ContainerBuilder builder) {
         base.Load(builder);
 
-        builder.RegisterType<Services.BSAssetsTrimmer>()
+        builder.RegisterType<Services.ModCleaner>()
             .AsSelf();
 
-        builder.RegisterType<BSAssetsTrimmerPlugin>()
+        builder.RegisterType<ModCleanerPlugin>()
             .AsSelf();
 
-        builder.RegisterType<BSAssetsTrimmerVM>()
+        builder.RegisterType<ModCleanerVM>()
             .AsSelf();
     }
 }

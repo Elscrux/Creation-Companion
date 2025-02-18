@@ -1,13 +1,13 @@
 ﻿using Avalonia.ReactiveUI;
-using BSAssetsTrimmer.ViewModels;
-namespace BSAssetsTrimmer.Views;
+using ModCleaner.ViewModels;
+namespace ModCleaner.Views;
 
-public partial class BSAssetsTrimmerView : ReactiveUserControl<BSAssetsTrimmerVM> {
-    public BSAssetsTrimmerView() {
+public partial class ModCleanerView : ReactiveUserControl<ModCleanerVM> {
+    public ModCleanerView() {
         InitializeComponent();
     }
 
-    public BSAssetsTrimmerView(BSAssetsTrimmerVM vm) : this() {
+    public ModCleanerView(ModCleanerVM vm) : this() {
         DataContext = vm;
     }
 }

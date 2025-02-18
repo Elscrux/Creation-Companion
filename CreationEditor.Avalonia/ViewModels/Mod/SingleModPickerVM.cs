@@ -18,6 +18,7 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
     public ReadOnlyObservableCollection<OrderedModItem> Mods { get; }
 
     [Reactive] public partial OrderedModItem? SelectedMod { get; set; }
+    public IObservable<OrderedModItem?> SelectedModChanged { get; }
     [Reactive] public partial string SelectionText { get; set; }
 
     [Reactive] public partial bool CanCreateNewMod { get; set; }
@@ -60,8 +61,9 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
             })
             .DisposeWith(this);
 
-        HasModSelected = this
-            .WhenAnyValue(x => x.SelectedMod)
+        SelectedModChanged = this.WhenAnyValue(x => x.SelectedMod);
+
+        HasModSelected = SelectedModChanged
             .Select(x => x is not null && !x.ModKey.IsNull);
     }
 

@@ -1,67 +1,67 @@
-﻿using BSAssetsTrimmer.Models;
-using CreationEditor;
+﻿using CreationEditor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Skyrim.Definitions;
+using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace BSAssetsTrimmer.Services;
+namespace ModCleaner.Services;
 
-public sealed class BSAssetsTrimmer(
+public sealed class ModCleaner(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     IRecordController recordController,
     IRecordReferenceController recordReferenceController) {
 
-    public void Start(ISkyrimModGetter bsAssets, IReadOnlyList<ModKey> dependencies) {
+    public void Start(ISkyrimModGetter mod, IReadOnlyList<ModKey> dependencies) {
         // Build graph of records that are connected via references
-        var graph = BuildGraph(bsAssets, dependencies);
+        var graph = BuildGraph(mod, dependencies);
 
         var included = FindRetainedRecords(graph, dependencies);
 
-        var recordsToTrim = bsAssets.EnumerateMajorRecords()
+        var recordsToClean = mod.EnumerateMajorRecords()
             .Select(x => x.ToFormLinkInformation())
             .Except(included)
             .ToArray();
 
-        // CreatedTrimmedBSAssetsPlugin(bsAssets, recordsToTrim);
-        CreatedTrimmerPlugin(recordsToTrim);
+        // CreatedCleanedMod(mod, recordsToClean);
+        CreatedCleanerMod(mod, recordsToClean);
     }
 
-    private void CreatedTrimmedBSAssetsPlugin(ISkyrimModGetter bsAssets, IEnumerable<IFormLinkIdentifier> recordsToTrim) {
-        var modKey = ModKey.FromFileName("BSAssetsTrimmed.esm");
-        var mod = new SkyrimMod(
-            modKey,
+    private void CreatedCleanedMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
+        var cleanModKey = ModKey.FromFileName(mod.ModKey.Name + "Cleaned.esm");
+        var cleanMod = new SkyrimMod(
+            cleanModKey,
             editorEnvironment.GameEnvironment.GameRelease.ToSkyrimRelease(),
             IEditorEnvironment.DefaultModVersion);
 
-        foreach (var record in recordsToTrim) {
-            mod.Remove(new FormKey(mod.ModKey, record.FormKey.ID));
+        foreach (var record in recordsToClean) {
+            cleanMod.Remove(new FormKey(cleanMod.ModKey, record.FormKey.ID));
         }
 
-        editorEnvironment.AddMutableMod(mod);
+        editorEnvironment.AddMutableMod(cleanMod);
     }
 
-    private void CreatedTrimmerPlugin(IEnumerable<IFormLinkIdentifier> recordsToTrim) {
-        var mod = new SkyrimMod(
-            ModKey.FromFileName("TrimBSAssets.esp"),
+    private void CreatedCleanerMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
+        var cleanMod = new SkyrimMod(
+            ModKey.FromFileName($"Clean{mod.ModKey.Name}.esp"),
             editorEnvironment.GameEnvironment.GameRelease.ToSkyrimRelease(),
             IEditorEnvironment.DefaultModVersion);
 
-        foreach (var record in recordsToTrim) {
-            var recordOverride = recordController.GetOrAddOverride(record, mod);
+        foreach (var record in recordsToClean) {
+            var recordOverride = recordController.GetOrAddOverride(record, cleanMod);
             recordOverride.IsDeleted = true;
         }
 
-        editorEnvironment.AddMutableMod(mod);
+        editorEnvironment.AddMutableMod(cleanMod);
     }
 
-    private Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> BuildGraph(IModGetter bsAssets, IReadOnlyList<ModKey> dependencies) {
+    private Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var graph = new Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>>();
 
-        foreach (var record in bsAssets.EnumerateMajorRecords()) {
+        foreach (var record in mod.EnumerateMajorRecords()) {
             // Add all transitive dependencies of the record
             var queue = new Queue<IFormLinkIdentifier>([record.ToFormLinkInformation()]);
             while (queue.Count > 0) {
@@ -69,9 +69,9 @@ public sealed class BSAssetsTrimmer(
                 graph.AddVertex(current);
 
                 foreach (var currentReference in recordReferenceController.GetReferences(current.FormKey)) {
-                    // This just checks if the reference was defined in BSAssets.esm or one of its dependencies. Update if needed.
+                    // This just checks if the reference was defined in the mod or one of its dependencies. Update if needed.
                     var modKey = currentReference.FormKey.ModKey;
-                    if (modKey != BSAssetsTrimmerPlugin.BSAssets
+                    if (modKey != mod.ModKey
                      && !dependencies.Contains(modKey)) continue;
 
                     if (!graph.Vertices.Contains(currentReference)) {
@@ -122,8 +122,7 @@ public sealed class BSAssetsTrimmer(
             if (included.Contains(vertex)) continue;
 
             if (SkyrimDefinitions.SkyrimModKeys.Contains(vertex.FormKey.ModKey)
-             || vertex.Type.InheritsFromAny(EssentialRecordTypes)
-             || editorEnvironment.LinkCache.Resolve(vertex).EditorID is {} editorID && editorID.StartsWith("BSKcc")
+             || vertex.Type.InheritsFromAny(EssentialRecordTypes) 
              || editorEnvironment.LinkCache.ResolveAllSimpleContexts(vertex).Any(c => dependencies.Contains(c.ModKey))) {
                 // Retain vanilla overrides
                 // Retain records that are essential and all their transitive dependencies

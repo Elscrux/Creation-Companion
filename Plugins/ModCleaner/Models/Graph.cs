@@ -1,5 +1,5 @@
 ﻿using Noggog;
-namespace BSAssetsTrimmer.Models;
+namespace ModCleaner.Models;
 
 public sealed class Graph<TVertex, TEdge>
     where TVertex : notnull
