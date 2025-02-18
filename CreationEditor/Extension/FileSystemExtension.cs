@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Hashing;
-using Noggog;
 namespace CreationEditor;
 
 public static class FileSystemExtension {
