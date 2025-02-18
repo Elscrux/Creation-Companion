@@ -97,13 +97,14 @@ public sealed class ModCleaner(
         typeof(IDialogBranchGetter),
         typeof(IDialogResponsesGetter),
         typeof(IStoryManagerEventNodeGetter),
+        typeof(IStoryManagerBranchNodeGetter),
+        typeof(IStoryManagerQuestNodeGetter),
     ];
 
     private static readonly Type[] ImplicitRetainedRecordTypes = [
         typeof(IConstructibleObjectGetter),
         typeof(IRelationshipGetter),
         typeof(IDialogViewGetter),
-        typeof(IStoryManagerQuestNodeGetter),
     ];
 
     private static readonly Type[] SelfRetainedRecordTypes = [
