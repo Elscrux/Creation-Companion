@@ -168,7 +168,7 @@ public sealed class ModCleaner(
             foreach (var vertex in graph.Vertices.Where(x => x.Type == implicitType)) {
                 if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
                 if (edges.Count == 0) continue;
-                if (edges.Any(x => !included.Contains(x.Target))) continue;
+                if (edges.All(x => !included.Contains(x.Target))) continue;
 
                 included.Add(vertex);
             }
