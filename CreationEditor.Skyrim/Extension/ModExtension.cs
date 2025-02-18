@@ -1,4 +1,6 @@
-﻿using Mutagen.Bethesda.Plugins.Records;
+﻿using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim;
 
@@ -8,6 +10,27 @@ public static class ModExtension {
             ISkyrimModGetter skyrimMod => skyrimMod.ModHeader.Stats.NumRecords,
             _ => throw new ArgumentOutOfRangeException(nameof(mod)),
         };
+    }
+
+    public static IEnumerable<ModKey> GetTransitiveMasters(this IModGetter mod, IGameEnvironment gameEnvironment, bool includeSelf = false) {
+        HashSet<ModKey> masters = includeSelf ? [mod.ModKey] : [];
+
+        var queue = new Queue<ModKey>(GetModMasters(mod));
+        while (queue.Count > 0) {
+            var current = queue.Dequeue();
+            if (!masters.Add(current)) continue;
+
+            var currentMod = gameEnvironment.LinkCache.GetMod(current);
+            foreach (var master in GetModMasters(currentMod)) {
+                queue.Enqueue(master);
+            }
+        }
+
+        return masters;
+
+        IEnumerable<ModKey> GetModMasters(IModGetter modGetter) {
+            return modGetter.MasterReferences.Select(m => m.Master);
+        }
     }
 
     public static IEnumerable<IReadOnlyList<IConditionGetter>> GetConditions(this IModGetter mod) {

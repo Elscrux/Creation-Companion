@@ -2,6 +2,7 @@
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Skyrim;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -58,7 +59,7 @@ public sealed class ModCleaner(
     }
 
     private Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
-        var masters = mod.MasterReferences.Select(x => x.Master).ToArray();
+        var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
         var graph = new Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>>();
 
         foreach (var record in mod.EnumerateMajorRecords()) {
