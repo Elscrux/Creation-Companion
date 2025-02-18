@@ -58,6 +58,7 @@ public sealed class ModCleaner(
     }
 
     private Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
+        var masters = mod.MasterReferences.Select(x => x.Master).ToArray();
         var graph = new Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>>();
 
         foreach (var record in mod.EnumerateMajorRecords()) {
@@ -71,6 +72,7 @@ public sealed class ModCleaner(
                     // This just checks if the reference was defined in the mod or one of its dependencies. Update if needed.
                     var modKey = currentReference.FormKey.ModKey;
                     if (modKey != mod.ModKey
+                     && !masters.Contains(modKey)
                      && !dependencies.Contains(modKey)) continue;
 
                     if (!graph.Vertices.Contains(currentReference)) {
