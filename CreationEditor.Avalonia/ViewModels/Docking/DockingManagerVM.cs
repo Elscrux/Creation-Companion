@@ -69,7 +69,7 @@ public sealed partial class DockingManagerVM : DockContainerVM {
     public override bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock) {
         outDock = ContainerChildren
             .Select(vm => vm.TryGetDock(control, out var layoutDock) ? layoutDock : null)
-            .NotNull()
+            .WhereNotNull()
             .FirstOrDefault();
 
         return outDock is not null;

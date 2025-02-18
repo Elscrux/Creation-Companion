@@ -332,7 +332,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         return oldDataGrid.SelectedItems
             .OfType<object>()
             .Select(selector)
-            .NotNull()
+            .WhereNotNull()
             .Any(canDrop);
     }
 
@@ -352,7 +352,7 @@ public sealed class DragDropExtended : AvaloniaObject {
         validItems = oldDataGrid.SelectedItems
             .OfType<object>()
             .Select(selector)
-            .NotNull()
+            .WhereNotNull()
             .Where(obj => sameGrid || canDrop(obj))
             .ToList();
 

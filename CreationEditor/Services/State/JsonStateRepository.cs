@@ -68,7 +68,7 @@ public sealed class JsonStateRepository<T>(
         return fileSystem.Directory
             .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
             .Select(filePath => GetStateIdentifier(fileSystem.Path.GetFileName(filePath)))
-            .NotNull();
+            .WhereNotNull();
     }
 
     public IEnumerable<T> LoadAll() {
@@ -76,7 +76,7 @@ public sealed class JsonStateRepository<T>(
             .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
             .Select(filePath => fileSystem.File.ReadAllText(filePath))
             .Select(json => JsonConvert.DeserializeObject<T>(json, _serializerSettings))
-            .NotNull();
+            .WhereNotNull();
     }
 
     public T? Load(Guid id) {

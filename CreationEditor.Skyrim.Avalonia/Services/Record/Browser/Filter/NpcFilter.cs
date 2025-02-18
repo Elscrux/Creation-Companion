@@ -17,7 +17,7 @@ public sealed class NpcFilter : RecordFilter<INpcGetter> {
 
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
         return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IRaceGetter>()
-            .NotNull()
+            .WhereNotNull()
             .Where(race => race.EditorID is not null)
             .Select(race => {
                 var listing = new RecordFilterListing(race.EditorID!, record => record is INpcGetter npc && npc.Race.FormKey == race.FormKey);

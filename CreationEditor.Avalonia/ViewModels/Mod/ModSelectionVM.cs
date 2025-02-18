@@ -95,12 +95,12 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                 using var frame = new MutagenFrame(stream);
                 return modGetterVM.GetModInfo(listing.ModKey, frame);
             })
-            .NotNull()
+            .WhereNotNull()
             .ToArray());
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
-            .Select(x => x.ListedOrder.Select(modGetterVM.GetModInfo).NotNull())
+            .Select(x => x.ListedOrder.Select(modGetterVM.GetModInfo).WhereNotNull())
             .StartWith(Array.Empty<ModInfo>());
 
         _mods = listedModInfos
@@ -120,7 +120,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                             IsSelected = x.LoadOrder.Exists(info => info.ModKey == modKey),
                         };
                     })
-                    .NotNull()
+                    .WhereNotNull()
                     .ToList();
             })
             .ToObservableCollection(this);

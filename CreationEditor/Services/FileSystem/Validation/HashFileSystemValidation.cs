@@ -144,7 +144,7 @@ public sealed class HashFileSystemValidation(
                 var hashDirectoryCacheData = await Task.WhenAll(fileSystem.Directory.EnumerateDirectories(directoryPath)
                     .Select(dir => Task.Run(() => BuildDirectoryCache(dir, nextLevel))));
 
-                subDirectories = hashDirectoryCacheData.NotNull().ToArray();
+                subDirectories = hashDirectoryCacheData.WhereNotNull().ToArray();
             }
 
             // Build files

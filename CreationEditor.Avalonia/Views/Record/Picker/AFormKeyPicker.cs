@@ -844,7 +844,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         IList<Type> GetGetterTypes(IEnumerable<Type> x) {
             return x.Select(type => LoquiRegistration.TryGetRegister(type, out var registration) ? registration.GetterType : null)
-                .NotNull()
+                .WhereNotNull()
                 .Distinct()
                 .OrderBy(type => type.Name)
                 .ToList();

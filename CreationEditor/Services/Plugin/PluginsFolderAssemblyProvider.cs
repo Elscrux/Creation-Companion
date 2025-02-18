@@ -29,6 +29,6 @@ public sealed class PluginsFolderAssemblyProvider(
         // Collect assemblies from files
         return pluginPaths
             .Select(Assembly.LoadFrom)
-            .NotNull();
+            .WhereNotNull();
     }
 }

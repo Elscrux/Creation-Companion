@@ -220,7 +220,7 @@ public sealed class AssetDirectory : IAsset {
                         _archiveService,
                         false)
                     : null)
-                .NotNull());
+                .WhereNotNull());
         }
 
         assets = assets.Concat(_archiveService.GetSubdirectories(Path)
@@ -236,7 +236,7 @@ public sealed class AssetDirectory : IAsset {
                     _archiveService,
                     true)
                 : null)
-            .NotNull());
+            .WhereNotNull());
 
         var addedFiles = new HashSet<string>();
         if (!IsVirtual) {
@@ -246,7 +246,7 @@ public sealed class AssetDirectory : IAsset {
                     var asset = FileToAsset(file.FullName);
                     return addedFiles.Add(file.Name) ? asset : null;
                 })
-                .NotNull());
+                .WhereNotNull());
         }
 
         assets = _archiveService.GetFilesInDirectory(Directory.FullName)
@@ -255,7 +255,7 @@ public sealed class AssetDirectory : IAsset {
                 var asset = FileToAsset(file, true);
                 return addedFiles.Add(_fileSystem.Path.GetFileName(file)) ? asset : null;
             })
-            .NotNull()
+            .WhereNotNull()
             .Concat(assets)
             .ToList();
 

@@ -92,7 +92,7 @@ public sealed class BsaArchiveService : IArchiveService {
             .DisposeWith(_disposables);
         ArchiveCreated = created
             .Select(e => e.Name)
-            .NotNull();
+            .WhereNotNull();
 
         var deleted = _watcher.Events().Deleted;
         deleted
@@ -100,7 +100,7 @@ public sealed class BsaArchiveService : IArchiveService {
             .DisposeWith(_disposables);
         ArchiveDeleted = deleted
             .Select(e => e.Name)
-            .NotNull();
+            .WhereNotNull();
 
         var renamed = _watcher.Events().Renamed;
         renamed
@@ -115,7 +115,7 @@ public sealed class BsaArchiveService : IArchiveService {
 
         ArchiveChanged = _watcher.Events().Changed
             .Select(e => e.Name)
-            .NotNull();
+            .WhereNotNull();
     }
     private IEnumerable<string> GetModBSAFiles(IModGetter mod) {
         var extension = GetExtension();

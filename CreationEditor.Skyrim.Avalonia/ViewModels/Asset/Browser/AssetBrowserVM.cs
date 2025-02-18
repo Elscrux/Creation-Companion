@@ -276,7 +276,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Open = ReactiveCommand.Create<IReadOnlyList<AssetTreeItem?>>(OpenAssets);
 
         Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<AssetTreeItem?>>(async assets => {
-            var deleteAssets = assets.NotNull().ToArray();
+            var deleteAssets = assets.WhereNotNull().ToArray();
             Control? content = null;
 
             var referenceBrowserVM = GetReferenceBrowserVM(deleteAssets);
@@ -383,7 +383,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         // Gather all references to all assets
         var referencedAssets = assets
-            .NotNull()
+            .WhereNotNull()
             .SelectMany(a => a.GetReferencedAssets())
             .DistinctBy(a => a.AssetLink.DataRelativePath);
 
@@ -583,7 +583,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     public void OpenAssets(IReadOnlyList<AssetTreeItem?> assets) {
-        foreach (var asset in assets.NotNull()) {
+        foreach (var asset in assets.WhereNotNull()) {
             var openPath = asset.Path;
             if (asset is { Asset: AssetFile, IsVirtual: true }) {
                 // When the asset is virtual, we need to extract it to a temp file first

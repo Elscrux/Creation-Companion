@@ -69,7 +69,7 @@ public sealed class AutofacPluginService<TMod, TModGetter> : IPluginService, IDi
                 }
                 return plugins;
             })
-            .NotNull()
+            .WhereNotNull()
             .ToList();
     }
 

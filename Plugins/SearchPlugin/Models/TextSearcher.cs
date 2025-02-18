@@ -14,7 +14,7 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
     public IEnumerable<TextReference> GetTextReference(IMajorRecordGetterEnumerable mod, string reference, StringComparison comparison) {
         foreach (var record in mod.EnumerateMajorRecords<TMajorGetter>()) {
             var references = GetText(record)
-                .NotNull()
+                .WhereNotNull()
                 .Where(text => text.Contains(reference, comparison))
                 .Select(text => new TextDiff(text, text))
                 .ToArray();
