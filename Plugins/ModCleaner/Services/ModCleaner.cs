@@ -2,7 +2,6 @@
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
-using CreationEditor.Skyrim.Definitions;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -19,7 +18,7 @@ public sealed class ModCleaner(
         // Build graph of records that are connected via references
         var graph = BuildGraph(mod, dependencies);
 
-        var included = FindRetainedRecords(graph, dependencies);
+        var included = FindRetainedRecords(graph, mod, dependencies);
 
         var recordsToClean = mod.EnumerateMajorRecords()
             .Select(x => x.ToFormLinkInformation())
@@ -116,16 +115,17 @@ public sealed class ModCleaner(
 
     private HashSet<IFormLinkIdentifier> FindRetainedRecords(
         Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> graph,
+        ISkyrimModGetter mod,
         IReadOnlyList<ModKey> dependencies) {
         var included = new HashSet<IFormLinkIdentifier>();
 
         foreach (var vertex in graph.Vertices) {
             if (included.Contains(vertex)) continue;
 
-            if (SkyrimDefinitions.SkyrimModKeys.Contains(vertex.FormKey.ModKey)
+            if (vertex.FormKey.ModKey != mod.ModKey
              || vertex.Type.InheritsFromAny(EssentialRecordTypes) 
              || editorEnvironment.LinkCache.ResolveAllSimpleContexts(vertex).Any(c => dependencies.Contains(c.ModKey))) {
-                // Retain vanilla overrides
+                // Retain overrides of records from other mods
                 // Retain records that are essential and all their transitive dependencies
                 // Retain placeholder records that are going to be replaced by Creation Club records via patch
                 // Retain things that are overridden by dependencies
