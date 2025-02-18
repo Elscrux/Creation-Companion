@@ -2,7 +2,7 @@
 using BSAssetsTrimmer.ViewModels;
 namespace BSAssetsTrimmer;
 
-public class BSAssetsTrimmerModule : Module {
+public class ModCleanerModule : Module {
     protected override void Load(ContainerBuilder builder) {
         base.Load(builder);
 

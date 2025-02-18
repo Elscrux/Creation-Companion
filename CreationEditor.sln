@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapperPlugin", "Plugins\Map
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaterPlugin", "Plugins\WaterPlugin\WaterPlugin.csproj", "{9E284BB8-1E26-4730-B2C3-04DF1DAC11BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSAssetsTrimmer", "Plugins\BSAssetsTrimmer\BSAssetsTrimmer.csproj", "{4C696115-0CE7-4043-8A20-880F07989F88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCleaner", "Plugins\ModCleaner\ModCleaner.csproj", "{4C696115-0CE7-4043-8A20-880F07989F88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
