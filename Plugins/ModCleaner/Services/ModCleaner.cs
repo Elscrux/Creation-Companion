@@ -163,6 +163,12 @@ public sealed class ModCleaner(
                 if (record.SubtypeName.Type is not "CUST" and not "SCEN") {
                     included.Add(vertex);
                 }
+            } else if (vertex.Type == typeof(ISceneGetter)) {
+                // Retain scenes that begin on quest start
+                var record = editorEnvironment.LinkCache.Resolve<ISceneGetter>(vertex.FormKey);
+                if (record.Flags is not null && record.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) {
+                    included.Add(vertex);
+                }
             }
         }
 
