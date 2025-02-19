@@ -153,12 +153,20 @@ public sealed class ModCleaner(
                 var record = editorEnvironment.LinkCache.Resolve<IDialogTopicGetter>(vertex.FormKey);
                 if (record.SubtypeName.Type is not "CUST" and not "SCEN") {
                     included.Add(vertex);
+
+                    if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
+
+                    RetainOutgoingEdges(edges);
                 }
             } else if (vertex.Type == typeof(ISceneGetter)) {
                 // Retain scenes that begin on quest start
                 var record = editorEnvironment.LinkCache.Resolve<ISceneGetter>(vertex.FormKey);
                 if (record.Flags is not null && record.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) {
                     included.Add(vertex);
+                    
+                    if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
+                    
+                    RetainOutgoingEdges(edges);
                 }
             }
         }
@@ -172,6 +180,8 @@ public sealed class ModCleaner(
                 if (edges.All(x => !included.Contains(x.Target))) continue;
 
                 included.Add(vertex);
+
+                RetainOutgoingEdges(edges);
             }
         }
 
