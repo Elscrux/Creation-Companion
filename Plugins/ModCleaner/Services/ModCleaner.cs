@@ -136,16 +136,7 @@ public sealed class ModCleaner(
 
                 if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
 
-                var queue = new Queue<IFormLinkIdentifier>(edges.Select(x => x.Target));
-                while (queue.Count > 0) {
-                    var current = queue.Dequeue();
-                    if (!included.Add(current)) continue;
-                    if (!graph.OutgoingEdges.TryGetValue(current, out var currentEdges)) continue;
-
-                    foreach (var edge in currentEdges) {
-                        queue.Enqueue(edge.Target);
-                    }
-                }
+                RetainOutgoingEdges(edges);
             } else if (vertex.Type.InheritsFromAny(SelfRetainedRecordTypes)) {
                 // Retain records that are self-retained, and keep adding all other records that are linked to them
                 var queue = new Queue<IFormLinkIdentifier>([vertex]);
@@ -185,5 +176,18 @@ public sealed class ModCleaner(
         }
 
         return included;
+
+        void RetainOutgoingEdges(HashSet<Edge<IFormLinkIdentifier>> edges) {
+            var queue = new Queue<IFormLinkIdentifier>(edges.Select(x => x.Target));
+            while (queue.Count > 0) {
+                var current = queue.Dequeue();
+                if (!included.Add(current)) continue;
+                if (!graph.OutgoingEdges.TryGetValue(current, out var currentEdges)) continue;
+                
+                foreach (var edge in currentEdges) {
+                    queue.Enqueue(edge.Target);
+                }
+            }
+        }
     }
 }
