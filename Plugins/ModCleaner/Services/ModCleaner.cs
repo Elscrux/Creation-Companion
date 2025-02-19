@@ -101,6 +101,7 @@ public sealed class ModCleaner(
         typeof(IStoryManagerEventNodeGetter),
         typeof(IStoryManagerBranchNodeGetter),
         typeof(IStoryManagerQuestNodeGetter),
+        typeof(ILoadScreenGetter),
     ];
 
     private static readonly Type[] ImplicitRetainedRecordTypes = [
@@ -111,7 +112,6 @@ public sealed class ModCleaner(
 
     private static readonly Type[] SelfRetainedRecordTypes = [
         typeof(IIdleAnimationGetter),
-        typeof(ILoadScreenGetter),
         typeof(IAddonNodeGetter),
         typeof(IAnimatedObjectGetter),
     ];
