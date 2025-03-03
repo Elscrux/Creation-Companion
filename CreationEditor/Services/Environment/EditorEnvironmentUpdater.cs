@@ -120,6 +120,8 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
     }
 
     public IEditorEnvironmentUpdater AddImmutableMod(ModKey modKey) {
+        modKey = GetFreeModKey(modKey);
+
         ImmutableMods.Add(modKey);
         return updater;
     }
@@ -150,8 +152,18 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
     }
 
     public IEditorEnvironmentUpdater AddNewMutableMod(ModKey modKey) {
+        modKey = GetFreeModKey(modKey);
+
         NewMutableMods.Add(modKey);
         return updater;
+    }
+
+    private ModKey GetFreeModKey(ModKey modKey) {
+        while (updater.GetLoadOrder().Contains(modKey)) {
+            modKey = ModKey.FromName(modKey.Name + "_Duplicate", modKey.Type);
+        }
+
+        return modKey;
     }
 }
 
