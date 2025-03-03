@@ -31,31 +31,20 @@ public sealed class ModCleaner(
     }
 
     private void CreatedCleanedMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
-        var cleanModKey = ModKey.FromFileName(mod.ModKey.Name + "Cleaned.esm");
-        var cleanMod = new SkyrimMod(
-            cleanModKey,
-            editorEnvironment.GameEnvironment.GameRelease.ToSkyrimRelease(),
-            IEditorEnvironment.DefaultModVersion);
+        var cleanMod = editorEnvironment.AddNewMutableMod(ModKey.FromFileName(mod.ModKey.Name + "Cleaned.esm"));
 
         foreach (var record in recordsToClean) {
             cleanMod.Remove(new FormKey(cleanMod.ModKey, record.FormKey.ID));
         }
-
-        editorEnvironment.AddMutableMod(cleanMod);
     }
 
     private void CreatedCleanerMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
-        var cleanMod = new SkyrimMod(
-            ModKey.FromFileName($"Clean{mod.ModKey.Name}.esp"),
-            editorEnvironment.GameEnvironment.GameRelease.ToSkyrimRelease(),
-            IEditorEnvironment.DefaultModVersion);
+        var cleanMod = editorEnvironment.AddNewMutableMod(ModKey.FromFileName($"Clean{mod.ModKey.Name}.esp"));
 
         foreach (var record in recordsToClean) {
             var recordOverride = recordController.GetOrAddOverride(record, cleanMod);
             recordOverride.IsDeleted = true;
         }
-
-        editorEnvironment.AddMutableMod(cleanMod);
     }
 
     private Graph<IFormLinkIdentifier, Edge<IFormLinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {

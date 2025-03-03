@@ -2,6 +2,7 @@
 using System.Reactive;
 using Avalonia.Threading;
 using CreationEditor;
+using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Record;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.ViewModels;
@@ -29,7 +30,7 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
 
     [Reactive] public partial bool IsBusy { get; set; }
 
-    public ReactiveCommand<ModKey, Unit> Run { get; }
+    public ReactiveCommand<OrderedModItem, Unit> Run { get; }
 
     public VanillaDuplicateCleanerVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
@@ -51,9 +52,9 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
                 }
             });
 
-        Run = ReactiveCommand.CreateRunInBackground<ModKey>(modKey => {
+        Run = ReactiveCommand.CreateRunInBackground<OrderedModItem>(mod => {
             Dispatcher.UIThread.Post(() => IsBusy = true);
-            Save(modKey);
+            Save(mod.ModKey);
             Dispatcher.UIThread.Post(() => IsBusy = false);
         });
     }
@@ -100,8 +101,8 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
     private void Save(ModKey modKey) {
         if (modKey.IsNull) return;
 
-        var cleanedBaseMod = new SkyrimMod(ModKey.FromName("Cleaned" + modKey.Name, ModType.Plugin), SkyrimRelease.SkyrimSE);
-        var cleanedOtherMods = new List<SkyrimMod>();
+        var cleanedBaseMod = _editorEnvironment.AddNewMutableMod<ISkyrimMod>(ModKey.FromName("Cleaned" + modKey.Name, ModType.Plugin));
+        var cleanedOtherMods = new List<ISkyrimMod>();
 
         var recordReplacements = Records
             .Where(r => r.IsSelected)
@@ -122,7 +123,7 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
                     var modName = $"Cleaned{context.ModKey.Name}From{modKey.Name}";
                     var cleanedMod = cleanedOtherMods.FindOrAdd(
                         mod => mod.ModKey.Name == modName,
-                        () => new SkyrimMod(ModKey.FromName(modName, ModType.Plugin), SkyrimRelease.SkyrimSE));
+                        () => _editorEnvironment.AddNewMutableMod<ISkyrimMod>(ModKey.FromName(modName, ModType.Plugin)));
 
                     context.GetOrAddAsOverride(cleanedMod);
                 }
@@ -137,14 +138,9 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
             .ToDictionary(x => x.RecordDiff.Old.FormKey, x => x.RecordDiff.New.FormKey);
 
         // Remap links and save mods
-        FinalizeMod(cleanedBaseMod);
+        cleanedBaseMod.RemapLinks(remapData);
         foreach (var cleanedOtherMod in cleanedOtherMods) {
-            FinalizeMod(cleanedOtherMod);
-        }
-
-        void FinalizeMod(IMod mod) {
-            mod.RemapLinks(remapData);
-            _editorEnvironment.AddMutableMod(mod);
+            cleanedOtherMod.RemapLinks(remapData);
         }
     }
 }
