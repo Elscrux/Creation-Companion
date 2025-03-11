@@ -739,6 +739,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                             });
                                         });
                                 case FormKeyPickerSearchMode.FormKey:
+                                    return Observable.Return<Func<IMajorRecordIdentifierGetter, bool>>(_ => false);
                                 // todo update based on https://github.com/Mutagen-Modding/Mutagen/blob/dev/Mutagen.Bethesda.WPF/Plugins/AFormKeyPicker.cs
                                 // var modKeyToId = x.Cache?.ListedOrder
                                 //         .Select((mod, index) => (Mod: mod, Index: (byte) index))
