@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Reactive.Subjects;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -9,6 +10,7 @@ using CreationEditor.Avalonia.Constants;
 using FluentAvalonia.UI.Controls;
 using MapperPlugin.ViewModels;
 using Mutagen.Bethesda;
+using ReactiveUI;
 namespace MapperPlugin.Views;
 
 public partial class MapperView : ReactiveUserControl<MapperVM> {
@@ -21,30 +23,77 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
     }
 
     public async Task ExportImage() {
-        if (Map?.Source is null || Drawings?.Source is not DrawingImage { Drawing: {} drawing }) return;
+        if (Map?.Source is null) return;
+
+        var drawing = Drawings?.Source is DrawingImage dImage ? dImage.Drawing : null;
+        var vertexColor = VertexColors?.Source as IImage;
 
         var topLevel = TopLevel.GetTopLevel(this);
         if (topLevel is null) return;
+
+        var includeMap = true;
+        var includeMappings = drawing is not null;
+        var includeVertexColor = vertexColor is not null;
+
+        var mapImage = new ReplaySubject<IImage?>();
+        mapImage.OnNext(Map.Source);
+        var vertexColorsImage = new ReplaySubject<IImage?>();
+        vertexColorsImage.OnNext(vertexColor);
+        var drawingsImage = new ReplaySubject<IImage?>();
+        drawingsImage.OnNext(Drawings?.Source);
 
         var dialog = new TaskDialog {
             Header = "Export Map",
             Content = new Grid {
                 Children = {
-                    new Image {
-                        Source = Drawings.Source,
-                    },
+                    new StackPanel {
+                        Spacing = 5,
+                        Children = {
+                            new Grid {
+                                Height = 450,
+                                Width = Map.Source.Size.Width / Map.Source.Size.Height * 450,
+                                Children = {
+                                    new Image { [!Image.SourceProperty] = mapImage.ToBinding() },
+                                    new Image { [!Image.SourceProperty] = vertexColorsImage.ToBinding() },
+                                    new Image { [!Image.SourceProperty] = drawingsImage.ToBinding() },
+                                }
+                            },
+                            new CheckBox {
+                                Content = "Include Map",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeMap = !includeMap;
+                                    mapImage.OnNext(includeMap ? Map.Source : null);
+                                }),
+                                IsChecked = includeMap,
+                            },
+                            new CheckBox {
+                                Content = "Include Mappings",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeMappings = !includeMappings;
+                                    drawingsImage.OnNext(includeMappings ? Drawings?.Source : null);
+                                }),
+                                IsChecked = includeMappings,
+                                IsEnabled = includeMappings,
+                            },
+                            new CheckBox {
+                                Content = "Include Vertex Color",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeVertexColor = !includeVertexColor;
+                                    vertexColorsImage.OnNext(includeVertexColor ? vertexColor : null);
+                                }),
+                                IsChecked = includeVertexColor,
+                                IsEnabled = includeVertexColor,
+                            },
+                        }
+                    }
                 },
             },
             XamlRoot = this,
             Buttons = {
                 new TaskDialogButton {
-                    Text = "Export All",
+                    Text = "Export",
                     IsDefault = true,
                     DialogResult = TaskDialogStandardResult.OK,
-                },
-                new TaskDialogButton {
-                    Text = "Export Mask",
-                    DialogResult = TaskDialogStandardResult.Yes,
                 },
                 TaskDialogButton.CancelButton,
             },
@@ -68,13 +117,9 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
         var renderTargetBitmap = new RenderTargetBitmap(size);
         var drawingContext = renderTargetBitmap.CreateDrawingContext();
 
-        // Also draw the map if selected
-        if (exportMode is TaskDialogStandardResult.OK) {
-            Map.Source.Draw(drawingContext, bounds, bounds);
-        }
-
-        // Draw the drawings
-        drawing.Draw(drawingContext);
+        if (includeMap) Map.Source.Draw(drawingContext, bounds, bounds);
+        if (includeVertexColor) vertexColor?.Draw(drawingContext, bounds, bounds);
+        if (includeMappings) drawing?.Draw(drawingContext);
 
         renderTargetBitmap.Save(file.Path.LocalPath);
     }
