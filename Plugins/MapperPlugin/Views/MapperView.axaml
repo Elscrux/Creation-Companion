@@ -138,6 +138,9 @@
                                 <Image x:Name="Map"
                                        Source="{Binding ImageSource}"/>
 
+                                <Image x:Name="Heightmap"
+                                       Source="{Binding HeightmapImage}"/>
+
                                 <Image x:Name="VertexColors"
                                        Source="{Binding VertexColorImage}"/>
 
@@ -159,7 +162,7 @@
         <GridSplitter Grid.Column="1"/>
 
         <Grid Grid.Column="2"
-              RowDefinitions="Auto,5,Auto,5,Auto,5,*">
+              RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
             <controls:CommandBar
                 Grid.Row="0"
                 DefaultLabelPosition="Right">
@@ -228,8 +231,14 @@
                 IsChecked="{Binding ShowVertexColor}"
                 Content="Show Vertex Color"/>
 
-            <Grid
+            <CheckBox
                 Grid.Row="4"
+                Margin="5,0"
+                IsChecked="{Binding ShowHeightmap}"
+                Content="Show Heightmap"/>
+
+            <Grid
+                Grid.Row="6"
                 ColumnDefinitions="Auto,5,Auto"
                 Margin="5"
                 VerticalAlignment="Top">
@@ -248,7 +257,7 @@
             </Grid>
 
             <DataGrid
-                Grid.Row="6"
+                Grid.Row="8"
                 ItemsSource="{Binding Mappings}"
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="True"

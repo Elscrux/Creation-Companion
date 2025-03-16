@@ -26,19 +26,23 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
         if (Map?.Source is null) return;
 
         var drawing = Drawings?.Source is DrawingImage dImage ? dImage.Drawing : null;
-        var vertexColor = VertexColors?.Source as IImage;
+        var heightmap = Heightmap?.Source;
+        var vertexColor = VertexColors?.Source;
 
         var topLevel = TopLevel.GetTopLevel(this);
         if (topLevel is null) return;
 
         var includeMap = true;
         var includeMappings = drawing is not null;
+        var includeHeightmap = heightmap is not null;
         var includeVertexColor = vertexColor is not null;
 
         var mapImage = new ReplaySubject<IImage?>();
         mapImage.OnNext(Map.Source);
         var vertexColorsImage = new ReplaySubject<IImage?>();
         vertexColorsImage.OnNext(vertexColor);
+        var heightmapImage = new ReplaySubject<IImage?>();
+        heightmapImage.OnNext(heightmap);
         var drawingsImage = new ReplaySubject<IImage?>();
         drawingsImage.OnNext(Drawings?.Source);
 
@@ -55,6 +59,7 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 Children = {
                                     new Image { [!Image.SourceProperty] = mapImage.ToBinding() },
                                     new Image { [!Image.SourceProperty] = vertexColorsImage.ToBinding() },
+                                    new Image { [!Image.SourceProperty] = heightmapImage.ToBinding() },
                                     new Image { [!Image.SourceProperty] = drawingsImage.ToBinding() },
                                 }
                             },
@@ -74,6 +79,15 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 }),
                                 IsChecked = includeMappings,
                                 IsEnabled = includeMappings,
+                            },
+                            new CheckBox {
+                                Content = "Include Heightmap",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeHeightmap = !includeHeightmap;
+                                    heightmapImage.OnNext(includeHeightmap ? heightmap : null);
+                                }),
+                                IsChecked = includeHeightmap,
+                                IsEnabled = includeHeightmap,
                             },
                             new CheckBox {
                                 Content = "Include Vertex Color",
@@ -118,6 +132,7 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
         var drawingContext = renderTargetBitmap.CreateDrawingContext();
 
         if (includeMap) Map.Source.Draw(drawingContext, bounds, bounds);
+        if (includeHeightmap) heightmap?.Draw(drawingContext, bounds, bounds);
         if (includeVertexColor) vertexColor?.Draw(drawingContext, bounds, bounds);
         if (includeMappings) drawing?.Draw(drawingContext);
 

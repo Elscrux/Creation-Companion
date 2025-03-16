@@ -32,6 +32,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
 
     public HeatmapCreator HeatmapCreator { get; }
     public VertexColorMapCreator VertexColorMapCreator { get; }
+    public HeightmapCreator HeightmapCreator { get; }
 
     [Reactive] public partial int BusyTasks { get; set; }
 
@@ -40,6 +41,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     [Reactive] public partial FormKey WorldspaceFormKey { get; set; }
 
     [Reactive] public partial bool ShowVertexColor { get; set; }
+    [Reactive] public partial bool ShowHeightmap { get; set; }
 
     [Reactive] public partial int TopCell { get; set; }
     [Reactive] public partial int BottomCell { get; set; }
@@ -50,6 +52,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
 
     [Reactive] public partial DrawingImage? DrawingsImage { get; set; }
     [Reactive] public partial IImage? VertexColorImage { get; set; }
+    [Reactive] public partial IImage? HeightmapImage { get; set; }
     [Reactive] public partial IImage? ImageSource { get; set; }
     [Reactive] public partial string? ImageFilePath { get; set; }
 
@@ -73,6 +76,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         _queryVMFactory = queryVMFactory;
         HeatmapCreator = new HeatmapCreator();
         VertexColorMapCreator = new VertexColorMapCreator();
+        HeightmapCreator = new HeightmapCreator();
         LinkCacheProvider = linkCacheProvider;
         var stateRepository = stateRepositoryFactory("Heatmap");
         TopCell = 64;
@@ -168,13 +172,34 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .ObserveOnTaskpool()
             .Select(x => {
                 if (x.Show && LinkCacheProvider.LinkCache.TryResolve<IWorldspaceGetter>(x.WorldspaceFormKey, out var worldspace)) {
-                    return VertexColorMapCreator.ScaleForGrid(worldspace, ImageSource!.Size, x.Grid.Left, x.Grid.Right, x.Grid.Top, x.Grid.Bottom);
+                    return VertexColorMapCreator.GetVertexColorMap(worldspace, ImageSource!.Size, x.Grid.Left, x.Grid.Right, x.Grid.Top, x.Grid.Bottom);
                 }
 
                 return null;
             })
             .ObserveOnGui()
             .Do(newImage => VertexColorImage = newImage)
+            .Do(_ => BusyTasks--)
+            .Subscribe()
+            .DisposeWith(this);
+
+        this.WhenAnyValue(
+                x => x.ShowHeightmap,
+                x => x.WorldspaceFormKey,
+                (showHeightmap, worldspace) => (Show: showHeightmap, WorldspaceFormKey: worldspace))
+            .CombineLatest(gridUpdates, (x, grid) => (x.Show, x.WorldspaceFormKey, Grid: grid))
+            .ObserveOnGui()
+            .Do(_ => BusyTasks++)
+            .ObserveOnTaskpool()
+            .Select(x => {
+                if (x.Show && LinkCacheProvider.LinkCache.TryResolve<IWorldspaceGetter>(x.WorldspaceFormKey, out var worldspace)) {
+                    return HeightmapCreator.GetHeightmap(worldspace, ImageSource!.Size, x.Grid.Left, x.Grid.Right, x.Grid.Top, x.Grid.Bottom);
+                }
+
+                return null;
+            })
+            .ObserveOnGui()
+            .Do(newImage => HeightmapImage = newImage)
             .Do(_ => BusyTasks--)
             .Subscribe()
             .DisposeWith(this);
