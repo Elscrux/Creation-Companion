@@ -7,5 +7,7 @@
         <WarningsAsErrors>nullable</WarningsAsErrors>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <!-- Disable to ensure Mod Organizer 2 compatibility -->
+        <CETCompat>false</CETCompat>
     </PropertyGroup>
 </Project>
