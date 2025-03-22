@@ -50,6 +50,15 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
                     "All Match",
                     (context, enumerable) => enumerable.Cast<object?>().All(item => Equals(item, context.CompareValue)),
                     simpleListFieldOverride),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Equals",
+                    (enumerable, count) => enumerable.CountIsExactly(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Less Than",
+                    (enumerable, count) => enumerable.CountIsLessThan(count)),
+                new QueryCompareFunction<IEnumerable, int>(
+                    "Count Greater Than",
+                    (enumerable, count) => enumerable.CountIsGreaterThan(count)),
             ],
             SimpleListAccepts<IEnumerable>,
             -50);
