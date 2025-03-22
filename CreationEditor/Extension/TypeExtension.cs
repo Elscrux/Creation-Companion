@@ -4,6 +4,24 @@ namespace CreationEditor;
 
 public static class TypeExtension {
     /// <summary>
+    /// Custom get property method that supports properties that explicitly implement an interface and thus have
+    /// a name like "Interface.Property" not just "Property" which causes the default GetProperty method to fail.
+    /// </summary>
+    /// <param name="type">The type to get the property from</param>
+    /// <param name="name">Name of the property</param>
+    /// <returns>Property if found, otherwise null</returns>
+    public static PropertyInfo? GetPropertyCustom(this Type type, string name) {
+        return type
+            .GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            .FirstOrDefault(p => {
+                var lastIndexOf = p.Name.AsSpan().LastIndexOf('.');
+                if (lastIndexOf == -1) return p.Name == name;
+
+                return string.Equals(p.Name[(lastIndexOf + 1)..], name, StringComparison.Ordinal);
+            });
+    }
+
+    /// <summary>
     /// Returns if any of the types in the calling enumerable inherits from the parameter type.
     /// Any 1 : 1
     /// </summary>

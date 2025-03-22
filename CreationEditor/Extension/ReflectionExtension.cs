@@ -7,7 +7,7 @@ public static class ReflectionExtension {
         var variables = name.Split('.');
         var current = obj;
         foreach (var variable in variables) {
-            var property = current.GetType().GetProperty(variable);
+            var property = current.GetType().GetPropertyCustom(variable);
             if (property is null) {
                 outValue = default;
                 return false;
@@ -40,7 +40,7 @@ public static class ReflectionExtension {
         var current = obj;
         PropertyInfo? property;
         while (i < names.Length - 1) {
-            property = current.GetType().GetProperty(names[i]);
+            property = current.GetType().GetPropertyCustom(names[i]);
             if (property is null) return false;
 
             current = property.GetValue(obj);
@@ -49,7 +49,7 @@ public static class ReflectionExtension {
             i++;
         }
 
-        property = current.GetType().GetProperty(names[^1]);
+        property = current.GetType().GetPropertyCustom(names[^1]);
         if (property is null) return false;
 
         if (property.PropertyType.IsAssignableFrom(typeof(T))) {
