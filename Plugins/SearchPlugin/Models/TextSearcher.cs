@@ -1,4 +1,6 @@
-﻿using Mutagen.Bethesda.Plugins.Cache;
+﻿using System.Collections.Concurrent;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -9,6 +11,7 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
     where TMajorGetter : class, IMajorRecordQueryableGetter
     where TModGetter : class, IModGetter
     where TMod : class, TModGetter, IMod {
+    private static readonly ConcurrentDictionary<FormKey, Lock> Locks = [];
     public abstract string SearcherName { get; }
 
     public IEnumerable<TextReference> GetTextReference(IMajorRecordGetterEnumerable mod, string reference, StringComparison comparison) {
@@ -48,19 +51,27 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
         string newText,
         StringComparison comparison) {
         if (record is not TMajorGetter) return;
-        if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(((IMajorRecordIdentifierGetter) record).FormKey, out var context)) return;
 
-        var overrideRecord = context.GetOrAddAsOverride(mod);
-        if (record is IDialogTopicGetter topic) {
-            // TEMP FIX - Make sure response count is sustained as Mutagen currently just counts
-            // the number of responses in the current mod and not the overwritten mods.
-            foreach (var response in topic.Responses) {
-                var responseContext = linkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
-                responseContext.GetOrAddAsOverride(mod);
+        var formKey = ((IMajorRecordIdentifierGetter) record).FormKey;
+        var recordLock = Locks.GetOrAdd(formKey);
+
+        lock (recordLock) {
+            if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(formKey, out var context)) return;
+
+            var overrideRecord = context.GetOrAddAsOverride(mod);
+            if (record is IDialogTopicGetter topic) {
+                // TEMP FIX - Make sure response count is sustained as Mutagen currently just counts
+                // the number of responses in the current mod and not the overwritten mods.
+                foreach (var response in topic.Responses) {
+                    var responseContext = linkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
+                    responseContext.GetOrAddAsOverride(mod);
+                }
             }
+
+            ReplaceText(overrideRecord, oldText, newText, comparison);
         }
 
-        ReplaceText(overrideRecord, oldText, newText, comparison);
+        Locks.TryRemove(formKey, out _);
     }
 
     protected abstract IEnumerable<string?> GetText(TMajorGetter record);

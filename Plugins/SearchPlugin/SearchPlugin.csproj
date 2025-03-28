@@ -11,6 +11,33 @@
       <PackageReference Include="ReactiveUI.SourceGenerators" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Models\LoadScreen.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Message.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Name.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Quest.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Activator.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Book.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\EditorID.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Topic.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
     </Target>
