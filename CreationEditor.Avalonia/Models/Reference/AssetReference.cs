@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Asset;
@@ -27,88 +28,93 @@ public sealed class AssetReference : IReference, IDisposable {
     public string Identifier => string.Empty;
     public string Type => Asset.Type.BaseFolder;
 
-    private ReadOnlyObservableCollection<IReference>? _children;
-    public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
-    private ReadOnlyObservableCollection<IReference> LoadChildren() {
 
+    private ReadOnlyObservableCollection<IReference>? _children;
+    private ObservableCollectionExtended<IReference>? _childrenCollection;
+    public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
+
+    private ReadOnlyObservableCollection<IReference> LoadChildren() {
         var references = ReferencedAsset.NifReferences
             .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
             .Cast<IReference>()
             .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReference(x, _linkCacheProvider, _recordReferenceController)));
 
-        var collection = new ObservableCollectionExtended<IReference>(references);
+        _childrenCollection = new ObservableCollectionExtended<IReference>(references);
 
-        ReferencedAsset.RecordReferences.ObserveCollectionChanges()
-            .Subscribe(e => {
-                if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    collection.Clear();
+        ReferencedAsset.RecordReferences.ObserveCollectionChanges().Subscribe(RecordReferenceUpdate);
+        ReferencedAsset.NifArchiveReferences.ObserveCollectionChanges().Subscribe(NifArchiveReferenceUpdate);
+        ReferencedAsset.NifDirectoryReferences.ObserveCollectionChanges().Subscribe(NifDirectoryReferenceUpdate);
 
-                    foreach (var path in ReferencedAsset.NifArchiveReferences.Concat(ReferencedAsset.NifDirectoryReferences)) {
-                        var reference = GetAssetReference(path);
-                        if (reference is not null) {
-                            collection.Add(reference);
-                        }
-                    }
-                } else {
-                    collection.Apply(e.EventArgs.Transform<IFormLinkGetter, RecordReference>(GetRecordReference));
+        return new ReadOnlyObservableCollection<IReference>(_childrenCollection);
+    }
+
+    private void RecordReferenceUpdate(EventPattern<NotifyCollectionChangedEventArgs> e) {
+        if (_childrenCollection is null) return;
+
+        if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
+            _childrenCollection.Clear();
+
+            foreach (var path in ReferencedAsset.NifArchiveReferences.Concat(ReferencedAsset.NifDirectoryReferences)) {
+                var reference = GetAssetReference(path);
+                if (reference is not null) {
+                    _childrenCollection.Add(reference);
                 }
-            });
-
-        ReferencedAsset.NifArchiveReferences.ObserveCollectionChanges()
-            .Subscribe(e => {
-                if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    collection.Clear();
-
-                    foreach (var path in ReferencedAsset.NifDirectoryReferences) {
-                        var reference = GetAssetReference(path);
-                        if (reference is not null) {
-                            collection.Add(reference);
-                        }
-                    }
-
-                    foreach (var formLink in ReferencedAsset.RecordReferences) {
-                        var reference = GetRecordReference(formLink);
-                        if (reference is not null) {
-                            collection.Add(reference);
-                        }
-                    }
-                } else {
-                    collection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
-                }
-            });
-
-        ReferencedAsset.NifDirectoryReferences.ObserveCollectionChanges()
-            .Subscribe(e => {
-                if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    collection.Clear();
-
-                    foreach (var path in ReferencedAsset.NifArchiveReferences) {
-                        var reference = GetAssetReference(path);
-                        if (reference is not null) {
-                            collection.Add(reference);
-                        }
-                    }
-
-                    foreach (var formLink in ReferencedAsset.RecordReferences) {
-                        var reference = GetRecordReference(formLink);
-                        if (reference is not null) {
-                            collection.Add(reference);
-                        }
-                    }
-                } else {
-                    collection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
-                }
-            });
-
-        return new ReadOnlyObservableCollection<IReference>(collection);
-
-        RecordReference? GetRecordReference(IFormLinkIdentifier formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
-        AssetReference? GetAssetReference(DataRelativePath path) {
-            var assetLink = _assetTypeService.GetAssetLink(path);
-            if (assetLink is null) return null;
-
-            return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
+            }
+        } else {
+            _childrenCollection.Apply(e.EventArgs.Transform<IFormLinkGetter, RecordReference>(GetRecordReference));
         }
+    }
+
+    private void NifArchiveReferenceUpdate(EventPattern<NotifyCollectionChangedEventArgs> e) {
+        if (_childrenCollection is null) return;
+
+        if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
+            _childrenCollection.Clear();
+
+            foreach (var path in ReferencedAsset.NifDirectoryReferences) {
+                var reference = GetAssetReference(path);
+                if (reference is not null) {
+                    _childrenCollection.Add(reference);
+                }
+            }
+
+            foreach (var formLink in ReferencedAsset.RecordReferences) {
+                var reference = GetRecordReference(formLink);
+                _childrenCollection.Add(reference);
+            }
+        } else {
+            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
+        }
+    }
+
+    private void NifDirectoryReferenceUpdate(EventPattern<NotifyCollectionChangedEventArgs> e) {
+        if (_childrenCollection is null) return;
+
+        if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
+            _childrenCollection.Clear();
+
+            foreach (var path in ReferencedAsset.NifArchiveReferences) {
+                var reference = GetAssetReference(path);
+                if (reference is not null) {
+                    _childrenCollection.Add(reference);
+                }
+            }
+
+            foreach (var formLink in ReferencedAsset.RecordReferences) {
+                var reference = GetRecordReference(formLink);
+                _childrenCollection.Add(reference);
+            }
+        } else {
+            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
+        }
+    }
+
+    private RecordReference GetRecordReference(IFormLinkIdentifier formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
+    private AssetReference? GetAssetReference(DataRelativePath path) {
+        var assetLink = _assetTypeService.GetAssetLink(path);
+        if (assetLink is null) return null;
+
+        return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
     }
 
     [field: AllowNull, MaybeNull]
