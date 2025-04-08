@@ -30,8 +30,8 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
     public IObservable<bool> IsLoading => _isLoading;
 
     private readonly ReferenceSubscriptionManager<FormKey, IReferencedRecord, IFormLinkIdentifier> _referenceSubscriptionManager
-        = new((record, change) => record.References.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
-            (record, newData) => record.References.ReplaceWith(newData),
+        = new((record, change) => record.RecordReferences.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
+            (record, newData) => record.RecordReferences.ReplaceWith(newData),
             record => record.FormKey);
 
     public RecordReferenceController(

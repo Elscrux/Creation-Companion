@@ -57,7 +57,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
 
         var openReferencesCommand = ReactiveCommand.Create<RecordListContext>(context => {
             var referencedRecord = context.SelectedRecords[0];
-            var references = referencedRecord.References
+            var references = referencedRecord.RecordReferences
                 .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
@@ -115,7 +115,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
                         : "Delete"),
                 () => menuItemProvider.Delete(deleteCommand).HotKey
             ),
-            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].References.Any(),
+            new RecordAction(context => context.SelectedRecords.Count == 1 && context.SelectedRecords[0].RecordReferences.Any(),
                 50,
                 RecordActionGroup.Inspection,
                 openReferencesCommand,

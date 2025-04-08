@@ -46,13 +46,13 @@ public sealed class RecordReference(
     private ReadOnlyObservableCollection<IReference>? _children;
     public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
     private ReadOnlyObservableCollection<IReference> LoadChildren() {
-        return ReferencedRecord.References
+        return ReferencedRecord.RecordReferences
             .SelectObservableCollectionSync(
                 IReference (identifier) => new RecordReference(identifier, linkCacheProvider, recordReferenceController),
                 _disposables);
     }
 
-    public bool HasChildren => _children is not null ? _children.Count > 0 : ReferencedRecord.References.Count > 0;
+    public bool HasChildren => _children is not null ? _children.Count > 0 : ReferencedRecord.RecordReferences.Count > 0;
 
     public void Dispose() => _disposables.Dispose();
 }

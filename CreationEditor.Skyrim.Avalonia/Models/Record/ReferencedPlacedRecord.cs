@@ -30,7 +30,7 @@ public sealed class ReferencedPlacedRecord : ReactiveObject, IReferencedRecord<I
         };
     }
 
-    public IObservableCollection<IFormLinkIdentifier> References => _referencedRecord.References;
+    public IObservableCollection<IFormLinkIdentifier> RecordReferences => _referencedRecord.RecordReferences;
     public IPlacedGetter Record {
         get => _referencedRecord.Record;
         set => _referencedRecord.Record = value;

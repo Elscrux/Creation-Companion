@@ -143,7 +143,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
             var records = referencedRecords.ToArray();
 
             var recordReferences = records
-                .SelectMany(record => record.References)
+                .SelectMany(record => record.RecordReferences)
                 .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
                 .Cast<IReference>()
                 .ToArray();
@@ -188,7 +188,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
                 },
             };
 
-            if (selectedRecordReferences.Exists(reference => reference.ReferencedRecord.References.Count > 0)) {
+            if (selectedRecordReferences.Exists(reference => reference.ReferencedRecord.RecordReferences.Count > 0)) {
                 var references = _menuItemProvider.References(OpenReferences, selectedRecordReferences.Select(record => record.ReferencedRecord));
                 contextFlyout.Items.Add(references);
             }

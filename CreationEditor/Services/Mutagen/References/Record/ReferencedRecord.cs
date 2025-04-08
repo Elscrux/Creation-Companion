@@ -9,13 +9,13 @@ public sealed partial class ReferencedRecord<TMajorRecordGetter> : ReactiveObjec
     where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
     [Reactive] public partial TMajorRecordGetter Record { get; set; }
-    public IObservableCollection<IFormLinkIdentifier> References { get; }
+    public IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
 
     public ReferencedRecord(
         TMajorRecordGetter record,
         IEnumerable<IFormLinkIdentifier>? references = null) {
         Record = record;
-        References = references is null
+        RecordReferences = references is null
             ? []
             : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
     }

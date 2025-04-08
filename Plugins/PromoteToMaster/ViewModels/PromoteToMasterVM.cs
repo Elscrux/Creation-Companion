@@ -131,7 +131,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             injectionTarget,
             newRecordMod,
             editMod,
-            formKey => recordReferenceDictionary[formKey].References,
+            formKey => recordReferenceDictionary[formKey].RecordReferences,
             editorIdMapper,
             ForceDelete);
     }

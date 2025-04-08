@@ -373,7 +373,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     #region ReplaceReferences
     public void ReplaceReferences(IReferencedRecord record, IMajorRecordGetter replacingRecord) {
-        ReplaceReferences(record.Record, record.References, replacingRecord);
+        ReplaceReferences(record.Record, record.RecordReferences, replacingRecord);
     }
     public void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord) {
         ReplaceReferences(record, references, replacingRecord, _editorEnvironment.ActiveMod);
