@@ -139,7 +139,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         ShowOnlyOrphaned: showOnlyOrphaned,
                         SearchText: searchText))
                 .ThrottleMedium()
-                .Select(tuple => Selector(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
+                .Select(tuple => FilterBuilder(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
 
         AssetTreeSource = new HierarchicalTreeDataGridSource<AssetTreeItem>([]) {
             Columns = {
@@ -603,14 +603,14 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    public Func<IAsset, bool> Selector(bool showBsaAssets, bool showEmptyDirectories, bool showOnlyOrphaned, string searchText) {
+    public Func<IAsset, bool> FilterBuilder(bool showBsaAssets, bool showEmptyDirectories, bool showOnlyOrphaned, string searchText) {
         var hideBsa = !showBsaAssets;
         var hideEmptyDirectories = !showEmptyDirectories;
         var filterText = !string.IsNullOrWhiteSpace(searchText);
 
-        return ShowAsset;
+        return ShowAssetFilter;
 
-        bool ShowAsset(IAsset asset) {
+        bool ShowAssetFilter(IAsset asset) {
             if (asset is null) return false;
 
             if (hideBsa && asset.IsVirtual) return false;
@@ -620,13 +620,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 if (asset is AssetFile file) {
                     if (file.ReferencedAsset.HasReferences) return false;
                 } else {
-                    if (!asset.Children.Any(ShowAsset)) return false;
+                    if (!asset.Children.Any(ShowAssetFilter)) return false;
                 }
             }
 
             if (filterText) {
                 if (asset.IsDirectory) {
-                    if (!asset.Children.Any(ShowAsset)) return false;
+                    if (!asset.Children.Any(ShowAssetFilter)) return false;
                 } else {
                     if (!_searchFilter.Filter(asset.Path, searchText)) return false;
                 }
