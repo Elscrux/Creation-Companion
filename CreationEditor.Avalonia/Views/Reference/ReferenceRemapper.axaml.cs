@@ -22,7 +22,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                             };
 
                             var dialog = new TaskDialog {
-                                Header = "Remap References",
+                                Header = "Remap References for " + (vm.ReferencedRecordContext?.Record.GetHumanReadableName() ?? "Unknown"),
                                 Content = formKeyPicker,
                                 XamlRoot = this,
                                 Buttons = {
