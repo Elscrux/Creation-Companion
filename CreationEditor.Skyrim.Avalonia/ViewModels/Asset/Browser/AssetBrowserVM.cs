@@ -216,7 +216,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                         return new TextBlock {
                             Text = asset.GetReferencedAssets()
-                                .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+                                .Select(x => x.RecordReferences.Count + x.AssetReferences.Count)
                                 .Sum()
                                 .ToString(),
                         };
@@ -388,7 +388,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         foreach (var referencedAsset in referencedAssets) {
             recordReferences.AddRange(referencedAsset.RecordReferences);
-            assetReferences.AddRange(referencedAsset.NifReferences);
+            assetReferences.AddRange(referencedAsset.AssetReferences);
         }
 
         var references = assetReferences

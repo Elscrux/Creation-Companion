@@ -1,14 +1,13 @@
-﻿using DynamicData.Binding;
+﻿using CreationEditor.Services.Mutagen.References.Record;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset;
 
-public interface IReferencedAsset {
+public interface IReferencedAsset : IReferenced {
     ModKey ModKey { get; }
     IAssetLinkGetter AssetLink { get; }
-    IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
-    IEnumerable<DataRelativePath> NifReferences { get; }
     IObservableCollection<DataRelativePath> NifDirectoryReferences { get; }
     IObservableCollection<DataRelativePath> NifArchiveReferences { get; }
 

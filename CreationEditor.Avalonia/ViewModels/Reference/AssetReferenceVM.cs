@@ -34,7 +34,7 @@ public sealed class AssetReferenceVM : IReferenceVM, IDisposable {
     public ReadOnlyObservableCollection<IReferenceVM> Children => _children ??= LoadChildren();
 
     private ReadOnlyObservableCollection<IReferenceVM> LoadChildren() {
-        var references = ReferencedAsset.NifReferences
+        var references = ReferencedAsset.AssetReferences
             .Select(path => new AssetReferenceVM(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
             .Cast<IReferenceVM>()
             .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _recordReferenceController)));

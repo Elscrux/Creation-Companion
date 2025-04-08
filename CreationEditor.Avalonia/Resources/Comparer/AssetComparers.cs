@@ -15,10 +15,10 @@ public static class AssetComparers {
 
     public static readonly FuncComparer<IAsset> ReferenceCountComparer = new((a1, a2) => {
         return a1.GetReferencedAssets()
-            .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+            .Select(x => x.RecordReferences.Count + x.AssetReferences.Count)
             .Sum()
             .CompareTo(a2.GetReferencedAssets()
-                .Select(x => x.RecordReferences.Count + x.NifReferences.Count())
+                .Select(x => x.RecordReferences.Count + x.AssetReferences.Count)
                 .Sum());
     });
 }

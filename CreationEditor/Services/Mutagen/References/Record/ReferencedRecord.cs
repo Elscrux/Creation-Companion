@@ -1,4 +1,5 @@
 ﻿using DynamicData.Binding;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
@@ -9,6 +10,8 @@ public sealed partial class ReferencedRecord<TMajorRecordGetter> : ReactiveObjec
     where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
     [Reactive] public partial TMajorRecordGetter Record { get; set; }
+
+    public IObservableCollection<DataRelativePath> AssetReferences { get; } = new ObservableCollectionExtended<DataRelativePath>();
     public IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
 
     public ReferencedRecord(

@@ -10,7 +10,7 @@ public sealed class ReferencedAsset : IReferencedAsset {
     public ModKey ModKey { get; } = ModKey.Null;
     public IAssetLinkGetter AssetLink { get; }
     public IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
-    public IEnumerable<DataRelativePath> NifReferences => NifDirectoryReferences.Concat(NifArchiveReferences);
+    public IObservableCollection<DataRelativePath> AssetReferences { get; }
     public IObservableCollection<DataRelativePath> NifDirectoryReferences { get; }
     public IObservableCollection<DataRelativePath> NifArchiveReferences { get; }
     public bool HasReferences => RecordReferences.Count > 0 || NifDirectoryReferences.Count > 0 || NifArchiveReferences.Count > 0;
@@ -35,6 +35,8 @@ public sealed class ReferencedAsset : IReferencedAsset {
             ? []
             : new ObservableCollectionExtended<DataRelativePath>(nifArchiveReferences);
 
+        AssetReferences = new ObservableCollectionExtended<DataRelativePath>(NifDirectoryReferences.Concat(NifArchiveReferences));
+
         ReferenceCount = new[] {
                 this.WhenAnyValue(x => x.RecordReferences.Count),
                 this.WhenAnyValue(x => x.NifDirectoryReferences.Count),
@@ -42,5 +44,11 @@ public sealed class ReferencedAsset : IReferencedAsset {
             }
             .CombineLatest()
             .Select(x => x.Sum());
+
+        NifDirectoryReferences.WhenCollectionChanges()
+            .Merge(NifArchiveReferences.WhenCollectionChanges())
+            .Subscribe(_ => {
+                AssetReferences.ReplaceWith(NifDirectoryReferences.Concat(NifArchiveReferences));
+            });
     }
 }
