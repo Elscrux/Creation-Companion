@@ -10,11 +10,13 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IFormLinkGetter>, IDisposable {
     private readonly DisposableBucket _disposableDropoff = new();
 
+    private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
@@ -29,11 +31,13 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     public bool SkipResolvedAssets { get; set; } = true; // todo change back to false by default when inferred assets bug is fixed
 
     public ModAssetQuery(
+        ILogger logger,
         IFileSystem fileSystem,
         ILinkCacheProvider linkCacheProvider,
         IDataDirectoryProvider dataDirectoryProvider,
         IMutagenTypeProvider mutagenTypeProvider,
         IAssetReferenceSerialization<IModGetter, IFormLinkGetter> serialization) {
+        _logger = logger;
         _fileSystem = fileSystem;
         _dataDirectoryProvider = dataDirectoryProvider;
         _mutagenTypeProvider = mutagenTypeProvider;
@@ -54,14 +58,36 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     public IEnumerable<AssetQueryResult<IFormLinkGetter>> ParseAssets(IModGetter source) {
         if (SkipResolvedAssets) {
             foreach (var record in source.EnumerateMajorRecords()) {
-                foreach (var assetLink in record.EnumerateAssetLinks(AssetLinkQuery.Listed | AssetLinkQuery.Inferred).Where(l => !l.IsNull)) {
-                    yield return new AssetQueryResult<IFormLinkGetter>(assetLink, record.ToLinkFromRuntimeType());
+                IEnumerable<AssetQueryResult<IFormLinkGetter>> results;
+                try {
+                    results = record.EnumerateAssetLinks(AssetLinkQuery.Listed | AssetLinkQuery.Inferred)
+                        .Where(l => !l.IsNull)
+                        .Select(l => new AssetQueryResult<IFormLinkGetter>(l, record.ToLinkFromRuntimeType()))
+                        .ToArray();
+                } catch (Exception e) {
+                    _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
+                    results = [];
+                }
+
+                foreach (var result in results) {
+                    yield return result;
                 }
             }
         } else {
             foreach (var record in source.EnumerateMajorRecords()) {
-                foreach (var assetLink in record.EnumerateAllAssetLinks(_assetLinkCache).Where(l => !l.IsNull)) {
-                    yield return new AssetQueryResult<IFormLinkGetter>(assetLink, record.ToLinkFromRuntimeType());
+                IEnumerable<AssetQueryResult<IFormLinkGetter>> results;
+                try {
+                    results = record.EnumerateAllAssetLinks(_assetLinkCache)
+                        .Where(l => !l.IsNull)
+                        .Select(l => new AssetQueryResult<IFormLinkGetter>(l, record.ToLinkFromRuntimeType()))
+                        .ToArray();
+                } catch (Exception e) {
+                    _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
+                    results = [];
+                }
+
+                foreach (var result in results) {
+                    yield return result;
                 }
             }
         }
