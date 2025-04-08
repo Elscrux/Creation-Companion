@@ -22,14 +22,9 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
         MainWindow mainWindow) {
 
         var newCommand = ReactiveCommand.Create<RecordListContext>(context => {
-            var oneListType = context.SelectedRecords
-                .Select(x => x.RecordTypeName)
-                .Distinct()
-                .CountIsExactly(1);
-
-            var recordType = oneListType
-                ? context.ListTypes.First()
-                : context.SelectedRecords[0].Record.Registration.GetterType;
+            var recordType = AllSelectedRecordsHaveSameType(context)
+                ? context.SelectedRecords[0].Record.Registration.GetterType
+                : context.ListTypes.First();
 
             var newRecord = recordController.CreateRecord(recordType);
             recordEditorController.OpenEditor(newRecord);
@@ -126,16 +121,17 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
 
     private static bool HasOneType(RecordListContext context) {
         // Try to infer the record type from the list types
-        var oneListType = context.SelectedRecords
-            .Select(x => x.RecordTypeName)
-            .Distinct()
-            .CountIsExactly(1);
-
+        var oneListType = context.ListTypes.CountIsExactly(1);
         if (oneListType) return true;
 
         // Try to infer the record type from the selected records
         // Only allow new if all the selected records are the same type
-        return context.SelectedRecords.Select(x => x.RecordTypeName)
+        return AllSelectedRecordsHaveSameType(context);
+    }
+
+    private static bool AllSelectedRecordsHaveSameType(RecordListContext context) {
+        return context.SelectedRecords
+            .Select(x => x.RecordTypeName)
             .Distinct()
             .CountIsExactly(1);
     }
