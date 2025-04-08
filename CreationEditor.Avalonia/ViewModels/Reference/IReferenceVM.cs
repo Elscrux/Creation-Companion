@@ -1,28 +1,28 @@
 ﻿using System.Collections.ObjectModel;
-namespace CreationEditor.Avalonia.Models.Reference;
+namespace CreationEditor.Avalonia.ViewModels.Reference;
 
-public interface IReference {
+public interface IReferenceVM {
     string Name { get; }
     string Identifier { get; }
     string Type { get; }
     bool HasChildren { get; }
-    ReadOnlyObservableCollection<IReference>? Children { get; }
+    ReadOnlyObservableCollection<IReferenceVM>? Children { get; }
 
-    static int CompareName(IReference? b, IReference? a) {
+    static int CompareName(IReferenceVM? b, IReferenceVM? a) {
         if (b is null) return -1;
         if (a is null) return 1;
 
         return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
     }
 
-    static int CompareIdentifier(IReference? b, IReference? a) {
+    static int CompareIdentifier(IReferenceVM? b, IReferenceVM? a) {
         if (b is null) return -1;
         if (a is null) return 1;
 
         return string.Compare(a.Identifier, b.Identifier, StringComparison.OrdinalIgnoreCase);
     }
 
-    static int CompareType(IReference? b, IReference? a) {
+    static int CompareType(IReferenceVM? b, IReferenceVM? a) {
         if (b is null) return -1;
         if (a is null) return 1;
 

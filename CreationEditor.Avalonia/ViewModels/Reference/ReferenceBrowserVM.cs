@@ -4,7 +4,6 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
 using Avalonia.Controls.Templates;
 using Avalonia.VisualTree;
-using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Views;
@@ -25,7 +24,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
     public ReferenceRemapperVM? ReferenceRemapperVM { get; }
 
     [Reactive] public partial bool ShowTree { get; set; }
-    [Reactive] public partial ITreeDataGridSource<IReference> ReferenceSource { get; set; }
+    [Reactive] public partial ITreeDataGridSource<IReferenceVM> ReferenceSource { get; set; }
 
     public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> EditRecord { get; }
     public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DuplicateRecord { get; }
@@ -36,7 +35,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
     public ReactiveCommand<Unit, Unit> RemapReferences { get; }
 
     public ReferenceBrowserVM(
-        Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
+        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserFactory,
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
         ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
@@ -45,7 +44,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
         object? context = null,
-        params IReference[] references) {
+        params IReferenceVM[] references) {
         _menuItemProvider = menuItemProvider;
         Context = context;
 
@@ -53,54 +52,54 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
             ReferenceRemapperVM = referenceRemapperVMFactory(context);
         }
 
-        var nameColumn = new TemplateColumn<IReference>(
+        var nameColumn = new TemplateColumn<IReferenceVM>(
             "Name",
-            new FuncDataTemplate<IReference>((r, _) => {
+            new FuncDataTemplate<IReferenceVM>((r, _) => {
                 if (r is null) return null;
 
                 return new TextBlock { Text = r.Name };
             }),
-            options: new TemplateColumnOptions<IReference> {
+            options: new TemplateColumnOptions<IReferenceVM> {
                 CanUserResizeColumn = true,
                 CanUserSortColumn = true,
                 IsTextSearchEnabled = true,
                 TextSearchValueSelector = reference => reference.Name,
-                CompareAscending = (a, b) => IReference.CompareName(b, a),
-                CompareDescending = (a, b) => -IReference.CompareName(b, a),
+                CompareAscending = (a, b) => IReferenceVM.CompareName(b, a),
+                CompareDescending = (a, b) => -IReferenceVM.CompareName(b, a),
             }
         );
-        var identifierColumn = new TemplateColumn<IReference>(
+        var identifierColumn = new TemplateColumn<IReferenceVM>(
             "Identifier",
-            new FuncDataTemplate<IReference>((r, _) => {
+            new FuncDataTemplate<IReferenceVM>((r, _) => {
                 if (r is null) return null;
 
                 return new TextBlock { Text = r.Identifier };
             }),
-            options: new TemplateColumnOptions<IReference> {
+            options: new TemplateColumnOptions<IReferenceVM> {
                 CanUserResizeColumn = true,
                 CanUserSortColumn = true,
-                CompareAscending = (a, b) => IReference.CompareIdentifier(b, a),
-                CompareDescending = (a, b) => -IReference.CompareIdentifier(b, a),
+                CompareAscending = (a, b) => IReferenceVM.CompareIdentifier(b, a),
+                CompareDescending = (a, b) => -IReferenceVM.CompareIdentifier(b, a),
             }
         );
-        var typeColumn = new TemplateColumn<IReference>(
+        var typeColumn = new TemplateColumn<IReferenceVM>(
             "Type",
-            new FuncDataTemplate<IReference>((r, _) => {
+            new FuncDataTemplate<IReferenceVM>((r, _) => {
                 if (r is null) return null;
 
                 return new TextBlock { Text = r.Type };
             }),
-            options: new TemplateColumnOptions<IReference> {
+            options: new TemplateColumnOptions<IReferenceVM> {
                 CanUserResizeColumn = true,
                 CanUserSortColumn = true,
-                CompareAscending = (a, b) => IReference.CompareType(b, a),
-                CompareDescending = (a, b) => -IReference.CompareType(b, a),
+                CompareAscending = (a, b) => IReferenceVM.CompareType(b, a),
+                CompareDescending = (a, b) => -IReferenceVM.CompareType(b, a),
             }
         );
 
-        var treeReferenceSource = new HierarchicalTreeDataGridSource<IReference>(references) {
+        var treeReferenceSource = new HierarchicalTreeDataGridSource<IReferenceVM>(references) {
             Columns = {
-                new HierarchicalExpanderColumn<IReference>(
+                new HierarchicalExpanderColumn<IReferenceVM>(
                     nameColumn,
                     reference => reference.Children,
                     reference => reference.HasChildren
@@ -109,16 +108,16 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
                 typeColumn,
             },
         };
-        if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> treeRowSelection) treeRowSelection.SingleSelect = false;
+        if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> treeRowSelection) treeRowSelection.SingleSelect = false;
 
-        var flatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReference>(references) {
+        var flatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReferenceVM>(references) {
             Columns = {
                 nameColumn,
                 identifierColumn,
                 typeColumn,
             },
         };
-        if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReference> flatRowSelection) flatRowSelection.SingleSelect = false;
+        if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> flatRowSelection) flatRowSelection.SingleSelect = false;
 
         EditRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
             foreach (var record in records) {
@@ -144,8 +143,8 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
 
             var recordReferences = records
                 .SelectMany(record => record.RecordReferences)
-                .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
-                .Cast<IReference>()
+                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, recordReferenceController))
+                .Cast<IReferenceVM>()
                 .ToArray();
 
             var referenceBrowserVM = referenceBrowserFactory(referencedRecords, recordReferences);
@@ -171,11 +170,11 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         if (treeDataGrid?.RowSelection is null) return;
 
         var selectedAssetReferences = treeDataGrid.RowSelection.SelectedItems
-            .OfType<AssetReference>()
+            .OfType<AssetReferenceVM>()
             .ToList();
 
         var selectedRecordReferences = treeDataGrid.RowSelection.SelectedItems
-            .OfType<RecordReference>()
+            .OfType<RecordReferenceVM>()
             .ToList();
 
         if (selectedRecordReferences.Count > 0) {

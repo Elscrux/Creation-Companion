@@ -12,9 +12,9 @@ using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
-namespace CreationEditor.Avalonia.Models.Reference;
+namespace CreationEditor.Avalonia.ViewModels.Reference;
 
-public sealed class AssetReference : IReference, IDisposable {
+public sealed class AssetReferenceVM : IReferenceVM, IDisposable {
     private readonly DisposableBucket _disposables = new();
 
     public IAssetLink Asset { get; }
@@ -29,23 +29,23 @@ public sealed class AssetReference : IReference, IDisposable {
     public string Type => Asset.Type.BaseFolder;
 
 
-    private ReadOnlyObservableCollection<IReference>? _children;
-    private ObservableCollectionExtended<IReference>? _childrenCollection;
-    public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
+    private ReadOnlyObservableCollection<IReferenceVM>? _children;
+    private ObservableCollectionExtended<IReferenceVM>? _childrenCollection;
+    public ReadOnlyObservableCollection<IReferenceVM> Children => _children ??= LoadChildren();
 
-    private ReadOnlyObservableCollection<IReference> LoadChildren() {
+    private ReadOnlyObservableCollection<IReferenceVM> LoadChildren() {
         var references = ReferencedAsset.NifReferences
-            .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
-            .Cast<IReference>()
-            .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReference(x, _linkCacheProvider, _recordReferenceController)));
+            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Cast<IReferenceVM>()
+            .Combine(ReferencedAsset.RecordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _recordReferenceController)));
 
-        _childrenCollection = new ObservableCollectionExtended<IReference>(references);
+        _childrenCollection = new ObservableCollectionExtended<IReferenceVM>(references);
 
         ReferencedAsset.RecordReferences.ObserveCollectionChanges().Subscribe(RecordReferenceUpdate);
         ReferencedAsset.NifArchiveReferences.ObserveCollectionChanges().Subscribe(NifArchiveReferenceUpdate);
         ReferencedAsset.NifDirectoryReferences.ObserveCollectionChanges().Subscribe(NifDirectoryReferenceUpdate);
 
-        return new ReadOnlyObservableCollection<IReference>(_childrenCollection);
+        return new ReadOnlyObservableCollection<IReferenceVM>(_childrenCollection);
     }
 
     private void RecordReferenceUpdate(EventPattern<NotifyCollectionChangedEventArgs> e) {
@@ -61,7 +61,7 @@ public sealed class AssetReference : IReference, IDisposable {
                 }
             }
         } else {
-            _childrenCollection.Apply(e.EventArgs.Transform<IFormLinkGetter, RecordReference>(GetRecordReference));
+            _childrenCollection.Apply(e.EventArgs.Transform<IFormLinkGetter, RecordReferenceVM>(GetRecordReference));
         }
     }
 
@@ -83,7 +83,7 @@ public sealed class AssetReference : IReference, IDisposable {
                 _childrenCollection.Add(reference);
             }
         } else {
-            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
+            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReferenceVM>(GetAssetReference));
         }
     }
 
@@ -105,16 +105,16 @@ public sealed class AssetReference : IReference, IDisposable {
                 _childrenCollection.Add(reference);
             }
         } else {
-            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReference>(GetAssetReference));
+            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReferenceVM>(GetAssetReference));
         }
     }
 
-    private RecordReference GetRecordReference(IFormLinkIdentifier formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
-    private AssetReference? GetAssetReference(DataRelativePath path) {
+    private RecordReferenceVM GetRecordReference(IFormLinkIdentifier formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
+    private AssetReferenceVM? GetAssetReference(DataRelativePath path) {
         var assetLink = _assetTypeService.GetAssetLink(path);
         if (assetLink is null) return null;
 
-        return new AssetReference(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
+        return new AssetReferenceVM(assetLink, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController);
     }
 
     [field: AllowNull, MaybeNull]
@@ -133,7 +133,7 @@ public sealed class AssetReference : IReference, IDisposable {
 
     public bool HasChildren => _children is not null ? _children.Count > 0 : ReferencedAsset.HasReferences;
 
-    public AssetReference(
+    public AssetReferenceVM(
         IAssetLink asset,
         ILinkCacheProvider linkCacheProvider,
         IAssetTypeService assetTypeService,
@@ -146,7 +146,7 @@ public sealed class AssetReference : IReference, IDisposable {
         _recordReferenceController = recordReferenceController;
     }
 
-    public AssetReference(
+    public AssetReferenceVM(
         DataRelativePath path,
         ILinkCacheProvider linkCacheProvider,
         IAssetTypeService assetTypeService,

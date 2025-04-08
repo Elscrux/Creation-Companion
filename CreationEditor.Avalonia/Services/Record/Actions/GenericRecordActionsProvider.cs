@@ -1,5 +1,4 @@
-﻿using CreationEditor.Avalonia.Models.Reference;
-using CreationEditor.Avalonia.Services.Avalonia;
+﻿using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
@@ -14,7 +13,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
     private readonly IList<RecordAction> _actions;
 
     public GenericRecordActionsProvider(
-        Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserFactory,
+        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserFactory,
         ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
@@ -58,8 +57,8 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
         var openReferencesCommand = ReactiveCommand.Create<RecordListContext>(context => {
             var referencedRecord = context.SelectedRecords[0];
             var references = referencedRecord.RecordReferences
-                .Select(identifier => new RecordReference(identifier, linkCacheProvider, recordReferenceController))
-                .Cast<IReference>()
+                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, recordReferenceController))
+                .Cast<IReferenceVM>()
                 .ToArray();
 
             var referenceBrowserVM = referenceBrowserFactory(referencedRecord, references);

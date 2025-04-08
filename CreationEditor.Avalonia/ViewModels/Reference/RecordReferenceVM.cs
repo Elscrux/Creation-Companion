@@ -6,13 +6,13 @@ using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-namespace CreationEditor.Avalonia.Models.Reference;
+namespace CreationEditor.Avalonia.ViewModels.Reference;
 
-public sealed class RecordReference(
+public sealed class RecordReferenceVM(
     IFormLinkIdentifier formLinkIdentifier,
     ILinkCacheProvider linkCacheProvider,
     IRecordReferenceController recordReferenceController)
-    : IReference, IDisposable {
+    : IReferenceVM, IDisposable {
 
     private readonly DisposableBucket _disposables = new();
 
@@ -43,12 +43,12 @@ public sealed class RecordReference(
     public string Identifier => formLinkIdentifier.FormKey.ToString();
     public string Type => formLinkIdentifier.Type.Name;
 
-    private ReadOnlyObservableCollection<IReference>? _children;
-    public ReadOnlyObservableCollection<IReference> Children => _children ??= LoadChildren();
-    private ReadOnlyObservableCollection<IReference> LoadChildren() {
+    private ReadOnlyObservableCollection<IReferenceVM>? _children;
+    public ReadOnlyObservableCollection<IReferenceVM> Children => _children ??= LoadChildren();
+    private ReadOnlyObservableCollection<IReferenceVM> LoadChildren() {
         return ReferencedRecord.RecordReferences
             .SelectObservableCollectionSync(
-                IReference (identifier) => new RecordReference(identifier, linkCacheProvider, recordReferenceController),
+                IReferenceVM (identifier) => new RecordReferenceVM(identifier, linkCacheProvider, recordReferenceController),
                 _disposables);
     }
 

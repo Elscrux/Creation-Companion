@@ -16,7 +16,6 @@ using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Asset;
-using CreationEditor.Avalonia.Models.Reference;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
@@ -45,7 +44,7 @@ using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
-    private readonly Func<object?, IReference[], ReferenceBrowserVM> _referenceBrowserVMFactory;
+    private readonly Func<object?, IReferenceVM[], ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IArchiveService _archiveService;
@@ -87,7 +86,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public HierarchicalTreeDataGridSource<AssetTreeItem> AssetTreeSource { get; }
 
     public AssetBrowserVM(
-        Func<object?, IReference[], ReferenceBrowserVM> referenceBrowserVMFactory,
+        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserVMFactory,
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         ModelAssetQuery modelAssetQuery,
@@ -393,9 +392,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var references = assetReferences
-            .Select(path => new AssetReference(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
-            .Cast<IReference>()
-            .Combine(recordReferences.Select(x => new RecordReference(x, _linkCacheProvider, _recordReferenceController)))
+            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Cast<IReferenceVM>()
+            .Combine(recordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _recordReferenceController)))
             .ToArray();
 
         if (references.Length == 0) return null;

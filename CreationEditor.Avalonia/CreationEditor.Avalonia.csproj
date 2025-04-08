@@ -117,6 +117,12 @@
         <Compile Update="Services\Asset\AssetSymbolService.cs">
           <DependentUpon>IAssetSymbolService.cs</DependentUpon>
         </Compile>
+        <Compile Update="ViewModels\Reference\RecordReferenceVM.cs">
+          <DependentUpon>IReferenceVM.cs</DependentUpon>
+        </Compile>
+        <Compile Update="ViewModels\Reference\AssetReferenceVM.cs">
+          <DependentUpon>IReferenceVM.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
