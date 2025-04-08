@@ -378,7 +378,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private ReferenceBrowserVM? GetReferenceBrowserVM(params AssetTreeItem[] assets) {
-        var recordReferences = new HashSet<IFormLinkGetter>(FormLinkIdentifierEqualityComparer.Instance);
+        var recordReferences = new HashSet<IFormLinkIdentifier>(FormLinkIdentifierEqualityComparer.Instance);
         var assetReferences = new HashSet<DataRelativePath>();
 
         // Gather all references to all assets

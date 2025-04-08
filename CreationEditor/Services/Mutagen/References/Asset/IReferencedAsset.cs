@@ -7,7 +7,7 @@ namespace CreationEditor.Services.Mutagen.References.Asset;
 public interface IReferencedAsset {
     ModKey ModKey { get; }
     IAssetLinkGetter AssetLink { get; }
-    IObservableCollection<IFormLinkGetter> RecordReferences { get; }
+    IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
     IEnumerable<DataRelativePath> NifReferences { get; }
     IObservableCollection<DataRelativePath> NifDirectoryReferences { get; }
     IObservableCollection<DataRelativePath> NifArchiveReferences { get; }

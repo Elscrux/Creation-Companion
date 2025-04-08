@@ -102,7 +102,7 @@ public sealed class AssetReference : IReference, IDisposable {
 
         return new ReadOnlyObservableCollection<IReference>(collection);
 
-        RecordReference? GetRecordReference(IFormLinkGetter formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
+        RecordReference? GetRecordReference(IFormLinkIdentifier formLink) => new(formLink, _linkCacheProvider, _recordReferenceController);
         AssetReference? GetAssetReference(DataRelativePath path) {
             var assetLink = _assetTypeService.GetAssetLink(path);
             if (assetLink is null) return null;

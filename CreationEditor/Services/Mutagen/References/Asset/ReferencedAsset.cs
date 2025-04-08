@@ -9,7 +9,7 @@ namespace CreationEditor.Services.Mutagen.References.Asset;
 public sealed class ReferencedAsset : IReferencedAsset {
     public ModKey ModKey { get; } = ModKey.Null;
     public IAssetLinkGetter AssetLink { get; }
-    public IObservableCollection<IFormLinkGetter> RecordReferences { get; }
+    public IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
     public IEnumerable<DataRelativePath> NifReferences => NifDirectoryReferences.Concat(NifArchiveReferences);
     public IObservableCollection<DataRelativePath> NifDirectoryReferences { get; }
     public IObservableCollection<DataRelativePath> NifArchiveReferences { get; }
@@ -18,14 +18,14 @@ public sealed class ReferencedAsset : IReferencedAsset {
 
     public ReferencedAsset(
         IAssetLinkGetter assetLink,
-        IEnumerable<IFormLinkGetter>? recordReferences,
+        IEnumerable<IFormLinkIdentifier>? recordReferences,
         IEnumerable<DataRelativePath>? nifDirectoryReferences,
         IEnumerable<DataRelativePath>? nifArchiveReferences) {
         AssetLink = assetLink;
 
         RecordReferences = recordReferences is null
             ? []
-            : new ObservableCollectionExtended<IFormLinkGetter>(recordReferences);
+            : new ObservableCollectionExtended<IFormLinkIdentifier>(recordReferences);
 
         NifDirectoryReferences = nifDirectoryReferences is null
             ? []

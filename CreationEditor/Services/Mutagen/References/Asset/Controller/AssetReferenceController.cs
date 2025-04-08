@@ -38,7 +38,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly ConcurrentQueue<AssetFile> _assetCreations = new();
     private readonly ConcurrentQueue<AssetFile> _assetDeletions = new();
 
-    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkGetter> _modAssetReferenceManager
+    private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkIdentifier> _modAssetReferenceManager
         = new((asset, change) => asset.RecordReferences.Apply(change),
             (record, newData) => record.RecordReferences.ReplaceWith(newData),
             asset => asset.AssetLink,
@@ -56,7 +56,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
-    private readonly List<AssetReferenceCache<IModGetter, IFormLinkGetter>> _modAssetCaches = [];
+    private readonly List<AssetReferenceCache<IModGetter, IFormLinkIdentifier>> _modAssetCaches = [];
     private AssetReferenceCache<string, DataRelativePath>? _nifDirectoryAssetReferenceCache;
     private readonly List<AssetReferenceCache<string, DataRelativePath>> _nifArchiveAssetCaches = [];
 
@@ -331,25 +331,25 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     private void AddRecordReferences(
-        AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache,
-        IFormLinkGetter newRecordLink,
+        AssetReferenceCache<IModGetter, IFormLinkIdentifier> modReferenceCache,
+        IFormLinkIdentifier newRecordLink,
         IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
             if (!modReferenceCache.AddReference(reference, newRecordLink)) continue;
 
-            var change = new Change<IFormLinkGetter>(ListChangeReason.Add, newRecordLink);
+            var change = new Change<IFormLinkIdentifier>(ListChangeReason.Add, newRecordLink);
             _modAssetReferenceManager.Update(reference, change);
         }
     }
 
     private void RemoveRecordReferences(
-        AssetReferenceCache<IModGetter, IFormLinkGetter> modReferenceCache,
-        IFormLinkGetter newRecordLink,
+        AssetReferenceCache<IModGetter, IFormLinkIdentifier> modReferenceCache,
+        IFormLinkIdentifier newRecordLink,
         IEnumerable<IAssetLinkGetter> references) {
         foreach (var reference in references) {
             if (!modReferenceCache.RemoveReference(reference, newRecordLink)) continue;
 
-            var change = new Change<IFormLinkGetter>(ListChangeReason.Remove, newRecordLink);
+            var change = new Change<IFormLinkIdentifier>(ListChangeReason.Remove, newRecordLink);
             _modAssetReferenceManager.Update(reference, change);
         }
     }

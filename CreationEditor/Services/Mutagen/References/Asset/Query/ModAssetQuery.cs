@@ -13,7 +13,7 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
-public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IFormLinkGetter>, IDisposable {
+public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IFormLinkIdentifier>, IDisposable {
     private readonly DisposableBucket _disposableDropoff = new();
 
     private readonly ILogger _logger;
@@ -23,10 +23,10 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     private IAssetLinkCache _assetLinkCache;
 
     public Version CacheVersion { get; } = new(1, 0);
-    public IAssetReferenceSerialization<IModGetter, IFormLinkGetter> Serialization { get; }
+    public IAssetReferenceSerialization<IModGetter, IFormLinkIdentifier> Serialization { get; }
     public string QueryName => "Mod";
-    public IDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>> AssetCaches { get; }
-        = new ConcurrentDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkGetter>>();
+    public IDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkIdentifier>> AssetCaches { get; }
+        = new ConcurrentDictionary<IModGetter, AssetReferenceCache<IModGetter, IFormLinkIdentifier>>();
 
     public bool SkipResolvedAssets { get; set; } = true; // todo change back to false by default when inferred assets bug is fixed
 
@@ -36,7 +36,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         ILinkCacheProvider linkCacheProvider,
         IDataDirectoryProvider dataDirectoryProvider,
         IMutagenTypeProvider mutagenTypeProvider,
-        IAssetReferenceSerialization<IModGetter, IFormLinkGetter> serialization) {
+        IAssetReferenceSerialization<IModGetter, IFormLinkIdentifier> serialization) {
         _logger = logger;
         _fileSystem = fileSystem;
         _dataDirectoryProvider = dataDirectoryProvider;
@@ -54,15 +54,15 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
     public string GetName(IModGetter source) => source.ModKey.FileName;
 
-    public IModGetter? ReferenceToSource(IFormLinkGetter reference) => null;
-    public IEnumerable<AssetQueryResult<IFormLinkGetter>> ParseAssets(IModGetter source) {
+    public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
+    public IEnumerable<AssetQueryResult<IFormLinkIdentifier>> ParseAssets(IModGetter source) {
         if (SkipResolvedAssets) {
             foreach (var record in source.EnumerateMajorRecords()) {
-                IEnumerable<AssetQueryResult<IFormLinkGetter>> results;
+                IEnumerable<AssetQueryResult<IFormLinkIdentifier>> results;
                 try {
                     results = record.EnumerateAssetLinks(AssetLinkQuery.Listed | AssetLinkQuery.Inferred)
                         .Where(l => !l.IsNull)
-                        .Select(l => new AssetQueryResult<IFormLinkGetter>(l, record.ToLinkFromRuntimeType()))
+                        .Select(l => new AssetQueryResult<IFormLinkIdentifier>(l, record.ToLinkFromRuntimeType()))
                         .ToArray();
                 } catch (Exception e) {
                     _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
@@ -75,11 +75,11 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
             }
         } else {
             foreach (var record in source.EnumerateMajorRecords()) {
-                IEnumerable<AssetQueryResult<IFormLinkGetter>> results;
+                IEnumerable<AssetQueryResult<IFormLinkIdentifier>> results;
                 try {
                     results = record.EnumerateAllAssetLinks(_assetLinkCache)
                         .Where(l => !l.IsNull)
-                        .Select(l => new AssetQueryResult<IFormLinkGetter>(l, record.ToLinkFromRuntimeType()))
+                        .Select(l => new AssetQueryResult<IFormLinkIdentifier>(l, record.ToLinkFromRuntimeType()))
                         .ToArray();
                 } catch (Exception e) {
                     _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
@@ -106,7 +106,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         writer.Write(_mutagenTypeProvider.GetGameName(source));
     }
 
-    public void WriteReferences(BinaryWriter writer, IEnumerable<IFormLinkGetter> references) {
+    public void WriteReferences(BinaryWriter writer, IEnumerable<IFormLinkIdentifier> references) {
         foreach (var usage in references) {
             writer.Write(usage.FormKey.ToString());
             writer.Write(_mutagenTypeProvider.GetTypeName(usage));
@@ -130,7 +130,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
         return game;
     }
 
-    public IEnumerable<IFormLinkGetter> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
+    public IEnumerable<IFormLinkIdentifier> ReadReferences(BinaryReader reader, string contextString, int assetReferenceCount) {
         for (var i = 0; i < assetReferenceCount; i++) {
             var referenceFormKey = FormKey.Factory(reader.ReadString());
             var typeString = reader.ReadString();

@@ -11,7 +11,7 @@ public sealed class AssetReferenceCacheFactory(
     NifArchiveAssetQuery nifArchiveAssetQuery)
     : IAssetReferenceCacheFactory {
 
-    public Task<AssetReferenceCache<IModGetter, IFormLinkGetter>> GetModCache(IModGetter mod) {
+    public Task<AssetReferenceCache<IModGetter, IFormLinkIdentifier>> GetModCache(IModGetter mod) {
         return assetReferenceCacheBuilder.BuildCache(modAssetQuery, mod);
     }
 
