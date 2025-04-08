@@ -56,4 +56,26 @@ public sealed class AssetProvider(
             ? archiveService.TryGetFileStream(assetFile.Path)
             : fileSystem.File.OpenRead(assetFile.Path);
     }
+
+    public IEnumerable<AssetFile> EnumerateAssetFiles(string directory, CancellationToken token = default) {
+        var assetContainer = GetAssetContainer(directory, token);
+
+        var queue = new Queue<AssetDirectory>([assetContainer]);
+        while (queue.Count > 0) {
+            var current = queue.Dequeue();
+
+            foreach (var asset in current.Children) {
+                switch (asset) {
+                    case AssetDirectory assetDirectory: {
+                        queue.Enqueue(assetDirectory);
+                        break;
+                    }
+                    case AssetFile assetFile: {
+                        yield return assetFile;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }

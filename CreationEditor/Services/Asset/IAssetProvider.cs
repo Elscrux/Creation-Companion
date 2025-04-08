@@ -26,4 +26,12 @@ public interface IAssetProvider {
     /// <param name="token">A CancellationToken can be used to prematurely exit the calculation.</param>
     /// <returns>FileStream of the file in the archive</returns>
     Stream? GetAssetFileStream(AssetFile assetFile, CancellationToken token = default);
+
+    /// <summary>
+    /// Enumerate all asset files in a directory and all its recursive subdirectories.
+    /// </summary>
+    /// <param name="directory">Full path to a directory to enumerate asset files for</param>
+    /// <param name="token">A CancellationToken can be used to prematurely exit the calculation.</param>
+    /// <returns>Asset files in the specified directory and all its subdirectories</returns>
+    IEnumerable<AssetFile> EnumerateAssetFiles(string directory, CancellationToken token = default);
 }
