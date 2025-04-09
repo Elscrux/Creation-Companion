@@ -45,9 +45,9 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         ActiveMod.ModKey = editorEnvironment.ActiveMod.ModKey;
         foreach (var mod in editorEnvironment.GameEnvironment.LinkCache.ListedOrder.Where(x => x.ModKey != editorEnvironment.ActiveMod.ModKey)) {
             if (mod is TMod mutable) {
-                LoadOrder.AddMutableMod(mutable);
+                LoadOrder.AddMutableMods(mutable);
             } else {
-                LoadOrder.AddImmutableMod(mod.ModKey);
+                LoadOrder.AddImmutableMods(mod.ModKey);
             }
         }
     }
@@ -109,20 +109,13 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
     internal readonly List<IMod> MutableMods = [];
     internal readonly List<ModKey> NewMutableMods = [];
 
-    public IEditorEnvironmentUpdater SetImmutableMods(IEnumerable<ModKey> modKeys) {
+    public IEditorEnvironmentUpdater SetImmutableMods(params IEnumerable<ModKey> modKeys) {
         ImmutableMods.ReplaceWith(modKeys);
         return updater;
     }
 
-    public IEditorEnvironmentUpdater AddImmutableMods(IEnumerable<ModKey> modKeys) {
-        ImmutableMods.AddRange(modKeys);
-        return updater;
-    }
-
-    public IEditorEnvironmentUpdater AddImmutableMod(ModKey modKey) {
-        modKey = GetFreeModKey(modKey);
-
-        ImmutableMods.Add(modKey);
+    public IEditorEnvironmentUpdater AddImmutableMods(params IEnumerable<ModKey> modKeys) {
+        ImmutableMods.AddRange(modKeys.Select(GetFreeModKey));
         return updater;
     }
 
@@ -131,18 +124,13 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
         return updater;
     }
 
-    public IEditorEnvironmentUpdater SetMutableMods(IEnumerable<IMod> mods) {
+    public IEditorEnvironmentUpdater SetMutableMods(params IEnumerable<IMod> mods) {
         MutableMods.ReplaceWith(mods);
         return updater;
     }
 
-    public IEditorEnvironmentUpdater AddMutableMods(IEnumerable<IMod> mods) {
+    public IEditorEnvironmentUpdater AddMutableMods(params IEnumerable<IMod> mods) {
         MutableMods.AddRange(mods);
-        return updater;
-    }
-
-    public IEditorEnvironmentUpdater AddMutableMod(IMod mod) {
-        MutableMods.Add(mod);
         return updater;
     }
 

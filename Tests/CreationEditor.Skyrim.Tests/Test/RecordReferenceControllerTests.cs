@@ -74,7 +74,7 @@ public sealed class RecordReferenceControllerTests {
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
         masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
-            .LoadOrder.SetImmutableMods([masterMod.ModKey])
+            .LoadOrder.SetImmutableMods(masterMod.ModKey)
             .ActiveMod.New("NewMod")
             .Build());
 
@@ -110,7 +110,7 @@ public sealed class RecordReferenceControllerTests {
         Assert.Equal(0, recordReferenceController.GetReferences(armorAddon.FormKey).Count());
 
         // Load the mutable mod - this will end up before the active mod in the load order
-        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMod(additionalMutableMod).Build());
+        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMods(additionalMutableMod).Build());
         await Task.Delay(2050); // wait for the new editor environment to propagate a little
 
         // Check that there is a reference now
@@ -146,7 +146,7 @@ public sealed class RecordReferenceControllerTests {
         var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
         masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
-            .LoadOrder.SetImmutableMods([masterMod.ModKey])
+            .LoadOrder.SetImmutableMods(masterMod.ModKey)
             .ActiveMod.New("NewMod")
             .Build());
 
@@ -166,7 +166,7 @@ public sealed class RecordReferenceControllerTests {
 
         // Load the mutable mod - this will end up before the active mod in the load order
         var additionalMutableMod = new SkyrimMod(ModKey.FromName("additionalMutableMod", ModType.Plugin), SkyrimRelease.SkyrimSE);
-        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMod(additionalMutableMod).Build());
+        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMods(additionalMutableMod).Build());
         await Task.Delay(250); // wait for the new editor environment to propagate a little
 
         // Remove the reference of one record from the mutable mod
@@ -180,7 +180,7 @@ public sealed class RecordReferenceControllerTests {
         editorEnvironment.SetActive("NewActiveMod");
 
         await Task.Delay(250); // wait for the new editor environment to propagate a little
-        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMod(additionalMutableMod).Build());
+        editorEnvironment.Update(updater => updater.LoadOrder.AddMutableMods(additionalMutableMod).Build());
         await Task.Delay(250); // wait for the new editor environment to propagate a little
 
         // Check if the mutable mod references are now visible
