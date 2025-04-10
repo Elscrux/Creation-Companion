@@ -32,7 +32,7 @@ public sealed class NifArchiveAssetParser(
         if (directory is null) yield break;
         if (!archiveReader.TryGetFolder(directory, out var archiveDirectory)) yield break;
 
-        var archiveFile = archiveDirectory.Files.FirstOrDefault(file => file.Path.Equals(filePath, AssetCompare.PathComparison));
+        var archiveFile = archiveDirectory.Files.FirstOrDefault(file => file.Path.Equals(filePath, DataRelativePath.PathComparison));
         if (archiveFile is null) yield break;
 
         foreach (var result in ParseArchiveFile(archiveFile)) {

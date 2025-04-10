@@ -370,7 +370,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var renameDialog = CreateAssetDialog($"Rename {name}", content);
         if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
             var oldName = _fileSystem.Path.GetFileNameWithoutExtension(asset.Path);
-            if (string.Equals(oldName, textBox.Text, AssetCompare.PathComparison)) return;
+            if (string.Equals(oldName, textBox.Text, DataRelativePath.PathComparison)) return;
 
             _assetController.Rename(asset.Path, textBox.Text + _fileSystem.Path.GetExtension(asset.Path));
         }
@@ -422,7 +422,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var relativeDstDirectory = GetRootRelativePath(directory.Path);
 
         // No need to move if the source and destination are the same
-        if (string.Equals(relativeSrcDirectory, relativeDstDirectory, AssetCompare.PathComparison)) return;
+        if (string.Equals(relativeSrcDirectory, relativeDstDirectory, DataRelativePath.PathComparison)) return;
 
         var content = new StackPanel {
             Children = {
@@ -557,13 +557,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         AssetTreeItem? currentNode;
         var items = AssetTreeSource.Items.ToList();
         do {
-            currentNode = items.Find(a => path.StartsWith(GetRootRelativePath(a.Path), AssetCompare.PathComparison));
+            currentNode = items.Find(a => path.StartsWith(GetRootRelativePath(a.Path), DataRelativePath.PathComparison));
             if (currentNode is null) break;
 
             pathIndices = pathIndices.Append(items.IndexOf(currentNode));
             items = currentNode.Children.ToList();
         }
-        while (!string.Equals(path, currentNode.Path, AssetCompare.PathComparison));
+        while (!string.Equals(path, currentNode.Path, DataRelativePath.PathComparison));
 
         var indexPathPart = new IndexPath();
         foreach (var pathIndex in pathIndices.SkipLast(1)) {

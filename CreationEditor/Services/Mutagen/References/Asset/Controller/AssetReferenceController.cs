@@ -186,7 +186,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         }
 
         void Remove(string archive) {
-            var cache = _nifArchiveAssetCaches.Find(c => string.Equals(c.Source, archive, AssetCompare.PathComparison));
+            var cache = _nifArchiveAssetCaches.Find(c => string.Equals(c.Source, archive, DataRelativePath.PathComparison));
             if (cache is null) return;
 
             // Change existing subscriptions

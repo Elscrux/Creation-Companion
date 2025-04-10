@@ -10,6 +10,7 @@ using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Models.Asset;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.Asset;
+using Mutagen.Bethesda.Assets;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Asset.Browser;
 
@@ -60,7 +61,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                 })
                 .OfType<AssetTreeItem>();
 
-            if (assets.Any(asset => assetTreeItem.Path.StartsWith(asset.Path, AssetCompare.PathComparison))) {
+            if (assets.Any(asset => assetTreeItem.Path.StartsWith(asset.Path, DataRelativePath.PathComparison))) {
                 e.Inner.DragEffects = DragDropEffects.None;
             }
         }

@@ -62,7 +62,7 @@ public sealed class HashFileSystemValidation(
             // Check all files in this directory and compare their hashes with the cache
             foreach (var filePath in fileSystem.Directory.EnumerateFiles(directoryPath, searchPattern)) {
                 var fileName = fileSystem.Path.GetFileName(filePath);
-                var fileCache = hashDirectoryCache.Files.FirstOrDefault(d => AssetCompare.PathComparer.Equals(d.Name, fileName));
+                var fileCache = hashDirectoryCache.Files.FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, fileName));
 
                 if (fileCache is null) {
                     yield return filePath;
@@ -76,7 +76,7 @@ public sealed class HashFileSystemValidation(
             async IAsyncEnumerable<string> DirectoryParse(string subDirectoryPath) {
                 var subDirectoryName = fileSystem.Path.GetFileName(subDirectoryPath);
                 var subDirectoryCache = hashDirectoryCache.SubDirectories
-                    .FirstOrDefault(d => AssetCompare.PathComparer.Equals(d.Name, subDirectoryName));
+                    .FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, subDirectoryName));
 
                 if (subDirectoryCache is null) {
                     // No cache exists for this subdirectory, return all new files in this directory as invalid
@@ -103,11 +103,11 @@ public sealed class HashFileSystemValidation(
                 if (i == strings.Length - 1) {
                     // File
                     var fileHash = fileSystem.GetFileHash(filePath);
-                    currentDirectory.Files.RemoveWhere(d => AssetCompare.PathComparer.Equals(d.Name, s));
+                    currentDirectory.Files.RemoveWhere(d => DataRelativePath.PathComparer.Equals(d.Name, s));
                     currentDirectory.Files.Add(new HashFileCacheData(s, fileHash));
                 } else {
                     // Directory
-                    var directory = currentDirectory.SubDirectories.FirstOrDefault(d => AssetCompare.PathComparer.Equals(d.Name, s));
+                    var directory = currentDirectory.SubDirectories.FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, s));
                     if (directory is null) {
                         var subDirectory = new HashDirectoryCacheData(s, new List<HashDirectoryCacheData>(), new List<HashFileCacheData>());
                         currentDirectory.SubDirectories.Add(subDirectory);

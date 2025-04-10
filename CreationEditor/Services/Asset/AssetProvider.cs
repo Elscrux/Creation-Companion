@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using Mutagen.Bethesda.Assets;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
@@ -19,14 +20,14 @@ public sealed class AssetProvider(
         foreach (var (path, asset) in _assetDirectories) {
             if (token.IsCancellationRequested) return null!;
 
-            if (!directory.StartsWith(path, AssetCompare.PathComparison)) continue;
+            if (!directory.StartsWith(path, DataRelativePath.PathComparison)) continue;
 
             // Retrieve child or self from the children
             var dir = asset.GetChildren<IAsset, AssetDirectory>(
-                    a => directory.StartsWith(a.Path, AssetCompare.PathComparison),
+                    a => directory.StartsWith(a.Path, DataRelativePath.PathComparison),
                     a => a.Children,
                     true)
-                .FirstOrDefault(child => string.Equals(directory, child.Path, AssetCompare.PathComparison));
+                .FirstOrDefault(child => string.Equals(directory, child.Path, DataRelativePath.PathComparison));
 
             if (dir is not null) return dir;
         }

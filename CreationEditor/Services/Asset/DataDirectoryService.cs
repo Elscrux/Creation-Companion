@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
@@ -78,7 +79,7 @@ public sealed class DataDirectoryService : IDataDirectoryService {
 
         bool Filter(T t) {
             // Ignore changes in the delete directory
-            if (t.FullPath.StartsWith(_deleteDirectoryProvider.DeleteDirectory, AssetCompare.PathComparison)) return false;
+            if (t.FullPath.StartsWith(_deleteDirectoryProvider.DeleteDirectory, DataRelativePath.PathComparison)) return false;
 
             return true;
         }

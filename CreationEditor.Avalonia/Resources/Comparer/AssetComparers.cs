@@ -1,11 +1,12 @@
 ﻿using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Asset;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Avalonia.Comparer;
 
 public static class AssetComparers {
     public static readonly FuncComparer<IAsset> PathComparer = new((a1, a2) => {
         if (a1.IsDirectory == a2.IsDirectory) {
-            return string.Compare(a1.Path, a2.Path, AssetCompare.PathComparison);
+            return string.Compare(a1.Path, a2.Path, DataRelativePath.PathComparison);
         }
 
         if (a1.IsDirectory) return -1;

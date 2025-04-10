@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive.Linq;
 using CreationEditor.Resources.Comparer;
-using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -140,7 +140,7 @@ public sealed class BsaArchiveService : IArchiveService {
         foreach (var reader in _archives.Values) {
             if (!reader.TryGetFolder(directoryPath, out var archiveFolder)) continue;
 
-            var archiveFile = archiveFolder.Files.FirstOrDefault(f => AssetCompare.PathComparer.Equals(f.Path, filePath));
+            var archiveFile = archiveFolder.Files.FirstOrDefault(f => DataRelativePath.PathComparer.Equals(f.Path, filePath));
             if (archiveFile is null) continue;
 
             return archiveFile.AsStream();
@@ -174,7 +174,7 @@ public sealed class BsaArchiveService : IArchiveService {
 
     public IEnumerable<string> GetSubdirectories(string directoryPath) {
         var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, directoryPath);
-        var isRoot = string.Equals(directoryPath, _dataDirectory, AssetCompare.PathComparison);
+        var isRoot = string.Equals(directoryPath, _dataDirectory, DataRelativePath.PathComparison);
 
         foreach (var (archivePath, reader) in _archives) {
             // Compile directories in archive
@@ -207,7 +207,7 @@ public sealed class BsaArchiveService : IArchiveService {
             if (!isRoot) {
                 var relativePathNames = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
                 foreach (var pathName in relativePathNames) {
-                    var dir = currentDirectories.FirstOrDefault(d => string.Equals(d.Name, pathName, AssetCompare.PathComparison));
+                    var dir = currentDirectories.FirstOrDefault(d => string.Equals(d.Name, pathName, DataRelativePath.PathComparison));
                     if (dir is null) {
                         invalid = true;
                         break;

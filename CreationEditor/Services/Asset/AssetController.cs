@@ -97,7 +97,7 @@ public sealed class AssetController(
                         // destination:       meshes\clutter-new\
                         // fullNewPath:       meshes\clutter-new\clutter\test.nif
                         : fileSystem.Path.Combine(destination, fileSystem.Path.GetFileName(basePath)),
-                    string.Equals(basePath, assetFile.Path, AssetCompare.PathComparison)
+                    DataRelativePath.PathComparer.Equals(basePath, assetFile.Path)
                         ? fileSystem.Path.GetFileName(basePath)
                         : fileSystem.Path.GetRelativePath(basePath, assetFile.Path));
             }
@@ -128,7 +128,7 @@ public sealed class AssetController(
             foreach (var reference in assetFile.ReferencedAsset.AssetReferences) {
                 var fullPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, reference.Path);
                 modelModificationService.RemapLinks(fullPath,
-                    p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, AssetCompare.PathComparison),
+                    p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, DataRelativePath.PathComparison),
                     dataRelativePath);
             }
         }

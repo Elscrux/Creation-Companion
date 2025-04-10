@@ -9,7 +9,7 @@ public sealed class AssetTypeService : IAssetTypeService {
     public IReadOnlyCollection<string> FileExtensions { get; }
     public IAssetTypeProvider Provider { get; }
 
-    private readonly Dictionary<string, IAssetType> _assetTypesExtensions = new(AssetCompare.PathComparer);
+    private readonly Dictionary<string, IAssetType> _assetTypesExtensions = new(DataRelativePath.PathComparer);
 
     private readonly Dictionary<string, IAssetType> _identifierAssetTypes;
 
@@ -23,7 +23,7 @@ public sealed class AssetTypeService : IAssetTypeService {
 
         FileExtensions = Provider.AllAssetTypes
             .SelectMany(a => a.FileExtensions)
-            .ToHashSet(AssetCompare.PathComparer);
+            .ToHashSet(DataRelativePath.PathComparer);
 
         foreach (var assetType in Provider.AllAssetTypes) {
             foreach (var extension in assetType.FileExtensions) {
@@ -37,9 +37,9 @@ public sealed class AssetTypeService : IAssetTypeService {
         if (extension.Length == 0) return null;
 
         // Temporary adjustments
-        if (extension == ".xwm" && filePath.Contains("music", AssetCompare.PathComparison)) return Provider.Music;
-        if (filePath.Contains("interface", AssetCompare.PathComparison)) return null;
-        if (filePath.Contains("source\\scripts", AssetCompare.PathComparison)) return null;
+        if (extension == ".xwm" && filePath.Contains("music", DataRelativePath.PathComparison)) return Provider.Music;
+        if (filePath.Contains("interface", DataRelativePath.PathComparison)) return null;
+        if (filePath.Contains("source\\scripts", DataRelativePath.PathComparison)) return null;
 
         _assetTypesExtensions.TryGetValue(extension, out var assetType);
 

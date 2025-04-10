@@ -4,6 +4,7 @@ using CreationEditor.Services.Archive;
 using CreationEditor.Services.Mutagen.References.Asset;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using DynamicData;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Exceptions;
 using Noggog;
@@ -115,7 +116,7 @@ public sealed class AssetDirectory : IAsset {
             var fileName = _fileSystem.Path.GetFileName(path);
             using var asset = Assets.Items.FirstOrDefault(asset => {
                 var assetName = _fileSystem.Path.GetFileName(asset.Path);
-                return string.Equals(assetName, fileName, AssetCompare.PathComparison);
+                return string.Equals(assetName, fileName, DataRelativePath.PathComparison);
             });
             if (asset is null) return;
 
@@ -141,7 +142,7 @@ public sealed class AssetDirectory : IAsset {
             var fileName = _fileSystem.Path.GetFileName(path);
             var asset = Assets.Items.FirstOrDefault(asset => {
                 var assetName = _fileSystem.Path.GetFileName(asset.Path);
-                return string.Equals(assetName, fileName, AssetCompare.PathComparison);
+                return string.Equals(assetName, fileName, DataRelativePath.PathComparison);
             });
             if (asset is not AssetFile file) return;
 
@@ -176,19 +177,19 @@ public sealed class AssetDirectory : IAsset {
             // instead, it might be best to subscribe just for changes in the current directory
             // would require a change in the data directory service api
             _dataDirectoryService.Created
-                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), DataRelativePath.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => Add(e.FullPath))
                 .DisposeWith(_disposables);
 
             _dataDirectoryService.Deleted
-                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), DataRelativePath.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => Remove(e.FullPath))
                 .DisposeWith(_disposables);
 
             _dataDirectoryService.Renamed
-                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), DataRelativePath.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => {
                     Remove(e.OldFullPath);
@@ -197,7 +198,7 @@ public sealed class AssetDirectory : IAsset {
                 .DisposeWith(_disposables);
 
             _dataDirectoryService.Changed
-                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), AssetCompare.PathComparison))
+                .Where(e => Path.Equals(_fileSystem.Path.GetDirectoryName(e.FullPath), DataRelativePath.PathComparison))
                 .ObserveOnGui()
                 .Subscribe(e => Change(e.FullPath))
                 .DisposeWith(_disposables);
@@ -205,7 +206,7 @@ public sealed class AssetDirectory : IAsset {
     }
 
     private void Refresh() {
-        var addedDirectories = new HashSet<string>(AssetCompare.PathComparer);
+        var addedDirectories = new HashSet<string>(DataRelativePath.PathComparer);
         IEnumerable<IAsset> assets = [];
         if (!IsVirtual) {
             assets = assets.Concat(Directory.EnumerateDirectories()
@@ -313,14 +314,14 @@ public sealed class AssetDirectory : IAsset {
         foreach (var directory in directories.SkipLast(1)) {
             currentDirectory = currentDirectory.Children
                 .OfType<AssetDirectory>()
-                .FirstOrDefault(dir => string.Equals(_fileSystem.Path.GetFileName(dir.Path), directory, AssetCompare.PathComparison));
+                .FirstOrDefault(dir => string.Equals(_fileSystem.Path.GetFileName(dir.Path), directory, DataRelativePath.PathComparison));
 
             if (currentDirectory is null) break;
         }
 
         return currentDirectory?.Children
             .OfType<AssetFile>()
-            .FirstOrDefault(file => string.Equals(_fileSystem.Path.GetFileName(file.Path), directories[^1], AssetCompare.PathComparison));
+            .FirstOrDefault(file => string.Equals(_fileSystem.Path.GetFileName(file.Path), directories[^1], DataRelativePath.PathComparison));
     }
 
     /// <summary>
