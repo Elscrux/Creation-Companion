@@ -38,6 +38,6 @@ public sealed class AssetSymbolService : IAssetSymbolService {
     }
 
     public Symbol GetSymbol(string fileExtension) {
-        return _fileExtensionSymbols.GetValueOrDefault(fileExtension, Symbol.OpenFile);
+        return _fileExtensionSymbols.GetValueOrDefault(fileExtension, Symbol.Document);
     }
 }
