@@ -25,7 +25,7 @@ public sealed class AssetSymbolService : IAssetSymbolService {
         }
 
         foreach (var extension in assetTypeProvider.ScriptSource.FileExtensions) {
-            _fileExtensionSymbols.Add(extension, Symbol.Code);
+            _fileExtensionSymbols.Add(extension, Symbol.CodeHTML);
         }
 
         foreach (var extension in assetTypeProvider.Script.FileExtensions) {
