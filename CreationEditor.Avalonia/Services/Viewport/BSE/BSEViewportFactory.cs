@@ -43,7 +43,7 @@ public sealed class BSEViewportFactory(
         var bsaFileNames = fileSystem.Directory
             .EnumerateFiles(assetDirectory, "*.bsa")
             .Select(path => fileSystem.Path.GetFileName(path))
-            // .OrderBy() todo order by load order priority (+ exclude non-loaded BSAs? would need ini parsing to check which inis are always loaded)
+            // .OrderBy() todo order by load order priority ( (first is highest priority) exclude non-loaded BSAs? would need ini parsing to check which inis are always loaded)
             .ToArray();
 
         logger.Here().Information("Initializing viewport with data directory {AssetDirectory}", assetDirectory);

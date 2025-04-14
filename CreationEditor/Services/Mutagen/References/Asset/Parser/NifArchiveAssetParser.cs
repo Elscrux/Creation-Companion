@@ -1,13 +1,13 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
 public sealed class NifArchiveAssetParser(
-    IFileSystem fileSystem,
     IAssetTypeService assetTypeService,
     ModelAssetQuery modelAssetQuery,
     IArchiveService archiveService)
@@ -15,32 +15,32 @@ public sealed class NifArchiveAssetParser(
 
     public string Name => "NifArchive";
 
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string archivePath) {
-        var archiveReader = archiveService.GetReader(archivePath);
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink archiveLink) {
+        var archiveReader = archiveService.GetReader(archiveLink);
 
         foreach (var archiveFile in archiveReader.Files) {
-            foreach (var result in ParseArchiveFile(archiveFile)) {
+            foreach (var result in ParseArchiveFile(archiveFile, archiveLink.FileSystem)) {
                 yield return result;
             }
         }
     }
 
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(string archive, string filePath) {
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(FileSystemLink archive, string filePath) {
         var archiveReader = archiveService.GetReader(archive);
 
-        var directory = fileSystem.Path.GetDirectoryName(filePath);
+        var directory = archive.FileSystem.Path.GetDirectoryName(filePath);
         if (directory is null) yield break;
         if (!archiveReader.TryGetFolder(directory, out var archiveDirectory)) yield break;
 
         var archiveFile = archiveDirectory.Files.FirstOrDefault(file => file.Path.Equals(filePath, DataRelativePath.PathComparison));
         if (archiveFile is null) yield break;
 
-        foreach (var result in ParseArchiveFile(archiveFile)) {
+        foreach (var result in ParseArchiveFile(archiveFile, archive.FileSystem)) {
             yield return result;
         }
     }
 
-    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseArchiveFile(IArchiveFile archiveFile) {
+    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseArchiveFile(IArchiveFile archiveFile, IFileSystem fileSystem) {
         var assetType = assetTypeService.GetAssetType(archiveFile.Path);
         if (assetType != assetTypeService.Provider.Model) yield break;
 
@@ -52,7 +52,7 @@ public sealed class NifArchiveAssetParser(
             bsaStream.Close();
 
             //Parse temp file as nif and delete it afterward
-            foreach (var result in modelAssetQuery.ParseAssets(tempPath, archiveFile.Path)) {
+            foreach (var result in modelAssetQuery.ParseAssets(tempPath, fileSystem, archiveFile.Path)) {
                 yield return result;
             }
         } finally {

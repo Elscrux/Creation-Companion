@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ModCleaner.Services;
 using ModCleaner.ViewModels;
 namespace ModCleaner;
 
@@ -13,6 +14,12 @@ public class ModCleanerModule : Module {
             .AsSelf();
 
         builder.RegisterType<ModCleanerVM>()
+            .AsSelf();
+
+        builder.RegisterType<AssetCleaner>()
+            .AsSelf();
+
+        builder.RegisterType<RecordCleaner>()
             .AsSelf();
     }
 }

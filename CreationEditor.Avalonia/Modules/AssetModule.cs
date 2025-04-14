@@ -62,11 +62,6 @@ public sealed class AssetModule : Module {
             .As<IAssetReferenceController>()
             .SingleInstance();
 
-        builder.RegisterType<AssetProvider>()
-            .AsSelf()
-            .As<IAssetProvider>()
-            .SingleInstance();
-
         builder.RegisterType<NifModificationService>()
             .As<IModelModificationService>();
     }

@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Mutagen.References.Asset.Query;
+﻿using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -15,11 +16,11 @@ public sealed class AssetReferenceCacheFactory(
         return assetReferenceCacheBuilder.BuildCache(modAssetQuery, mod);
     }
 
-    public Task<AssetReferenceCache<string, DataRelativePath>> GetNifCache(string directoryPath) {
-        return assetReferenceCacheBuilder.BuildCache(nifAssetQuery, directoryPath);
+    public Task<AssetReferenceCache<FileSystemLink, DataRelativePath>> GetNifCache(FileSystemLink directoryLink) {
+        return assetReferenceCacheBuilder.BuildCache(nifAssetQuery, directoryLink);
     }
 
-    public Task<AssetReferenceCache<string, DataRelativePath>> GetNifArchiveCache(string archiveFilePath) {
-        return assetReferenceCacheBuilder.BuildCache(nifArchiveAssetQuery, archiveFilePath);
+    public Task<AssetReferenceCache<FileSystemLink, DataRelativePath>> GetNifArchiveCache(FileSystemLink archiveLink) {
+        return assetReferenceCacheBuilder.BuildCache(nifArchiveAssetQuery, archiveLink);
     }
 }

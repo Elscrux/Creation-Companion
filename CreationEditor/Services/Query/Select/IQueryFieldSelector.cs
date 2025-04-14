@@ -4,7 +4,7 @@ namespace CreationEditor.Services.Query.Select;
 
 public sealed record QueryFieldSelectorMemento(QueryFieldMemento? SelectedField, string RecordTypeName);
 
-public interface IQueryFieldSelector : IReactiveObject, IMementoProvider<QueryFieldSelectorMemento> {
+public interface IQueryFieldSelector : IReactiveObject, IMementoProvider<QueryFieldSelectorMemento>, IMementoReceiver<QueryFieldSelectorMemento> {
     IQueryField? SelectedField { get; set; }
 
     Type? RecordType { get; set; }

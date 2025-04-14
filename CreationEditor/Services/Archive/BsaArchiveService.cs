@@ -1,243 +1,93 @@
 ﻿using System.IO.Abstractions;
-using System.Reactive.Linq;
-using CreationEditor.Resources.Comparer;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
-using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Archive;
 
-public sealed class BsaArchiveService : IArchiveService {
-    private sealed record ArchiveDirectory(string Name, IList<ArchiveDirectory> Subdirectories);
+public sealed class BsaArchiveService(
+    IFileSystem fileSystem,
+    IEditorEnvironment editorEnvironment)
+    : IArchiveService {
+    private readonly Dictionary<FileSystemLink, IArchiveReader> _archiveReaders = new();
+    private readonly Dictionary<IArchiveReader, IReadOnlyList<string>> _archiveDirectories = new();
 
-    private readonly IGameReleaseContext _gameReleaseContext;
-    private readonly IFileSystem _fileSystem;
-    private readonly DisposableBucket _disposables = new();
-    private readonly IFileSystemWatcher _watcher;
+    public string GetExtension() => global::Mutagen.Bethesda.Archives.Archive.GetExtension(editorEnvironment.GameEnvironment.GameRelease);
 
-    private readonly Dictionary<string, IArchiveReader> _archives = new();
-    private readonly Dictionary<string, List<ArchiveDirectory>> _archiveDirectories = new();
+    public IArchiveReader GetReader(FileSystemLink link) {
+        if (_archiveReaders.TryGetValue(link, out var reader)) return reader;
 
-    private const string BsaFilter = "*.bsa";
-
-    private readonly string _dataDirectory;
-
-    private string? _archiveExtension;
-    public string GetExtension() => _archiveExtension ?? LoadExtension();
-    private string LoadExtension() => _archiveExtension = global::Mutagen.Bethesda.Archives.Archive.GetExtension(_gameReleaseContext.Release);
-
-    public IReadOnlyList<string> Archives { get; }
-
-    public IObservable<string> ArchiveCreated { get; }
-    public IObservable<string> ArchiveDeleted { get; }
-    public IObservable<string> ArchiveChanged { get; }
-    public IObservable<(string OldName, string NewName)> ArchiveRenamed { get; }
-
-    public BsaArchiveService(
-        IEditorEnvironment editorEnvironment,
-        IGameReleaseContext gameReleaseContext,
-        IDataDirectoryProvider dataDirectoryProvider,
-        IFileSystem fileSystem) {
-        _gameReleaseContext = gameReleaseContext;
-        _fileSystem = fileSystem;
-        _dataDirectory = dataDirectoryProvider.Path;
-
-        // Collect bsa files in the data directory and sort them based on the load order
-        var bsaNameOrder = editorEnvironment.GameEnvironment.LinkCache.ListedOrder
-            .SelectMany(GetModBSAFiles)
-            .ToArray();
-
-        // todo potentially filter out bsa files that are not in the load order or referenced in the ini file
-        Archives = fileSystem.Directory
-            .EnumerateFiles(_dataDirectory, BsaFilter)
-            .Order(new FuncComparer<string>((x, y) => {
-                var indexOfX = bsaNameOrder.IndexOf(x);
-                var indexOfY = bsaNameOrder.IndexOf(y);
-
-                if (indexOfX == -1) {
-                    if (indexOfY == -1) return 0;
-
-                    return -1;
-                }
-
-                if (indexOfY == -1) return 1;
-
-                // Files that are higher in the load order will have a higher index and be prioritized 
-                return indexOfX.CompareTo(indexOfY);
-            }))
-            .ToArray();
-
-        foreach (var bsa in Archives) Add(bsa);
-
-        // Create file system watcher in the data directory to check for new BSA files
-        _watcher = fileSystem.FileSystemWatcher.New(_dataDirectory, BsaFilter);
-        _watcher.EnableRaisingEvents = true;
-        _watcher.IncludeSubdirectories = false;
-
-        _watcher.Events().Changed
-            .Subscribe(e => {
-                Remove(e.FullPath);
-                Add(e.FullPath);
-            })
-            .DisposeWith(_disposables);
-
-        var created = _watcher.Events().Created;
-        created
-            .Subscribe(e => {
-                Add(e.FullPath);
-            })
-            .DisposeWith(_disposables);
-        ArchiveCreated = created
-            .Select(e => e.Name)
-            .WhereNotNull();
-
-        var deleted = _watcher.Events().Deleted;
-        deleted
-            .Subscribe(e => Remove(e.FullPath))
-            .DisposeWith(_disposables);
-        ArchiveDeleted = deleted
-            .Select(e => e.Name)
-            .WhereNotNull();
-
-        var renamed = _watcher.Events().Renamed;
-        renamed
-            .Subscribe(e => {
-                Remove(e.OldFullPath);
-                Add(e.FullPath);
-            })
-            .DisposeWith(_disposables);
-        ArchiveRenamed = renamed
-            .Where(e => e.OldName is not null && e.Name is not null)
-            .Select(e => (e.OldName, e.Name))!;
-
-        ArchiveChanged = _watcher.Events().Changed
-            .Select(e => e.Name)
-            .WhereNotNull();
-    }
-    private IEnumerable<string> GetModBSAFiles(IModGetter mod) {
-        var extension = GetExtension();
-
-        yield return mod.ModKey.Name + extension;
-        yield return mod.ModKey.Name + " - Textures" + extension;
+        var archiveReader =
+            global::Mutagen.Bethesda.Archives.Archive.CreateReader(editorEnvironment.GameEnvironment.GameRelease, link.FullPath, link.FileSystem);
+        _archiveReaders.Add(link, archiveReader);
+        return archiveReader;
     }
 
-    public IArchiveReader GetReader(string path) {
-        if (_archives.TryGetValue(path, out var reader)) return reader;
-
-        return global::Mutagen.Bethesda.Archives.Archive.CreateReader(_gameReleaseContext.Release, path);
-    }
-
-    public Stream? TryGetFileStream(string filePath) {
-        filePath = _fileSystem.Path.GetRelativePath(_dataDirectory, filePath);
-
-        var directoryPath = _fileSystem.Path.GetDirectoryName(filePath);
+    private IArchiveFile? GetArchiveFile(IArchiveReader archiveReader, DataRelativePath filePath) {
+        // Search for file in archives
+        var directoryPath = fileSystem.Path.GetDirectoryName(filePath.Path);
         if (directoryPath is null) return null;
 
-        // Search for file in archives
-        foreach (var reader in _archives.Values) {
-            if (!reader.TryGetFolder(directoryPath, out var archiveFolder)) continue;
+        if (!archiveReader.TryGetFolder(directoryPath, out var archiveFolder)) return null;
 
-            var archiveFile = archiveFolder.Files.FirstOrDefault(f => DataRelativePath.PathComparer.Equals(f.Path, filePath));
-            if (archiveFile is null) continue;
-
-            return archiveFile.AsStream();
-        }
-
-        return null;
+        return archiveFolder.Files.FirstOrDefault(f => DataRelativePath.PathComparer.Equals(f.Path, filePath));
     }
 
-    public string? TryGetFileAsTempFile(string filePath) {
-        var fileStream = TryGetFileStream(filePath);
-        if (fileStream is null) return null;
+    public Stream? TryGetFileStream(IArchiveReader archiveReader, DataRelativePath filePath) {
+        var archiveFile = GetArchiveFile(archiveReader, filePath);
+        return archiveFile?.AsStream();
+    }
 
-        var tempFilePath = _fileSystem.Path.GetTempFileName() + _fileSystem.Path.GetExtension(filePath);
-        using var tempFileStream = _fileSystem.File.Create(tempFilePath);
-        fileStream.CopyTo(tempFileStream);
+    public string? TryGetFileAsTempFile(IArchiveReader archiveReader, DataRelativePath filePath) {
+        var archiveFile = GetArchiveFile(archiveReader, filePath);
+        if (archiveFile is null) return null;
+
+        var tempFilePath = fileSystem.Path.GetTempFileName() + fileSystem.Path.GetExtension(filePath.Path);
+        using var tempFileStream = fileSystem.File.Create(tempFilePath);
+        archiveFile.AsStream().CopyTo(tempFileStream);
 
         return tempFilePath;
     }
 
-    public IEnumerable<string> GetFilesInDirectory(string directoryPath) {
-        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, directoryPath);
+    public IEnumerable<string> GetFilesInDirectory(IArchiveReader archiveReader, DataRelativePath directoryPath) {
+        if (!archiveReader.TryGetFolder(directoryPath.Path, out var archiveFolder)) yield break;
 
-        foreach (var reader in _archives.Values) {
-            if (!reader.TryGetFolder(relativePath, out var archiveFolder)) continue;
-
-            foreach (var archiveFile in archiveFolder.Files) {
-                yield return archiveFile.Path;
-            }
+        foreach (var archiveFile in archiveFolder.Files) {
+            yield return archiveFile.Path;
         }
     }
 
-    public IEnumerable<string> GetSubdirectories(string directoryPath) {
-        var relativePath = _fileSystem.Path.GetRelativePath(_dataDirectory, directoryPath);
-        var isRoot = string.Equals(directoryPath, _dataDirectory, DataRelativePath.PathComparison);
+    public IEnumerable<string> GetSubdirectories(IArchiveReader archiveReader, DataRelativePath directoryPath) {
+        // Compile directories in archive
+        if (!_archiveDirectories.TryGetValue(archiveReader, out var archiveDirectories)) {
+            archiveDirectories = archiveReader.Files
+                .Select(archiveFile => fileSystem.Path.GetDirectoryName(archiveFile.Path))
+                .WhereNotNull()
+                .Distinct()
+                .SelectMany(DirectoriesSelector)
+                .Distinct()
+                .ToArray();
 
-        foreach (var (archivePath, reader) in _archives) {
-            // Compile directories in archive
-            if (!_archiveDirectories.TryGetValue(archivePath, out var directories)) {
-                directories = [];
+            _archiveDirectories.Add(archiveReader, archiveDirectories);
+        }
 
-                foreach (var file in reader.Files) {
-                    var dirName = _fileSystem.Path.GetDirectoryName(file.Path);
-                    if (dirName is null) continue;
+        return archiveDirectories
+            .Where(dir => {
+                if (!directoryPath.Path.StartsWith(dir, DataRelativePath.PathComparison)) return false;
 
-                    var directoryNames = dirName.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
-                    if (directoryNames.Length == 0) continue;
+                var relativePath = fileSystem.Path.GetRelativePath(dir, directoryPath.Path);
+                return relativePath.Split(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar).Length == 1;
+            });
 
-                    IList<ArchiveDirectory> subDirectories = directories;
-                    foreach (var dir in directoryNames) {
-                        var currentDir = subDirectories.FirstOrDefault(d => d.Name == dir);
-                        if (currentDir is null) {
-                            currentDir = new ArchiveDirectory(dir, new List<ArchiveDirectory>());
-                            subDirectories.Add(currentDir);
-                        }
-                        subDirectories = currentDir.Subdirectories;
-                    }
-                }
+        IEnumerable<string> DirectoriesSelector(string dirPath) {
+            var directoryNames = dirPath.Split(fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar);
 
-                _archiveDirectories.Add(archivePath, directories);
-            }
-
-            var invalid = false;
-            IList<ArchiveDirectory> currentDirectories = directories;
-            if (!isRoot) {
-                var relativePathNames = relativePath.Split(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
-                foreach (var pathName in relativePathNames) {
-                    var dir = currentDirectories.FirstOrDefault(d => string.Equals(d.Name, pathName, DataRelativePath.PathComparison));
-                    if (dir is null) {
-                        invalid = true;
-                        break;
-                    }
-
-                    currentDirectories = dir.Subdirectories;
-                }
-            }
-
-            if (isRoot || !invalid) {
-                foreach (var currentDirectory in currentDirectories) {
-                    yield return _fileSystem.Path.Combine(directoryPath, currentDirectory.Name);
-                }
+            var currentPath = string.Empty;
+            foreach (var directoryName in directoryNames) {
+                currentPath = fileSystem.Path.Combine(currentPath, directoryName);
+                yield return currentPath;
             }
         }
-    }
-
-    private void Add(string fullPath) {
-        if (_archives.ContainsKey(fullPath)) return;
-
-        var reader = global::Mutagen.Bethesda.Archives.Archive.CreateReader(_gameReleaseContext.Release, fullPath);
-        _archives.Add(fullPath, reader);
-    }
-
-    private void Remove(string fullPath) {
-        _archives.Remove(fullPath);
-    }
-
-    public void Dispose() {
-        _disposables.Dispose();
-        _watcher.Dispose();
     }
 }

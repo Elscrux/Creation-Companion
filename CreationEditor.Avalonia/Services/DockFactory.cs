@@ -14,7 +14,6 @@ using CreationEditor.Avalonia.Views.Asset.Browser;
 using CreationEditor.Avalonia.Views.Logging;
 using CreationEditor.Avalonia.Views.Record;
 using CreationEditor.Avalonia.Views.Scripting;
-using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services;
@@ -24,9 +23,8 @@ using DockResult = (Func<Control> GetControl, DockConfig DockConfig);
 public sealed class DockFactory(
     Func<ILogVM> logVMFactory,
     Func<IRecordBrowserVM> recordBrowserVMFactory,
-    Func<string, IAssetBrowserVM> assetBrowserVMFactory,
+    Func<IAssetBrowserVM> assetBrowserVMFactory,
     Func<IScriptVM> scriptVMFactory,
-    IDataDirectoryProvider dataDirectoryProvider,
     ILogger logger,
     IFileSystem fileSystem,
     IViewportFactory viewportFactory,
@@ -124,8 +122,7 @@ public sealed class DockFactory(
                 };
                 break;
             case DockElement.AssetBrowser:
-                var folder = parameter as string ?? dataDirectoryProvider.Path;
-                var assetBrowserVM = assetBrowserVMFactory(folder);
+                var assetBrowserVM = assetBrowserVMFactory();
                 getControl = () => new AssetBrowser(assetBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {

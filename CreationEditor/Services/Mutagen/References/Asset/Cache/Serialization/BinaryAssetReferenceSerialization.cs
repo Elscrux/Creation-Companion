@@ -88,6 +88,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
                         // Parse asset link
                         var assetPath = reader.ReadString();
                         var assetLink = assetTypeService.GetAssetLink(assetPath, assetType);
+                        if (assetLink is null) continue;
 
                         var assetUsageCount = reader.ReadInt32();
                         var usages = cacheableQuery

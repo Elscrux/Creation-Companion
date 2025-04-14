@@ -1,23 +1,23 @@
-﻿using System.IO.Abstractions;
-using Avalonia.Media;
+﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
+using Serilog;
 namespace CreationEditor.Avalonia.Services.Asset;
 
 public class ImageLoader(
-    IFileSystem fileSystem,
-    IDataDirectoryService dataDirectoryService,
-    IAssetProvider assetProvider)
+    ILogger logger,
+    IDataSourceService dataSourceService)
     : IImageLoader {
 
     public IImage? LoadImage(string path) {
         // Get file path
-        var fullPath = fileSystem.Path.Combine(dataDirectoryService.Path, path);
-        var assetFile = assetProvider.GetAssetFile(fullPath);
-        if (assetFile is null) return null;
+        if (!dataSourceService.TryGetFileLink(path, out var link)) {
+            logger.Here().Warning("Failed to get file link for {Path}", path);
+            return null;
+        }
 
         // Get stream
-        var stream = assetProvider.GetAssetFileStream(assetFile);
+        var stream = link.ReadAsFile();
         if (stream is null) return null;
 
         // Create bitmap

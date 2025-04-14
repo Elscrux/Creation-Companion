@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Exceptions;
@@ -10,24 +11,31 @@ namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ModelAssetQuery(
     ILogger logger,
-    IFileSystem fileSystem,
+    IDataSourceService dataSourceService,
     IAssetTypeService assetTypeService)
-    : IAssetReferenceQuery<string, DataRelativePath> {
+    : IAssetReferenceQuery<FileSystemLink, DataRelativePath> {
 
     public string QueryName => "Model";
-    public IDictionary<string, AssetReferenceCache<string, DataRelativePath>> AssetCaches { get; }
-        = new ConcurrentDictionary<string, AssetReferenceCache<string, DataRelativePath>>();
+    public IDictionary<FileSystemLink, AssetReferenceCache<FileSystemLink, DataRelativePath>> AssetCaches { get; }
+        = new ConcurrentDictionary<FileSystemLink, AssetReferenceCache<FileSystemLink, DataRelativePath>>();
 
-    public string ReferenceToSource(DataRelativePath reference) => reference.Path;
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source) => ParseAssetsInternal(source, source).Distinct();
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string source, DataRelativePath actualReference) =>
-        ParseAssetsInternal(source, actualReference).Distinct();
+    public string GetName(FileSystemLink source) => source.FullPath;
+    public FileSystemLink? ReferenceToSource(DataRelativePath reference) {
+        dataSourceService.TryGetFileLink(reference.Path, out var link);
+        return link;
+    }
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink source)
+        => ParseAssetsInternal(source.FullPath, source.FileSystem, source.DataRelativePath).Distinct();
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink source, DataRelativePath actualReference)
+        => ParseAssetsInternal(source.FullPath, source.FileSystem, actualReference).Distinct();
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string fullPath, IFileSystem fileSystem, DataRelativePath actualReference)
+        => ParseAssetsInternal(fullPath, fileSystem, actualReference).Distinct();
 
-    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssetsInternal(string path, DataRelativePath actualReference) {
-        if (!fileSystem.File.Exists(path)) yield break;
+    private IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssetsInternal(string fullPath, IFileSystem fileSystem, DataRelativePath actualReference) {
+        if (!fileSystem.File.Exists(fullPath)) yield break;
 
         using var nif = new NifFile();
-        nif.Load(path);
+        nif.Load(fullPath);
 
         if (!nif.IsValid()) yield break;
 
@@ -72,7 +80,7 @@ public sealed class ModelAssetQuery(
                     logger.Here().Warning(e,
                         "Failed to parse asset path {AssetString} referenced in {Path}: {Exception}",
                         assetString,
-                        path,
+                        fullPath,
                         e.Message);
                     yield break;
                 }

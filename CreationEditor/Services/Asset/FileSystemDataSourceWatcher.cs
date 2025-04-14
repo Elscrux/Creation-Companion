@@ -1,20 +1,18 @@
-﻿using System.IO.Abstractions;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
-using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
 
-public sealed class DataDirectoryService : IDataDirectoryService {
+public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
     private readonly DisposableBucket _disposables = new();
 
-    private readonly IAssetTypeService _assetTypeService;
     private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
-    private readonly IFileSystem _fileSystem;
+    private readonly IAssetTypeService _assetTypeService;
 
-    public string Path { get; }
+    public IDataSource DataSource { get; }
 
     public IObservable<FileSystemEventArgs> Created => _createdFile.Merge(_createdDirectory);
     public IObservable<FileSystemEventArgs> CreatedFile => _createdFile;
@@ -40,16 +38,14 @@ public sealed class DataDirectoryService : IDataDirectoryService {
     private readonly Subject<RenamedEventArgs> _renamedFile = new();
     private readonly Subject<RenamedEventArgs> _renamedDirectory = new();
 
-    public DataDirectoryService(
-        IDataDirectoryProvider dataDirectoryProvider,
+    public FileSystemDataSourceWatcher(
+        IDataSource dataSource,
         IDeleteDirectoryProvider deleteDirectoryProvider,
-        IFileSystem fileSystem,
         IAssetTypeService assetTypeService) {
-        Path = dataDirectoryProvider.Path;
+        DataSource = dataSource;
         _deleteDirectoryProvider = deleteDirectoryProvider;
-        _fileSystem = fileSystem;
         _assetTypeService = assetTypeService;
-        var watcher = _fileSystem.FileSystemWatcher.New(Path).DisposeWith(_disposables);
+        var watcher = dataSource.FileSystem.FileSystemWatcher.New(DataSource.Path).DisposeWith(_disposables);
         // _watcher.Filters.AddRange(_assetTypeService.GetFileMasks()); doesn't allow directory changes
         watcher.IncludeSubdirectories = true;
         watcher.EnableRaisingEvents = true;
@@ -66,10 +62,10 @@ public sealed class DataDirectoryService : IDataDirectoryService {
         observable
             .Where(Filter)
             .Subscribe(x => {
-                if (_fileSystem.Directory.Exists(x.FullPath)) {
+                if (DataSource.FileSystem.Directory.Exists(x.FullPath)) {
                     directoryObserver.OnNext(x);
                 } else {
-                    var extension = _fileSystem.Path.GetExtension(x.FullPath);
+                    var extension = DataSource.FileSystem.Path.GetExtension(x.FullPath);
                     if (_assetTypeService.FileExtensions.Contains(extension)) {
                         fileObserver.OnNext(x);
                     }

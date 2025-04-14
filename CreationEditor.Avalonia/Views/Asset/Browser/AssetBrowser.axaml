@@ -6,7 +6,7 @@
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:asset="clr-namespace:CreationEditor.Avalonia.Models.Asset"
+             xmlns:fileSystemLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
              x:DataType="browser:IAssetBrowserVM">
@@ -95,8 +95,8 @@
                 </TreeDataGrid.KeyBindings>
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
-                    <treeDataGrid:ExpandAllChildren x:TypeArguments="asset:AssetTreeItem"/>
-                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="asset:AssetTreeItem"/>
+                    <treeDataGrid:ExpandAllChildren x:TypeArguments="fileSystemLink:FileSystemLink"/>
+                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="fileSystemLink:FileSystemLink"/>
                 </Interaction.Behaviors>
             </TreeDataGrid>
 

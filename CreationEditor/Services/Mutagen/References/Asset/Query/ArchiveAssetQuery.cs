@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.IO.Abstractions;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Asset.Parser;
@@ -7,23 +8,24 @@ using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Query;
 
 public sealed class ArchiveAssetQuery(
-    IFileSystem fileSystem,
     IArchiveAssetParser archiveAssetParser,
-    IAssetReferenceSerialization<string, DataRelativePath> serialization)
-    : IAssetReferenceCacheableQuery<string, DataRelativePath> {
+    IAssetReferenceSerialization<FileSystemLink, DataRelativePath> serialization)
+    : IAssetReferenceCacheableQuery<FileSystemLink, DataRelativePath> {
 
     public Version CacheVersion { get; } = new(1, 0);
-    public IAssetReferenceSerialization<string, DataRelativePath> Serialization { get; } = serialization;
+    public IAssetReferenceSerialization<FileSystemLink, DataRelativePath> Serialization { get; } = serialization;
     public string QueryName => archiveAssetParser.Name;
-    public IDictionary<string, AssetReferenceCache<string, DataRelativePath>> AssetCaches { get; }
-        = new ConcurrentDictionary<string, AssetReferenceCache<string, DataRelativePath>>();
+    public IDictionary<FileSystemLink, AssetReferenceCache<FileSystemLink, DataRelativePath>> AssetCaches { get; }
+        = new ConcurrentDictionary<FileSystemLink, AssetReferenceCache<FileSystemLink, DataRelativePath>>();
 
-    public void WriteCacheValidation(BinaryWriter writer, string source) {
-        var hash = fileSystem.GetFileHash(source);
+    public string GetName(FileSystemLink source) => source.FullPath;
+
+    public void WriteCacheValidation(BinaryWriter writer, FileSystemLink source) {
+        var hash = source.FileSystem.GetFileHash(source.FullPath);
         writer.Write(hash);
     }
 
-    public void WriteContext(BinaryWriter writer, string source) => writer.Write(source);
+    public void WriteContext(BinaryWriter writer, FileSystemLink source) => writer.Write(source.FullPath);
 
     public void WriteReferences(BinaryWriter writer, IEnumerable<DataRelativePath> references) {
         foreach (var usage in references) {
@@ -31,9 +33,9 @@ public sealed class ArchiveAssetQuery(
         }
     }
 
-    public bool IsCacheUpToDate(BinaryReader reader, string source) {
-        var hash = reader.ReadBytes(fileSystem.GetHashBytesLength());
-        return fileSystem.IsFileHashValid(source, hash);
+    public bool IsCacheUpToDate(BinaryReader reader, FileSystemLink source) {
+        var hash = reader.ReadBytes(source.FileSystem.GetHashBytesLength());
+        return source.FileSystem.IsFileHashValid(source.FullPath, hash);
     }
 
     public string ReadContextString(BinaryReader reader) => reader.ReadString();
@@ -44,6 +46,6 @@ public sealed class ArchiveAssetQuery(
         }
     }
 
-    public string? ReferenceToSource(DataRelativePath reference) => null;
-    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(string archivePath) => archiveAssetParser.ParseAssets(archivePath);
+    public FileSystemLink? ReferenceToSource(DataRelativePath reference) => null;
+    public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink archivePath) => archiveAssetParser.ParseAssets(archivePath);
 }

@@ -49,7 +49,7 @@ public sealed class QueryPluginVM : ViewModel {
 
         SaveColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
             var memento = vm.QueryVM.QueryRunner.CreateMemento();
-            stateRepository.Save(memento, vm.QueryVM.QueryRunner.Id, memento.Name);
+            stateRepository.Save(memento, memento.Id, memento.Name);
         });
 
         DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {

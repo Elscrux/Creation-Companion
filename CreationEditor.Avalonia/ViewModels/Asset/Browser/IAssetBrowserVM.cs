@@ -1,8 +1,8 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
-using CreationEditor.Avalonia.Models.Asset;
-using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
+using Mutagen.Bethesda.Assets;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Asset.Browser;
@@ -16,19 +16,19 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     ReactiveCommand<Unit, Unit> Undo { get; }
     ReactiveCommand<Unit, Unit> Redo { get; }
 
-    ReactiveCommand<IReadOnlyList<AssetTreeItem?>, Unit> Open { get; }
-    ReactiveCommand<IReadOnlyList<AssetTreeItem?>, Unit> Delete { get; }
-    ReactiveCommand<AssetTreeItem, Unit> Rename { get; }
-    ReactiveCommand<AssetTreeItem, Unit> OpenReferences { get; }
-    ReactiveCommand<string, Unit> MoveTo { get; }
-    ReactiveCommand<AssetDirectory, Unit> AddFolder { get; }
-    ReactiveCommand<AssetDirectory, Unit> OpenAssetBrowser { get; }
+    ReactiveCommand<IReadOnlyList<FileSystemLink?>, Unit> Open { get; }
+    ReactiveCommand<IReadOnlyList<FileSystemLink?>, Unit> Delete { get; }
+    ReactiveCommand<FileSystemLink, Unit> Rename { get; }
+    ReactiveCommand<FileSystemLink, Unit> OpenReferences { get; }
+    ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
+    ReactiveCommand<FileSystemLink, Unit> AddFolder { get; }
+    ReactiveCommand<FileSystemLink, Unit> OpenAssetBrowser { get; }
 
     bool IsBusyLoadingAssets { get; set; }
     bool IsBusyLoadingReferences { get; set; }
 
-    HierarchicalTreeDataGridSource<AssetTreeItem> AssetTreeSource { get; }
+    HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
 
-    Task Drop(AssetDirectory directory, DragInfo dragInfo);
-    IEnumerable<Control> GetContextMenuItems(AssetTreeItem asset);
+    Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo);
+    IEnumerable<Control> GetContextMenuItems(FileSystemLink asset);
 }

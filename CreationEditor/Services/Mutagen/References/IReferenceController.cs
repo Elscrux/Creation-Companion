@@ -22,6 +22,6 @@ public interface IReferenceController<in T> {
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="t"></param>
-    void RegisterDeletion(T t);
+    /// <param name="pair"></param>
+    void RegisterDeletion(T pair);
 }

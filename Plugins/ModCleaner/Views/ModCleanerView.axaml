@@ -43,14 +43,14 @@
                     <avaloniaProgressRing:ProgressRing
                         ToolTip.Tip="Loading References"
                         HorizontalAlignment="Left"
-                        IsVisible="{Binding RecordReferenceController.IsLoading^}"
+                        IsVisible="{Binding IsLoading^}"
                         Foreground="{DynamicResource SystemAccentColor}"
                         Width="20" Height="20"/>
 
                     <Button
                         Content="Run"
                         Command="{Binding Run}"
-                        IsVisible="{Binding !RecordReferenceController.IsLoading^}"
+                        IsVisible="{Binding !IsLoading^}"
                         IsEnabled="{Binding !!CleaningModPickerVM.HasModSelected^}"/>
                 </StackPanel>
             </StackPanel>

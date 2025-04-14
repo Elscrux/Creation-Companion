@@ -1,156 +1,181 @@
-﻿using System.IO.Abstractions;
+﻿using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using Mutagen.Bethesda.Environments.DI;
+using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetController(
-    IFileSystem fileSystem,
-    IDataDirectoryProvider dataDirectoryProvider,
     IDeleteDirectoryProvider deleteDirectoryProvider,
-    IAssetProvider assetProvider,
+    IAssetTypeService assetTypeService,
+    IDataSourceService dataSourceService,
+    IAssetReferenceController assetReferenceController,
     IModelModificationService modelModificationService,
     ILinkCacheProvider linkCacheProvider,
     IRecordController recordController,
     ILogger logger)
     : IAssetController {
 
-    private string CreateDeletePath(string path) {
-        var relativePath = fileSystem.Path.GetRelativePath(dataDirectoryProvider.Path, path);
-
-        return fileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, relativePath);
+    private FileSystemLink CreateDeletePath(FileSystemLink link) {
+        var deletePath = link.FileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, link.DataRelativePath.Path);
+        return link with { DataRelativePath = deletePath };
     }
 
-    public void Delete(string path, CancellationToken token = default) {
+    public void Delete(FileSystemLink link, CancellationToken token = default) {
         try {
-            MoveInternal(path, CreateDeletePath(path), true, token);
+            MoveInternal(link, CreateDeletePath(link), true, token);
         } catch (Exception e) {
-            logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", path, e.Message);
+            logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", link, e.Message);
         }
     }
 
-    public void Move(string path, string destination, CancellationToken token = default) {
+    public void Move(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
         try {
-            MoveInternal(path, destination, false, token);
+            MoveInternal(origin, destination, false, token);
         } catch (Exception e) {
-            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", path, destination, e.Message);
+            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
         }
     }
 
-    public void Rename(string path, string newName, CancellationToken token = default) {
-        var directoryPath = fileSystem.Path.GetDirectoryName(path);
+    public void Rename(FileSystemLink origin, string newName, CancellationToken token = default) {
+        var directoryPath = origin.FileSystem.Path.GetDirectoryName(origin.DataRelativePath.Path);
+
         if (directoryPath is not null) {
+            var destination = origin with { DataRelativePath = origin.FileSystem.Path.Combine(directoryPath, newName) };
             try {
-                MoveInternal(path, fileSystem.Path.Combine(directoryPath, newName), true, token);
+                MoveInternal(origin, destination, true, token);
             } catch (Exception e) {
-                logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", path, newName, e.Message);
+                logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", origin, newName, e.Message);
             }
         } else {
-            logger.Here().Warning("Couldn't find path to base directory of {Path}", path);
+            logger.Here().Warning("Couldn't find path to base directory of {Path}", origin);
         }
     }
 
-    private void MoveInternal(string path, string destination, bool rename, CancellationToken token) {
-        var isFile = fileSystem.Path.HasExtension(path);
+    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, CancellationToken token) {
+        var originIsFile = origin.IsFile;
 
         // Get the parent directory for a file path or self for a directory path
-        var baseDirectory = isFile ? fileSystem.Path.GetDirectoryName(path) : path;
+        var baseDirectory = originIsFile ? origin.ParentDirectory?.DataRelativePath.Path : origin.DataRelativePath.Path;
         if (baseDirectory is null) return;
 
-        var assetContainer = assetProvider.GetAssetContainer(baseDirectory, token);
+        var baseIsFile = originIsFile || origin.FileSystem.Path.HasExtension(baseDirectory);
+        var destinationIsFile = destination.IsFile;
 
-        var basePath = assetContainer.Path;
-        var baseIsFile = isFile || fileSystem.Path.HasExtension(basePath);
-        var destinationIsFile = fileSystem.Path.HasExtension(destination);
-
-        if (isFile) {
-            var assetFile = assetContainer.GetAssetFile(path);
-            if (assetFile is null) return;
-
-            MoveInt(assetFile, token);
+        if (originIsFile) {
+            MoveInt(origin, token);
         } else {
-            foreach (var assetFile in assetContainer.GetAllChildren<IAsset, AssetFile>(a => a.Children, true)) {
-                MoveInt(assetFile, token);
+            foreach (var assetLink in origin.EnumerateFileLinks(true)) {
+                MoveInternal(origin, assetLink, rename, token);
             }
         }
 
-        void MoveInt(AssetFile assetFile, CancellationToken innerToken) {
+        void MoveInt(FileSystemLink fileLink, CancellationToken innerToken) {
             // Calculate the full path of that the file should be moved to
-            string fullNewPath;
+            DataRelativePath newDataRelativePath;
             if (destinationIsFile) {
-                fullNewPath = destination;
+                newDataRelativePath = destination.DataRelativePath;
             } else {
-                fullNewPath = fileSystem.Path.Combine(
-                    rename || baseIsFile
-                        // Example Renaming meshes\clutter to meshes\clutter-new
-                        // basePath:          meshes\clutter
-                        // assetFile.Path:    meshes\clutter\test.nif
-                        // destination:       meshes\clutter-new\
-                        // fullNewPath:       meshes\clutter-new\test.nif
-                        ? destination
-                        // Example Moving meshes\clutter to meshes\clutter-new
-                        // basePath:          meshes\clutter
-                        // assetFile.Path:    meshes\clutter\test.nif
-                        // destination:       meshes\clutter-new\
-                        // fullNewPath:       meshes\clutter-new\clutter\test.nif
-                        : fileSystem.Path.Combine(destination, fileSystem.Path.GetFileName(basePath)),
-                    DataRelativePath.PathComparer.Equals(basePath, assetFile.Path)
-                        ? fileSystem.Path.GetFileName(basePath)
-                        : fileSystem.Path.GetRelativePath(basePath, assetFile.Path));
+                var adjustedBasePath = rename || baseIsFile
+                    // Example Renaming meshes\clutter to meshes\clutter-new
+                    // basePath:          meshes\clutter
+                    // assetFile.Path:    meshes\clutter\test.nif
+                    // destination:       meshes\clutter-new\
+                    // fullNewPath:       meshes\clutter-new\test.nif
+                    ? destination.DataRelativePath.Path
+                    // Example Moving meshes\clutter to meshes\clutter-new
+                    // basePath:          meshes\clutter
+                    // assetFile.Path:    meshes\clutter\test.nif
+                    // destination:       meshes\clutter-new\
+                    // fullNewPath:       meshes\clutter-new\clutter\test.nif
+                    : destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, destination.FileSystem.Path.GetFileName(baseDirectory));
+
+                var nestedPath = DataRelativePath.PathComparer.Equals(baseDirectory, fileLink.DataRelativePath.Path)
+                    ? origin.FileSystem.Path.GetFileName(baseDirectory)
+                    : origin.FileSystem.Path.GetRelativePath(baseDirectory, fileLink.DataRelativePath.Path);
+
+                newDataRelativePath = destination.FileSystem.Path.Combine(adjustedBasePath, nestedPath);
             }
-
-            var dataRelativePath = fileSystem.Path.GetRelativePath(dataDirectoryProvider.Path, fullNewPath);
-
-            // Path without the base folder prefix
-            // Change meshes\clutter\test\test.nif to clutter\test.nif
-            var shortenedPath = fileSystem.Path.GetRelativePath(assetFile.ReferencedAsset.AssetLink.Type.BaseFolder, dataRelativePath);
+            var newPath = destination with { DataRelativePath = newDataRelativePath };
 
             // Reaching point of no return - after this alterations will be made 
             if (innerToken.IsCancellationRequested) return;
 
             // Move the asset
-            if (!FileSystemMove(assetFile.Path, fullNewPath, innerToken)) return;
+            if (!FileSystemMove(fileLink, newPath, innerToken)) return;
 
-            // Remap references in records
-            foreach (var formLink in assetFile.ReferencedAsset.RecordReferences) {
-                if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
+            RemapReferences(fileLink, newPath);
+        }
+    }
 
-                var recordOverride = recordController.GetOrAddOverride(record);
-                recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
-                    { assetFile.ReferencedAsset.AssetLink, shortenedPath },
-                });
-            }
+    private void RemapReferences(FileSystemLink link, FileSystemLink newLink) {
+        // Remap references in records
+        RemapRecordReferences(link, newLink);
 
-            // Remap references in NIFs
-            foreach (var reference in assetFile.ReferencedAsset.AssetReferences) {
-                var fullPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, reference.Path);
-                modelModificationService.RemapLinks(fullPath,
-                    p => !p.IsNullOrWhitespace() && assetFile.Path.EndsWith(p, DataRelativePath.PathComparison),
-                    dataRelativePath);
+        // Remap references in NIFs
+        RemapAssetReferences(link, newLink);
+    }
+
+    private void RemapAssetReferences(FileSystemLink link, FileSystemLink newLink) {
+        var assetLink = assetTypeService.GetAssetLink(link.DataRelativePath);
+        if (assetLink is null) {
+            logger.Here().Warning("Couldn't find asset type for {Path}", link.DataRelativePath);
+            return;
+        }
+
+        foreach (var reference in assetReferenceController.GetAssetReferences(assetLink)) {
+            if (dataSourceService.TryGetFileLink(reference, out var referenceFileLink)) {
+                modelModificationService.RemapLinks(
+                    referenceFileLink,
+                    p => !p.IsNullOrWhitespace() && referenceFileLink.DataRelativePath.Path.EndsWith(p, DataRelativePath.PathComparison),
+                    newLink.DataRelativePath.Path);
+            } else {
+                logger.Here().Warning("Couldn't find file link {Reference} of {Path}", reference, link.FullPath);
             }
         }
     }
 
-    private bool FileSystemMove(string path, string destination, CancellationToken token) {
-        var destinationDirectory = fileSystem.Path.GetDirectoryName(destination);
+    private void RemapRecordReferences(FileSystemLink link, FileSystemLink newLink) {
+        var assetLink = assetTypeService.GetAssetLink(link.DataRelativePath);
+        if (assetLink is null) {
+            logger.Here().Warning("Couldn't find asset type for {Path}", link.DataRelativePath);
+            return;
+        }
+
+        // Path without the base folder prefix
+        // i.e. Change meshes\clutter\test\test.nif to clutter\test.nif
+        var shortenedDataRelativePath = link.FileSystem.Path.GetRelativePath(assetLink.Type.BaseFolder, newLink.DataRelativePath.Path);
+
+        foreach (var formLink in assetReferenceController.GetRecordReferences(assetLink)) {
+            if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
+
+            var recordOverride = recordController.GetOrAddOverride(record);
+            recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
+                { assetLink, shortenedDataRelativePath },
+            });
+        }
+    }
+
+    private bool FileSystemMove(FileSystemLink origin, FileSystemLink destination, CancellationToken token) {
+        var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
-            if (destinationDirectory is not null) fileSystem.Directory.CreateDirectory(destinationDirectory);
+            if (destinationDirectory is not null) destination.FileSystem.Directory.CreateDirectory(destinationDirectory);
 
-            if (fileSystem.File.Exists(path)) {
+            if (origin.Exists()) {
                 if (token.IsCancellationRequested) return false;
 
-                fileSystem.File.Move(path, destination);
+                origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
             } else {
                 if (token.IsCancellationRequested) return false;
 
-                fileSystem.Directory.Move(path, destination);
+                origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
             }
         } catch (Exception e) {
-            logger.Here().Warning(e, "Couldn't move {File} to {Dir}: {Exception}", path, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't move {File} to {Dir}: {Exception}", origin, destination, e.Message);
             return false;
         }
 

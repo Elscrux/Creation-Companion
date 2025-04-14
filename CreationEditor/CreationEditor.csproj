@@ -89,12 +89,6 @@
         <Compile Update="Services\Cache\CacheLocationProvider.cs">
           <DependentUpon>ICacheLocationProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Asset\AssetDirectory.cs">
-          <DependentUpon>IAsset.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Asset\AssetFile.cs">
-          <DependentUpon>IAsset.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Asset\AssetController.cs">
           <DependentUpon>IAssetController.cs</DependentUpon>
         </Compile>
@@ -209,5 +203,7 @@
         <Compile Update="Services\Query\ReflectionIQueryFieldProvider.cs">
           <DependentUpon>IQueryFieldProvider.cs</DependentUpon>
         </Compile>
+        <Compile Remove="Services\Asset\AssetProvider.cs" />
+        <Compile Remove="Services\Asset\IAssetProvider.cs" />
     </ItemGroup>
 </Project>

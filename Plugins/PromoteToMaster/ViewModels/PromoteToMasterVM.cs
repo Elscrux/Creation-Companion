@@ -17,6 +17,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace PromoteToMaster.ViewModels;
 
+// TODO Add asset handling
 public sealed partial class PromoteToMasterVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
 
