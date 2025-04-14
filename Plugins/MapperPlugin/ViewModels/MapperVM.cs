@@ -26,7 +26,7 @@ using ReactiveUI.SourceGenerators;
 using Serilog;
 namespace MapperPlugin.ViewModels;
 
-public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento> {
+public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento>, IMementoReceiver<MapperMemento> {
     private readonly Func<QueryVM> _queryVMFactory;
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
 

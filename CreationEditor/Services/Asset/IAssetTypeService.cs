@@ -27,8 +27,7 @@ public interface IAssetTypeService {
     /// <param name="filePath">File path to build the asset link for</param>
     /// <param name="assetType">Asset type of the file at the file path</param>
     /// <returns>Asset link of file path</returns>
-    IAssetLink GetAssetLink(DataRelativePath filePath, IAssetType assetType);
-
+    IAssetLink? GetAssetLink(DataRelativePath filePath, IAssetType assetType);
 
     /// <summary>
     /// Gets an identifier for an asset type

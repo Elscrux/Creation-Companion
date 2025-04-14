@@ -1,9 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using System.IO.Abstractions;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
@@ -12,7 +11,6 @@ using CreationEditor.Services.Notification;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Assets;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
@@ -24,19 +22,17 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly CompositeDisposable _disposables = new();
 
     private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly IArchiveService _archiveService;
+    private readonly IDataSourceService _dataSourceService;
     private readonly INotificationService _notificationService;
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly NifFileAssetParser _nifFileAssetParser;
     private readonly IAssetReferenceCacheFactory _assetReferenceCacheFactory;
 
-    private readonly ConcurrentQueue<IMajorRecordGetter> _recordCreations = new();
-    private readonly ConcurrentQueue<IMajorRecordGetter> _recordDeletions = new();
+    private readonly ConcurrentQueue<RecordModPair> _recordCreations = new();
+    private readonly ConcurrentQueue<RecordModPair> _recordDeletions = new();
 
-    private readonly ConcurrentQueue<AssetFile> _assetCreations = new();
-    private readonly ConcurrentQueue<AssetFile> _assetDeletions = new();
+    private readonly ConcurrentQueue<FileSystemLink> _assetCreations = new();
+    private readonly ConcurrentQueue<FileSystemLink> _assetDeletions = new();
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkIdentifier> _modAssetReferenceManager
         = new((asset, change) => asset.RecordReferences.Apply(change),
@@ -57,8 +53,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             AssetLinkEqualityComparer.Instance);
 
     private readonly List<AssetReferenceCache<IModGetter, IFormLinkIdentifier>> _modAssetCaches = [];
-    private AssetReferenceCache<string, DataRelativePath>? _nifDirectoryAssetReferenceCache;
-    private readonly List<AssetReferenceCache<string, DataRelativePath>> _nifArchiveAssetCaches = [];
+    private readonly List<AssetReferenceCache<FileSystemLink, DataRelativePath>> _nifDirectoryAssetReferenceCaches = [];
+    private readonly List<AssetReferenceCache<FileSystemLink, DataRelativePath>> _nifArchiveAssetCaches = [];
 
     private int _loadingProcesses;
     private readonly BehaviorSubject<bool> _isLoading = new(true);
@@ -66,33 +62,43 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     public AssetReferenceController(
         ILogger logger,
-        IFileSystem fileSystem,
-        IArchiveService archiveService,
+        IDataSourceService dataSourceService,
         INotificationService notificationService,
         IEditorEnvironment editorEnvironment,
-        IDataDirectoryProvider dataDirectoryProvider,
         IRecordController recordController,
         NifFileAssetParser nifFileAssetParser,
         IAssetReferenceCacheFactory assetReferenceCacheFactory) {
         _logger = logger;
-        _fileSystem = fileSystem;
-        _archiveService = archiveService;
+        _dataSourceService = dataSourceService;
         _notificationService = notificationService;
         _editorEnvironment = editorEnvironment;
-        _dataDirectoryProvider = dataDirectoryProvider;
         _nifFileAssetParser = nifFileAssetParser;
         _assetReferenceCacheFactory = assetReferenceCacheFactory;
 
+        // Task.Run(() => InitLoadOrderReferences());
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences).FireAndForget(
-                e => logger.Here().Error(e, "Failed to load Asset References {Exception}", e.Message)))
+                e => logger.Here().Error(e, "Failed to load Mod Asset References {Exception}", e.Message)))
             .DisposeWith(_disposables);
 
-        Task.Run(() => UpdateLoadingProcess(InitNifDirectoryReferences))
-            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory References {Exception}", e.Message));
-        Task.Run(() => UpdateLoadingProcess(InitNifArchiveReferences))
-            .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive References {Exception}", e.Message));
+        // var fileSystemDataSources = _dataSourceService.PriorityOrder.OfType<FileSystemDataSource>().ToArray();
+        // var archiveDataSources = _dataSourceService.PriorityOrder.OfType<ArchiveDataSource>().ToArray();
+        // Task.Run(() => InitNifDirectoryReferences(fileSystemDataSources))
+        //     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory Asset References {Exception}", e.Message));
+        // Task.Run(() => InitNifArchiveReferences(archiveDataSources))
+        //     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive Asset References {Exception}", e.Message));
+        _dataSourceService.DataSourcesChanged
+            .ObserveOnTaskpool()
+            .Subscribe(dataSources => {
+                var fileSystemDataSources = dataSources.OfType<FileSystemDataSource>().ToArray();
+                var archiveDataSources = dataSources.OfType<ArchiveDataSource>().ToArray();
+                Task.Run(() => UpdateLoadingProcess(() => InitNifDirectoryReferences(fileSystemDataSources)))
+                    .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory Asset References {Exception}", e.Message));
+                Task.Run(() => UpdateLoadingProcess(() => InitNifArchiveReferences(archiveDataSources)))
+                    .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive Asset References {Exception}", e.Message));
+            })
+            .DisposeWith(_disposables);
 
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate).DisposeWith(_disposables);
         recordController.RecordCreated.Subscribe(RegisterCreation).DisposeWith(_disposables);
@@ -113,90 +119,90 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         // Add references for new mods
         var tasks = _editorEnvironment.LinkCache.PriorityOrder
             .Where(mod => _modAssetCaches.TrueForAll(c => c.Source.ModKey != mod.ModKey))
-            .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetModCache(mod)));
+            .Select(mod => _assetReferenceCacheFactory.GetModCache(mod));
 
         foreach (var assetCache in await Task.WhenAll(tasks)) {
             _modAssetCaches.Add(assetCache);
         }
 
         // Update existing subscriptions
-        _modAssetReferenceManager.UpdateAll(asset => _modAssetCaches.GetReferences(asset));
+        _modAssetReferenceManager.UpdateAll(_modAssetCaches.GetReferences);
+
+        // Handle previous record creations and deletions  while the reference cache wasn't initialized
+        while (_recordCreations.TryDequeue(out var record)) RegisterCreation(record);
+        while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         linearNotifier.Stop();
     }
 
-    private async Task InitNifDirectoryReferences() {
+    private async Task InitNifDirectoryReferences(IReadOnlyList<FileSystemDataSource> fileSystemDataSources) {
         using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Nif References");
 
-        _nifDirectoryAssetReferenceCache = await _assetReferenceCacheFactory.GetNifCache(_dataDirectoryProvider.Path);
+        // Remove active subscriptions from unloaded directories
+        _nifDirectoryAssetReferenceCaches.RemoveWhere(f => !fileSystemDataSources.Contains(f.Source.DataSource));
+
+        // Remove references from unloaded directories
+        _nifDirectoryAssetReferenceManager.UnregisterWhere(asset => !_dataSourceService.FileExists(asset.AssetLink.DataRelativePath));
+
+        // Add references for new directories
+        var tasks = fileSystemDataSources
+            .Select(dataSource => Task.Run(async () => {
+                var fileSystemLink = new FileSystemLink(dataSource, string.Empty);
+                return await _assetReferenceCacheFactory.GetNifCache(fileSystemLink);
+            }))
+            .ToArray();
+
+        foreach (var assetCache in await Task.WhenAll(tasks)) {
+            _nifDirectoryAssetReferenceCaches.Add(assetCache);
+        }
+
+        // Change existing subscriptions
+        _nifDirectoryAssetReferenceManager.UpdateAll(_nifDirectoryAssetReferenceCaches.GetReferences);
+
+        // Handle previous record creations and deletions  while the reference cache wasn't initialized
+        while (_assetCreations.TryDequeue(out var asset)) RegisterCreation(asset);
+        while (_assetDeletions.TryDequeue(out var asset)) RegisterDeletion(asset);
+
+        linearNotifier.Stop();
+    }
+
+    private async Task InitNifArchiveReferences(IReadOnlyList<ArchiveDataSource> archiveDataSources) {
+        using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Archive Nif References");
+
+        // Remove active subscriptions from unloaded archives
+        _nifDirectoryAssetReferenceManager.UnregisterWhere(asset => !_dataSourceService.FileExists(asset.AssetLink.DataRelativePath));
+
+        // Remove references from unloaded archives
+        var currentArchives = archiveDataSources.Select(x => x.ArchiveLink).ToArray();
+        _nifDirectoryAssetReferenceCaches.RemoveWhere(f => !currentArchives.Contains(f.Source));
+
+        // Add references for new archives
+        var tasks = archiveDataSources
+            .Where(dataSource => _nifArchiveAssetCaches.Any(x => x.Source.Equals(dataSource.ArchiveLink)))
+            .Select(async archive => {
+                using var notifier = new ChainedNotifier(_notificationService, $"Loading Archive Nif References in {archive.Name}");
+                var newCache = await _assetReferenceCacheFactory.GetNifArchiveCache(archive.ArchiveLink);
+
+                notifier.Stop();
+
+                return newCache;
+            });
+
+        foreach (var assetCache in await Task.WhenAll(tasks)) {
+            _nifArchiveAssetCaches.Add(assetCache);
+        }
+
+        // Change existing subscriptions
+        _nifArchiveAssetReferenceManager.UpdateAll(_nifArchiveAssetCaches.GetReferences);
 
         linearNotifier.Stop();
 
-        // Change existing subscriptions
-        _nifDirectoryAssetReferenceManager.UpdateAll(asset => _nifDirectoryAssetReferenceCache.GetReferences(asset));
-    }
-
-    private async Task InitNifArchiveReferences() {
-        var extension = _archiveService.GetExtension();
-        var dataDirectory = _dataDirectoryProvider.Path;
-
-        var archives = _fileSystem.Directory.EnumerateFiles(dataDirectory, $"*{extension}").ToArray();
-        if (archives.Length > 0) {
-            using var linearNotifier = new ChainedNotifier(_notificationService, "Loading Archive Nif References");
-
-            var assetCaches = await Task.WhenAll(archives
-                .Select(mod => Task.Run(async () => await _assetReferenceCacheFactory.GetNifArchiveCache(mod))));
-
-            _nifArchiveAssetCaches.AddRange(assetCaches);
-
-            // Update existing subscriptions with new references
-            _nifArchiveAssetReferenceManager.UpdateAll(asset => assetCaches.GetReferences(asset));
-
-            linearNotifier.Stop();
-
-            _logger.Here().Information("Loaded Nif References for {Count} Archives", _nifArchiveAssetCaches.Count);
-        }
-
-        _archiveService.ArchiveCreated
-            .Subscribe(Add)
-            .DisposeWith(_disposables);
-
-        _archiveService.ArchiveDeleted
-            .Subscribe(Remove)
-            .DisposeWith(_disposables);
-
-        _archiveService.ArchiveRenamed
-            .Subscribe(e => {
-                Remove(e.OldName);
-                return Add(e.NewName);
-            })
-            .DisposeWith(_disposables);
-
-        async Task Add(string archive) {
-            var relativePath = _fileSystem.Path.GetRelativePath(dataDirectory, archive);
-            using var notifier = new ChainedNotifier(_notificationService, $"Loading Archive Nif References in {relativePath}");
-
-            var newCache = await _assetReferenceCacheFactory.GetNifArchiveCache(archive);
-            _nifArchiveAssetCaches.Add(newCache);
-
-            // Change existing subscriptions
-            _nifArchiveAssetReferenceManager.UpdateAll(asset => newCache.GetReferences(asset));
-
-            notifier.Stop();
-        }
-
-        void Remove(string archive) {
-            var cache = _nifArchiveAssetCaches.Find(c => string.Equals(c.Source, archive, DataRelativePath.PathComparison));
-            if (cache is null) return;
-
-            // Change existing subscriptions
-            _nifArchiveAssetReferenceManager.UpdateAll(asset => cache.GetReferences(asset));
-        }
+        _logger.Here().Information("Loaded Nif References for {Count} Archives", _nifArchiveAssetCaches.Count);
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
         var modReferences = _modAssetCaches.GetReferences(asset);
-        var nifDirectoryReferences = _nifDirectoryAssetReferenceCache?.GetReferences(asset);
+        var nifDirectoryReferences = _nifDirectoryAssetReferenceCaches.GetReferences(asset);
         var nifArchiveReferences = _nifArchiveAssetCaches.GetReferences(asset);
         referencedAsset = new ReferencedAsset(asset, modReferences, nifDirectoryReferences, nifArchiveReferences);
 
@@ -207,76 +213,94 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         return new CompositeDisposable(pluginDisposable, nifDisposable, nifArchiveDisposable);
     }
 
-    public Action<AssetFile> RegisterUpdate(AssetFile assetFile) {
-        if (_nifDirectoryAssetReferenceCache is null) return _ => {};
+    public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IAssetLinkGetter assetLink) {
+        return _modAssetCaches.GetReferences(assetLink);
+    }
 
-        ValidateAsset(assetFile);
+    public IEnumerable<DataRelativePath> GetAssetReferences(IAssetLinkGetter assetLink) {
+        var nifDirectoryReferences = _nifDirectoryAssetReferenceCaches.GetReferences(assetLink);
+        var nifArchiveReferences = _nifArchiveAssetCaches.GetReferences(assetLink);
 
-        var before = _nifDirectoryAssetReferenceCache.FindLinksToReference(assetFile.ReferencedAsset.AssetLink.DataRelativePath).ToArray();
+        return nifDirectoryReferences.Concat(nifArchiveReferences);
+    }
+
+    public Action<FileSystemLink> RegisterUpdate(FileSystemLink fileLink) {
+        ValidateAsset(fileLink);
+
+        var cache = GetCacheFor(fileLink);
+        if (cache is null) return _ => {};
+
+        var before = cache.FindLinksToReference(fileLink.DataRelativePath).ToArray();
 
         return newAsset => {
-            var after = _nifFileAssetParser.ParseFile(newAsset.Path).Select(result => result.AssetLink).ToArray();
+            var after = _nifFileAssetParser.ParseFile(newAsset).Select(result => result.AssetLink).ToArray();
 
             // Calculate the diff
             var removedReferences = before.Except(after);
             var addedReferences = after.Except(before);
 
             // Remove the asset from its former references
-            RemoveAssetReferences(newAsset, removedReferences);
+            RemoveAssetReferences(cache, newAsset, removedReferences);
 
             // Add the asset to its new references
-            AddAssetReferences(newAsset, addedReferences);
+            AddAssetReferences(cache, newAsset, addedReferences);
         };
     }
 
-    public void RegisterCreation(AssetFile file) {
-        if (_nifDirectoryAssetReferenceCache is null) {
-            _assetCreations.Enqueue(file);
+    public void RegisterCreation(FileSystemLink fileLink) {
+        var cache = GetCacheFor(fileLink);
+        if (cache is null) {
+            _assetCreations.Enqueue(fileLink);
             return;
         }
 
-        ValidateAsset(file);
+        ValidateAsset(fileLink);
 
-        AddAssetReferences(file, _nifFileAssetParser.ParseFile(file.Path).Select(r => r.AssetLink));
+        AddAssetReferences(cache, fileLink, _nifFileAssetParser.ParseFile(fileLink).Select(r => r.AssetLink));
     }
 
-    public void RegisterDeletion(AssetFile file) {
-        if (_nifDirectoryAssetReferenceCache is null) {
-            _assetDeletions.Enqueue(file);
+    public void RegisterDeletion(FileSystemLink fileLink) {
+        var cache = GetCacheFor(fileLink);
+        if (cache is null) {
+            _assetDeletions.Enqueue(fileLink);
             return;
         }
 
-        ValidateAsset(file);
+        ValidateAsset(fileLink);
 
-        RemoveAssetReferences(file, _nifFileAssetParser.ParseFile(file.Path).Select(r => r.AssetLink));
+        RemoveAssetReferences(cache, fileLink, _nifFileAssetParser.ParseFile(fileLink).Select(r => r.AssetLink));
     }
 
-    private static void ValidateAsset(AssetFile assetFileFile) {
-        if (assetFileFile.IsVirtual) throw new NotImplementedException("Updating virtual assets is not supported currently");
+    private static void ValidateAsset(FileSystemLink fileLink) {
+        if (!fileLink.Exists()) throw new NotImplementedException("Updating virtual assets is not supported currently");
     }
 
-    private void AddAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
+    private void AddAssetReferences(
+        AssetReferenceCache<FileSystemLink, DataRelativePath> cache,
+        FileSystemLink fileLink,
+        IEnumerable<IAssetLinkGetter> references) {
         foreach (var added in references) {
-            var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetReferenceCache?.AddReference(added, dataRelativePath);
+            cache.AddReference(added, fileLink.DataRelativePath);
 
-            var change = new Change<DataRelativePath>(ListChangeReason.Add, dataRelativePath);
+            var change = new Change<DataRelativePath>(ListChangeReason.Add, fileLink.DataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(added, change);
         }
     }
 
-    private void RemoveAssetReferences(AssetFile file, IEnumerable<IAssetLinkGetter> references) {
+    private void RemoveAssetReferences(
+        AssetReferenceCache<FileSystemLink, DataRelativePath> cache,
+        FileSystemLink fileLink,
+        IEnumerable<IAssetLinkGetter> references) {
         foreach (var removed in references) {
-            var dataRelativePath = file.ReferencedAsset.AssetLink.DataRelativePath;
-            _nifDirectoryAssetReferenceCache?.RemoveReference(removed, dataRelativePath);
+            cache.RemoveReference(removed, fileLink.DataRelativePath);
 
-            var change = new Change<DataRelativePath>(ListChangeReason.Remove, dataRelativePath);
+            var change = new Change<DataRelativePath>(ListChangeReason.Remove, fileLink.DataRelativePath);
             _nifDirectoryAssetReferenceManager.Update(removed, change);
         }
     }
 
     public Action<RecordModPair> RegisterUpdate(RecordModPair old) {
-        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
+        var modCache = GetCacheFor(old.Mod.ModKey);
         if (modCache is null) return _ => {};
 
         // Collect the references before and after the update
@@ -305,26 +329,22 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterCreation(RecordModPair pair) {
-        if (_nifDirectoryAssetReferenceCache is null) {
-            _recordCreations.Enqueue(pair.Record);
+        var modCache = GetCacheFor(pair.Mod.ModKey);
+        if (modCache is null) {
+            _recordCreations.Enqueue(pair);
             return;
         }
-
-        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
-        if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
         AddRecordReferences(modCache, pair.Record.ToLinkFromRuntimeType(), pair.Record.EnumerateAllAssetLinks(assetLinkCache));
     }
 
     public void RegisterDeletion(RecordModPair pair) {
-        if (_nifDirectoryAssetReferenceCache is null) {
-            _recordDeletions.Enqueue(pair.Record);
+        var modCache = GetCacheFor(pair.Mod.ModKey);
+        if (modCache is null) {
+            _recordDeletions.Enqueue(pair);
             return;
         }
-
-        var modCache = _modAssetCaches.Find(cache => cache.Source.ModKey == _editorEnvironment.ActiveMod.ModKey);
-        if (modCache is null) return;
 
         using var assetLinkCache = _editorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
         RemoveRecordReferences(modCache, pair.Record.ToLinkFromRuntimeType(), pair.Record.EnumerateAllAssetLinks(assetLinkCache));
@@ -352,6 +372,14 @@ public sealed class AssetReferenceController : IAssetReferenceController {
             var change = new Change<IFormLinkIdentifier>(ListChangeReason.Remove, newRecordLink);
             _modAssetReferenceManager.Update(reference, change);
         }
+    }
+
+    private AssetReferenceCache<IModGetter, IFormLinkIdentifier>? GetCacheFor(ModKey modKey) {
+        return _modAssetCaches.Find(cache => cache.Source.ModKey == modKey);
+    }
+
+    private AssetReferenceCache<FileSystemLink, DataRelativePath>? GetCacheFor(FileSystemLink link) {
+        return _nifDirectoryAssetReferenceCaches.Find(x => x.Source.Contains(link));
     }
 
     private async Task UpdateLoadingProcess(Func<Task> action) {

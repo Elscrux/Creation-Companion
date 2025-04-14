@@ -6,7 +6,7 @@ namespace CreationEditor.Services.Query.Select;
 
 public sealed record QueryFieldSelectorCollectionMemento(IReadOnlyList<QueryFieldSelectorMemento> Selectors);
 
-public interface IQueryFieldSelectorCollection : IReactiveObject, IMementoProvider<QueryFieldSelectorCollectionMemento> {
+public interface IQueryFieldSelectorCollection : IReactiveObject, IMementoProvider<QueryFieldSelectorCollectionMemento>, IMementoReceiver<QueryFieldSelectorCollectionMemento> {
     IObservableCollection<IQueryFieldSelector> Selectors { get; }
     IObservable<Unit> SelectionChanged { get; }
 

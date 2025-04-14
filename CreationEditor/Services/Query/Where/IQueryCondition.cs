@@ -13,7 +13,7 @@ public sealed record QueryConditionMemento(
     bool IsOr,
     bool Negate);
 
-public interface IQueryCondition : IMementoProvider<QueryConditionMemento>, IDisposableDropoff {
+public interface IQueryCondition : IMementoProvider<QueryConditionMemento>, IMementoReceiver<QueryConditionMemento>, IDisposableDropoff {
     IObservableCollection<IQueryCompareFunction> CompareFunctions { get; }
     IQueryCompareFunction? SelectedCompareFunction { get; }
 

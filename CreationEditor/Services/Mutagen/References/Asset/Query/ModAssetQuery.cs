@@ -53,7 +53,6 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     }
 
     public string GetName(IModGetter source) => source.ModKey.FileName;
-
     public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
     public IEnumerable<AssetQueryResult<IFormLinkIdentifier>> ParseAssets(IModGetter source) {
         if (SkipResolvedAssets) {

@@ -14,7 +14,7 @@ public sealed record QueryRunnerMemento(
     QueryFieldSelectorCollectionMemento OrderBySelector,
     QueryFieldSelectorCollectionMemento FieldSelector);
 
-public interface IQueryRunner : IMementoProvider<QueryRunnerMemento> {
+public interface IQueryRunner : IMementoProvider<QueryRunnerMemento>, IMementoReceiver<QueryRunnerMemento> {
     Guid Id { get; }
     string Name { get; set; }
     IQueryFrom QueryFrom { get; }

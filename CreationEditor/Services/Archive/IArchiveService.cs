@@ -1,7 +1,10 @@
-﻿using Mutagen.Bethesda.Archives;
+﻿using CreationEditor.Resources.Comparer;
+using CreationEditor.Services.DataSource;
+using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Archive;
 
-public interface IArchiveService : IDisposable {
+public interface IArchiveService {
     /// <summary>
     /// The extension of the archive files this service can read.
     /// </summary>
@@ -11,60 +14,39 @@ public interface IArchiveService : IDisposable {
     /// <summary>
     /// Get an archive reader for an archive.
     /// </summary>
-    /// <param name="path">Full path to the archive</param>
+    /// <param name="link">File system link to the archive</param>
     /// <returns>Archive reader</returns>
-    IArchiveReader GetReader(string path);
+    IArchiveReader GetReader(FileSystemLink link);
 
     /// <summary>
     /// Get files of archives inside a directory.
     /// </summary>
-    /// <param name="directoryPath">Path to directory in archives relative to the data directory</param>
+    /// <param name="archiveReader">Archive reader of the archive</param>
+    /// <param name="directoryPath">Path to directory in the archive relative to the data directory</param>
     /// <returns>Enumerable of file paths in the directory relative to the data directory</returns>
-    IEnumerable<string> GetFilesInDirectory(string directoryPath);
+    IEnumerable<string> GetFilesInDirectory(IArchiveReader archiveReader, DataRelativePath directoryPath);
 
     /// <summary>
-    /// Get subdirectory of archives inside a directory.
+    /// Get subdirectory of archive inside a directory.
     /// </summary>
-    /// <param name="directoryPath">Path to directory in archives relative to the data directory</param>
+    /// <param name="archiveReader">Archive reader of the archive</param>
+    /// <param name="directoryPath">Path to directory in the archive relative to the data directory</param>
     /// <returns>Enumerable of subdirectories paths in the directory relative to the data directory</returns>
-    IEnumerable<string> GetSubdirectories(string directoryPath);
+    IEnumerable<string> GetSubdirectories(IArchiveReader archiveReader, DataRelativePath directoryPath);
 
     /// <summary>
     /// Tries to get a file stream of a file in an archive.
     /// </summary>
+    /// <param name="archiveReader">Archive reader of the archive</param>
     /// <param name="filePath">Full path to the file in the archive</param>
     /// <returns>FileStream of the file in the archive</returns>
-    Stream? TryGetFileStream(string filePath);
+    Stream? TryGetFileStream(IArchiveReader archiveReader, DataRelativePath filePath);
 
     /// <summary>
     /// Tries to copy the content of a file in an archive to a temporary file.
     /// </summary>
+    /// <param name="archiveReader">Archive reader of the archive</param>
     /// <param name="filePath">Full path to the file in the archive</param>
     /// <returns>The full path of the temporary file</returns>
-    string? TryGetFileAsTempFile(string filePath);
-
-    /// <summary>
-    /// Names of archives ordered by their priority from low to high priority.
-    /// </summary>
-    IReadOnlyList<string> Archives { get; }
-
-    /// <summary>
-    /// Emits the name of a newly created archives.
-    /// </summary>
-    IObservable<string> ArchiveCreated { get; }
-
-    /// <summary>
-    /// Emits the name of deleted archives.
-    /// </summary>
-    IObservable<string> ArchiveDeleted { get; }
-
-    /// <summary>
-    /// Emits the name of changed archives.
-    /// </summary>
-    IObservable<string> ArchiveChanged { get; }
-
-    /// <summary>
-    /// Emits the old and new name of renamed archives.
-    /// </summary>
-    IObservable<(string OldName, string NewName)> ArchiveRenamed { get; }
+    string? TryGetFileAsTempFile(IArchiveReader archiveReader, DataRelativePath filePath);
 }

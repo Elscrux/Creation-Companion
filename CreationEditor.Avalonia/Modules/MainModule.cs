@@ -17,6 +17,7 @@ using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views.Startup;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
@@ -57,8 +58,16 @@ public sealed class MainModule : Module {
             .As<IApplicationSplashScreen>();
 
         // Services
-        builder.RegisterType<DataDirectoryService>()
-            .As<IDataDirectoryService>()
+        builder.RegisterType<DataSourceService>()
+            .As<IDataSourceService>()
+            .SingleInstance();
+
+        builder.RegisterType<SharedDataSourceWatcherProvider>()
+            .As<IDataSourceWatcherProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<FileSystemDataSourceWatcher>()
+            .As<IDataSourceWatcher>()
             .SingleInstance();
 
         builder.RegisterType<BusyService>()

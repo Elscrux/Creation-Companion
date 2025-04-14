@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Mutagen.References.Asset.Query;
+﻿using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
@@ -16,7 +17,7 @@ public interface IFileAssetParser {
     /// <summary>
     /// Parses the given file into a list of asset references.
     /// </summary>
-    /// <param name="filePath">Full path to the file to parse</param>
+    /// <param name="fileSystemLink">File system link to the file to parse</param>
     /// <returns>Enumerable of asset references</returns>
-    IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(string filePath);
+    IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(FileSystemLink fileSystemLink);
 }

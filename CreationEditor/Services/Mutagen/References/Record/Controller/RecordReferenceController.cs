@@ -48,7 +48,7 @@ public sealed class RecordReferenceController : IRecordReferenceController, IDis
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(() => Init().FireAndForget(e =>
-                _logger.Here().Error(e, "Failed to initialize Record References: {Message}", e.Message)))
+                _logger.Here().Error(e, "Failed to initialize Mod Record References: {Message}", e.Message)))
             .DisposeWith(_disposable);
 
         recordController.RecordChangedDiff.Subscribe(RegisterUpdate);

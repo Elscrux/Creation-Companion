@@ -12,7 +12,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace MapperPlugin.ViewModels;
 
-public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<MarkingMappingMemento> {
+public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<MarkingMappingMemento>, IMementoReceiver<MarkingMappingMemento> {
     private const uint MaxAutomaticUpdateSize = 10;
     private readonly Subject<Unit> _forceUpdates = new();
 

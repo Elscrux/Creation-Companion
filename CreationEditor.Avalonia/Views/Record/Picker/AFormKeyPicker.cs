@@ -397,7 +397,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 }
             })
             .StartWith(new State(StatusIndicatorState.Passive, FormKeyNull, FormKey.Null, string.Empty))
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOnGui()
             .Do(rec => {
                 if (Processing) Processing = false;
                 if (StatusString != rec.Text) StatusString = rec.Text;
@@ -493,7 +493,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
             })
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOnGui()
             .Do(rec => {
                 if (Processing) {
                     Processing = false;
@@ -623,7 +623,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                     return new State(StatusIndicatorState.Failure, ex.ToString(), FormKey.Null, string.Empty);
                 }
             })
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOnGui()
             .Do(rec => {
                 if (Processing) Processing = false;
                 if (StatusString != rec.Text) StatusString = rec.Text;

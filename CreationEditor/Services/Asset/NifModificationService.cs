@@ -1,22 +1,24 @@
-﻿using System.IO.Abstractions;
+﻿using CreationEditor.Services.DataSource;
+using Mutagen.Bethesda.Assets;
 using nifly;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class NifModificationService(
-    IFileSystem fileSystem,
     ILogger logger)
     : IModelModificationService {
 
-    public void RemapLinks(string file, Func<string, bool> shouldReplace, string newLink) {
-        if (!fileSystem.File.Exists(file)) return;
+    public void RemapLinks(FileSystemLink fileSystemLink, Func<string, bool> shouldReplaceLink, DataRelativePath newLink) {
+        if (!fileSystemLink.Exists()) return;
 
         using var nif = new NifFile();
-        nif.Load(file);
+        nif.Load(fileSystemLink.FullPath);
 
         if (!nif.IsValid()) return;
 
         var modifiedNif = false;
+
+        var newLinkPath = newLink.Path;
 
         var niHeader = nif.GetHeader();
         var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
@@ -31,7 +33,7 @@ public sealed class NifModificationService(
                     var niString = items[index];
                     if (niString is null) continue;
 
-                    if (shouldReplace(niString.get())) {
+                    if (shouldReplaceLink(niString.get())) {
                         occurenceIndices.Add(index);
                     }
                 }
@@ -39,7 +41,7 @@ public sealed class NifModificationService(
                 if (occurenceIndices.Count <= 0) continue;
 
                 // Replace all occurrences with the new path
-                var newPathNiString = new NiString(newLink);
+                var newPathNiString = new NiString(newLinkPath);
                 foreach (var occurenceIndex in occurenceIndices) {
                     items[occurenceIndex] = newPathNiString;
                 }
@@ -57,36 +59,36 @@ public sealed class NifModificationService(
                 if (effectShader is not null) {
                     var modifiedEffectShader = false;
 
-                    if (shouldReplace(effectShader.greyscaleTexture.get())) {
-                        effectShader.greyscaleTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.greyscaleTexture.get())) {
+                        effectShader.greyscaleTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.lightingTexture.get())) {
-                        effectShader.lightingTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.lightingTexture.get())) {
+                        effectShader.lightingTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.normalTexture.get())) {
-                        effectShader.normalTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.normalTexture.get())) {
+                        effectShader.normalTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.reflectanceTexture.get())) {
-                        effectShader.reflectanceTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.reflectanceTexture.get())) {
+                        effectShader.reflectanceTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.sourceTexture.get())) {
-                        effectShader.sourceTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.sourceTexture.get())) {
+                        effectShader.sourceTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.emitGradientTexture.get())) {
-                        effectShader.emitGradientTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.emitGradientTexture.get())) {
+                        effectShader.emitGradientTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.envMapTexture.get())) {
-                        effectShader.envMapTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.envMapTexture.get())) {
+                        effectShader.envMapTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
-                    if (shouldReplace(effectShader.envMaskTexture.get())) {
-                        effectShader.envMaskTexture = new NiString(newLink);
+                    if (shouldReplaceLink(effectShader.envMaskTexture.get())) {
+                        effectShader.envMaskTexture = new NiString(newLinkPath);
                         modifiedEffectShader = true;
                     }
 
@@ -97,8 +99,8 @@ public sealed class NifModificationService(
                 } else {
                     // Remap BS Shader No  Lighting Property
                     var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
-                    if (shaderNoLighting is not null && shouldReplace(shaderNoLighting.baseTexture.get())) {
-                        shaderNoLighting.baseTexture = new NiString(newLink);
+                    if (shaderNoLighting is not null && shouldReplaceLink(shaderNoLighting.baseTexture.get())) {
+                        shaderNoLighting.baseTexture = new NiString(newLinkPath);
                         niHeader.ReplaceBlock(blockId, shaderNoLighting);
 
                         modifiedNif = true;
@@ -109,9 +111,9 @@ public sealed class NifModificationService(
 
         if (modifiedNif) {
             try {
-                nif.Save(file);
+                nif.Save(fileSystemLink.FullPath);
             } catch (Exception e) {
-                logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", file, e.Message);
+                logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", fileSystemLink, e.Message);
             }
         }
     }

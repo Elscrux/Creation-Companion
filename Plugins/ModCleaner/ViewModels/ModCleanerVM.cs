@@ -1,9 +1,11 @@
 ﻿using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia.Threading;
 using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
@@ -13,7 +15,9 @@ using Serilog;
 namespace ModCleaner.ViewModels;
 
 public sealed partial class ModCleanerVM : ViewModel {
+    public IObservable<bool> IsLoading => RecordReferenceController.IsLoading;//.CombineLatest(AssetReferenceController.IsLoading, (a, b) => a || b);
     public IRecordReferenceController RecordReferenceController { get; }
+    // public IAssetReferenceController AssetReferenceController { get; }
     public SingleModPickerVM CleaningModPickerVM { get; }
     public MultiModPickerVM DependenciesModPickerVM { get; }
     [Reactive] public partial bool IsBusy { get; set; }
@@ -25,9 +29,11 @@ public sealed partial class ModCleanerVM : ViewModel {
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         Services.ModCleaner modCleaner,
         IRecordReferenceController recordReferenceController,
+        // IAssetReferenceController assetReferenceController,
         SingleModPickerVM cleaningModPickerVM,
         MultiModPickerVM dependenciesModPickerVM) {
         RecordReferenceController = recordReferenceController;
+        // AssetReferenceController = assetReferenceController;
         CleaningModPickerVM = cleaningModPickerVM;
         DependenciesModPickerVM = dependenciesModPickerVM;
         DependenciesModPickerVM.Filter = _ => false;

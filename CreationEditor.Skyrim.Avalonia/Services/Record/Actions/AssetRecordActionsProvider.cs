@@ -24,7 +24,7 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
             var assetBrowser = await dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
             if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
 
-            await assetBrowserVM.MoveTo.Execute(dataRelativePath.Path);
+            await assetBrowserVM.MoveTo.Execute(dataRelativePath);
         });
 
         _actions = [
