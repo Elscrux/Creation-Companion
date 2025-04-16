@@ -204,8 +204,6 @@ public sealed class RecordReferenceQuery(
     private ModReferenceCache LoadReferenceCache(string cacheFilePath) {
         using var linearNotifier = new LinearNotifier(notificationService);
         linearNotifier.Next("Decompressing Cache");
-        var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
-        var records = new HashSet<FormKey>();
         var game = GetGameName(cacheFilePath);
 
         // Read mod cache file
@@ -214,6 +212,7 @@ public sealed class RecordReferenceQuery(
         using (var reader = new BinaryReader(zip)) {
             // Read form keys
             var recordCount = reader.ReadInt32();
+            var records = new HashSet<FormKey>(recordCount);
             for (var i = 0; i < recordCount; i++) {
                 var formKey = FormKey.Factory(reader.ReadString());
                 records.Add(formKey);
@@ -221,12 +220,13 @@ public sealed class RecordReferenceQuery(
 
             // Read references
             var formCount = reader.ReadInt32();
+            var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(formCount);
             using (var counter = new CountingNotifier(notificationService, "Reading Cache", formCount)) {
                 for (var i = 0; i < formCount; i++) {
                     counter.NextStep();
                     var formKey = FormKey.Factory(reader.ReadString());
                     var referenceCount = reader.ReadInt32();
-                    var references = new HashSet<IFormLinkIdentifier>();
+                    var references = new HashSet<IFormLinkIdentifier>(referenceCount);
                     for (var j = 0; j < referenceCount; j++) {
                         var referenceFormKey = FormKey.Factory(reader.ReadString());
                         var typeString = reader.ReadString();
@@ -237,8 +237,8 @@ public sealed class RecordReferenceQuery(
                     modCache.Add(formKey, references);
                 }
             }
-        }
 
-        return new ModReferenceCache(modCache, records);
+            return new ModReferenceCache(modCache, records);
+        }
     }
 }
