@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
+using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Lifecycle;
 using CreationEditor.Avalonia.Services.Record.List;
@@ -26,6 +27,8 @@ using CreationEditor.Services.Plugin;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 using FluentAvalonia.UI.Windowing;
+using Mutagen.Bethesda.Fonts.DI;
+using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
@@ -53,6 +56,15 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<RecordBrowserSettings>()
             .As<IRecordBrowserSettings>();
+
+        builder.RegisterType<GetFontConfigListing>()
+            .As<IGetFontConfigListing>();
+
+        builder.RegisterType<GetFontConfig>()
+            .As<IGetFontConfig>();
+
+        builder.RegisterType<FontProvider>()
+            .As<IFontProvider>();
 
         builder.RegisterType<StartupSplashScreen>()
             .As<IApplicationSplashScreen>();
@@ -116,6 +128,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<GameFontLoader>()
+            .As<IGameFontLoader>()
             .SingleInstance();
 
         // Factory

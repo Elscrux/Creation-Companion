@@ -5,12 +5,21 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using CreationEditor.Avalonia.Html;
 using CreationEditor.Avalonia.Services.Asset;
+using CreationEditor.Avalonia.Services.Avalonia.Font;
 using HtmlAgilityPack;
+using Mutagen.Bethesda.Fonts.DI;
+using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
 
-public sealed record HtmlConverterOptions(double Width, double LineSpacing, string DefaultFont = "SkyrimBooks_Gaelic");
+public sealed record HtmlConverterOptions(Language Language, double Width, double LineSpacing, string DefaultFont = "SkyrimBooks_Gaelic");
 
-public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions htmlConverterOptions) {
+public sealed class HtmlConverter(
+    IImageLoader imageLoader,
+    IGameFontLoader gameFontLoader,
+    Func<Language, IFontProvider> fontProviderFactory,
+    HtmlConverterOptions htmlConverterOptions) {
+    private readonly IFontProvider _fontProvider = fontProviderFactory(htmlConverterOptions.Language);
+
     public IEnumerable<Control> GenerateControls(string text) {
         var currentStackPanel = new StackPanel();
         foreach (var control in GetControls(text)) {
@@ -299,39 +308,13 @@ public sealed class HtmlConverter(IImageLoader imageLoader, HtmlConverterOptions
     }
 
     private IEnumerable<Control> ProcessFont(HtmlNode node, TextOptions textOptions) {
-        // var embeddedFontCollection = new EmbeddedFontCollection();
-        // FontManager.Current.AddFontCollection();
         if (node.TryGetAttribute<string>("color", out var colorStr) && Color.TryParse(colorStr, out var color)) {
             textOptions = textOptions with { FontColor = new SolidColorBrush(color) };
         }
         if (node.TryGetAttribute<string>("face", out var faceStr)) {
-            // Apply mappings - todo replace with font config mappings
-            faceStr = faceStr switch {
-                "$HandwrittenFont" => "SkyrimBooks_Handwritten",
-                "$CClub_Font" => "Eurostile LT Cyr Std",
-                "$CClub_Font_Bold" => "Eurostile LT Cyr Std",
-                "$StartMenuFont" => "Futura Condensed",
-                "$DialogueFont" => "Futura CondensedLight",
-                "$EverywhereFont" => "Futura CondensedLight",
-                "$EverywhereBoldFont" => "Futura Condensed",
-                "$EverywhereMediumFont" => "Futura Condensed",
-                "$DragonFont" => "Dragon_script",
-                "$SkyrimBooks" => "SkyrimBooks_Gaelic",
-                "$HandwrittenBold" => "SkyrimBooks_Handwritten",
-                "$FalmerFont" => "Falmer",
-                "$DwemerFont" => "Dwemer",
-                "$DaedricFont" => "Daedric",
-                "$MageScriptFont" => "Mage Script",
-                "$SkyrimSymbolsFont" => "SkyrimSymbols",
-                "$SkyrimBooks_UnreadableFont" => "SkyrimBooks_Unreadable",
-                "$ControllerButtons" => "Controller  Buttons",
-                "$ControllerButtonsInverted" => "Controller  Buttons inverted",
-                _ => htmlConverterOptions.DefaultFont,
-            };
-            try {
-                textOptions = textOptions with { FontFamily = FontFamily.Parse(faceStr) }; // use mapping for fonts
-            } catch (ArgumentException e) {
-                Console.WriteLine(e);
+            if (_fontProvider.FontMappings.TryGetValue(faceStr, out var fontName)) {
+                var fontFamily = new FontFamily(gameFontLoader.GetFontName(fontName.FontId));
+                textOptions = textOptions with { FontFamily = fontFamily };
             }
         }
         if (node.TryGetAttribute<int>("size", out var size)) {

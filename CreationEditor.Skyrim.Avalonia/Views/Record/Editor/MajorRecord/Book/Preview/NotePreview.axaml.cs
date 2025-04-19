@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Book;
+using Mutagen.Bethesda.Strings;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
@@ -21,7 +22,7 @@ public partial class NotePreview : ActivatableUserControl {
 
     private double _totalTextHeight;
     private int _currentLeftPage;
-    private HtmlConverter? _htmlConverter;
+    private Func<Language, HtmlConverter>? _htmlConverterFactory;
 
     public NotePreview() {
         InitializeComponent();
@@ -38,14 +39,14 @@ public partial class NotePreview : ActivatableUserControl {
             .NotNull()
             .OfType<BookEditorVM>()
             .Subscribe(vm => {
-                UpdatePreview(vm.BookText);
+                UpdatePreview(vm.Language, vm.BookText);
                 ScrollDefault();
-                _htmlConverter = vm.CreateHtmlConverter(new HtmlConverterOptions(PageWidth, LineSpacing));
+                _htmlConverterFactory = language => vm.CreateHtmlConverter(new HtmlConverterOptions(language, PageWidth, LineSpacing));
 
                 vm.WhenAnyValue(x => x.BookText)
                     .Subscribe(text => {
                         vm.BookText = text;
-                        UpdatePreview(text);
+                        UpdatePreview(vm.Language, text);
                     })
                     .DisposeWith(ActivatedDisposable);
             })
@@ -90,12 +91,13 @@ public partial class NotePreview : ActivatableUserControl {
         return _currentLeftPage != 0;
     }
 
-    private void UpdatePreview(string? text) {
-        if (text is null || _htmlConverter is null) return;
+    private void UpdatePreview(Language language, string? text) {
+        if (text is null || _htmlConverterFactory is null) return;
 
         var maxSize = new Size(PageWidth, PageHeight * 100);
 
-        var controls = _htmlConverter.GenerateControls(text).ToList();
+        var htmlConverter = _htmlConverterFactory(language);
+        var controls = htmlConverter.GenerateControls(text).ToList();
         foreach (var control in controls) {
             control.Measure(maxSize);
             var desiredSize = control.DesiredSize;
