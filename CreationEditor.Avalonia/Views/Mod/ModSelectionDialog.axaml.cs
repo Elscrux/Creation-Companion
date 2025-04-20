@@ -7,8 +7,8 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Mod;
 
-public partial class ModSelectionPopup : ReactiveUserControl<ModSelectionVM> {
-    public ModSelectionPopup() {
+public partial class ModSelectionDialog : ReactiveUserControl<ModSelectionVM> {
+    public ModSelectionDialog() {
         InitializeComponent();
 
         this.WhenActivated(disposables => {
@@ -23,7 +23,7 @@ public partial class ModSelectionPopup : ReactiveUserControl<ModSelectionVM> {
         });
     }
 
-    public ModSelectionPopup(ModSelectionVM modSelectionVM) : this() {
+    public ModSelectionDialog(ModSelectionVM modSelectionVM) : this() {
         DataContext = modSelectionVM;
     }
 

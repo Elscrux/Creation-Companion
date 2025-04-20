@@ -228,7 +228,7 @@
             </Grid>
         </DockPanel>
 
-        <mod:ModSelectionPopup
+        <mod:ModSelectionDialog
             x:Name="ModSelectionPopup"
             DataContext="{Binding ModSelectionVM}"/>
     </Grid>
