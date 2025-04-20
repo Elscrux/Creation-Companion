@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
+using Avalonia.Data;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -55,6 +56,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public ReactiveCommand<Unit, Unit> ToggleSelection { get; }
+    public IBinding LoadOrderItemIsEnabled { get; } = new Binding(nameof(LoadOrderModItem.MastersValid));
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
     public ModSelectionVM(

@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia.Data;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData.Binding;
@@ -25,5 +26,6 @@ public class DesignModSelectionVM : IModSelectionVM {
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
     public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
     public ReactiveCommand<Unit, Unit> ToggleSelection { get; } = ReactiveCommand.Create(() => {});
+    public IBinding LoadOrderItemIsEnabled { get; } = new Binding();
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
 }

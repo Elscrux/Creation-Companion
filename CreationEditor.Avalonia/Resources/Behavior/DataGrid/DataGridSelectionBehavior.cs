@@ -24,13 +24,14 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
         = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), _ => true);
 
+    public static readonly StyledProperty<IBinding?> ItemIsEnabledProperty
+        = AvaloniaProperty.Register<DataGrid, IBinding?>(nameof(ItemIsEnabled));
+
     public static readonly StyledProperty<bool> MultiSelectProperty
         = AvaloniaProperty.Register<DataGridSelectionBehavior, bool>(nameof(MultiSelect), true);
 
     private bool _attached;
     private bool _isProcessing;
-
-    public string? EnabledMapping { get; init; }
 
     public bool AddColumn { get; init; } = true;
     public bool AddContextFlyout { get; init; } = true;
@@ -50,6 +51,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public Func<IReactiveSelectable, bool> SelectionGuard {
         get => GetValue(SelectionGuardProperty);
         set => SetValue(SelectionGuardProperty, value);
+    }
+
+    public IBinding? ItemIsEnabled {
+        get => GetValue(ItemIsEnabledProperty);
+        set => SetValue(ItemIsEnabledProperty, value);
     }
 
     public bool MultiSelect {
@@ -176,9 +182,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                         },
                     };
 
-                    if (EnabledMapping is not null) {
+                    if (ItemIsEnabled is not null) {
                         checkBox
-                            .Bind(InputElement.IsEnabledProperty, new Binding(EnabledMapping))
+                            .Bind(InputElement.IsEnabledProperty, ItemIsEnabled)
                             .DisposeWith(_visualsAttachedDisposable);
                     }
 

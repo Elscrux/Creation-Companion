@@ -58,7 +58,7 @@
 
                 <Interaction.Behaviors>
                     <behavior:DataGridSelectionBehavior
-                        EnabledMapping="MastersValid"
+                        ItemIsEnabled="{Binding LoadOrderItemIsEnabled}"
                         SelectionGuard="{Binding CanSelect}"/>
                 </Interaction.Behaviors>
 
