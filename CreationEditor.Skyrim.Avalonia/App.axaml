@@ -67,6 +67,7 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/ImageStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DockingStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/DataGridStyles.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/IconStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/TreeDataGridStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/TextBlockStyles.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Resources/Style/TreeViewStyles.axaml"/>

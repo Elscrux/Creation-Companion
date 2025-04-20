@@ -21,5 +21,5 @@ public sealed class ModCleanerPlugin(
 
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new SymbolIcon { Symbol = Symbol.Filter };
+    public object GetIcon() => new FontIcon { Glyph = "🧹" };
 }

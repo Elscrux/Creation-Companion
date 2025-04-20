@@ -83,7 +83,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Share },
+                Icon = new SymbolIcon { Symbol = Symbol.Copy },
                 Header = customHeader ?? "Duplicate",
             },
             parameter,

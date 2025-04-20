@@ -20,5 +20,5 @@ public sealed class WaterPlugin<TMod, TModGetter>(
 
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Left;
-    public object GetIcon() => new SymbolIcon { Symbol = Symbol.Globe };
+    public object GetIcon() => new FontIcon { Glyph = "🌊" };
 }
