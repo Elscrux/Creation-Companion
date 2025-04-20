@@ -55,7 +55,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     private readonly Subject<Unit> _refreshListings = new();
 
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
-    public ReactiveCommand<Unit, Unit> ToggleSelection { get; }
     public IBinding LoadOrderItemIsEnabled { get; } = new Binding(nameof(LoadOrderModItem.MastersValid));
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
@@ -186,15 +185,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                 if (SelectedMod is null) return;
 
                 SelectedMod.IsActive = !SelectedMod.IsActive;
-            })
-            .DisposeWith(this);
-
-        ToggleSelection = ReactiveCommand.Create(
-            canExecute: selectedModValid,
-            execute: () => {
-                if (SelectedMod is null) return;
-
-                SelectedMod.IsSelected = !SelectedMod.IsSelected;
             })
             .DisposeWith(this);
 

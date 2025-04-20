@@ -7,7 +7,6 @@
     xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Mod"
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
-    xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
     x:Name="Selection"
     d:DesignHeight="500" d:DesignWidth="750"
     x:DataType="mod:IModSelectionVM">
@@ -43,8 +42,7 @@
                       IsReadOnly="True"
                       SelectionMode="Extended"
                       GridLinesVisibility="None"
-                      Classes="NoCellSelection Small"
-                      attached:DoubleTappedProperty.Command="{Binding ToggleSelection}">
+                      Classes="NoCellSelection Small">
 
                 <DataGrid.KeyBindings>
                     <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>

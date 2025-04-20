@@ -36,6 +36,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public bool AddColumn { get; init; } = true;
     public bool AddContextFlyout { get; init; } = true;
     public bool AddKeyBinding { get; init; } = true;
+    public bool AddDoubleTap { get; init; } = true;
 
     public bool ColumnEnabled { get; set; }
     public bool ContextFlyoutEnabled { get; set; }
@@ -82,6 +83,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         if (AddColumn) AddSelectionColumn();
         if (AddContextFlyout) AddSelectionMenu();
         if (AddKeyBinding) AddKeyBindings();
+        if (AddDoubleTap) AddDoubleTapHandler();
 
         if (AssociatedObject is not null) AssociatedObject.LayoutUpdated += UpdateAllChecked;
     }
@@ -90,6 +92,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         if (ColumnEnabled) RemoveSelectionColumn();
         if (ContextFlyoutEnabled) RemoveSelectionMenu();
         if (KeyBindingEnabled) RemoveKeyBindings();
+        if (AddDoubleTap) RemoveDoubleTapHandler();
 
         if (AssociatedObject is not null) AssociatedObject.LayoutUpdated -= UpdateAllChecked;
 
@@ -260,11 +263,25 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         KeyBindingEnabled = false;
     }
 
+    private void AddDoubleTapHandler() {
+        AssociatedObject?.AddHandler(InputElement.DoubleTappedEvent, DoubleTappedEventHandler);
+    }
+
+    private void RemoveDoubleTapHandler() {
+        AssociatedObject?.RemoveHandler(InputElement.DoubleTappedEvent, DoubleTappedEventHandler);
+    }
+
+    private void DoubleTappedEventHandler(object? sender, TappedEventArgs e) {
+        if (AssociatedObject?.SelectedItems is null) return;
+
+        SelectSelectedItems(!AssociatedObject.SelectedItems.OfType<IReactiveSelectable>().Any(s => s.IsSelected));
+    }
+
     private void TryProcess(Action action) {
         if (_isProcessing) return;
 
         _isProcessing = true;
-        action.Invoke();
+        action();
         _isProcessing = false;
     }
 
@@ -299,7 +316,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         TryProcess(() => {
             _isProcessing = true;
             foreach (var selectable in AssociatedObject.SelectedItems.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
+                selectable.IsSelected = newState && SelectionGuard(selectable);
             }
         });
 
@@ -311,7 +328,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = newState && SelectionGuard.Invoke(selectable);
+                selectable.IsSelected = newState && SelectionGuard(selectable);
                 AllChecked = newState;
             }
         });
@@ -340,7 +357,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
             AssociatedObject.SelectedItems
                 .Cast<IReactiveSelectable>()
-                .ForEach(selectable => selectable.IsSelected = newStatus && SelectionGuard.Invoke(selectable));
+                .ForEach(selectable => selectable.IsSelected = newStatus && SelectionGuard(selectable));
         });
 
         UpdateAllChecked();
@@ -351,7 +368,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = !selectable.IsSelected && SelectionGuard.Invoke(selectable);
+                selectable.IsSelected = !selectable.IsSelected && SelectionGuard(selectable);
             }
         });
 
