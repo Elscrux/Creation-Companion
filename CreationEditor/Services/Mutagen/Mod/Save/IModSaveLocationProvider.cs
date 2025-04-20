@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
+// todo: replace with data sources
 public interface IModSaveLocationProvider {
     /// <summary>
     /// Set the save location to the data folder.

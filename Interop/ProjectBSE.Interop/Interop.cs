@@ -9,9 +9,9 @@ public static partial class Interop {
 
     [LibraryImport(DllName, EntryPoint = "initTGEditor", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial int InitTGEditor_Native(InitConfig config, string[] bsaFileNames, ulong count);
-    public static int InitTGEditor(InitConfig config, string[] bsaFileNames) {
-        return InitTGEditor_Native(config, bsaFileNames, (ulong) bsaFileNames.Length);
+    private static partial int InitTGEditor_Native(InitConfig config, string[] archiveFileNames, ulong count);
+    public static int InitTGEditor(InitConfig config, string[] archiveFileNames) {
+        return InitTGEditor_Native(config, archiveFileNames, (ulong) archiveFileNames.Length);
     }
 
     [LibraryImport(DllName, EntryPoint = "getMainWindowHandle")]

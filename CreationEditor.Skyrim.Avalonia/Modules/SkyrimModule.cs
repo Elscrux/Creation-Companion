@@ -5,6 +5,7 @@ using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
@@ -19,6 +20,7 @@ using CreationEditor.Skyrim.Avalonia.Services.Record.List;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Skyrim.Avalonia.ViewModels.DataSource;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
@@ -42,8 +44,9 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
     protected override IReg<ICellBrowserFactory> CellBrowserFactory => Register<SkyrimCellBrowserFactory>();
     protected override IReg<IApplicationIconProvider> ApplicationIconProvider => Register<SkyrimApplicationIconProvider>();
 
-    protected override IReg<IArchiveService> ArchiveService => Register<BsaArchiveService>();
+    protected override IReg<IArchiveService> ArchiveService => Register<ArchiveService>();
     protected override IReg<IAssetBrowserVM> AssetBrowserVM => Register<AssetBrowserVM>();
+    protected override IReg<IDataSourceSelectionVM> DataSourceSelectionVM => Register<DataSourceSelectionVM>();
     protected override IReg<IAssetTypeProvider> AssetTypeProvider => Register<SkyrimAssetTypeProvider>();
 
     protected override IReg<IScriptVM> ScriptVM => Register<PapyrusScriptVM>();

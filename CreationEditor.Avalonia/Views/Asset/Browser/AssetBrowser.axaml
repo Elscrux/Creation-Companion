@@ -7,6 +7,7 @@
              xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:fileSystemLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
              x:DataType="browser:IAssetBrowserVM">
@@ -24,8 +25,9 @@
             Command="{Binding Redo}"/>
     </UserControl.KeyBindings>
 
-    <Grid RowDefinitions="Auto,*">
-        <StackPanel Grid.Row="0"
+    <Grid RowDefinitions="400,Auto,*">
+        <dataSource:DataSourceSelection DataContext="{Binding DataSourceSelectionVM}"/>
+        <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
                     Margin="5"
                     Spacing="5">
@@ -40,8 +42,8 @@
                             <TextBlock Text="Show"
                                        FontSize="12"/>
 
-                            <CheckBox IsChecked="{Binding ShowBsaAssets}"
-                                      Content="BSA Files"/>
+                            <CheckBox IsChecked="{Binding ShowArchiveAssets}"
+                                      Content="Archive Files"/>
                             <CheckBox IsChecked="{Binding ShowEmptyDirectories}"
                                       Content="Empty Directories"/>
                             <CheckBox IsChecked="{Binding ShowOnlyOrphaned}"
@@ -67,7 +69,7 @@
             </StackPanel>
         </StackPanel>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <TreeDataGrid
                 x:Name="AssetTree"
                 Classes="Select"

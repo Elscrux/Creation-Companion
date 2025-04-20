@@ -19,10 +19,15 @@ public interface IDataSourceService {
     IObservable<IReadOnlyList<IDataSource>> DataSourcesChanged { get; }
 
     /// <summary>
-    /// Returns list of data sources.
+    /// Returns a list of all data sources.
     /// Data sources are sorted from least
     /// </summary>
     IReadOnlyList<IDataSource> PriorityOrder { get; }
+
+    /// <summary>
+    /// Active data source to be used as main data source to save files in.
+    /// </summary>
+    IDataSource ActiveDataSource { get; }
 
     /// <summary>
     /// Returns the data source for the given path.
@@ -56,6 +61,7 @@ public interface IDataSourceService {
 
     /// <summary>
     /// Enumerates all file system links in the given directory.
+    /// In case of duplicate files, the file from the highest priority data source will be returned.
     /// </summary>
     /// <param name="directoryPath">Data relative path to the directory.</param>
     /// <param name="includeSubDirectories">Whether to include subdirectories.</param>

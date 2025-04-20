@@ -6,6 +6,7 @@ public interface IStateRepository<T>
 
     IEnumerable<StateIdentifier> LoadAllStateIdentifiers();
     IEnumerable<T> LoadAll();
+    IEnumerable<KeyValuePair<StateIdentifier, T>> LoadAllWithStateIdentifier();
     T? Load(Guid id);
 
     bool Save(T state, Guid id, string name = "");

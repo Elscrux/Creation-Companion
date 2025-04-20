@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
@@ -15,6 +16,7 @@ using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
@@ -41,10 +43,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly Func<object?, IReferenceVM[], ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IArchiveService _archiveService;
     private readonly IMenuItemProvider _menuItemProvider;
-    private readonly IAssetReferenceController _assetReferenceController = null!;
-    private readonly IAssetController _assetController = null!;
+    private readonly IAssetReferenceController _assetReferenceController;
+    private readonly IAssetController _assetController;
     private readonly ILinkCacheProvider _linkCacheProvider;
-    private readonly IRecordReferenceController _recordReferenceController = null!;
+    private readonly IRecordReferenceController _recordReferenceController;
     private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
     private readonly ISearchFilter _searchFilter;
@@ -52,7 +54,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IDataSourceWatcher _dataSourceWatcher;
 
     [Reactive] public partial string SearchText { get; set; }
-    [Reactive] public partial bool ShowBsaAssets { get; set; }
+    [Reactive] public partial bool ShowArchiveAssets { get; set; }
     [Reactive] public partial bool ShowEmptyDirectories { get; set; }
     [Reactive] public partial bool ShowOnlyOrphaned { get; set; }
 
@@ -73,9 +75,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public ReactiveCommand<FileSystemLink, Unit> OpenAssetBrowser { get; }
 
     public HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
+    public IDataSourceSelectionVM DataSourceSelectionVM { get; }
 
     public AssetBrowserVM(
         Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserVMFactory,
+        IDataSourceSelectionVM dataSourceSelectionVM,
         IDataSourceWatcherProvider dataSourceWatcherProvider,
         IDataSourceService dataSourceService,
         ModelAssetQuery modelAssetQuery,
@@ -91,6 +95,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         MainWindow mainWindow,
         ISearchFilter searchFilter
     ) {
+        DataSourceSelectionVM = dataSourceSelectionVM;
         SearchText = "";
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _archiveService = archiveService;
@@ -109,24 +114,24 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IsBusyLoadingAssets = true;
         IsBusyLoadingReferences = true;
 
-        // _assetReferenceController.IsLoading
-        //     .ObserveOnGui()
-        //     .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
-        //     .DisposeWith(this);
+        _assetReferenceController.IsLoading
+            .ObserveOnGui()
+            .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
+            .DisposeWith(this);
 
         var filter =
-            this.WhenAnyValue(x => x.ShowBsaAssets)
+            this.WhenAnyValue(x => x.ShowArchiveAssets)
                 .CombineLatest(
                     this.WhenAnyValue(x => x.ShowEmptyDirectories),
                     this.WhenAnyValue(x => x.ShowOnlyOrphaned),
                     this.WhenAnyValue(x => x.SearchText),
-                    (showBsaAssets, showEmptyDirectories, showOnlyOrphaned, searchText) => (
-                        ShowBsaAssets: showBsaAssets,
+                    (showArchiveAssets, showEmptyDirectories, showOnlyOrphaned, searchText) => (
+                        ShowArchiveAssets: showArchiveAssets,
                         ShowEmptyDirectories: showEmptyDirectories,
                         ShowOnlyOrphaned: showOnlyOrphaned,
                         SearchText: searchText))
                 .ThrottleMedium()
-                .Select(tuple => FilterBuilder(tuple.ShowBsaAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
+                .Select(tuple => FilterBuilder(tuple.ShowArchiveAssets, tuple.ShowEmptyDirectories, tuple.ShowOnlyOrphaned, tuple.SearchText));
 
         AssetTreeSource = new HierarchicalTreeDataGridSource<FileSystemLink>([]) {
             Columns = {
@@ -196,17 +201,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     new FuncDataTemplate<FileSystemLink>((asset, _) => {
                         if (asset is null) return null;
 
-                        return new TextBlock {
-                            Text = ""
-                        };
-                        // if (asset is null || asset.Asset is FileSystemLink) return null;
-                        //
-                        // return new TextBlock {
-                        //     Text = asset.GetReferencedAssets()
-                        //         .Select(x => x.RecordReferences.Count + x.AssetReferences.Count)
-                        //         .Sum()
-                        //         .ToString(),
-                        // };
+                        var assetLink = _assetTypeService.GetAssetLink(asset.DataRelativePath);
+                        if (assetLink is null) return null;
+
+                        var referenceCount = assetReferenceController.GetReferenceCount(assetLink);
+                        return new TextBlock { Text = referenceCount.ToString() };
                     }),
                     null,
                     new GridLength(),
@@ -295,9 +294,14 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         OpenReferences = ReactiveCommand.Create<FileSystemLink>(OpenAssetReferences,
             this.WhenAnyValue(x => x.AssetTreeSource.RowSelection!.SelectedItem)
-                .Select(x => true)
-            // .Select(x => x?.AnyOrphaned.Select(o => !o) ?? Observable.Return(false))
-            // .Switch()
+                .Select(link => {
+                    if (link is null) return false;
+
+                    var assetLink = _assetTypeService.GetAssetLink(link.DataRelativePath);
+                    if (assetLink is null) return false;
+
+                    return assetReferenceController.GetReferenceCount(assetLink) > 0;
+                })
         );
 
         AddFolder = ReactiveCommand.CreateFromTask<FileSystemLink>(AddAssetFolder);
@@ -315,6 +319,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var links = rootDirectory.EnumerateAllLinks(false).ToArray();
 
         Dispatcher.UIThread.Post(() => {
+            AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);
             AssetTreeSource.Items = links;
             IsBusyLoadingAssets = false;
         });

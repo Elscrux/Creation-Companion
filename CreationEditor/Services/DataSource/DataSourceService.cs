@@ -3,11 +3,9 @@ using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Archive;
-using CreationEditor.Services.Environment;
 using CreationEditor.Services.State;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.DataSource;
 
 // TODO: It would be good to automatically distribute changes in a plugin per master plugin. What I mean is, if you're rerouting a bunch of mesh paths in different esms, having a seperate esp for the records in each plugin rather than one big esp would be very useful in our case
@@ -15,10 +13,10 @@ namespace CreationEditor.Services.DataSource;
 // so you'd check a box that pipes every edit to an immutable mod into a dedicated mod that edits one plugin each there
 // maybe just for custom code for BS and no actual system behind it for everyone to use
 public sealed class DataSourceService : IDataSourceService {
-    private readonly IEditorEnvironment _editorEnvironment;
     private readonly IArchiveService _archiveService;
     private readonly List<IDataSource> _dataSources = [];
     public IReadOnlyList<IDataSource> PriorityOrder => _dataSources.ToArray();
+    public IDataSource ActiveDataSource { get; }
 
     /// <summary>
     /// Orders archives before file system data sources and keeps the order within the same type of data source.
@@ -26,7 +24,7 @@ public sealed class DataSourceService : IDataSourceService {
     private readonly FuncComparer<IDataSource> _dataSourceComparer;
 
     /// <summary>
-    /// Orders archives based on the load order of the bsa files in the data directory.
+    /// Orders archives based on the load order of the archive files in the data directory.
     /// </summary>
     private readonly IComparer<FileSystemLink> _archivePriorityComparer;
 
@@ -36,24 +34,20 @@ public sealed class DataSourceService : IDataSourceService {
 
     public DataSourceService(
         IFileSystem fileSystem,
-        IEditorEnvironment editorEnvironment,
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
         Func<string, IStateRepository<DataSourceMemento>> stateRepositoryFactory
     ) {
-        _editorEnvironment = editorEnvironment;
         _archiveService = archiveService;
         _stateRepository = stateRepositoryFactory("DataSource");
 
         _archivePriorityComparer = new FuncComparer<FileSystemLink>((x, y) => {
-            // Collect bsa files in the data directory and sort them based on the load order
-            var bsaNameOrder = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder
-                .SelectMany(GetModBSAFiles)
-                .ToArray();
+            // Collect archive files in the data directory and sort them based on the load order
+            var archiveLoadOrder = archiveService.GetArchiveLoadOrder().ToArray();
 
-            // todo potentially filter out bsa files that are not in the load order or referenced in the ini file
-            var indexOfX = bsaNameOrder.IndexOf(x.DataRelativePath.Path);
-            var indexOfY = bsaNameOrder.IndexOf(y.DataRelativePath.Path);
+            // todo potentially filter out archive files that are not in the load order or referenced in the ini file
+            var indexOfX = archiveLoadOrder.IndexOf(x.DataRelativePath.Path);
+            var indexOfY = archiveLoadOrder.IndexOf(y.DataRelativePath.Path);
 
             if (indexOfX == -1) {
                 if (indexOfY == -1) return 0;
@@ -65,13 +59,6 @@ public sealed class DataSourceService : IDataSourceService {
 
             // Files that are higher in the load order will have a higher index and be prioritized 
             return indexOfX.CompareTo(indexOfY);
-
-            IEnumerable<string> GetModBSAFiles(IModGetter mod) {
-                var extension = _archiveService.GetExtension();
-
-                yield return mod.ModKey.Name + extension;
-                yield return mod.ModKey.Name + " - Textures" + extension;
-            }
         });
 
         _dataSourceComparer = new FuncComparer<IDataSource>((s1, s2) => {
@@ -86,25 +73,28 @@ public sealed class DataSourceService : IDataSourceService {
             return 0;
         });
 
-        InitDataSources(fileSystem, dataDirectoryProvider, archiveService);
-    }
-
-    private void InitDataSources(IFileSystem fileSystem, IDataDirectoryProvider dataDirectoryProvider, IArchiveService archiveService) {
         List<FileSystemDataSource> fileSystemDataSources = [];
         List<ArchiveDataSource> archiveDataSources = [];
 
-        var mementos = _stateRepository.LoadAll().ToArray();
+        var mementos = _stateRepository.LoadAll()
+            .DistinctBy(x => x.Path)
+            .ToArray();
 
+        // Add file system data sources from mementos
         foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.FileSystem)) {
             fileSystemDataSources.Add(new FileSystemDataSource(fileSystem, dataSourceMemento.Path, dataSourceMemento.IsReadyOnly));
         }
 
         // If there is no data folder source, add it
-        if (!fileSystemDataSources.Any(fs => DataRelativePath.PathComparer.Equals(fs.Path, dataDirectoryProvider.Path))) {
-            var dataFolderDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
-            fileSystemDataSources.Insert(0, dataFolderDataSource);
+        var dataDirectoryDataSource = fileSystemDataSources.FirstOrDefault(fs => DataRelativePath.PathComparer.Equals(fs.Path, dataDirectoryProvider.Path));
+        if (dataDirectoryDataSource is null) {
+            dataDirectoryDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
+            fileSystemDataSources.Insert(0, dataDirectoryDataSource);
         }
 
+        ActiveDataSource = dataDirectoryDataSource;
+
+        // Add archive data sources from mementos
         foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.Archive)) {
             var archiveDataSourcePath = fileSystem.Path.GetDirectoryName(dataSourceMemento.Path);
             if (archiveDataSourcePath is null) continue;
@@ -119,6 +109,9 @@ public sealed class DataSourceService : IDataSourceService {
 
         // If any loaded archive is not added, add it
         foreach (var archive in GetArchives(fileSystemDataSources)) {
+            var existingArchive = archiveDataSources.FirstOrDefault(dataSource => dataSource.Path == archive.FullPath);
+            if (existingArchive is not null) continue;
+
             var archiveDataSource = new ArchiveDataSource(fileSystem, archive.FullPath, archiveService.GetReader(archive), archive);
             archiveDataSources.Add(archiveDataSource);
         }
@@ -132,6 +125,8 @@ public sealed class DataSourceService : IDataSourceService {
             .ToArray();
 
         _dataSources.AddRange(dataSources);
+
+        OnDataSourcesChanged();
     }
 
     public bool TryGetDataSource(string dataSourcePath, [NotNullWhen(true)] out IDataSource? dataSource) {
@@ -194,47 +189,19 @@ public sealed class DataSourceService : IDataSourceService {
     }
 
     private void OnDataSourcesChanged() {
+        var existingStateIdentifiers = _stateRepository.LoadAllWithStateIdentifier().ToDictionary(x => x.Key, x => x.Value);
         foreach (var dataSource in PriorityOrder) {
+            var ((id, _), _) = existingStateIdentifiers.FirstOrDefault(x => x.Value.Path == dataSource.Path);
             var memento = dataSource.CreateMemento();
-            _stateRepository.Save(memento, Guid.NewGuid(), memento.Name);
+            _stateRepository.Save(memento, id, dataSource.Name);
         }
 
         _dataSourcesChanged.OnNext(PriorityOrder);
     }
 
     private IEnumerable<FileSystemLink> GetArchives(IReadOnlyList<IDataSource> dataSources) {
-        var compareArchiveNames = new FuncComparer<FileSystemLink>((x, y) => {
-            // Collect bsa files in the data directory and sort them based on the load order
-            var bsaNameOrder = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder
-                .SelectMany(GetModBSAFiles)
-                .ToArray();
-
-            // todo potentially filter out bsa files that are not in the load order or referenced in the ini file
-            var indexOfX = bsaNameOrder.IndexOf(x.DataRelativePath.Path);
-            var indexOfY = bsaNameOrder.IndexOf(y.DataRelativePath.Path);
-
-            if (indexOfX == -1) {
-                if (indexOfY == -1) return 0;
-
-                return -1;
-            }
-
-            if (indexOfY == -1) return 1;
-
-            // Files that are higher in the load order will have a higher index and be prioritized 
-            return indexOfX.CompareTo(indexOfY);
-
-            IEnumerable<string> GetModBSAFiles(IModGetter mod) {
-                var extension = _archiveService.GetExtension();
-
-                yield return mod.ModKey.Name + extension;
-                yield return mod.ModKey.Name + " - Textures" + extension;
-            }
-        });
-
         return dataSources
             .Select(dataSource => new FileSystemLink(dataSource, string.Empty))
-            .SelectMany(rootLink => rootLink.EnumerateFileLinks("*" + _archiveService.GetExtension(), false))
-            .Order(compareArchiveNames);
+            .SelectMany(rootLink => rootLink.EnumerateFileLinks("*" + _archiveService.GetExtension(), false));
     }
 }

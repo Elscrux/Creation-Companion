@@ -31,4 +31,11 @@ public interface IAssetReferenceController : IReferenceController<RecordModPair>
     /// <param name="assetLink">Asset link to get referenced asset version of</param>
     /// <returns>Asset references for this asset</returns>
     IEnumerable<DataRelativePath> GetAssetReferences(IAssetLinkGetter assetLink);
+
+    /// <summary>
+    /// Gets the number of references for this asset at the current time.
+    /// </summary>
+    /// <param name="assetLink">Asset link to get referenced asset version of</param>
+    /// <returns>Number of references for this asset</returns>   
+    int GetReferenceCount(IAssetLinkGetter assetLink);
 }

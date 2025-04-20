@@ -7,6 +7,7 @@ using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Asset.Parser;
 
+// TODO: replace with with generic implementation that doesn't require special handling of archives 
 public sealed class NifArchiveAssetParser(
     IAssetTypeService assetTypeService,
     ModelAssetQuery modelAssetQuery,
@@ -46,12 +47,12 @@ public sealed class NifArchiveAssetParser(
 
         var tempPath = fileSystem.Path.GetTempFileName();
         try {
-            //Create temp file and copy file from bsa to it
-            using var bsaStream = fileSystem.File.Create(tempPath);
-            archiveFile.AsStream().CopyTo(bsaStream);
-            bsaStream.Close();
+            //Create a temp file and copy the file from the archive to it
+            using var archiveStream = fileSystem.File.Create(tempPath);
+            archiveFile.AsStream().CopyTo(archiveStream);
+            archiveStream.Close();
 
-            //Parse temp file as nif and delete it afterward
+            //Parse the temp file as nif and delete it afterward
             foreach (var result in modelAssetQuery.ParseAssets(tempPath, fileSystem, archiveFile.Path)) {
                 yield return result;
             }

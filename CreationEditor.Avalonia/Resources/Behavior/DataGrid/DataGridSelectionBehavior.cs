@@ -186,9 +186,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     };
 
                     if (ItemIsEnabled is not null) {
-                        checkBox
-                            .Bind(InputElement.IsEnabledProperty, ItemIsEnabled)
-                            .DisposeWith(_visualsAttachedDisposable);
+                        checkBox[!InputElement.IsEnabledProperty] = ItemIsEnabled;
                     }
 
                     return checkBox;

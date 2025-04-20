@@ -224,6 +224,14 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         return nifDirectoryReferences.Concat(nifArchiveReferences);
     }
 
+    public int GetReferenceCount(IAssetLinkGetter assetLink) {
+        var nifDirectoryReferences = _nifDirectoryAssetReferenceCaches.GetReferences(assetLink);
+        var nifArchiveReferences = _nifArchiveAssetCaches.GetReferences(assetLink);
+        var modReferences = _modAssetCaches.GetReferences(assetLink);
+
+        return nifDirectoryReferences.Count() + nifArchiveReferences.Count() + modReferences.Count();
+    }
+
     public Action<FileSystemLink> RegisterUpdate(FileSystemLink fileLink) {
         ValidateAsset(fileLink);
 

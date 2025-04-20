@@ -79,6 +79,20 @@ public sealed class JsonStateRepository<T>(
             .WhereNotNull();
     }
 
+    public IEnumerable<KeyValuePair<StateIdentifier, T>> LoadAllWithStateIdentifier() {
+        return fileSystem.Directory
+            .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
+            .Select<string, KeyValuePair<StateIdentifier, T>?>(filePath => {
+                var stateIdentifier = GetStateIdentifier(fileSystem.Path.GetFileName(filePath));
+                var json = fileSystem.File.ReadAllText(filePath);
+                var t = JsonConvert.DeserializeObject<T>(json, _serializerSettings);
+                if (t is null) return null;
+
+                return new KeyValuePair<StateIdentifier, T>(stateIdentifier, t);
+            })
+            .WhereNotNull();
+    }
+
     public T? Load(Guid id) {
         var filePath = fileSystem.Directory
             .EnumerateFiles(GetDirectoryPath(), Wildcard + id + JsonExtension)

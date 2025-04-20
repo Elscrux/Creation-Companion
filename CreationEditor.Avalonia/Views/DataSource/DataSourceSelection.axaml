@@ -1,0 +1,85 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
+             xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.DataSource"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.ViewModels.DataSource"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.DataSource.DataSourceSelection"
+             x:DataType="dataSource:IDataSourceSelectionVM">
+    <Grid RowDefinitions="Auto,*">
+        <Button Grid.Row="0"
+                ToolTip.Tip="Settings"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+            <controls:SymbolIcon Symbol="SettingsFilled"/>
+
+            <Button.Flyout>
+                <Flyout>
+                    <StackPanel>
+                        <TextBlock Text="Show"
+                                   FontSize="12"/>
+
+                        <CheckBox IsChecked="{Binding ShowArchiveDataSources}"
+                                  Content="Archives"/>
+                    </StackPanel>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+
+        <DataGrid Grid.Row="1"
+                  Margin="5"
+                  VerticalAlignment="Stretch"
+                  Background="{DynamicResource SystemControlTransparentBrush}"
+                  ItemsSource="{Binding DataSources}"
+                  AutoGenerateColumns="False"
+                  CanUserReorderColumns="False" CanUserResizeColumns="True"
+                  CanUserSortColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Extended"
+                  GridLinesVisibility="None"
+                  Classes="NoCellSelection Small"
+                  attached:DragDropExtended.AllowDrag="True"
+                  attached:DragDropExtended.AllowDrop="True">
+
+            <Interaction.Behaviors>
+                <behavior:DataGridSelectionBehavior
+                    ItemIsEnabled="{Binding DataSourceIsEnabled}"
+                    SelectionGuard="{Binding CanSelect}"/>
+            </Interaction.Behaviors>
+
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="model:DataSourceItem">
+                            <StackPanel VerticalAlignment="Center">
+                                <controls:FontIcon
+                                    Glyph="&#xE72E;"
+                                    Foreground="Orange"
+                                    IsVisible="{Binding DataSource.IsReadOnly}"/>
+                                <controls:FontIcon
+                                    Glyph="&#xE785;"
+                                    Foreground="ForestGreen"
+                                    IsVisible="{Binding !DataSource.IsReadOnly}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Name"
+                                        MinWidth="130">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="model:DataSourceItem">
+                            <TextBlock Text="{Binding DataSource.Name}"
+                                       VerticalAlignment="Center"
+                                       ToolTip.Tip="{Binding DataSource.Path}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

@@ -1,5 +1,4 @@
-﻿using CreationEditor.Resources.Comparer;
-using CreationEditor.Services.DataSource;
+﻿using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Archive;
@@ -10,6 +9,12 @@ public interface IArchiveService {
     /// </summary>
     /// <returns>string of the file extension, including the starting dot</returns>
     string GetExtension();
+
+    /// <summary>
+    /// Get the load order of archives to load based on the game environment.
+    /// </summary>
+    /// <returns>Load order of archives sorted from highest to lowest priority</returns>
+    IEnumerable<string> GetArchiveLoadOrder();
 
     /// <summary>
     /// Get an archive reader for an archive.

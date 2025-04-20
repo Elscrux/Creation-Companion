@@ -1,11 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using System.IO.Abstractions;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;
 using CreationEditor.Services.Mutagen.Type;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
@@ -17,8 +16,7 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     private readonly DisposableBucket _disposableDropoff = new();
 
     private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
     private IAssetLinkCache _assetLinkCache;
 
@@ -32,14 +30,12 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
 
     public ModAssetQuery(
         ILogger logger,
-        IFileSystem fileSystem,
+        IDataSourceService dataSourceService,
         ILinkCacheProvider linkCacheProvider,
-        IDataDirectoryProvider dataDirectoryProvider,
         IMutagenTypeProvider mutagenTypeProvider,
         IAssetReferenceSerialization<IModGetter, IFormLinkIdentifier> serialization) {
         _logger = logger;
-        _fileSystem = fileSystem;
-        _dataDirectoryProvider = dataDirectoryProvider;
+        _dataSourceService = dataSourceService;
         _mutagenTypeProvider = mutagenTypeProvider;
         _assetLinkCache = linkCacheProvider.LinkCache.CreateImmutableAssetLinkCache();
         Serialization = serialization;
@@ -93,10 +89,10 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     }
 
     public void WriteCacheValidation(BinaryWriter writer, IModGetter mod) {
-        var modFilePath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, mod.ModKey.FileName);
-        if (!_fileSystem.File.Exists(modFilePath)) return;
+        if (!_dataSourceService.TryGetFileLink(mod.ModKey.FileName.String, out var modLink)) return;
+        if (!modLink.Exists()) return;
 
-        var hash = _fileSystem.GetFileHash(modFilePath);
+        var hash = modLink.FileSystem.GetFileHash(modLink.FullPath);
         writer.Write(hash);
     }
 
@@ -113,14 +109,14 @@ public sealed class ModAssetQuery : IAssetReferenceCacheableQuery<IModGetter, IF
     }
 
     public bool IsCacheUpToDate(BinaryReader reader, IModGetter source) {
-        var modFilePath = _fileSystem.Path.Combine(_dataDirectoryProvider.Path, source.ModKey.FileName);
-        if (!_fileSystem.Path.Exists(modFilePath)) return false;
+        if (!_dataSourceService.TryGetFileLink(source.ModKey.FileName.String, out var modLink)) return false;
+        if (!modLink.Exists()) return false;
 
         // Read hash in cache
-        var hash = reader.ReadBytes(_fileSystem.GetHashBytesLength());
+        var hash = reader.ReadBytes(modLink.FileSystem.GetHashBytesLength());
 
         // Validate hash
-        return _fileSystem.IsFileHashValid(modFilePath, hash);
+        return modLink.FileSystem.IsFileHashValid(modLink.FullPath, hash);
     }
 
     public string ReadContextString(BinaryReader reader) {

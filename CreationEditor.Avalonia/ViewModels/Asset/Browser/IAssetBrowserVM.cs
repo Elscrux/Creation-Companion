@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using Noggog;
@@ -9,7 +10,7 @@ namespace CreationEditor.Avalonia.ViewModels.Asset.Browser;
 
 public interface IAssetBrowserVM : IDisposableDropoff {
     string SearchText { get; set; }
-    bool ShowBsaAssets { get; set; }
+    bool ShowArchiveAssets { get; set; }
     bool ShowEmptyDirectories { get; set; }
     bool ShowOnlyOrphaned { get; set; }
 
@@ -28,6 +29,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool IsBusyLoadingReferences { get; set; }
 
     HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
+    IDataSourceSelectionVM DataSourceSelectionVM { get; }
 
     Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo);
     IEnumerable<Control> GetContextMenuItems(FileSystemLink asset);

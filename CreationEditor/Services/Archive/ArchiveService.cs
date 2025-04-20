@@ -2,18 +2,35 @@
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Archives.DI;
 using Mutagen.Bethesda.Assets;
+using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Archive;
 
-public sealed class BsaArchiveService(
+public sealed class ArchiveService(
     IFileSystem fileSystem,
+    IGetArchiveIniListings archiveIniListings,
+    IArchiveExtensionProvider archiveExtensionProvider,
     IEditorEnvironment editorEnvironment)
     : IArchiveService {
     private readonly Dictionary<FileSystemLink, IArchiveReader> _archiveReaders = new();
     private readonly Dictionary<IArchiveReader, IReadOnlyList<string>> _archiveDirectories = new();
 
-    public string GetExtension() => global::Mutagen.Bethesda.Archives.Archive.GetExtension(editorEnvironment.GameEnvironment.GameRelease);
+    public string GetExtension() => archiveExtensionProvider.Get();
+
+    public IEnumerable<string> GetArchiveLoadOrder() {
+        return archiveIniListings.Get().Select(fileName => fileName.String)
+            .Concat(editorEnvironment.LinkCache.ListedOrder.SelectMany(GetModArchiveFiles))
+            .Distinct();
+
+        IEnumerable<string> GetModArchiveFiles(IModGetter mod) {
+            var extension = GetExtension();
+
+            yield return mod.ModKey.Name + extension;
+            yield return mod.ModKey.Name + " - Textures" + extension;
+        }
+    }
 
     public IArchiveReader GetReader(FileSystemLink link) {
         if (_archiveReaders.TryGetValue(link, out var reader)) return reader;

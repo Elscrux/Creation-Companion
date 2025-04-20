@@ -1,8 +1,8 @@
-﻿using System.IO.Abstractions;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Views.Viewport;
+using CreationEditor.Services.Archive;
 using Mutagen.Bethesda.Environments.DI;
 using Noggog;
 using Serilog;
@@ -12,7 +12,7 @@ namespace CreationEditor.Avalonia.Services.Viewport.BSE;
 public sealed class BSEViewportFactory(
     ILogger logger,
     IDataDirectoryProvider dataDirectoryProvider,
-    IFileSystem fileSystem)
+    IArchiveService archiveService)
     : IViewportFactory {
 
     public bool IsMultiInstanceCapable => false;
@@ -40,20 +40,16 @@ public sealed class BSEViewportFactory(
 
     private void StartupEditor() {
         var assetDirectory = dataDirectoryProvider.Path;
-        var bsaFileNames = fileSystem.Directory
-            .EnumerateFiles(assetDirectory, "*.bsa")
-            .Select(path => fileSystem.Path.GetFileName(path))
-            // .OrderBy() todo order by load order priority ( (first is highest priority) exclude non-loaded BSAs? would need ini parsing to check which inis are always loaded)
-            .ToArray();
+        var archiveLoadOrder = archiveService.GetArchiveLoadOrder().ToArray();
 
         logger.Here().Information("Initializing viewport with data directory {AssetDirectory}", assetDirectory);
 
-        if (bsaFileNames.Length > 0) {
+        if (archiveLoadOrder.Length > 0) {
             logger.Here().Debug(
-                "Loading BSAs: {FileNames}",
-                string.Join(", ", bsaFileNames));
+                "Loading archives: {FileNames}",
+                string.Join(", ", archiveLoadOrder));
         } else {
-            logger.Here().Warning("No BSAs detected in {AssetDirectory}", assetDirectory);
+            logger.Here().Warning("No archives detected in {AssetDirectory}", assetDirectory);
         }
 
         var initConfig = new InitConfig {
@@ -61,7 +57,7 @@ public sealed class BSEViewportFactory(
             AssetDirectory = assetDirectory,
         };
 
-        var code = InitTGEditor(initConfig, bsaFileNames);
+        var code = InitTGEditor(initConfig, archiveLoadOrder);
         logger.Here().Information("Closed viewport with code {Code}", code);
     }
 }

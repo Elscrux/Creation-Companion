@@ -5,6 +5,7 @@ using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
@@ -35,6 +36,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
     protected abstract IReg<IArchiveService> ArchiveService { get; }
     protected abstract IReg<IAssetBrowserVM> AssetBrowserVM { get; }
+    protected abstract IReg<IDataSourceSelectionVM> DataSourceSelectionVM { get; }
     protected abstract IReg<IAssetTypeProvider> AssetTypeProvider { get; }
 
     protected abstract IReg<IScriptVM> ScriptVM { get; }
@@ -108,6 +110,9 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
         Register(builder, AssetBrowserVM)
             .As<IAssetBrowserVM>();
+
+        Register(builder, DataSourceSelectionVM)
+            .As<IDataSourceSelectionVM>();
     }
 
     private static IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle>
