@@ -12,7 +12,6 @@ using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
-using Noggog;
 using ReactiveUI;
 using Action = System.Action;
 namespace CreationEditor.Avalonia.Behavior;
@@ -316,7 +315,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         TryProcess(() => {
             _isProcessing = true;
             foreach (var selectable in AssociatedObject.SelectedItems.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = newState && SelectionGuard(selectable);
+                if (!SelectionGuard(selectable)) continue;
+
+                selectable.IsSelected = newState;
             }
         });
 
@@ -328,7 +329,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = newState && SelectionGuard(selectable);
+                if (!SelectionGuard(selectable)) continue;
+
+                selectable.IsSelected = newState;
                 AllChecked = newState;
             }
         });
@@ -355,9 +358,11 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                 .Cast<IReactiveSelectable>()
                 .All(selectable => selectable.IsSelected);
 
-            AssociatedObject.SelectedItems
-                .Cast<IReactiveSelectable>()
-                .ForEach(selectable => selectable.IsSelected = newStatus && SelectionGuard(selectable));
+            foreach (var selectable in AssociatedObject.SelectedItems.Cast<IReactiveSelectable>()) {
+                if (!SelectionGuard(selectable)) continue;
+
+                selectable.IsSelected = newStatus;
+            }
         });
 
         UpdateAllChecked();
@@ -368,7 +373,9 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
         TryProcess(() => {
             foreach (var selectable in AssociatedObject.ItemsSource.Cast<IReactiveSelectable>()) {
-                selectable.IsSelected = !selectable.IsSelected && SelectionGuard(selectable);
+                if (!SelectionGuard(selectable)) continue;
+
+                selectable.IsSelected = !selectable.IsSelected;
             }
         });
 
