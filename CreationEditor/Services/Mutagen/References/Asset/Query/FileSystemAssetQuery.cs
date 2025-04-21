@@ -25,10 +25,7 @@ public sealed class FileSystemAssetQuery(
 
     public string GetName(FileSystemLink source) => source.FullPath;
 
-    public FileSystemLink? ReferenceToSource(DataRelativePath reference) {
-        dataSourceService.TryGetFileLink(reference.Path, out var fileLink);
-        return fileLink;
-    }
+    public FileSystemLink? ReferenceToSource(DataRelativePath reference) => dataSourceService.GetFileLink(reference.Path);
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink path) {
         // For files, just parse the file
         if (path.IsFile) {

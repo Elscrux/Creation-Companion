@@ -55,7 +55,15 @@ public interface IDataSourceService {
     /// The first data source in the load order that contains the file will be used.
     /// </summary>
     /// <param name="dataRelativePath">Data relative path to the file.</param>
-    /// <param name="link">File system link to return.</param>
+    /// <returns>File system link to the file if found, null otherwise.</returns>
+    FileSystemLink? GetFileLink(DataRelativePath dataRelativePath);
+
+    /// <summary>
+    /// Tries to get the file system link for the given data relative path.
+    /// The first data source in the load order that contains the file will be used.
+    /// </summary>
+    /// <param name="dataRelativePath">Data relative path to the file.</param>
+    /// <param name="link">File system link to the file if found, null otherwise.</param>
     /// <returns>>True if the file system link was found in any data source, false otherwise.</returns>
     bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out FileSystemLink? link);
 

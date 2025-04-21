@@ -20,10 +20,7 @@ public sealed class ModelAssetQuery(
         = new ConcurrentDictionary<FileSystemLink, AssetReferenceCache<FileSystemLink, DataRelativePath>>();
 
     public string GetName(FileSystemLink source) => source.FullPath;
-    public FileSystemLink? ReferenceToSource(DataRelativePath reference) {
-        dataSourceService.TryGetFileLink(reference.Path, out var link);
-        return link;
-    }
+    public FileSystemLink? ReferenceToSource(DataRelativePath reference) => dataSourceService.GetFileLink(reference.Path);
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink source)
         => ParseAssetsInternal(source.FullPath, source.FileSystem, source.DataRelativePath).Distinct();
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseAssets(FileSystemLink source, DataRelativePath actualReference)

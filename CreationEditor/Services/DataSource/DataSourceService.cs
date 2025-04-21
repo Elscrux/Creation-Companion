@@ -151,15 +151,16 @@ public sealed class DataSourceService : IDataSourceService {
         OnDataSourcesChanged();
     }
 
-    public bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out FileSystemLink? link) {
+    public FileSystemLink? GetFileLink(DataRelativePath dataRelativePath) {
         var firstMatch = _dataSources.FirstOrDefault(d => d.FileExists(dataRelativePath));
-        if (firstMatch is null) {
-            link = null;
-            return false;
-        }
+        if (firstMatch is null) return null;
 
-        link = new FileSystemLink(firstMatch, dataRelativePath);
-        return true;
+        return new FileSystemLink(firstMatch, dataRelativePath);
+    }
+
+    public bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out FileSystemLink? link) {
+        link = GetFileLink(dataRelativePath);
+        return link is not null;
     }
 
     public IEnumerable<FileSystemLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories) {
