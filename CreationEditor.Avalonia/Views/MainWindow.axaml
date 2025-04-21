@@ -13,6 +13,7 @@
     xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod"
     xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:dialog="clr-namespace:CreationEditor.Avalonia.Views.Dialog"
     Title="{Binding WindowTitleObs^}"
     MinHeight="480" MinWidth="720"
     x:DataType="viewModels:MainVM"
@@ -53,8 +54,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
-                        <MenuItem Header="_Open"
-                                  Command="{Binding #ModSelectionPopup.Show}">
+                        <MenuItem Header="_Open">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Open"/>
                             </MenuItem.Icon>
@@ -228,8 +228,13 @@
             </Grid>
         </DockPanel>
 
-        <mod:ModSelectionDialog
+        <dialog:SaveDialog
             x:Name="ModSelectionPopup"
-            DataContext="{Binding ModSelectionVM}"/>
+            Title="Select Mods"
+            DataContext="{Binding ModSelectionVM}">
+            <dialog:SaveDialog.Dialog>
+                <mod:ModSelectionView DataContext="{Binding}"/>
+            </dialog:SaveDialog.Dialog>
+        </dialog:SaveDialog>
     </Grid>
 </windowing:AppWindow>

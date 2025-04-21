@@ -48,7 +48,10 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
-    public IObservable<bool> CanLoad { get; }
+    public IObservable<bool> CanSave { get; }
+    public IObservable<string> SaveButtonContent => AnyModsActive.Select(anyModActive => anyModActive
+        ? "Load " + ActiveMod?.FileName
+        : "Create " + ModCreationVM.NewModKey?.FileName);
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
 
@@ -197,8 +200,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             })
             .DisposeWith(this);
 
-        CanLoad = AnyModsLoaded;
-        CanLoad = ModCreationVM.IsValid().CombineLatest(
+        CanSave = ModCreationVM.IsValid().CombineLatest(
             AnyModsLoaded,
             AnyModsActive,
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
@@ -208,7 +210,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     /// Build Dictionary _masterInfos with all masters of a single plugin recursively
     /// </summary>
     /// <param name="mods">List of all mods</param>
-    private Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> GetMasterInfos(IReadOnlyList<ModInfo> mods) {
+    private static Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> GetMasterInfos(IReadOnlyList<ModInfo> mods) {
         var masterInfos = new Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)>();
         var modKeyIndices = mods
             .Select((mod, i) => (mod.ModKey, i))
@@ -243,7 +245,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
     public void RefreshListings() => _refreshListings.OnNext(Unit.Default);
 
-    public async Task<bool> LoadMods() {
+    public async Task<bool> Save() {
         // Prompt to save the active mod when changing to another mod
         if (!await CheckPendingSave()) return false;
 

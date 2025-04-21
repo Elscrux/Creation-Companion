@@ -21,10 +21,12 @@ public class DesignModSelectionVM : IModSelectionVM {
     public LoadOrderModItem? SelectedMod { get; set; } = new(new ModInfo(ModKey.FromFileName("BestMod.esp")), true, 3);
     public IModGetterVM SelectedModDetails { get; init; } = null!;
     public ModCreationVM ModCreationVM => null!;
-    public IObservable<bool> CanLoad { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsLoaded { get; } = Observable.Return(true);
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
+    public IObservable<bool>? CanSave => null;
+    public IObservable<string>? SaveButtonContent => null;
     public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
     public IBinding LoadOrderItemIsEnabled { get; } = new Binding();
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
+    public Task<bool> Save() => Task.FromResult(true);
 }

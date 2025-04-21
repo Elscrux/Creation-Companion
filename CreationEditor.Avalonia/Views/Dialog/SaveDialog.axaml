@@ -1,12 +1,11 @@
 ﻿<UserControl
-    x:Class="CreationEditor.Avalonia.Views.Mod.ModSelectionDialog"
+    x:Class="CreationEditor.Avalonia.Views.Dialog.SaveDialog"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
-    xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
+    xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Dialog"
     d:DesignHeight="1080" d:DesignWidth="1920"
-    x:DataType="vm:ModSelectionVM"
+    x:DataType="vm:ISaveDialogVM"
     x:Name="Popup">
     <UserControl.Effect>
         <DropShadowEffect
@@ -32,9 +31,11 @@
                                Foreground="{DynamicResource ButtonForeground}"
                                FontSize="20"
                                FontWeight="Bold"
-                               Text="Select Mods"/>
-                    <view:ModSelectionView Grid.Row="1"
-                                           MinHeight="100" MinWidth="100"/>
+                               Text="{Binding #Popup.Title}"/>
+                    <ContentControl
+                        Grid.Row="1"
+                        MinHeight="100" MinWidth="100"
+                        Content="{Binding #Popup.Dialog}"/>
                 </Grid>
             </Border>
 
@@ -45,13 +46,13 @@
                 <Grid ColumnDefinitions="*,25,*"
                       HorizontalAlignment="Stretch">
                     <Button
-                        x:Name="LoadButton"
+                        x:Name="SaveButton"
                         Grid.Column="0"
                         HorizontalAlignment="Stretch"
-                        IsEnabled="{Binding CanLoad^}"
+                        IsEnabled="{Binding CanSave^, FallbackValue=True}"
+                        Content="{Binding SaveButtonContent^, FallbackValue=Save}"
                         Classes="Accent"
-                        Content="Load"
-                        Command="{Binding #Popup.LoadAndHide}"/>
+                        Command="{Binding #Popup.SaveAndHide}"/>
                     <Button
                         Grid.Column="2"
                         x:Name="CancelButton"
