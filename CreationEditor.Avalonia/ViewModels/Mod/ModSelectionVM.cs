@@ -9,13 +9,13 @@ using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Views;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using DynamicData;
 using DynamicData.Binding;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Binary.Streams;
@@ -65,12 +65,11 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         MainWindow mainWindow,
         IRecordEditorController recordEditorController,
         IModSaveService modSaveService,
-        IGameReleaseContext gameReleaseContext,
+        IDataSourceService dataSourceService,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IModGetterVM modGetterVM,
         ModCreationVM modCreationVM,
-        IDataDirectoryProvider dataDirectoryProvider,
         ILoadOrderListingsProvider listingsProvider,
         IPluginListingsPathProvider listingsPathProvider) {
         _editorEnvironment = editorEnvironment;
@@ -79,28 +78,18 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         _modSaveService = modSaveService;
         SelectedModDetails = modGetterVM;
         ModCreationVM = modCreationVM;
-        var release = gameReleaseContext.Release;
-        PluginsFilePath = listingsPathProvider.Get(release);
+        PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease);
         MissingPluginsFile = !fileSystem.File.Exists(PluginsFilePath);
         ModSearchText = string.Empty;
 
-        var directoryPath = dataDirectoryProvider.Path;
-
         // Mods listed in the plugins file
         var listedModInfos = _refreshListings.Select(_ => listingsProvider.Get()
-            .Select(listing => {
-                var path = fileSystem.Path.Combine(directoryPath, listing.FileName);
-                if (!fileSystem.Path.Exists(path)) return null;
-
-                var binaryReadParameters = new BinaryReadParameters { FileSystem = fileSystem };
-                var modPath = new ModPath(listing.ModKey, path);
-                var parsingMeta = ParsingMeta.Factory(binaryReadParameters, release, modPath);
-                var stream = new MutagenBinaryReadStream(path, parsingMeta);
-                using var frame = new MutagenFrame(stream);
-                return modGetterVM.GetModInfo(listing.ModKey, frame);
-            })
+            .Select(loadOrderListing => dataSourceService.GetFileLink(loadOrderListing.FileName))
             .WhereNotNull()
-            .ToArray());
+            .Select(ConvertToModInfo)
+            .WhereNotNull()
+            .ToArray()
+        );
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
@@ -204,6 +193,18 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             AnyModsLoaded,
             AnyModsActive,
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
+    }
+
+    private ModInfo? ConvertToModInfo(FileSystemLink link) {
+        if (!link.Exists()) return null;
+
+        var modKey = ModKey.FromFileName(link.Name);
+        var binaryReadParameters = new BinaryReadParameters { FileSystem = link.FileSystem };
+        var modPath = new ModPath(modKey, link.FullPath);
+        var parsingMeta = ParsingMeta.Factory(binaryReadParameters, _editorEnvironment.GameEnvironment.GameRelease, modPath);
+        var stream = new MutagenBinaryReadStream(link.FullPath, parsingMeta);
+        using var frame = new MutagenFrame(stream);
+        return SelectedModDetails.GetModInfo(modKey, frame);
     }
 
     /// <summary>
