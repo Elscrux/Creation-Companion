@@ -89,6 +89,8 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     }
 
     protected override void OnDetaching() {
+        _attached = false;
+
         if (ColumnEnabled) RemoveSelectionColumn();
         if (ContextFlyoutEnabled) RemoveSelectionMenu();
         if (KeyBindingEnabled) RemoveKeyBindings();
