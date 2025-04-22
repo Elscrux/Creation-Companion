@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
-namespace CreationEditor.Avalonia.Views.Asset.Picker;
+namespace CreationEditor.Avalonia.Views.Asset.Picker.File;
 
 public class AFilePicker : ActivatableTemplatedControl {
     public static readonly StyledProperty<string> TitleProperty

@@ -1,5 +1,5 @@
 ﻿using Avalonia;
-namespace CreationEditor.Avalonia.Views.Asset.Picker;
+namespace CreationEditor.Avalonia.Views.Asset.Picker.File;
 
 public class TextFilePicker : AFilePicker {
     public static readonly StyledProperty<string?> WatermarkProperty

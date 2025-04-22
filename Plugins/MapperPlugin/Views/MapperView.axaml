@@ -14,6 +14,7 @@
              xmlns:viewConstants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
              xmlns:query="clr-namespace:CreationEditor.Avalonia.Views.Query;assembly=CreationEditor.Avalonia"
+             xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MapperPlugin.Views.MapperView"
              x:DataType="viewModels:MapperVM"
@@ -46,7 +47,7 @@
                     ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
                     LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"/>
 
-                <asset:TextFilePicker
+                <file:TextFilePicker
                     Grid.Column="2"
                     IsVisible="{Binding !WorldspaceFormKey.IsNull}"
                     Watermark="Select Map"

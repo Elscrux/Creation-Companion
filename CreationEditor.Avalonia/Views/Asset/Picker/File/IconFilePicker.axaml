@@ -1,17 +1,17 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:CreationEditor.Avalonia.Views.Asset.Picker"
-        xmlns:controls1="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File">
     <Design.PreviewWith>
         <Border Padding="20">
-            <controls:IconFilePicker/>
+            <file:IconFilePicker/>
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="controls|IconFilePicker">
+    <Style Selector="file|IconFilePicker">
         <Setter Property="Template">
             <ControlTemplate>
-                <Button Name="{x:Static controls:IconFilePicker.DropButton}"
+                <Button Name="{x:Static file:IconFilePicker.DropButton}"
                         Command="{TemplateBinding Pick}"
                         Background="{DynamicResource SystemControlTransparentBrush}"
                         BorderBrush="{DynamicResource SystemControlTransparentBrush}"
@@ -20,7 +20,7 @@
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Stretch"
                         DragDrop.AllowDrop="True">
-                    <controls1:SymbolIcon
+                    <controls:SymbolIcon
                         Symbol="Upload"
                         FontSize="{TemplateBinding FontSize}"
                         IsVisible="{TemplateBinding ShowIcon}"/>

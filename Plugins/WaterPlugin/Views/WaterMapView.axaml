@@ -12,6 +12,7 @@
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
              xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
              xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="800"
              x:Class="WaterPlugin.Views.WaterMapView"
              x:DataType="viewModels:WaterMapVM"
@@ -123,7 +124,7 @@
                                         <Grid>
                                             <Image Source="{Binding Source}"/>
 
-                                            <asset:IconFilePicker
+                                            <file:IconFilePicker
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
                                                 FontSize="64"

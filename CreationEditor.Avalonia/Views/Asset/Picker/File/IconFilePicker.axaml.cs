@@ -7,7 +7,7 @@ using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using CreationEditor.Avalonia.Constants;
 using Path = System.IO.Path;
-namespace CreationEditor.Avalonia.Views.Asset.Picker;
+namespace CreationEditor.Avalonia.Views.Asset.Picker.File;
 
 [TemplatePart(DropButton, typeof(Button))]
 public class IconFilePicker : AFilePicker {
