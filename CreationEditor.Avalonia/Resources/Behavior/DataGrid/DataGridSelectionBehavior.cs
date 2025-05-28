@@ -8,6 +8,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.LogicalTree;
 using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Models.Selectables;
@@ -272,6 +273,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
 
     private void DoubleTappedEventHandler(object? sender, TappedEventArgs e) {
         if (AssociatedObject?.SelectedItems is null) return;
+        if (e.Source is Control control && control.FindLogicalAncestorOfType<CheckBox>() is not null) return;
 
         SelectSelectedItems(!AssociatedObject.SelectedItems.OfType<IReactiveSelectable>().Any(s => s.IsSelected));
     }
