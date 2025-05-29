@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
+using Mutagen.Bethesda.Plugins.Order;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Environment;
 
@@ -67,7 +68,8 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         linearNotifier.Next("Preparing immutable mods");
         var builder = GameEnvironmentBuilder<TMod, TModGetter>
             .Create(_gameReleaseContext.Release)
-            .WithLoadOrder(GetLoadOrder().ToArray());
+            .WithLoadOrder(GetLoadOrder().ToArray())
+            .TransformModListings(x => x.Select(TryLoadListingFromFallback));
 
         linearNotifier.Next("Preparing mutable mods");
         foreach (var mutableMod in LoadOrder.MutableMods) {
@@ -102,12 +104,32 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
 
         return new EditorEnvironmentResult<TMod, TModGetter>(environment, activeMod);
     }
+
+    private IModListingGetter<TModGetter> TryLoadListingFromFallback(IModListingGetter<TModGetter> listing) {
+        if (listing.ExistsOnDisk) return listing;
+
+        foreach (var fallbackModLocation in LoadOrder.FallbackModLocations) {
+            var fileName = _fileSystem.Path.GetFileName(fallbackModLocation);
+            if (fileName != listing.FileName) continue;
+
+            var modPath = new ModPath(fallbackModLocation);
+            var mod = ModInstantiator<TMod>.Importer(modPath,
+                _gameReleaseContext.Release,
+                new BinaryReadParameters {
+                    FileSystem = _fileSystem
+                });
+            return new ModListing<TModGetter>(mod, listing.Enabled, listing.GhostSuffix);
+        }
+
+        return listing;
+    }
 }
 
 public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
     internal readonly List<ModKey> ImmutableMods = [];
     internal readonly List<IMod> MutableMods = [];
     internal readonly List<ModKey> NewMutableMods = [];
+    internal readonly List<string> FallbackModLocations = [];
 
     public IEditorEnvironmentUpdater SetImmutableMods(params IEnumerable<ModKey> modKeys) {
         ImmutableMods.ReplaceWith(modKeys);
@@ -152,6 +174,16 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
         }
 
         return modKey;
+    }
+
+    public IEditorEnvironmentUpdater AddFallbackModLocation(IEnumerable<string> modLocations) {
+        FallbackModLocations.AddRange(modLocations);
+        return updater;
+    }
+
+    public IEditorEnvironmentUpdater RemoveFallbackModLocation(string modLocation) {
+        FallbackModLocations.Remove(modLocation);
+        return updater;
     }
 }
 
