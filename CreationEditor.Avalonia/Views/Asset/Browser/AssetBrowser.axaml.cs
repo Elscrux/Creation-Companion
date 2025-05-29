@@ -38,14 +38,14 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
-        foreach (var asset in e.Models.OfType<FileSystemLink>()) {
-            if (asset.DataSource.IsReadOnly) {
-                e.AllowedEffects = DragDropEffects.None;
-            }
-        }
+        e.AllowedEffects = e.Models.OfType<FileSystemLink>().Any(x => x.DataSource.IsReadOnly)
+            ? DragDropEffects.None
+            : DragDropEffects.Move;
     }
 
     private void AssetTree_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
+        e.Inner.DragEffects = DragDropEffects.Move;
+
         if (e.TargetRow.Model is FileSystemLink { IsDirectory: true } directoryLink
          && e.Position is not (TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before)) {
             if (e.Inner.Data.Get(DragInfo.DataFormat) is DragInfo dragInfo) {
