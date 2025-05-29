@@ -1,6 +1,7 @@
 ﻿using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using FluentAvalonia.UI.Controls;
+using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Avalonia.Services.Asset;
 
 public sealed class AssetSymbolService : IAssetSymbolService {
@@ -9,12 +10,12 @@ public sealed class AssetSymbolService : IAssetSymbolService {
     public AssetSymbolService(
         IAssetTypeProvider assetTypeProvider,
         IArchiveService archiveService) {
-        _fileExtensionSymbols= new Dictionary<string, Symbol> {
-            { ".esp", Symbol.Save },
-            { ".esm", Symbol.Save },
-            { ".esl", Symbol.Save },
-            { archiveService.GetExtension(), Symbol.Library },
-        };
+        _fileExtensionSymbols = Enum
+            .GetValues<ModType>()
+            .Select(x => x.ToFileExtension())
+            .ToDictionary(x => x, _ => Symbol.Save);
+
+        _fileExtensionSymbols.Add(archiveService.GetExtension(), Symbol.Library);
 
         foreach (var extension in assetTypeProvider.Texture.FileExtensions) {
             _fileExtensionSymbols.Add(extension, Symbol.Image);
