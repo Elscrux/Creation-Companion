@@ -26,12 +26,17 @@ public sealed class ListShortcuts : AvaloniaObject {
     public static readonly AttachedProperty<ICommand> AddProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
     public static readonly AttachedProperty<ICommand> RemoveProperty =
         AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Remove");
+    public static readonly AttachedProperty<Func<object, bool>> CanRemoveProperty =
+        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, Func<object, bool>>("CanRemove");
 
     public static ICommand GetAdd(AvaloniaObject element) => element.GetValue(AddProperty);
     public static void SetAdd(AvaloniaObject element, ICommand addValue) => element.SetValue(AddProperty, addValue);
 
     public static ICommand GetRemove(AvaloniaObject element) => element.GetValue(RemoveProperty);
     public static void SetRemove(AvaloniaObject element, ICommand parameter) => element.SetValue(RemoveProperty, parameter);
+
+    public static Func<object, bool> GetCanRemove(AvaloniaObject element) => element.GetValue(CanRemoveProperty) ?? (_ => true);
+    public static void SetCanRemove(AvaloniaObject element, Func<object, bool> canRemove) => element.SetValue(CanRemoveProperty, canRemove);
 
     private static readonly KeyGesture AddGesture = new(Key.OemPlus);
     private static readonly KeyGesture RemoveGesture = new(Key.OemMinus);
@@ -83,7 +88,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                                 var t = source.GetType().GetGenericArguments()[0];
 
                                 var genericAddRemoveButtonMethodInfo = TreeDataGridAddRemoveButtonMethodInfo.MakeGenericMethod(t);
-                                genericAddRemoveButtonMethodInfo.Invoke(null, [source, args.NewValue.GetValueOrDefault()]);
+                                genericAddRemoveButtonMethodInfo.Invoke(null, [treeDataGrid, source, args.NewValue.GetValueOrDefault()]);
                             });
                     }
                     void OnTreeDataGridUnloaded(object? sender, RoutedEventArgs e) {
@@ -107,27 +112,29 @@ public sealed class ListShortcuts : AvaloniaObject {
         }
     }
 
-    private static FuncDataTemplate<object> RemoveButtonTemplate<TRowType>(ICommand? command) {
-        return new FuncDataTemplate<object>((o, _) => new Button {
-            [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
-                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
-                    AncestorType = typeof(TRowType),
+    private static FuncDataTemplate<object> RemoveButtonTemplate<TRowType>(AvaloniaObject control, ICommand? command) {
+        return new FuncDataTemplate<object>((o, _) => GetCanRemove(control) is {} canRemove && canRemove(o)
+            ? new Button {
+                [!Visual.IsVisibleProperty] = new Binding("IsPointerOver") {
+                    RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor) {
+                        AncestorType = typeof(TRowType),
+                    },
                 },
-            },
-            Content = new SymbolIcon { Symbol = Symbol.Delete },
-            Foreground = Brushes.Red,
-            Classes = { "Transparent" },
-            Command = command,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            HorizontalContentAlignment = HorizontalAlignment.Left,
-            CommandParameter = new ArrayList { o },
-        });
+                Content = new SymbolIcon { Symbol = Symbol.Delete },
+                Foreground = Brushes.Red,
+                Classes = { "Transparent" },
+                Command = command,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                CommandParameter = new ArrayList { o },
+            }
+            : null);
     }
 
     private static void DataGrid_AddRemoveButton(DataGrid dg, ICommand? command) {
         var removeColumn = new DataGridTemplateColumn {
             Tag = RemoveColumnTag,
-            CellTemplate = RemoveButtonTemplate<DataGridRow>(command),
+            CellTemplate = RemoveButtonTemplate<DataGridRow>(dg, command),
             CanUserResize = false,
             CanUserSort = false,
             CanUserReorder = false,
@@ -144,10 +151,10 @@ public sealed class ListShortcuts : AvaloniaObject {
         }
     }
 
-    private static void TreeDataGrid_AddRemoveButton<T>(ITreeDataGridSource treeDataGridSource, ICommand? command) {
+    private static void TreeDataGrid_AddRemoveButton<T>(TreeDataGrid treeDataGrid, ITreeDataGridSource treeDataGridSource, ICommand? command) {
         var templateColumn = new TemplateColumn<T>(
             string.Empty,
-            RemoveButtonTemplate<TreeDataGridRow>(command),
+            RemoveButtonTemplate<TreeDataGridRow>(treeDataGrid, command),
             options: new TemplateColumnOptions<T> {
                 CanUserResizeColumn = false,
                 CanUserSortColumn = false,
