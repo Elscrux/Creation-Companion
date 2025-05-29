@@ -1,7 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:CreationEditor.Avalonia.Views.Basic"
-        xmlns:command="clr-namespace:CreationEditor.Avalonia.Command">
+        xmlns:controls="using:CreationEditor.Avalonia.Views.Basic">
     <Design.PreviewWith>
         <controls:SelectList/>
     </Design.PreviewWith>
@@ -11,22 +10,9 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <ScrollViewer MaxHeight="750">
-                    <ItemsControl ItemsSource="{TemplateBinding ItemsSource}"
-                                  ItemTemplate="{TemplateBinding DataTemplate}">
-                        <ItemsControl.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuItem Header="Select All"
-                                          Command="{x:Static command:SelectableCommand.SelectAll}"
-                                          CommandParameter="{TemplateBinding ItemsSource}"/>
-                                <MenuItem Header="Unselect All"
-                                          Command="{x:Static command:SelectableCommand.UnselectAll}"
-                                          CommandParameter="{TemplateBinding ItemsSource}"/>
-                                <MenuItem Header="Toggle All"
-                                          Command="{x:Static command:SelectableCommand.ToggleAll}"
-                                          CommandParameter="{TemplateBinding ItemsSource}"/>
-                            </MenuFlyout>
-                        </ItemsControl.ContextFlyout>
-                    </ItemsControl>
+                    <ItemsControl x:Name="PART_ItemsControl"
+                                  ItemsSource="{TemplateBinding ItemsSource}"
+                                  ItemTemplate="{TemplateBinding DataTemplate}"/>
                 </ScrollViewer>
             </ControlTemplate>
         </Setter>
