@@ -57,7 +57,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                     })
                     .OfType<FileSystemLink>();
 
-                if (assets.Any(asset => directoryLink.Contains(asset))) {
+                if (assets.Any(asset => asset.ParentDirectory == directoryLink)) {
                     e.Inner.DragEffects = DragDropEffects.None;
                 }
             }
