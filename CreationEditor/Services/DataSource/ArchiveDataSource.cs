@@ -36,7 +36,7 @@ public sealed class ArchiveDataSource : IDataSource {
         return FileSystem.File.Exists(fullPath);
     }
 
-    private bool Equals(FileSystemDataSource other) => DataRelativePath.PathComparer.Equals(Path, other.Path);
-    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is FileSystemDataSource other && Equals(other);
+    private bool Equals(ArchiveDataSource other) => DataRelativePath.PathComparer.Equals(Path, other.Path);
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is ArchiveDataSource other && Equals(other);
     public override int GetHashCode() => Path.GetHashCode();
 }
