@@ -40,6 +40,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     private readonly MainWindow _mainWindow;
     private readonly IRecordEditorController _recordEditorController;
     private readonly IModSaveService _modSaveService;
+    private readonly IDataSourceService _dataSourceService;
     public IModGetterVM SelectedModDetails { get; init; }
     public ModCreationVM ModCreationVM { get; }
     public bool MissingPluginsFile { get; }
@@ -76,6 +77,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         _mainWindow = mainWindow;
         _recordEditorController = recordEditorController;
         _modSaveService = modSaveService;
+        _dataSourceService = dataSourceService;
         SelectedModDetails = modGetterVM;
         ModCreationVM = modCreationVM;
         PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease);
@@ -84,12 +86,13 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
         // Mods listed in the plugins file
         var listedModInfos = _refreshListings.Select(_ => listingsProvider.Get()
-            .Select(loadOrderListing => dataSourceService.GetFileLink(loadOrderListing.FileName))
+            .Select(loadOrderListing => _dataSourceService.GetFileLink(loadOrderListing.FileName))
             .WhereNotNull()
+            .Concat(GetModsFromDataSources())
+            .DistinctBy(x => x.Name)
             .Select(ConvertToModInfo)
             .WhereNotNull()
-            .ToArray()
-        );
+            .ToArray());
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
@@ -195,6 +198,14 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
+    private IEnumerable<FileSystemLink> GetModsFromDataSources() {
+        return Enum.GetValues<ModType>()
+            .SelectMany(modType => _dataSourceService.EnumerateFileLinksInAllDataSources(
+                string.Empty,
+                false,
+                "*" + modType.ToFileExtension()));
+    }
+
     private ModInfo? ConvertToModInfo(FileSystemLink link) {
         if (!link.Exists()) return null;
 
@@ -273,6 +284,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
             return updater
                 .LoadOrder.SetImmutableMods(loadedMods.OrderBy(key => mods[key].LoadOrderIndex))
+                .LoadOrder.AddFallbackModLocation(GetModsFromDataSources().Select(x => x.FullPath))
                 .Build();
         });
 
