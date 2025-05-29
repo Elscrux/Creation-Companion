@@ -9,7 +9,9 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
 public sealed partial class RecordBrowserSettings : ViewModel, IRecordBrowserSettings {
     public ISearchFilter SearchFilter { get; }
-    public IModScopeProvider ModScopeProvider { get; }
+
+    public IModScopeProviderVM ModScopeProviderVM { get; }
+    public IModScopeProvider ModScopeProvider => ModScopeProviderVM;
 
     [Reactive] public partial string SearchTerm { get; set; }
     [Reactive] public partial Func<IMajorRecordGetter, bool>? CustomFilter { get; set; }
@@ -18,13 +20,13 @@ public sealed partial class RecordBrowserSettings : ViewModel, IRecordBrowserSet
 
     public RecordBrowserSettings(
         ISearchFilter searchFilter,
-        IModScopeProvider modScopeProvider) {
+        IModScopeProviderVM modScopeProviderVM) {
+        ModScopeProviderVM = modScopeProviderVM;
         SearchFilter = searchFilter;
-        ModScopeProvider = modScopeProvider;
 
         SearchTerm = string.Empty;
         SettingsChanged = Observable.Merge(
-            ModScopeProvider.ScopeChanged.Unit(),
+            ModScopeProviderVM.ScopeChanged.Unit(),
             this.WhenAnyValue(x => x.CustomFilter).Unit(),
             this.WhenAnyValue(x => x.SearchTerm).Unit());
     }
@@ -37,7 +39,7 @@ public sealed partial class RecordBrowserSettings : ViewModel, IRecordBrowserSet
     }
 
     public bool Filter(IMajorRecordIdentifierGetter record) {
-        if (!ModScopeProvider.SelectedModKeys.Contains(record.FormKey.ModKey)) return false;
+        if (!ModScopeProviderVM.SelectedModKeys.Contains(record.FormKey.ModKey)) return false;
         if (SearchTerm.IsNullOrEmpty()) return true;
 
         var editorID = record.EditorID;

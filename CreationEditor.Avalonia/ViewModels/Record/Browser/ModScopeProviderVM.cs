@@ -6,6 +6,7 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Mod;
 using DynamicData;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -14,13 +15,14 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
-public sealed partial class ModScopeProvider : ViewModel, IModScopeProvider {
+public sealed partial class ModScopeProviderVM : ViewModel, IModScopeProviderVM {
     private readonly IEditorEnvironment _editorEnvironment;
 
     [Reactive] public partial ILinkCache LinkCache { get; private set; }
     [Reactive] public partial BrowserScope Scope { get; set; }
 
-    public ReadOnlyObservableCollection<ISelectableModKey> Mods { get; }
+    IReadOnlyList<ISelectableModKey> IModScopeProvider.Mods => Mods;
+    public ReadOnlyObservableCollection<ModItem> Mods { get; }
 
     private readonly IObservableCache<IModGetter, ModKey> _selectedMods;
     public IEnumerable<ModKey> SelectedModKeys => _selectedMods.Keys;
@@ -29,22 +31,19 @@ public sealed partial class ModScopeProvider : ViewModel, IModScopeProvider {
     public IObservable<Unit> ScopeChanged { get; }
     public IObservable<ILinkCache> LinkCacheChanged { get; }
 
-    public ModScopeProvider(IEditorEnvironment editorEnvironment) {
+    public ModScopeProviderVM(IEditorEnvironment editorEnvironment) {
         _editorEnvironment = editorEnvironment;
         LinkCache = _editorEnvironment.LinkCache;
 
         LinkCacheChanged = this.WhenAnyValue(x => x.LinkCache);
 
-        var modsChangeSet = LinkCacheChanged
+        Mods = LinkCacheChanged
             .Select(x => x.ListedOrder.AsObservableChangeSet())
             .Switch()
-            .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true });
-
-        Mods = modsChangeSet
-            .Transform(ISelectableModKey (modItem) => modItem)
+            .Transform(mod => new ModItem(mod.ModKey) { IsSelected = true })
             .ToObservableCollection(this);
 
-        _selectedMods = modsChangeSet
+        _selectedMods = Mods.ToObservableChangeSet()
             .AutoRefresh(mod => mod.IsSelected)
             .Filter(mod => mod.IsSelected)
             .Transform(x => LinkCache.GetMod(x.ModKey))

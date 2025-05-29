@@ -122,6 +122,9 @@
         <Compile Update="ViewModels\Reference\AssetReferenceVM.cs">
           <DependentUpon>IReferenceVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="ViewModels\Record\Browser\ModScopeProviderVM.cs">
+          <DependentUpon>IModScopeProviderVM.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

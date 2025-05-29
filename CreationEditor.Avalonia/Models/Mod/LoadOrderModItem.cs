@@ -1,11 +1,12 @@
 ﻿using CreationEditor.Avalonia.Models.Selectables;
+using CreationEditor.Services.Mutagen.Mod;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Mod;
 
-public sealed partial class LoadOrderModItem : ReactiveObject, IReactiveSelectable, IModKeyed, IDisposableDropoff {
+public sealed partial class LoadOrderModItem : ReactiveObject, ISelectableModKey, IReactiveSelectable, IDisposableDropoff {
     private readonly DisposableBucket _disposables = new();
 
     public uint LoadOrderIndex { get; }

@@ -34,7 +34,7 @@ public partial class RecordBrowserSettingsView : ActivatableUserControl {
             .Subscribe(_ => {
                 if (Settings is null) return;
 
-                Settings.ModScopeProvider.Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment;
+                Settings.ModScopeProviderVM.Scope = OnlyActive ? BrowserScope.ActiveMod : BrowserScope.Environment;
             })
             .DisposeWith(ActivatedDisposable);
     }

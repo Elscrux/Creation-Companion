@@ -118,9 +118,10 @@ public sealed class MainModule : Module {
         builder.RegisterGeneric(typeof(JsonStateRepository<>))
             .As(typeof(IStateRepository<>));
 
-        builder.RegisterType<ModScopeProvider>()
+        builder.RegisterType<ModScopeProviderVM>()
             .AsSelf()
-            .As<IModScopeProvider>();
+            .As<IModScopeProvider>()
+            .As<IModScopeProviderVM>();
 
         builder.RegisterType<MenuItemProvider>()
             .As<IMenuItemProvider>()
