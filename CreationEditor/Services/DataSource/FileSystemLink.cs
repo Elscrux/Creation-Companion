@@ -54,7 +54,8 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
             includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
         foreach (var file in files) {
-            var dataRelativePath = new DataRelativePath(file);
+            var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
+            var dataRelativePath = new DataRelativePath(relativePath);
             yield return this with { DataRelativePath = dataRelativePath };
         }
     }
@@ -68,7 +69,8 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
             includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
         foreach (var file in files) {
-            var dataRelativePath = new DataRelativePath(file);
+            var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
+            var dataRelativePath = new DataRelativePath(relativePath);
             yield return this with { DataRelativePath = dataRelativePath };
         }
     }
