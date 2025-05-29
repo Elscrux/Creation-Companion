@@ -27,8 +27,8 @@ using CreationEditor.Services.Plugin;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 using FluentAvalonia.UI.Windowing;
+using Mutagen.Bethesda.Fonts;
 using Mutagen.Bethesda.Fonts.DI;
-using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {

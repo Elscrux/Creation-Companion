@@ -22,7 +22,6 @@
         <PackageReference Include="FluentAvaloniaUI" />
         <PackageReference Include="HtmlAgilityPack" />
         <PackageReference Include="MessageBox.Avalonia" />
-        <PackageReference Include="Noggog.Autofac" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.SourceGenerators" />

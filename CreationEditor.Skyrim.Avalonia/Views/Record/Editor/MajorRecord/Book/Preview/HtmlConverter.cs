@@ -7,7 +7,7 @@ using CreationEditor.Avalonia.Html;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using HtmlAgilityPack;
-using Mutagen.Bethesda.Fonts.DI;
+using Mutagen.Bethesda.Fonts;
 using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
 
