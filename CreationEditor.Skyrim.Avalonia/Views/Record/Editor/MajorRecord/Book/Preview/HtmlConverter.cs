@@ -329,8 +329,8 @@ public sealed class HtmlConverter(
 
     private IEnumerable<Control> ProcessImage(HtmlNode imageNode, TextOptions textOptions) {
         const string imagePrefix = "img://";
-        var src = imageNode.GetAttributeValue("src", null);
-        if (src is null || !src.StartsWith(imagePrefix, StringComparison.OrdinalIgnoreCase)) return [];
+        var src = imageNode.GetAttributeValue("src", string.Empty);
+        if (!src.StartsWith(imagePrefix, StringComparison.OrdinalIgnoreCase)) return [];
 
         return [
             new Image {
