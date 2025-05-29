@@ -151,7 +151,9 @@ public sealed class ListShortcuts : AvaloniaObject {
             options: new TemplateColumnOptions<T> {
                 CanUserResizeColumn = false,
                 CanUserSortColumn = false,
-            });
+            }) {
+            Tag = RemoveColumnTag,
+        };
 
         if (treeDataGridSource.Columns.Any(c => ReferenceEquals(c.Tag, RemoveColumnTag))) return;
 
