@@ -73,8 +73,9 @@ public interface IDataSourceService {
     /// </summary>
     /// <param name="directoryPath">Data relative path to the directory.</param>
     /// <param name="includeSubDirectories">Whether to include subdirectories.</param>
+    /// <param name="searchPattern">Search pattern to filter files.</param>
     /// <returns>File system links in the given directory.</returns>
-    IEnumerable<FileSystemLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories);
+    IEnumerable<FileSystemLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories, string searchPattern = "*");
 
     /// <summary>
     /// Checks if the given data relative path exists in any data source.

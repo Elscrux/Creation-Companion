@@ -163,23 +163,26 @@ public sealed class DataSourceService : IDataSourceService {
         return link is not null;
     }
 
-    public IEnumerable<FileSystemLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories) {
+    public IEnumerable<FileSystemLink> EnumerateFileLinksInAllDataSources(
+        DataRelativePath directoryPath,
+        bool includeSubDirectories,
+        string searchPattern = "*") {
         var referencedFiles = new HashSet<DataRelativePath>();
 
-        foreach (var dataSource in _dataSources) {
+        foreach (var dataSource in PriorityOrder) {
             var fullPath = dataSource.GetFullPath(directoryPath);
             if (!dataSource.FileSystem.Directory.Exists(fullPath)) continue;
 
             var files = dataSource.FileSystem.Directory.EnumerateFiles(
                 fullPath,
-                "*",
+                searchPattern,
                 includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
             foreach (var file in files) {
-                if (referencedFiles.Contains(file)) continue;
+                var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, file);
+                var dataRelativePath = new DataRelativePath(relativePath);
+                if (!referencedFiles.Add(dataRelativePath)) continue;
 
-                var dataRelativePath = new DataRelativePath(file);
-                referencedFiles.Add(dataRelativePath);
                 yield return new FileSystemLink(dataSource, dataRelativePath);
             }
         }
