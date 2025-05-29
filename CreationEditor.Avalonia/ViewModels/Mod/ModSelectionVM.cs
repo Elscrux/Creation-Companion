@@ -85,14 +85,17 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         ModSearchText = string.Empty;
 
         // Mods listed in the plugins file
-        var listedModInfos = _refreshListings.Select(_ => listingsProvider.Get()
+        var listedMods = _refreshListings
+            .Select(_ => listingsProvider.Get()
             .Select(loadOrderListing => _dataSourceService.GetFileLink(loadOrderListing.FileName))
-            .WhereNotNull()
-            .Concat(GetModsFromDataSources())
-            .DistinctBy(x => x.Name)
-            .Select(ConvertToModInfo)
-            .WhereNotNull()
-            .ToArray());
+            .WhereNotNull());
+
+        var dataSourceMods = _dataSourceService.DataSourcesChanged.Select(_ => GetModsFromDataSources());
+
+        var listedModInfos = listedMods.CombineLatest(dataSourceMods,
+                (listed, dataSource) => listed.Concat(dataSource).DistinctBy(x => x.Name)
+            )
+            .Select(x => x.Select(ConvertToModInfo).WhereNotNull().ToArray());
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
