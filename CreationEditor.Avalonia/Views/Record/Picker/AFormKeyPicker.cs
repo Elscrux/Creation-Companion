@@ -25,9 +25,12 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record.Picker;
 
-[TemplatePart(Name = "PART_EditorIDBox", Type = typeof(TextBox))]
-[TemplatePart(Name = "PART_FormKeyBox", Type = typeof(TextBox))]
+[TemplatePart(Name = EditorIDBoxName, Type = typeof(TextBox))]
+[TemplatePart(Name = FormKeyBoxName, Type = typeof(TextBox))]
 public class AFormKeyPicker : ActivatableTemplatedControl {
+    private const string EditorIDBoxName = "PART_EditorIDBox";
+    private const string FormKeyBoxName = "PART_FormKeyBox";
+
     private enum UpdatingType { None, FormKey, EditorID, FormStr }
     private UpdatingType _updating;
 
@@ -859,9 +862,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
 
-        var editorIdBox = e.NameScope.Find<TextBox>("PART_EditorIDBox");
+        var editorIdBox = e.NameScope.Find<TextBox>(EditorIDBoxName);
         AttachTextBox(editorIdBox, FormKeyPickerSearchMode.EditorID);
-        var formKeyBox = e.NameScope.Find<TextBox>("PART_FormKeyBox");
+        var formKeyBox = e.NameScope.Find<TextBox>(FormKeyBoxName);
         AttachTextBox(formKeyBox, FormKeyPickerSearchMode.FormKey);
     }
 

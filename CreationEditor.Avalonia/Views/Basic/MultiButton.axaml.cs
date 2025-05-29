@@ -5,14 +5,16 @@ using Avalonia.Input;
 using Avalonia.VisualTree;
 namespace CreationEditor.Avalonia.Views.Basic;
 
-[TemplatePart("PART_ItemsControl", typeof(ItemsControl))]
+[TemplatePart(ItemsControlPartName, typeof(ItemsControl))]
 public class MultiButton : SelectingItemsControl {
+    private const string ItemsControlPartName = "PART_ItemsControl";
+
     private ItemsControl _itemsControl = null!;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
 
-        _itemsControl = e.NameScope.Get<ItemsControl>("PART_ItemsControl");
+        _itemsControl = e.NameScope.Get<ItemsControl>(ItemsControlPartName);
     }
 
     /// <inheritdoc/>
