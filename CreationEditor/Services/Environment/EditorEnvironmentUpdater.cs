@@ -113,7 +113,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
             if (fileName != listing.FileName) continue;
 
             var modPath = new ModPath(fallbackModLocation);
-            var mod = ModInstantiator<TMod>.Importer(modPath,
+            var mod = ModInstantiator<TModGetter>.Importer(modPath,
                 _gameReleaseContext.Release,
                 new BinaryReadParameters {
                     FileSystem = _fileSystem
