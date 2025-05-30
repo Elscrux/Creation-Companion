@@ -14,6 +14,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using CreationEditor.Avalonia.Comparer;
+using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
@@ -236,14 +237,14 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
         set => SetValue(ErrorBrushProperty, value);
     }
     public static readonly StyledProperty<ISolidColorBrush> ErrorBrushProperty =
-        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(ErrorBrush), Brushes.IndianRed);
+        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(ErrorBrush), StandardBrushes.InvalidBrush);
 
     public ISolidColorBrush SuccessBrush {
         get => GetValue(SuccessBrushProperty);
         set => SetValue(SuccessBrushProperty, value);
     }
     public static readonly StyledProperty<ISolidColorBrush> SuccessBrushProperty =
-        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(SuccessBrush), Brushes.ForestGreen);
+        AvaloniaProperty.Register<AFormKeyPicker, ISolidColorBrush>(nameof(SuccessBrush), StandardBrushes.ValidBrush);
 
     public ISolidColorBrush PassiveBrush {
         get => GetValue(PassiveBrushProperty);

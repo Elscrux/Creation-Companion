@@ -1,11 +1,12 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using CreationEditor.Avalonia.Constants;
 namespace CreationEditor.Avalonia.Converter;
 
 public sealed class BoolToBrushConverter : IValueConverter {
-    public IBrush ValidBrush { get; set; } = Brushes.ForestGreen;
-    public IBrush ErrorBrush { get; set; } = Brushes.IndianRed;
+    public IBrush ValidBrush { get; set; } = StandardBrushes.ValidBrush;
+    public IBrush ErrorBrush { get; set; } = StandardBrushes.InvalidBrush;
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is true ? ValidBrush : ErrorBrush;
 

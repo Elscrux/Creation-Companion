@@ -18,5 +18,6 @@ public static class StandardBrushes {
             ? new SolidColorBrush(color)
             : null;
 
-    public static IBrush InvalidBrush => Brushes.Red;
+    public static ISolidColorBrush ValidBrush => Brushes.ForestGreen;
+    public static ISolidColorBrush InvalidBrush => Brushes.IndianRed;
 }
