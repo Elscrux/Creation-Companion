@@ -73,7 +73,7 @@ public static class ObservableCollectionExtension {
             .Merge()
             .Subscribe(e => {
                 if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    internalCollection.ReplaceWith(lhs);
+                    internalCollection.Load(lhs);
                     foreach (var rhs in rhsList) {
                         internalCollection.AddRange(rhs);
                     }

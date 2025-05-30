@@ -160,7 +160,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         Id = memento.Id;
         Name = memento.Name;
         QueryFrom.RestoreMemento(memento.QueryFrom);
-        QueryConditions.ReplaceWith(memento.QueryConditions.Select(entryMemento => {
+        QueryConditions.Load(memento.QueryConditions.Select(entryMemento => {
             var queryCondition = _queryConditionFactory.Create();
             queryCondition.RestoreMemento(entryMemento);
             return queryCondition;

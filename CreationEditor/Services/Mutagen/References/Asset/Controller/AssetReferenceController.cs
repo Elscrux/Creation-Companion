@@ -36,19 +36,19 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, IFormLinkIdentifier> _modAssetReferenceManager
         = new((asset, change) => asset.RecordReferences.Apply(change),
-            (record, newData) => record.RecordReferences.ReplaceWith(newData),
+            (record, newData) => record.RecordReferences.Load(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, DataRelativePath> _nifDirectoryAssetReferenceManager
         = new((asset, change) => asset.NifDirectoryReferences.Apply(change),
-            (record, newData) => record.NifDirectoryReferences.ReplaceWith(newData),
+            (record, newData) => record.NifDirectoryReferences.Load(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IReferencedAsset, DataRelativePath> _nifArchiveAssetReferenceManager
         = new((asset, change) => asset.NifArchiveReferences.Apply(change),
-            (record, newData) => record.NifArchiveReferences.ReplaceWith(newData),
+            (record, newData) => record.NifArchiveReferences.Load(newData),
             asset => asset.AssetLink,
             AssetLinkEqualityComparer.Instance);
 

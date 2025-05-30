@@ -153,7 +153,7 @@ public sealed record GroupInstance(object Class, IObservableCollection<object> I
                 var groupInstances = Items.OfType<GroupInstance>().ToList();
 
                 // Replace the group instances with their items
-                Items.ReplaceWith(groupInstances.SelectMany(x => x.Items));
+                Items.Load(groupInstances.SelectMany(x => x.Items));
 
                 // Cleanup duplicate group instances
                 Cleanup();

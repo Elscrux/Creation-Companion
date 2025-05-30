@@ -73,7 +73,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                 if (RecordPromotionChanges.Count > 0) return;
 
                 var recordPromotionChanges = GetAffectedRecords(RecordsToPromote).ToList();
-                Dispatcher.UIThread.Post(() => RecordPromotionChanges.ReplaceWith(recordPromotionChanges));
+                Dispatcher.UIThread.Post(() => RecordPromotionChanges.Load(recordPromotionChanges));
             },
             allModsSelected
         );

@@ -58,6 +58,6 @@ public sealed partial class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimM
         Localization = modInfo.Localization;
         FormVersion = modInfo.FormVersion;
 
-        Masters.ReplaceWith(modInfo.Masters);
+        Masters.Load(modInfo.Masters);
     }
 }

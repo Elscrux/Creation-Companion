@@ -48,7 +48,7 @@ public sealed class ReferencedAsset : IReferencedAsset {
         NifDirectoryReferences.WhenCollectionChanges()
             .Merge(NifArchiveReferences.WhenCollectionChanges())
             .Subscribe(_ => {
-                AssetReferences.ReplaceWith(NifDirectoryReferences.Concat(NifArchiveReferences));
+                AssetReferences.Load(NifDirectoryReferences.Concat(NifArchiveReferences));
             });
     }
 }

@@ -263,7 +263,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     }
 
     public void RestoreMemento(MapperMemento memento) {
-        Mappings.ReplaceWith(memento.MarkingMappings.Select(m => {
+        Mappings.Load(memento.MarkingMappings.Select(m => {
             var markingMapping = CreateMapping();
             markingMapping.RestoreMemento(m);
             return markingMapping;
