@@ -23,9 +23,9 @@ public sealed class DragDropExtended : AvaloniaObject {
     public static readonly AttachedProperty<bool>
         AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, bool>("AllowDrop");
     public static readonly AttachedProperty<Func<object, bool>> CanDropProperty =
-        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, bool>>("CanDrop");
+        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, bool>>("CanDrop", (_ => true));
     public static readonly AttachedProperty<Func<object, object?>> DropSelectorProperty =
-        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, object?>>("DropSelector");
+        AvaloniaProperty.RegisterAttached<DragDropExtended, DataGrid, Func<object, object?>>("DropSelector", (o => o));
 
     public static bool GetAllowDrag(AvaloniaObject obj) => obj.GetValue(AllowDragProperty);
     public static void SetAllowDrag(AvaloniaObject obj, bool value) => obj.SetValue(AllowDragProperty, value);
