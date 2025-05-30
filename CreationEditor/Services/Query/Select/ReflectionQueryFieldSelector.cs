@@ -1,4 +1,5 @@
-﻿using Noggog;
+﻿using System.Reflection;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.Select;
@@ -12,7 +13,7 @@ public sealed partial class ReflectionQueryFieldSelector : ReactiveObject, IQuer
     public ReflectionQueryFieldSelector() {
         this.WhenAnyValue(x => x.RecordType)
             .Subscribe(_ => {
-                var props = RecordType.GetAllPropertyInfos().ToArray();
+                var props = RecordType.GetAllMemberInfos<PropertyInfo>().ToArray();
                 SelectedField = props.FirstOrDefault()?.ToQueryField();
             })
             .DisposeWith(_disposables);
@@ -29,7 +30,7 @@ public sealed partial class ReflectionQueryFieldSelector : ReactiveObject, IQuer
 
         if (memento.SelectedField is not null) {
             SelectedField = RecordType
-                .GetAllPropertyInfos()
+                .GetAllMemberInfos<PropertyInfo>()
                 .FirstOrDefault(field => field.Name == memento.SelectedField.Name)?
                 .ToQueryField();
         }

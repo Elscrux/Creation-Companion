@@ -142,25 +142,25 @@ public static class TypeExtension {
     ];
 
     /// <summary>
-    /// Returns all the properties of the type.
+    /// Returns all the members of the type.
     /// </summary>
-    /// <param name="type">Type to get properties from</param>
-    /// <returns>Properties of the type</returns>
-    public static IEnumerable<PropertyInfo> GetAllPropertyInfos(this Type? type) {
+    /// <param name="type">Type to get members from</param>
+    /// <returns>Members of the type</returns>
+    public static IEnumerable<T> GetAllMemberInfos<T>(this Type? type) where T : MemberInfo {
         if (type is null) return [];
 
         if (!type.IsInterface) {
-            return GetQueryFields(type);
+            return GetMembers(type);
         }
 
         // If the record type is an interface, we need to get the fields from all the interfaces it inherits from.
-        var dictionary = new Dictionary<string, PropertyInfo>();
+        var dictionary = new Dictionary<string, T>();
         var typeQueue = new Queue<Type>();
         typeQueue.Enqueue(type);
 
         while (typeQueue.Count != 0) {
             var t = typeQueue.Dequeue();
-            foreach (var queryField in GetQueryFields(t)) {
+            foreach (var queryField in GetMembers(t)) {
                 dictionary.TryAdd(queryField.Name, queryField);
             }
 
@@ -169,9 +169,10 @@ public static class TypeExtension {
             }
         }
 
-        return dictionary.Values.OrderBy(field => field.Name);
+        return dictionary.Values.OrderBy(emember => emember.Name);
 
-        IEnumerable<PropertyInfo> GetQueryFields(Type t) => t.GetProperties()
-            .Where(p => !BlacklistedNames.Contains(p.Name) && !BlacklistedTypes.Contains(p.PropertyType));
+        IEnumerable<T> GetMembers(Type t) => t.GetMembers()
+            .OfType<T>()
+            .Where(p => !BlacklistedNames.Contains(p.Name) && !BlacklistedTypes.Contains(p.DeclaringType));
     }
 }
