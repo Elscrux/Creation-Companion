@@ -7,7 +7,7 @@
              xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:fileSystemLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
-             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource"
+             xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
              x:DataType="browser:IAssetBrowserVM">
@@ -25,12 +25,18 @@
             Command="{Binding Redo}"/>
     </UserControl.KeyBindings>
 
-    <Grid RowDefinitions="400,Auto,*">
-        <dataSource:DataSourceSelection DataContext="{Binding DataSourceSelectionVM}"/>
-        <StackPanel Grid.Row="1"
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
                     Margin="5"
                     Spacing="5">
+            <controls:FAComboBox
+                IsEditable="True"
+                IsTextSearchEnabled="True"
+                ItemsSource="{Binding DataSourceSelections}"
+                SelectedItem="{Binding DataSource}"
+                DisplayMemberBinding="{Binding Name, DataType=fileSystemLink:IDataSource}"/>
+
             <Button ToolTip.Tip="Filters"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch">
@@ -42,12 +48,53 @@
                             <TextBlock Text="Show"
                                        FontSize="12"/>
 
-                            <CheckBox IsChecked="{Binding ShowArchiveAssets}"
-                                      Content="Archive Files"/>
+                            <StackPanel Orientation="Horizontal">
+                                <ToggleButton IsChecked="{Binding ShowReferencedFiles}">
+                                    <ToggleButton.Styles>
+                                        <Style
+                                            Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{x:Static constants:StandardBrushes.ValidBrush}"/>
+                                        </Style>
+                                    </ToggleButton.Styles>
+
+                                    <ToggleButton.Content>
+                                        <StackPanel>
+                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <TextBlock>Referenced</TextBlock>
+                                        </StackPanel>
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+
+                                <ToggleButton IsChecked="{Binding ShowOrphanedFiles}">
+                                    <ToggleButton.Styles>
+                                        <Style
+                                            Selector="ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+                                            <Setter Property="Background"
+                                                    Value="{x:Static constants:StandardBrushes.InvalidBrush}"/>
+                                        </Style>
+                                    </ToggleButton.Styles>
+
+                                    <ToggleButton.Content>
+                                        <StackPanel>
+                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <TextBlock>Orphaned</TextBlock>
+                                        </StackPanel>
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+
+                                <ToggleButton IsChecked="{Binding ShowOtherFiles}">
+                                    <ToggleButton.Content>
+                                        <StackPanel>
+                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <TextBlock>Other</TextBlock>
+                                        </StackPanel>
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+                            </StackPanel>
                             <CheckBox IsChecked="{Binding ShowEmptyDirectories}"
                                       Content="Empty Directories"/>
-                            <CheckBox IsChecked="{Binding ShowOnlyOrphaned}"
-                                      Content="Only Orphaned"/>
+
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>
@@ -69,7 +116,7 @@
             </StackPanel>
         </StackPanel>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <TreeDataGrid
                 x:Name="AssetTree"
                 Classes="Select"
@@ -81,20 +128,6 @@
                 RowDrop="AssetTree_OnRowDrop"
                 DoubleTapped="AssetTree_OnDoubleTapped"
                 KeyDown="AssetTree_OnKeyDown">
-                <TreeDataGrid.KeyBindings>
-                    <KeyBinding
-                        Gesture="Ctrl+R"
-                        Command="{Binding OpenReferences}"
-                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItem}"/>
-                    <KeyBinding
-                        Gesture="F2"
-                        Command="{Binding Rename}"
-                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItem}"/>
-                    <KeyBinding
-                        Gesture="Delete"
-                        Command="{Binding Delete}"
-                        CommandParameter="{Binding #AssetTree.RowSelection.SelectedItems}"/>
-                </TreeDataGrid.KeyBindings>
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
                     <treeDataGrid:ExpandAllChildren x:TypeArguments="fileSystemLink:FileSystemLink"/>

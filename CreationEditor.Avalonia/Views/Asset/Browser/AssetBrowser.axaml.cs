@@ -38,7 +38,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
-        e.AllowedEffects = e.Models.OfType<FileSystemLink>().Any(x => x.DataSource.IsReadOnly)
+        e.AllowedEffects = e.Models.ToArray().OfType<FileSystemLink>().Any(x => x.DataSource.IsReadOnly)
             ? DragDropEffects.None
             : DragDropEffects.Move;
     }
@@ -57,7 +57,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                     })
                     .OfType<FileSystemLink>();
 
-                if (assets.Any(asset => asset.ParentDirectory == directoryLink)) {
+                if (assets.Any(asset => asset == directoryLink || asset.ParentDirectory == directoryLink)) {
                     e.Inner.DragEffects = DragDropEffects.None;
                 }
             }

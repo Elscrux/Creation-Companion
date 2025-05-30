@@ -122,7 +122,7 @@ public sealed class DockFactory(
                 };
                 break;
             case DockElement.AssetBrowser:
-                var assetBrowserVM = assetBrowserVMFactory();
+                var assetBrowserVM = await Dispatcher.UIThread.InvokeAsync(assetBrowserVMFactory);
                 getControl = () => new AssetBrowser(assetBrowserVM);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
