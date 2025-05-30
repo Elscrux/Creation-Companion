@@ -9,7 +9,7 @@ public interface IDockPreview {
     void ShowPreview(Dock dock) {
         AdornerLayer.SetAdorner((Visual) this,
             new Rectangle {
-                Fill = StandardBrushes.ValidBrush,
+                Fill = StandardBrushes.HighlightBrush,
                 IsHitTestVisible = false,
                 Opacity = 0.5,
             });

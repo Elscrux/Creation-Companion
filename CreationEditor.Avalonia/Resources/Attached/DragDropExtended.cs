@@ -153,7 +153,7 @@ public sealed class DragDropExtended : AvaloniaObject {
             row,
             new Rectangle {
                 Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
-                    ? StandardBrushes.ValidBrush
+                    ? StandardBrushes.HighlightBrush
                     : StandardBrushes.InvalidBrush,
                 Height = 2,
                 VerticalAlignment = VerticalAlignment.Bottom,
@@ -239,7 +239,7 @@ public sealed class DragDropExtended : AvaloniaObject {
             row,
             new Rectangle {
                 Fill = ReferenceEquals(oldList, newList) || CanDropAny(newDataGrid, oldDataGrid)
-                    ? StandardBrushes.ValidBrush
+                    ? StandardBrushes.HighlightBrush
                     : StandardBrushes.InvalidBrush,
                 Height = 2,
                 VerticalAlignment = VerticalAlignment.Top,

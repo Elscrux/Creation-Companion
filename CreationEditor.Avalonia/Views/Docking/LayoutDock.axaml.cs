@@ -21,7 +21,7 @@ public partial class LayoutDock : ReactiveUserControl<LayoutDockVM>, IDockPrevie
         var border = new Border {
             IsHitTestVisible = false,
             Opacity = 0.5,
-            BorderBrush = StandardBrushes.ValidBrush,
+            BorderBrush = StandardBrushes.HighlightBrush,
             BorderThickness = new Thickness(
                 dock == Dock.Left ? PreviewOutlineThickness : 0,
                 dock == Dock.Top ? PreviewOutlineThickness : 0,

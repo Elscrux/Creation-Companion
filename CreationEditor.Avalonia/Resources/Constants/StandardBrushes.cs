@@ -4,7 +4,7 @@ using Avalonia.Media;
 namespace CreationEditor.Avalonia.Constants;
 
 public static class StandardBrushes {
-    public static IBrush? ValidBrush =>
+    public static IBrush? HighlightBrush =>
         Application.Current is not null
      && Application.Current.TryFindResource("SystemAccentColor", Application.Current.ActualThemeVariant, out var obj)
      && obj is Color color

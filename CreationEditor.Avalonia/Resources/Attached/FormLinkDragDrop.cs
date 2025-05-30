@@ -200,7 +200,7 @@ public sealed class FormLinkDragDrop : AvaloniaObject {
         AdornerLayer.SetAdorner(
             visual,
             new Border {
-                BorderBrush = canSetFormLink is not null && canSetFormLink(formLink) ? StandardBrushes.ValidBrush : StandardBrushes.InvalidBrush,
+                BorderBrush = canSetFormLink is not null && canSetFormLink(formLink) ? StandardBrushes.HighlightBrush : StandardBrushes.InvalidBrush,
                 BorderThickness = new Thickness(2),
                 IsHitTestVisible = false,
             });

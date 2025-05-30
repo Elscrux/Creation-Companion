@@ -428,15 +428,15 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         Inlines = [
                             new Run("Move "),
                             new Run(draggedAssets.Length.ToString()) {
-                                Foreground = StandardBrushes.ValidBrush,
+                                Foreground = StandardBrushes.HighlightBrush,
                             },
                             new Run(" Items from "),
                             new Run(relativeSrcDirectory) {
-                                Foreground = StandardBrushes.ValidBrush,
+                                Foreground = StandardBrushes.HighlightBrush,
                             },
                             new Run(" to "),
                             new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.ValidBrush,
+                                Foreground = StandardBrushes.HighlightBrush,
                             },
                         ],
                         FontSize = 14,
@@ -445,11 +445,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         Inlines = [
                             new Run("Move "),
                             new Run(GetRootRelativePath(firstDraggedAsset)) {
-                                Foreground = StandardBrushes.ValidBrush,
+                                Foreground = StandardBrushes.HighlightBrush,
                             },
                             new Run(" to "),
                             new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.ValidBrush,
+                                Foreground = StandardBrushes.HighlightBrush,
                             },
                         ],
                         FontSize = 14,

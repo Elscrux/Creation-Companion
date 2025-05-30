@@ -95,7 +95,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
                 new Rectangle {
                     IsHitTestVisible = false,
                     Opacity = 0.5,
-                    Fill = StandardBrushes.ValidBrush,
+                    Fill = StandardBrushes.HighlightBrush,
                     [Grid.RowProperty] = 1,
                 },
             },

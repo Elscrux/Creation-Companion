@@ -55,7 +55,7 @@ public class IconFilePicker : AFilePicker {
         if (sender is Visual visual) {
             AdornerLayer.SetAdorner(visual,
                 new Rectangle {
-                    Fill = StandardBrushes.ValidBrush,
+                    Fill = StandardBrushes.HighlightBrush,
                     Opacity = 0.5,
                     IsHitTestVisible = false,
                 });

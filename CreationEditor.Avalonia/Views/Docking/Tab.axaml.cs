@@ -45,7 +45,7 @@ public partial class Tab : UserControl, IDockPreview {
             new Rectangle {
                 Width = 20,
                 HorizontalAlignment = horizontalAlignment,
-                Fill = StandardBrushes.ValidBrush,
+                Fill = StandardBrushes.HighlightBrush,
                 IsHitTestVisible = false,
                 Opacity = 0.5,
             });
