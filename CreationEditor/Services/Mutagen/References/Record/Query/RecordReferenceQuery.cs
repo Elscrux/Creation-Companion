@@ -1,11 +1,12 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Cache;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Notification;
 using ICSharpCode.SharpZipLib.GZip;
-using Mutagen.Bethesda.Environments.DI;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -17,7 +18,7 @@ namespace CreationEditor.Services.Mutagen.References.Record.Query;
 /// </summary>
 public sealed class RecordReferenceQuery(
     Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
-    IDataDirectoryProvider dataDirectoryProvider,
+    IDataSourceService dataSourceService,
     IFileSystem fileSystem,
     IMutagenTypeProvider mutagenTypeProvider,
     INotificationService notificationService,
@@ -34,12 +35,11 @@ public sealed class RecordReferenceQuery(
     public IReadOnlyDictionary<ModKey, ModReferenceCache> ModCaches => _modCaches;
     private readonly Dictionary<ModKey, ModReferenceCache> _modCaches = new();
 
-    private string ModFilePath(ModKey mod) => fileSystem.Path.Combine(dataDirectoryProvider.Path, mod.FileName);
     private bool TryGetCacheFileName(IModGetter mod, out string cacheFilePath) {
         // Get mod path
         var modKey = mod.ModKey;
-        var modFilePath = ModFilePath(modKey);
-        if (!fileSystem.File.Exists(modFilePath)) {
+        var link = dataSourceService.GetFileLink(new DataRelativePath(modKey.FileName));
+        if (link is null || !link.Exists()) {
             cacheFilePath = string.Empty;
             return false;
         }
@@ -47,7 +47,7 @@ public sealed class RecordReferenceQuery(
         // Create a unique cache file path for game, cache version, mod filename and mod hash
         // Example: Skyrim/v2.0/NewMod.esp_4B0B3420E493A066.cache
         var gameName = mutagenTypeProvider.GetGameName(mod);
-        var modHash = fileSystem.GetFileHash(modFilePath);
+        var modHash = link.FileSystem.GetFileHash(link.FullPath);
         cacheFilePath = _cacheLocationProvider.CacheFile(gameName, $"v{Version}", $"{modKey.FileName}_{Convert.ToHexString(modHash)}");
 
         return true;

@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -12,7 +14,7 @@ namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed partial class ModCreationVM : ValidatableViewModel {
     private readonly IEditorEnvironment _editorEnvironment;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IFileSystem _fileSystem;
 
     private const string WatermarkBase = "NewMod";
@@ -29,10 +31,10 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
 
     public ModCreationVM(
         IEditorEnvironment editorEnvironment,
-        IDataDirectoryProvider dataDirectoryProvider,
+        IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         _editorEnvironment = editorEnvironment;
-        _dataDirectoryProvider = dataDirectoryProvider;
+        _dataSourceService = dataSourceService;
         _fileSystem = fileSystem;
 
         NewModType = ModType.Plugin;
@@ -91,11 +93,11 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
     private bool ModExistsOnDisk(string name) {
         if (name.IndexOfAny(_fileSystem.Path.GetInvalidFileNameChars()) != -1) return false;
 
-        var directoryPath = _dataDirectoryProvider.Path;
         return Enum.GetValues<ModType>()
             .Exists(modType => {
-                var modpath = _fileSystem.Path.Combine(directoryPath, new ModKey(name, modType).FileName);
-                return _fileSystem.File.Exists(modpath);
+                var fileName = new ModKey(name, modType).FileName;
+                var link = _dataSourceService.GetFileLink(new DataRelativePath(fileName));
+                return link is not null && link.Exists();
             });
     }
 }

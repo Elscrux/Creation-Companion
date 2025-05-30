@@ -13,11 +13,10 @@ public sealed class NifFileAssetParser(
     public string FilterPattern => "*.nif";
 
     public IEnumerable<AssetQueryResult<DataRelativePath>> ParseFile(FileSystemLink fileSystemLink) {
-        var fullPath = fileSystemLink.FullPath;
-        var type = assetTypeService.GetAssetType(fullPath);
+        var type = assetTypeService.GetAssetType(fileSystemLink.DataRelativePath.Path);
         if (type != assetTypeService.Provider.Model) yield break;
 
-        foreach (var result in modelAssetQuery.ParseAssets(fileSystemLink, fullPath)) {
+        foreach (var result in modelAssetQuery.ParseAssets(fileSystemLink, fileSystemLink.DataRelativePath)) {
             yield return result;
         }
     }

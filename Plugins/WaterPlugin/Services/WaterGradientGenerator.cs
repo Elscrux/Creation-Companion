@@ -1,9 +1,9 @@
-﻿using System.IO.Abstractions;
-using System.IO.Hashing;
+﻿using System.IO.Hashing;
 using System.Text;
 using Avalonia.Platform;
 using CreationEditor;
 using CreationEditor.Avalonia;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Skyrim;
@@ -21,7 +21,7 @@ namespace WaterPlugin.Services;
 
 public sealed class WaterGradientGenerator(
     ILogger logger,
-    IFileSystem fileSystem,
+    IDataSourceService dataSourceService,
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     RecordController<ISkyrimMod, ISkyrimModGetter> recordController) {
     private const string DefaultWater = @"Data\Textures\Water\DefaultWater.dds";
@@ -89,8 +89,9 @@ public sealed class WaterGradientGenerator(
             cell.Water.SetTo(water.FormKey);
 
             // Add flow file
+            var fileSystem = dataSourceService.ActiveDataSource.FileSystem;
             var directoryPath = fileSystem.Path.Combine(
-                editorEnvironment.GameEnvironment.DataFolderPath.Path,
+                dataSourceService.ActiveDataSource.Path,
                 "Textures",
                 "Water",
                 editorEnvironment.ActiveMod.ModKey.FileName);
@@ -110,8 +111,8 @@ public sealed class WaterGradientGenerator(
             var reflection = reflectionColor.ToSystemDrawingColor();
 
             var hashAlgorithm = new XxHash3();
-            var weights = string.Join("_", waterWeights.Select(x => x.Key.FormKey.ToString() + x.Value));
-            hashAlgorithm.Append(Encoding.UTF8.GetBytes(weights));
+            var weightsStr = string.Join("_", waterWeights.Select(x => x.Key.FormKey.ToString() + x.Value));
+            hashAlgorithm.Append(Encoding.UTF8.GetBytes(weightsStr));
             var hash = hashAlgorithm.GetCurrentHash();
 
             var editorId = $"{worldspace.EditorID}Water"

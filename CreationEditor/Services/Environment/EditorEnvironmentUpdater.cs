@@ -1,5 +1,7 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Notification;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
@@ -21,18 +23,18 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter>
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
     private readonly IFileSystem _fileSystem;
+    private readonly IDataSourceService _dataSourceService;
     private readonly INotificationService _notificationService;
-    private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IGameReleaseContext _gameReleaseContext;
 
     public EditorEnvironmentUpdater(
         IFileSystem fileSystem,
+        IDataSourceService dataSourceService,
         INotificationService notificationService,
-        IDataDirectoryProvider dataDirectoryProvider,
         IGameReleaseContext gameReleaseContext) {
         _fileSystem = fileSystem;
+        _dataSourceService = dataSourceService;
         _notificationService = notificationService;
-        _dataDirectoryProvider = dataDirectoryProvider;
         _gameReleaseContext = gameReleaseContext;
         ActiveMod = new ActiveModBuilder(this);
         LoadOrder = new LoadOrderBuilder(this);
@@ -88,7 +90,8 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
             ActiveModBuilder.ActiveModMode.Existing => ActiveMod.LastMod is TMod lastMod && ActiveMod.ModKey == lastMod.ModKey
                 ? lastMod
                 : ModInstantiator<TMod>.Importer(
-                    new ModPath(_fileSystem.Path.Combine(_dataDirectoryProvider.Path, ActiveMod.ModKey.FileName)),
+                    new ModPath(_dataSourceService.GetFileLink(new DataRelativePath(ActiveMod.ModKey.FileName))?.FullPath
+                     ?? throw new FileNotFoundException($"Active mod file {ActiveMod.ModKey.FileName} not found in any data source.")),
                     _gameReleaseContext.Release,
                     new BinaryReadParameters { FileSystem = _fileSystem }
                 ),
