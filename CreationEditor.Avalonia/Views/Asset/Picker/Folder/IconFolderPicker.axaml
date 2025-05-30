@@ -1,0 +1,36 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <folder:IconFolderPicker/>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="folder|IconFolderPicker">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Button Name="{x:Static folder:IconFolderPicker.DropButton}"
+                        Command="{TemplateBinding Pick}"
+                        Background="{DynamicResource SystemControlTransparentBrush}"
+                        BorderBrush="{DynamicResource SystemControlTransparentBrush}"
+                        BorderThickness="0,1,1,1"
+                        CornerRadius="0,4,4,0"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        DragDrop.AllowDrop="True">
+                    <controls:SymbolIcon
+                        Symbol="Upload"
+                        FontSize="{TemplateBinding FontSize}"
+                        IsVisible="{TemplateBinding ShowIcon}"/>
+                    <Button.Styles>
+                        <Style Selector="Button:dragover">
+                            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>
