@@ -1,4 +1,6 @@
-﻿using Avalonia;
+﻿using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Media;
 using CreationEditor.Avalonia.ViewModels;
 using FluentAvalonia.UI.Windowing;
 using ReactiveUI;
@@ -23,6 +25,14 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
 
         TitleBar.ExtendsContentIntoTitleBar = true;
         TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
+
+        var anyDialogVisible = ModSelectionPopup.GetObservable(IsVisibleProperty)
+            .CombineLatest(DataSourceSelectionPopup.GetObservable(IsVisibleProperty), (a, b) => a || b);
+
+        DockPanel[!IsHitTestVisibleProperty] = anyDialogVisible.Select(x => !x).ToBinding();
+        DockPanel.Effect = new BlurEffect {
+            [!BlurEffect.RadiusProperty] = anyDialogVisible.Select(x => x ? 5.0 : 0.0).ToBinding(),
+        };
 
         this.GetObservable(DataContextProperty).Subscribe(OnDataContextUpdated);
         this.GetObservable(ViewModelProperty).Subscribe(OnViewModelUpdated);

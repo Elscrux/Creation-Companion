@@ -11,30 +11,15 @@
     xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
     xmlns:plugin="clr-namespace:CreationEditor.Avalonia.Services.Plugin"
     xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod"
-    xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
-    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:dialog="clr-namespace:CreationEditor.Avalonia.Views.Dialog"
+    xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource"
     Title="{Binding WindowTitleObs^}"
     MinHeight="480" MinWidth="720"
     x:DataType="viewModels:MainVM"
     x:Name="Window">
     <Grid>
         <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                   IsHitTestVisible="{Binding !#ModSelectionPopup.IsVisible}">
-            <DockPanel.Resources>
-                <converter:ReturnParameterIfTrueConverter
-                    x:Key="IfTrueConverter"
-                    x:TypeArguments="system:Double"
-                    DefaultValue="5"/>
-            </DockPanel.Resources>
-
-            <DockPanel.Effect>
-                <BlurEffect
-                    Radius="{Binding !#ModSelectionPopup.IsVisible,
-                     Converter={StaticResource IfTrueConverter},
-                     ConverterParameter=0}"/>
-            </DockPanel.Effect>
-
+                   x:Name="DockPanel">
             <Panel DockPanel.Dock="Top"
                    VerticalAlignment="Top">
                 <Menu Margin="0,0,150,0">
@@ -45,12 +30,21 @@
                     </Menu.ItemsPanel>
 
                     <MenuItem Header="_File">
+                        <MenuItem Header="_Data Sources"
+                                  HotKey="Ctrl+Alt+M"
+                                  InputGesture="Ctrl+Alt+D"
+                                  Command="{Binding #DataSourceSelectionPopup.Show}">
+                            <MenuItem.Icon>
+                                <controls:SymbolIcon Symbol="Library"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
                         <MenuItem Header="_Mods"
                                   HotKey="Ctrl+Alt+M"
                                   InputGesture="Ctrl+Alt+M"
                                   Command="{Binding #ModSelectionPopup.Show}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Library"/>
+                                <controls:SymbolIcon Symbol="Save"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -233,7 +227,20 @@
             Title="Select Mods"
             DataContext="{Binding ModSelectionVM}">
             <dialog:SaveDialog.Dialog>
-                <mod:ModSelectionView DataContext="{Binding}"/>
+                <mod:ModSelectionView
+                    DataContext="{Binding}"
+                    DataSourceSelectionPopup="{Binding #DataSourceSelectionPopup}"/>
+            </dialog:SaveDialog.Dialog>
+        </dialog:SaveDialog>
+
+        <dialog:SaveDialog
+            x:Name="DataSourceSelectionPopup"
+            IsVisible="False"
+            Title="Select Data Sources"
+            CancelEnabledFromStart="True"
+            DataContext="{Binding DataSourceSelectionVM}">
+            <dialog:SaveDialog.Dialog>
+                <dataSource:DataSourceSelection DataContext="{Binding}"/>
             </dialog:SaveDialog.Dialog>
         </dialog:SaveDialog>
     </Grid>

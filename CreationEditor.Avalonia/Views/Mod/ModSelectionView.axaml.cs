@@ -1,13 +1,23 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.Views.Dialog;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 namespace CreationEditor.Avalonia.Views.Mod;
 
 public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
+    public static readonly StyledProperty<SaveDialog> DataSourceSelectionPopupProperty
+        = AvaloniaProperty.Register<ModSelectionView, SaveDialog>(nameof(DataSourceSelectionPopup));
+
+    public SaveDialog DataSourceSelectionPopup {
+        get => GetValue(DataSourceSelectionPopupProperty);
+        set => SetValue(DataSourceSelectionPopupProperty, value);
+    }
+
     public ModSelectionView() {
         InitializeComponent();
     }
@@ -36,5 +46,9 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
         }
 
         modSelectionVM.RefreshListings();
+    }
+
+    private void OpenDataSourceSelectionView(object? sender, RoutedEventArgs e) {
+        DataSourceSelectionPopup.Show();
     }
 }

@@ -53,13 +53,14 @@
                         Content="{Binding SaveButtonContent^, FallbackValue=Save}"
                         Classes="Accent"
                         Command="{Binding #Popup.SaveAndHide}"/>
+
                     <Button
                         Grid.Column="2"
                         x:Name="CancelButton"
                         HorizontalAlignment="Stretch"
                         Background="{DynamicResource ButtonBackground}"
                         Content="Cancel"
-                        IsEnabled="False"
+                        IsEnabled="{Binding #Popup.CancelEnabledFromStart}"
                         IsCancel="True"
                         Command="{Binding #Popup.Hide}"/>
                 </Grid>

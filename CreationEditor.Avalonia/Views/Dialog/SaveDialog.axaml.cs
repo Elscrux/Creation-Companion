@@ -5,6 +5,14 @@ using CreationEditor.Avalonia.ViewModels.Dialog;
 namespace CreationEditor.Avalonia.Views.Dialog;
 
 public partial class SaveDialog : ReactiveUserControl<ISaveDialogVM> {
+    public static readonly StyledProperty<bool> CancelEnabledFromStartProperty
+        = AvaloniaProperty.Register<SaveDialog, bool>(nameof(CancelEnabledFromStart));
+
+    public bool CancelEnabledFromStart {
+        get => GetValue(CancelEnabledFromStartProperty);
+        set => SetValue(CancelEnabledFromStartProperty, value);
+    }
+
     public static readonly StyledProperty<string> TitleProperty
         = AvaloniaProperty.Register<SaveDialog, string>(nameof(Title));
 
@@ -28,6 +36,7 @@ public partial class SaveDialog : ReactiveUserControl<ISaveDialogVM> {
     public SaveDialog(ISaveDialogVM vm) : this() {
         DataContext = vm;
     }
+
     public void Show() => IsVisible = true;
     public void Hide() {
         IsVisible = false;

@@ -7,6 +7,7 @@
     xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
     xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Mod"
     xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Mod"
+    xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     x:Name="Selection"
     d:DesignHeight="500" d:DesignWidth="750"
     x:DataType="mod:IModSelectionVM">
@@ -25,10 +26,22 @@
 
         <Grid Grid.Column="0"
               RowDefinitions="Auto,*,Auto">
-            <TextBox Grid.Row="0"
-                     Margin="5"
-                     Watermark="Search..."
-                     Text="{Binding ModSearchText}"/>
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="Auto,*">
+                <Button Grid.Column="0"
+                        Margin="5, 0"
+                        Click="OpenDataSourceSelectionView"
+                        VerticalAlignment="Stretch">
+                    <controls:SymbolIcon
+                        Symbol="List"
+                        ToolTip.Tip="Data Sources"/>
+                </Button>
+
+                <TextBox
+                    Grid.Column="1"
+                    Watermark="Search..."
+                    Text="{Binding ModSearchText}"/>
+            </Grid>
 
             <DataGrid Grid.Row="1"
                       Margin="5"

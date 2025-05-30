@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
+using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Avalonia.ViewModels.Setting;
@@ -28,6 +29,7 @@ public sealed class MainVM : ViewModel {
     public INotificationVM NotificationVM { get; }
     public IBusyService BusyService { get; }
     public ModSelectionVM ModSelectionVM { get; }
+    public IDataSourceSelectionVM DataSourceSelectionVM { get; }
 
     public IObservable<string> WindowTitleObs { get; }
 
@@ -76,6 +78,7 @@ public sealed class MainVM : ViewModel {
         IBusyService busyService,
         IEditorEnvironment editorEnvironment,
         ModSelectionVM modSelectionVM,
+        IDataSourceSelectionVM dataSourceSelectionVM,
         IDockingManagerService dockingManagerService,
         IDockFactory dockFactory,
         MainWindow mainWindow,
@@ -86,6 +89,7 @@ public sealed class MainVM : ViewModel {
         NotificationVM = notificationVM;
         BusyService = busyService;
         ModSelectionVM = modSelectionVM;
+        DataSourceSelectionVM = dataSourceSelectionVM;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
         mainWindow.SplashScreen = splashScreen;

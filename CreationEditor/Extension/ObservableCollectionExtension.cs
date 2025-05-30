@@ -186,4 +186,16 @@ public static class ObservableCollectionExtension {
             collection.Move(collection.IndexOf(sortedOrder[i]), i);
         }
     }
+    
+    public static void ApplyOrderNoMove<T>(this IObservableCollection<T> collection, IOrderedEnumerable<T> order) {
+        var sortedOrder = order.ToList();
+
+        for (var i = 0; i < sortedOrder.Count; i++) {
+            var item = sortedOrder[i];
+            if (ReferenceEquals(collection[i], item)) continue;
+
+            collection.RemoveAt(collection.IndexOf(item));
+            collection.Insert(i, item);
+        }
+    }
 }

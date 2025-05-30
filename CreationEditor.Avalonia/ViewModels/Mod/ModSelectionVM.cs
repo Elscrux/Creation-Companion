@@ -153,7 +153,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             .AutoRefresh(modItem => modItem.IsActive);
 
         AnyModsActive = modActivated
-            .Select(collection => collection.Any(mod => mod is { Type: ChangeType.Item, Item: { Current: {IsActive: true} } }));
+            .Select(collection => collection.Any(mod => mod is { Type: ChangeType.Item, Item.Current.IsActive: true }));
 
         modActivated
             .CombineLatest(
