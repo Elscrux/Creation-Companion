@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using CreationEditor.Resources.Comparer;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.DataSource;
 
@@ -20,14 +21,25 @@ public interface IDataSourceService {
 
     /// <summary>
     /// Returns a list of all data sources.
-    /// Data sources are sorted from least
+    /// Data sources are sorted from the highest priority to the lowest priority.
     /// </summary>
     IReadOnlyList<IDataSource> PriorityOrder { get; }
+
+    /// <summary>
+    /// Returns a list of all data sources.
+    /// Data sources are sorted from the lowest priority to the highest priority.
+    /// </summary>
+    IReadOnlyList<IDataSource> ListedOrder { get; }
 
     /// <summary>
     /// Active data source to be used as main data source to save files in.
     /// </summary>
     IDataSource ActiveDataSource { get; }
+
+    /// <summary>
+    /// Ensures load order of data sources based on certain rules.
+    /// </summary>
+    FuncComparer<IDataSource> DataSourceComparer { get; }
 
     /// <summary>
     /// Returns the data source for the given path.
@@ -36,19 +48,6 @@ public interface IDataSourceService {
     /// <param name="dataSource">Data source to return.</param>
     /// <returns>True if the data source was found, false otherwise.</returns>
     bool TryGetDataSource(string dataSourcePath, [NotNullWhen(true)] out IDataSource? dataSource);
-
-    /// <summary>
-    /// Adds a data source at the of the load order.
-    /// </summary>
-    /// <param name="dataSource">Data source to add.</param>
-    void AddDataSource(IDataSource dataSource);
-
-    /// <summary>
-    /// Moves a data source to the given index.
-    /// </summary>
-    /// <param name="dataSource">Data source to move.</param>
-    /// <param name="newIndex">New index to move the data source to.</param>
-    void MoveDataSource(IDataSource dataSource, int newIndex);
 
     /// <summary>
     /// Tries to get the file system link for the given data relative path.
@@ -83,4 +82,18 @@ public interface IDataSourceService {
     /// <param name="path">Data relative path to check.</param>
     /// <returns>>True if the data relative path exists in any data source, false otherwise.</returns>
     bool FileExists(DataRelativePath path);
+
+    /// <summary>
+    /// Replaces the current data sources with the given list.
+    /// </summary>
+    /// <param name="dataSources">List of data sources to set.</param>
+    /// <param name="activeDataSource">Optional active data source to set.</param>
+    void UpdateDataSources(IReadOnlyList<IDataSource> dataSources, IDataSource activeDataSource);
+
+    /// <summary>
+    /// Gets the archive data sources from within the given data sources.
+    /// </summary>
+    /// <param name="dataSources">Data sources to search for archive data sources.</param>
+    /// <returns>Enumerable of archive data sources found in the given data sources.</returns>
+    IEnumerable<ArchiveDataSource> GetNestedArchiveDataSources(IEnumerable<IDataSource> dataSources);
 }

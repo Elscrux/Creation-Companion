@@ -205,5 +205,17 @@
         </Compile>
         <Compile Remove="Services\Asset\AssetProvider.cs" />
         <Compile Remove="Services\Asset\IAssetProvider.cs" />
+        <Compile Update="Services\Asset\FileSystemDataSourceWatcher.cs">
+          <DependentUpon>IDataSourceWatcher.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Asset\SharedDataSourceWatcherProvider.cs">
+          <DependentUpon>IDataSourceWatcherProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\DataSource\FileSystemDataSource.cs">
+          <DependentUpon>IDataSource.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\DataSource\ArchiveDataSource.cs">
+          <DependentUpon>IDataSource.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

@@ -22,6 +22,10 @@ public sealed class FileSystemDataSource : IDataSource {
         return new DataSourceMemento(DataSourceType.FileSystem, Name, Path, IsReadOnly);
     }
 
+    public FileSystemLink GetRootLink() {
+        return new FileSystemLink(this, string.Empty);
+    }
+
     public string GetFullPath(DataRelativePath path) {
         return FileSystem.Path.Combine(Path, path.Path);
     }
@@ -29,6 +33,31 @@ public sealed class FileSystemDataSource : IDataSource {
     public bool FileExists(DataRelativePath path) {
         var fullPath = GetFullPath(path.Path);
         return FileSystem.File.Exists(fullPath);
+    }
+
+    public bool DirectoryExists(DataRelativePath path) {
+        var fullPath = GetFullPath(path.Path);
+        return FileSystem.Directory.Exists(fullPath);
+    }
+    public IEnumerable<DataRelativePath> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+        var fullPath = GetFullPath(path.Path);
+        var files = FileSystem.Directory
+            .EnumerateFiles(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+        foreach (var file in files) {
+            var relativePath = FileSystem.Path.GetRelativePath(Path, file);
+            yield return new DataRelativePath(relativePath);
+        }
+    }
+    public IEnumerable<DataRelativePath> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+        var fullPath = GetFullPath(path.Path);
+        var directories = FileSystem.Directory
+            .EnumerateDirectories(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+        foreach (var directory in directories) {
+            var relativePath = FileSystem.Path.GetRelativePath(Path, directory);
+            yield return new DataRelativePath(relativePath);
+        }
     }
 
     public Stream Create(DataRelativePath path) {

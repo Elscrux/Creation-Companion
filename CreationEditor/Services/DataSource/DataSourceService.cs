@@ -8,20 +8,15 @@ using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Services.DataSource;
 
-// TODO: It would be good to automatically distribute changes in a plugin per master plugin. What I mean is, if you're rerouting a bunch of mesh paths in different esms, having a seperate esp for the records in each plugin rather than one big esp would be very useful in our case
-// but still possible probably when you have a point that pipes changes to certain records to certain plugins - so a change to BSHeartland.esm goes to EditedBSH.esp and so on
-// so you'd check a box that pipes every edit to an immutable mod into a dedicated mod that edits one plugin each there
-// maybe just for custom code for BS and no actual system behind it for everyone to use
 public sealed class DataSourceService : IDataSourceService {
+    private readonly IFileSystem _fileSystem;
     private readonly IArchiveService _archiveService;
     private readonly List<IDataSource> _dataSources = [];
-    public IReadOnlyList<IDataSource> PriorityOrder => _dataSources.ToArray();
-    public IDataSource ActiveDataSource { get; }
+    public IReadOnlyList<IDataSource> ListedOrder => _dataSources.ToArray();
+    public IReadOnlyList<IDataSource> PriorityOrder => ListedOrder.Reverse().ToArray();
+    public IDataSource ActiveDataSource { get; private set; }
 
-    /// <summary>
-    /// Orders archives before file system data sources and keeps the order within the same type of data source.
-    /// </summary>
-    private readonly FuncComparer<IDataSource> _dataSourceComparer;
+    public FuncComparer<IDataSource> DataSourceComparer { get; }
 
     /// <summary>
     /// Orders archives based on the load order of the archive files in the data directory.
@@ -38,6 +33,7 @@ public sealed class DataSourceService : IDataSourceService {
         IArchiveService archiveService,
         Func<string, IStateRepository<DataSourceMemento>> stateRepositoryFactory
     ) {
+        _fileSystem = fileSystem;
         _archiveService = archiveService;
         _stateRepository = stateRepositoryFactory("DataSource");
 
@@ -61,18 +57,45 @@ public sealed class DataSourceService : IDataSourceService {
             return indexOfX.CompareTo(indexOfY);
         });
 
-        _dataSourceComparer = new FuncComparer<IDataSource>((s1, s2) => {
-            if (s1 is ArchiveDataSource) {
-                if (s2 is ArchiveDataSource) return 0;
+        DataSourceComparer = new FuncComparer<IDataSource>((s1, s2) => {
+            return s1 switch {
+                ArchiveDataSource a1 => s2 switch {
+                    ArchiveDataSource a2 => _archivePriorityComparer.Compare(a1.ArchiveLink, a2.ArchiveLink),
+                    _ => -1,
+                },
+                FileSystemDataSource => s2 switch {
+                    ArchiveDataSource => 1,
+                    _ => IndexOfOrMax(s1).CompareTo(IndexOfOrMax(s2)),
+                },
+                _ => IndexOfOrMax(s1).CompareTo(IndexOfOrMax(s2)),
+            };
 
-                return -1;
+            int IndexOfOrMax(IDataSource dataSource) {
+                var indexOf = _dataSources.IndexOf(dataSource);
+                return indexOf == -1 ? int.MaxValue : indexOf;
             }
-
-            if (s2 is ArchiveDataSource) return 1;
-
-            return 0;
         });
 
+        var (archiveDataSources, fileSystemDataSources) = GetMementoDataSources();
+
+        // If there is no data folder source, add it
+        var dataDirectoryDataSource =
+            fileSystemDataSources.FirstOrDefault(fs => DataRelativePath.PathComparer.Equals(fs.Path, dataDirectoryProvider.Path));
+        if (dataDirectoryDataSource is null) {
+            dataDirectoryDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
+        } else {
+            // Move the data directory data source to the front of the list
+            fileSystemDataSources.Remove(dataDirectoryDataSource);
+        }
+
+        fileSystemDataSources.Insert(0, dataDirectoryDataSource);
+
+        ActiveDataSource = dataDirectoryDataSource;
+
+        UpdateDataSources(archiveDataSources.Concat<IDataSource>(fileSystemDataSources).ToArray(), ActiveDataSource);
+    }
+
+    private (List<ArchiveDataSource> ArchiveDataSources, List<FileSystemDataSource> FileSystemDatSources) GetMementoDataSources() {
         List<FileSystemDataSource> fileSystemDataSources = [];
         List<ArchiveDataSource> archiveDataSources = [];
 
@@ -82,77 +105,32 @@ public sealed class DataSourceService : IDataSourceService {
 
         // Add file system data sources from mementos
         foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.FileSystem)) {
-            fileSystemDataSources.Add(new FileSystemDataSource(fileSystem, dataSourceMemento.Path, dataSourceMemento.IsReadyOnly));
+            fileSystemDataSources.Add(new FileSystemDataSource(_fileSystem, dataSourceMemento.Path, dataSourceMemento.IsReadyOnly));
         }
-
-        // If there is no data folder source, add it
-        var dataDirectoryDataSource = fileSystemDataSources.FirstOrDefault(fs => DataRelativePath.PathComparer.Equals(fs.Path, dataDirectoryProvider.Path));
-        if (dataDirectoryDataSource is null) {
-            dataDirectoryDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
-            fileSystemDataSources.Insert(0, dataDirectoryDataSource);
-        }
-
-        ActiveDataSource = dataDirectoryDataSource;
 
         // Add archive data sources from mementos
         foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.Archive)) {
-            var archiveDataSourcePath = fileSystem.Path.GetDirectoryName(dataSourceMemento.Path);
+            var archiveDataSourcePath = _fileSystem.Path.GetDirectoryName(dataSourceMemento.Path);
             if (archiveDataSourcePath is null) continue;
 
             var dataSource = fileSystemDataSources.FirstOrDefault(dataSource => dataSource.Path == archiveDataSourcePath);
             if (dataSource is null) continue;
 
-            var archiveLink = new FileSystemLink(dataSource, fileSystem.Path.GetFileName(dataSourceMemento.Path));
-            var archiveDataSource = new ArchiveDataSource(fileSystem, dataSourceMemento.Path, archiveService.GetReader(archiveLink), archiveLink);
+            var archiveLink = new FileSystemLink(dataSource, _fileSystem.Path.GetFileName(dataSourceMemento.Path));
+            var archiveDataSource = new ArchiveDataSource(_fileSystem, dataSourceMemento.Path, _archiveService.GetReader(archiveLink), archiveLink);
             archiveDataSources.Add(archiveDataSource);
         }
 
-        // If any loaded archive is not added, add it
-        foreach (var archive in GetArchives(fileSystemDataSources)) {
-            var existingArchive = archiveDataSources.FirstOrDefault(dataSource => dataSource.Path == archive.FullPath);
-            if (existingArchive is not null) continue;
-
-            var archiveDataSource = new ArchiveDataSource(fileSystem, archive.FullPath, archiveService.GetReader(archive), archive);
-            archiveDataSources.Add(archiveDataSource);
-        }
-
-        archiveDataSources = archiveDataSources
-            .OrderBy(dataSource => dataSource.ArchiveLink, _archivePriorityComparer)
-            .ToList();
-
-        var dataSources = archiveDataSources
-            .Concat<IDataSource>(fileSystemDataSources)
-            .ToArray();
-
-        _dataSources.AddRange(dataSources);
-
-        OnDataSourcesChanged();
+        return (archiveDataSources, fileSystemDataSources);
     }
 
     public bool TryGetDataSource(string dataSourcePath, [NotNullWhen(true)] out IDataSource? dataSource) {
-        dataSource = _dataSources.FirstOrDefault(x => DataRelativePath.PathComparer.Equals(x.Path, dataSourcePath));
+        dataSource = PriorityOrder.FirstOrDefault(x => DataRelativePath.PathComparer.Equals(x.Path, dataSourcePath));
         return dataSource is not null;
     }
 
-    public void AddDataSource(IDataSource dataSource) {
-        _dataSources.Add(dataSource);
-        OnDataSourcesChanged();
-    }
-
-    public void MoveDataSource(IDataSource dataSource, int newIndex) {
-        // todo check if the movement is still keeping a valid order
-        if (!_dataSources.Contains(dataSource)) return;
-
-        var index = _dataSources.IndexOf(dataSource);
-        if (index == newIndex) return;
-
-        _dataSources.RemoveAt(index);
-        _dataSources.Insert(newIndex < index ? newIndex : newIndex - 1, dataSource);
-        OnDataSourcesChanged();
-    }
-
     public FileSystemLink? GetFileLink(DataRelativePath dataRelativePath) {
-        var firstMatch = _dataSources.FirstOrDefault(d => d.FileExists(dataRelativePath));
+        var firstMatch = PriorityOrder.FirstOrDefault(d => d.FileExists(dataRelativePath));
         if (firstMatch is null) return null;
 
         return new FileSystemLink(firstMatch, dataRelativePath);
@@ -170,17 +148,11 @@ public sealed class DataSourceService : IDataSourceService {
         var referencedFiles = new HashSet<DataRelativePath>();
 
         foreach (var dataSource in PriorityOrder) {
-            var fullPath = dataSource.GetFullPath(directoryPath);
-            if (!dataSource.FileSystem.Directory.Exists(fullPath)) continue;
+            if (!dataSource.DirectoryExists(directoryPath)) continue;
 
-            var files = dataSource.FileSystem.Directory.EnumerateFiles(
-                fullPath,
-                searchPattern,
-                includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            var files = dataSource.EnumerateFiles(directoryPath, searchPattern, includeSubDirectories);
 
-            foreach (var file in files) {
-                var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, file);
-                var dataRelativePath = new DataRelativePath(relativePath);
+            foreach (var dataRelativePath in files) {
                 if (!referencedFiles.Add(dataRelativePath)) continue;
 
                 yield return new FileSystemLink(dataSource, dataRelativePath);
@@ -192,20 +164,63 @@ public sealed class DataSourceService : IDataSourceService {
         return _dataSources.Any(dataSource => dataSource.FileExists(path));
     }
 
+    public void UpdateDataSources(IReadOnlyList<IDataSource> dataSources, IDataSource activeDataSource) {
+        if (!dataSources.Contains(activeDataSource))
+            throw new ArgumentException("Active data source must be part of the provided data sources.", nameof(activeDataSource));
+
+        var fileSystemDataSources = dataSources.OfType<FileSystemDataSource>().ToList();
+        var archiveDataSources = dataSources.OfType<ArchiveDataSource>().ToList();
+
+        // Load archive data sources found in file system data sources
+        archiveDataSources = archiveDataSources
+            .Concat(GetNestedArchiveDataSources(fileSystemDataSources))
+            .DistinctBy(x => x.Path)
+            .OrderBy(dataSource => dataSource.ArchiveLink, _archivePriorityComparer)
+            .ToList();
+
+        // Create order where archives are loaded first, and then overwritten by file system data sources
+        dataSources = archiveDataSources
+            .Concat<IDataSource>(fileSystemDataSources)
+            .ToArray();
+
+        _dataSources.Clear();
+        _dataSources.AddRange(dataSources);
+
+        ActiveDataSource = activeDataSource;
+
+        OnDataSourcesChanged();
+    }
+
+    public IEnumerable<ArchiveDataSource> GetNestedArchiveDataSources(IEnumerable<IDataSource> dataSources) {
+        return GetArchives(dataSources.OfType<FileSystemDataSource>())
+            .Select(archive => new ArchiveDataSource(_fileSystem, archive.FullPath, _archiveService.GetReader(archive), archive));
+    }
+
     private void OnDataSourcesChanged() {
         var existingStateIdentifiers = _stateRepository.LoadAllWithStateIdentifier().ToDictionary(x => x.Key, x => x.Value);
+
+        // Add or update mementos for each data source in the priority order
         foreach (var dataSource in PriorityOrder) {
-            var ((id, _), _) = existingStateIdentifiers.FirstOrDefault(x => x.Value.Path == dataSource.Path);
+            var (existingIdentifier, _) = existingStateIdentifiers.FirstOrDefault(x => x.Value.Path == dataSource.Path);
+            var id = existingIdentifier?.Id ?? Guid.NewGuid();
+
             var memento = dataSource.CreateMemento();
             _stateRepository.Save(memento, id, dataSource.Name);
         }
 
-        _dataSourcesChanged.OnNext(PriorityOrder);
+        // Remove any mementos that are not in the current data sources
+        foreach (var (id, memento) in existingStateIdentifiers) {
+            if (_dataSources.Any(ds => ds.Path == memento.Path)) continue;
+
+            _stateRepository.Delete(id.Id, id.Name);
+        }
+
+        _dataSourcesChanged.OnNext(ListedOrder);
     }
 
-    private IEnumerable<FileSystemLink> GetArchives(IReadOnlyList<IDataSource> dataSources) {
+    private IEnumerable<FileSystemLink> GetArchives(IEnumerable<FileSystemDataSource> dataSources) {
         return dataSources
-            .Select(dataSource => new FileSystemLink(dataSource, string.Empty))
-            .SelectMany(rootLink => rootLink.EnumerateFileLinks("*" + _archiveService.GetExtension(), false));
+            .SelectMany(dataSource => dataSource.GetRootLink()
+                .EnumerateFileLinks("*" + _archiveService.GetExtension(), false));
     }
 }

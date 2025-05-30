@@ -2,13 +2,6 @@
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.DataSource;
 
-// TODO: Use data source for anything that needs to be accessed by a path
-// TODO: Replace instances of DataDirectoryProvider with data sources
-// TODO: Also replace IDataDirectoryService dataDirectoryService
-// Add vanilla data folder by default
-// Use sources as a way to access any data
-// Replace asset controller methods to have inputs that are a "data source" + a "data relative path"
-// TODO replace instances where GameEnvironment.DataFolderPath is used with a data source
 public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelativePath) : IComparable<FileSystemLink> {
     public string FullPath => FileSystem.Path.Combine(DataSource.Path, DataRelativePath.Path);
     public IFileSystem FileSystem => DataSource.FileSystem;
@@ -33,12 +26,16 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
         }
     }
 
-    public bool Exists() => FileSystem.File.Exists(FullPath);
+    public bool Exists() => IsFile
+        ? FileSystem.File.Exists(FullPath) 
+        : FileSystem.Directory.Exists(FullPath);
 
     public bool Contains(FileSystemLink fileSystemLink) {
         if (!fileSystemLink.DataSource.Equals(DataSource)) return false;
 
-        return fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison);
+        return IsFile
+            ? fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison)
+            : fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar, DataRelativePath.PathComparison);
     }
 
     public IEnumerable<FileSystemLink> EnumerateFileLinks(bool includeSubDirectories) {
@@ -61,6 +58,10 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
     }
 
     public IEnumerable<FileSystemLink> EnumerateDirectoryLinks(bool includeSubDirectories) {
+        return EnumerateDirectoryLinks("*", includeSubDirectories);
+    }
+
+    public IEnumerable<FileSystemLink> EnumerateDirectoryLinks(string searchPattern, bool includeSubDirectories) {
         if (!FileSystem.Directory.Exists(FullPath)) yield break;
 
         var files = FileSystem.Directory.EnumerateDirectories(

@@ -79,8 +79,7 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<FileSystemDataSourceWatcher>()
-            .As<IDataSourceWatcher>()
-            .SingleInstance();
+            .As<IDataSourceWatcher>();
 
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
