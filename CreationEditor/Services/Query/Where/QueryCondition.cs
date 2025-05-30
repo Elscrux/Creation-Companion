@@ -64,6 +64,8 @@ public sealed partial class QueryCondition : ReactiveObject, IQueryCondition {
         this.WhenAnyValue(x => x.FieldSelector.SelectedField)
             .NotNull()
             .Subscribe(field => {
+                if (recordType == field.Type) return;
+
                 CompareFunctions.ReplaceWith(queryCompareFunctionFactory.Get(field.Type));
                 SelectedCompareFunction = CompareFunctions.FirstOrDefault();
                 ConditionState = new QueryConditionState(SelectedCompareFunction, field.Type, _queryConditionFactory);
