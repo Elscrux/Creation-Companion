@@ -58,6 +58,12 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
     public IAssetType Script => SkyrimScriptCompiledAssetType.Instance;
     public IAssetType Sound => SkyrimSoundAssetType.Instance;
     public IAssetType Music => SkyrimMusicAssetType.Instance;
+    public IAssetType DeformedModel => SkyrimDeformedModelAssetType.Instance;
+    public IAssetType Seq => SkyrimSeqAssetType.Instance;
+    public IAssetType BodyTexture => SkyrimBodyTextureAssetType.Instance;
+    public IAssetType Behavior => SkyrimBehaviorAssetType.Instance;
+    public IAssetType Translation => SkyrimTranslationAssetType.Instance;
+    public IAssetType Interface => SkyrimInterfaceAssetType.Instance;
 
     public IAssetLink TextureLink(DataRelativePath path) => new AssetLink<SkyrimTextureAssetType>(path);
     public IAssetLink ModelLink(DataRelativePath path) => new AssetLink<SkyrimModelAssetType>(path);
@@ -65,4 +71,10 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
     public IAssetLink ScriptLink(DataRelativePath path) => new AssetLink<SkyrimScriptCompiledAssetType>(path);
     public IAssetLink SoundLink(DataRelativePath path) => new AssetLink<SkyrimSoundAssetType>(path);
     public IAssetLink MusicLink(DataRelativePath path) => new AssetLink<SkyrimMusicAssetType>(path);
+    public IAssetLink DeformedModelLink(DataRelativePath path) => new AssetLink<SkyrimDeformedModelAssetType>(path);
+    public IAssetLink SeqLink(DataRelativePath path) => new AssetLink<SkyrimSeqAssetType>(path);
+    public IAssetLink BodyTextureLink(DataRelativePath path) => new AssetLink<SkyrimBodyTextureAssetType>(path);
+    public IAssetLink BehaviorLink(DataRelativePath path) => new AssetLink<SkyrimBehaviorAssetType>(path);
+    public IAssetLink TranslationLink(DataRelativePath path) => new AssetLink<SkyrimTranslationAssetType>(path);
+    public IAssetLink InterfaceLink(DataRelativePath path) => new AssetLink<SkyrimInterfaceAssetType>(path);
 }

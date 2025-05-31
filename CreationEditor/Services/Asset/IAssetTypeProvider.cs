@@ -24,4 +24,10 @@ public interface IAssetTypeProvider {
     IAssetType Script { get; }
     IAssetType Sound { get; }
     IAssetType Music { get; }
+    IAssetType DeformedModel { get; }
+    IAssetType Seq { get; }
+    IAssetType BodyTexture { get; }
+    IAssetType Behavior { get; }
+    IAssetType Translation { get; }
+    IAssetType Interface { get; }
 }
