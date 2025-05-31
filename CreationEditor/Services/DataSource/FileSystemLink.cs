@@ -1,9 +1,11 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
 using Mutagen.Bethesda.Assets;
 using Noggog;
 namespace CreationEditor.Services.DataSource;
 
-public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelativePath) : IComparable<FileSystemLink> {
+public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath dataRelativePath)
+    : IComparable<FileSystemLink>, IEquatable<FileSystemLink> {
     public string FullPath => FileSystem.Path.Combine(DataSource.Path, DataRelativePath.Path);
     public IFileSystem FileSystem => DataSource.FileSystem;
 
@@ -24,12 +26,15 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
             var parentDirectoryPath = FileSystem.Path.GetDirectoryName(DataRelativePath.Path);
             if (parentDirectoryPath is null) return null;
 
-            return this with { DataRelativePath = parentDirectoryPath };
+            return new FileSystemLink(DataSource, parentDirectoryPath);
         }
     }
 
+    public IDataSource DataSource { get; } = dataSource;
+    public DataRelativePath DataRelativePath { get; init; } = dataRelativePath;
+
     public bool Exists() => IsFile
-        ? FileSystem.File.Exists(FullPath) 
+        ? FileSystem.File.Exists(FullPath)
         : FileSystem.Directory.Exists(FullPath);
 
     public bool Contains(FileSystemLink fileSystemLink) {
@@ -37,7 +42,9 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
 
         return IsFile
             ? fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison)
-            : DataRelativePath.Path.IsNullOrEmpty() || fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar, DataRelativePath.PathComparison);
+            : DataRelativePath.Path.IsNullOrEmpty()
+         || fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar,
+                DataRelativePath.PathComparison);
     }
 
     public IEnumerable<FileSystemLink> EnumerateFileLinks(bool includeSubDirectories) {
@@ -54,8 +61,7 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            var dataRelativePath = new DataRelativePath(relativePath);
-            yield return this with { DataRelativePath = dataRelativePath };
+            yield return new FileSystemLink(DataSource, new DataRelativePath(relativePath));
         }
     }
 
@@ -73,8 +79,7 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            var dataRelativePath = new DataRelativePath(relativePath);
-            yield return this with { DataRelativePath = dataRelativePath };
+            yield return new FileSystemLink(DataSource, new DataRelativePath(relativePath));
         }
     }
 
@@ -91,7 +96,11 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
         return FileSystem.File.OpenRead(FullPath);
     }
 
-    public virtual bool Equals(FileSystemLink? other) {
+    public override bool Equals(object? obj) {
+        return Equals(obj as FileSystemLink);
+    }
+
+    public bool Equals(FileSystemLink? other) {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
 
@@ -123,5 +132,10 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
         }
 
         return DataRelativePath.PathComparer.Compare(DataSource.Path, other.DataSource.Path);
+    }
+
+    public void Deconstruct(out IDataSource dataSource, out DataRelativePath dataRelativePath) {
+        dataSource = DataSource;
+        dataRelativePath = DataRelativePath;
     }
 }

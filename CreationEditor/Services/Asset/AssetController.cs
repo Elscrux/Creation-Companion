@@ -21,7 +21,7 @@ public sealed class AssetController(
 
     private FileSystemLink CreateDeletePath(FileSystemLink link) {
         var deletePath = link.FileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, link.DataRelativePath.Path);
-        return link with { DataRelativePath = deletePath };
+        return new FileSystemLink(link.DataSource, deletePath);
     }
 
     public void Delete(FileSystemLink link, CancellationToken token = default) {
@@ -44,7 +44,7 @@ public sealed class AssetController(
         var directoryPath = origin.FileSystem.Path.GetDirectoryName(origin.DataRelativePath.Path);
 
         if (directoryPath is not null) {
-            var destination = origin with { DataRelativePath = origin.FileSystem.Path.Combine(directoryPath, newName) };
+            var destination = new FileSystemLink(origin.DataSource, origin.FileSystem.Path.Combine(directoryPath, newName));
             try {
                 MoveInternal(origin, destination, true, token);
             } catch (Exception e) {
@@ -99,7 +99,7 @@ public sealed class AssetController(
 
                 newDataRelativePath = destination.FileSystem.Path.Combine(adjustedBasePath, nestedPath);
             }
-            var newPath = destination with { DataRelativePath = newDataRelativePath };
+            var newPath = new FileSystemLink(destination.DataSource, newDataRelativePath);
 
             // Reaching point of no return - after this alterations will be made 
             if (innerToken.IsCancellationRequested) return;

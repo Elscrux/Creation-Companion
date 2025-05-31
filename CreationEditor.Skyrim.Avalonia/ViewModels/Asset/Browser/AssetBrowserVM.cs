@@ -962,7 +962,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         // Handle re-adding of root items
         var rootRows = rows.Where(r => r.ModelIndexPath.Count == 1).ToArray();
         foreach (var rootItem in GetAllRootItems()) {
-            if (rootRows.Exists(r => r.Model == rootItem)) continue;
+            if (rootRows.Exists(r => r.Model.Equals(rootItem))) continue;
 
             if (rootItem.IsFile) {
                 if (SearchAndFilter(rootItem)) {
