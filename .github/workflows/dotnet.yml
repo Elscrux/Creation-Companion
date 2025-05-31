@@ -4,56 +4,55 @@
 name: .NET
 
 on:
-  push:
-    branches: [ "master", "dev" ]
-  pull_request:
-    branches: [ "master", "dev" ]
+    push:
+        branches: [ "master", "dev" ]
+    pull_request:
+        branches: [ "master", "dev" ]
 
 jobs:
-  build:
-    
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix: 
-        dotnet-version: [ '9.0' ]
-        os: [ubuntu-latest, windows-latest]
-        renderer: ["MrTroble/Project-BSE"]
-        include:
-          - os: ubuntu-latest
-            renderer-name: "TGAppLinux"
-          - os: windows-latest
-            renderer-name: "TGAppWindows"
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}
-    
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Build
-      run: dotnet build -c Release --no-restore
-    
-    -   name: Test
-        run: dotnet test --filter  'FullyQualifiedName!~ProjectBSE.Interop.Test' -c Release --no-build
-    
-    - name: Download renderer artifact
-      if: github.ref == 'refs/heads/master'
-      uses: aochmann/actions-download-artifact@1.0.4
-      with:
-        repo: ${{ matrix.renderer }}
-        latest: true
-        name: ${{ matrix.renderer-name }}
-        path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
-    
-    - name: Upload a Build Artifact
-      if: github.ref == 'refs/heads/master'
-      uses: actions/upload-artifact@v4
-      with:
-        name: creation-companion-${{ matrix.os }}
-        path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
+    build:
+        
+        runs-on: ${{ matrix.os }}
+        
+        strategy:
+            matrix:
+                dotnet-version: [ '9.0' ]
+                os: [ ubuntu-latest, windows-latest ]
+                renderer: [ "MrTroble/Project-BSE" ]
+                include:
+                -   os: ubuntu-latest
+                    renderer-name: "TGAppLinux"
+                -   os: windows-latest
+                    renderer-name: "TGAppWindows"
+        
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Setup .NET
+                uses: actions/setup-dotnet@v4
+                with:
+                    dotnet-version: ${{ matrix.dotnet-version }}
+
+            -   name: Restore dependencies
+                run: dotnet restore
+
+            -   name: Build
+                run: dotnet build -c Release --no-restore
+
+            -   name: Test
+                run: dotnet test --filter  'FullyQualifiedName!~ProjectBSE.Interop.Test' -c Release --no-build
+
+            -   name: Download renderer artifact
+                if: github.ref == 'refs/heads/master'
+                uses: actions/download-artifact@v4
+                with:
+                    repository: ${{ matrix.renderer }}
+                    name: ${{ matrix.renderer-name }}
+                    path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
+
+            -   name: Upload a Build Artifact
+                if: github.ref == 'refs/heads/master'
+                uses: actions/upload-artifact@v4
+                with:
+                    name: creation-companion-${{ matrix.os }}
+                    path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
