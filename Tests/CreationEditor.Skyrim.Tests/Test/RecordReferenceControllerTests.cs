@@ -71,10 +71,8 @@ public sealed class RecordReferenceControllerTests {
         masterMod.ArmorAddons.Add(armorAddon);
 
         // Build the initial environment with the master mod
-        var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
-        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
-            .LoadOrder.SetImmutableMods(masterMod.ModKey)
+            .LoadOrder.SetMutableMods(masterMod)
             .ActiveMod.New("NewMod")
             .Build());
 
@@ -127,11 +125,9 @@ public sealed class RecordReferenceControllerTests {
     [Theory, CreationEditorAutoData]
     public async Task Test_ReferenceUpdate_AfterLoadOrderChange_ActiveModHasPriorityOverMutable(
         SkyrimMod masterMod,
-        IFileSystem fileSystem,
         IEditorEnvironment editorEnvironment,
         IRecordController recordController,
-        RecordReferenceController recordReferenceController,
-        IDataDirectoryProvider dataDirectoryProvider) {
+        RecordReferenceController recordReferenceController) {
         // Create two record with references in the master mod
         var armor = new Armor(masterMod);
         var armor2 = new Armor(masterMod);
@@ -143,10 +139,8 @@ public sealed class RecordReferenceControllerTests {
         armor2.Armature.Add(armorAddon);
 
         // Build the initial environment with the master mod
-        var modPath = fileSystem.Path.Combine(dataDirectoryProvider.Path, masterMod.ModKey.FileName);
-        masterMod.WriteToBinary(modPath, new BinaryWriteParameters { FileSystem = fileSystem });
         editorEnvironment.Update(updater => updater
-            .LoadOrder.SetImmutableMods(masterMod.ModKey)
+            .LoadOrder.SetMutableMods(masterMod)
             .ActiveMod.New("NewMod")
             .Build());
 
