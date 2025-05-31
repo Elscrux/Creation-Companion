@@ -217,5 +217,8 @@
         <Compile Update="Services\DataSource\ArchiveDataSource.cs">
           <DependentUpon>IDataSource.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Asset\IgnoredDirectoriesProvider.cs">
+          <DependentUpon>IIgnoredDirectoriesProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

@@ -111,6 +111,10 @@ public sealed class MainModule : Module {
             .As<IDeleteDirectoryProvider>()
             .SingleInstance();
 
+        builder.RegisterType<IgnoredDirectoriesProvider>()
+            .As<IIgnoredDirectoriesProvider>()
+            .SingleInstance();
+
         builder.RegisterType<CacheLocationProvider>()
             .As<ICacheLocationProvider>();
 
