@@ -281,6 +281,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     .ObserveOnGui()
                     .Subscribe(Tree_RenameLink)
                     .DisposeWith(this);
+                watcher.Changed
+                    .ObserveOnGui()
+                    .Subscribe(Tree_UpdateLink)
+                    .DisposeWith(this);
 
                 Dispatcher.UIThread.Post(() => {
                     IsBusyLoadingAssets = true;
@@ -697,6 +701,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return filteredFileSystemChildren;
     }
 
+    private bool SearchAndFilter(FileSystemLink link) {
+        return _searchFilter.Filter(link.DataRelativePath.Path, SearchTextPattern()) && FilterLink(link);
+    }
+
     private bool FilterLink(FileSystemLink link) {
         var assetLink = _assetTypeService.GetAssetLink(link.DataRelativePath);
         if (assetLink is not null) {
@@ -769,6 +777,28 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Tree_AddLink(rename.New);
     }
 
+    private void Tree_UpdateLink(FileSystemLink link) {
+        if (!SearchAndFilter(link)) {
+            Tree_RemoveLink(link);
+            return;
+        }
+
+        var parentRow = FindParentRow(link);
+        if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
+
+        _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+
+        var value = ItemsField.GetValue(childRows);
+        if (value is not TreeDataGridItemsSourceView view) return;
+
+        var index = view.Inner.IndexOf(link);
+        if (index < 0) return;
+
+        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, link, link, index);
+        view.Inner[index] = link;
+        OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
+    }
+
     private void Tree_UpdateAll() {
         _filteredFileSystemChildrenCache.Clear();
 
@@ -777,7 +807,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             // Handle removing of root items
             if (row.ModelIndexPath.Count == 1) {
                 if (row.Model.IsFile) {
-                    if (!_searchFilter.Filter(row.Model.DataRelativePath.Path, SearchTextPattern()) || !FilterLink(row.Model)) {
+                    if (!SearchAndFilter(row.Model)) {
                         RootItems.Remove(row.Model);
                     }
                 } else {
@@ -830,7 +860,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             if (rootRows.Exists(r => r.Model == rootItem)) continue;
 
             if (rootItem.IsFile) {
-                if (_searchFilter.Filter(rootItem.DataRelativePath.Path, SearchTextPattern()) && FilterLink(rootItem)) {
+                if (SearchAndFilter(rootItem)) {
                     RootItems.Add(rootItem);
                 }
             } else {
