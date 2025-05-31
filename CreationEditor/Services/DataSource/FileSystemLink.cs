@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Assets;
 using Noggog;
 namespace CreationEditor.Services.DataSource;
 
+[DebuggerDisplay("{ToString()}")]
 public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath dataRelativePath)
     : IComparable<FileSystemLink>, IEquatable<FileSystemLink> {
     public string FullPath => FileSystem.Path.Combine(DataSource.Path, DataRelativePath.Path);
@@ -137,5 +138,9 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
     public void Deconstruct(out IDataSource dataSource, out DataRelativePath dataRelativePath) {
         dataSource = DataSource;
         dataRelativePath = DataRelativePath;
+    }
+
+    public override string ToString() {
+        return $"[{DataSource.Path}] {DataRelativePath.Path}";
     }
 }
