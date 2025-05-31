@@ -236,13 +236,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         var assetLink = _assetTypeService.GetAssetLink(asset.DataRelativePath);
                         if (assetLink is null) return null;
 
-                        var assetLinks = GetMissingAssets(assetLink).ToArray();
+                        var assetLinks = GetMissingAssets(asset, assetLink).ToArray();
                         if (assetLinks.Length == 0) return null;
 
                         return new SymbolIcon {
                             Symbol = Symbol.ImportantFilled,
                             Foreground = StandardBrushes.InvalidBrush,
-                            [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks),
+                            [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath.Path)),
                         };
                     })),
             },
@@ -346,12 +346,12 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         OpenAssetBrowser = ReactiveCommand.CreateFromTask<FileSystemLink>(asset => dockFactory.Open(DockElement.AssetBrowser, parameter: asset));
     }
 
-    private IEnumerable<DataRelativePath> GetMissingAssets(IAssetLinkGetter assetLink) {
+    private IEnumerable<IAssetLinkGetter> GetMissingAssets(FileSystemLink link, IAssetLinkGetter assetLink) {
         if (assetLink.AssetTypeInstance != SkyrimModelAssetType.Instance) return [];
 
         // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
-        return _assetReferenceController.GetAssetReferences(assetLink)
-            .Where(path => !DataSourceService.FileExists(path.Path));
+        return _assetReferenceController.GetAssetLinksFrom(link)
+            .Where(path => !DataSourceService.FileExists(path.DataRelativePath));
     }
 
     private HierarchicalRow<FileSystemLink>? FindParentRow(FileSystemLink link) {
