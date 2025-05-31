@@ -97,6 +97,9 @@
                             <CheckBox IsChecked="{Binding ShowEmptyDirectories}"
                                       Content="Empty Directories"/>
 
+                            <CheckBox IsChecked="{Binding ShowIgnoredDirectories}"
+                                      Content="Ignored Directories"/>
+
                             <WrapPanel>
                                 <ToggleButton x:Name="TextureButton"
                                               IsChecked="{Binding ShowTextures}"/>

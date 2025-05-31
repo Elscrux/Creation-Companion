@@ -13,6 +13,7 @@ namespace CreationEditor.Avalonia.ViewModels.Asset.Browser;
 public interface IAssetBrowserVM : IDisposableDropoff {
     string SearchText { get; set; }
     bool ShowEmptyDirectories { get; set; }
+    bool ShowIgnoredDirectories { get; set; }
     bool ShowReferencedFiles { get; set; }
     bool ShowOrphanedFiles { get; set; }
     bool ShowOtherFiles { get; set; }

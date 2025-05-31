@@ -52,6 +52,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IRecordReferenceController _recordReferenceController;
     private readonly MainWindow _mainWindow;
+    private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
     private FileSystemLink _rootDirectory = null!;
 
@@ -67,6 +68,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [Reactive] public partial IDataSource DataSource { get; set; }
     [Reactive] public partial string SearchText { get; set; }
     [Reactive] public partial bool ShowEmptyDirectories { get; set; }
+    [Reactive] public partial bool ShowIgnoredDirectories { get; set; }
     [Reactive] public partial bool ShowReferencedFiles { get; set; }
     [Reactive] public partial bool ShowOrphanedFiles { get; set; }
     [Reactive] public partial bool ShowOtherFiles { get; set; }
@@ -114,6 +116,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IRecordReferenceController recordReferenceController,
         IDockFactory dockFactory,
         MainWindow mainWindow,
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter) {
         DataSourceService = dataSourceService;
         SearchText = "";
@@ -126,6 +129,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _linkCacheProvider = linkCacheProvider;
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
+        _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _searchFilter = searchFilter;
 
         ShowReferencedFiles = true;
@@ -296,6 +300,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 this.WhenAnyValue(x => x.ShowSeq),
                 this.WhenAnyValue(x => x.ShowTranslations),
                 this.WhenAnyValue(x => x.ShowEmptyDirectories),
+                this.WhenAnyValue(x => x.ShowIgnoredDirectories),
                 this.WhenAnyValue(x => x.ShowReferencedFiles),
                 this.WhenAnyValue(x => x.ShowOrphanedFiles),
                 this.WhenAnyValue(x => x.ShowOtherFiles))
@@ -406,7 +411,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .FirstOrDefault(row => row.Model.DataRelativePath == parentPath);
     }
 
-    private IEnumerable<FileSystemLink> GetAllRootItems() => _rootDirectory.EnumerateAllLinks(false);
+    private IEnumerable<FileSystemLink> GetAllRootItems() {
+        return _rootDirectory
+            .EnumerateAllLinks(false)
+            .Where(dir => ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(dir.DataRelativePath));
+    }
 
     private async Task AddAssetFolder(FileSystemLink dir) {
         var textBox = new TextBox { Text = "New Folder" };
@@ -715,7 +724,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 span = span[removeChars..];
 
                 // Check for directory separators and remove everything after the first one (only top level files and directories count)
-                var indexOfAny = span.IndexOfAny(directory.FileSystem.Path.DirectorySeparatorChar, directory.FileSystem.Path.AltDirectorySeparatorChar);
+                var indexOfAny = span.IndexOfAny(directory.FileSystem.Path.DirectorySeparatorChar,
+                    directory.FileSystem.Path.AltDirectorySeparatorChar);
                 if (indexOfAny >= 0) {
                     span = span[..indexOfAny];
                 }
@@ -903,7 +913,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         RootItems.Remove(row.Model);
                     }
                 } else {
-                    if (!ShowEmptyDirectories && !GetFilteredFileSystemChildren(row.Model).Any()) {
+                    // Specifically handle ignored directories here too to make sure they are removed when the setting changes
+                    if (!ShowIgnoredDirectories && _ignoredDirectoriesProvider.IsIgnored(row.Model.DataRelativePath)
+                     || !ShowEmptyDirectories && !GetFilteredFileSystemChildren(row.Model).Any()) {
                         RootItems.Remove(row.Model);
                     }
                 }
@@ -926,7 +938,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     } else {
                         foreach (var oldLink in oldLinks) view.Inner.Remove(oldLink);
                     }
-                    OnItemsCollectionChangedMethod.Invoke(childRows, [null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)]);
+                    OnItemsCollectionChangedMethod.Invoke(childRows,
+                        [null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)]);
                 } else {
                     foreach (var oldLink in oldLinks) {
                         var indexOf = view.Inner.IndexOf(oldLink);
