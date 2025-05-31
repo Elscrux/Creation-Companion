@@ -20,6 +20,7 @@ namespace CreationEditor.Services.Mutagen.References.Asset.Controller;
 
 public sealed class AssetReferenceController : IAssetReferenceController {
     private readonly CompositeDisposable _disposables = new();
+    private readonly CompositeDisposable _dataSourceUpdatedDisposables = new();
 
     private readonly ILogger _logger;
     private readonly IDataSourceService _dataSourceService;
@@ -63,6 +64,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     public AssetReferenceController(
         ILogger logger,
         IDataSourceService dataSourceService,
+        IDataSourceWatcherProvider dataSourceWatcherProvider,
         INotificationService notificationService,
         IEditorEnvironment editorEnvironment,
         IRecordController recordController,
@@ -70,33 +72,55 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         IAssetReferenceCacheFactory assetReferenceCacheFactory) {
         _logger = logger;
         _dataSourceService = dataSourceService;
+        var dataSourceWatcherProvider1 = dataSourceWatcherProvider;
         _notificationService = notificationService;
         _editorEnvironment = editorEnvironment;
         _nifFileAssetParser = nifFileAssetParser;
         _assetReferenceCacheFactory = assetReferenceCacheFactory;
 
-        // Task.Run(() => InitLoadOrderReferences());
         _editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(_ => UpdateLoadingProcess(InitLoadOrderReferences).FireAndForget(
                 e => logger.Here().Error(e, "Failed to load Mod Asset References {Exception}", e.Message)))
             .DisposeWith(_disposables);
 
-        // var fileSystemDataSources = _dataSourceService.PriorityOrder.OfType<FileSystemDataSource>().ToArray();
-        // var archiveDataSources = _dataSourceService.PriorityOrder.OfType<ArchiveDataSource>().ToArray();
-        // Task.Run(() => InitNifDirectoryReferences(fileSystemDataSources))
-        //     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory Asset References {Exception}", e.Message));
-        // Task.Run(() => InitNifArchiveReferences(archiveDataSources))
-        //     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive Asset References {Exception}", e.Message));
         _dataSourceService.DataSourcesChanged
             .ObserveOnTaskpool()
             .Subscribe(dataSources => {
+                _dataSourceUpdatedDisposables.Clear();
+
                 var fileSystemDataSources = dataSources.OfType<FileSystemDataSource>().ToArray();
                 var archiveDataSources = dataSources.OfType<ArchiveDataSource>().ToArray();
                 Task.Run(() => UpdateLoadingProcess(() => InitNifDirectoryReferences(fileSystemDataSources)))
                     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Directory Asset References {Exception}", e.Message));
                 Task.Run(() => UpdateLoadingProcess(() => InitNifArchiveReferences(archiveDataSources)))
                     .FireAndForget(e => logger.Here().Error(e, "Failed to load Nif Archive Asset References {Exception}", e.Message));
+
+                foreach (var dataSource in fileSystemDataSources) {
+                    var watcher = dataSourceWatcherProvider1.GetWatcher(dataSource);
+                    watcher.CreatedFile
+                        .Subscribe(RegisterCreation)
+                        .DisposeWith(_dataSourceUpdatedDisposables);
+
+                    watcher.DeletedFile
+                        .Subscribe(RegisterDeletion)
+                        .DisposeWith(_dataSourceUpdatedDisposables);
+
+                    watcher.RenamedFile
+                        .Subscribe(x => {
+                            RegisterDeletion(x.Old);
+                            RegisterCreation(x.New);
+                        })
+                        .DisposeWith(_dataSourceUpdatedDisposables);
+
+                    watcher.Changed
+                        .Subscribe(link => {
+                            var registerUpdate = RegisterUpdate(link);
+                            registerUpdate(link);
+                        })
+                        .DisposeWith(_dataSourceUpdatedDisposables);
+
+                }
             })
             .DisposeWith(_disposables);
 
