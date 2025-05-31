@@ -232,6 +232,13 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         return nifDirectoryReferences.Count() + nifArchiveReferences.Count() + modReferences.Count();
     }
 
+    public IEnumerable<IAssetLinkGetter> GetAssetLinksFrom(FileSystemLink fileLink) {
+        var cache = GetCacheFor(fileLink);
+        if (cache is null) return [];
+
+        return cache.FindLinksToReference(fileLink.DataRelativePath);
+    }
+
     public Action<FileSystemLink> RegisterUpdate(FileSystemLink fileLink) {
         ValidateAsset(fileLink);
 
