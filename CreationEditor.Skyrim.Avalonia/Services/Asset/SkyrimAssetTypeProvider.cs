@@ -17,6 +17,7 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
         SkyrimBodyTextureAssetType.Instance,
         SkyrimBehaviorAssetType.Instance,
         SkyrimTranslationAssetType.Instance,
+        SkyrimInterfaceAssetType.Instance,
     ];
 
     public IDictionary<IAssetType, Func<DataRelativePath, IAssetLink>> AssetTypeConstructor { get; }
@@ -32,6 +33,7 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
             { SkyrimBodyTextureAssetType.Instance, path => new AssetLink<SkyrimBodyTextureAssetType>(path) },
             { SkyrimBehaviorAssetType.Instance, path => new AssetLink<SkyrimBehaviorAssetType>(path) },
             { SkyrimTranslationAssetType.Instance, path => new AssetLink<SkyrimTranslationAssetType>(path) },
+            { SkyrimInterfaceAssetType.Instance, path => new AssetLink<SkyrimInterfaceAssetType>(path) },
         };
 
     public IDictionary<IAssetType, string> AssetTypeIdentifiers { get; }
@@ -47,6 +49,7 @@ public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
             { SkyrimBodyTextureAssetType.Instance, "BDY" },
             { SkyrimBehaviorAssetType.Instance, "BEH" },
             { SkyrimTranslationAssetType.Instance, "TRL" },
+            { SkyrimInterfaceAssetType.Instance, "INT" },
         };
 
     public IAssetType Texture => SkyrimTextureAssetType.Instance;
