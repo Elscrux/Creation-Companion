@@ -42,13 +42,13 @@ jobs:
             -   name: Test
                 run: dotnet test --filter  'FullyQualifiedName!~ProjectBSE.Interop.Test' -c Release --no-build
 
-            -   name: Download renderer artifact
-                if: github.ref == 'refs/heads/master'
-                uses: actions/download-artifact@v4
-                with:
-                    repository: ${{ matrix.renderer }}
-                    name: ${{ matrix.renderer-name }}
-                    path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
+#            -   name: Download renderer artifact
+#                if: github.ref == 'refs/heads/master'
+#                uses: actions/download-artifact@v4
+#                with:
+#                    repository: ${{ matrix.renderer }}
+#                    name: ${{ matrix.renderer-name }}
+#                    path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
 
             -   name: Upload a Build Artifact
                 if: github.ref == 'refs/heads/master'
