@@ -70,6 +70,18 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [Reactive] public partial bool ShowReferencedFiles { get; set; }
     [Reactive] public partial bool ShowOrphanedFiles { get; set; }
     [Reactive] public partial bool ShowOtherFiles { get; set; }
+    [Reactive] public partial bool ShowTextures { get; set; }
+    [Reactive] public partial bool ShowModels { get; set; }
+    [Reactive] public partial bool ShowScriptSources { get; set; }
+    [Reactive] public partial bool ShowScripts { get; set; }
+    [Reactive] public partial bool ShowSounds { get; set; }
+    [Reactive] public partial bool ShowMusic { get; set; }
+    [Reactive] public partial bool ShowBehaviors { get; set; }
+    [Reactive] public partial bool ShowBodyTextures { get; set; }
+    [Reactive] public partial bool ShowDeformedModels { get; set; }
+    [Reactive] public partial bool ShowInterfaces { get; set; }
+    [Reactive] public partial bool ShowSeq { get; set; }
+    [Reactive] public partial bool ShowTranslations { get; set; }
 
     [Reactive] public partial bool IsBusyLoadingAssets { get; set; }
     [Reactive] public partial bool IsBusyLoadingReferences { get; set; }
@@ -119,6 +131,20 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         ShowReferencedFiles = true;
         ShowOrphanedFiles = true;
         ShowOtherFiles = true;
+
+        ShowTextures = true;
+        ShowModels = true;
+        ShowScriptSources = true;
+        ShowScripts = true;
+        ShowSounds = true;
+        ShowMusic = true;
+        ShowBehaviors = true;
+        ShowBodyTextures = true;
+        ShowDeformedModels = true;
+        ShowInterfaces = true;
+        ShowSeq = true;
+        ShowTranslations = true;
+
         SearchText = string.Empty;
         IsBusyLoadingAssets = true;
         IsBusyLoadingReferences = true;
@@ -255,12 +281,25 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
             .DisposeWith(this);
 
-        this.WhenAnyValue(x => x.ShowEmptyDirectories)
-            .CombineLatest(
+
+        Observable.CombineLatest(
+                this.WhenAnyValue(x => x.ShowTextures),
+                this.WhenAnyValue(x => x.ShowModels),
+                this.WhenAnyValue(x => x.ShowScriptSources),
+                this.WhenAnyValue(x => x.ShowScripts),
+                this.WhenAnyValue(x => x.ShowSounds),
+                this.WhenAnyValue(x => x.ShowMusic),
+                this.WhenAnyValue(x => x.ShowBehaviors),
+                this.WhenAnyValue(x => x.ShowBodyTextures),
+                this.WhenAnyValue(x => x.ShowDeformedModels),
+                this.WhenAnyValue(x => x.ShowInterfaces),
+                this.WhenAnyValue(x => x.ShowSeq),
+                this.WhenAnyValue(x => x.ShowTranslations),
+                this.WhenAnyValue(x => x.ShowEmptyDirectories),
                 this.WhenAnyValue(x => x.ShowReferencedFiles),
                 this.WhenAnyValue(x => x.ShowOrphanedFiles),
-                this.WhenAnyValue(x => x.ShowOtherFiles),
-                this.WhenAnyValue(x => x.SearchText))
+                this.WhenAnyValue(x => x.ShowOtherFiles))
+            .CombineLatest(this.WhenAnyValue(x => x.SearchText))
             .ObserveOnGui()
             .ThrottleMedium()
             .Subscribe(Tree_UpdateAll)
@@ -710,6 +749,57 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private bool FilterLink(FileSystemLink link) {
         var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
         if (assetLink is not null) {
+            switch (assetLink.Type) {
+                case SkyrimBehaviorAssetType:
+                    if (!ShowBehaviors) return false;
+
+                    break;
+                case SkyrimBodyTextureAssetType:
+                    if (!ShowBodyTextures) return false;
+
+                    break;
+                case SkyrimDeformedModelAssetType:
+                    if (!ShowDeformedModels) return false;
+
+                    break;
+                case SkyrimInterfaceAssetType:
+                    if (!ShowInterfaces) return false;
+
+                    break;
+                case SkyrimModelAssetType:
+                    if (!ShowModels) return false;
+
+                    break;
+                case SkyrimMusicAssetType:
+                    if (!ShowMusic) return false;
+
+                    break;
+                case SkyrimScriptCompiledAssetType:
+                    if (!ShowScripts) return false;
+
+                    break;
+                case SkyrimScriptSourceAssetType:
+                    if (!ShowScriptSources) return false;
+
+                    break;
+                case SkyrimSeqAssetType:
+                    if (!ShowSeq) return false;
+
+                    break;
+                case SkyrimSoundAssetType:
+                    if (!ShowSounds) return false;
+
+                    break;
+                case SkyrimTextureAssetType:
+                    if (!ShowTextures) return false;
+
+                    break;
+                case SkyrimTranslationAssetType:
+                    if (!ShowTranslations) return false;
+
+                    break;
+            }
+
             var hasReferences = _assetReferenceController.GetAssetReferences(assetLink).Any()
              || _assetReferenceController.GetRecordReferences(assetLink).Any();
 
@@ -841,7 +931,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     foreach (var oldLink in oldLinks) {
                         var indexOf = view.Inner.IndexOf(oldLink);
                         if (indexOf < 0) continue;
-                
+
                         var removeArgs = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldLink, indexOf);
                         view.Inner.Remove(oldLink);
                         OnItemsCollectionChangedMethod.Invoke(childRows, [null, removeArgs]);

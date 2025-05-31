@@ -16,6 +16,18 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool ShowReferencedFiles { get; set; }
     bool ShowOrphanedFiles { get; set; }
     bool ShowOtherFiles { get; set; }
+    bool ShowTextures { get; set; }
+    bool ShowModels { get; set; }
+    bool ShowScriptSources { get; set; }
+    bool ShowScripts { get; set; }
+    bool ShowSounds { get; set; }
+    bool ShowMusic { get; set; }
+    bool ShowBehaviors { get; set; }
+    bool ShowBodyTextures { get; set; }
+    bool ShowDeformedModels { get; set; }
+    bool ShowInterfaces { get; set; }
+    bool ShowSeq { get; set; }
+    bool ShowTranslations { get; set; }
 
     ReactiveCommand<Unit, Unit> Undo { get; }
     ReactiveCommand<Unit, Unit> Redo { get; }

@@ -10,6 +10,7 @@
              xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
+             x:Name="Control"
              x:DataType="browser:IAssetBrowserVM">
     <UserControl.KeyBindings>
         <KeyBinding
@@ -44,7 +45,7 @@
 
                 <Button.Flyout>
                     <Flyout>
-                        <StackPanel>
+                        <StackPanel MaxWidth="250">
                             <TextBlock Text="Show"
                                        FontSize="12"/>
 
@@ -92,9 +93,55 @@
                                     </ToggleButton.Content>
                                 </ToggleButton>
                             </StackPanel>
+
                             <CheckBox IsChecked="{Binding ShowEmptyDirectories}"
                                       Content="Empty Directories"/>
 
+                            <WrapPanel>
+                                <ToggleButton x:Name="TextureButton"
+                                              IsChecked="{Binding ShowTextures}"/>
+
+                                <ToggleButton x:Name="ModelButton"
+                                              IsChecked="{Binding ShowModels}"/>
+
+                                <ToggleButton x:Name="ScriptSourcesButton"
+                                              IsChecked="{Binding ShowScriptSources}"/>
+
+                                <ToggleButton x:Name="ScriptsButton"
+                                              IsChecked="{Binding ShowScripts}"/>
+
+                                <ToggleButton x:Name="SoundsButton"
+                                              IsChecked="{Binding ShowSounds}"/>
+
+                                <ToggleButton x:Name="MusicButton"
+                                              IsChecked="{Binding ShowMusic}"/>
+
+                                <Button x:Name="ExtraModel" Content="..." VerticalContentAlignment="Center">
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <WrapPanel MaxWidth="250">
+                                                <ToggleButton x:Name="BehaviorButton"
+                                                              IsChecked="{Binding ShowBehaviors}"/>
+
+                                                <ToggleButton x:Name="BodyTextureButton"
+                                                              IsChecked="{Binding ShowBodyTextures}"/>
+
+                                                <ToggleButton x:Name="DeformedModelButton"
+                                                              IsChecked="{Binding ShowDeformedModels}"/>
+
+                                                <ToggleButton x:Name="InterfaceButton"
+                                                              IsChecked="{Binding ShowInterfaces}"/>
+
+                                                <ToggleButton x:Name="SeqButton"
+                                                              IsChecked="{Binding ShowSeq}"/>
+
+                                                <ToggleButton x:Name="TranslationButton"
+                                                              IsChecked="{Binding ShowTranslations}"/>
+                                            </WrapPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </WrapPanel>
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>

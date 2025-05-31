@@ -5,10 +5,16 @@ using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Avalonia.VisualTree;
+using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.DataSource;
+using FluentAvalonia.UI.Controls;
+using Mutagen.Bethesda.Assets;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Asset.Browser;
 
@@ -23,6 +29,60 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             AssetTree.ContextRequested += ContextRequestHandler;
             d.Add(Disposable.Create(() => AssetTree.ContextRequested -= ContextRequestHandler));
         });
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e) {
+        base.OnLoaded(e);
+
+        if (ViewModel is null) return;
+
+        var anyExtraSelected = ViewModel.WhenAnyValue(x => x.ShowBehaviors)
+            .CombineLatest(
+                ViewModel.WhenAnyValue(x => x.ShowBodyTextures),
+                ViewModel.WhenAnyValue(x => x.ShowDeformedModels),
+                ViewModel.WhenAnyValue(x => x.ShowInterfaces),
+                ViewModel.WhenAnyValue(x => x.ShowSeq),
+                ViewModel.WhenAnyValue(x => x.ShowTranslations),
+                (x1, x2, x3, x4, x5, x6) => x1 || x2 || x3 || x4 || x5 || x6);
+
+        ExtraModel[!BackgroundProperty] = anyExtraSelected
+            .Select(anySelected => anySelected
+                ? StandardBrushes.GetBrush("ToggleButtonBackgroundChecked")
+                : StandardBrushes.GetBrush("ToggleButtonBackground"))
+            .ToBinding();
+
+        ExtraModel[!ForegroundProperty] = anyExtraSelected
+            .Select(anySelected => anySelected
+                ? Brushes.Black
+                : Brushes.White)
+            .ToBinding();
+
+        TextureButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Texture, "Texture");
+        ModelButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Model, "Model");
+        ScriptSourcesButton.Content = GetControl(ViewModel.AssetTypeService.Provider.ScriptSource, "Script Source");
+        ScriptsButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Script, "Script");
+        SoundsButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Sound, "Sound");
+        MusicButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Music, "Music");
+        BehaviorButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Behavior, "Behavior");
+        BodyTextureButton.Content = GetControl(ViewModel.AssetTypeService.Provider.BodyTexture, "Body Texture");
+        DeformedModelButton.Content = GetControl(ViewModel.AssetTypeService.Provider.DeformedModel, "Deformed Model");
+        SeqButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Seq, "Seq");
+        InterfaceButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Interface, "Interface");
+        TranslationButton.Content = GetControl(ViewModel.AssetTypeService.Provider.Translation, "Translation");
+
+        Control GetControl(IAssetType assetType, string name) {
+            var icon = ViewModel.AssetIconService.GetIcon(assetType);
+            if (icon is FontIcon fontIcon) fontIcon.FontSize = 20;
+            return new StackPanel {
+                Height = 20,
+                Orientation = Orientation.Horizontal,
+                Spacing = 2,
+                Children = {
+                    icon,
+                    new TextBlock { Text = name, VerticalAlignment = VerticalAlignment.Center },
+                }
+            };
+        }
     }
 
     private void ContextRequestHandler(object? sender, ContextRequestedEventArgs e) {
