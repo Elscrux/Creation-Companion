@@ -13,4 +13,14 @@ public static class DataSourceExtensions {
         link = new FileSystemLink(dataSource, relativePath);
         return true;
     }
+
+    public static bool TryGetDataRelativePath(this IDataSource dataSource, string fullPath, out DataRelativePath relativePath) {
+        if (!fullPath.StartsWith(dataSource.Path, DataRelativePath.PathComparison)) {
+            relativePath = default;
+            return false;
+        }
+
+        relativePath = new DataRelativePath(dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, fullPath));
+        return true;
+    }
 }

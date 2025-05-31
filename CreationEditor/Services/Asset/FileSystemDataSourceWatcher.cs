@@ -45,7 +45,7 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
         DataSource = dataSource;
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _assetTypeService = assetTypeService;
-        var watcher = dataSource.FileSystem.FileSystemWatcher.New(DataSource.Path).DisposeWith(_disposables);
+        var watcher = DataSource.FileSystem.FileSystemWatcher.New(DataSource.Path).DisposeWith(_disposables);
         // _watcher.Filters.AddRange(_assetTypeService.GetFileMasks()); doesn't allow directory changes
         watcher.IncludeSubdirectories = true;
         watcher.EnableRaisingEvents = true;
@@ -95,7 +95,11 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
             })
             .DisposeWith(_disposables);
 
-        bool Filter(TEvent t) => !_ignoredDirectoriesProvider.IsIgnored(t.FullPath);
+        bool Filter(TEvent t) {
+            if (!DataSource.TryGetDataRelativePath(t.FullPath, out var relativePath)) return false;
+
+            return _ignoredDirectoriesProvider.IsIgnored(relativePath);
+        }
     }
 
     public void Dispose() => _disposables.Dispose();
