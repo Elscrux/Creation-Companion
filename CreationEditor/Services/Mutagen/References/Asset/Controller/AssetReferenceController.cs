@@ -311,7 +311,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     private static void ValidateAsset(FileSystemLink fileLink) {
-        if (!fileLink.Exists()) throw new NotImplementedException("Updating virtual assets is not supported currently");
+        if (fileLink.DataSource.IsReadOnly) throw new NotImplementedException("Updating virtual assets is not supported currently");
     }
 
     private void AddAssetReferences(
