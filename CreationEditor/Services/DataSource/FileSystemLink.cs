@@ -91,6 +91,15 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
         return FileSystem.File.OpenRead(FullPath);
     }
 
+    public virtual bool Equals(FileSystemLink? other) {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return DataSource.Equals(other.DataSource) && DataRelativePath.Equals(other.DataRelativePath);
+    }
+
+    public override int GetHashCode() => HashCode.Combine(DataSource, DataRelativePath);
+
     public int CompareTo(FileSystemLink? other) {
         if (ReferenceEquals(this, other)) return 0;
         if (other is null) return 1;
