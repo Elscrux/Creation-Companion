@@ -1,13 +1,22 @@
 ﻿using System.IO.Abstractions;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Services.Asset;
 
-public sealed class DeleteDirectoryProvider(
-    IFileSystem fileSystem,
-    IDataDirectoryProvider dataDirectoryProvider
-) : IDeleteDirectoryProvider {
-
+public sealed class DeleteDirectoryProvider : IDeleteDirectoryProvider {
     private const string DeleteDirectoryName = "_DELETE_";
 
-    public string DeleteDirectory => fileSystem.Path.Combine(dataDirectoryProvider.Path, DeleteDirectoryName);
+    private readonly IFileSystem _fileSystem;
+    private readonly IDataDirectoryProvider _dataDirectoryProvider;
+
+    public DeleteDirectoryProvider(
+        IFileSystem fileSystem,
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
+        IDataDirectoryProvider dataDirectoryProvider) {
+        _fileSystem = fileSystem;
+        _dataDirectoryProvider = dataDirectoryProvider;
+        ignoredDirectoriesProvider.AddIgnoredDirectory(new DataRelativePath(DeleteDirectoryName));
+    }
+
+    public string DeleteDirectory => _fileSystem.Path.Combine(_dataDirectoryProvider.Path, DeleteDirectoryName);
 }

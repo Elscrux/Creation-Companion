@@ -9,7 +9,7 @@ namespace CreationEditor.Services.Asset;
 public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
     private readonly DisposableBucket _disposables = new();
 
-    private readonly IDeleteDirectoryProvider _deleteDirectoryProvider;
+    private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly IAssetTypeService _assetTypeService;
 
     public IDataSource DataSource { get; }
@@ -40,10 +40,10 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
 
     public FileSystemDataSourceWatcher(
         IDataSource dataSource,
-        IDeleteDirectoryProvider deleteDirectoryProvider,
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         IAssetTypeService assetTypeService) {
         DataSource = dataSource;
-        _deleteDirectoryProvider = deleteDirectoryProvider;
+        _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _assetTypeService = assetTypeService;
         var watcher = dataSource.FileSystem.FileSystemWatcher.New(DataSource.Path).DisposeWith(_disposables);
         // _watcher.Filters.AddRange(_assetTypeService.GetFileMasks()); doesn't allow directory changes
@@ -70,11 +70,16 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
                 return (Old: oldLink, New: newLink);
             }
 
-            throw new InvalidOperationException($"File system link for path '{arg.OldFullPath}' or '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
+            throw new InvalidOperationException(
+                $"File system link for path '{arg.OldFullPath}' or '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
         }
     }
 
-    private void HandleFileSystemEvent<TEvent, T>(IObservable<TEvent> observable, IObserver<T> fileObserver, IObserver<T> directoryObserver, Func<TEvent, T> select)
+    private void HandleFileSystemEvent<TEvent, T>(
+        IObservable<TEvent> observable,
+        IObserver<T> fileObserver,
+        IObserver<T> directoryObserver,
+        Func<TEvent, T> select)
         where TEvent : FileSystemEventArgs {
         observable
             .Where(Filter)
@@ -90,12 +95,7 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
             })
             .DisposeWith(_disposables);
 
-        bool Filter(TEvent t) {
-            // Ignore changes in the delete directory
-            if (t.FullPath.StartsWith(_deleteDirectoryProvider.DeleteDirectory, DataRelativePath.PathComparison)) return false;
-
-            return true;
-        }
+        bool Filter(TEvent t) => !_ignoredDirectoriesProvider.IsIgnored(t.FullPath);
     }
 
     public void Dispose() => _disposables.Dispose();
