@@ -7,8 +7,9 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
     public string FullPath => FileSystem.Path.Combine(DataSource.Path, DataRelativePath.Path);
     public IFileSystem FileSystem => DataSource.FileSystem;
 
-    public bool IsFile => FileSystem.Path.HasExtension(DataRelativePath.Path);
-    public bool IsDirectory => !IsFile;
+    private bool? _isFile;
+    public bool IsFile => _isFile ??= FileSystem.File.Exists(FullPath);
+    public bool IsDirectory => _isFile.HasValue ? !IsFile : FileSystem.Directory.Exists(FullPath);
 
     /// <summary>
     /// Gets the name of the file or directory.
