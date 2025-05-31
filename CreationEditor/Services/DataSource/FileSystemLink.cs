@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Mutagen.Bethesda.Assets;
+using Noggog;
 namespace CreationEditor.Services.DataSource;
 
 public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelativePath) : IComparable<FileSystemLink> {
@@ -35,7 +36,7 @@ public record FileSystemLink(IDataSource DataSource, DataRelativePath DataRelati
 
         return IsFile
             ? fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison)
-            : fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar, DataRelativePath.PathComparison);
+            : DataRelativePath.Path.IsNullOrEmpty() || fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar, DataRelativePath.PathComparison);
     }
 
     public IEnumerable<FileSystemLink> EnumerateFileLinks(bool includeSubDirectories) {
