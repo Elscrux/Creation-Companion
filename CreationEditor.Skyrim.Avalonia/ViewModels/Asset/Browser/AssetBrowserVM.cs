@@ -51,7 +51,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IAssetController _assetController;
     private readonly ILinkCacheProvider _linkCacheProvider;
     private readonly IRecordReferenceController _recordReferenceController;
-    private readonly IAssetTypeService _assetTypeService;
     private readonly MainWindow _mainWindow;
     private readonly ISearchFilter _searchFilter;
     private FileSystemLink _rootDirectory = null!;
@@ -62,6 +61,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public IDataSourceService DataSourceService { get; }
     public ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
+    public IAssetTypeService AssetTypeService { get; }
+    public IAssetIconService AssetIconService { get; }
 
     [Reactive] public partial IDataSource DataSource { get; set; }
     [Reactive] public partial string SearchText { get; set; }
@@ -96,20 +97,20 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetReferenceController assetReferenceController,
         IAssetController assetController,
         IAssetTypeService assetTypeService,
-        IAssetSymbolService assetSymbolService,
+        IAssetIconService assetIconService,
         ILinkCacheProvider linkCacheProvider,
         IRecordReferenceController recordReferenceController,
         IDockFactory dockFactory,
         MainWindow mainWindow,
-        ISearchFilter searchFilter
-    ) {
+        ISearchFilter searchFilter) {
         DataSourceService = dataSourceService;
         SearchText = "";
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _menuItemProvider = menuItemProvider;
         _assetReferenceController = assetReferenceController;
         _assetController = assetController;
-        _assetTypeService = assetTypeService;
+        AssetTypeService = assetTypeService;
+        AssetIconService = assetIconService;
         _linkCacheProvider = linkCacheProvider;
         _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
@@ -146,40 +147,41 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 textBlock.Foreground = Brushes.Gray;
                             }
 
-                            // Symbol
-                            var symbolIcon = new SymbolIcon {
-                                Symbol = asset.IsFile
-                                    ? assetSymbolService.GetSymbol(asset.Extension)
-                                    : Symbol.Folder,
-                                VerticalAlignment = VerticalAlignment.Center,
-                            };
-
+                            // Icon
+                            FAIconElement icon;
                             if (asset.IsFile) {
-                                if (_assetTypeService.GetAssetLink(asset.DataRelativePath) is {} assetLink
+                                var assetType = AssetTypeService.GetAssetType(asset.DataRelativePath.Path);
+                                icon = assetType is null
+                                    ? AssetIconService.GetIcon(asset.DataRelativePath.Extension)
+                                    : AssetIconService.GetIcon(assetType);
+
+                                if (assetType is not null
+                                 && AssetTypeService.GetAssetLink(asset.DataRelativePath, assetType) is {} assetLink
                                  && _assetReferenceController.GetReferencedAsset(assetLink, out var referencedAsset) is {} disposable) {
-                                    symbolIcon[!FAIconElement.ForegroundProperty] = referencedAsset.ReferenceCount
+                                    icon[!FAIconElement.ForegroundProperty] = referencedAsset.ReferenceCount
                                         .Select(c => c > 0
                                             ? StandardBrushes.ValidBrush
                                             : StandardBrushes.InvalidBrush)
                                         .ToBinding();
-                                    symbolIcon.Unloaded += OnSymbolIconOnUnloaded;
+                                    icon.Unloaded += OnSymbolIconOnUnloaded;
 
                                     void OnSymbolIconOnUnloaded(object? sender, RoutedEventArgs e) {
                                         disposable.Dispose();
-                                        symbolIcon.Unloaded -= OnSymbolIconOnUnloaded;
+                                        icon.Unloaded -= OnSymbolIconOnUnloaded;
                                     }
                                 } else {
-                                    symbolIcon.Foreground = Brushes.Gray;
+                                    icon.Foreground = Brushes.Gray;
                                 }
                             } else {
-                                symbolIcon.Foreground = Brushes.Goldenrod;
+                                icon = AssetIconService.GetIcon(Symbol.Folder);
+                                icon.Foreground = Brushes.Goldenrod;
                             }
 
                             return new StackPanel {
                                 Orientation = Orientation.Horizontal,
                                 Spacing = 5,
                                 Children = {
-                                    symbolIcon,
+                                    icon,
                                     textBlock,
                                 },
                             };
@@ -207,7 +209,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     new FuncDataTemplate<FileSystemLink>((asset, _) => {
                         if (asset is null) return null;
 
-                        var assetLink = _assetTypeService.GetAssetLink(asset.DataRelativePath);
+                        var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
                         if (assetLink is null) return null;
 
                         var referenceCount = assetReferenceController.GetReferenceCount(assetLink);
@@ -233,7 +235,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (asset is null) return null;
                         if (asset.IsDirectory) return null;
 
-                        var assetLink = _assetTypeService.GetAssetLink(asset.DataRelativePath);
+                        var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
                         if (assetLink is null) return null;
 
                         var assetLinks = GetMissingAssets(asset, assetLink).ToArray();
@@ -338,7 +340,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 .Select(link => {
                     if (link is null) return false;
 
-                    var assetLink = _assetTypeService.GetAssetLink(link.DataRelativePath);
+                    var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
                     if (assetLink is null) return false;
 
                     return assetReferenceController.GetReferenceCount(assetLink) > 0;
@@ -423,7 +425,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         // Gather all references to all assets
         foreach (var (_, dataRelativePath) in assets) {
-            var assetLink = _assetTypeService.GetAssetLink(dataRelativePath);
+            var assetLink = AssetTypeService.GetAssetLink(dataRelativePath);
             if (assetLink is null) continue;
 
             assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
@@ -431,7 +433,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var references = assetReferences
-            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, _assetTypeService, _assetReferenceController, _recordReferenceController))
+            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, AssetTypeService, _assetReferenceController, _recordReferenceController))
             .Cast<IReferenceVM>()
             .Combine(recordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _recordReferenceController)))
             .ToArray();
@@ -530,7 +532,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             },
         ];
 
-        var assetLink = _assetTypeService.GetAssetLink(asset.DataRelativePath);
+        var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
         if (assetLink is not null) {
             var assetReferences = _assetReferenceController.GetAssetReferences(assetLink);
             var recordReferences = _assetReferenceController.GetRecordReferences(assetLink);
@@ -706,7 +708,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private bool FilterLink(FileSystemLink link) {
-        var assetLink = _assetTypeService.GetAssetLink(link.DataRelativePath);
+        var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
         if (assetLink is not null) {
             var hasReferences = _assetReferenceController.GetAssetReferences(assetLink).Any()
              || _assetReferenceController.GetRecordReferences(assetLink).Any();

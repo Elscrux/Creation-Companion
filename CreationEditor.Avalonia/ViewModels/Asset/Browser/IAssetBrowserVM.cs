@@ -2,6 +2,8 @@
 using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using CreationEditor.Avalonia.Services.Asset;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using Noggog;
@@ -32,6 +34,9 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
     IDataSource DataSource { get; set; }
     ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
+
+    IAssetTypeService AssetTypeService { get; }
+    IAssetIconService AssetIconService { get; }
 
     Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo);
     IEnumerable<Control> GetContextMenuItems(FileSystemLink asset);
