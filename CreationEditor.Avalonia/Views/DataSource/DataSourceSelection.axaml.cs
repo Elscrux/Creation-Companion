@@ -38,8 +38,6 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
         if (e.TargetRow.Model is not DataSourceItem item) return;
         if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
 
-        Console.WriteLine();
-
         var indexOf = ViewModel.DataSources.IndexOf(item);
 
         var targetIndex = e.Position switch {

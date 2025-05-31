@@ -29,6 +29,8 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
     private readonly IDataSourceService _dataSourceService;
 
     public ObservableCollectionExtended<DataSourceItem> DataSources { get; } = [];
+    private IDataSource? ActiveDataSource => DataSources.FirstOrDefault(d => d.IsActive)?.DataSource;
+
     private readonly HierarchicalTreeDataGridSource<DataSourceItem> _dataSourceTreeSource;
     public ITreeDataGridSource DataSourceTreeSource => _dataSourceTreeSource;
     public Func<object, bool> CanRemoveDataSource { get; }
@@ -163,7 +165,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
             .DisposeWith(this);
 
         var anyDataSourceActive = dataSourceActivated
-            .Select(x => x.Any(dataSource => dataSource is { Type: ChangeType.Item, Item.Current.IsActive: true }));
+            .Select(_ => ActiveDataSource is not null);
 
         var anyDataSourceSelected = DataSources.WhenCollectionChanges().Select(_ => DataSources.Count > 0);
 
@@ -210,7 +212,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
             .Select(d => d.DataSource)
             .ToList();
         
-        var activeDataSource = DataSources.FirstOrDefault(d => d.IsActive)?.DataSource;
+        var activeDataSource = ActiveDataSource;
         if (activeDataSource is null) return Task.FromResult(false);
 
         _dataSourceService.UpdateDataSources(newDataSources, activeDataSource);
