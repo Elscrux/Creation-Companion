@@ -113,9 +113,6 @@
         <Compile Update="Views\Basic\PageData.cs">
           <DependentUpon>PageHost.axaml</DependentUpon>
         </Compile>
-        <Compile Update="Services\Asset\AssetSymbolService.cs">
-          <DependentUpon>IAssetSymbolService.cs</DependentUpon>
-        </Compile>
         <Compile Update="ViewModels\Reference\RecordReferenceVM.cs">
           <DependentUpon>IReferenceVM.cs</DependentUpon>
         </Compile>

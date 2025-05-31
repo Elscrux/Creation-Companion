@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Builder;
+using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -38,6 +39,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
     protected abstract IReg<IAssetBrowserVM> AssetBrowserVM { get; }
     protected abstract IReg<IDataSourceSelectionVM> DataSourceSelectionVM { get; }
     protected abstract IReg<IAssetTypeProvider> AssetTypeProvider { get; }
+    protected abstract IReg<IAssetIconService> AssetIconService { get; }
 
     protected abstract IReg<IScriptVM> ScriptVM { get; }
 
@@ -88,6 +90,10 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
         Register(builder, AssetTypeProvider)
             .As<IAssetTypeProvider>()
+            .SingleInstance();
+
+        Register(builder, AssetIconService)
+            .As<IAssetIconService>()
             .SingleInstance();
 
         // Factory

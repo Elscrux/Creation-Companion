@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Modules;
+using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Editor;
@@ -48,6 +49,7 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
     protected override IReg<IAssetBrowserVM> AssetBrowserVM => Register<AssetBrowserVM>();
     protected override IReg<IDataSourceSelectionVM> DataSourceSelectionVM => Register<DataSourceSelectionVM>();
     protected override IReg<IAssetTypeProvider> AssetTypeProvider => Register<SkyrimAssetTypeProvider>();
+    protected override IReg<IAssetIconService> AssetIconService => Register<SkyrimAssetIconService>();
 
     protected override IReg<IScriptVM> ScriptVM => Register<PapyrusScriptVM>();
 

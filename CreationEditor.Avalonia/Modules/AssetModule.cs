@@ -45,9 +45,6 @@ public sealed class AssetModule : Module {
         builder.RegisterType<NifFileAssetParser>()
             .AsSelf();
 
-        builder.RegisterType<AssetSymbolService>()
-            .As<IAssetSymbolService>();
-
         builder.RegisterType<AssetTypeService>()
             .As<IAssetTypeService>();
 
