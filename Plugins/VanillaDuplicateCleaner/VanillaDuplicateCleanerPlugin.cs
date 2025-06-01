@@ -23,5 +23,5 @@ public sealed class VanillaDuplicateCleanerPlugin(
 
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new SymbolIcon { Symbol = Symbol.Clear };
+    public object GetIcon() => new FontIcon { Glyph = "" };
 }
