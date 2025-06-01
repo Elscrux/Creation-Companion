@@ -122,18 +122,18 @@ public sealed class AssetController(
         }
     }
 
-    private void RemapReferences(FileSystemLink link, FileSystemLink newLink) {
+    public void RemapReferences(FileSystemLink oldLink, FileSystemLink newLink) {
         // Remap references in records
-        RemapRecordReferences(link, newLink);
+        RemapRecordReferences(oldLink, newLink);
 
         // Remap references in NIFs
-        RemapAssetReferences(link, newLink);
+        RemapAssetReferences(oldLink, newLink);
     }
 
-    private void RemapAssetReferences(FileSystemLink link, FileSystemLink newLink) {
-        var assetLink = assetTypeService.GetAssetLink(link.DataRelativePath);
+    private void RemapAssetReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+        var assetLink = assetTypeService.GetAssetLink(oldLink.DataRelativePath);
         if (assetLink is null) {
-            logger.Here().Warning("Couldn't find asset type for {Path}", link.DataRelativePath);
+            logger.Here().Warning("Couldn't find asset type for {Path}", oldLink.DataRelativePath);
             return;
         }
 
@@ -141,24 +141,24 @@ public sealed class AssetController(
             if (dataSourceService.TryGetFileLink(reference, out var referenceFileLink)) {
                 modelModificationService.RemapLinks(
                     referenceFileLink,
-                    p => !p.IsNullOrWhitespace() && link.DataRelativePath.Path.EndsWith(p, DataRelativePath.PathComparison),
+                    p => !p.IsNullOrWhitespace() && oldLink.DataRelativePath.Path.EndsWith(p, DataRelativePath.PathComparison),
                     newLink.DataRelativePath.Path);
             } else {
-                logger.Here().Warning("Couldn't find file link {Reference} of {Path}", reference, link.FullPath);
+                logger.Here().Warning("Couldn't find file link {Reference} of {Path}", reference, oldLink.FullPath);
             }
         }
     }
 
-    private void RemapRecordReferences(FileSystemLink link, FileSystemLink newLink) {
-        var assetLink = assetTypeService.GetAssetLink(link.DataRelativePath);
+    private void RemapRecordReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+        var assetLink = assetTypeService.GetAssetLink(oldLink.DataRelativePath);
         if (assetLink is null) {
-            logger.Here().Warning("Couldn't find asset type for {Path}", link.DataRelativePath);
+            logger.Here().Warning("Couldn't find asset type for {Path}", oldLink.DataRelativePath);
             return;
         }
 
         // Path without the base folder prefix
         // i.e. Change meshes\clutter\test\test.nif to clutter\test.nif
-        var shortenedDataRelativePath = link.FileSystem.Path.GetRelativePath(assetLink.Type.BaseFolder, newLink.DataRelativePath.Path);
+        var shortenedDataRelativePath = oldLink.FileSystem.Path.GetRelativePath(assetLink.Type.BaseFolder, newLink.DataRelativePath.Path);
 
         foreach (var formLink in assetReferenceController.GetRecordReferences(assetLink)) {
             if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
