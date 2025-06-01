@@ -63,7 +63,18 @@ public sealed class AssetController(
         if (baseDirectory is null) return;
 
         var baseIsFile = originIsFile || origin.FileSystem.Path.HasExtension(baseDirectory);
-        var destinationIsFile = destination.IsFile;
+        var destDirExists = destination.FileSystem.Directory.Exists(destination.FullPath);
+        var destFileExists = destination.FileSystem.File.Exists(destination.FullPath);
+        bool destinationIsFile;
+        if (destFileExists) {
+            destinationIsFile = true;
+        } else if (destDirExists) {
+            // If the destination is a directory, we need to move the file into it
+            destinationIsFile = false;
+        } else {
+            // If the destination doesn't exist, we assume it's a directory
+            destinationIsFile = destination.FileSystem.Path.HasExtension(destination.DataRelativePath.Path);
+        }
 
         if (originIsFile) {
             MoveInt(origin, token);
