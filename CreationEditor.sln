@@ -38,8 +38,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaterPlugin", "Plugins\Wate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCleaner", "Plugins\ModCleaner\ModCleaner.csproj", "{4C696115-0CE7-4043-8A20-880F07989F88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleAssetRemapper", "TestConsoleAssetRemapper\TestConsoleAssetRemapper.csproj", "{86A93D39-213C-4E73-9E2B-FF4C12A5AF61}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,10 +104,6 @@ Global
 		{4C696115-0CE7-4043-8A20-880F07989F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C696115-0CE7-4043-8A20-880F07989F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C696115-0CE7-4043-8A20-880F07989F88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86A93D39-213C-4E73-9E2B-FF4C12A5AF61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86A93D39-213C-4E73-9E2B-FF4C12A5AF61}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86A93D39-213C-4E73-9E2B-FF4C12A5AF61}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86A93D39-213C-4E73-9E2B-FF4C12A5AF61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{230A2302-FF8A-473C-B24C-02B53892958F} = {E1F85481-4715-40F4-9143-3CF8579C96FA}
