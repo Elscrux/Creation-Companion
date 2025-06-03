@@ -287,7 +287,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
             return updater
                 .LoadOrder.SetImmutableMods(loadedMods.OrderBy(key => mods[key].LoadOrderIndex))
-                .LoadOrder.AddFallbackModLocation(GetModsFromDataSources().Select(x => x.FullPath))
                 .Build();
         });
 

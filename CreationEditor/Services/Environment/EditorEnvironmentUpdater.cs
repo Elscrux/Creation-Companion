@@ -8,6 +8,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Order;
 using Mutagen.Bethesda.Plugins.Records;
+using Serilog;
 namespace CreationEditor.Services.Environment;
 
 public interface IEditorEnvironmentUpdater {
@@ -22,16 +23,19 @@ public interface IEditorEnvironmentUpdater {
 public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironmentUpdater
     where TMod : class, TModGetter, IContextMod<TMod, TModGetter>
     where TModGetter : class, IContextGetterMod<TMod, TModGetter> {
+    private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IDataSourceService _dataSourceService;
     private readonly INotificationService _notificationService;
     private readonly IGameReleaseContext _gameReleaseContext;
 
     public EditorEnvironmentUpdater(
+        ILogger logger,
         IFileSystem fileSystem,
         IDataSourceService dataSourceService,
         INotificationService notificationService,
         IGameReleaseContext gameReleaseContext) {
+        _logger = logger;
         _fileSystem = fileSystem;
         _dataSourceService = dataSourceService;
         _notificationService = notificationService;
@@ -71,7 +75,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         var builder = GameEnvironmentBuilder<TMod, TModGetter>
             .Create(_gameReleaseContext.Release)
             .WithLoadOrder(GetLoadOrder().ToArray())
-            .TransformModListings(x => x.Select(TryLoadListingFromFallback));
+            .TransformModListings(x => x.Select(TryLoadListingFromDataSource));
 
         linearNotifier.Next("Preparing mutable mods");
         foreach (var mutableMod in LoadOrder.MutableMods) {
@@ -108,20 +112,21 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         return new EditorEnvironmentResult<TMod, TModGetter>(environment, activeMod);
     }
 
-    private IModListingGetter<TModGetter> TryLoadListingFromFallback(IModListingGetter<TModGetter> listing) {
-        if (listing.ExistsOnDisk) return listing;
-
-        foreach (var fallbackModLocation in LoadOrder.FallbackModLocations) {
-            var fileName = _fileSystem.Path.GetFileName(fallbackModLocation);
-            if (fileName != listing.FileName) continue;
-
-            var modPath = new ModPath(fallbackModLocation);
+    private IModListingGetter<TModGetter> TryLoadListingFromDataSource(IModListingGetter<TModGetter> listing) {
+        if (_dataSourceService.TryGetFileLink(listing.FileName, out var link)) {
+            var modPath = new ModPath(link.FullPath);
             var mod = ModInstantiator<TModGetter>.Importer(modPath,
                 _gameReleaseContext.Release,
                 new BinaryReadParameters {
                     FileSystem = _fileSystem
                 });
             return new ModListing<TModGetter>(mod, listing.Enabled, listing.GhostSuffix);
+        }
+
+        if (!listing.ExistsOnDisk) {
+            _logger.Here().Error("Failed to load mod listing for {FileName} from any data source {DataSources}",
+                listing.FileName,
+                _dataSourceService.ListedOrder.Select(x => x.Name));
         }
 
         return listing;
@@ -132,7 +137,6 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
     internal readonly List<ModKey> ImmutableMods = [];
     internal readonly List<IMod> MutableMods = [];
     internal readonly List<ModKey> NewMutableMods = [];
-    internal readonly List<string> FallbackModLocations = [];
 
     public IEditorEnvironmentUpdater SetImmutableMods(params IEnumerable<ModKey> modKeys) {
         ImmutableMods.ReplaceWith(modKeys);
@@ -177,16 +181,6 @@ public sealed class LoadOrderBuilder(IEditorEnvironmentUpdater updater) {
         }
 
         return modKey;
-    }
-
-    public IEditorEnvironmentUpdater AddFallbackModLocation(IEnumerable<string> modLocations) {
-        FallbackModLocations.AddRange(modLocations);
-        return updater;
-    }
-
-    public IEditorEnvironmentUpdater RemoveFallbackModLocation(string modLocation) {
-        FallbackModLocations.Remove(modLocation);
-        return updater;
     }
 }
 
