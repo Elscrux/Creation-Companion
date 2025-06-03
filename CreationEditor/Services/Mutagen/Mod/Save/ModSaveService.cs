@@ -1,13 +1,17 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Strings;
+using Mutagen.Bethesda.Strings.DI;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.Mod.Save;
 
 public sealed class ModSaveService(
     IEditorEnvironment editorEnvironment,
     ILinkCacheProvider linkCacheProvider,
+    IAssetTypeProvider assetTypeProvider,
     IModSaveLocationProvider modSaveLocationProvider,
     IFileSystem fileSystem,
     ISavePipeline savePipeline,
@@ -51,17 +55,28 @@ public sealed class ModSaveService(
     }
 
     private void Write(IMod mod, string filePath) {
-        mod.BeginWrite
+        var builder = mod.BeginWrite
             .ToPath(filePath)
             .WithLoadOrder(editorEnvironment.GameEnvironment.LoadOrder)
             .WithDataFolder(editorEnvironment.GameEnvironment.DataFolderPath)
             .WithFileSystem(fileSystem)
-            .WithAllParentMasters()
-            // todo add options for localization export!
-            // .WithStringsWriter()
-            // .WithTargetLanguage()
-            // .WithEmbeddedEncodings()
-            .Write();
+            .WithAllParentMasters();
+
+        // If the mod is using localization, set up the strings writer
+        if (mod.UsingLocalization) {
+            var stringsFolder = fileSystem.Path.Combine(modSaveLocationProvider.GetSaveLocation(), assetTypeProvider.Translation.BaseFolder);
+
+            builder
+                .WithStringsWriter(new StringsWriter(
+                    editorEnvironment.GameEnvironment.GameRelease,
+                    mod.ModKey,
+                    stringsFolder,
+                    MutagenEncoding.Default,
+                    fileSystem))
+                .WithTargetLanguage(Language.English);
+        }
+
+        builder.Write();
     }
 
     public void BackupMod(IMod mod, int limit = -1) {
