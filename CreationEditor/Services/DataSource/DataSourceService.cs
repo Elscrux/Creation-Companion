@@ -104,21 +104,25 @@ public sealed class DataSourceService : IDataSourceService {
             .ToArray();
 
         // Add file system data sources from mementos
-        foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.FileSystem)) {
-            fileSystemDataSources.Add(new FileSystemDataSource(_fileSystem, dataSourceMemento.Path, dataSourceMemento.IsReadyOnly));
+        foreach (var (_, _, path, isReadyOnly) in mementos.Where(x => x.Type == DataSourceType.FileSystem)) {
+            if (_fileSystem.Directory.Exists(path)) {
+                fileSystemDataSources.Add(new FileSystemDataSource(_fileSystem, path, isReadyOnly));
+            }
         }
 
         // Add archive data sources from mementos
-        foreach (var dataSourceMemento in mementos.Where(x => x.Type == DataSourceType.Archive)) {
-            var archiveDataSourcePath = _fileSystem.Path.GetDirectoryName(dataSourceMemento.Path);
+        foreach (var (_, _, path, _) in mementos.Where(x => x.Type == DataSourceType.Archive)) {
+            var archiveDataSourcePath = _fileSystem.Path.GetDirectoryName(path);
             if (archiveDataSourcePath is null) continue;
 
             var dataSource = fileSystemDataSources.FirstOrDefault(dataSource => dataSource.Path == archiveDataSourcePath);
             if (dataSource is null) continue;
 
-            var archiveLink = new FileSystemLink(dataSource, _fileSystem.Path.GetFileName(dataSourceMemento.Path));
-            var archiveDataSource = new ArchiveDataSource(_fileSystem, dataSourceMemento.Path, _archiveService.GetReader(archiveLink), archiveLink);
-            archiveDataSources.Add(archiveDataSource);
+            var archiveLink = new FileSystemLink(dataSource, _fileSystem.Path.GetFileName(path));
+            if (archiveLink.Exists()) {
+                var archiveDataSource = new ArchiveDataSource(_fileSystem, path, _archiveService.GetReader(archiveLink), archiveLink);
+                archiveDataSources.Add(archiveDataSource);
+            }
         }
 
         return (archiveDataSources, fileSystemDataSources);
