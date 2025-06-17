@@ -167,8 +167,8 @@ public static partial class Interop {
     public static int QuadrantSize => Marshal.SizeOf<QuadrantMarshaller.QuadrantUnmanaged>();
 
     [CustomMarshaller(typeof(Quadrant), MarshalMode.Default, typeof(QuadrantMarshaller))]
-    internal static class QuadrantMarshaller {
-        public static unsafe QuadrantUnmanaged ConvertToUnmanaged(Quadrant managed) {
+    internal static unsafe class QuadrantMarshaller {
+        public static QuadrantUnmanaged ConvertToUnmanaged(Quadrant managed) {
             return new QuadrantUnmanaged {
                 BaseLayer = BaseLayerMarshaller.ConvertToUnmanaged(managed.BaseLayer),
                 AlphaLayers = ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.AllocateContainerForUnmanagedElements(
@@ -178,7 +178,7 @@ public static partial class Interop {
             };
         }
 
-        public static unsafe Quadrant ConvertToManaged(QuadrantUnmanaged unmanaged) {
+        public static Quadrant ConvertToManaged(QuadrantUnmanaged unmanaged) {
             return new Quadrant {
                 BaseLayer = BaseLayerMarshaller.ConvertToManaged(unmanaged.BaseLayer),
                 AlphaLayers =
@@ -188,13 +188,13 @@ public static partial class Interop {
             };
         }
 
-        public static unsafe void Free(QuadrantUnmanaged unmanaged) {
+        public static void Free(QuadrantUnmanaged unmanaged) {
             ArrayMarshaller<AlphaLayer, AlphaLayerMarshaller.AlphaLayerUnmanaged>.Free(unmanaged.AlphaLayers);
         }
 
         internal struct QuadrantUnmanaged {
             public BaseLayerMarshaller.BaseLayerUnmanaged BaseLayer;
-            public unsafe AlphaLayerMarshaller.AlphaLayerUnmanaged* AlphaLayers; // max 8 layers (pass by pointer)
+            public AlphaLayerMarshaller.AlphaLayerUnmanaged* AlphaLayers; // max 8 layers (pass by pointer)
             public byte AlphaLayersLength;
         }
     }
