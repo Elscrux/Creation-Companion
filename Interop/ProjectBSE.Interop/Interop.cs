@@ -142,6 +142,7 @@ public static partial class Interop {
         public long CornerSetsStruct;
         public long TerrainInfoStruct;
         public long FeatureSetStruct;
+        public long KeyBindingsStruct;
     }
     #endregion
 }

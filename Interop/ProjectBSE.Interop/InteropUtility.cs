@@ -25,6 +25,21 @@ public static class InteropUtility {
         return result;
     }
 
+    public static string[] ToStringArrayDirectly(this IntPtr pointer, int count) {
+        var result = new string[count];
+ 
+        var offset = 0;
+        for (var i = 0; i < count; i++) {
+            var str = Marshal.PtrToStringAnsi(pointer + offset);
+            if (str is not { Length: > 0 }) return result;
+
+            result[i] = str;
+            offset += str.Length + 1;
+        }
+
+        return result;
+    }
+
     public static string[] ToStringArray(this IList<FormKey> formKeys) {
         var strings = new string[formKeys.Count];
         for (var i = 0; i < formKeys.Count; i++) {

@@ -24,6 +24,23 @@ public sealed class InteropTest {
     }
 
     [Fact]
+    public void TestKeybindings() {
+        UpdateKeybindings(Enum.GetValues<IOFunction>()
+            .ToDictionary(x => x,
+                _ => new IOFunctionBinding {
+                    Type = IOFunctionBindingType.Keyboard,
+                    Key = -1,
+                })
+        );
+        var strings = EnumerateKeyBindingNames();
+        Assert.NotNull(strings);
+        Assert.NotEmpty(strings);
+        var keyBindings = GetKeyBindings();
+        Assert.NotNull(keyBindings);
+        Assert.NotEmpty(keyBindings.BindingList);
+    }
+
+    [Fact]
     public void TestSize() {
         var sizeInformation = GetSizeInfo();
 
@@ -39,6 +56,7 @@ public sealed class InteropTest {
         Assert.Equal(sizeInformation.CornerSetsStruct, CornerSetsSize);
         Assert.Equal(sizeInformation.TerrainInfoStruct, TerrainInfoSize);
         Assert.Equal(sizeInformation.FeatureSetStruct, FeatureSetSize);
+        Assert.Equal(sizeInformation.KeyBindingsStruct, KeyBindingsSize);
     }
 
     [Fact]
