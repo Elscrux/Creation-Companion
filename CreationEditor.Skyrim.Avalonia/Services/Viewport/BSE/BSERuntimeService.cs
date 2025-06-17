@@ -40,6 +40,27 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
 
         viewportFactory.ViewportInitialized
             .Subscribe(_ => {
+                UpdateKeybindings(new Dictionary<IOFunction, IOFunctionBinding> {
+                    { IOFunction.FreeForward, new IOFunctionBinding { Key = 'w', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeLeft, new IOFunctionBinding { Key = 'a', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeBackwards, new IOFunctionBinding { Key = 's', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeRight, new IOFunctionBinding { Key = 'd', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeDown, new IOFunctionBinding { Key = 'q', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeUp, new IOFunctionBinding { Key = 'e', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.FreeSpeedAdd, new IOFunctionBinding { Key = 1, Type = IOFunctionBindingType.Scroll } },
+                    { IOFunction.FreeSpeedReduce, new IOFunctionBinding { Key = -1, Type = IOFunctionBindingType.Scroll } },
+                    { IOFunction.FreeReset, new IOFunctionBinding { Key = '-', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.RotatingForward, new IOFunctionBinding { Key = 1, Type = IOFunctionBindingType.Scroll } },
+                    { IOFunction.RotatingBackwards, new IOFunctionBinding { Key = -1, Type = IOFunctionBindingType.Scroll } },
+                    { IOFunction.RotatingUp, new IOFunctionBinding { Key = 'q', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.RotatingDown, new IOFunctionBinding { Key = 'e', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.RotatingReset, new IOFunctionBinding { Key = '-', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.RotatingSpeedAdd, new IOFunctionBinding { Key = '+', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.RotatingSpeedReduce, new IOFunctionBinding { Key = '-', Type = IOFunctionBindingType.Keyboard } },
+                    { IOFunction.MoveCamera, new IOFunctionBinding { Key = 0, Type = IOFunctionBindingType.Mouse } },
+                    { IOFunction.Select, new IOFunctionBinding { Key = 1, Type = IOFunctionBindingType.Mouse } },
+                    { IOFunction.MultiSelectModifier, new IOFunctionBinding { Key = 'y', Type = IOFunctionBindingType.Keyboard } },// How to set control key?
+                });
                 SetupSelectionCallback();
             });
     }
