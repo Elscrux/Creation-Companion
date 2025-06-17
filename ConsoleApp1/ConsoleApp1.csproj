@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
+    </ItemGroup>
+
+</Project>

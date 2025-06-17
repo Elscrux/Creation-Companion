@@ -76,4 +76,30 @@ public static class TreeExtension {
         bool includeRoot = false) {
         return rootEnumerable.SelectMany(rootItem => GetChildren(rootItem, childPredicate, childSelector, includeRoot));
     }
+
+    public static IEnumerable<T> GetTreeLeaves<T>(
+        this T root,
+        Func<T, IEnumerable<T>?> childSelector) {
+        if (childSelector(root)?.Any() is false) {
+            yield return root;
+            yield break;
+        }
+
+        var stack = new Stack<T>();
+        stack.Push(root);
+
+        while (stack.Count > 0) {
+            var current = stack.Pop();
+
+            var childEnumerable = childSelector(current);
+            if (childEnumerable is null || !childEnumerable.Any()) {
+                yield return current;
+                continue;
+            }
+
+            foreach (var child in childEnumerable) {
+                stack.Push(child);
+            }
+        }
+    }
 }
