@@ -45,51 +45,116 @@ public sealed class InteropTest {
     public void TestLoadRefs() {
         ReferenceLoad[] referenceLoads = [TestReference];
 
-        var loadCallbackTriggered = false;
+        var callbackTriggered = false;
         AddLoadCallback(refs => {
             Assert.Equal(referenceLoads.Length, refs.Length);
             for (var i = 0; i < refs.Length; i++) {
                 Assert.Equal(refs[i].FormKey, referenceLoads[i].FormKey);
             }
-            loadCallbackTriggered = true;
+            callbackTriggered = true;
         });
 
         WaitFinishedInit();
 
         LoadReferences(referenceLoads);
 
-        Assert.True(loadCallbackTriggered);
+        Assert.True(callbackTriggered);
     }
 
     [Fact]
-    public void TestHideRefs() {
-        var hideFormKey = FormKey.Factory("123456:Base.esm");
-        var showFormKey = FormKey.Factory("654321:Base.esm");
-        FormKey[] showFormKeys = [showFormKey];
-        FormKey[] hideFormKeys = [hideFormKey];
+    public void TestDeleteRefs() {
+        FormKey[] formKeys = [FormKey.Factory("123456:Skyrim.esm")];
 
-        var hideCallbackTriggered = false;
-        AddHideCallback(formKeys => {
-            Assert.NotNull(formKeys);
-            Assert.Equal(hideFormKeys.Length, formKeys.Length);
-            Assert.Equal(hideFormKey, formKeys[0]);
-            hideCallbackTriggered = true;
-        });
-
-        var showCallbackTriggered = false;
-        AddShowCallback(formKeys => {
-            Assert.NotNull(formKeys);
-            Assert.Equal(showFormKeys.Length, formKeys.Length);
-            Assert.Equal(showFormKey, formKeys[0]);
-            showCallbackTriggered = true;
+        var callbackTriggered = false;
+        AddDeleteCallback(refs => {
+            Assert.Equal(formKeys.Length, refs.Length);
+            for (var i = 0; i < refs.Length; i++) {
+                Assert.Equal(refs[i], formKeys[i]);
+            }
+            callbackTriggered = true;
         });
 
         WaitFinishedInit();
 
-        ShowReferences(showFormKeys);
-        Assert.True(showCallbackTriggered);
+        DeleteReferences(formKeys);
 
-        HideReferences(hideFormKeys);
-        Assert.True(hideCallbackTriggered);
+        Assert.True(callbackTriggered);
+    }
+
+    // Update, Hide, and Show currently don't work because they are not implemented on the C++ side,
+    // and it stops calling anything after the C++ handler function returns false.
+
+    [Fact]
+    public void TestUpdateRefs() {
+        ReferenceUpdate[] updates = [
+            new() {
+                FormKey = FormKey.Factory("123456:Skyrim.esm"),
+                Transform = new ReferenceTransform(),
+                Update = UpdateType.Transform
+            },
+            new() {
+                FormKey = FormKey.Factory("123456:Skyrim.esm"),
+                Path = "test.nif",
+                Update = UpdateType.Path
+            },
+        ];
+
+        var callbackTriggered = false;
+        AddUpdateCallback(refs => {
+            Assert.Equal(updates.Length, refs.Length);
+            for (var i = 0; i < refs.Length; i++) {
+                Assert.Equal(refs[i].FormKey, updates[i].FormKey);
+                Assert.Equal(refs[i].Path, updates[i].Path);
+                Assert.Equal(refs[i].Transform, updates[i].Transform);
+                Assert.Equal(refs[i].Update, updates[i].Update);
+            }
+            callbackTriggered = true;
+        });
+
+        WaitFinishedInit();
+
+        UpdateReferences(updates);
+
+        Assert.True(callbackTriggered);
+    }
+
+    [Fact]
+    public void TestHideRefs() {
+        FormKey[] formKeys = [FormKey.Factory("123456:Skyrim.esm")];
+
+        var callbackTriggered = false;
+        AddHideCallback(refs => {
+            Assert.Equal(formKeys.Length, refs.Length);
+            for (var i = 0; i < refs.Length; i++) {
+                Assert.Equal(refs[i], formKeys[i]);
+            }
+            callbackTriggered = true;
+        });
+
+        WaitFinishedInit();
+
+        HideReferences(formKeys);
+
+        Assert.True(callbackTriggered);
+    }
+
+    [Fact]
+    public void TestShowRefs() {
+        FormKey[] formKeys = [FormKey.Factory("123456:Skyrim.esm")];
+    
+        var callbackTriggered = false;
+        AddShowCallback(refs => {
+            Assert.Equal(formKeys.Length, refs.Length);
+            for (var i = 0; i < refs.Length; i++) {
+                Assert.Equal(refs[i], formKeys[i]);
+            }
+            callbackTriggered = true;
+        });
+    
+        WaitFinishedInit();
+    
+        ShowReferences(formKeys);
+    
+        Assert.True(callbackTriggered);
     }
 }
