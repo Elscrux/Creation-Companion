@@ -73,8 +73,7 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
 
         // Service
         builder.RegisterType<BSERuntimeService>()
-            .As<IViewportRuntimeService>()
-            .SingleInstance();
+            .As<IViewportRuntimeService>();
 
         // View Model
         builder.RegisterType<InteriorCellsVM>()
