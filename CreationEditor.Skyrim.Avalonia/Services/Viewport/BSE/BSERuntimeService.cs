@@ -59,7 +59,7 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
                     { IOFunction.RotatingSpeedReduce, new IOFunctionBinding { Key = '-', Type = IOFunctionBindingType.Keyboard } },
                     { IOFunction.MoveCamera, new IOFunctionBinding { Key = 0, Type = IOFunctionBindingType.Mouse } },
                     { IOFunction.Select, new IOFunctionBinding { Key = 1, Type = IOFunctionBindingType.Mouse } },
-                    { IOFunction.MultiSelectModifier, new IOFunctionBinding { Key = 'y', Type = IOFunctionBindingType.Keyboard } },// How to set control key?
+                    { IOFunction.MultiSelectModifier, new IOFunctionBinding { Key = (int) SpecialKeys.Ctrl, Type = IOFunctionBindingType.Keyboard } },// How to set control key?
                 });
                 SetupSelectionCallback();
             });

@@ -26,7 +26,6 @@ public static partial class Interop {
         };
         GetKeyBindings_Native(ref bindings);
         return bindings;
-
     }
 
     [LibraryImport(DllName, EntryPoint = "enumerateKeyBindingNames", StringMarshalling = StringMarshalling.Utf8)]
@@ -77,8 +76,9 @@ public static partial class Interop {
         FreeCam,
     }
 
-    public enum SpecialKeys : uint {
-        Shift = 126,
+    public enum SpecialKeys {
+        Shift = 340,
+        Ctrl = 341
     }
 
     public enum RepressChecks : uint {
