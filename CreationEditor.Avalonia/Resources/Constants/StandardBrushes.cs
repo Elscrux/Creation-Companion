@@ -4,9 +4,9 @@ using Avalonia.Media;
 namespace CreationEditor.Avalonia.Constants;
 
 public static class StandardBrushes {
-    public static IBrush? HighlightBrush => GetBrush("SystemAccentColor");
+    public static ISolidColorBrush? HighlightBrush => GetBrush("SystemAccentColor");
 
-    public static IBrush? BackgroundBrush => GetBrush("SolidBackgroundFillColorTertiary");
+    public static ISolidColorBrush? BackgroundBrush => GetBrush("SolidBackgroundFillColorTertiary");
 
     public static ISolidColorBrush ValidBrush => Brushes.ForestGreen;
     public static ISolidColorBrush InvalidBrush => Brushes.IndianRed;

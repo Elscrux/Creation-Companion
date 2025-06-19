@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Resources\Style\**"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -121,6 +122,12 @@
         </Compile>
         <Compile Update="ViewModels\Record\Browser\ModScopeProviderVM.cs">
           <DependentUpon>IModScopeProviderVM.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\Attached\DataGridDragDropHandler.cs">
+          <DependentUpon>DragDropHandler.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\Attached\ListBoxDragDropHandler.cs">
+          <DependentUpon>DragDropHandler.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 

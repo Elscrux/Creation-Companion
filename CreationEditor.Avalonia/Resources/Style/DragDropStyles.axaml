@@ -1,0 +1,121 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Styles.Resources>
+        <attached:ListBoxDragDropHandler
+            Orientation="Vertical"
+            x:Key="ListBoxDragDropDragDropHandler"/>
+
+        <attached:DataGridDragDropHandler
+            Orientation="Vertical"
+            x:Key="DataGridDragDropHandler"/>
+
+        <attached:DragContext x:Key="DragContext"/>
+    </Styles.Resources>
+
+    <!-- Data Grid -->
+    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
+        <Setter Property="HeadersVisibility" Value="All"/>
+    </Style>
+
+    <!-- This makes only the DataGridRowHeader available for dragging, instead of making the entire row draggable -->
+    <!-- Which prevents a conflict between text selection in a cell and drag-and-drop -->
+    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
+        <Style Selector="^[(attached|DragDropExtended.AllowDrop)=True] DataGridRowHeader">
+            <Setter Property="(Interaction.Behaviors)">
+                <BehaviorCollectionTemplate>
+                    <BehaviorCollection>
+                        <ContextDragWithDirectionBehavior
+                            Context="{StaticResource DragContext}"
+                            Handler="{StaticResource DataGridDragDropHandler}"/>
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+            <Setter Property="Content">
+                <Template>
+                    <StackPanel Orientation="Horizontal">
+                        <controls:SymbolIcon
+                            FontSize="24"
+                            MaxWidth="7"
+                            Symbol="MoreVertical"/>
+                        <controls:SymbolIcon
+                            FontSize="24"
+                            MaxWidth="7"
+                            Symbol="MoreVertical"/>
+                    </StackPanel>
+                </Template>
+            </Setter>
+        </Style>
+    </Style>
+
+    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
+        <Style Selector="^[(attached|DragDropExtended.AllowDrop)=False] DataGridRow">
+            <Setter Property="(Interaction.Behaviors)">
+                <BehaviorCollectionTemplate>
+                    <BehaviorCollection>
+                        <ContextDragWithDirectionBehavior
+                            Context="{StaticResource DragContext}"
+                            Handler="{StaticResource DataGridDragDropHandler}"/>
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+        </Style>
+    </Style>
+
+    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrop)=True]">
+        <Setter
+            Property="RowHeaderWidth"
+            Value="24"/>
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <ContextDropBehavior
+                        Handler="{StaticResource DataGridDragDropHandler}"/>
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+    </Style>
+
+    <!-- List Box -->
+    <Style Selector=":is(ListBox)[(attached|DragDropExtended.AllowDrop)=True]">
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <ContextDropBehavior
+                        Handler="{StaticResource ListBoxDragDropDragDropHandler}"/>
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style
+        Selector=":is(ListBox)[(attached|DragDropExtended.AllowDrag)=True] > :is(ListBoxItem)">
+        <Setter Property="ZIndex" Value="0"/>
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <ContextDragBehavior
+                        Context="{StaticResource DragContext}"
+                        Handler="{StaticResource ListBoxDragDropDragDropHandler}"/>
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- TODO Add TreeView -->
+</Styles>

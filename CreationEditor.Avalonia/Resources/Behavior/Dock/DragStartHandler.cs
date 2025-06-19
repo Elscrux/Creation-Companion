@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 using Noggog;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class DragHandler(
+public sealed class DragStartHandler(
     Func<object?, object?, PointerEventArgs, Task> dragCallback,
     double dragStartDistance = 10) {
 
@@ -15,11 +15,11 @@ public sealed class DragHandler(
     private readonly Dictionary<object, List<Interactive>> _identifierElements = new();
 
     public void Register(Interactive element, object? identifier = null) {
-        element.AddHandler(InputElement.PointerPressedEvent, Pressed, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        element.AddHandler(InputElement.PointerMovedEvent, Moved, RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        element.AddHandler(InputElement.PointerReleasedEvent,
-            Released,
-            RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        // todo register also for list item boxes loaded later
+        const RoutingStrategies routingStrategies = RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
+        element.AddHandler(InputElement.PointerPressedEvent, Pressed, routingStrategies);
+        element.AddHandler(InputElement.PointerMovedEvent, Moved, routingStrategies);
+        element.AddHandler(InputElement.PointerReleasedEvent, Released, routingStrategies);
 
         if (identifier is not null) {
             _elementIdentifiers.TryAdd(element, identifier);

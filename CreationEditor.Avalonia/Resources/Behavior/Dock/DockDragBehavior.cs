@@ -5,14 +5,14 @@ using CreationEditor.Avalonia.Models.Docking;
 namespace CreationEditor.Avalonia.Behavior;
 
 public sealed class DockDragBehavior : Behavior<Control> {
-    private readonly DragHandler _dragHandler = new(Drag);
+    private readonly DragStartHandler _dragStartHandler = new(Drag);
 
     protected override void OnAttached() {
         base.OnAttached();
 
         if (AssociatedObject is null) return;
 
-        _dragHandler.Register(AssociatedObject);
+        _dragStartHandler.Register(AssociatedObject);
     }
 
     protected override void OnDetaching() {
@@ -20,7 +20,7 @@ public sealed class DockDragBehavior : Behavior<Control> {
 
         if (AssociatedObject is null) return;
 
-        _dragHandler.Unregister(AssociatedObject);
+        _dragStartHandler.Unregister(AssociatedObject);
     }
 
     private static async Task Drag(object? sender, object? identifier, PointerEventArgs e) {

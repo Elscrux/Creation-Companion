@@ -7,7 +7,8 @@
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
         xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker"
-        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic">
+        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
+        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached">
     <Design.PreviewWith>
         <Border Padding="20">
             <picker:FormKeyPicker/>
@@ -19,6 +20,17 @@
     </Style>
 
     <Style Selector="picker|FormKeyPicker">
+        <Style.Resources>
+            <attached:FormLinkDragDropHandler x:Key="FormLinkDragDropHandler"/>
+        </Style.Resources>
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <ContextDropBehavior
+                        Handler="{StaticResource FormLinkDragDropHandler}"/>
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border
@@ -97,6 +109,18 @@
                                 Margin="5, 1"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
+                            <Button.Resources>
+                                <attached:DragContext x:Key="DragContext"/>
+                                <attached:DefaultDragHandler x:TypeArguments="picker:FormKeyPicker"
+                                                           x:Key="DragHandler"/>
+                            </Button.Resources>
+                            <Interaction.Behaviors>
+                                <BehaviorCollection>
+                                    <ContextDragBehavior
+                                        Context="{StaticResource DragContext}"
+                                        Handler="{StaticResource DragHandler}"/>
+                                </BehaviorCollection>
+                            </Interaction.Behaviors>
                             <Button.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
                                     <ReflectionBinding Path="$parent.IsPointerOver"/>

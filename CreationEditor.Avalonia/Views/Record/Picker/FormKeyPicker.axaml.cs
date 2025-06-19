@@ -53,8 +53,9 @@ public class FormKeyPicker : AFormKeyPicker {
 
         dragger?.SetValue(FormLinkDragDrop.AllowDragDataGridProperty, true);
         SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
+        SetValue(DragDropExtended.DragHandlerProperty, new FormLinkDragDropHandler());
 
-        dragger?.SetValue(FormLinkDragDrop.GetFormLinkProperty,
+        SetValue(FormLinkDragDrop.GetFormLinkProperty,
             _ => {
                 if (LinkCache is null
                  || !LinkCache.TryResolve(FormKey, EnabledTypes(SelectableTypes), out var record))

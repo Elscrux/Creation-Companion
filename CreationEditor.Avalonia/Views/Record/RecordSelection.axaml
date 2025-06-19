@@ -18,7 +18,6 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
-                  attached:FormLinkDragDrop.AllowDragDataGrid="True"
                   attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
                   attached:DragDropExtended.AllowDrag="True"
                   IsReadOnly="True">

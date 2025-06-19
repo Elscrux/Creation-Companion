@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using System.Collections;
+using DynamicData;
 using Noggog;
 namespace CreationEditor;
 
@@ -71,5 +72,57 @@ public static class ListExtension {
     public static void Apply<T>(this IList<T> source, Change<T> item, IEqualityComparer<T>? equalityComparer = null)
         where T : notnull {
         source.Clone(item.AsEnumerable(), equalityComparer);
+    }
+
+    public static void MoveItem(this IList list, int sourceIndex, int targetIndex) {
+        if (sourceIndex < targetIndex)
+        {
+            var item = list[sourceIndex];
+            list.RemoveAt(sourceIndex);
+            list.Insert(targetIndex, item);
+        }
+        else
+        {
+            var removeIndex = sourceIndex + 1;
+            if (list.Count + 1 > removeIndex)
+            {
+                var item = list[sourceIndex];
+                list.RemoveAt(removeIndex - 1);
+                list.Insert(targetIndex, item);
+            }
+        }
+    }
+
+    public static void MoveItem<T>(this IList<T> list, int sourceIndex, int targetIndex) {
+        if (sourceIndex < targetIndex)
+        {
+            var item = list[sourceIndex];
+            list.RemoveAt(sourceIndex);
+            list.Insert(targetIndex, item);
+        }
+        else
+        {
+            var removeIndex = sourceIndex + 1;
+            if (list.Count + 1 > removeIndex)
+            {
+                var item = list[sourceIndex];
+                list.RemoveAt(removeIndex - 1);
+                list.Insert(targetIndex, item);
+            }
+        }
+    }
+
+    public static void SwapItems(this IList list, int sourceIndex, int targetIndex) {
+        var item1 = list[sourceIndex];
+        var item2 = list[targetIndex];
+        list[targetIndex] = item1;
+        list[sourceIndex] = item2;
+    }
+
+    public static void SwapItems<T>(this IList<T> list, int sourceIndex, int targetIndex) {
+        var item1 = list[sourceIndex];
+        var item2 = list[targetIndex];
+        list[targetIndex] = item1;
+        list[sourceIndex] = item2;
     }
 }

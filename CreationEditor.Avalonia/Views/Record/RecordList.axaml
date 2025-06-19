@@ -11,6 +11,10 @@
              x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
     <Grid>
+        <Grid.Resources>
+            <attached:FormLinkDragDropHandler x:Key="FormLinkDragHandler"/>
+        </Grid.Resources>
+
         <!-- Background needs to be transparent to make the context menu work in empty area -->
         <!-- https://github.com/AvaloniaUI/Avalonia/issues/2718 -->
         <DataGrid
@@ -24,9 +28,9 @@
             CanUserReorderColumns="True" CanUserResizeColumns="True"
             AutoGenerateColumns="False"
             KeyDown="RecordGrid_OnKeyDown"
-            attached:FormLinkDragDrop.AllowDragDataGrid="True"
             attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
             attached:DragDropExtended.AllowDrag="True"
+            attached:DragDropExtended.DragHandler="{StaticResource FormLinkDragHandler}"
             Classes="Small"
             IsReadOnly="True">
             <Interaction.Behaviors>
