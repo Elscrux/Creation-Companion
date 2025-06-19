@@ -24,6 +24,7 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed class MainVM : ViewModel {
+    private readonly IEditorEnvironment _editorEnvironment;
     private const string BaseWindowTitle = "Creation Companion";
 
     public INotificationVM NotificationVM { get; }
@@ -86,6 +87,7 @@ public sealed class MainVM : ViewModel {
         IModSaveService modSaveService,
         IApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
+        _editorEnvironment = editorEnvironment;
         NotificationVM = notificationVM;
         BusyService = busyService;
         ModSelectionVM = modSelectionVM;
@@ -111,7 +113,7 @@ public sealed class MainVM : ViewModel {
         });
 
         OpenGameFolder = ReactiveCommand.Create(() => {
-            var gameFolder = fileSystem.Directory.GetParent(editorEnvironment.GameEnvironment.DataFolderPath);
+            var gameFolder = fileSystem.Directory.GetParent(_editorEnvironment.GameEnvironment.DataFolderPath);
             if (gameFolder is not null) {
                 Process.Start(new ProcessStartInfo {
                     FileName = gameFolder.FullName,
@@ -123,7 +125,7 @@ public sealed class MainVM : ViewModel {
 
         OpenDataFolder = ReactiveCommand.Create(() => {
             Process.Start(new ProcessStartInfo {
-                FileName = editorEnvironment.GameEnvironment.DataFolderPath,
+                FileName = _editorEnvironment.GameEnvironment.DataFolderPath,
                 UseShellExecute = true,
                 Verb = "open",
             });
@@ -136,13 +138,17 @@ public sealed class MainVM : ViewModel {
         });
 
         Save = ReactiveCommand.CreateRunInBackground(() => {
-            Parallel.ForEach(editorEnvironment.MutableMods, modSaveService.SaveMod);
+            Parallel.ForEach(_editorEnvironment.MutableMods, modSaveService.SaveMod);
         });
 
         OpenDockElement = ReactiveCommand.CreateFromTask<DockElement>(element => dockFactory.Open(element));
 
-        WindowTitleObs = editorEnvironment.ActiveModChanged
+        WindowTitleObs = _editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
+    }
+
+    public bool IsEnvironmentUninitialized() {
+        return _editorEnvironment.ActiveMod.ModKey.IsNull;    
     }
 }

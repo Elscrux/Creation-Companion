@@ -224,6 +224,7 @@
 
         <dialog:SaveDialog
             x:Name="ModSelectionPopup"
+            IsVisible="False"
             Title="Select Mods"
             DataContext="{Binding ModSelectionVM}">
             <dialog:SaveDialog.Dialog>

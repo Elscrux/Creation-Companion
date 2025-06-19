@@ -38,7 +38,13 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         this.GetObservable(ViewModelProperty).Subscribe(OnViewModelUpdated);
     }
 
-    private void OnDataContextUpdated(object? value) => ViewModel = value as MainVM;
+    private void OnDataContextUpdated(object? value) {
+        ViewModel = value as MainVM;
+
+        if (ViewModel is not null && ViewModel.IsEnvironmentUninitialized()) {
+            ModSelectionPopup.Show();
+        }
+    }
 
     private void OnViewModelUpdated(object? value) {
         if (value is null) {
