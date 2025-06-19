@@ -41,8 +41,12 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
     private void OnDataContextUpdated(object? value) {
         ViewModel = value as MainVM;
 
-        if (ViewModel is not null && ViewModel.IsEnvironmentUninitialized()) {
+        if (ViewModel is null) return;
+
+        if (ViewModel.IsEnvironmentUninitialized()) {
             ModSelectionPopup.Show();
+        } else {
+            ModSelectionPopup.CancelEnabledFromStart = true;
         }
     }
 
