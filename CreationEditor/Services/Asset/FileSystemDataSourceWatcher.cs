@@ -98,7 +98,7 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
         bool Filter(TEvent t) {
             if (!DataSource.TryGetDataRelativePath(t.FullPath, out var relativePath)) return false;
 
-            return _ignoredDirectoriesProvider.IsIgnored(relativePath);
+            return !_ignoredDirectoriesProvider.IsIgnored(relativePath);
         }
     }
 
