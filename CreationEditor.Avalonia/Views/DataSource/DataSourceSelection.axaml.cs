@@ -14,13 +14,13 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
         InitializeComponent();
     }
 
-    private static void TreeDataGrid_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
+    private void TreeDataGrid_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
         e.AllowedEffects = e.Models.OfType<DataSourceItem>().Any(x => x.DataSource is ArchiveDataSource)
             ? DragDropEffects.None
             : DragDropEffects.Move;
     }
 
-    private static void TreeDataGrid_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
+    private void TreeDataGrid_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
         e.Inner.DragEffects = DragDropEffects.Move;
 
         if (e.TargetRow.Model is not DataSourceItem
