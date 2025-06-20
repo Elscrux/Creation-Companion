@@ -4,7 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.VisualTree;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
-public sealed class DataGridDragDropHandler : DragDropHandler<DataGrid, DataGridRow> {
+public sealed class DataGridDragDropHandler : CollectionDragDropHandler<DataGrid, DataGridRow> {
     protected override IEnumerable GetItems(DataGrid control) => control.ItemsSource;
     protected override IList GetSelectedItems(DataGrid control) => control.SelectedItems;
     protected override int IndexOfElement(DataGrid control, DataGridRow element) => element.Index;

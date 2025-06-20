@@ -4,7 +4,7 @@ using Avalonia.LogicalTree;
 using FluentAvalonia.Core;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
-public sealed class ListBoxDragDropHandler : DragDropHandler<ListBox, ListBoxItem> {
+public sealed class ListBoxDragDropHandler : CollectionDragDropHandler<ListBox, ListBoxItem> {
     protected override IEnumerable GetItems(ListBox control) {
         return control.ItemsSource ?? throw new InvalidOperationException(
             "ListBox does not have ItemsSource set.");

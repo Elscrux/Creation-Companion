@@ -15,7 +15,7 @@ using CreationEditor.Avalonia.Constants;
 using Noggog;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
-public abstract class DragDropHandler<TControl, TElement> : DropHandlerBase, IDragHandler
+public abstract class CollectionDragDropHandler<TControl, TElement> : DropHandlerBase, IDragHandler
     where TControl : Control
     where TElement : Control {
     public Orientation Orientation { get; set; }

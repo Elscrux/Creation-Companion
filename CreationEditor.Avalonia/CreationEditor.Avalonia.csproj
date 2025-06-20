@@ -129,6 +129,12 @@
         <Compile Update="Resources\Attached\DragDrop\FormLinkDragDrop.cs">
           <DependentUpon>ICustomDragDropData.cs</DependentUpon>
         </Compile>
+        <Compile Update="Resources\Attached\DragDrop\ListBoxDragDropHandler.cs">
+          <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\Attached\DragDrop\DataGridDragDropHandler.cs">
+          <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
