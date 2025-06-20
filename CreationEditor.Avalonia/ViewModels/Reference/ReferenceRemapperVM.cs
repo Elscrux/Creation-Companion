@@ -69,7 +69,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
 
             IsRemapping = true;
             Task.Run(() => {
-                recordController.ReplaceReferences(ReferencedRecordContext, record);
+                recordController.RemapReferences(ReferencedRecordContext, record);
                 Dispatcher.UIThread.Post(() => IsRemapping = false);
             });
         });

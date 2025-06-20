@@ -234,21 +234,21 @@ public interface IRecordController {
     bool MarkForDeletion(IMajorRecordGetter record, IMod mod, Func<IEnumerable<IFormLinkIdentifier>> referenceGetter, bool forceDelete = false);
     #endregion
 
-    #region ReplaceReferences
+    #region RemapReferences
     /// <summary>
-    /// Replaces all references of a record with with another record.
+    /// Replaces all references of a record with another record.
     /// </summary>
     /// <param name="record">Record to replace references for</param>
-    /// <param name="replacingRecord">Record to replace references with</param>
-    void ReplaceReferences(IReferencedRecord record, IMajorRecordGetter replacingRecord);
+    /// <param name="remappingRecord">Record to remap references with</param>
+    void RemapReferences(IReferencedRecord record, IMajorRecordGetter remappingRecord);
 
     /// <summary>
-    /// Replaces given references of a record with with another record.
+    /// Replaces given references of a record with another record.
     /// </summary>
     /// <param name="record">Record to replace references for</param>
     /// <param name="references">References to record to edit</param>
-    /// <param name="replacingRecord">Record to replace references with</param>
-    void ReplaceReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter replacingRecord);
+    /// <param name="remappingRecord">Record to remap references with</param>
+    void RemapReferences(IMajorRecordGetter record, IEnumerable<IFormLinkIdentifier> references, IMajorRecordGetter remappingRecord);
     #endregion
 
     #region RegisterUpdate
