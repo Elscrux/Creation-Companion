@@ -36,15 +36,28 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
     }
 
     public IEnumerable<object> GetMenuItems(RecordListContext context) {
-        return _groups.OrderByDescending(x => x.Key.Priority)
+        var groups = _groups.OrderByDescending(x => x.Key.Priority)
             // Get all the menu items for each group
             .Select(p => p.Value
                 .Where(x => x.IsVisible(context))
                 .OrderByDescending(x => x.Priority)
-                .Select(action => action.MenuItemFactory(context)))
-            // Flatten the groups into a single list and add separators between groups
-            .SelectMany<IEnumerable<MenuItem>, object>(
-                (x, i) => i == 0 ? x : [new Separator(), ..x]);
+                .Select(action => action.MenuItemFactory(context)));
+
+        // Flatten the groups into a single list and add separators between groups
+        var needSeparator = false;
+        foreach (var group in groups) {
+            if (!group.Any()) continue;
+
+            if (needSeparator) {
+                yield return new Separator();
+            }
+
+            foreach (var item in group) {
+                yield return item;
+            }
+
+            needSeparator = true;
+        }
     }
 
     public void ExecutePrimary(RecordListContext context) {
