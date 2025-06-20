@@ -63,8 +63,8 @@ public sealed class AssetReferenceCache<TSource, TReference>
     }
 
     public bool AddReference(IAssetLinkGetter asset, TReference newReference) {
-        if (!TryGetReferences(asset, out var references)) return false;
-
+        var assetDictionary = Cache.GetOrAdd(asset.Type);
+        var references = assetDictionary.GetOrAdd(asset);
         return references.Add(newReference);
     }
 
