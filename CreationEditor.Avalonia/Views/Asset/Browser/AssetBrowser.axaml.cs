@@ -113,14 +113,14 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
          && !dragEventArgs.Data.Contains(ContextDropBehaviorBase.DataFormat)
          && ViewModel is not null) {
             var assetLink = ViewModel.GetAssetLink(fileSystemLink);
-            if (assetLink is null) return;
-
-            dataObject.Set(ContextDropBehaviorBase.DataFormat,
-                new DragContext {
-                    Data = {
-                        { AssetLinkDragDrop.Data, new AssetFileSystemLink(fileSystemLink, assetLink) }
-                    }
-                });
+            if (assetLink is not null) {
+                dataObject.Set(ContextDropBehaviorBase.DataFormat,
+                    new DragContext {
+                        Data = {
+                            { AssetLinkDragDrop.Data, new AssetFileSystemLink(fileSystemLink, assetLink) }
+                        }
+                    });
+            }
         }
 
         e.Inner.DragEffects = DragDropEffects.Move;
