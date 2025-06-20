@@ -2,18 +2,27 @@
 using System.Reactive;
 using System.Reactive.Subjects;
 using Avalonia.Threading;
+using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed partial class ReferenceRemapperVM : ViewModel {
+    public IDataSourceService DataSourceService { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
     public object? Context { get; }
+
+    public FileSystemLink? FileSystemLink { get; }
+    public IAssetType? AssetType { get; }
+
     public IReferencedRecord? ReferencedRecordContext { get; }
 
     public bool ContextCanBeRemapped { get; }
@@ -23,16 +32,30 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     [Reactive] public partial bool IsRemapping { get; set; }
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
-    public ReactiveCommand<FormKey, Unit> RemapReferences { get; }
+    public ReactiveCommand<FormKey, Unit> RemapRecordReferences { get; }
+    public ReactiveCommand<FileSystemLink, Unit> RemapAssetReferences { get; }
 
     public ReferenceRemapperVM(
+        IDataSourceService dataSourceService,
         ILinkCacheProvider linkCacheProvider,
+        IAssetController assetController,
+        IAssetTypeService assetTypeService,
         IRecordController recordController,
         object? context = null) {
+        DataSourceService = dataSourceService;
         LinkCacheProvider = linkCacheProvider;
         Context = context;
 
-        var referencedRecord = ParseContext(context);
+        FileSystemLink = ParseAssetContext(context);
+        if (FileSystemLink is not null) {
+            ContextCanBeRemapped = true;
+            var assetLink = assetTypeService.GetAssetLink(FileSystemLink.DataRelativePath);
+            if (assetLink is not null) {
+                AssetType = assetLink.AssetTypeInstance;
+            }
+        }
+
+        var referencedRecord = ParseRecordContext(context);
         if (referencedRecord is not null) {
             ReferencedRecordContext = referencedRecord;
             ContextCanBeRemapped = true;
@@ -40,8 +63,8 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
             ScopedTypes = ContextType.AsEnumerable().ToArray();
         }
 
-        RemapReferences = ReactiveCommand.Create<FormKey>(formKey => {
-            if (ReferencedRecordContext is null || ContextType is null) return;
+        RemapRecordReferences = ReactiveCommand.Create<FormKey>(formKey => {
+            if (ContextType is null || ReferencedRecordContext is null) return;
             if (!linkCacheProvider.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
 
             IsRemapping = true;
@@ -50,9 +73,26 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
                 Dispatcher.UIThread.Post(() => IsRemapping = false);
             });
         });
+
+        RemapAssetReferences = ReactiveCommand.Create<FileSystemLink>(fileSystemLink => {
+            if (FileSystemLink is null || AssetType is null) return;
+
+            IsRemapping = true;
+            Task.Run(() => {
+                assetController.RemapReferences(FileSystemLink, fileSystemLink);
+                Dispatcher.UIThread.Post(() => IsRemapping = false);
+            });
+        });
     }
 
-    private static IReferencedRecord? ParseContext(object? context) {
+    private static FileSystemLink? ParseAssetContext(object? context) {
+        return context switch {
+            FileSystemLink fileSystemLink => fileSystemLink,
+            _ => null,
+        };
+    }
+
+    private static IReferencedRecord? ParseRecordContext(object? context) {
         return context switch {
             IReferencedRecord referencedRecord => referencedRecord,
             IEnumerable enumerable => enumerable.OfType<IReferencedRecord>().FirstOrDefault(),
