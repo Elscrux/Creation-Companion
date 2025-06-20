@@ -50,6 +50,15 @@ public interface IDataSourceService {
     bool TryGetDataSource(string dataSourcePath, [NotNullWhen(true)] out IDataSource? dataSource);
 
     /// <summary>
+    /// Tries to get the file system link for the given path.
+    /// In case of an absolute file path, it will be separated into the data source and the relative path.
+    /// If the data source exists, the file system link will be returned.
+    /// </summary>
+    /// <param name="path">Path to the file.</param>
+    /// <returns>File system link to the file if found, null otherwise.</returns>
+    FileSystemLink? GetFileLink(string path);
+
+    /// <summary>
     /// Tries to get the file system link for the given data relative path.
     /// The first data source in the load order that contains the file will be used.
     /// </summary>

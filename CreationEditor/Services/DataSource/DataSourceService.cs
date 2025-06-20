@@ -133,6 +133,16 @@ public sealed class DataSourceService : IDataSourceService {
         return dataSource is not null;
     }
 
+    public FileSystemLink? GetFileLink(string path) {
+        if (!_fileSystem.Path.IsPathRooted(path)) return GetFileLink(new DataRelativePath(path));
+
+        var dataSource = PriorityOrder.FirstOrDefault(d => path.StartsWith(d.Path, DataRelativePath.PathComparison));
+        if (dataSource is null) return null;
+
+        var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, path);
+        return new FileSystemLink(dataSource, relativePath);
+    }
+
     public FileSystemLink? GetFileLink(DataRelativePath dataRelativePath) {
         var firstMatch = PriorityOrder.FirstOrDefault(d => d.FileExists(dataRelativePath));
         if (firstMatch is null) return null;

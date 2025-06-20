@@ -704,6 +704,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
+    public IAssetLinkGetter? GetAssetLink(FileSystemLink fileSystemLink) {
+        return AssetTypeService.GetAssetLink(fileSystemLink.DataRelativePath);
+    }
+
     private string SearchTextPattern() {
         // Surround with * and remove invalid chars
         return '*' + DataSource.FileSystem.Path.GetInvalidPathChars()

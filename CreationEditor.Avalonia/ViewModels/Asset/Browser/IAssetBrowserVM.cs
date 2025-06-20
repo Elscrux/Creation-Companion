@@ -6,6 +6,7 @@ using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
+using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Asset.Browser;
@@ -51,6 +52,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     IAssetTypeService AssetTypeService { get; }
     IAssetIconService AssetIconService { get; }
 
+    IAssetLinkGetter? GetAssetLink(FileSystemLink fileSystemLink);
     Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo);
     IEnumerable<Control> GetContextMenuItems(FileSystemLink asset);
 }

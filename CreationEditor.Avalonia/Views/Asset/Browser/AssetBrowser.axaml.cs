@@ -10,6 +10,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Avalonia.VisualTree;
+using Avalonia.Xaml.Interactions.DragAndDrop;
+using CreationEditor.Avalonia.Attached;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.DataSource;
@@ -104,6 +106,23 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
+        // Set drag data on first drag over - needed to integrate into the editor wide drag and drop system
+        var dragEventArgs = e.Inner;
+        if (e.TargetRow.DataContext is FileSystemLink fileSystemLink
+         && dragEventArgs.Data is DataObject dataObject
+         && !dragEventArgs.Data.Contains(ContextDropBehaviorBase.DataFormat)
+         && ViewModel is not null) {
+            var assetLink = ViewModel.GetAssetLink(fileSystemLink);
+            if (assetLink is null) return;
+
+            dataObject.Set(ContextDropBehaviorBase.DataFormat,
+                new DragContext {
+                    Data = {
+                        { AssetLinkDragDrop.Data, new AssetFileSystemLink(fileSystemLink, assetLink) }
+                    }
+                });
+        }
+
         e.Inner.DragEffects = DragDropEffects.Move;
 
         if (e.TargetRow.Model is FileSystemLink { IsDirectory: true } directoryLink
