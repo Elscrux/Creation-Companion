@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Comparer;
+using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
@@ -29,9 +30,9 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "References",
-                Binding = new Binding("References.Count", BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.RecordReferences) + "." + nameof(IReferencedRecord.RecordReferences.Count), BindingMode.OneWay),
                 CanUserSort = true,
-                CustomSortComparer = ReferencedRecordComparers.ReferenceCountComparer,
+                CustomSortComparer = ReferencedRecordComparers.RecordReferenceCountComparer,
             },
             200);
     }
