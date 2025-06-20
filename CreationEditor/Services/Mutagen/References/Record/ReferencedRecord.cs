@@ -27,6 +27,7 @@ public sealed partial class ReferencedRecord<TMajorRecordGetter> : ReactiveObjec
         return obj switch {
             IReferencedRecord<TMajorRecordGetter> referencedRecord => referencedRecord.Equals(this),
             TMajorRecordGetter record => record.FormKey.Equals(Record.FormKey),
+            IFormKeyGetter formKeyGetter => formKeyGetter.FormKey.Equals(Record.FormKey),
             _ => false,
         };
     }
