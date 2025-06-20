@@ -72,8 +72,6 @@ public abstract class CollectionDragDropHandler<TControl, TElement> : DropHandle
 
         Drop(e, dragContext);
 
-        ResetTransform(control);
-
         return true;
     }
 
@@ -186,6 +184,9 @@ public abstract class CollectionDragDropHandler<TControl, TElement> : DropHandle
             out var sourceList,
             out var targetControl,
             out var targetList)) return;
+
+        ResetTransform(sourceControl);
+        ResetTransform(targetControl);
 
         if (!dragContext.Data.TryGetValue(DragDropExtended.DataCurrentIndex, out var i) || i is not int index) return;
         if (index == -1 || index > targetList.Count) return;
