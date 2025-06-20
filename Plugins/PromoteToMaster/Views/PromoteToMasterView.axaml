@@ -157,7 +157,7 @@
                             <Separator Grid.Row="5"/>
 
                             <TextBlock Grid.Row="6"
-                                       Text="These records will be affected:"/>
+                                       Text="These assets will be affected:"/>
 
                             <DataGrid Grid.Row="8"
                                       Background="{DynamicResource SystemControlTransparentBrush}"
