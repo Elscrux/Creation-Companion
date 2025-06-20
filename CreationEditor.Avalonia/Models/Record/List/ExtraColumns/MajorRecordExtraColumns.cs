@@ -10,7 +10,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "EditorID",
-                Binding = new Binding("Record.EditorID", BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.EditorID), BindingMode.OneWay),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.EditorIDComparer,
                 Width = new DataGridLength(200),
@@ -20,7 +20,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "FormKey",
-                Binding = new Binding("Record.FormKey", BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.FormKey), BindingMode.OneWay),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.FormKeyComparer,
                 Width = new DataGridLength(100),
@@ -30,7 +30,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "References",
-                Binding = new Binding(nameof(IReferencedRecord.RecordReferences) + "." + nameof(IReferencedRecord.RecordReferences.Count), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.RecordReferences) + '.' + nameof(IReferencedRecord.RecordReferences.Count), BindingMode.OneWay),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.RecordReferenceCountComparer,
             },
