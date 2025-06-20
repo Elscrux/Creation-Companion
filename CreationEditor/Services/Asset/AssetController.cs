@@ -26,15 +26,23 @@ public sealed class AssetController(
 
     public void Delete(FileSystemLink link, CancellationToken token = default) {
         try {
-            MoveInternal(link, CreateDeletePath(link), true, false, token);
+            MoveInternal(link, CreateDeletePath(link), true, false, false, token);
         } catch (Exception e) {
             logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", link, e.Message);
         }
     }
 
+    public void Copy(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
+        try {
+            MoveInternal(origin, destination, false, true, true, token);
+        } catch (Exception e) {
+            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
+        }
+    }
+
     public void Move(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
         try {
-            MoveInternal(origin, destination, false, true, token);
+            MoveInternal(origin, destination, false, true, false, token);
         } catch (Exception e) {
             logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
         }
@@ -46,7 +54,7 @@ public sealed class AssetController(
         if (directoryPath is not null) {
             var destination = new FileSystemLink(origin.DataSource, origin.FileSystem.Path.Combine(directoryPath, newName));
             try {
-                MoveInternal(origin, destination, true, true, token);
+                MoveInternal(origin, destination, true, true, false, token);
             } catch (Exception e) {
                 logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", origin, newName, e.Message);
             }
@@ -55,7 +63,7 @@ public sealed class AssetController(
         }
     }
 
-    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, CancellationToken token) {
+    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, bool copy, CancellationToken token) {
         var originIsFile = origin.IsFile;
 
         // Get the parent directory for a file path or self for a directory path
@@ -80,7 +88,7 @@ public sealed class AssetController(
             MoveInt(origin, token);
         } else {
             foreach (var assetLink in origin.EnumerateFileLinks(true)) {
-                MoveInternal(origin, assetLink, rename, doRemap, token);
+                MoveInternal(origin, assetLink, rename, doRemap, copy, token);
             }
         }
 
@@ -116,7 +124,7 @@ public sealed class AssetController(
             if (innerToken.IsCancellationRequested) return;
 
             // Move the asset
-            if (!FileSystemMove(fileLink, newPath, innerToken)) return;
+            if (!FileSystemMove(fileLink, newPath, copy, innerToken)) return;
 
             if (doRemap) {
                 RemapReferences(fileLink, newPath);
@@ -172,7 +180,7 @@ public sealed class AssetController(
         }
     }
 
-    private bool FileSystemMove(FileSystemLink origin, FileSystemLink destination, CancellationToken token) {
+    private bool FileSystemMove(FileSystemLink origin, FileSystemLink destination, bool copy, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
@@ -181,11 +189,19 @@ public sealed class AssetController(
             if (origin.Exists()) {
                 if (token.IsCancellationRequested) return false;
 
-                origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
+                if (copy) {
+                    origin.FileSystem.File.Copy(origin.FullPath, destination.FullPath);
+                } else {
+                    origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
+                }
             } else {
                 if (token.IsCancellationRequested) return false;
 
-                origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
+                if (copy) {
+                    origin.FileSystem.Directory.DeepCopy(origin.FullPath, destination.FullPath);
+                } else {
+                    origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
+                }
             }
         } catch (Exception e) {
             logger.Here().Warning(e, "Couldn't move {File} to {Dir}: {Exception}", origin, destination, e.Message);

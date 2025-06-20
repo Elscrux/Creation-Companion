@@ -11,6 +11,14 @@ public interface IAssetController {
     void Move(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default);
 
     /// <summary>
+    /// Copy a file or directory to a new location.
+    /// </summary>
+    /// <param name="origin">Link to the file or directory that should be copied</param>
+    /// <param name="destination">Link to the new location of the file or directory</param>
+    /// <param name="token">A CancellationToken can be used to cancel the task as long as it hasn't modified anything</param>
+    void Copy(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default);
+
+    /// <summary>
     /// Rename a file or directory.
     /// </summary>
     /// <param name="origin">Link to the file or directory to rename</param>
