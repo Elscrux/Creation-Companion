@@ -16,8 +16,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Constants;
-using CreationEditor.Avalonia.Models;
-using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
@@ -99,7 +97,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public ReactiveCommand<FileSystemLink, Unit> CopyPath { get; }
     public ReactiveCommand<FileSystemLink, Unit> OpenReferences { get; }
     public ReactiveCommand<FileSystemLink, Unit> AddFolder { get; }
-    public ReactiveCommand<FileSystemLink, Unit> OpenAssetBrowser { get; }
 
     public HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
 
@@ -114,7 +111,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetIconService assetIconService,
         ILinkCacheProvider linkCacheProvider,
         IRecordReferenceController recordReferenceController,
-        IDockFactory dockFactory,
         MainWindow mainWindow,
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter) {
@@ -392,8 +388,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         );
 
         AddFolder = ReactiveCommand.CreateFromTask<FileSystemLink>(AddAssetFolder);
-
-        OpenAssetBrowser = ReactiveCommand.CreateFromTask<FileSystemLink>(asset => dockFactory.Open(DockElement.AssetBrowser, parameter: asset));
     }
 
     private IEnumerable<IAssetLinkGetter> GetMissingAssets(FileSystemLink link, IAssetLinkGetter assetLink) {
@@ -592,12 +586,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         if (asset.IsDirectory) {
             items.Add(new Separator());
-            items.Add(new MenuItem {
-                Icon = new SymbolIcon { Symbol = Symbol.Open },
-                Header = "Open in new Asset Browser",
-                Command = OpenAssetBrowser,
-                CommandParameter = asset,
-            });
             items.Add(new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.NewFolder },
                 Header = "Add Folder",

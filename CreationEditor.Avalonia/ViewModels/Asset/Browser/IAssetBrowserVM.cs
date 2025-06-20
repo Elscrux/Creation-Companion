@@ -40,7 +40,6 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     ReactiveCommand<FileSystemLink, Unit> OpenReferences { get; }
     ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
     ReactiveCommand<FileSystemLink, Unit> AddFolder { get; }
-    ReactiveCommand<FileSystemLink, Unit> OpenAssetBrowser { get; }
 
     bool IsBusyLoadingAssets { get; set; }
     bool IsBusyLoadingReferences { get; set; }
