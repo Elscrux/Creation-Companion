@@ -46,7 +46,7 @@ public sealed class AssetReferenceCache<TSource, TReference>
 
         if (!assetDictionary.TryGetValue(asset, out var usages)) yield break;
 
-        foreach (var usage in usages) {
+        foreach (var usage in usages.ToArray()) {
             yield return usage;
         }
     }
