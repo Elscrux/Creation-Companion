@@ -9,8 +9,8 @@
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="PromoteToMaster.Views.PromotionWindow"
     x:DataType="viewModels:PromoteToMasterVM"
-    Width="500" Height="500"
-    MinWidth="500" MinHeight="500"
+    Width="500" Height="800"
+    MinWidth="500" MinHeight="800"
     Title="Promote">
     <views:PromoteToMasterView/>
 </windowing:AppWindow>

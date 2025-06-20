@@ -6,6 +6,9 @@
              xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:dataSource="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
+             xmlns:views="clr-namespace:PromoteToMaster.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PromoteToMaster.Views.PromoteToMasterView"
              x:DataType="viewModels:PromoteToMasterVM"
@@ -20,7 +23,7 @@
                         <StackPanel Spacing="15">
                             <basic:LabeledContentControl
                                 Header="Inject records into"
-                                HeaderToolTip="New records will be created with records that are labeled to come from this mod.">
+                                HeaderToolTip="New records will be labeled to come from this mod.">
                                 <mod:ModPicker DataContext="{Binding InjectToMod}"/>
                             </basic:LabeledContentControl>
 
@@ -51,6 +54,67 @@
                                 <CheckBox IsChecked="{Binding ForceDelete}"
                                           Classes="CheckmarkOnly"/>
                             </basic:LabeledContentControl>
+
+                            <basic:LabeledContentControl
+                                Header="Move Assets"
+                                HeaderToolTip="Assets referenced by the records will be moved from the 'From' data sources to the 'To' data source.">
+                                <StackPanel Spacing="10">
+                                    <ComboBox ItemsSource="{x:Static viewModels:PromoteToMasterVM.AssetPromotionModes}"
+                                              SelectedItem="{Binding AssetPromotionMode}"
+                                              ToolTip.Tip="{Binding AssetPromotionMode, Converter={x:Static views:PromoteToMasterView.AssetPromotionModeToString}}">
+                                        <ComboBox.DataTemplates>
+                                            <DataTemplate DataType="viewModels:AssetPromotionMode">
+                                                <TextBlock Text="{Binding}"
+                                                           ToolTip.Tip="{Binding Converter={x:Static views:PromoteToMasterView.AssetPromotionModeToString}}"/>
+                                            </DataTemplate>
+                                        </ComboBox.DataTemplates>
+                                    </ComboBox>
+
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="10">
+                                        <StackPanel>
+                                            <TextBlock Text="From"/>
+                                            <ListBox ItemsSource="{Binding AssetOrigins}"
+                                                     dragDrop:DragDropExtended.AllowDrag="True"
+                                                     dragDrop:DragDropExtended.AllowDrop="True"
+                                                     Padding="10"
+                                                     MinWidth="200"
+                                                     MinHeight="200"
+                                                     Background="{DynamicResource ButtonBackground}">
+                                                <ListBox.DataTemplates>
+                                                    <DataTemplate DataType="dataSource:IDataSource">
+                                                        <TextBlock Text="{Binding Name}"/>
+                                                    </DataTemplate>
+                                                </ListBox.DataTemplates>
+                                            </ListBox>
+                                        </StackPanel>
+
+                                        <StackPanel>
+                                            <TextBlock Text="To"/>
+                                            <Grid>
+                                                <TextBlock Text="Drag a Data Source here to copy/move assets referenced by the records to it."
+                                                           IsVisible="{Binding NoAssetTarget^}"
+                                                           TextWrapping="Wrap"
+                                                           Margin="10"
+                                                           MaxWidth="200"
+                                                           Foreground="Gray"/>
+                                                <ListBox ItemsSource="{Binding AssetTargets}"
+                                                         dragDrop:DragDropExtended.AllowDrag="True"
+                                                         dragDrop:DragDropExtended.AllowDrop="True"
+                                                         Padding="10"
+                                                         MinWidth="200"
+                                                         Background="{DynamicResource ButtonBackground}">
+                                                    <ListBox.DataTemplates>
+                                                        <DataTemplate DataType="dataSource:IDataSource">
+                                                            <TextBlock Text="{Binding Name}"/>
+                                                        </DataTemplate>
+                                                    </ListBox.DataTemplates>
+                                                </ListBox>
+                                            </Grid>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </basic:LabeledContentControl>
                         </StackPanel>
                     </DataTemplate>
                 </basic:PageData.DataTemplate>
@@ -61,16 +125,16 @@
                             NextButtonText="Confirm">
                 <basic:PageData.DataTemplate>
                     <DataTemplate DataType="viewModels:PromoteToMasterVM">
-                        <Grid RowDefinitions="Auto,10,Auto,10,*">
+                        <Grid RowDefinitions="Auto,10,Auto,10,*,10,Auto,10,*">
                             <TextBlock Grid.Row="0"
                                        Text="Do you really want to continue?"
-                                       Classes="h2"/>
+                                       FontWeight="Bold"
+                                       Classes="h1"/>
 
                             <TextBlock Grid.Row="2"
                                        Text="These records will be affected:"/>
 
                             <DataGrid Grid.Row="4"
-                                      x:Name="RecordGrid"
                                       Background="{DynamicResource SystemControlTransparentBrush}"
                                       ItemsSource="{Binding RecordPromotionChanges}"
                                       CanUserSortColumns="True"
@@ -87,6 +151,31 @@
                                     <DataGridTextColumn Header="Change"
                                                         Binding="{Binding ChangeType}"
                                                         x:DataType="viewModels:RecordPromotionChange"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <Separator Grid.Row="5"/>
+
+                            <TextBlock Grid.Row="6"
+                                       Text="These records will be affected:"/>
+
+                            <DataGrid Grid.Row="8"
+                                      Background="{DynamicResource SystemControlTransparentBrush}"
+                                      ItemsSource="{Binding AssetPromotionChanges}"
+                                      CanUserSortColumns="True"
+                                      CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Data Source"
+                                                        Binding="{Binding FileSystemLink.DataSource.Name}"
+                                                        x:DataType="viewModels:AssetPromotionChange"/>
+                                    <DataGridTextColumn Header="Path"
+                                                        Binding="{Binding FileSystemLink.DataRelativePath.Path}"
+                                                        x:DataType="viewModels:AssetPromotionChange"/>
+                                    <DataGridTextColumn Header="Change"
+                                                        Binding="{Binding ChangeType}"
+                                                        x:DataType="viewModels:AssetPromotionChange"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
