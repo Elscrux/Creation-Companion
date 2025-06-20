@@ -11,10 +11,8 @@ namespace CreationEditor.Avalonia.Views.Record.Picker;
 
 // Ported from Mutagen.Bethesda.WPF by Noggog
 [TemplatePart(Name = PopupName, Type = typeof(Popup))]
-[TemplatePart(Name = DraggerName, Type = typeof(Button))]
 public class FormKeyPicker : AFormKeyPicker {
     private const string PopupName = "PART_Popup";
-    private const string DraggerName = "PART_Dragger";
 
     public double MaxSearchBoxHeight {
         get => GetValue(MaxSearchBoxHeightProperty);
@@ -49,11 +47,8 @@ public class FormKeyPicker : AFormKeyPicker {
         base.OnApplyTemplate(e);
 
         _popup = e.NameScope.Find<Popup>(PopupName);
-        var dragger = e.NameScope.Find<Button>(DraggerName);
 
-        dragger?.SetValue(FormLinkDragDrop.AllowDragDataGridProperty, true);
-        SetValue(FormLinkDragDrop.AllowDropDataGridProperty, true);
-        SetValue(DragDropExtended.DragHandlerProperty, new FormLinkDragDropHandler());
+        SetValue(DragDropExtended.DragHandlerProperty, new CustomDragDropDataHandler<FormLinkDragDrop, IFormLinkIdentifier>());
 
         SetValue(FormLinkDragDrop.GetFormLinkProperty,
             _ => {

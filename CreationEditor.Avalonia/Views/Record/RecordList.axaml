@@ -7,12 +7,15 @@
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Core"
              mc:Ignorable="d"
              x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
     <Grid>
         <Grid.Resources>
-            <attached:FormLinkDragDropHandler x:Key="FormLinkDragHandler"/>
+            <attached:CustomDragDropDataHandler
+                x:TypeArguments="attached:FormLinkDragDrop, plugins:IFormLinkIdentifier"
+                x:Key="FormLinkDragDropHandler"/>
         </Grid.Resources>
 
         <!-- Background needs to be transparent to make the context menu work in empty area -->
@@ -30,7 +33,7 @@
             KeyDown="RecordGrid_OnKeyDown"
             attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
             attached:DragDropExtended.AllowDrag="True"
-            attached:DragDropExtended.DragHandler="{StaticResource FormLinkDragHandler}"
+            attached:DragDropExtended.DragHandler="{StaticResource FormLinkDragDropHandler}"
             Classes="Small"
             IsReadOnly="True">
             <Interaction.Behaviors>

@@ -8,7 +8,8 @@
         xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
         xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker"
         xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
-        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached">
+        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
+        xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Core">
     <Design.PreviewWith>
         <Border Padding="20">
             <picker:FormKeyPicker/>
@@ -21,7 +22,9 @@
 
     <Style Selector="picker|FormKeyPicker">
         <Style.Resources>
-            <attached:FormLinkDragDropHandler x:Key="FormLinkDragDropHandler"/>
+            <attached:CustomDragDropDataHandler
+                x:TypeArguments="attached:FormLinkDragDrop, plugins:IFormLinkIdentifier"
+                x:Key="FormLinkDragDropHandler"/>
         </Style.Resources>
         <Setter Property="(Interaction.Behaviors)">
             <BehaviorCollectionTemplate>
@@ -103,7 +106,6 @@
                         </Button>
 
                         <Button Grid.Row="0" Grid.Column="2"
-                                x:Name="PART_Dragger"
                                 MinWidth="10" MinHeight="10"
                                 Padding="0"
                                 Margin="5, 1"

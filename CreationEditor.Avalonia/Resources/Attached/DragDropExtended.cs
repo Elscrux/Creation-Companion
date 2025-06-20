@@ -8,10 +8,10 @@ public sealed class DragDropExtended : AvaloniaObject {
     public const string DataStartPosition = "DragDropExtended_StartPosition";
     public const string DataCurrentIndex = "DragDropExtended_Index";
 
-    public static readonly AttachedProperty<bool>
-        AllowDragProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, Interactive, bool>("AllowDrag");
-    public static readonly AttachedProperty<bool>
-        AllowDropProperty = AvaloniaProperty.RegisterAttached<DragDropExtended, Interactive, bool>("AllowDrop");
+    public static readonly AttachedProperty<bool> AllowDragProperty =
+        AvaloniaProperty.RegisterAttached<DragDropExtended, Interactive, bool>("AllowDrag");
+    public static readonly AttachedProperty<bool> AllowDropProperty =
+        AvaloniaProperty.RegisterAttached<DragDropExtended, Interactive, bool>("AllowDrop");
     public static readonly AttachedProperty<Func<object, bool>> CanDropProperty =
         AvaloniaProperty.RegisterAttached<DragDropExtended, Interactive, Func<object, bool>>("CanDrop", (_ => true));
     public static readonly AttachedProperty<Func<object, object?>> DropSelectorProperty =
