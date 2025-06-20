@@ -88,7 +88,10 @@ public sealed class AssetController(
             MoveInt(origin, token);
         } else {
             foreach (var assetLink in origin.EnumerateFileLinks(true)) {
-                MoveInternal(origin, assetLink, rename, doRemap, copy, token);
+                var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, assetLink.DataRelativePath.Path);
+                var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, relativePath);
+                var linkDestination = new  FileSystemLink(destination.DataSource, destinationPath);
+                MoveInternal(assetLink, linkDestination, rename, doRemap, copy, token);
             }
         }
 
