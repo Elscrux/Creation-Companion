@@ -8,6 +8,7 @@
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordSelection"
              x:DataType="list:RecordSelectionVM">
@@ -18,8 +19,8 @@
                   CanUserSortColumns="True"
                   CanUserReorderColumns="True" CanUserResizeColumns="True"
                   AutoGenerateColumns="False"
-                  attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
-                  attached:DragDropExtended.AllowDrag="True"
+                  dragDrop:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
+                  dragDrop:DragDropExtended.AllowDrag="True"
                   IsReadOnly="True">
 
             <Interaction.Behaviors>

@@ -1,12 +1,7 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Xaml.Interactions.DragAndDrop;
-using CreationEditor.Avalonia.Constants;
 using Mutagen.Bethesda.Plugins;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class FormLinkDragDrop : AvaloniaObject, ICustomDragDropData<IFormLinkIdentifier> {
 

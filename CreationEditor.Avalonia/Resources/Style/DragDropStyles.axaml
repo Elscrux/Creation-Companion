@@ -1,7 +1,7 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
-        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -9,26 +9,26 @@
     </Design.PreviewWith>
 
     <Styles.Resources>
-        <attached:ListBoxDragDropHandler
+        <dragDrop:ListBoxDragDropHandler
             Orientation="Vertical"
             x:Key="ListBoxDragDropDragDropHandler"/>
 
-        <attached:DataGridDragDropHandler
+        <dragDrop:DataGridDragDropHandler
             Orientation="Vertical"
             x:Key="DataGridDragDropHandler"/>
 
-        <attached:DragContext x:Key="DragContext"/>
+        <dragDrop:DragContext x:Key="DragContext"/>
     </Styles.Resources>
 
     <!-- Data Grid -->
-    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
+    <Style Selector="DataGrid[(dragDrop|DragDropExtended.AllowDrag)=True]">
         <Setter Property="HeadersVisibility" Value="All"/>
     </Style>
 
     <!-- This makes only the DataGridRowHeader available for dragging, instead of making the entire row draggable -->
     <!-- Which prevents a conflict between text selection in a cell and drag-and-drop -->
-    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
-        <Style Selector="^[(attached|DragDropExtended.AllowDrop)=True] DataGridRowHeader">
+    <Style Selector="DataGrid[(dragDrop|DragDropExtended.AllowDrag)=True]">
+        <Style Selector="^[(dragDrop|DragDropExtended.AllowDrop)=True] DataGridRowHeader">
             <Setter Property="(Interaction.Behaviors)">
                 <BehaviorCollectionTemplate>
                     <BehaviorCollection>
@@ -55,8 +55,8 @@
         </Style>
     </Style>
 
-    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrag)=True]">
-        <Style Selector="^[(attached|DragDropExtended.AllowDrop)=False] DataGridRow">
+    <Style Selector="DataGrid[(dragDrop|DragDropExtended.AllowDrag)=True]">
+        <Style Selector="^[(dragDrop|DragDropExtended.AllowDrop)=False] DataGridRow">
             <Setter Property="(Interaction.Behaviors)">
                 <BehaviorCollectionTemplate>
                     <BehaviorCollection>
@@ -69,7 +69,7 @@
         </Style>
     </Style>
 
-    <Style Selector="DataGrid[(attached|DragDropExtended.AllowDrop)=True]">
+    <Style Selector="DataGrid[(dragDrop|DragDropExtended.AllowDrop)=True]">
         <Setter
             Property="RowHeaderWidth"
             Value="24"/>
@@ -84,7 +84,7 @@
     </Style>
 
     <!-- List Box -->
-    <Style Selector=":is(ListBox)[(attached|DragDropExtended.AllowDrop)=True]">
+    <Style Selector=":is(ListBox)[(dragDrop|DragDropExtended.AllowDrop)=True]">
         <Setter Property="(Interaction.Behaviors)">
             <BehaviorCollectionTemplate>
                 <BehaviorCollection>
@@ -103,7 +103,7 @@
     </Style>
 
     <Style
-        Selector=":is(ListBox)[(attached|DragDropExtended.AllowDrag)=True] > :is(ListBoxItem)">
+        Selector=":is(ListBox)[(dragDrop|DragDropExtended.AllowDrag)=True] > :is(ListBoxItem)">
         <Setter Property="ZIndex" Value="0"/>
         <Setter Property="(Interaction.Behaviors)">
             <BehaviorCollectionTemplate>

@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using FluentAvalonia.Core;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class ListBoxDragDropHandler : DragDropHandler<ListBox, ListBoxItem> {
     protected override IEnumerable GetItems(ListBox control) {

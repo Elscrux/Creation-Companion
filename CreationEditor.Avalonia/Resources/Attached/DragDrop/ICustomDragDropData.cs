@@ -1,5 +1,5 @@
 ﻿using Avalonia;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public interface ICustomDragDropData<T> {
     static abstract string Data { get; }

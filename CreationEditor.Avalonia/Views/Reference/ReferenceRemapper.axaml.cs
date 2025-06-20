@@ -5,7 +5,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using Avalonia.Xaml.Interactivity;
-using CreationEditor.Avalonia.Attached;
+using CreationEditor.Avalonia.Attached.DragDrop;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views.Asset.Picker.File;
 using CreationEditor.Avalonia.Views.Record.Picker;

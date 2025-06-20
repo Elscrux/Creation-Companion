@@ -14,6 +14,7 @@
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:picker1="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
              xmlns:subrecord="clr-namespace:CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.Subrecord.ConditionsEditor"
              x:Name="Editor">
@@ -27,9 +28,9 @@
               GridLinesVisibility="Horizontal"
               MinHeight="250"
               Classes="NoCellSelection Medium Mutable"
-              attached:DragDropExtended.AllowDrag="True"
-              attached:DragDropExtended.AllowDrop="True"
-              attached:DragDropExtended.CanDrop="{Binding #Editor.CanDrop}">
+              dragDrop:DragDropExtended.AllowDrag="True"
+              dragDrop:DragDropExtended.AllowDrop="True"
+              dragDrop:DragDropExtended.CanDrop="{Binding #Editor.CanDrop}">
 
         <attached:ListShortcuts.Add>
             <command:AddElement

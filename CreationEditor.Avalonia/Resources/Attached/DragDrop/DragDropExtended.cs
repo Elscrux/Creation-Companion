@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Interactivity;
 using Avalonia.Xaml.Interactions.DragAndDrop;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class DragDropExtended : AvaloniaObject {
     public const string DataSourceControl = "DragDropExtended_SourceList";

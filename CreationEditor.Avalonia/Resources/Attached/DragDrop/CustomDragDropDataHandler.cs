@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using CreationEditor.Avalonia.Constants;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class CustomDragDropDataHandler<T, TData> : DropHandlerBase, IDragHandler
     where T : ICustomDragDropData<TData> {

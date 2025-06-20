@@ -2,7 +2,7 @@ using System.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.VisualTree;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class DataGridDragDropHandler : DragDropHandler<DataGrid, DataGridRow> {
     protected override IEnumerable GetItems(DataGrid control) => control.ItemsSource;

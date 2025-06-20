@@ -4,17 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
-             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Core"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop"
              mc:Ignorable="d"
              x:DataType="list:IRecordListVM"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordList">
     <Grid>
         <Grid.Resources>
-            <attached:CustomDragDropDataHandler
-                x:TypeArguments="attached:FormLinkDragDrop, plugins:IFormLinkIdentifier"
+            <dragDrop:CustomDragDropDataHandler
+                x:TypeArguments="dragDrop:FormLinkDragDrop, plugins:IFormLinkIdentifier"
                 x:Key="FormLinkDragDropHandler"/>
         </Grid.Resources>
 
@@ -31,9 +31,9 @@
             CanUserReorderColumns="True" CanUserResizeColumns="True"
             AutoGenerateColumns="False"
             KeyDown="RecordGrid_OnKeyDown"
-            attached:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
-            attached:DragDropExtended.AllowDrag="True"
-            attached:DragDropExtended.DragHandler="{StaticResource FormLinkDragDropHandler}"
+            dragDrop:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
+            dragDrop:DragDropExtended.AllowDrag="True"
+            dragDrop:DragDropExtended.DragHandler="{StaticResource FormLinkDragDropHandler}"
             Classes="Small"
             IsReadOnly="True">
             <Interaction.Behaviors>

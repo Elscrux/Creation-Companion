@@ -8,8 +8,8 @@
         xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
         xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker"
         xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
-        xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
-        xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Core">
+        xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Core"
+        xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop">
     <Design.PreviewWith>
         <Border Padding="20">
             <picker:FormKeyPicker/>
@@ -22,8 +22,8 @@
 
     <Style Selector="picker|FormKeyPicker">
         <Style.Resources>
-            <attached:CustomDragDropDataHandler
-                x:TypeArguments="attached:FormLinkDragDrop, plugins:IFormLinkIdentifier"
+            <dragDrop:CustomDragDropDataHandler
+                x:TypeArguments="dragDrop:FormLinkDragDrop, plugins:IFormLinkIdentifier"
                 x:Key="FormLinkDragDropHandler"/>
         </Style.Resources>
         <Setter Property="(Interaction.Behaviors)">
@@ -112,8 +112,8 @@
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
                             <Button.Resources>
-                                <attached:DragContext x:Key="DragContext"/>
-                                <attached:DefaultDragHandler x:TypeArguments="picker:FormKeyPicker"
+                                <dragDrop:DragContext x:Key="DragContext"/>
+                                <dragDrop:DefaultDragHandler x:TypeArguments="picker:FormKeyPicker"
                                                            x:Key="DragHandler"/>
                             </Button.Resources>
                             <Interaction.Behaviors>

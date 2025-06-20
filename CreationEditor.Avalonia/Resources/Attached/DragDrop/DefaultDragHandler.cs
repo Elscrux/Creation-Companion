@@ -2,7 +2,7 @@
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class DefaultDragHandler<T> : IDragHandler where T : Visual {
     public void BeforeDragDrop(object? sender, PointerEventArgs e, object? context) {

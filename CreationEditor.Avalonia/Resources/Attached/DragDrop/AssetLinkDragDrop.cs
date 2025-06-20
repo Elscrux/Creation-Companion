@@ -2,7 +2,7 @@
 using Avalonia.Input;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Plugins.Assets;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed record AssetFileSystemLink(FileSystemLink FileSystemLink, IAssetLinkGetter AssetLink);
 

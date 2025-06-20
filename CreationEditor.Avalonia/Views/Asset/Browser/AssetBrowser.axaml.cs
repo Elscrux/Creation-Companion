@@ -11,7 +11,7 @@ using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
-using CreationEditor.Avalonia.Attached;
+using CreationEditor.Avalonia.Attached.DragDrop;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.DataSource;

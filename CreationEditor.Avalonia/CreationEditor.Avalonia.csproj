@@ -123,11 +123,11 @@
         <Compile Update="ViewModels\Record\Browser\ModScopeProviderVM.cs">
           <DependentUpon>IModScopeProviderVM.cs</DependentUpon>
         </Compile>
-        <Compile Update="Resources\Attached\DataGridDragDropHandler.cs">
-          <DependentUpon>DragDropHandler.cs</DependentUpon>
+        <Compile Update="Resources\Attached\DragDrop\AssetLinkDragDrop.cs">
+          <DependentUpon>ICustomDragDropData.cs</DependentUpon>
         </Compile>
-        <Compile Update="Resources\Attached\ListBoxDragDropHandler.cs">
-          <DependentUpon>DragDropHandler.cs</DependentUpon>
+        <Compile Update="Resources\Attached\DragDrop\FormLinkDragDrop.cs">
+          <DependentUpon>ICustomDragDropData.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 

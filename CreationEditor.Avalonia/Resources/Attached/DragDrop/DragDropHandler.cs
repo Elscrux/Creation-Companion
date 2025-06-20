@@ -13,7 +13,7 @@ using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using CreationEditor.Avalonia.Constants;
 using Noggog;
-namespace CreationEditor.Avalonia.Attached;
+namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public abstract class DragDropHandler<TControl, TElement> : DropHandlerBase, IDragHandler
     where TControl : Control

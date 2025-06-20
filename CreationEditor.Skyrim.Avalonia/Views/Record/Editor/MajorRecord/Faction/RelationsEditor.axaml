@@ -10,6 +10,7 @@
              xmlns:vm="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction"
              xmlns:subrecord="clr-namespace:CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord"
              xmlns:picker="clr-namespace:CreationEditor.Avalonia.Views.Record.Picker;assembly=CreationEditor.Avalonia"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Faction.RelationsEditor"
              x:DataType="vm:RelationEditorVM">
@@ -23,8 +24,8 @@
                   CanUserResizeColumns="True"
                   CanUserSortColumns="True"
                   AutoGenerateColumns="False"
-                  attached:DragDropExtended.AllowDrag="True"
-                  attached:DragDropExtended.AllowDrop="True"
+                  dragDrop:DragDropExtended.AllowDrag="True"
+                  dragDrop:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRelationIndex}"
                   Classes="NoCellSelection Medium Mutable"
                   attached:ListShortcuts.Add="{Binding AddRelation}"
