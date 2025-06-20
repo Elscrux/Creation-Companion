@@ -23,19 +23,25 @@ public sealed class ListShortcuts : AvaloniaObject {
     private static readonly MethodInfo TreeDataGridAddRemoveButtonMethodInfo =
         typeof(ListShortcuts).GetMethod(nameof(TreeDataGrid_AddRemoveButton), BindingFlags.Static | BindingFlags.NonPublic)!;
 
-    public static readonly AttachedProperty<ICommand> AddProperty = AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
+    public static readonly AttachedProperty<ICommand> AddProperty =
+        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Add");
+    public static readonly AttachedProperty<object?> AddParameterProperty =
+        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, object?>("AddParameter");
     public static readonly AttachedProperty<ICommand> RemoveProperty =
         AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, ICommand>("Remove");
     public static readonly AttachedProperty<Func<object, bool>> CanRemoveProperty =
-        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, Func<object, bool>>("CanRemove");
+        AvaloniaProperty.RegisterAttached<ListShortcuts, Interactive, Func<object, bool>>("CanRemove", (_ => true));
 
     public static ICommand GetAdd(AvaloniaObject element) => element.GetValue(AddProperty);
     public static void SetAdd(AvaloniaObject element, ICommand addValue) => element.SetValue(AddProperty, addValue);
 
+    public static object? GetAddParameter(AvaloniaObject element) => element.GetValue(AddParameterProperty);
+    public static void SetAddParameter(AvaloniaObject element, object? addParameterValue) => element.SetValue(AddParameterProperty, addParameterValue);
+
     public static ICommand GetRemove(AvaloniaObject element) => element.GetValue(RemoveProperty);
     public static void SetRemove(AvaloniaObject element, ICommand parameter) => element.SetValue(RemoveProperty, parameter);
 
-    public static Func<object, bool> GetCanRemove(AvaloniaObject element) => element.GetValue(CanRemoveProperty) ?? (_ => true);
+    public static Func<object, bool> GetCanRemove(AvaloniaObject element) => element.GetValue(CanRemoveProperty);
     public static void SetCanRemove(AvaloniaObject element, Func<object, bool> canRemove) => element.SetValue(CanRemoveProperty, canRemove);
 
     private static readonly KeyGesture AddGesture = new(Key.OemPlus);
@@ -49,7 +55,8 @@ public sealed class ListShortcuts : AvaloniaObject {
 
     static ListShortcuts() {
         AddProperty.Changed.Subscribe(args => {
-            HandleGesture(args, null, AddGesture, AddHeader, AddSymbol);
+            var parameter = GetAddParameter(args.Sender);
+            HandleGesture(args, parameter, AddGesture, AddHeader, AddSymbol);
 
             switch (args.Sender) {
                 case Control c:
@@ -109,6 +116,7 @@ public sealed class ListShortcuts : AvaloniaObject {
 
             addButton.IsVisible = true;
             addButton.Command = args.NewValue.GetValueOrDefault();
+            addButton[!Button.CommandParameterProperty] = c.GetObservable(AddParameterProperty).ToBinding();
         }
     }
 
@@ -124,9 +132,9 @@ public sealed class ListShortcuts : AvaloniaObject {
                 Foreground = Brushes.Red,
                 Classes = { "Transparent" },
                 Command = command,
+                CommandParameter = new ArrayList { o },
                 HorizontalAlignment = HorizontalAlignment.Left,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                CommandParameter = new ArrayList { o },
             }
             : null);
     }
@@ -171,7 +179,7 @@ public sealed class ListShortcuts : AvaloniaObject {
 
     private static void HandleGesture(
         AvaloniaPropertyChangedEventArgs<ICommand> args,
-        IList? selectedItems,
+        object? parameter,
         KeyGesture gesture,
         string header,
         Symbol menuIcon) {
@@ -184,7 +192,7 @@ public sealed class ListShortcuts : AvaloniaObject {
             control.KeyBindings.Add(new KeyBinding {
                 Command = newCommand,
                 Gesture = gesture,
-                CommandParameter = selectedItems!,
+                CommandParameter = parameter!,
             });
         } else {
             control.KeyBindings.RemoveWhere(keyBinding => ReferenceEquals(keyBinding.Gesture, gesture));
@@ -192,30 +200,30 @@ public sealed class ListShortcuts : AvaloniaObject {
 
         // Add context menu
         control.ContextFlyout ??= new MenuFlyout();
-        AddCommand(selectedItems, header, control.ContextFlyout, newCommand, menuIcon);
+        AddCommand();
 
         control.GetPropertyChangedObservable(Control.ContextFlyoutProperty)
             .Subscribe(_ => {
                 control.ContextFlyout ??= new MenuFlyout();
-                AddCommand(selectedItems, header, control.ContextFlyout, newCommand, menuIcon);
+                AddCommand();
             });
-    }
 
-    private static void AddCommand(IEnumerable? selectedItems, string header, FlyoutBase? flyout, ICommand? newCommand, Symbol menuIcon) {
-        if (flyout is not MenuFlyout { Items: {} list }) return;
-        if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
+        void AddCommand() {
+            if (control.ContextFlyout is not MenuFlyout { Items: {} list }) return;
+            if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
 
-        if (newCommand is not null) {
-            list.Add(new MenuItem {
-                Icon = new SymbolIcon { Symbol = menuIcon },
-                Header = header,
-                Command = newCommand,
-                CommandParameter = selectedItems,
-            });
-        } else {
-            for (var i = list.Count - 1; i >= 0; i--) {
-                if (list[i] is MenuItem menuItem && ReferenceEquals(menuItem.Header, header)) {
-                    list.RemoveAt(i);
+            if (newCommand is not null) {
+                list.Add(new MenuItem {
+                    Icon = new SymbolIcon { Symbol = menuIcon },
+                    Header = header,
+                    Command = newCommand,
+                    CommandParameter = parameter,
+                });
+            } else {
+                for (var i = list.Count - 1; i >= 0; i--) {
+                    if (list[i] is MenuItem menuItem && ReferenceEquals(menuItem.Header, header)) {
+                        list.RemoveAt(i);
+                    }
                 }
             }
         }
