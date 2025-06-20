@@ -50,9 +50,13 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
 
     public IObservable<bool> CanSave { get; }
-    public IObservable<string> SaveButtonContent => AnyModsActive.Select(anyModActive => anyModActive
-        ? "Load " + ActiveMod?.FileName
-        : "Create " + ModCreationVM.NewModKey?.FileName);
+    public IObservable<string> SaveButtonContent => AnyModsActive
+        .Select(anyModActive => anyModActive
+            ? Observable.Return("Load " + ActiveMod?.FileName)
+            : ModCreationVM
+                .WhenAnyValue(x => x.NewModName, x => x.NewModType)
+                .Select(_ => "Create " + ModCreationVM.NewModKey?.FileName))
+        .Switch();
     public IObservable<bool> AnyModsLoaded { get; }
     public IObservable<bool> AnyModsActive { get; }
 
