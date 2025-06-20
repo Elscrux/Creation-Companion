@@ -26,7 +26,7 @@ public sealed class AssetController(
 
     public void Delete(FileSystemLink link, CancellationToken token = default) {
         try {
-            MoveInternal(link, CreateDeletePath(link), true, token);
+            MoveInternal(link, CreateDeletePath(link), true, false, token);
         } catch (Exception e) {
             logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", link, e.Message);
         }
@@ -34,7 +34,7 @@ public sealed class AssetController(
 
     public void Move(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
         try {
-            MoveInternal(origin, destination, false, token);
+            MoveInternal(origin, destination, false, true, token);
         } catch (Exception e) {
             logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
         }
@@ -46,7 +46,7 @@ public sealed class AssetController(
         if (directoryPath is not null) {
             var destination = new FileSystemLink(origin.DataSource, origin.FileSystem.Path.Combine(directoryPath, newName));
             try {
-                MoveInternal(origin, destination, true, token);
+                MoveInternal(origin, destination, true, true, token);
             } catch (Exception e) {
                 logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", origin, newName, e.Message);
             }
@@ -55,7 +55,7 @@ public sealed class AssetController(
         }
     }
 
-    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, CancellationToken token) {
+    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, CancellationToken token) {
         var originIsFile = origin.IsFile;
 
         // Get the parent directory for a file path or self for a directory path
@@ -80,7 +80,7 @@ public sealed class AssetController(
             MoveInt(origin, token);
         } else {
             foreach (var assetLink in origin.EnumerateFileLinks(true)) {
-                MoveInternal(origin, assetLink, rename, token);
+                MoveInternal(origin, assetLink, rename, doRemap, token);
             }
         }
 
@@ -118,7 +118,9 @@ public sealed class AssetController(
             // Move the asset
             if (!FileSystemMove(fileLink, newPath, innerToken)) return;
 
-            RemapReferences(fileLink, newPath);
+            if (doRemap) {
+                RemapReferences(fileLink, newPath);
+            }
         }
     }
 
