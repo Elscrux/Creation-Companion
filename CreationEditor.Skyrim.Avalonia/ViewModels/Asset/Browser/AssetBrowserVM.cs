@@ -757,8 +757,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return filteredFileSystemChildren;
     }
 
-    private bool SearchAndFilter(FileSystemLink link) {
-        return _searchFilter.Filter(link.DataRelativePath.Path, SearchTextPattern()) && FilterLink(link);
+    private bool SearchAndFilterFile(FileSystemLink fileLink) {
+        return _searchFilter.Filter(fileLink.DataRelativePath.Path, SearchTextPattern()) && FilterLink(fileLink);
+    }
+
+    private bool SearchAndFilterDirectory(FileSystemLink directoryLink) {
+        return (ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(directoryLink.DataRelativePath))
+         && (ShowEmptyDirectories || GetFilteredFileSystemChildren(directoryLink).Any());
     }
 
     private bool FilterLink(FileSystemLink link) {
@@ -849,7 +854,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
      ?? throw new InvalidOperationException("Could not find _items field on childRows.");
 
     private void Tree_AddLink(FileSystemLink link) {
-        if (!FilterLink(link)) return;
+        if (link.IsFile) {
+            if (!FilterLink(link)) return;
+        } else {
+            if (!SearchAndFilterDirectory(link)) return;
+        }
 
         var parentRow = FindParentRow(link);
         if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
@@ -867,7 +876,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private void Tree_RemoveLink(FileSystemLink link) {
         var parentRow = FindParentRow(link);
         if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
-        if (childRows.All(r => r.Model != link)) return;
+        if (childRows.All(r => !Equals(r.Model, link))) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
 
@@ -914,13 +923,12 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             // Handle removing of root items
             if (row.ModelIndexPath.Count == 1) {
                 if (row.Model.IsFile) {
-                    if (!SearchAndFilter(row.Model)) {
+                    if (!SearchAndFilterFile(row.Model)) {
                         RootItems.Remove(row.Model);
                     }
                 } else {
                     // Specifically handle ignored directories here too to make sure they are removed when the setting changes
-                    if (!ShowIgnoredDirectories && _ignoredDirectoriesProvider.IsIgnored(row.Model.DataRelativePath)
-                     || !ShowEmptyDirectories && !GetFilteredFileSystemChildren(row.Model).Any()) {
+                    if (!SearchAndFilterDirectory(row.Model)) {
                         RootItems.Remove(row.Model);
                     }
                 }
@@ -970,11 +978,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             if (rootRows.Exists(r => r.Model.Equals(rootItem))) continue;
 
             if (rootItem.IsFile) {
-                if (SearchAndFilter(rootItem)) {
+                if (SearchAndFilterFile(rootItem)) {
                     RootItems.Add(rootItem);
                 }
             } else {
-                if (ShowEmptyDirectories || GetFilteredFileSystemChildren(rootItem).Any()) {
+                if (SearchAndFilterDirectory(rootItem)) {
                     RootItems.Add(rootItem);
                 }
             }
