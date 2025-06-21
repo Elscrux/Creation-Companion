@@ -85,17 +85,12 @@ public sealed class AssetController(
         }
 
         if (originIsFile) {
-            MoveInt(origin, token);
+            MoveFile(origin, token);
         } else {
-            foreach (var assetLink in origin.EnumerateFileLinks(true)) {
-                var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, assetLink.DataRelativePath.Path);
-                var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, relativePath);
-                var linkDestination = new  FileSystemLink(destination.DataSource, destinationPath);
-                MoveInternal(assetLink, linkDestination, rename, doRemap, copy, token);
-            }
+            MoveDirectory(origin, token);
         }
 
-        void MoveInt(FileSystemLink fileLink, CancellationToken innerToken) {
+        void MoveFile(FileSystemLink fileLink, CancellationToken innerToken) {
             // Calculate the full path of that the file should be moved to
             DataRelativePath newDataRelativePath;
             if (destinationIsFile) {
@@ -103,14 +98,14 @@ public sealed class AssetController(
             } else {
                 var adjustedBasePath = rename || baseIsFile
                     // Example Renaming meshes\clutter to meshes\clutter-new
-                    // basePath:          meshes\clutter
-                    // assetFile.Path:    meshes\clutter\test.nif
+                    // baseDirectory:     meshes\clutter
+                    // fileLink:          meshes\clutter\test.nif
                     // destination:       meshes\clutter-new\
                     // fullNewPath:       meshes\clutter-new\test.nif
                     ? destination.DataRelativePath.Path
                     // Example Moving meshes\clutter to meshes\clutter-new
-                    // basePath:          meshes\clutter
-                    // assetFile.Path:    meshes\clutter\test.nif
+                    // baseDirectory:     meshes\clutter
+                    // fileLink:          meshes\clutter\test.nif
                     // destination:       meshes\clutter-new\
                     // fullNewPath:       meshes\clutter-new\clutter\test.nif
                     : destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, destination.FileSystem.Path.GetFileName(baseDirectory));
@@ -131,6 +126,27 @@ public sealed class AssetController(
 
             if (doRemap) {
                 RemapReferences(fileLink, newPath);
+            }
+        }
+
+        void MoveDirectory(FileSystemLink directoryLink, CancellationToken innerToken) {
+            if (destinationIsFile) {
+                logger.Here().Warning("Cannot move directory {Path} to file {Destination}, skipping", directoryLink, destination);
+                return;
+            }
+
+            // Reaching point of no return - after this alterations will be made 
+            if (innerToken.IsCancellationRequested) return;
+
+            // Add directory name to the destination path
+            var newDestinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name);
+            destination = new FileSystemLink(destination.DataSource, newDestinationPath); 
+
+            // Move the asset
+            if (!FileSystemMove(directoryLink, destination, copy, innerToken)) return;
+
+            if (doRemap) {
+                RemapReferences(directoryLink, destination);
             }
         }
     }
@@ -198,7 +214,7 @@ public sealed class AssetController(
         try {
             if (destinationDirectory is not null) destination.FileSystem.Directory.CreateDirectory(destinationDirectory);
 
-            if (origin.Exists()) {
+            if (origin.IsFile) {
                 if (token.IsCancellationRequested) return false;
 
                 if (copy) {
@@ -212,7 +228,22 @@ public sealed class AssetController(
                 if (copy) {
                     origin.FileSystem.Directory.DeepCopy(origin.FullPath, destination.FullPath);
                 } else {
-                    origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
+                    if (destination.Exists()) {
+                        // If the destination directory already exists, integrate the contents with recursive FileSystemMove calls
+                        foreach (var link in origin.EnumerateAllLinks(true)) {
+                            var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, link.DataRelativePath.Path);
+                            var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
+                            var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
+                            FileSystemMove(link, linkDestination, copy, token);
+                        }
+                        
+                        // If directory is empty after moving files, delete it
+                        if (!origin.EnumerateAllLinks(true).Any()) {
+                            origin.FileSystem.Directory.Delete(origin.FullPath, true);
+                        }
+                    } else {
+                        origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
+                    }
                 }
             }
         } catch (Exception e) {
