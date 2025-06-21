@@ -136,11 +136,20 @@ public sealed class AssetController(
     }
 
     public void RemapReferences(FileSystemLink oldLink, FileSystemLink newLink) {
-        // Remap references in records
-        RemapRecordReferences(oldLink, newLink);
+        if (oldLink.IsFile) {
+            // Remap references in records
+            RemapRecordReferences(oldLink, newLink);
 
-        // Remap references in NIFs
-        RemapAssetReferences(oldLink, newLink);
+            // Remap references in NIFs
+            RemapAssetReferences(oldLink, newLink);
+        } else {
+            foreach (var fileLink in oldLink.EnumerateFileLinks(true)) {
+                var relativePath = oldLink.FileSystem.Path.GetRelativePath(oldLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
+                var destinationPath = newLink.FileSystem.Path.Combine(newLink.DataRelativePath.Path, oldLink.Name, relativePath);
+                var linkDestination = new  FileSystemLink(newLink.DataSource, destinationPath);
+                RemapReferences(fileLink, linkDestination);
+            }
+        }
     }
 
     private void RemapAssetReferences(FileSystemLink oldLink, FileSystemLink newLink) {
