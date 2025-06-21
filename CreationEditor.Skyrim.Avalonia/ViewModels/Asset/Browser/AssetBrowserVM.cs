@@ -165,7 +165,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             // Name
                             var textBlock = new TextBlock {
                                 Text = asset.Name,
-                                [ToolTip.TipProperty] = GetRootRelativePath(asset),
+                                [ToolTip.TipProperty] = asset.DataRelativePath.Path,
                                 VerticalAlignment = VerticalAlignment.Center,
                             };
 
@@ -365,7 +365,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
 
             var deleteDialog = assets.Count == 1
-                ? CreateAssetDialog(deleteAssets, $"Delete {GetRootRelativePath(deleteAssets[0])}", content)
+                ? CreateAssetDialog(deleteAssets, $"Delete {deleteAssets[0].Name}", content)
                 : CreateAssetDialog(deleteAssets, $"Delete {assets.Count}", content);
 
             if (await deleteDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
@@ -417,7 +417,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     private async Task AddAssetFolder(FileSystemLink dir) {
         var textBox = new TextBox { Text = "New Folder" };
-        var relativePath = GetRootRelativePath(dir);
+        var relativePath = dir.DataRelativePath.Path;
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
         if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
@@ -428,7 +428,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     private void OpenAssetReferences(FileSystemLink asset) {
         var referenceBrowserVM = GetReferenceBrowserVM(asset);
-        var relativePath = GetRootRelativePath(asset);
+        var relativePath = asset.DataRelativePath.Path;
 
         var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
         referenceWindow.Show(_mainWindow);
@@ -437,7 +437,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private void CopyAssetPath(FileSystemLink asset) {
         var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
 
-        clipboard?.SetTextAsync(GetRootRelativePath(asset));
+        clipboard?.SetTextAsync(asset.DataRelativePath.Path);
     }
 
     private async Task RenameAsset(FileSystemLink asset) {
@@ -505,8 +505,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var srcDirectory = firstDraggedAsset.ParentDirectory;
         if (srcDirectory is null) return;
 
-        var relativeSrcDirectory = GetRootRelativePath(srcDirectory);
-        var relativeDstDirectory = GetRootRelativePath(dstDirectory);
+        var relativeSrcDirectory = srcDirectory.DataRelativePath.Path;
+        var relativeDstDirectory = dstDirectory.DataRelativePath.Path;
 
         // No need to move if the source and destination are the same
         if (string.Equals(relativeSrcDirectory, relativeDstDirectory, DataRelativePath.PathComparison)) return;
@@ -535,7 +535,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     : new TextBlock {
                         Inlines = [
                             new Run("Move "),
-                            new Run(GetRootRelativePath(firstDraggedAsset)) {
+                            new Run(firstDraggedAsset.Name) {
                                 Foreground = StandardBrushes.HighlightBrush,
                             },
                             new Run(" to "),
@@ -635,7 +635,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         if (IsBusyLoadingReferences) {
             assetDialog.IconSource = new SymbolIconSource { Symbol = Symbol.ReportHacked };
-            assetDialog.Header += " - Not all references have been loaded yet.";
+            assetDialog.SubHeader += "Warning: This change might break something - Not all references have been loaded yet.";
         }
 
         return assetDialog;
@@ -649,15 +649,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
             dialog.Footer = new ItemsControl {
                 ItemsSource = fileLinks,
-                ItemTemplate = new FuncDataTemplate<FileSystemLink>((asset, _) => new TextBlock { Text = GetRootRelativePath(asset) }),
+                ItemTemplate = new FuncDataTemplate<FileSystemLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
             };
         }
 
         return dialog;
-    }
-
-    private string GetRootRelativePath(FileSystemLink link) {
-        return link.FileSystem.Path.GetRelativePath(DataSource.Path, link.FullPath);
     }
 
     private void MoveToPath(DataRelativePath path) {
@@ -665,7 +661,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         FileSystemLink? currentNode;
         var items = AssetTreeSource.Items.ToList();
         do {
-            currentNode = items.Find(a => path.Path.StartsWith(GetRootRelativePath(a), DataRelativePath.PathComparison));
+            currentNode = items.Find(a => path.Path.StartsWith(a.DataRelativePath.Path, DataRelativePath.PathComparison));
             if (currentNode is null) break;
 
             pathIndices = pathIndices.Append(items.IndexOf(currentNode));
