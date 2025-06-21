@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CreationEditor.Services.DataSource;
-using Mutagen.Bethesda.Assets;
 using Noggog;
 using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
@@ -10,7 +9,6 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
     private readonly DisposableBucket _disposables = new();
 
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
-    private readonly IAssetTypeService _assetTypeService;
 
     public IDataSource DataSource { get; }
 
@@ -40,11 +38,9 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
 
     public FileSystemDataSourceWatcher(
         IDataSource dataSource,
-        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
-        IAssetTypeService assetTypeService) {
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider) {
         DataSource = dataSource;
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
-        _assetTypeService = assetTypeService;
         var watcher = DataSource.FileSystem.FileSystemWatcher.New(DataSource.Path).DisposeWith(_disposables);
         // _watcher.Filters.AddRange(_assetTypeService.GetFileMasks()); doesn't allow directory changes
         watcher.IncludeSubdirectories = true;
@@ -87,10 +83,7 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
                 if (DataSource.FileSystem.Directory.Exists(x.FullPath)) {
                     directoryObserver.OnNext(select(x));
                 } else {
-                    var extension = DataSource.FileSystem.Path.GetExtension(x.FullPath);
-                    if (_assetTypeService.FileExtensions.Contains(extension)) {
-                        fileObserver.OnNext(select(x));
-                    }
+                    fileObserver.OnNext(select(x));
                 }
             })
             .DisposeWith(_disposables);
