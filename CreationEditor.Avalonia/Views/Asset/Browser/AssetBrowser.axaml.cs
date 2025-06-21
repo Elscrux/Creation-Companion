@@ -161,6 +161,17 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
     private async void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {
         if (AssetTree.RowSelection is null || ViewModel is null) return;
+        if (e.Source is not Visual visual) return;
+
+        var dataGridRow = visual.FindAncestorOfType<TreeDataGridRow>();
+        if (dataGridRow is null) return;
+
+        var selectedItems = AssetTree.RowSelection!.SelectedItems;
+
+        if (!AssetTree.RowSelection!.SelectedItems.Contains(dataGridRow.Model)) {
+            // We got an outdated selected items list - just use the current asset
+            selectedItems = [dataGridRow.Model];
+        }
 
         switch (e.Key) {
             // Focus search box
@@ -169,38 +180,38 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                 break;
             // Open references
             case Key.R when (e.KeyModifiers & KeyModifiers.Control) != 0:
-                if (AssetTree.RowSelection.SelectedItem is FileSystemLink item) {
-                    if (!await ViewModel.OpenReferences.CanExecute) break;
-
+                if (dataGridRow.Model is FileSystemLink item) {
                     await ViewModel.OpenReferences.Execute(item);
                 }
                 break;
             // Rename
             case Key.F2:
-                if (AssetTree.RowSelection.SelectedItem is FileSystemLink fileSystemLink) {
-                    if (!await ViewModel.Rename.CanExecute) break;
-
+                if (dataGridRow.Model is FileSystemLink fileSystemLink) {
                     await ViewModel.Rename.Execute(fileSystemLink);
                 }
                 break;
             // Delete
             case Key.Delete:
-                await ViewModel.Delete.Execute(AssetTree.RowSelection.SelectedItems.OfType<FileSystemLink?>().ToList());
+                await ViewModel.Delete.Execute(selectedItems.OfType<FileSystemLink?>().ToList());
                 break;
         }
     }
 
     private async void AssetTree_OnDoubleTapped(object? sender, TappedEventArgs e) {
         if (AssetTree.RowSelection is null || ViewModel is null) return;
+        if (e.Source is not Visual visual) return;
 
-        // Ignore double taps on the chevron
-        if (e.Source is Visual v && v.GetVisualChildren().Any(x => x.Name == "ChevronPath")) return;
+        // Ignore double taps on the expander chevron
+        if (visual.GetVisualChildren().Any(x => x.Name == "ChevronPath")) return;
 
-        if (AssetTree.RowSelection.SelectedItem is FileSystemLink { IsFile: true }) {
-            await ViewModel.Open.Execute(AssetTree.RowSelection.SelectedItems.OfType<FileSystemLink>().ToList());
+        var dataGridRow = visual.FindAncestorOfType<TreeDataGridRow>();
+        if (dataGridRow is null) return;
+
+        if (dataGridRow.Model is FileSystemLink { IsFile: true } fileLink) {
+            // Open file
+            await ViewModel.Open.Execute([fileLink]);
         } else {
-            if (e.Source is not Visual visual) return;
-
+            // Expand or collapse directory
             var expanderCell = visual.FindAncestorOfType<TreeDataGridExpanderCell>();
             if (expanderCell is not null) {
                 expanderCell.IsExpanded = !expanderCell.IsExpanded;

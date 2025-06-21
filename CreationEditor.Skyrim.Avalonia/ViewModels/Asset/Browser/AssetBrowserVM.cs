@@ -567,10 +567,17 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     public IEnumerable<Control> GetContextMenuItems(FileSystemLink asset) {
+        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems;
+
+        if (!AssetTreeSource.RowSelection!.SelectedItems.Contains(asset)) {
+            // We got an outdated selected items list - just use the current asset
+            selectedItems = [asset];
+        }
+
         List<Control> items = [
-            _menuItemProvider.File(Open, AssetTreeSource.RowSelection!.SelectedItems),
+            _menuItemProvider.File(Open, selectedItems),
             _menuItemProvider.Rename(Rename, asset),
-            _menuItemProvider.Delete(Delete, AssetTreeSource.RowSelection!.SelectedItems),
+            _menuItemProvider.Delete(Delete, selectedItems),
             new Separator(),
             new MenuItem {
                 Icon = new SymbolIcon { Symbol = Symbol.Copy },
