@@ -443,8 +443,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private async Task RenameAsset(FileSystemLink asset) {
         if (asset.IsDirectory) return;
 
-        var name = asset.NameWithoutExtension;
-        var textBox = new TextBox { Text = name };
+        var nameWithoutExtension = asset.NameWithoutExtension;
+        var textBox = new TextBox { Text = nameWithoutExtension };
         var content = new StackPanel { Children = { textBox } };
 
         var referenceBrowserVM = GetReferenceBrowserVM(asset);
@@ -456,10 +456,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             content.Children.Add(referenceBrowser);
         }
 
-        var renameDialog = CreateAssetDialog($"Rename {name}", content);
+        var renameDialog = CreateAssetDialog($"Rename {asset.Name}", content);
         if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-            var oldName = asset.NameWithoutExtension;
-            if (string.Equals(oldName, textBox.Text, DataRelativePath.PathComparison)) return;
+            if (string.Equals(nameWithoutExtension, textBox.Text, DataRelativePath.PathComparison)) return;
 
             _assetController.Rename(asset, textBox.Text + asset.Extension);
         }
