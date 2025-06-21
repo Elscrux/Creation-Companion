@@ -11,6 +11,12 @@ public static class StandardBrushes {
     public static ISolidColorBrush ValidBrush => Brushes.ForestGreen;
     public static ISolidColorBrush InvalidBrush => Brushes.IndianRed;
 
+    public static IBrush GetStatusBrush(bool status) {
+        return status
+            ? ValidBrush
+            : InvalidBrush;
+    }
+
     public static SolidColorBrush? GetBrush(string dynamicColorKey) =>
         Application.Current is not null
      && Application.Current.TryFindResource(dynamicColorKey, Application.Current.ActualThemeVariant, out var obj)

@@ -185,9 +185,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                  && AssetTypeService.GetAssetLink(asset.DataRelativePath, assetType) is {} assetLink
                                  && _assetReferenceController.GetReferencedAsset(assetLink, out var referencedAsset) is {} disposable) {
                                     icon[!FAIconElement.ForegroundProperty] = referencedAsset.ReferenceCount
-                                        .Select(c => c > 0
-                                            ? StandardBrushes.ValidBrush
-                                            : StandardBrushes.InvalidBrush)
+                                        .Select(c => StandardBrushes.GetStatusBrush(c > 0))
                                         .ToBinding();
                                     icon.Unloaded += OnSymbolIconOnUnloaded;
 
