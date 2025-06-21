@@ -326,7 +326,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     .Where(x => Equals(x.Old.DataSource, DataSource) || Equals(x.New.DataSource, DataSource))
                     .Subscribe(Tree_RenameLink)
                     .DisposeWith(this);
-                watcher.Changed
+                watcher.ChangedFile
                     .ObserveOnGui()
                     .Where(x => Equals(x.DataSource, DataSource))
                     .Subscribe(Tree_UpdateFileLink)
@@ -884,13 +884,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Tree_AddLink(rename.New);
     }
 
-    private void Tree_UpdateLink(FileSystemLink link) {
-        if (!SearchAndFilter(link)) {
-            Tree_RemoveLink(link);
+    private void Tree_UpdateFileLink(FileSystemLink fileLink) {
+        if (!SearchAndFilterFile(fileLink)) {
+            Tree_RemoveLink(fileLink);
             return;
         }
 
-        var parentRow = FindParentRow(link);
+        var parentRow = FindParentRow(fileLink);
         if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
@@ -898,11 +898,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var value = ItemsField.GetValue(childRows);
         if (value is not TreeDataGridItemsSourceView view) return;
 
-        var index = view.Inner.IndexOf(link);
+        var index = view.Inner.IndexOf(fileLink);
         if (index < 0) return;
 
-        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, link, link, index);
-        view.Inner[index] = link;
+        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, fileLink, fileLink, index);
+        view.Inner[index] = fileLink;
         OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
     }
 
