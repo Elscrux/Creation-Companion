@@ -313,19 +313,23 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 var watcher = dataSourceWatcherProvider.GetWatcher(dataSource);
                 watcher.Created
                     .ObserveOnGui()
+                    .Where(x => Equals(x.DataSource, DataSource))
                     .Subscribe(Tree_AddLink)
                     .DisposeWith(this);
                 watcher.Deleted
                     .ObserveOnGui()
+                    .Where(x => Equals(x.DataSource, DataSource))
                     .Subscribe(Tree_RemoveLink)
                     .DisposeWith(this);
                 watcher.Renamed
                     .ObserveOnGui()
+                    .Where(x => Equals(x.Old.DataSource, DataSource) || Equals(x.New.DataSource, DataSource))
                     .Subscribe(Tree_RenameLink)
                     .DisposeWith(this);
                 watcher.Changed
                     .ObserveOnGui()
-                    .Subscribe(Tree_UpdateLink)
+                    .Where(x => Equals(x.DataSource, DataSource))
+                    .Subscribe(Tree_UpdateFileLink)
                     .DisposeWith(this);
 
                 Dispatcher.UIThread.Post(() => {
