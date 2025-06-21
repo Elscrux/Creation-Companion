@@ -526,6 +526,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             },
                         ],
                         FontSize = 14,
+                        TextWrapping = TextWrapping.Wrap,
                     }
                     : new TextBlock {
                         Inlines = [
@@ -539,6 +540,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             },
                         ],
                         FontSize = 14,
+                        TextWrapping = TextWrapping.Wrap,
                     },
             },
         };
