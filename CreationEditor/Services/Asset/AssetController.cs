@@ -64,11 +64,18 @@ public sealed class AssetController(
     }
 
     private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, bool copy, CancellationToken token) {
-        var originIsFile = origin.IsFile;
+        if (!origin.Exists()) {
+            logger.Here().Warning("Cannot move {Path} because it does not exist", origin);
+            return;
+        }
 
         // Get the parent directory for a file path or self for a directory path
+        var originIsFile = origin.IsFile;
         var baseDirectory = originIsFile ? origin.ParentDirectory?.DataRelativePath.Path : origin.DataRelativePath.Path;
-        if (baseDirectory is null) return;
+        if (baseDirectory is null) {
+            logger.Here().Warning("Cannot move {Path} because no parent directory could be found", origin);
+            return;
+        }
 
         var baseIsFile = originIsFile || origin.FileSystem.Path.HasExtension(baseDirectory);
         var destDirExists = destination.FileSystem.Directory.Exists(destination.FullPath);
