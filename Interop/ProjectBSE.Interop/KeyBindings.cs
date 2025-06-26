@@ -6,7 +6,7 @@ namespace ProjectBSE.Interop;
 public static partial class Interop {
     [LibraryImport(DllName, EntryPoint = "updateKeybindings")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial void UpdateKeybindings_Native(KeyBindings keyBindings);
+    private static partial void UpdateKeybindings_Native(in IOFunctionBinding[] bindings);
     public static void UpdateKeybindings(Dictionary<IOFunction, IOFunctionBinding> keyBindings) {
         // Add missing keys with default value -1 to ensure all IOFunction enum members are represented
         foreach (var ioFunction in Enum.GetValues<IOFunction>()) {
@@ -14,7 +14,7 @@ public static partial class Interop {
         }
 
         var ioFunctionBindings = keyBindings.Select(x => x.Value).ToArray();
-        UpdateKeybindings_Native(new KeyBindings { BindingList = ioFunctionBindings });
+        UpdateKeybindings_Native(ioFunctionBindings);
     }
 
     [LibraryImport(DllName, EntryPoint = "getKeybindings")]
