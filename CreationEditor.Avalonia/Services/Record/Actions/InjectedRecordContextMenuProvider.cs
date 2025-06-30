@@ -32,7 +32,7 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
         var recordAction = recordActions.FirstOrDefault();
         if (recordAction is null) return;
 
-        using var disposable = recordAction.Command.Execute(contextFactory()).Subscribe();
+        using var disposable = recordAction.Command?.Execute(contextFactory()).Subscribe();
     }
 
     public IEnumerable<object> GetMenuItems(RecordListContext context) {
@@ -65,6 +65,6 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
             .SelectMany(x => x.Value)
             .FirstOrDefault(x => x.IsPrimary && x.IsVisible(context));
 
-        using var disposable = primary?.Command.Execute(context).Subscribe();
+        using var disposable = primary?.Command?.Execute(context).Subscribe();
     }
 }
