@@ -25,4 +25,18 @@ public static class ReferencedRecordComparers {
 
             return EditorIDComparer.Compare(x, y);
         });
+
+    public static readonly FuncSelectorComparer<IReferencedRecord, IWeightValueGetter> WeightComparer
+        = new(x => x.Record as IWeightValueGetter,
+            (x, y) => x.Weight.CompareTo(y.Weight));
+
+    public static readonly FuncSelectorComparer<IReferencedRecord, IWeightValueGetter> ValueComparer
+        = new(x => x.Record as IWeightValueGetter,
+            (x, y) => x.Value.CompareTo(y.Value));
+
+    public static FuncSelectorComparer<IReferencedRecord, object?> SelectorComparer(Func<IReferencedRecord, object?> selector)
+        => new(selector, (x, y) => {
+            var checkNull = ObjectComparers.CheckNull(x, y);
+            return checkNull ?? string.Compare(x!.ToString()!, y!.ToString(), StringComparison.OrdinalIgnoreCase);
+        });
 }

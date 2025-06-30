@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
+using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Plugins.Aspects;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
@@ -11,6 +12,7 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
                 Header = "Weight",
                 Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Weight), BindingMode.OneWay),
                 CanUserSort = true,
+                CustomSortComparer = ReferencedRecordComparers.WeightComparer,
                 Width = new DataGridLength(85),
             },
             10);
@@ -20,6 +22,7 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
                 Header = "Value",
                 Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Value), BindingMode.OneWay),
                 CanUserSort = true,
+                CustomSortComparer = ReferencedRecordComparers.ValueComparer,
                 Width = new DataGridLength(75),
             },
             11);
