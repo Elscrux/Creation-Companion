@@ -56,7 +56,7 @@ public partial record ListDefinition(
         List<Feature> features,
         IReadOnlyList<IMajorRecordGetter> records,
         EnchantmentProvider enchantmentProvider,
-        ITierProvider tierProvider,
+        ITierController tierController,
         Func<ListDefinitionIdentifier, List<CreatedLeveledList>> listsProvider,
         ILinkCache<ISkyrimMod, ISkyrimModGetter> linkCache,
         ISkyrimMod mod) {
@@ -92,7 +92,7 @@ public partial record ListDefinition(
             foreach (var record in records) {
                 var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record);
 
-                var tierIdentifier = tierProvider.GetTier(record);
+                var tierIdentifier = tierController.GetTier(record);
                 if (tierIdentifier is null) continue;
 
                 var tiers = GetTiers(tierIdentifier)

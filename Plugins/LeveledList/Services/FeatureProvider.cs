@@ -1,4 +1,5 @@
-﻿using CreationEditor.Skyrim;
+﻿using CreationEditor.Services.Environment;
+using CreationEditor.Skyrim;
 using LeveledList.Model;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins.Aspects;
@@ -8,43 +9,72 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace LeveledList.Services;
 
-public class FeatureProvider {
-    public FeatureWildcard GetFeatureWildcard(
-        FeatureWildcardIdentifier featureWildcardIdentifier,
-        Func<IMajorRecordGetter, TierIdentifier?> getTier,
-        ILinkCache linkCache) {
+public sealed class FeatureProvider(
+    ILinkCacheProvider linkCacheProvider,
+    ITierController tierController)
+    : IFeatureProvider {
+    public const FeatureWildcardIdentifier Tier = "Tier";
+    public const FeatureWildcardIdentifier SchoolOfMagic = "SchoolOfMagic";
+    public const FeatureWildcardIdentifier MagicLevel = "MagicLevel";
+    public const FeatureWildcardIdentifier Enchantment = "Enchantment";
+    public const FeatureWildcardIdentifier WeaponType = "WeaponType";
+    public const FeatureWildcardIdentifier ArmorSlot = "ArmorSlot";
+    public const FeatureWildcardIdentifier ArmorTypeFeature = "ArmorType";
+
+    public IEnumerable<FeatureWildcardIdentifier> GetApplicableFeatureWildcards(Type t) {
+        if (t.IsAssignableTo(typeof(IEnchantableGetter))) {
+            yield return SchoolOfMagic;
+            yield return MagicLevel;
+            yield return Enchantment;
+        }
+
+        if (t.IsAssignableTo(typeof(IWeaponGetter))) {
+            yield return WeaponType;
+        }
+
+        if (t.IsAssignableTo(typeof(IArmorGetter))) {
+            yield return ArmorSlot;
+            yield return ArmorTypeFeature;
+        }
+
+        if (t.IsAssignableTo(typeof(IMajorRecordGetter))) {
+            yield return Tier;
+        }
+    }
+
+    public FeatureWildcard GetFeatureWildcard(FeatureWildcardIdentifier featureWildcardIdentifier) {
         return featureWildcardIdentifier switch {
-            "Tier" => new FeatureWildcard(
+            Tier => new FeatureWildcard(
                 featureWildcardIdentifier,
-                getTier),
-            "SchoolOfMagic" => new FeatureWildcard(
+                tierController.GetTier),
+            SchoolOfMagic => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IEnchantableGetter enchantable) return null;
 
-                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCache);
-                    return objectEffect?.GetSchoolOfMagic(linkCache);
+                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
+                    return objectEffect?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
                 }),
-            "MagicLevel" => new FeatureWildcard(
+            MagicLevel => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IEnchantableGetter enchantable) return null;
 
-                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCache);
-                    return objectEffect?.GetMagicLevel(linkCache);
+                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
+                    return objectEffect?.GetMagicLevel(linkCacheProvider.LinkCache);
                 }),
-            "Enchantment" => new FeatureWildcard(
+            Enchantment => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IEnchantableGetter enchantable) return null;
 
-                    var enchantment = enchantable.ObjectEffect.TryResolve(linkCache);
+                    var enchantment = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
                     if (enchantment is null) return null;
 
                     while (!enchantment.BaseEnchantment.IsNull) {
                         if (enchantment.FormKey == enchantment.BaseEnchantment.FormKey) break;
 
-                        enchantment = enchantment.BaseEnchantment.TryResolve(linkCache);
+                        enchantment = enchantment.BaseEnchantment.TryResolve(linkCacheProvider.LinkCache);
                         if (enchantment is null) return null;
                     }
 
@@ -56,10 +86,10 @@ public class FeatureProvider {
                         .Replace("Damage", string.Empty)
                         .Replace("Base", string.Empty);
                 }),
-            "WeaponType" => new FeatureWildcard(
+            WeaponType => new FeatureWildcard(
                 featureWildcardIdentifier,
-                record => GetByKeyword<IWeaponGetter>(record, "WeapType", linkCache)),
-            "ArmorType" => new FeatureWildcard(
+                record => GetByKeyword<IWeaponGetter>(record, "WeapType", linkCacheProvider.LinkCache)),
+            ArmorTypeFeature => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IArmorGetter armor) return null;
@@ -71,7 +101,7 @@ public class FeatureProvider {
                         _ => null
                     };
                 }),
-            "ArmorSlot" => new FeatureWildcard(
+            ArmorSlot => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IArmorGetter { Keywords: not null } armor) return null;

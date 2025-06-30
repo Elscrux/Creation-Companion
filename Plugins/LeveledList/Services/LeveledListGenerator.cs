@@ -1,24 +1,22 @@
 ﻿using CreationEditor;
+using CreationEditor.Services.Environment;
 using LeveledList.Model;
 using LeveledList.Resources;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 namespace LeveledList.Services;
 
-public class Generator {
+public class LeveledListGenerator(
+    IFeatureProvider featureProvider,
+    ITierController tierController,
+    IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
+    IModGetter modToLookAt,
+    ISkyrimMod mod) {
     public void Generate() {
-        var env = GameEnvironment.Typical.Skyrim(SkyrimRelease.SkyrimSE);
-        var modToLookAt = env.LinkCache.PriorityOrder[^1];
         var recordTypeProvider = new RecordTypeProvider(modToLookAt);
-        var featureProvider = new FeatureProvider();
-        var enchantmentProvider = new EnchantmentProvider(env.LinkCache);
-        var mod = new SkyrimMod(ModKey.FromFileName("GeneratedLeveledLists.esp"), SkyrimRelease.SkyrimSE, 1.7f);
-
+        var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
         var fileStream = File.Open(@"E:\dev\leveled-list-configs\lists\base-armor-light.yaml", FileMode.Open);
         var deserializer = new DeserializerBuilder()
             .WithTypeConverter(new FormKeyYamlTypeConverter())
@@ -34,10 +32,7 @@ public class Generator {
             var featureWildcardIdentifiers = listDefinition.GetFeatureWildcardIdentifiers().ToArray();
 
             var featureWildcards = featureWildcardIdentifiers
-                .Select(featureWildcardIdentifier => featureProvider.GetFeatureWildcard(
-                    featureWildcardIdentifier,
-                    r => listTypeDefinition.GetTier(r),
-                    env.LinkCache))
+                .Select(featureProvider.GetFeatureWildcard)
                 .ToList();
 
             var rootFeatureNode = GroupByFeatureWildcard(listDefinition, records, featureWildcards, []) ?? new FeatureNode([], records);
@@ -59,9 +54,9 @@ public class Generator {
                     featureNode.Features,
                     featureNode.Records,
                     enchantmentProvider,
-                    listTypeDefinition,
+                    tierController,
                     identifier => createdListsPerDefinition[identifier],
-                    env.LinkCache,
+                    editorEnvironment.LinkCache,
                     mod);
 
                 createdLists.Add(new CreatedLeveledList(featureNode, leveledItem));
@@ -76,7 +71,7 @@ public class Generator {
     }
 
     public FeatureNode? GroupByFeatureWildcard(
-        Model.ListDefinition listDefinition,
+        ListDefinition listDefinition,
         IEnumerable<IMajorRecordGetter> records,
         List<FeatureWildcard> featureWildcards,
         List<Feature> features,

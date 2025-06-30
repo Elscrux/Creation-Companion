@@ -28,6 +28,10 @@ public sealed class RecordModule : Module {
             .As<IRecordReferenceController>()
             .SingleInstance();
 
+        builder.RegisterType<RecordDecorationController>()
+            .As<IRecordDecorationController>()
+            .SingleInstance();
+
         // Record Browser
         builder.RegisterType<RecordFilterBuilder>()
             .As<IRecordFilterBuilder>();

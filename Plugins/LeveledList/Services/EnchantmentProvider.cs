@@ -1,10 +1,10 @@
 ﻿using System.Text.RegularExpressions;
-using Mutagen.Bethesda.Plugins.Cache;
+using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services;
 
-public partial class EnchantmentProvider(ILinkCache linkCache) {
+public partial class EnchantmentProvider(ILinkCacheProvider linkCacheProvider) {
     [GeneratedRegex(@"\d+$")]
     public static partial Regex EnchantmentRegex { get; }
 
@@ -13,7 +13,7 @@ public partial class EnchantmentProvider(ILinkCache linkCache) {
             case IEnchantableGetter enchantable:
                 if (enchantable.ObjectEffect.IsNull) return 0;
 
-                var enchantment = enchantable.ObjectEffect.TryResolve(linkCache);
+                var enchantment = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
                 if (enchantment is null) return 0;
 
                 var editorId = enchantment.EditorID;

@@ -1,13 +1,12 @@
-﻿using LeveledList.Services;
-using Mutagen.Bethesda.Plugins.Records;
+﻿using Mutagen.Bethesda.Plugins.Records;
 namespace LeveledList.Model;
 
 public record ListTypeDefinition(
     string Type,
     List<TierIdentifier> Tiers,
-    Dictionary<ListDefinitionIdentifier, Model.ListDefinition> Lists,
+    Dictionary<ListDefinitionIdentifier, ListDefinition> Lists,
     Dictionary<string, Item>? Items = null
-) : ITierProvider {
+) {
     public ListTypeDefinition() : this(string.Empty, [], []) {}
 
     public TierIdentifier? GetTier(IMajorRecordGetter record) {

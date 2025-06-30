@@ -123,6 +123,9 @@ public sealed class MainModule : Module {
         builder.RegisterGeneric(typeof(JsonStateRepository<,>))
             .As(typeof(IStateRepository<,>));
 
+        builder.RegisterGeneric(typeof(CachedStateRepository<,>))
+            .As(typeof(ICachedStateRepository<,>));
+
         builder.RegisterGeneric(typeof(StateRepositoryFactory<,>))
             .As(typeof(IStateRepositoryFactory<,>));
 

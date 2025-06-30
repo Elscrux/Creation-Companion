@@ -2,6 +2,61 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="LeveledList.Views.LeveledListView">
+             x:Class="LeveledList.Views.LeveledListView"
+             x:DataType="viewModels:LeveledListVM">
+    <Grid>
+        <DataGrid ItemsSource="{Binding Records}"
+                  Background="{DynamicResource SystemControlTransparentBrush}"
+                  CanUserSortColumns="True"
+                  CanUserReorderColumns="True" CanUserResizeColumns="True"
+                  Classes="Small">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="EditorID">
+                    <DataTemplate DataType="viewModels:LeveledListRecord">
+                        <TextBlock Text="{Binding Record.Record.EditorID}"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTemplateColumn Header="Tiers">
+                    <DataTemplate DataType="viewModels:LeveledListRecord">
+                        <TextBlock Text="{Binding Tier}"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Features">
+                    <DataTemplate DataType="viewModels:LeveledListRecord">
+                        <ItemsControl ItemsSource="{Binding Features}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="({0:0.}: {1:0.}">
+                                                <Binding Path="Key" />
+                                                <Binding Path="Value" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <avaloniaProgressRing:ProgressRing
+            IsActive="{Binding IsBusy^, FallbackValue=false}"
+            HorizontalAlignment="Left" VerticalAlignment="Top"
+            Width="100" Height="100"
+            Margin="50"/>
+    </Grid>
 </UserControl>
