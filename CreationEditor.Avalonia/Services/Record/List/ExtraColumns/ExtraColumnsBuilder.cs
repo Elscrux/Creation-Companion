@@ -14,6 +14,11 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
             .SelectMany(c => c));
 
+        _extraColumns.AddRange(
+            provider.AutoAttachingExtraColumnsCache
+                .Where(c => c.CanAttachTo(recordType))
+                .SelectMany(x => x.CreateColumns()));
+
         return this;
     }
 

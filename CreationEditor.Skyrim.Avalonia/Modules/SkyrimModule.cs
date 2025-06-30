@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
@@ -12,6 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Avalonia;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
@@ -87,6 +89,11 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
 
         builder.RegisterAssemblyTypes(typeof(FactionEditorVM).Assembly)
             .Where(x => x.Name.Contains("EditorVM"))
+            .AsImplementedInterfaces();
+
+        // Extra Columns
+        builder.RegisterAssemblyTypes(typeof(ModeledExtraColumns).Assembly)
+            .AssignableTo<IUntypedExtraColumns>()
             .AsImplementedInterfaces();
 
         // Converter

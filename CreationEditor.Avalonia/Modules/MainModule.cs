@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
+using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
@@ -29,6 +30,7 @@ using CreationEditor.Services.State;
 using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Fonts;
 using Mutagen.Bethesda.Fonts.DI;
+using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Avalonia.Modules;
 
 public sealed class MainModule : Module {
@@ -141,6 +143,10 @@ public sealed class MainModule : Module {
         builder.RegisterType<MenuItemProvider>()
             .As<IMenuItemProvider>()
             .SingleInstance();
+
+        builder.RegisterAssemblyTypes(typeof(IUntypedExtraColumns).Assembly)
+            .AssignableTo<IUntypedExtraColumns>()
+            .AsImplementedInterfaces();
 
         builder.RegisterType<ExtraColumnProvider>()
             .As<IExtraColumnProvider>()

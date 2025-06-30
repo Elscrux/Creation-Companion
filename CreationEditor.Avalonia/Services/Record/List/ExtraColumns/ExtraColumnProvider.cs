@@ -3,10 +3,12 @@ namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnProvider : IExtraColumnProvider {
     public IReadOnlyDictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
+    public IReadOnlyList<IAutoAttachingExtraColumns> AutoAttachingExtraColumnsCache { get; }
 
-    public ExtraColumnProvider() {
-        ExtraColumnsCache = typeof(IExtraColumns)
-            .GetAllSubClasses<IExtraColumns>()
-            .ToDictionary(extraColumns => extraColumns.Type, extraColumns => extraColumns);
+    public ExtraColumnProvider(
+        IEnumerable<IExtraColumns> extraColumns,
+        IEnumerable<IAutoAttachingExtraColumns> autoAttachingExtraColumns) {
+        ExtraColumnsCache = extraColumns.ToDictionary(e => e.Type, columns => columns);
+        AutoAttachingExtraColumnsCache = autoAttachingExtraColumns.ToArray();
     }
 }
