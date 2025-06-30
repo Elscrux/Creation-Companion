@@ -28,8 +28,7 @@ public sealed class RecordSelectionVM : ViewModel {
         IsBusy = isFiltering
             .CombineLatest(
                 RecordProvider.IsBusy,
-                (filtering, busy) => (Filtering: filtering, Busy: busy))
-            .ObserveOnGui()
-            .Select(list => list.Filtering || list.Busy);
+                (filtering, busy) => filtering || busy)
+            .ObserveOnGui();
     }
 }
