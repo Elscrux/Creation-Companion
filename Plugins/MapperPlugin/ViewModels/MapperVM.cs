@@ -61,13 +61,13 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     public ReactiveCommand<Unit, Unit> AddMapping { get; }
     public ReactiveCommand<IList, Unit> RemoveMapping { get; }
     public ReactiveCommand<string, Unit> SaveMap { get; }
-    public ReactiveCommand<Guid, Unit> LoadMap { get; }
-    public ReactiveCommand<StateIdentifier, Unit> DeleteMap { get; }
-    public IObservableCollection<StateIdentifier> SavedMaps { get; } = new ObservableCollectionExtended<StateIdentifier>();
+    public ReactiveCommand<NamedGuid, Unit> LoadMap { get; }
+    public ReactiveCommand<NamedGuid, Unit> DeleteMap { get; }
+    public IObservableCollection<NamedGuid> SavedMaps { get; } = new ObservableCollectionExtended<NamedGuid>();
 
     public MapperVM(
         Func<QueryVM> queryVMFactory,
-        Func<string, IStateRepository<MapperMemento>> stateRepositoryFactory,
+        IStateRepositoryFactory<MapperMemento, NamedGuid> stateRepositoryFactory,
         ILogger logger,
         IGameReleaseContext gameReleaseContext,
         IRecordReferenceController recordReferenceController,
@@ -78,13 +78,13 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         VertexColorMapCreator = new VertexColorMapCreator();
         HeightmapCreator = new HeightmapCreator();
         LinkCacheProvider = linkCacheProvider;
-        var stateRepository = stateRepositoryFactory("Heatmap");
+        var stateRepository = stateRepositoryFactory.Create("Heatmap");
         TopCell = 64;
         BottomCell = -64;
         LeftCell = -64;
         RightCell = 64;
         MarkingSize = 10;
-        SavedMaps.AddRange(stateRepository.LoadAllStateIdentifiers());
+        SavedMaps.AddRange(stateRepository.LoadAllIdentifiers());
 
         var registrationsByGetterType = mutagenTypeProvider
             .GetRegistrations(gameReleaseContext.Release)
@@ -107,23 +107,23 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         SaveMap = ReactiveCommand.Create<string>(name => {
             var memento = CreateMemento();
             var newGuid = Guid.NewGuid();
-            stateRepository.Save(memento, newGuid, name);
-            foreach (var removeMap in SavedMaps.Where(x => x.Name == name).ToList()) {
-                SavedMaps.Remove(removeMap);
-                stateRepository.Delete(removeMap.Id, removeMap.Name);
+            stateRepository.Save(memento, new NamedGuid(newGuid, name));
+            foreach (var id in SavedMaps.Where(x => x.Name == name).ToList()) {
+                SavedMaps.Remove(id);
+                stateRepository.Delete(id);
             }
-            SavedMaps.Add(new StateIdentifier(newGuid, name));
+            SavedMaps.Add(new NamedGuid(newGuid, name));
         });
 
-        LoadMap = ReactiveCommand.Create<Guid>(id => {
+        LoadMap = ReactiveCommand.Create<NamedGuid>(id => {
             var memento = stateRepository.Load(id);
             if (memento is not null) {
                 RestoreMemento(memento);
             }
         });
 
-        DeleteMap = ReactiveCommand.Create<StateIdentifier>(id => {
-            stateRepository.Delete(id.Id, id.Name);
+        DeleteMap = ReactiveCommand.Create<NamedGuid>(id => {
+            stateRepository.Delete(id);
             SavedMaps.RemoveWhere(x => x.Id == id.Id);
         });
 

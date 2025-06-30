@@ -206,7 +206,7 @@
                                                     HorizontalAlignment="Stretch"
                                                     Content="{Binding Name}"
                                                     Command="{Binding #View.ViewModel.LoadMap}"
-                                                    CommandParameter="{Binding Id}"/>
+                                                    CommandParameter="{Binding}"/>
 
                                                 <Button HorizontalAlignment="Right"
                                                         VerticalAlignment="Stretch"

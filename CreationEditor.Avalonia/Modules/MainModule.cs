@@ -118,8 +118,20 @@ public sealed class MainModule : Module {
         builder.RegisterType<CacheLocationProvider>()
             .As<ICacheLocationProvider>();
 
-        builder.RegisterGeneric(typeof(JsonStateRepository<>))
-            .As(typeof(IStateRepository<>));
+        builder.RegisterGeneric(typeof(JsonStateRepository<,>))
+            .As(typeof(IStateRepository<,>));
+
+        builder.RegisterGeneric(typeof(StateRepositoryFactory<,>))
+            .As(typeof(IStateRepositoryFactory<,>));
+
+        builder.RegisterType<GuidStateIdentifier>()
+            .As<IStateIdentifier<Guid>>();
+
+        builder.RegisterType<NamedGuidStateIdentifier>()
+            .As<IStateIdentifier<NamedGuid>>();
+
+        builder.RegisterType<FormKeyStateIdentifier>()
+            .As<IStateIdentifier<FormKey>>();
 
         builder.RegisterType<ModScopeProviderVM>()
             .AsSelf()

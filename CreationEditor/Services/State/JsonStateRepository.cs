@@ -6,15 +6,16 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.State;
 
-public sealed class JsonStateRepository<T>(
+public sealed class JsonStateRepository<TState, TIdentifier>(
     IContractResolver contractResolver,
+    IStateIdentifier<TIdentifier> stateIdentifier,
     ILogger logger,
     IFileSystem fileSystem,
-    string stateId)
-    : IStateRepository<T>
-    where T : class {
+    params IEnumerable<string> stateIds)
+    : IStateRepository<TState, TIdentifier>
+    where TState : class
+    where TIdentifier : notnull {
 
-    private const int GuidLength = 36;
     private const string JsonExtension = ".json";
     private const string Wildcard = "*";
     private const string RootPath = "States";
@@ -29,96 +30,101 @@ public sealed class JsonStateRepository<T>(
         },
     };
 
-    private string GetDirectoryPath() {
-        var directoryPath = fileSystem.Path.Combine(
+    private string GetDirectoryPath(bool createDirectory = true) {
+        var directoryPath = fileSystem.Path.Combine([
             AppDomain.CurrentDomain.BaseDirectory,
             RootPath,
-            stateId);
+            ..stateIds
+        ]);
 
-        fileSystem.Directory.CreateDirectory(directoryPath);
+        if (createDirectory) fileSystem.Directory.CreateDirectory(directoryPath);
 
         return directoryPath;
     }
 
-    private static string GetFileName(string name, Guid id) => name + "-" + id + JsonExtension;
-    private static StateIdentifier GetStateIdentifier(string fileName) {
-        var guidStart = fileName.Length - JsonExtension.Length - GuidLength;
-        var id = Guid.Parse(fileName.AsSpan(guidStart, GuidLength));
-        var name = fileName[..(guidStart - 1)];
-        return new StateIdentifier(id, name);
+    private IEnumerable<string> EnumerateStateFiles() => fileSystem.Directory
+        .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension);
+
+    private TIdentifier GetIdentifier(string fileName) {
+        var idLength = fileName.Length - JsonExtension.Length;
+        var idSpan = fileName.AsSpan(0, idLength);
+        return stateIdentifier.Parse(idSpan);
     }
 
-    private IFileInfo GetFileInfo(string name, Guid id) {
-        var fileName = GetFileName(name, id);
-
+    private IFileInfo GetFileInfo(TIdentifier id) {
+        var fileName = stateIdentifier.AsFileName(id);
         var filePath = fileSystem.Path.Combine(
             GetDirectoryPath(),
-            fileName.Replace(" ", "-"));
+            fileName.Replace(' ', '-') + JsonExtension);
 
         return fileSystem.FileInfo.New(filePath);
     }
 
     public int Count() {
-        return fileSystem.Directory
-            .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
-            .Count();
+        return EnumerateStateFiles().Count();
     }
 
-    public IEnumerable<StateIdentifier> LoadAllStateIdentifiers() {
-        return fileSystem.Directory
-            .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
-            .Select(filePath => GetStateIdentifier(fileSystem.Path.GetFileName(filePath)))
-            .WhereNotNull();
+    public IEnumerable<string> GetNeighboringStates() {
+        var directoryPath = GetDirectoryPath(false);
+        var parentDirectory = fileSystem.Path.GetDirectoryName(directoryPath);
+        if (!fileSystem.Directory.Exists(parentDirectory)) return [];
+
+        return fileSystem.Directory.EnumerateDirectories(parentDirectory);
+
     }
 
-    public IEnumerable<T> LoadAll() {
-        return fileSystem.Directory
-            .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
+    public IEnumerable<TIdentifier> LoadAllIdentifiers() {
+        return EnumerateStateFiles()
+            .Select(filePath => GetIdentifier(fileSystem.Path.GetFileName(filePath)));
+    }
+
+    public IEnumerable<TState> LoadAll() {
+        return EnumerateStateFiles()
             .Select(filePath => fileSystem.File.ReadAllText(filePath))
-            .Select(json => JsonConvert.DeserializeObject<T>(json, _serializerSettings))
+            .Select(json => JsonConvert.DeserializeObject<TState>(json, _serializerSettings))
             .WhereNotNull();
     }
 
-    public IEnumerable<KeyValuePair<StateIdentifier, T>> LoadAllWithStateIdentifier() {
-        return fileSystem.Directory
-            .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension)
-            .Select<string, KeyValuePair<StateIdentifier, T>?>(filePath => {
-                var stateIdentifier = GetStateIdentifier(fileSystem.Path.GetFileName(filePath));
+    public IReadOnlyDictionary<TIdentifier, TState> LoadAllWithIdentifier() {
+        return EnumerateStateFiles()
+            .Select<string, KeyValuePair<TIdentifier, TState>?>(filePath => {
+                var identifier = GetIdentifier(fileSystem.Path.GetFileName(filePath));
                 var json = fileSystem.File.ReadAllText(filePath);
-                var t = JsonConvert.DeserializeObject<T>(json, _serializerSettings);
-                if (t is null) return null;
+                var state = JsonConvert.DeserializeObject<TState>(json, _serializerSettings);
+                if (state is null) return null;
 
-                return new KeyValuePair<StateIdentifier, T>(stateIdentifier, t);
+                return new KeyValuePair<TIdentifier, TState>(identifier, state);
             })
-            .WhereNotNull();
+            .WhereNotNull()
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
-    public T? Load(Guid id) {
-        var filePath = fileSystem.Directory
-            .EnumerateFiles(GetDirectoryPath(), Wildcard + id + JsonExtension)
-            .FirstOrDefault();
+    public TState? Load(TIdentifier id) {
+        var fileInfo = GetFileInfo(id);
+        if (!fileInfo.Exists) return null;
 
-        if (filePath is null) return null;
-
-        var json = fileSystem.File.ReadAllText(filePath);
-        return JsonConvert.DeserializeObject<T>(json, _serializerSettings);
+        var json = fileSystem.File.ReadAllText(fileInfo.FullName);
+        return JsonConvert.DeserializeObject<TState>(json, _serializerSettings);
     }
 
-    public bool Save(T state, Guid id, string name = "") {
-        var filePath = GetFileInfo(name, id);
+    public bool Save(TState state, TIdentifier id) {
+        var filePath = GetFileInfo(id);
         if (filePath.Directory is null) return false;
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
-        logger.Here().Verbose("Exporting {State} {Name} with Id {Id} to {Path}", stateId, name, id, filePath);
+        logger.Here().Verbose("Exporting {State} with Id {Id} to {Path}", stateIds.Last(), id, filePath);
         var content = JsonConvert.SerializeObject(state, _serializerSettings);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
     }
 
-    public void Delete(Guid id, string name) {
-        var filePath = GetFileInfo(name, id);
-        if (filePath.Exists) filePath.Delete();
+    public void Delete(TIdentifier id) {
+        var filePath = GetFileInfo(id);
+        if (!filePath.Exists) return;
+
+        logger.Here().Verbose("Deleting {State} with Id {Id} at {Path}", stateIds.Last(), id, filePath.FullName);
+        filePath.Delete();
     }
 }

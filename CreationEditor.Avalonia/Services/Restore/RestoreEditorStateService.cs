@@ -7,15 +7,14 @@ using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Avalonia.Services.Restore;
 
 public sealed record EditorStateMemento(
-    Guid Id,
     IReadOnlyList<ModKey> LoadOrder,
     ModKey ActiveMod);
 
 public class RestoreEditorStateService(
     IEditorEnvironment editorEnvironment,
     IDataSourceService dataSourceService,
-    Func<string, IStateRepository<EditorStateMemento>> stateRepositoryFactory) : ILifecycleTask {
-    private readonly IStateRepository<EditorStateMemento> _stateRepository = stateRepositoryFactory("EditorState");
+    IStateRepositoryFactory<EditorStateMemento, Guid> stateRepositoryFactory) : ILifecycleTask {
+    private readonly IStateRepository<EditorStateMemento, Guid> _stateRepository = stateRepositoryFactory.Create("EditorState");
 
     public void PreStartup() {
         var memento = _stateRepository.LoadAll().FirstOrDefault();
@@ -45,13 +44,13 @@ public class RestoreEditorStateService(
     }
 
     public void OnExit() {
-        var memento = _stateRepository.LoadAll().FirstOrDefault();
+        var mementoWithIdentifier = _stateRepository.LoadAllWithIdentifier().FirstOrDefault();
 
-        memento = new EditorStateMemento(
-            memento?.Id ?? Guid.NewGuid(),
+        var id = mementoWithIdentifier.Value is null ? Guid.NewGuid() : mementoWithIdentifier.Key;
+        var memento = new EditorStateMemento(
             editorEnvironment.GameEnvironment.LoadOrder.ListedOrder.Select(x => x.ModKey).ToArray(),
             editorEnvironment.ActiveMod.ModKey);
 
-        _stateRepository.Save(memento, memento.Id);
+        _stateRepository.Save(memento, id);
     }
 }

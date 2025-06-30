@@ -32,14 +32,14 @@ public sealed class QueryPluginVM : ViewModel {
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
-        Func<string, IStateRepository<QueryRunnerMemento>> stateRepositoryFactory,
+        IStateRepositoryFactory<QueryRunnerMemento, Guid> stateRepositoryFactory,
         IMenuItemProvider menuItemProvider,
         MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
         ColumnsGrid.Children.Add(_paddingRight);
 
-        var stateRepository = stateRepositoryFactory("Query");
+        var stateRepository = stateRepositoryFactory.Create("Query");
 
         QueryCount = stateRepository.Count();
 
@@ -49,7 +49,7 @@ public sealed class QueryPluginVM : ViewModel {
 
         SaveColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
             var memento = vm.QueryVM.QueryRunner.CreateMemento();
-            stateRepository.Save(memento, memento.Id, memento.Name);
+            stateRepository.Save(memento, memento.Id);
         });
 
         DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {

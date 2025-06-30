@@ -24,18 +24,18 @@ public sealed class DataSourceService : IDataSourceService {
     private readonly IComparer<FileSystemLink> _archivePriorityComparer;
 
     private readonly ReplaySubject<IReadOnlyList<IDataSource>> _dataSourcesChanged = new(1);
-    private readonly IStateRepository<DataSourceMemento> _stateRepository;
+    private readonly IStateRepository<DataSourceMemento, NamedGuid> _stateRepository;
     public IObservable<IReadOnlyList<IDataSource>> DataSourcesChanged => _dataSourcesChanged;
 
     public DataSourceService(
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
-        Func<string, IStateRepository<DataSourceMemento>> stateRepositoryFactory
+        IStateRepositoryFactory<DataSourceMemento, NamedGuid> stateRepositoryFactory
     ) {
         _fileSystem = fileSystem;
         _archiveService = archiveService;
-        _stateRepository = stateRepositoryFactory("DataSource");
+        _stateRepository = stateRepositoryFactory.Create("DataSource");
 
         _archivePriorityComparer = new FuncComparer<FileSystemLink>((x, y) => {
             // Collect archive files in the data directory and sort them based on the load order
@@ -211,22 +211,22 @@ public sealed class DataSourceService : IDataSourceService {
     }
 
     private void OnDataSourcesChanged() {
-        var existingStateIdentifiers = _stateRepository.LoadAllWithStateIdentifier().ToDictionary(x => x.Key, x => x.Value);
+        var existingStateIdentifiers = _stateRepository.LoadAllWithIdentifier().ToDictionary(x => x.Key, x => x.Value);
 
         // Add or update mementos for each data source in the priority order
         foreach (var dataSource in PriorityOrder) {
-            var (existingIdentifier, _) = existingStateIdentifiers.FirstOrDefault(x => x.Value.Path == dataSource.Path);
-            var id = existingIdentifier?.Id ?? Guid.NewGuid();
+            var existing = existingStateIdentifiers.FirstOrDefault(x => x.Value.Path == dataSource.Path);
+            var id = existing.Value is null ? Guid.NewGuid() : existing.Key.Id;
 
             var memento = dataSource.CreateMemento();
-            _stateRepository.Save(memento, id, dataSource.Name);
+            _stateRepository.Save(memento, new NamedGuid(id, dataSource.Name));
         }
 
         // Remove any mementos that are not in the current data sources
         foreach (var (id, memento) in existingStateIdentifiers) {
             if (_dataSources.Any(ds => ds.Path == memento.Path)) continue;
 
-            _stateRepository.Delete(id.Id, id.Name);
+            _stateRepository.Delete(id);
         }
 
         _dataSourcesChanged.OnNext(ListedOrder);
