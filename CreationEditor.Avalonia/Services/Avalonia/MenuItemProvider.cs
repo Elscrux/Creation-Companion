@@ -1,17 +1,12 @@
 ﻿using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
 public sealed class MenuItemProvider : IMenuItemProvider {
     private static MenuItem Init(MenuItem menuItem, object? parameter, KeyGesture? keyGesture = null) {
-        if (parameter is IBinding binding) {
-            menuItem[!MenuItem.CommandParameterProperty] = binding;
-        } else {
-            menuItem.CommandParameter = parameter;
-        }
+        menuItem.Bind(MenuItem.CommandParameterProperty, parameter);
         menuItem.HotKey = keyGesture;
         menuItem.InputGesture = keyGesture;
         return menuItem;
