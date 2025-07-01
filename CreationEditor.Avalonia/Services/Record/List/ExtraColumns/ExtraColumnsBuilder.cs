@@ -40,7 +40,14 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
         return AddColumnType(typeof(TExtraColumns));
     }
 
-    public IEnumerable<DataGridColumn> Build() => _extraColumns
-        .OrderByDescending(c => c.Priority)
-        .Select(c => c.Column);
+    public IEnumerable<DataGridColumn> Build() {
+        var finalColumns = _extraColumns
+            .OrderByDescending(c => c.Priority)
+            .Select(c => c.Column)
+            .ToList();
+
+        _extraColumns.Clear();
+
+        return finalColumns;
+    }
 }
