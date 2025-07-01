@@ -120,14 +120,17 @@ public sealed class MainModule : Module {
         builder.RegisterType<CacheLocationProvider>()
             .As<ICacheLocationProvider>();
 
-        builder.RegisterGeneric(typeof(JsonStateRepository<,>))
-            .As(typeof(IStateRepository<,>));
+        builder.RegisterGeneric(typeof(JsonStateRepository<,,>))
+            .As(typeof(IStateRepository<,,>));
 
-        builder.RegisterGeneric(typeof(CachedStateRepository<,>))
-            .As(typeof(ICachedStateRepository<,>));
+        builder.RegisterGeneric(typeof(CachedStateRepository<,,>))
+            .As(typeof(ICachedStateRepository<,,>));
 
-        builder.RegisterGeneric(typeof(StateRepositoryFactory<,>))
-            .As(typeof(IStateRepositoryFactory<,>));
+        builder.RegisterGeneric(typeof(StateRepositoryFactory<,,>))
+            .As(typeof(IStateRepositoryFactory<,,>));
+
+        builder.RegisterType<StringStateIdentifier>()
+            .As<IStateIdentifier<string>>();
 
         builder.RegisterType<GuidStateIdentifier>()
             .As<IStateIdentifier<Guid>>();

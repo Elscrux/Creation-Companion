@@ -3,7 +3,6 @@ using System.Reactive;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Assets;
-using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;

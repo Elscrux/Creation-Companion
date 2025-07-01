@@ -32,7 +32,7 @@ public sealed class QueryPluginVM : ViewModel {
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
-        IStateRepositoryFactory<QueryRunnerMemento, Guid> stateRepositoryFactory,
+        IStateRepositoryFactory<QueryRunnerMemento, QueryRunnerMemento, Guid> stateRepositoryFactory,
         IMenuItemProvider menuItemProvider,
         MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;

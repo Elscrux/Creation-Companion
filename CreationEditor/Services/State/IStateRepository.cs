@@ -1,15 +1,15 @@
 ﻿namespace CreationEditor.Services.State;
 
-public interface IStateRepository<TState, TIdentifier>
+public interface IStateRepository<out TStateOut, TState, TIdentifier>
+    where TStateOut : class, TState
     where TState : class
     where TIdentifier : notnull {
     int Count();
 
-    IEnumerable<string> GetNeighboringStates();
     IEnumerable<TIdentifier> LoadAllIdentifiers();
-    IEnumerable<TState> LoadAll();
+    IEnumerable<TStateOut> LoadAll();
     IReadOnlyDictionary<TIdentifier, TState> LoadAllWithIdentifier();
-    TState? Load(TIdentifier id);
+    TStateOut? Load(TIdentifier id);
 
     bool Save(TState state, TIdentifier id);
 

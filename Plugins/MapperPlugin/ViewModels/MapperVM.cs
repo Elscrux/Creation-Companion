@@ -67,7 +67,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
 
     public MapperVM(
         Func<QueryVM> queryVMFactory,
-        IStateRepositoryFactory<MapperMemento, NamedGuid> stateRepositoryFactory,
+        IStateRepositoryFactory<MapperMemento, MapperMemento, NamedGuid> stateRepositoryFactory,
         ILogger logger,
         IGameReleaseContext gameReleaseContext,
         IRecordReferenceController recordReferenceController,

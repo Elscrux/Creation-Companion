@@ -1,33 +1,39 @@
 ﻿namespace CreationEditor.Services.State;
 
-public sealed class CachedStateRepository<TState, TIdentifier>(IStateRepository<TState, TIdentifier> wrappedRepo)
-    : ICachedStateRepository<TState, TIdentifier>
+public sealed class CachedStateRepository<TStateOut, TState, TIdentifier>(
+    IEnumerable<string> stateIds,
+    IStateRepositoryFactory<TStateOut, TState, TIdentifier> repoFactory)
+    : ICachedStateRepository<TStateOut, TState, TIdentifier>
+    where TStateOut : class, TState
     where TState : class
     where TIdentifier : notnull {
-    private readonly Dictionary<TIdentifier, TState> _cache = new();
-    
-    public int Count() => wrappedRepo.Count();
-    public IEnumerable<string> GetNeighboringStates() => wrappedRepo.GetNeighboringStates();
-    public IEnumerable<TIdentifier> LoadAllIdentifiers() => wrappedRepo.LoadAllIdentifiers();
-    public IEnumerable<TState> LoadAll() => wrappedRepo.LoadAll();
-    public IReadOnlyDictionary<TIdentifier, TState> LoadAllWithIdentifier() => wrappedRepo.LoadAllWithIdentifier();
-    public TState? Load(TIdentifier id) {
+    private readonly IStateRepository<TStateOut, TState, TIdentifier> _wrappedRepo = repoFactory.Create(stateIds);
+    private readonly Dictionary<TIdentifier, TStateOut> _cache = new();
+
+    public int Count() => _wrappedRepo.Count();
+    public IEnumerable<TIdentifier> LoadAllIdentifiers() => _wrappedRepo.LoadAllIdentifiers();
+    public IEnumerable<TStateOut> LoadAll() => _wrappedRepo.LoadAll();
+    public IReadOnlyDictionary<TIdentifier, TState> LoadAllWithIdentifier() => _wrappedRepo.LoadAllWithIdentifier();
+    public TStateOut? Load(TIdentifier id) {
         if (_cache.TryGetValue(id, out var value)) return value;
 
-        value = wrappedRepo.Load(id);
+        value = _wrappedRepo.Load(id);
         if (value is null) return value;
 
         _cache[id] = value;
         return value;
     }
     public bool Save(TState state, TIdentifier id) {
-        _cache[id] = state;
+        if (state is not TStateOut stateT) {
+            throw new ArgumentException($"State must be of type {typeof(TStateOut).Name}", nameof(state));
+        }
 
-        return wrappedRepo.Save(state, id);
+        _cache[id] = stateT;
+        return _wrappedRepo.Save(state, id);
     }
     public void Delete(TIdentifier id) {
         _cache.Remove(id);
 
-        wrappedRepo.Delete(id);
+        _wrappedRepo.Delete(id);
     }
 }

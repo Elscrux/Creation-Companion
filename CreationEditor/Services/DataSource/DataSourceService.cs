@@ -24,14 +24,14 @@ public sealed class DataSourceService : IDataSourceService {
     private readonly IComparer<FileSystemLink> _archivePriorityComparer;
 
     private readonly ReplaySubject<IReadOnlyList<IDataSource>> _dataSourcesChanged = new(1);
-    private readonly IStateRepository<DataSourceMemento, NamedGuid> _stateRepository;
+    private readonly IStateRepository<DataSourceMemento, DataSourceMemento, NamedGuid> _stateRepository;
     public IObservable<IReadOnlyList<IDataSource>> DataSourcesChanged => _dataSourcesChanged;
 
     public DataSourceService(
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
-        IStateRepositoryFactory<DataSourceMemento, NamedGuid> stateRepositoryFactory
+        IStateRepositoryFactory<DataSourceMemento, DataSourceMemento, NamedGuid> stateRepositoryFactory
     ) {
         _fileSystem = fileSystem;
         _archiveService = archiveService;

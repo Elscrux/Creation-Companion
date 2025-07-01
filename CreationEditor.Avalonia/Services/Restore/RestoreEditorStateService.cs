@@ -13,8 +13,8 @@ public sealed record EditorStateMemento(
 public class RestoreEditorStateService(
     IEditorEnvironment editorEnvironment,
     IDataSourceService dataSourceService,
-    IStateRepositoryFactory<EditorStateMemento, Guid> stateRepositoryFactory) : ILifecycleTask {
-    private readonly IStateRepository<EditorStateMemento, Guid> _stateRepository = stateRepositoryFactory.Create("EditorState");
+    IStateRepositoryFactory<EditorStateMemento, EditorStateMemento, Guid> stateRepositoryFactory) : ILifecycleTask {
+    private readonly IStateRepository<EditorStateMemento, EditorStateMemento, Guid> _stateRepository = stateRepositoryFactory.Create("EditorState");
 
     public void PreStartup() {
         var memento = _stateRepository.LoadAll().FirstOrDefault();

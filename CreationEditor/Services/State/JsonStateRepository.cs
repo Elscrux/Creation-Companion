@@ -6,13 +6,14 @@ using Noggog;
 using Serilog;
 namespace CreationEditor.Services.State;
 
-public sealed class JsonStateRepository<TState, TIdentifier>(
+public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     IContractResolver contractResolver,
     IStateIdentifier<TIdentifier> stateIdentifier,
     ILogger logger,
     IFileSystem fileSystem,
     params IEnumerable<string> stateIds)
-    : IStateRepository<TState, TIdentifier>
+    : IStateRepository<TStateOut, TState, TIdentifier>
+    where TStateOut : class, TState
     where TState : class
     where TIdentifier : notnull {
 
@@ -30,14 +31,14 @@ public sealed class JsonStateRepository<TState, TIdentifier>(
         },
     };
 
-    private string GetDirectoryPath(bool createDirectory = true) {
+    private string GetDirectoryPath() {
         var directoryPath = fileSystem.Path.Combine([
             AppDomain.CurrentDomain.BaseDirectory,
             RootPath,
             ..stateIds
         ]);
 
-        if (createDirectory) fileSystem.Directory.CreateDirectory(directoryPath);
+        fileSystem.Directory.CreateDirectory(directoryPath);
 
         return directoryPath;
     }
@@ -64,24 +65,15 @@ public sealed class JsonStateRepository<TState, TIdentifier>(
         return EnumerateStateFiles().Count();
     }
 
-    public IEnumerable<string> GetNeighboringStates() {
-        var directoryPath = GetDirectoryPath(false);
-        var parentDirectory = fileSystem.Path.GetDirectoryName(directoryPath);
-        if (!fileSystem.Directory.Exists(parentDirectory)) return [];
-
-        return fileSystem.Directory.EnumerateDirectories(parentDirectory);
-
-    }
-
     public IEnumerable<TIdentifier> LoadAllIdentifiers() {
         return EnumerateStateFiles()
             .Select(filePath => GetIdentifier(fileSystem.Path.GetFileName(filePath)));
     }
 
-    public IEnumerable<TState> LoadAll() {
+    public IEnumerable<TStateOut> LoadAll() {
         return EnumerateStateFiles()
             .Select(filePath => fileSystem.File.ReadAllText(filePath))
-            .Select(json => JsonConvert.DeserializeObject<TState>(json, _serializerSettings))
+            .Select(json => JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings))
             .WhereNotNull();
     }
 
@@ -90,7 +82,7 @@ public sealed class JsonStateRepository<TState, TIdentifier>(
             .Select<string, KeyValuePair<TIdentifier, TState>?>(filePath => {
                 var identifier = GetIdentifier(fileSystem.Path.GetFileName(filePath));
                 var json = fileSystem.File.ReadAllText(filePath);
-                var state = JsonConvert.DeserializeObject<TState>(json, _serializerSettings);
+                var state = JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings);
                 if (state is null) return null;
 
                 return new KeyValuePair<TIdentifier, TState>(identifier, state);
@@ -99,22 +91,26 @@ public sealed class JsonStateRepository<TState, TIdentifier>(
             .ToDictionary(x => x.Key, x => x.Value);
     }
 
-    public TState? Load(TIdentifier id) {
+    public TStateOut? Load(TIdentifier id) {
         var fileInfo = GetFileInfo(id);
         if (!fileInfo.Exists) return null;
 
         var json = fileSystem.File.ReadAllText(fileInfo.FullName);
-        return JsonConvert.DeserializeObject<TState>(json, _serializerSettings);
+        return JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings);
     }
 
     public bool Save(TState state, TIdentifier id) {
+        if (state is not TStateOut stateT) {
+            throw new ArgumentException($"State must be of type {typeof(TStateOut).Name}");
+        }
+
         var filePath = GetFileInfo(id);
         if (filePath.Directory is null) return false;
 
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
         logger.Here().Verbose("Exporting {State} with Id {Id} to {Path}", stateIds.Last(), id, filePath);
-        var content = JsonConvert.SerializeObject(state, _serializerSettings);
+        var content = JsonConvert.SerializeObject(stateT, _serializerSettings);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
