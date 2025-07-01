@@ -17,5 +17,5 @@ public sealed class LeveledListPlugin(
     public Control GetControl() => new LeveledListView(leveledListVM());
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new FontIcon { Glyph = "🗺️" };
+    public object GetIcon() => new TextBlock { Text = "🎚️️️" };
 }
