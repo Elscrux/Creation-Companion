@@ -134,11 +134,11 @@ public sealed class ListShortcuts : AvaloniaObject {
                 },
                 Content = new SymbolIcon { Symbol = Symbol.Delete },
                 Foreground = Brushes.Red,
+                Padding = new Thickness(0),
                 Classes = { "Transparent" },
                 Command = command,
                 CommandParameter = new ArrayList { o },
-                HorizontalAlignment = HorizontalAlignment.Left,
-                HorizontalContentAlignment = HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Center,
             }
             : null);
     }
