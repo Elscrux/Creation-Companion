@@ -4,7 +4,6 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
-using Mutagen.Bethesda.Fonts.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;

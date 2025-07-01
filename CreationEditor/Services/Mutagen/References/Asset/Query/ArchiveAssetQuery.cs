@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.IO.Abstractions;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Cache.Serialization;

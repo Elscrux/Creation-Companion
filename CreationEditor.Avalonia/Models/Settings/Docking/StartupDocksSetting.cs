@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Services.Settings;
-using DynamicData.Binding;
 using Newtonsoft.Json;
 namespace CreationEditor.Avalonia.Models.Settings.Docking;
 

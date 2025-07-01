@@ -9,7 +9,6 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Record;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;

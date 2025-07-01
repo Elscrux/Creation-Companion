@@ -1,11 +1,9 @@
 ﻿using System.Reactive;
-using System.Reactive.Linq;
 using Avalonia.Threading;
 using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;

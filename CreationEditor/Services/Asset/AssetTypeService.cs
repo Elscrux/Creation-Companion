@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
-using Mutagen.Bethesda.Plugins.Exceptions;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
