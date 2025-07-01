@@ -3,10 +3,11 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
-using LeveledList.Model;
+using LeveledList.Model.Tier;
+using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-namespace LeveledList.Services;
+namespace LeveledList.Services.Record.Actions;
 
 public sealed class TierRecordActionProvider : IRecordActionsProvider {
     private readonly ITierController _tierController;
@@ -26,7 +27,7 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
 
         _actions = [
             new RecordAction(
-                context => context.SelectedRecords.All(record => record.Record is IItemGetter),
+                context => context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
                 RecordActionGroup.Misc,
                 null,
@@ -34,6 +35,20 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
                     Header = "Add to Tier",
                     Icon = new SymbolIcon { Symbol = Symbol.Add },
                     ItemsSource = GetMenuItems(context),
+                }),
+            new RecordAction(
+                context => context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
+                0,
+                RecordActionGroup.Misc,
+                null,
+                context => new MenuItem {
+                    Header = "Remove from Tier",
+                    Icon = new SymbolIcon { Symbol = Symbol.Remove },
+                    Command = ReactiveCommand.Create(() => {
+                        foreach (var record in context.SelectedRecords) {
+                            _tierController.RemoveRecordTier(record.Record);
+                        }
+                    })
                 }),
         ];
     }
@@ -44,24 +59,31 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
         var firstType = context.SelectedRecords[0].Type;
         if (context.SelectedRecords.Any(r => r.Type != firstType)) return [];
 
+        const char separator = '/';
         var tiers = _tierController.GetTiers(firstType);
-        var tierGroup = new TierGroup(string.Empty, tiers, '/');
-        return MenuItems(tierGroup);
+        var tierGroup = new TierGroup(string.Empty, tiers, separator);
+        return MenuItems(tierGroup, string.Empty);
 
-        IEnumerable<MenuItem> MenuItems(TierGroup group) {
+        IEnumerable<MenuItem> MenuItems(TierGroup group, string prefix) {
             foreach (var subGroup in group.GetGroups()) {
                 yield return new MenuItem {
                     Header = subGroup.GroupIdentifier,
-                    ItemsSource = MenuItems(subGroup),
+                    ItemsSource = MenuItems(subGroup, JoinPrefix(subGroup.GroupIdentifier)),
                 };
             }
 
             foreach (var item in group.GetItems()) {
                 yield return new MenuItem {
                     Header = item,
-                    Command =  _addToTierCommand,
-                    CommandParameter = (Context: context, Tier: item)
+                    Command = _addToTierCommand,
+                    CommandParameter = (Context: context, Tier: JoinPrefix(item)),
                 };
+            }
+
+            string JoinPrefix(string subPrefix) {
+                return string.IsNullOrEmpty(prefix)
+                    ? subPrefix
+                    : prefix + separator + subPrefix;
             }
         }
     }

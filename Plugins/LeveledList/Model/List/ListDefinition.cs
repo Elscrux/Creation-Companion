@@ -1,10 +1,11 @@
 ﻿using System.Text.RegularExpressions;
-using LeveledList.Services;
+using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace LeveledList.Model;
+using EnchantmentProvider = LeveledList.Services.LeveledList.EnchantmentProvider;
+namespace LeveledList.Model.List;
 
 public partial record ListDefinition(
     ListDefinitionIdentifier Name,
@@ -29,7 +30,7 @@ public partial record ListDefinition(
         }
     }
 
-    public string GetFullName(IReadOnlyList<Feature> features) {
+    public string GetFullName(IReadOnlyList<Feature.Feature> features) {
         if (features.Count == 0) return Name;
 
         var name = Name;
@@ -53,7 +54,7 @@ public partial record ListDefinition(
     }
 
     public LeveledItem CreateLeveledItem(
-        List<Feature> features,
+        List<Feature.Feature> features,
         IReadOnlyList<IMajorRecordGetter> records,
         EnchantmentProvider enchantmentProvider,
         ITierController tierController,
@@ -92,7 +93,7 @@ public partial record ListDefinition(
             foreach (var record in records) {
                 var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record);
 
-                var tierIdentifier = tierController.GetTier(record);
+                var tierIdentifier = tierController.GetRecordTier(record);
                 if (tierIdentifier is null) continue;
 
                 var tiers = GetTiers(tierIdentifier)

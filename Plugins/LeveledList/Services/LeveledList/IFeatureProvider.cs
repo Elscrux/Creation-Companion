@@ -1,5 +1,5 @@
-﻿using LeveledList.Model;
-namespace LeveledList.Services;
+﻿using LeveledList.Model.Feature;
+namespace LeveledList.Services.LeveledList;
 
 public interface IFeatureProvider {
     IEnumerable<FeatureWildcardIdentifier> GetApplicableFeatureWildcards(Type t);

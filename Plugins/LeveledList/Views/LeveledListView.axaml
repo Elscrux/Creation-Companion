@@ -3,60 +3,82 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
-             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="LeveledList.Views.LeveledListView"
              x:DataType="viewModels:LeveledListVM">
+    <UserControl.Styles>
+        <Style Selector="DataValidationErrors">
+            <Setter Property="Theme" Value="{DynamicResource TooltipDataValidationErrors}"/>
+        </Style>
+    </UserControl.Styles>
     <Grid>
-        <DataGrid ItemsSource="{Binding Records}"
-                  Background="{DynamicResource SystemControlTransparentBrush}"
-                  CanUserSortColumns="True"
-                  CanUserReorderColumns="True" CanUserResizeColumns="True"
-                  Classes="Small">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="EditorID">
-                    <DataTemplate DataType="viewModels:LeveledListRecord">
-                        <TextBlock Text="{Binding Record.Record.EditorID}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn>
-                
-                <DataGridTemplateColumn Header="Tiers">
-                    <DataTemplate DataType="viewModels:LeveledListRecord">
-                        <TextBlock Text="{Binding Tier}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition MinWidth="200" Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel
+                                     Grid.Column="0"
+                                     Spacing="10">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="5">
+                <controls:FAComboBox
+                    IsEditable="True"
+                    IsTextSearchEnabled="True"
+                    ItemsSource="{Binding ItemTypes}"
+                    SelectedItem="{Binding SelectedItemType}"
+                    DisplayMemberBinding="{Binding Name}"/>
 
-                <DataGridTemplateColumn Header="Features">
-                    <DataTemplate DataType="viewModels:LeveledListRecord">
-                        <ItemsControl ItemsSource="{Binding Features}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                <Button Command="{Binding Save}"
+                        Content="Save"/>
+            </StackPanel>
 
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="({0:0.}: {1:0.}">
-                                                <Binding Path="Key" />
-                                                <Binding Path="Value" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </DataTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+            <basic:LabeledContentControl
+                Header="Create Tiers"
+                HeaderToolTip="Tiers represent a group of records that can be used in a leveled list. You can create nested tiers like 'heavy/iron' by adding a '/' to group them. Use the record browser to assign records to tiers.">
+                <DataGrid
+                    Classes="NoCellSelection Mutable"
+                    Background="{DynamicResource SystemControlTransparentBrush}"
+                    CanUserSortColumns="False"
+                    AutoGenerateColumns="False"
+                    HorizontalAlignment="Left"
+                    ItemsSource="{Binding Tiers}"
+                    dragDrop:DragDropExtended.AllowDrag="True"
+                    dragDrop:DragDropExtended.AllowDrop="True"
+                    attached:ListShortcuts.Add="{Binding AddTier}"
+                    attached:ListShortcuts.Remove="{Binding RemoveTier}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name"
+                                            Binding="{Binding Identifier, DataType=viewModels:TierItem}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </basic:LabeledContentControl>
+        </StackPanel>
 
-        <avaloniaProgressRing:ProgressRing
-            IsActive="{Binding IsBusy^, FallbackValue=false}"
-            HorizontalAlignment="Left" VerticalAlignment="Top"
-            Width="100" Height="100"
-            Margin="50"/>
+        <GridSplitter Grid.Column="1"/>
+        
+        <StackPanel
+            Grid.Column="2"
+            Spacing="10">
+            
+            <basic:LabeledContentControl
+                Header="View Tier Records">
+                <controls:FAComboBox
+                    IsEditable="True"
+                    IsTextSearchEnabled="True"
+                    ItemsSource="{Binding Tiers}"
+                    SelectedItem="{Binding SelectedTier}"
+                    DisplayMemberBinding="{Binding Identifier}"/>
+            </basic:LabeledContentControl>
+            
+            <record:RecordList
+                HorizontalAlignment="Stretch"
+                DataContext="{Binding RecordListVM}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

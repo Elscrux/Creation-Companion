@@ -2,7 +2,7 @@
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace LeveledList.Services;
+namespace LeveledList.Services.LeveledList;
 
 public partial class EnchantmentProvider(ILinkCacheProvider linkCacheProvider) {
     [GeneratedRegex(@"\d+$")]

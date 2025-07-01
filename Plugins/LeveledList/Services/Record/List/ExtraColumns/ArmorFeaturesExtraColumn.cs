@@ -5,14 +5,15 @@ using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Services.Mutagen.References.Record;
+using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
-namespace LeveledList.Services;
+namespace LeveledList.Services.Record.List.ExtraColumns;
 
 public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
     private readonly Func<IMajorRecordGetter, object?> _armorTypeSelector =
-        featureProvider.GetFeatureWildcard(FeatureProvider.ArmorTypeFeature).Selector;
+        featureProvider.GetFeatureWildcard(FeatureProvider.ArmorType).Selector;
 
     private readonly Func<IMajorRecordGetter, object?> _armorSlotSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.ArmorSlot).Selector;

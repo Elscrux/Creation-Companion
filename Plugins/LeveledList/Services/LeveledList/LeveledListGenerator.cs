@@ -1,12 +1,15 @@
 ﻿using CreationEditor;
 using CreationEditor.Services.Environment;
-using LeveledList.Model;
+using LeveledList.Model.Feature;
+using LeveledList.Model.List;
 using LeveledList.Resources;
+using LeveledList.Services.Record;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-namespace LeveledList.Services;
+using ListDefinition = LeveledList.Model.List.ListDefinition;
+namespace LeveledList.Services.LeveledList;
 
 public class LeveledListGenerator(
     IFeatureProvider featureProvider,

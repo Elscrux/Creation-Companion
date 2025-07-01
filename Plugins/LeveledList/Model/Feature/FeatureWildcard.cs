@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
-namespace LeveledList.Model;
+namespace LeveledList.Model.Feature;
 
 public record FeatureWildcard(FeatureWildcardIdentifier Identifier, Func<IMajorRecordGetter, object?> Selector) {
     public virtual bool Equals(FeatureWildcard? other) {

@@ -1,3 +1,3 @@
-﻿namespace LeveledList.Model;
+﻿namespace LeveledList.Model.Feature;
 
 public record Feature(FeatureWildcard Wildcard, object Key);

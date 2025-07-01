@@ -1,13 +1,13 @@
 ﻿using CreationEditor.Services.Environment;
 using CreationEditor.Skyrim;
-using LeveledList.Model;
+using LeveledList.Model.Feature;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-namespace LeveledList.Services;
+namespace LeveledList.Services.LeveledList;
 
 public sealed class FeatureProvider(
     ILinkCacheProvider linkCacheProvider,
@@ -19,7 +19,7 @@ public sealed class FeatureProvider(
     public const FeatureWildcardIdentifier Enchantment = "Enchantment";
     public const FeatureWildcardIdentifier WeaponType = "WeaponType";
     public const FeatureWildcardIdentifier ArmorSlot = "ArmorSlot";
-    public const FeatureWildcardIdentifier ArmorTypeFeature = "ArmorType";
+    public const FeatureWildcardIdentifier ArmorType = "ArmorType";
 
     public IEnumerable<FeatureWildcardIdentifier> GetApplicableFeatureWildcards(Type t) {
         if (t.IsAssignableTo(typeof(IEnchantableGetter))) {
@@ -34,7 +34,7 @@ public sealed class FeatureProvider(
 
         if (t.IsAssignableTo(typeof(IArmorGetter))) {
             yield return ArmorSlot;
-            yield return ArmorTypeFeature;
+            yield return ArmorType;
         }
 
         if (t.IsAssignableTo(typeof(IMajorRecordGetter))) {
@@ -46,7 +46,7 @@ public sealed class FeatureProvider(
         return featureWildcardIdentifier switch {
             Tier => new FeatureWildcard(
                 featureWildcardIdentifier,
-                tierController.GetTier),
+                tierController.GetRecordTier),
             SchoolOfMagic => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
@@ -89,15 +89,15 @@ public sealed class FeatureProvider(
             WeaponType => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => GetByKeyword<IWeaponGetter>(record, "WeapType", linkCacheProvider.LinkCache)),
-            ArmorTypeFeature => new FeatureWildcard(
+            ArmorType => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
                     if (record is not IArmorGetter armor) return null;
 
                     return armor.BodyTemplate?.ArmorType switch {
-                        ArmorType.Clothing => "clothing",
-                        ArmorType.LightArmor => "light",
-                        ArmorType.HeavyArmor => "heavy",
+                        Mutagen.Bethesda.Skyrim.ArmorType.Clothing => "clothing",
+                        Mutagen.Bethesda.Skyrim.ArmorType.LightArmor => "light",
+                        Mutagen.Bethesda.Skyrim.ArmorType.HeavyArmor => "heavy",
                         _ => null
                     };
                 }),

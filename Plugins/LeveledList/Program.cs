@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Modules;
 using CreationEditor.Services.Environment;
 using CreationEditor.Skyrim.Avalonia.Modules;
 using LeveledList;
-using LeveledList.Services;
+using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -28,4 +28,4 @@ var tierController = container.Resolve<ITierController>();
 var generator = new LeveledListGenerator(featureProvider, tierController, editorEnvironment, modToLookAt, mod);
 generator.Generate();
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Generation done!");

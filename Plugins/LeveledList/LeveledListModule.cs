@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Services.Plugin;
-using LeveledList.Services;
+using LeveledList.Services.LeveledList;
+using LeveledList.Services.Record.List.ExtraColumns;
 using LeveledList.ViewModels;
 namespace LeveledList;
 

@@ -1,5 +1,5 @@
-﻿namespace LeveledList.Model;
-using Noggog;
+﻿using Noggog;
+namespace LeveledList.Model.Tier;
 
 public sealed class TierGroup {
     public string GroupIdentifier { get; }

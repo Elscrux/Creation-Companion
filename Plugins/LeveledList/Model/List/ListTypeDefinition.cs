@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
-namespace LeveledList.Model;
+namespace LeveledList.Model.List;
 
 public record ListTypeDefinition(
     string Type,

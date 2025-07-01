@@ -1,6 +1,6 @@
 ﻿using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace LeveledList.Services;
+namespace LeveledList.Services.Record;
 
 public class RecordTypeProvider(IModGetter mod) {
     public IEnumerable<IMajorRecordGetter> GetRecords(string type) {

@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-namespace LeveledList.Model;
+namespace LeveledList.Model.List;
 
 public record ListEntryDefinition(
     short Level,
