@@ -15,6 +15,6 @@ public sealed class NamedRequiredExtraColumns : ExtraColumns<INamedRequiredGette
                 CustomSortComparer = ReferencedRecordComparers.NamedRequiredComparer,
                 Width = new DataGridLength(100),
             },
-            99);
+            175);
     }
 }

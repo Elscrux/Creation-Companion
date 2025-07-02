@@ -17,6 +17,7 @@ public sealed class TierExtraColumn(IRecordDecorationController recordDecoration
                 new DataGridTemplateColumn {
                     Header = "Tier",
                     CellTemplate = new FuncDataTemplate<IReferencedRecord>((record, _) => new TextBlock {
+                        Name = "CellTextBlock",
                         [!TextBlock.TextProperty] = recordDecorationController.GetObservable<Tier>(record.Record)
                             .Select(x => x.ToString())
                             .ToBinding(),
@@ -25,7 +26,7 @@ public sealed class TierExtraColumn(IRecordDecorationController recordDecoration
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(record =>
                         recordDecorationController.Get<Tier>(record.Record)?.TierIdentifier)
                 },
-                160),
+                149),
         ];
     }
 

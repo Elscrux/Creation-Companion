@@ -11,31 +11,31 @@ using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
-public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
-    private readonly Func<IMajorRecordGetter, object?> _armorTypeSelector =
-        featureProvider.GetFeatureWildcard(FeatureProvider.ArmorType).Selector;
+public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
+    private readonly Func<IMajorRecordGetter, object?> _schoolOfMagicSelector =
+        featureProvider.GetFeatureWildcard(FeatureProvider.SchoolOfMagic).Selector;
 
-    private readonly Func<IMajorRecordGetter, object?> _armorSlotSelector =
-        featureProvider.GetFeatureWildcard(FeatureProvider.ArmorSlot).Selector;
+    private readonly Func<IMajorRecordGetter, object?> _enchantmentSelector =
+        featureProvider.GetFeatureWildcard(FeatureProvider.Enchantment).Selector;
 
     public IEnumerable<ExtraColumn> CreateColumns() {
         return [
             new ExtraColumn(
                 new DataGridTemplateColumn {
-                    Header = "Armor Type",
-                    CellTemplate = CellTemplate(_armorTypeSelector),
+                    Header = "Enchantment",
+                    CellTemplate = CellTemplate(_enchantmentSelector),
                     CanUserSort = true,
-                    CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorTypeSelector(x.Record)),
+                    CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _enchantmentSelector(x.Record)),
                 },
-                146),
+                142),
             new ExtraColumn(
                 new DataGridTemplateColumn {
-                    Header = "Armor Slot",
-                    CellTemplate = CellTemplate(_armorSlotSelector),
+                    Header = "School of Magic",
+                    CellTemplate = CellTemplate(_schoolOfMagicSelector),
                     CanUserSort = true,
-                    CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorSlotSelector(x.Record)),
+                    CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _schoolOfMagicSelector(x.Record)),
                 },
-                145),
+                141),
         ];
     }
 
@@ -48,5 +48,5 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
         });
     }
 
-    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IArmorGetter));
+    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IEnchantableGetter));
 }
