@@ -4,7 +4,9 @@
         xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder">
     <Design.PreviewWith>
         <Border Padding="20">
-            <folder:IconFolderPicker/>
+            <folder:IconFolderPicker
+                FontSize="16"
+                ShowIcon="True"/>
         </Border>
     </Design.PreviewWith>
 
@@ -15,8 +17,6 @@
                         Command="{TemplateBinding Pick}"
                         Background="{DynamicResource SystemControlTransparentBrush}"
                         BorderBrush="{DynamicResource SystemControlTransparentBrush}"
-                        BorderThickness="0,1,1,1"
-                        CornerRadius="0,4,4,0"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Stretch"
                         DragDrop.AllowDrop="True">

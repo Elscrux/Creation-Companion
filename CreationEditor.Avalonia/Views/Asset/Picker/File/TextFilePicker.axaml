@@ -38,12 +38,13 @@
                             BorderBrush="{DynamicResource ButtonBorderBrush}"
                             BorderThickness="0.5"/>
 
-                    <Button Grid.Column="2" Command="{TemplateBinding Pick}"
+                    <Button Grid.Column="2"
+                            Command="{TemplateBinding Pick}"
                             BorderThickness="0,1,1,1"
                             CornerRadius="0,4,4,0"
                             VerticalAlignment="Center">
                         <controls:SymbolIcon
-                            Symbol="Folder"
+                            Symbol="Document"
                             ToolTip.Tip="Open"/>
                     </Button>
                 </Grid>

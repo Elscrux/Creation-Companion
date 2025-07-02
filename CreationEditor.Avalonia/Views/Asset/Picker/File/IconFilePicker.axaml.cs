@@ -14,7 +14,7 @@ public class IconFilePicker : AFilePicker {
     public const string DropButton = "PART_DropButton";
 
     public static readonly StyledProperty<bool> ShowIconProperty
-        = AvaloniaProperty.Register<IconFilePicker, bool>(nameof(ShowIcon));
+        = AvaloniaProperty.Register<IconFilePicker, bool>(nameof(ShowIcon), true);
 
     public bool ShowIcon {
         get => GetValue(ShowIconProperty);
