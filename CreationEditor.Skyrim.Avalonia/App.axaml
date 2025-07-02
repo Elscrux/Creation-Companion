@@ -82,6 +82,7 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Asset/Picker/File/IconFilePicker.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Asset/Picker/File/TextFilePicker.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Asset/Picker/Folder/IconFolderPicker.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Asset/Picker/Folder/TextFolderPicker.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/MultiButton.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/LabeledContentControl.axaml"/>
     </Application.Styles>
