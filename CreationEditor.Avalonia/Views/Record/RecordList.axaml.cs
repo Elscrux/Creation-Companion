@@ -51,7 +51,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
     }
 
     private void ScrollToItem(IReferencedRecord? referencedRecord) {
-        if (RecordGrid is null || referencedRecord is null) return;
+        if (RecordGrid is not { Columns.Count: 0 } || referencedRecord is null) return;
 
         RecordGrid.SelectedItem = referencedRecord;
         RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, RecordGrid.Columns.First());
