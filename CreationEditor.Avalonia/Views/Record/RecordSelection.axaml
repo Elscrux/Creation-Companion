@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
              xmlns:list="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.List"
              xmlns:records="clr-namespace:Mutagen.Bethesda.Plugins.Records;assembly=Mutagen.Bethesda.Core"
