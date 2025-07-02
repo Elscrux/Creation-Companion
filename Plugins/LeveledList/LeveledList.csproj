@@ -22,6 +22,9 @@
       <Compile Update="Services\LeveledList\TierController.cs">
         <DependentUpon>ITierController.cs</DependentUpon>
       </Compile>
+      <Compile Update="Services\Record\RecordTypeProvider.cs">
+        <DependentUpon>IRecordTypeProvider.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <Target Name="CopyPlugin" AfterTargets="Build">

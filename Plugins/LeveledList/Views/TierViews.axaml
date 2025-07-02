@@ -1,0 +1,92 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
+             xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
+             xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
+             xmlns:tier="clr-namespace:LeveledList.Model.Tier"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="LeveledList.Views.TiersView"
+             x:DataType="viewModels:TiersVM">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition MinWidth="200" Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel
+            Grid.Column="0"
+            Spacing="10">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="5">
+                <controls:FAComboBox
+                    IsEditable="True"
+                    IsTextSearchEnabled="True"
+                    ItemsSource="{Binding TierRecordTypes}"
+                    SelectedItem="{Binding SelectedTierType}"
+                    DisplayMemberBinding="{Binding Name}"/>
+
+                <Button Command="{Binding SaveTiers}"
+                        Content="Save Tiers"/>
+            </StackPanel>
+
+            <basic:LabeledContentControl
+                Header="Create Tiers"
+                HeaderToolTip="Tiers represent a group of records that can be used in a leveled list. 
+You can create nested tiers like 'heavy/iron' by adding a '/' to group them. 
+Use the record browser to assign records to tiers.">
+                <DataGrid
+                    Classes="NoCellSelection Mutable"
+                    Background="{DynamicResource SystemControlTransparentBrush}"
+                    CanUserSortColumns="False"
+                    AutoGenerateColumns="False"
+                    HorizontalAlignment="Left"
+                    ItemsSource="{Binding Tiers}"
+                    dragDrop:DragDropExtended.AllowDrag="True"
+                    dragDrop:DragDropExtended.AllowDrop="True"
+                    attached:ListShortcuts.Add="{Binding AddTier}"
+                    attached:ListShortcuts.Remove="{Binding RemoveTier}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Header="Name"
+                            Binding="{Binding Identifier, DataType=tier:TierItem}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </basic:LabeledContentControl>
+        </StackPanel>
+
+        <GridSplitter Grid.Column="1"/>
+
+        <Grid
+            Grid.Column="2"
+            RowDefinitions="Auto,10,*">
+
+            <basic:LabeledContentControl
+                Grid.Row="0"
+                Header="View Tier Records">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10">
+                    <TextBlock Text="Filter by Tier"
+                               VerticalAlignment="Center"/>
+
+                    <controls:FAComboBox
+                        IsEditable="True"
+                        IsTextSearchEnabled="True"
+                        ItemsSource="{Binding Tiers}"
+                        SelectedItem="{Binding SelectedTier}"
+                        DisplayMemberBinding="{Binding Identifier}"/>
+                </StackPanel>
+            </basic:LabeledContentControl>
+
+            <record:RecordList
+                Grid.Row="2"
+                HorizontalAlignment="Stretch"
+                DataContext="{Binding RecordListVM}"/>
+        </Grid>
+    </Grid>
+</UserControl>

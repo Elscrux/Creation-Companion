@@ -8,7 +8,7 @@ public partial class LeveledListView : ReactiveUserControl<LeveledListVM> {
         InitializeComponent();
     }
 
-    public LeveledListView(LeveledListVM leveledListVM) : this() {
-        DataContext = leveledListVM;
+    public LeveledListView(LeveledListVM listsVM) : this() {
+        DataContext = listsVM;
     }
 }

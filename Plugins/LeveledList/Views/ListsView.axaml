@@ -1,0 +1,77 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
+             xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder;assembly=CreationEditor.Avalonia"
+             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="LeveledList.Views.ListsView"
+             x:DataType="viewModels:ListsVM">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition MinWidth="200"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid RowDefinitions="Auto,10,*"
+            Grid.Column="0">
+            <folder:TextFolderPicker
+                Grid.Row="0"
+                x:Name="FolderPicker"
+                Watermark="Select Leveled List Folder"
+                MinWidth="250"
+                HorizontalAlignment="Left"
+                FolderPath="{Binding LeveledListFolderPath, Mode=TwoWay}"
+                Margin="5"/>
+
+            <basic:LabeledContentControl
+                Grid.Row="2"
+                Header="List Definitions">
+                <DataGrid 
+                    ItemsSource="{Binding ListTypeDefinitions}"
+                    SelectedItem="{Binding SelectedList}"
+                    Margin="5"
+                    VerticalAlignment="Top"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    GridLinesVisibility="None"
+                    Classes="NoCellSelection">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Type" Binding="{Binding TypeDefinition.Type}"/>
+                        <DataGridTextColumn Header="Identifier" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="EditorID" Binding="{Binding ListDefinition.Name}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </basic:LabeledContentControl>
+        </Grid>
+
+        <GridSplitter Grid.Column="1"/>
+
+        <Grid Grid.Column="2"
+              RowDefinitions="Auto,10,*">
+            <basic:LabeledContentControl
+                Grid.Row="0"
+                Header="Generation Preview">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10">
+                    <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
+
+                    <TextBox
+                        Text="{Binding LeveledListFilter}"
+                        Watermark="Filter"
+                        HorizontalAlignment="Left"
+                        MinWidth="100"/>
+                </StackPanel>
+            </basic:LabeledContentControl>
+
+            <Grid Grid.Row="2">
+                <TreeDataGrid
+                    Height="{Binding $parent.Bounds.Height}"
+                    Source="{Binding LeveledListSource}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
