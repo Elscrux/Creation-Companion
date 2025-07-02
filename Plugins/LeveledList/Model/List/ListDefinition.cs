@@ -1,17 +1,35 @@
 ﻿using System.Text.RegularExpressions;
-using LeveledList.Services.LeveledList;
-using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim;
-using Noggog;
+using LeveledList.Model.Feature;
 using EnchantmentProvider = LeveledList.Services.LeveledList.EnchantmentProvider;
 namespace LeveledList.Model.List;
+
+public static class ListDefinitionExtensions {
+    public static IReadOnlyList<FeatureWildcardIdentifier> GetFeatureWildcards(this ListDefinitionIdentifier identifier) {
+        var wildcards = new List<FeatureWildcardIdentifier>();
+        var readOnlySpan = identifier.AsSpan();
+
+        var startIndex = identifier.AsSpan().IndexOf('[');
+        while (startIndex != -1) {
+            var endIndex = readOnlySpan.IndexOf(']');
+            if (endIndex < startIndex) break;
+
+            var wildcard = readOnlySpan[(startIndex + 1)..endIndex];
+            wildcards.Add(new FeatureWildcardIdentifier(wildcard.ToString()));
+
+            readOnlySpan = readOnlySpan[(endIndex + 1)..];
+            startIndex = readOnlySpan.IndexOf('[');
+        }
+
+        return wildcards;
+    }
+}
 
 public partial record ListDefinition(
     ListDefinitionIdentifier Name,
     Dictionary<FeatureWildcardIdentifier, List<FeatureIdentifier>>? Restrict = null,
     Dictionary<TierIdentifier, List<ListEntryDefinition>>? Tiers = null,
-    Dictionary<ListDefinitionIdentifier, Dictionary<FeatureWildcardIdentifier, Dictionary<FeatureIdentifier, List<ListEntryDefinition>>>>? IncludeLists = null,
+    Dictionary<ListDefinitionIdentifier, Dictionary<FeatureWildcardIdentifier, Dictionary<FeatureIdentifier, List<ListEntryDefinition>>>>?
+        IncludeLists = null,
     float Chance = 100.0f,
     bool UseAll = false,
     bool CalculateForEach = true,
@@ -53,55 +71,23 @@ public partial record ListDefinition(
         return name;
     }
 
-    public LeveledItem CreateLeveledItem(
-        List<Feature.Feature> features,
-        IReadOnlyList<IMajorRecordGetter> records,
+    public LeveledList CreateLeveledItem(
+        FeatureNode featureNode,
         EnchantmentProvider enchantmentProvider,
-        ITierController tierController,
-        Func<ListDefinitionIdentifier, List<CreatedLeveledList>> listsProvider,
-        ILinkCache<ISkyrimMod, ISkyrimModGetter> linkCache,
-        ISkyrimMod mod) {
-        var fullName = GetFullName(features);
-        LeveledItem leveledItem;
-        if (linkCache.TryResolveIdentifier<ILeveledItemGetter>(fullName, out var formKey)) {
-            var context = linkCache.ResolveContext<LeveledItem, ILeveledItemGetter>(formKey);
-            leveledItem = context.GetOrAddAsOverride(mod);
-            if (leveledItem.Entries is null) {
-                leveledItem.Entries = [];
-            } else {
-                leveledItem.Entries.Clear();
-            }
-            leveledItem.Flags = 0;
-            leveledItem.ChanceNone = new Percent((100 - Chance) / 100);
-        } else {
-            leveledItem = new LeveledItem(mod) {
-                EditorID = fullName,
-                ChanceNone = new Percent((100 - Chance) / 100),
-                Entries = [],
-            };
-        }
-
-        if (UseAll) {
-            leveledItem.Flags |= LeveledItem.Flag.UseAll;
-        } else {
-            if (CalculateForEach) leveledItem.Flags |= LeveledItem.Flag.CalculateForEachItemInCount;
-            if (CalculateFromAllLevels) leveledItem.Flags |= LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer;
-            if (SpecialLoot) leveledItem.Flags |= LeveledItem.Flag.SpecialLoot;
-        }
+        Func<ListDefinitionIdentifier, List<LeveledList>> listsProvider) {
+        var fullName = GetFullName(featureNode.Features);
+        var leveledList = new LeveledList(featureNode.Features, fullName, [], Chance, UseAll, CalculateForEach, CalculateFromAllLevels, SpecialLoot);
 
         if (Tiers is not null) {
-            foreach (var record in records) {
-                var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record);
+            foreach (var record in featureNode.Records) {
+                var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record.Record);
 
-                var tierIdentifier = tierController.GetRecordTier(record);
-                if (tierIdentifier is null) continue;
-
-                var tiers = GetTiers(tierIdentifier)
+                var tiers = GetTiers(record.Tier)
                     .Where(t => t.EnchantmentLevel == enchantmentLevel);
 
                 foreach (var listTierItem in tiers) {
-                    var entries = listTierItem.GetEntries(record);
-                    leveledItem.Entries!.AddRange(entries);
+                    var entries = listTierItem.GetEntries(new LeveledListEntryItem(null, record.Record));
+                    leveledList.Entries.AddRange(entries);
                 }
             }
         }
@@ -111,30 +97,33 @@ public partial record ListDefinition(
                 var lists = listsProvider(listDefinitionIdentifier);
 
                 // Group by shared features
-                var wildcards = features.Select(x => x.Wildcard.Identifier).ToHashSet();
+                var wildcards = featureNode.Features.Select(x => x.Wildcard.Identifier).ToHashSet();
                 var matchingLists = lists
-                    .Where(leveledList => leveledList.FeatureNode.Features
+                    .Where(list => list.Features
                         .Where(f => wildcards.Contains(f.Wildcard.Identifier))
-                        .All(features.Contains))
+                        .All(featureNode.Features.Contains))
                     .ToArray();
 
                 var (featureWildcardIdentifier, tierDefinition) = tierDefinitionsPerFeature.First();
                 foreach (var (featureIdentifier, tiers) in tierDefinition) {
-                    foreach (var (container, item) in matchingLists) {
-                        var feature = container.Features.FirstOrDefault(f => f.Wildcard.Identifier == featureWildcardIdentifier);
+                    foreach (var list in matchingLists) {
+                        var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier == featureWildcardIdentifier);
                         if (feature is null) continue;
                         if (featureIdentifier != "_" && feature.Key.ToString() != featureIdentifier) continue;
 
                         foreach (var wildcardTier in tiers) {
-                            var entries = wildcardTier.GetEntries(item);
-                            leveledItem.Entries!.AddRange(entries);
+                            var entries = wildcardTier.GetEntries(new LeveledListEntryItem(list, null));
+                            leveledList.Entries.AddRange(entries);
                         }
                     }
                 }
             }
         }
 
-        return leveledItem;
+        // Sort the entries by level
+        leveledList.Entries.Sort((a, b) => a.Level.CompareTo(b.Level));
+
+        return leveledList;
     }
 
     public IEnumerable<ListEntryDefinition> GetTiers(TierIdentifier tier) {

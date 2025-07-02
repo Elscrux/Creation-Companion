@@ -2,34 +2,22 @@
 using CreationEditor.Services.Environment;
 using LeveledList.Model.Feature;
 using LeveledList.Model.List;
-using LeveledList.Resources;
+using LeveledList.Model.Tier;
 using LeveledList.Services.Record;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using ListDefinition = LeveledList.Model.List.ListDefinition;
 namespace LeveledList.Services.LeveledList;
 
 public class LeveledListGenerator(
-    IFeatureProvider featureProvider,
-    ITierController tierController,
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
-    IModGetter modToLookAt,
-    ISkyrimMod mod) {
-    public void Generate() {
-        var recordTypeProvider = new RecordTypeProvider(modToLookAt);
+    IRecordTypeProvider recordTypeProvider,
+    IFeatureProvider featureProvider) {
+    public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IModGetter modToLookAt) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
-        var fileStream = File.Open(@"E:\dev\leveled-list-configs\lists\base-armor-light.yaml", FileMode.Open);
-        var deserializer = new DeserializerBuilder()
-            .WithTypeConverter(new FormKeyYamlTypeConverter())
-            .WithNamingConvention(HyphenatedNamingConvention.Instance)
-            .Build();
+        var records = recordTypeProvider.GetRecords(modToLookAt, listTypeDefinition.Type).ToArray();
 
-        var listTypeDefinition = deserializer.Deserialize<ListTypeDefinition>(new StreamReader(fileStream));
-        var records = recordTypeProvider.GetRecords(listTypeDefinition.Type).ToArray();
-
-        var createdListsPerDefinition = new Dictionary<ListDefinitionIdentifier, List<CreatedLeveledList>>();
+        var createdListsPerDefinition = new Dictionary<ListDefinitionIdentifier, List<Model.List.LeveledList>>();
 
         foreach (var (listName, listDefinition) in listTypeDefinition.Lists) {
             var featureWildcardIdentifiers = listDefinition.GetFeatureWildcardIdentifiers().ToArray();
@@ -45,37 +33,29 @@ public class LeveledListGenerator(
                         return true;
                     }
 
-                    return featureRestrictions.Contains(f.Key);
+                    return featureRestrictions.Any(feature => StringComparer.OrdinalIgnoreCase.Equals(feature, f.Key));
                 }))
                 .ToList();
 
-            var createdLists = new List<CreatedLeveledList>();
+            var createdLists = new List<Model.List.LeveledList>();
             createdListsPerDefinition.Add(listName, createdLists);
 
             foreach (var featureNode in fullyFeaturedNodes) {
                 var leveledItem = listDefinition.CreateLeveledItem(
-                    featureNode.Features,
-                    featureNode.Records,
+                    featureNode,
                     enchantmentProvider,
-                    tierController,
-                    identifier => createdListsPerDefinition[identifier],
-                    editorEnvironment.LinkCache,
-                    mod);
+                    identifier => createdListsPerDefinition[identifier]);
 
-                createdLists.Add(new CreatedLeveledList(featureNode, leveledItem));
+                createdLists.Add(leveledItem);
 
-                if (!mod.LeveledItems.ContainsKey(leveledItem.FormKey)) {
-                    mod.LeveledItems.Add(leveledItem);
-                }
+                yield return leveledItem;
             }
         }
-
-        mod.WriteToBinary(@"E:\TES\Skyrim\modlists\beyond-skyrim\overwrite\" + mod.ModKey.FileName);
     }
 
     public FeatureNode? GroupByFeatureWildcard(
         ListDefinition listDefinition,
-        IEnumerable<IMajorRecordGetter> records,
+        IEnumerable<RecordWithTier> records,
         List<FeatureWildcard> featureWildcards,
         List<Feature> features,
         int level = 0) {
@@ -85,10 +65,10 @@ public class LeveledListGenerator(
 
         var featureWildcard = featureWildcards[level];
         var restrictions = listDefinition.Restrict?.GetValueOrDefault(featureWildcard.Identifier);
-        var groups = recordList.GroupBy(r => featureWildcard.Selector(r));
+        var groups = recordList.GroupBy(r => featureWildcard.Selector(r.Record));
         foreach (var group in groups) {
             if (group.Key is null) continue;
-            if (restrictions is not null && !restrictions.Contains(group.Key)) continue;
+            if (restrictions is not null && !restrictions.Any(r => StringComparer.OrdinalIgnoreCase.Equals(group.Key, r))) continue;
 
             var feature = new Feature(featureWildcard, group.Key);
             var newFeatures = features.Append(feature).ToList();

@@ -1,7 +1,4 @@
-﻿using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim;
-namespace LeveledList.Model.List;
+﻿namespace LeveledList.Model.List;
 
 public record ListEntryDefinition(
     short Level,
@@ -12,16 +9,14 @@ public record ListEntryDefinition(
 ) {
     public ListEntryDefinition() : this(1) {}
 
-    public IEnumerable<LeveledItemEntry> GetEntries(IMajorRecordGetter item) {
+    public IEnumerable<LeveledListEntry> GetEntries(LeveledListEntryItem item) {
         var currentLevel = Level;
         for (var i = 0; i < Amount; i++) {
-            yield return new LeveledItemEntry {
-                Data = new LeveledItemEntryData {
-                    Reference = new FormLink<IItemGetter>(item.FormKey),
-                    Level = currentLevel,
-                    Count = Count,
-                }
-            };
+            yield return new LeveledListEntry(
+                item,
+                currentLevel,
+                Count
+            );
             currentLevel += Interval;
         }
     }

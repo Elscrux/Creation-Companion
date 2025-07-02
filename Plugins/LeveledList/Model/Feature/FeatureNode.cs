@@ -1,6 +1,6 @@
-﻿using Mutagen.Bethesda.Plugins.Records;
+﻿using LeveledList.Model.Tier;
 namespace LeveledList.Model.Feature;
 
-public record FeatureNode(List<Feature> Features, IReadOnlyList<IMajorRecordGetter> Records) {
+public record FeatureNode(List<Feature> Features, IReadOnlyList<RecordWithTier> Records) {
     public List<FeatureNode> Children { get; } = [];
 }

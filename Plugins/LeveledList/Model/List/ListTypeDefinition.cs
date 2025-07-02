@@ -1,5 +1,4 @@
-﻿using Mutagen.Bethesda.Plugins.Records;
-namespace LeveledList.Model.List;
+﻿namespace LeveledList.Model.List;
 
 public record ListTypeDefinition(
     string Type,
@@ -8,11 +7,4 @@ public record ListTypeDefinition(
     Dictionary<string, Item>? Items = null
 ) {
     public ListTypeDefinition() : this(string.Empty, [], []) {}
-
-    public TierIdentifier? GetTier(IMajorRecordGetter record) {
-        var recordEditorId = record.EditorID;
-        if (recordEditorId is null) return null;
-
-        return Tiers.FirstOrDefault(tier => recordEditorId.Contains(tier, StringComparison.OrdinalIgnoreCase));
-    }
 }
