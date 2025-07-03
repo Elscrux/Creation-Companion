@@ -109,7 +109,7 @@ public partial record ListDefinition(
                     foreach (var list in matchingLists) {
                         var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier == featureWildcardIdentifier);
                         if (feature is null) continue;
-                        if (featureIdentifier != "_" && feature.Key.ToString() != featureIdentifier) continue;
+                        if (featureIdentifier != "_" && !featureIdentifier.FeatureIdentifierEquals(feature.Key.ToString())) continue;
 
                         foreach (var wildcardTier in tiers) {
                             var entries = wildcardTier.GetEntries(new LeveledListEntryItem(list, null));
@@ -147,7 +147,7 @@ public partial record ListDefinition(
                 return true;
             }
 
-            return featureRestrictions.Any(feature => StringComparer.OrdinalIgnoreCase.Equals(feature, f.Key));
+            return featureRestrictions.Any(feature => feature.FeatureIdentifierEquals(f.Key.ToString()));
         });
     }
 }

@@ -62,7 +62,7 @@ public class LeveledListGenerator(
         var groups = recordList.GroupBy(r => featureWildcard.Selector(r.Record));
         foreach (var group in groups) {
             if (group.Key is null) continue;
-            if (restrictions is not null && !restrictions.Any(r => StringComparer.OrdinalIgnoreCase.Equals(group.Key, r))) continue;
+            if (restrictions is not null && !restrictions.Any(r => r.FeatureIdentifierEquals(group.Key.ToString()))) continue;
 
             var feature = new Feature(featureWildcard, group.Key);
             var newFeatures = features.Append(feature).ToList();
