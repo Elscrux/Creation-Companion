@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
+using Avalonia.Threading;
 using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
@@ -110,10 +111,11 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         this.WhenAnyValue(x => x.SelectedList)
             .CombineLatest(ModPickerVM.SelectedModChanged, (def, mod) => (Definition: def, SelectedMod: mod))
+            .ObserveOnTaskpool()
             .Subscribe(x => {
                 var mod = editorEnvironment.ResolveMod(x.SelectedMod?.ModKey);
                 if (mod is null || x.Definition is null) {
-                    _leveledLists.Clear();
+                    Dispatcher.UIThread.Post(() => _leveledLists.Clear());
                     return;
                 }
 
@@ -126,10 +128,11 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
                             return list.EditorID == x.Definition.ListDefinition.GetFullName(list.Features);
                         })
-                        .Select(l => new LeveledListTreeNode(l, null));
-                    _leveledLists.Load(lists);
+                        .Select(l => new LeveledListTreeNode(l, null))
+                        .ToArray();
+                    Dispatcher.UIThread.Post(() => _leveledLists.Load(lists));
                 } catch (Exception e) {
-                    _leveledLists.Clear();
+                    Dispatcher.UIThread.Post(() => _leveledLists.Clear());
                     logger.Here().Error(e, "Failed to generate leveled lists for {ListDefinition}", x.Definition.ListDefinition.Name);
 
                 }
