@@ -44,7 +44,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     }
 
     private IEnumerable<string> EnumerateStateFiles() => fileSystem.Directory
-        .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension);
+        .EnumerateFiles(GetDirectoryPath(), Wildcard + JsonExtension, SearchOption.AllDirectories);
 
     private TIdentifier GetIdentifier(string fileName) {
         var idLength = fileName.Length - JsonExtension.Length;
@@ -66,8 +66,9 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     }
 
     public IEnumerable<TIdentifier> LoadAllIdentifiers() {
+        var stateDirectory = GetDirectoryPath();
         return EnumerateStateFiles()
-            .Select(filePath => GetIdentifier(fileSystem.Path.GetFileName(filePath)));
+            .Select(filePath => GetIdentifier(fileSystem.Path.GetRelativePath(stateDirectory, filePath)));
     }
 
     public IEnumerable<TStateOut> LoadAll() {
@@ -78,9 +79,11 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     }
 
     public IReadOnlyDictionary<TIdentifier, TState> LoadAllWithIdentifier() {
+        var stateDirectory = GetDirectoryPath();
         return EnumerateStateFiles()
             .Select<string, KeyValuePair<TIdentifier, TState>?>(filePath => {
-                var identifier = GetIdentifier(fileSystem.Path.GetFileName(filePath));
+                var fileName = fileSystem.Path.GetRelativePath(stateDirectory, filePath);
+                var identifier = GetIdentifier(fileName);
                 var json = fileSystem.File.ReadAllText(filePath);
                 var state = JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings);
                 if (state is null) return null;
