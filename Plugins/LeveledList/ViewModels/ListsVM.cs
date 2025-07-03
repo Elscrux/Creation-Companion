@@ -125,6 +125,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                             var featureWildcards = x.Definition.ListDefinition.Name.GetFeatureWildcards().ToArray();
                             if (list.Features.Count != featureWildcards.Length) return false;
                             if (list.Features.Any(f => !featureWildcards.Contains(f.Wildcard.Identifier))) return false;
+                            if (!x.Definition.ListDefinition.Restricts(list.Features)) return false;
 
                             return list.EditorID == x.Definition.ListDefinition.GetFullName(list.Features);
                         })
