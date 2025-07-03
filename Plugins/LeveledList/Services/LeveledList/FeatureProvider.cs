@@ -20,6 +20,7 @@ public sealed class FeatureProvider(
     public const FeatureWildcardIdentifier WeaponType = "WeaponType";
     public const FeatureWildcardIdentifier ArmorSlot = "ArmorSlot";
     public const FeatureWildcardIdentifier ArmorType = "ArmorType";
+    public const FeatureWildcardIdentifier AmmunitionType = "AmmunitionType";
 
     public IEnumerable<FeatureWildcardIdentifier> GetApplicableFeatureWildcards(Type t) {
         if (t.IsAssignableTo(typeof(IEnchantableGetter))) {
@@ -35,6 +36,10 @@ public sealed class FeatureProvider(
         if (t.IsAssignableTo(typeof(IArmorGetter))) {
             yield return ArmorSlot;
             yield return ArmorType;
+        }
+
+        if (t.IsAssignableTo(typeof(IAmmunitionGetter))) {
+            yield return AmmunitionType;
         }
 
         if (t.IsAssignableTo(typeof(IMajorRecordGetter))) {
@@ -122,6 +127,15 @@ public sealed class FeatureProvider(
                     if (armor.Keywords.Contains(Skyrim.Keyword.ClothingRing)) return "ring";
 
                     return null;
+                }),
+            AmmunitionType => new FeatureWildcard(
+                featureWildcardIdentifier,
+                record => {
+                    if (record is not IAmmunitionGetter ammunition) return null;
+
+                    return ammunition.Flags.HasFlag(Ammunition.Flag.NonBolt)
+                        ? "arrow"
+                        : "bolt";
                 }),
             _ => throw new ArgumentOutOfRangeException(nameof(featureWildcardIdentifier), featureWildcardIdentifier, null)
         };
