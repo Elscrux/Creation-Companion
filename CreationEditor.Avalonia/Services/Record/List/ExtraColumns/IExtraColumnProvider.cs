@@ -10,5 +10,5 @@ public interface IExtraColumnProvider {
     /// <summary>
     /// Extra columns that are automatically attached if a function evaluates to true.
     /// </summary>
-    IReadOnlyList<IAutoAttachingExtraColumns> AutoAttachingExtraColumnsCache { get; }
+    IReadOnlyList<IConditionalExtraColumns> AutoAttachingExtraColumnsCache { get; }
 }

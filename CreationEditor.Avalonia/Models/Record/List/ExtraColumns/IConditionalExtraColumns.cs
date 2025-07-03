@@ -1,5 +1,5 @@
 ﻿namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
-public interface IAutoAttachingExtraColumns : IUntypedExtraColumns {
+public interface IConditionalExtraColumns : IUntypedExtraColumns {
     bool CanAttachTo(Type type);
 }
