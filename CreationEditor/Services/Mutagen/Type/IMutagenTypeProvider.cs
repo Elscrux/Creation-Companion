@@ -48,6 +48,13 @@ public interface IMutagenTypeProvider {
     string GetGameName(IMajorRecordGetter record);
 
     /// <summary>
+    /// Returns the game name of a record type
+    /// </summary>
+    /// <param name="recordType">Type of the record to retrieve the game name for</param>
+    /// <returns>Game name of a record type</returns>
+    string GetGameName(System.Type recordType);
+
+    /// <summary>
     /// Returns the type name of a record
     /// </summary>
     /// <param name="record">Record to retrieve the type name for</param>

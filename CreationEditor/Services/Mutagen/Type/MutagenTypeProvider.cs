@@ -59,6 +59,10 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
         return record.Registration.ProtocolKey.Namespace[BaseNamespace.Length..];
     }
 
+    public string GetGameName(System.Type recordType) {
+        return recordType.Namespace![BaseNamespace.Length..];
+    }
+
     public string GetTypeName(IMajorRecordGetter record) {
         var span = record.Registration.ClassType.FullName.AsSpan();
         var lastIndexOfDot = span.LastIndexOf('.');
