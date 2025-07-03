@@ -1,4 +1,5 @@
-﻿using LeveledList.Model;
+﻿using CreationEditor.Skyrim;
+using LeveledList.Model;
 using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Records;
@@ -13,9 +14,9 @@ public class RecordTypeProvider(ITierController tierController) : IRecordTypePro
             ListRecordType.Weapon => mod.EnumerateMajorRecords<IWeaponGetter>()
                 .Concat<IMajorRecordGetter>(mod.EnumerateMajorRecords<IAmmunitionGetter>()),
             ListRecordType.Poison => mod.EnumerateMajorRecords<IIngestibleGetter>()
-                .Where(i => i.Flags.HasFlag(Ingestible.Flag.Poison)),
+                .Where(i => i.IsPoison()),
             ListRecordType.Potion => mod.EnumerateMajorRecords<IIngestibleGetter>()
-                .Where(i => (i.Flags & (Ingestible.Flag.Poison | Ingestible.Flag.FoodItem | Ingestible.Flag.Medicine)) == 0),
+                .Where(i => i.IsPotion()),
             ListRecordType.SpellTome => mod.EnumerateMajorRecords<IBookGetter>()
                 .Where(b => b.Teaches is IBookSpellGetter),
             ListRecordType.Staff => mod.EnumerateMajorRecords<IWeaponGetter>()
@@ -29,7 +30,8 @@ public class RecordTypeProvider(ITierController tierController) : IRecordTypePro
         if (record is IWeaponGetter) return ListRecordType.Weapon;
         if (record is IAmmunitionGetter) return ListRecordType.Weapon; // Ammunition is treated as a weapon
         if (record is IIngestibleGetter ingestible) {
-            return ingestible.Flags.HasFlag(Ingestible.Flag.Poison) ? ListRecordType.Poison : ListRecordType.Potion;
+            if (ingestible.IsPoison()) return ListRecordType.Poison;
+            if (ingestible.IsPotion()) return ListRecordType.Potion;
         }
         if (record is IBookGetter book) {
             return book.Teaches is IBookSpellGetter ? ListRecordType.SpellTome : ListRecordType.Staff;
