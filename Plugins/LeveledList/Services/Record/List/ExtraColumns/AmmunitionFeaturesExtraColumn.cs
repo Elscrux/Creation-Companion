@@ -15,7 +15,7 @@ public sealed class AmmunitionFeaturesExtraColumn(IFeatureProvider featureProvid
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Ammunition Type",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_ammunitionTypeSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_ammunitionTypeSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _ammunitionTypeSelector(x.Record)),
                 },

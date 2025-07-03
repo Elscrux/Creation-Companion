@@ -18,7 +18,7 @@ public sealed class WeaponFeaturesExtraColumn(IFeatureProvider featureProvider) 
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Weapon Type",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_weaponTypeSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_weaponTypeSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _weaponTypeSelector(x.Record)),
                 },
@@ -26,7 +26,7 @@ public sealed class WeaponFeaturesExtraColumn(IFeatureProvider featureProvider) 
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Magic Level",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_magicLevelSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_magicLevelSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _magicLevelSelector(x.Record)),
                 },

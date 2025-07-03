@@ -18,7 +18,7 @@ public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvi
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Enchantment",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_enchantmentSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_enchantmentSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _enchantmentSelector(x.Record)),
                 },
@@ -26,7 +26,7 @@ public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvi
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "School of Magic",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_schoolOfMagicSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_schoolOfMagicSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _schoolOfMagicSelector(x.Record)),
                 },

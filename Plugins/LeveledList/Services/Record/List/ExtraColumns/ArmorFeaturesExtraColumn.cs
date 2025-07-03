@@ -18,7 +18,7 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Armor Type",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_armorTypeSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_armorTypeSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorTypeSelector(x.Record)),
                 },
@@ -26,7 +26,7 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Armor Slot",
-                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_armorSlotSelector),
+                    CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(_armorSlotSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorSlotSelector(x.Record)),
                 },
