@@ -92,7 +92,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                     "Count",
                     new FuncDataTemplate<LeveledListTreeNode>((x, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,
-                        Text = x?.Entry?.Level.ToString()
+                        Text = x?.Entry?.Count.ToString()
                     })),
             }
         };
