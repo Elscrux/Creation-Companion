@@ -28,13 +28,7 @@ public class LeveledListGenerator(
 
             var rootFeatureNode = GroupByFeatureWildcard(listDefinition, records, featureWildcards, []) ?? new FeatureNode([], records);
             var fullyFeaturedNodes = rootFeatureNode.GetTreeLeaves(c => c.Children)
-                .Where(c => c.Features.Count == 0 || c.Features.All(f => {
-                    if (listDefinition.Restrict?.TryGetValue(f.Wildcard.Identifier, out var featureRestrictions) is not true) {
-                        return true;
-                    }
-
-                    return featureRestrictions.Any(feature => StringComparer.OrdinalIgnoreCase.Equals(feature, f.Key));
-                }))
+                .Where(node => listDefinition.Restricts(node.Features))
                 .ToList();
 
             var createdLists = new List<Model.List.LeveledList>();

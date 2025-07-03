@@ -138,4 +138,16 @@ public partial record ListDefinition(
         // Otherwise, no tiers are available for this definition
         return [];
     }
+
+    public bool Restricts(IReadOnlyList<Feature.Feature> features) {
+        if (features.Count == 0) return true;
+
+        return features.All(f => {
+            if (Restrict?.TryGetValue(f.Wildcard.Identifier, out var featureRestrictions) is not true) {
+                return true;
+            }
+
+            return featureRestrictions.Any(feature => StringComparer.OrdinalIgnoreCase.Equals(feature, f.Key));
+        });
+    }
 }
