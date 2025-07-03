@@ -7,6 +7,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using CreationEditor;
+using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
@@ -26,7 +27,9 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace LeveledList.ViewModels;
 
 public sealed partial class ListsVM : ValidatableViewModel {
+    private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
+    private readonly IEditorEnvironment _editorEnvironment;
     private readonly LeveledListGenerator _generator;
 
     private readonly IObservableCollection<LeveledListTreeNode> _leveledLists = new ObservableCollectionExtended<LeveledListTreeNode>();
@@ -49,7 +52,9 @@ public sealed partial class ListsVM : ValidatableViewModel {
         ISearchFilter searchFilter,
         LeveledListGenerator generator) {
         ModPickerVM = modPickerVM;
+        _logger = logger;
         _fileSystem = fileSystem;
+        _editorEnvironment = editorEnvironment;
         _generator = generator;
 
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
@@ -112,38 +117,39 @@ public sealed partial class ListsVM : ValidatableViewModel {
         this.WhenAnyValue(x => x.SelectedList)
             .CombineLatest(ModPickerVM.SelectedModChanged, (def, mod) => (Definition: def, SelectedMod: mod))
             .ObserveOnTaskpool()
-            .Subscribe(x => {
-                var mod = editorEnvironment.ResolveMod(x.SelectedMod?.ModKey);
-                if (mod is null || x.Definition is null) {
-                    Dispatcher.UIThread.Post(() => _leveledLists.Clear());
-                    return;
-                }
-
-                try {
-                    var lists = _generator.Generate(x.Definition.TypeDefinition, mod)
-                        .Where(list => {
-                            var featureWildcards = x.Definition.ListDefinition.Name.GetFeatureWildcards().ToArray();
-                            if (list.Features.Count != featureWildcards.Length) return false;
-                            if (list.Features.Any(f => !featureWildcards.Contains(f.Wildcard.Identifier))) return false;
-                            if (!x.Definition.ListDefinition.Restricts(list.Features)) return false;
-
-                            return list.EditorID == x.Definition.ListDefinition.GetFullName(list.Features);
-                        })
-                        .Select(l => new LeveledListTreeNode(l, null))
-                        .ToArray();
-                    Dispatcher.UIThread.Post(() => _leveledLists.Load(lists));
-                } catch (Exception e) {
-                    Dispatcher.UIThread.Post(() => _leveledLists.Clear());
-                    logger.Here().Error(e, "Failed to generate leveled lists for {ListDefinition}", x.Definition.ListDefinition.Name);
-
-                }
-            })
+            .Subscribe(x => UpdateListsShowcase(x.Definition, x.SelectedMod))
             .DisposeWith(this);
     }
 
     private static IEnumerable<LeveledListTreeNode>? SelectNodes(Model.List.LeveledList? list) {
         return list?.Entries
             .Select(entry => new LeveledListTreeNode(null, entry));
+    }
+
+    private void UpdateListsShowcase(ExtendedListDefinition? definition, OrderedModItem? selectedMod) {
+        var mod = _editorEnvironment.ResolveMod(selectedMod?.ModKey);
+        if (mod is null || definition is null) {
+            Dispatcher.UIThread.Post(() => _leveledLists.Clear());
+            return;
+        }
+
+        try {
+            var lists = _generator.Generate(definition.TypeDefinition, mod)
+                .Where(list => {
+                    var featureWildcards = definition.ListDefinition.Name.GetFeatureWildcards().ToArray();
+                    if (list.Features.Count != featureWildcards.Length) return false;
+                    if (list.Features.Any(f => !featureWildcards.Contains(f.Wildcard.Identifier))) return false;
+                    if (!definition.ListDefinition.Restricts(list.Features)) return false;
+
+                    return list.EditorID == definition.ListDefinition.GetFullName(list.Features);
+                })
+                .Select(l => new LeveledListTreeNode(l, null))
+                .ToArray();
+            Dispatcher.UIThread.Post(() => _leveledLists.Load(lists));
+        } catch (Exception e) {
+            Dispatcher.UIThread.Post(() => _leveledLists.Clear());
+            _logger.Here().Error(e, "Failed to generate leveled lists for {ListDefinition}", definition.ListDefinition.Name);
+        }
     }
 
     private IEnumerable<ExtendedListDefinition> GetDefinitions(string directoryPath) {
