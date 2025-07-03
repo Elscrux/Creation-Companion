@@ -12,7 +12,7 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
 
     private readonly ConcurrentDictionary<string, System.Type> _typeCache = new();
 
-    public System.Type GetType(string gameName, string typeName) {
+    public System.Type GetType(ReadOnlySpan<char> gameName, ReadOnlySpan<char> typeName) {
         var name = $"{gameName}.{typeName}";
         if (_typeCache.TryGetValue(name, out var cachedType)) {
             return cachedType;
@@ -26,6 +26,10 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
 
         _typeCache.UpdateOrAdd(name, _ => registration.GetterType);
         return registration.GetterType;
+    }
+
+    public System.Type GetType(string gameName, string typeName) {
+        return GetType(gameName.AsSpan(), typeName.AsSpan());
     }
 
     public bool TryGetType(string gameName, string typeName, [MaybeNullWhen(false)] out System.Type type) {

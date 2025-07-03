@@ -13,6 +13,15 @@ public interface IMutagenTypeProvider {
     /// <param name="typeName">Name of the type</param>
     /// <returns>Type of name and game</returns>
     /// <exception cref="ArgumentException">Thrown when the type could not be found</exception>
+    System.Type GetType(ReadOnlySpan<char> gameName, ReadOnlySpan<char> typeName);
+
+    /// <summary>
+    /// Retrieve a mutagen type from a game name and type name
+    /// </summary>
+    /// <param name="gameName">Name of the game</param>
+    /// <param name="typeName">Name of the type</param>
+    /// <returns>Type of name and game</returns>
+    /// <exception cref="ArgumentException">Thrown when the type could not be found</exception>
     System.Type GetType(string gameName, string typeName);
 
     /// <summary>
