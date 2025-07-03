@@ -3,7 +3,7 @@ using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Plugins.Records;
 namespace LeveledList.Services.Record;
 
-public interface IRecordTypeProvider {
+public interface ILeveledListRecordTypeProvider {
     ListRecordType? GetListRecordType(IMajorRecordGetter record);
     IEnumerable<RecordWithTier> GetRecords(IModGetter mod, ListRecordType type);
 }

@@ -11,16 +11,16 @@ using ReactiveUI;
 namespace LeveledList.Services.Record.Actions;
 
 public sealed class TierRecordActionProvider : IRecordActionsProvider {
-    private readonly IRecordTypeProvider _recordTypeProvider;
+    private readonly ILeveledListRecordTypeProvider _leveledListRecordTypeProvider;
     private readonly ITierController _tierController;
     private readonly IList<RecordAction> _actions;
     private readonly ReactiveCommand<(RecordListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
 
     public TierRecordActionProvider(
         IRecordDecorationController recordDecorationController,
-        IRecordTypeProvider recordTypeProvider,
+        ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
         ITierController tierController) {
-        _recordTypeProvider = recordTypeProvider;
+        _leveledListRecordTypeProvider = leveledListRecordTypeProvider;
         _tierController = tierController;
 
         _addToTierCommand = ReactiveCommand.Create<(RecordListContext Context, TierIdentifier Tier)>(x => {
@@ -60,8 +60,8 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
     private IEnumerable<MenuItem> GetMenuItems(RecordListContext context) {
         if (context.SelectedRecords.Count == 0) return [];
 
-        var listRecordType = _recordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
-        if (listRecordType is null || context.SelectedRecords.Any(r => _recordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
+        var listRecordType = _leveledListRecordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
+        if (listRecordType is null || context.SelectedRecords.Any(r => _leveledListRecordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
 
         const char separator = '/';
         var tiers = _tierController.GetTiers(listRecordType.Value);

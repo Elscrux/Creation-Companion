@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace LeveledList.Services.Record;
 
-public class RecordTypeProvider(ITierController tierController) : IRecordTypeProvider {
+public class LeveledListRecordTypeProvider(ITierController tierController) : ILeveledListRecordTypeProvider {
     private static IEnumerable<IMajorRecordGetter> GetRecordsOnly(IModGetter mod, ListRecordType type) {
         return type switch {
             ListRecordType.Armor => mod.EnumerateMajorRecords<IArmorGetter>(),

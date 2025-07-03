@@ -22,8 +22,8 @@
       <Compile Update="Services\LeveledList\TierController.cs">
         <DependentUpon>ITierController.cs</DependentUpon>
       </Compile>
-      <Compile Update="Services\Record\RecordTypeProvider.cs">
-        <DependentUpon>IRecordTypeProvider.cs</DependentUpon>
+      <Compile Update="Services\Record\LeveledListRecordTypeProvider.cs">
+        <DependentUpon>ILeveledListRecordTypeProvider.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

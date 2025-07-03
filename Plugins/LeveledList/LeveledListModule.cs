@@ -36,8 +36,8 @@ public class LeveledListModule : ExtensionModule {
             .As<ITierController>()
             .SingleInstance();
 
-        builder.RegisterType<RecordTypeProvider>()
-            .As<IRecordTypeProvider>()
+        builder.RegisterType<LeveledListRecordTypeProvider>()
+            .As<ILeveledListRecordTypeProvider>()
             .SingleInstance();
 
         builder.RegisterAssemblyTypes(typeof(ArmorFeaturesExtraColumn).Assembly)

@@ -11,11 +11,11 @@ namespace LeveledList.Services.LeveledList;
 
 public class LeveledListGenerator(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
-    IRecordTypeProvider recordTypeProvider,
+    ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     IFeatureProvider featureProvider) {
     public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IModGetter modToLookAt) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
-        var records = recordTypeProvider.GetRecords(modToLookAt, listTypeDefinition.Type).ToArray();
+        var records = leveledListRecordTypeProvider.GetRecords(modToLookAt, listTypeDefinition.Type).ToArray();
 
         var createdListsPerDefinition = new Dictionary<ListDefinitionIdentifier, List<Model.List.LeveledList>>();
 
