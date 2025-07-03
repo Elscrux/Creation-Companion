@@ -8,10 +8,9 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Environment;
 using DynamicData;
 using DynamicData.Binding;
+using LeveledList.Model;
 using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -20,12 +19,9 @@ namespace LeveledList.ViewModels;
 public sealed partial class TiersVM : ValidatableViewModel {
     public IObservableCollection<TierItem> Tiers { get; } = new ObservableCollectionExtended<TierItem>();
 
-    public List<Type> TierRecordTypes { get; } = [
-        typeof(IArmorGetter),
-        typeof(IWeaponGetter),
-    ];
+    public IReadOnlyList<ListRecordType> TierRecordTypes { get; } = Enum.GetValues<ListRecordType>();
 
-    [Reactive] public partial Type SelectedTierType { get; set; } = typeof(IArmorGetter);
+    [Reactive] public partial ListRecordType SelectedTierType { get; set; } = ListRecordType.Armor;
     [Reactive] public partial TierItem? SelectedTier { get; set; }
     [Reactive] public partial IRecordListVM RecordListVM { get; set; }
 
@@ -80,7 +76,7 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
         IRecordListVM GetRecordListVM() {
             var records = tierController.GetAllRecordTiers()
-                .Where(x => linkCacheProvider.LinkCache.TryResolve(x.Key, SelectedTierType, out _));
+                .Where(x => linkCacheProvider.LinkCache.TryResolve(x.Key, out _));
 
             if (SelectedTier is not null) {
                 records = records
@@ -88,11 +84,14 @@ public sealed partial class TiersVM : ValidatableViewModel {
             }
 
             var formLinkInformation = records
-                .Select(x => new FormLinkInformation(x.Key, SelectedTierType));
+                .Select(x => x.Key);
+
+            foreach (var recordType in SelectedTierType.GetRecordTypes()) {
+                extraColumnsBuilder = extraColumnsBuilder.AddRecordType(recordType);
+            }
 
             return recordListVMBuilder
-                .WithExtraColumns(extraColumnsBuilder
-                    .AddRecordType(SelectedTierType))
+                .WithExtraColumns(extraColumnsBuilder)
                 .BuildWithSource(formLinkInformation)
                 .DisposeWith(this);
         }

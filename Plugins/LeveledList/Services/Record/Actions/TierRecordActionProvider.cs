@@ -5,23 +5,27 @@ using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace LeveledList.Services.Record.Actions;
 
 public sealed class TierRecordActionProvider : IRecordActionsProvider {
+    private readonly IRecordTypeProvider _recordTypeProvider;
     private readonly ITierController _tierController;
     private readonly IList<RecordAction> _actions;
     private readonly ReactiveCommand<(RecordListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
 
     public TierRecordActionProvider(
         IRecordDecorationController recordDecorationController,
+        IRecordTypeProvider recordTypeProvider,
         ITierController tierController) {
+        _recordTypeProvider = recordTypeProvider;
         _tierController = tierController;
 
         _addToTierCommand = ReactiveCommand.Create<(RecordListContext Context, TierIdentifier Tier)>(x => {
             foreach (var record in x.Context.SelectedRecords) {
-                recordDecorationController.Update(record, new Tier(x.Tier));
+                recordDecorationController.Update(record.Record.ToFormLinkInformation(), new Tier(x.Tier));
             }
         });
 
@@ -56,11 +60,11 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
     private IEnumerable<MenuItem> GetMenuItems(RecordListContext context) {
         if (context.SelectedRecords.Count == 0) return [];
 
-        var firstType = context.SelectedRecords[0].Type;
-        if (context.SelectedRecords.Any(r => r.Type != firstType)) return [];
+        var listRecordType = _recordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
+        if (context.SelectedRecords.Any(r => _recordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
 
         const char separator = '/';
-        var tiers = _tierController.GetTiers(firstType);
+        var tiers = _tierController.GetTiers(listRecordType);
         var tierGroup = new TierGroup(string.Empty, tiers, separator);
         return MenuItems(tierGroup, string.Empty);
 

@@ -28,8 +28,7 @@
                     IsEditable="True"
                     IsTextSearchEnabled="True"
                     ItemsSource="{Binding TierRecordTypes}"
-                    SelectedItem="{Binding SelectedTierType}"
-                    DisplayMemberBinding="{Binding Name}"/>
+                    SelectedItem="{Binding SelectedTierType}"/>
 
                 <Button Command="{Binding SaveTiers}"
                         Content="Save Tiers"/>

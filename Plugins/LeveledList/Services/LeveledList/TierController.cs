@@ -1,5 +1,6 @@
 ﻿using CreationEditor.Services.Mutagen.References.Record.Controller;
 using CreationEditor.Services.State;
+using LeveledList.Model;
 using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -17,32 +18,31 @@ public sealed class TierController : ITierController {
     }
 
     public TierIdentifier? GetRecordTier(IMajorRecordGetter record) {
-        var tier = _recordDecorationController.Get<Tier>(record);
+        var tier = _recordDecorationController.Get<Tier>(record.ToFormLinkInformation());
         return tier?.TierIdentifier;
     }
 
     public void SetRecordTier(IMajorRecordGetter record, TierIdentifier tier) {
-        _recordDecorationController.Update(record, new Tier(tier));
+        _recordDecorationController.Update(record.ToFormLinkInformation(), new Tier(tier));
     }
 
     public void RemoveRecordTier(IMajorRecordGetter record) {
         _recordDecorationController.Delete<Tier>(record);
     }
 
-    public IReadOnlyDictionary<FormKey, Tier> GetAllRecordTiers() {
+    public IReadOnlyDictionary<IFormLinkGetter, Tier> GetAllRecordTiers() {
         return _recordDecorationController
             .GetAllDecorations<Tier>();
     }
 
-    public IEnumerable<TierIdentifier> GetTiers<TMajorRecordGetter>() => GetTiers(typeof(TMajorRecordGetter));
-    public IEnumerable<TierIdentifier> GetTiers(Type recordType) {
-        var state = _stateRepository.Load(GetTypeKey(recordType));
+    public IEnumerable<TierIdentifier> GetTiers(ListRecordType type) {
+        var state = _stateRepository.Load(GetTypeKey(type));
         return state?.Tiers ?? [];
     }
 
-    public void SetTiers(Type recordType, IEnumerable<TierIdentifier> tiers) {
-        _stateRepository.Save(new TierDefinitions(tiers.ToList()), GetTypeKey(recordType));
+    public void SetTiers(ListRecordType type, IEnumerable<TierIdentifier> tiers) {
+        _stateRepository.Save(new TierDefinitions(tiers.ToList()), GetTypeKey(type));
     }
 
-    private static string GetTypeKey(Type recordType) => recordType.Name;
+    private static string GetTypeKey(ListRecordType type) => type.ToString();
 }

@@ -1,4 +1,5 @@
-﻿using LeveledList.Model.Tier;
+﻿using LeveledList.Model;
+using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -6,23 +7,37 @@ using Noggog;
 namespace LeveledList.Services.Record;
 
 public class RecordTypeProvider(ITierController tierController) : IRecordTypeProvider {
-    private static IEnumerable<IMajorRecordGetter> GetRecordsOnly(IModGetter mod, string type) {
+    private static IEnumerable<IMajorRecordGetter> GetRecordsOnly(IModGetter mod, ListRecordType type) {
         return type switch {
-            "armor" => mod.EnumerateMajorRecords<IArmorGetter>(),
-            "weapon" => mod.EnumerateMajorRecords<IWeaponGetter>(),
-            "poison" => mod.EnumerateMajorRecords<IIngestibleGetter>()
+            ListRecordType.Armor => mod.EnumerateMajorRecords<IArmorGetter>(),
+            ListRecordType.Weapon => mod.EnumerateMajorRecords<IWeaponGetter>()
+                .Concat<IMajorRecordGetter>(mod.EnumerateMajorRecords<IAmmunitionGetter>()),
+            ListRecordType.Poison => mod.EnumerateMajorRecords<IIngestibleGetter>()
                 .Where(i => i.Flags.HasFlag(Ingestible.Flag.Poison)),
-            "potion" => mod.EnumerateMajorRecords<IIngestibleGetter>()
+            ListRecordType.Potion => mod.EnumerateMajorRecords<IIngestibleGetter>()
                 .Where(i => (i.Flags & (Ingestible.Flag.Poison | Ingestible.Flag.FoodItem | Ingestible.Flag.Medicine)) == 0),
-            "spelltome" => mod.EnumerateMajorRecords<IBookGetter>()
+            ListRecordType.SpellTome => mod.EnumerateMajorRecords<IBookGetter>()
                 .Where(b => b.Teaches is IBookSpellGetter),
-            "staff" => mod.EnumerateMajorRecords<IWeaponGetter>()
+            ListRecordType.Staff => mod.EnumerateMajorRecords<IWeaponGetter>()
                 .Where(w => w.Data is { AnimationType: WeaponAnimationType.Staff }),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
 
-    public IEnumerable<RecordWithTier> GetRecords(IModGetter mod, string type) {
+    public ListRecordType GetListRecordType(IMajorRecordGetter record) {
+        if (record is IArmorGetter) return ListRecordType.Armor;
+        if (record is IWeaponGetter) return ListRecordType.Weapon;
+        if (record is IAmmunitionGetter) return ListRecordType.Weapon; // Ammunition is treated as a weapon
+        if (record is IIngestibleGetter ingestible) {
+            return ingestible.Flags.HasFlag(Ingestible.Flag.Poison) ? ListRecordType.Poison : ListRecordType.Potion;
+        }
+        if (record is IBookGetter book) {
+            return book.Teaches is IBookSpellGetter ? ListRecordType.SpellTome : ListRecordType.Staff;
+        }
+        throw new ArgumentOutOfRangeException(nameof(record), record, "Unsupported record type for ListRecordType");
+    }
+
+    public IEnumerable<RecordWithTier> GetRecords(IModGetter mod, ListRecordType type) {
         return GetRecordsOnly(mod, type)
             .Select(record => {
                 var tier = tierController.GetRecordTier(record);
