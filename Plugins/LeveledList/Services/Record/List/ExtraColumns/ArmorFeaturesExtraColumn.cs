@@ -1,14 +1,9 @@
-﻿using System.Reactive.Linq;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Templates;
+﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
-using CreationEditor.Services.Mutagen.References.Record;
 using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using ReactiveUI;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
 public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
@@ -23,7 +18,7 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Armor Type",
-                    CellTemplate = CellTemplate(_armorTypeSelector),
+                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_armorTypeSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorTypeSelector(x.Record)),
                 },
@@ -31,21 +26,12 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
             new ExtraColumn(
                 new DataGridTemplateColumn {
                     Header = "Armor Slot",
-                    CellTemplate = CellTemplate(_armorSlotSelector),
+                    CellTemplate = FeaturesExtraColumn.GetCellTemplate(_armorSlotSelector),
                     CanUserSort = true,
                     CustomSortComparer = ReferencedRecordComparers.SelectorComparer(x => _armorSlotSelector(x.Record)),
                 },
                 145),
         ];
-    }
-
-    private static FuncDataTemplate<IReferencedRecord> CellTemplate(Func<IMajorRecordGetter, object?> selector) {
-        return new FuncDataTemplate<IReferencedRecord>((record, _) => new TextBlock {
-            Name = "CellTextBlock",
-            [!TextBlock.TextProperty] = record.WhenAnyValue(x => x.Record)
-                .Select(r => selector(r)?.ToString())
-                .ToBinding()
-        });
     }
 
     public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IArmorGetter));
