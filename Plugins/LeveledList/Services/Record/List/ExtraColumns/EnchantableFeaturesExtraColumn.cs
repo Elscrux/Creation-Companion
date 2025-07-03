@@ -6,14 +6,14 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
-public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
+public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvider) : ExtraColumns<IEnchantableGetter> {
     private readonly Func<IMajorRecordGetter, object?> _schoolOfMagicSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.SchoolOfMagic).Selector;
 
     private readonly Func<IMajorRecordGetter, object?> _enchantmentSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.Enchantment).Selector;
 
-    public IEnumerable<ExtraColumn> CreateColumns() {
+    public override IEnumerable<ExtraColumn> CreateColumns() {
         return [
             new ExtraColumn(
                 new DataGridTemplateColumn {
@@ -33,6 +33,4 @@ public sealed class EnchantableFeaturesExtraColumn(IFeatureProvider featureProvi
                 141),
         ];
     }
-
-    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IEnchantableGetter));
 }

@@ -6,11 +6,11 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
-public sealed class AmmunitionFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
+public sealed class AmmunitionFeaturesExtraColumn(IFeatureProvider featureProvider) : ExtraColumns<IAmmunitionGetter> {
     private readonly Func<IMajorRecordGetter, object?> _ammunitionTypeSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.AmmunitionType).Selector;
 
-    public IEnumerable<ExtraColumn> CreateColumns() {
+    public override IEnumerable<ExtraColumn> CreateColumns() {
         return [
             new ExtraColumn(
                 new DataGridTemplateColumn {
@@ -22,6 +22,4 @@ public sealed class AmmunitionFeaturesExtraColumn(IFeatureProvider featureProvid
                 146),
         ];
     }
-
-    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IAmmunitionGetter));
 }

@@ -6,14 +6,14 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
-public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) : IAutoAttachingExtraColumns {
+public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) : ExtraColumns<IArmorGetter> {
     private readonly Func<IMajorRecordGetter, object?> _armorTypeSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.ArmorType).Selector;
 
     private readonly Func<IMajorRecordGetter, object?> _armorSlotSelector =
         featureProvider.GetFeatureWildcard(FeatureProvider.ArmorSlot).Selector;
 
-    public IEnumerable<ExtraColumn> CreateColumns() {
+    public override IEnumerable<ExtraColumn> CreateColumns() {
         return [
             new ExtraColumn(
                 new DataGridTemplateColumn {
@@ -33,6 +33,4 @@ public sealed class ArmorFeaturesExtraColumn(IFeatureProvider featureProvider) :
                 145),
         ];
     }
-
-    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IArmorGetter));
 }

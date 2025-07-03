@@ -41,7 +41,7 @@ public class LeveledListModule : ExtensionModule {
             .SingleInstance();
 
         builder.RegisterAssemblyTypes(typeof(ArmorFeaturesExtraColumn).Assembly)
-            .As<IAutoAttachingExtraColumns>()
+            .As<IExtraColumns>()
             .SingleInstance();
     }
 }

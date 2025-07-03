@@ -11,8 +11,8 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Record.List.ExtraColumns;
 
-public sealed class TierExtraColumn(IRecordDecorationController recordDecorationController) : IAutoAttachingExtraColumns {
-    public IEnumerable<ExtraColumn> CreateColumns() {
+public sealed class TierExtraColumn(IRecordDecorationController recordDecorationController) : ExtraColumns<IItemGetter> {
+    public override IEnumerable<ExtraColumn> CreateColumns() {
         return [
             new ExtraColumn(
                 new DataGridTemplateColumn {
@@ -30,6 +30,4 @@ public sealed class TierExtraColumn(IRecordDecorationController recordDecoration
                 149),
         ];
     }
-
-    public bool CanAttachTo(Type type) => type.IsAssignableTo(typeof(IItemGetter));
 }
