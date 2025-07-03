@@ -141,6 +141,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<FormKeyStateIdentifier>()
             .As<IStateIdentifier<FormKey>>();
 
+        builder.RegisterType<FormLinkStateIdentifier>()
+            .As<IStateIdentifier<IFormLinkGetter>>();
+
         builder.RegisterType<ModScopeProviderVM>()
             .AsSelf()
             .As<IModScopeProvider>()
