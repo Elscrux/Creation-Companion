@@ -25,7 +25,7 @@ public class RecordTypeProvider(ITierController tierController) : IRecordTypePro
         };
     }
 
-    public ListRecordType GetListRecordType(IMajorRecordGetter record) {
+    public ListRecordType? GetListRecordType(IMajorRecordGetter record) {
         if (record is IArmorGetter) return ListRecordType.Armor;
         if (record is IWeaponGetter) return ListRecordType.Weapon;
         if (record is IAmmunitionGetter) return ListRecordType.Weapon; // Ammunition is treated as a weapon
@@ -36,7 +36,8 @@ public class RecordTypeProvider(ITierController tierController) : IRecordTypePro
         if (record is IBookGetter book) {
             return book.Teaches is IBookSpellGetter ? ListRecordType.SpellTome : ListRecordType.Staff;
         }
-        throw new ArgumentOutOfRangeException(nameof(record), record, "Unsupported record type for ListRecordType");
+
+        return null;
     }
 
     public IEnumerable<RecordWithTier> GetRecords(IModGetter mod, ListRecordType type) {

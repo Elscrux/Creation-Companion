@@ -61,10 +61,10 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
         if (context.SelectedRecords.Count == 0) return [];
 
         var listRecordType = _recordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
-        if (context.SelectedRecords.Any(r => _recordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
+        if (listRecordType is null || context.SelectedRecords.Any(r => _recordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
 
         const char separator = '/';
-        var tiers = _tierController.GetTiers(listRecordType);
+        var tiers = _tierController.GetTiers(listRecordType.Value);
         var tierGroup = new TierGroup(string.Empty, tiers, separator);
         return MenuItems(tierGroup, string.Empty);
 
