@@ -138,9 +138,6 @@ public sealed class MainModule : Module {
         builder.RegisterType<NamedGuidStateIdentifier>()
             .As<IStateIdentifier<NamedGuid>>();
 
-        builder.RegisterType<FormKeyStateIdentifier>()
-            .As<IStateIdentifier<FormKey>>();
-
         builder.RegisterType<FormLinkStateIdentifier>()
             .As<IStateIdentifier<IFormLinkGetter>>();
 

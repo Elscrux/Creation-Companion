@@ -229,9 +229,6 @@
         <Compile Update="Services\State\NamedGuidStateIdentifier.cs">
           <DependentUpon>IStateIdentifier.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\State\FormKeyStateIdentifier.cs">
-          <DependentUpon>IStateIdentifier.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\State\StateRepositoryFactory.cs">
           <DependentUpon>IStateRepositoryFactory.cs</DependentUpon>
         </Compile>
