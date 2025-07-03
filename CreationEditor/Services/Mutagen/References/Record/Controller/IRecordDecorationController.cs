@@ -5,10 +5,10 @@ namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 public interface IRecordDecorationController {
     void Register<TDecoration>() where TDecoration : class;
 
-    IReadOnlyDictionary<FormKey, TDecoration> GetAllDecorations<TDecoration>() where TDecoration : class ;
-    IObservable<TDecoration> GetObservable<TDecoration>(IFormKeyGetter formKeyGetter);
-    IEnumerable<object> GetAll(IFormKeyGetter formKeyGetter);
-    TDecoration? Get<TDecoration>(IFormKeyGetter formKeyGetter) where TDecoration : class;
-    void Update<TDecoration>(IFormKeyGetter formKeyGetter, TDecoration value) where TDecoration : class;
+    IReadOnlyDictionary<IFormLinkGetter, TDecoration> GetAllDecorations<TDecoration>() where TDecoration : class ;
+    IObservable<TDecoration> GetObservable<TDecoration>(IFormLinkGetter formLink);
+    IEnumerable<object> GetAll(IFormLinkGetter formLink);
+    TDecoration? Get<TDecoration>(IFormLinkGetter formLink) where TDecoration : class;
+    void Update<TDecoration>(IFormLinkGetter formLink, TDecoration value) where TDecoration : class;
     void Delete<TDecoration>(IMajorRecordGetter record) where TDecoration : class;
 }

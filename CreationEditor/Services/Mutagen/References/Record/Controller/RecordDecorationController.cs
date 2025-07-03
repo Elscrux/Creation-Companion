@@ -8,23 +8,23 @@ using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Record.Controller;
 
 public sealed class RecordDecorationController(ILifetimeScope lifetimeScope) : IRecordDecorationController {
-    private readonly Dictionary<string, IStateRepository<object, object, FormKey>> _decorationStateRepos = new();
-    private readonly Dictionary<FormKey, SourceCache<object, string>> _decorations = [];
+    private readonly Dictionary<string, IStateRepository<object, object, IFormLinkGetter>> _decorationStateRepos = new();
+    private readonly Dictionary<IFormLinkGetter, SourceCache<object, string>> _decorations = [];
 
     public void Register<TDecoration>()
         where TDecoration : class {
         var key = GetDecorationKey<TDecoration>();
         _decorationStateRepos.UpdateOrAdd(key,
             _ => {
-                var factory = lifetimeScope.Resolve<IStateRepositoryFactory<TDecoration, object, FormKey>>();
+                var factory = lifetimeScope.Resolve<IStateRepositoryFactory<TDecoration, object, IFormLinkGetter>>();
                 return factory.Create("CustomRecordData", key);
             });
     }
 
-    public IReadOnlyDictionary<FormKey, TDecoration> GetAllDecorations<TDecoration>()
+    public IReadOnlyDictionary<IFormLinkGetter, TDecoration> GetAllDecorations<TDecoration>()
         where TDecoration : class {
         if (!_decorationStateRepos.TryGetValue(GetDecorationKey<TDecoration>(), out var repo)) {
-            return new Dictionary<FormKey, TDecoration>();
+            return new Dictionary<IFormLinkGetter, TDecoration>();
         }
 
         return repo.LoadAllWithIdentifier()
@@ -34,9 +34,9 @@ public sealed class RecordDecorationController(ILifetimeScope lifetimeScope) : I
                 kvp => (kvp.Value as TDecoration)!);
     }
 
-    public IObservable<TDecoration> GetObservable<TDecoration>(IFormKeyGetter formKeyGetter) {
-        if (!_decorations.TryGetValue(formKeyGetter.FormKey, out var decoration)) {
-            decoration = CreateNewDecorations(formKeyGetter);
+    public IObservable<TDecoration> GetObservable<TDecoration>(IFormLinkGetter formLink) {
+        if (!_decorations.TryGetValue(formLink, out var decoration)) {
+            decoration = CreateNewDecorations(formLink);
         }
 
         return decoration
@@ -44,26 +44,26 @@ public sealed class RecordDecorationController(ILifetimeScope lifetimeScope) : I
             .OfType<TDecoration>();
     }
 
-    public IEnumerable<object> GetAll(IFormKeyGetter formKeyGetter) {
-        if (_decorations.TryGetValue(formKeyGetter.FormKey, out var decoration)) return decoration.Items;
+    public IEnumerable<object> GetAll(IFormLinkGetter formLink) {
+        if (_decorations.TryGetValue(formLink, out var decoration)) return decoration.Items;
 
-        var newDecoration = CreateNewDecorations(formKeyGetter);
+        var newDecoration = CreateNewDecorations(formLink);
         return newDecoration.Items;
     }
 
-    public TDecoration? Get<TDecoration>(IFormKeyGetter formKeyGetter)
+    public TDecoration? Get<TDecoration>(IFormLinkGetter formLink)
         where TDecoration : class {
         if (!_decorationStateRepos.TryGetValue(GetDecorationKey<TDecoration>(), out var repo)) return null;
 
-        var value = repo.Load(formKeyGetter.FormKey);
+        var value = repo.Load(formLink);
         return value as TDecoration;
     }
 
-    public void Update<TDecoration>(IFormKeyGetter formKeyGetter, TDecoration value)
+    public void Update<TDecoration>(IFormLinkGetter formLink, TDecoration value)
         where TDecoration : class {
         if (!_decorationStateRepos.TryGetValue(GetDecorationKey<TDecoration>(), out var repo)) return;
 
-        var formKey = formKeyGetter.FormKey;
+        var formKey = formLink;
         _decorations.GetOrAdd(formKey, _ => CreateNewDecorations(formKey)).AddOrUpdate(value);
         repo.Save(value, formKey);
     }
@@ -72,22 +72,22 @@ public sealed class RecordDecorationController(ILifetimeScope lifetimeScope) : I
         where TDecoration : class {
         if (!_decorationStateRepos.TryGetValue(GetDecorationKey<TDecoration>(), out var repo)) return;
 
-        var formKey = record.FormKey;
-        repo.Delete(formKey);
+        var formLink = record.ToFormLinkInformation();
+        repo.Delete(formLink);
 
-        if (_decorations.TryGetValue(formKey, out var decoration)) {
+        if (_decorations.TryGetValue(formLink, out var decoration)) {
             decoration.Remove(GetDecorationKey<TDecoration>());
         }
     }
 
-    private SourceCache<object, string> CreateNewDecorations(IFormKeyGetter formKeyGetter) {
+    private SourceCache<object, string> CreateNewDecorations(IFormLinkGetter formLink) {
         var items = _decorationStateRepos.Values
-            .Select(repo => repo.Load(formKeyGetter.FormKey))
+            .Select(repo => repo.Load(formLink))
             .WhereNotNull()
             .ToArray();
 
         var newDecoration = new SourceCache<object, string>(GetDecorationKey);
-        _decorations[formKeyGetter.FormKey] = newDecoration;
+        _decorations[formLink] = newDecoration;
         newDecoration.Edit(x => x.Load(items));
         return newDecoration;
     }
