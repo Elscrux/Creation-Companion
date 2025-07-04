@@ -12,6 +12,7 @@ public class LeveledListRecordTypeProvider(ITierController tierController) : ILe
         return type switch {
             ListRecordType.Armor => mod.EnumerateMajorRecords<IArmorGetter>(),
             ListRecordType.Weapon => mod.EnumerateMajorRecords<IWeaponGetter>()
+                .Where(w => w.Data is not { AnimationType: WeaponAnimationType.Staff })
                 .Concat<IMajorRecordGetter>(mod.EnumerateMajorRecords<IAmmunitionGetter>()),
             ListRecordType.Poison => mod.EnumerateMajorRecords<IIngestibleGetter>()
                 .Where(i => i.IsPoison()),
