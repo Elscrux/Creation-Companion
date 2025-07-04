@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
@@ -57,7 +58,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
         var cacheFile = GetCacheFile(source, cacheableQuery);
 
         // Read cache file
-        var cache = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
+        var cache = new ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>>();
         using var fileStream = fileSystem.File.OpenRead(cacheFile);
         using var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
@@ -82,7 +83,7 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
                     var assetType = assetTypeService.GetAssetTypeFromIdentifier(assetTypeString);
 
                     // Parse assets
-                    var assets = new Dictionary<IAssetLinkGetter, HashSet<TReference>>(AssetLinkEqualityComparer.Instance);
+                    var assets = new ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>(AssetLinkEqualityComparer.Instance);
                     var assetCount = reader.ReadInt32();
                     for (var j = 0; j < assetCount; j++) {
                         // Parse asset link
@@ -95,10 +96,10 @@ public sealed class BinaryAssetReferenceSerialization<TSource, TReference>(
                             .ReadReferences(reader, contextString, assetUsageCount)
                             .ToHashSet();
 
-                        assets.Add(assetLink, usages);
+                        assets.TryAdd(assetLink, usages);
                     }
 
-                    cache.Add(assetType, assets);
+                    cache.TryAdd(assetType, assets);
                 }
             } catch (Exception e) {
                 logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e.Message);

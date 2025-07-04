@@ -14,7 +14,7 @@ public interface IRecordReferenceCache {
             var modReferenceCache = GetModReferenceCache(modKey);
             if (modReferenceCache is null || !modReferenceCache.Cache.TryGetValue(formKey, out var references)) continue;
 
-            foreach (var reference in references) {
+            foreach (var reference in references.ToArray()) {
                 // Skip references that are overridden by another mod
                 var containingMod = modOrder.FirstOrDefault(m =>
                     GetModReferenceCache(m.ModKey) is {} cache
@@ -36,7 +36,7 @@ public interface IRecordReferenceCache {
         if (GetModReferenceCache(mod.ModKey) is not {} cache
          || !cache.Cache.TryGetValue(formKey, out var references)) yield break;
 
-        foreach (var reference in references) {
+        foreach (var reference in references.ToArray()) {
             yield return reference;
         }
     }
