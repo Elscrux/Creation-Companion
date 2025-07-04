@@ -154,7 +154,7 @@ public sealed class AssetController(
                 .Select(fileLink => {
                     var relativePath =
                         directoryLink.FileSystem.Path.GetRelativePath(directoryLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name, relativePath);
+                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
                     var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
                     return (fileLink, linkDestination);
                 })
