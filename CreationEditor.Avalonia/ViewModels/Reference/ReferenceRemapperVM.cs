@@ -78,7 +78,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
 
             IsRemapping = true;
             Task.Run(() => {
-                assetController.RemapReferences(FileSystemLink, fileSystemLink);
+                assetController.RemapFileReferences(FileSystemLink, fileSystemLink);
                 Dispatcher.UIThread.Post(() => IsRemapping = false);
             });
         });

@@ -34,11 +34,18 @@ public interface IAssetController {
     void Delete(FileSystemLink link, CancellationToken token = default);
 
     /// <summary>
-    /// Remap references to a file or directory to a new file or directory.
+    /// Remap references to a directory to a new directory.
     /// </summary>
-    /// <param name="oldLink">Link to the file or directory that should be remapped</param>
-    /// <param name="newLink">Link to the new file or directory</param>
-    void RemapReferences(FileSystemLink oldLink, FileSystemLink newLink);
+    /// <param name="oldLink">Link to the directory that should be remapped</param>
+    /// <param name="newLink">Link to the new directory</param>
+    void RemapDirectoryReferences(FileSystemLink oldLink, FileSystemLink newLink);
+
+    /// <summary>
+    /// Remap references to a file to a new file.
+    /// </summary>
+    /// <param name="oldLink">Link to the file that should be remapped</param>
+    /// <param name="newLink">Link to the new file</param>
+    void RemapFileReferences(FileSystemLink oldLink, FileSystemLink newLink);
 
     void Redo();
     void Undo();
