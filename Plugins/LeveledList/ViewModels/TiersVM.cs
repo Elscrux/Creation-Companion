@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia.Threading;
+using CreationEditor;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.ViewModels;
@@ -38,18 +40,22 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
         this.WhenAnyValue(x => x.SelectedTierType)
             .Select(tierController.GetTiers)
+            .ObserveOnTaskpool()
             .Subscribe(tiers => {
-                SelectedTier = null;
-                Tiers.Load(tiers
-                    .Select(tier => new TierItem { Identifier = tier }));
-
-                RecordListVM = GetRecordListVM();
+                var vm = GetRecordListVM();
+                Dispatcher.UIThread.Post(() => {
+                    SelectedTier = null;
+                    Tiers.Load(tiers.Select(tier => new TierItem { Identifier = tier }));
+                    RecordListVM = vm;
+                });
             })
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedTier)
+            .ObserveOnTaskpool()
             .Subscribe(_ => {
-                RecordListVM = GetRecordListVM();
+                var vm = GetRecordListVM();
+                Dispatcher.UIThread.Post(() => RecordListVM = vm);
             })
             .DisposeWith(this);
 
@@ -75,7 +81,10 @@ public sealed partial class TiersVM : ValidatableViewModel {
         });
 
         IRecordListVM GetRecordListVM() {
+            var tiers = tierController.GetTiers(SelectedTierType).ToHashSet();
+
             var records = tierController.GetAllRecordTiers()
+                .Where(x => tiers.Contains(x.Value.TierIdentifier))
                 .Where(x => linkCacheProvider.LinkCache.TryResolve(x.Key, out _));
 
             if (SelectedTier is not null) {
@@ -90,10 +99,10 @@ public sealed partial class TiersVM : ValidatableViewModel {
                 extraColumnsBuilder = extraColumnsBuilder.AddRecordType(recordType);
             }
 
-            return recordListVMBuilder
+            return Dispatcher.UIThread.Invoke(() => recordListVMBuilder
                 .WithExtraColumns(extraColumnsBuilder)
                 .BuildWithSource(formLinkInformation)
-                .DisposeWith(this);
+                .DisposeWith(this));
         }
     }
 }
