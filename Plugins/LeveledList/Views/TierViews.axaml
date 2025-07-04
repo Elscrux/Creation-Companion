@@ -67,6 +67,7 @@ Use the record browser to assign records to tiers.">
 
             <basic:LabeledContentControl
                 Grid.Row="0"
+                Margin="10, 0"
                 Header="View Tier Records">
                 <StackPanel Orientation="Horizontal"
                             Spacing="10">

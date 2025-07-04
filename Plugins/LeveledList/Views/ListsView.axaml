@@ -54,6 +54,7 @@
               RowDefinitions="Auto,10,*">
             <basic:LabeledContentControl
                 Grid.Row="0"
+                Margin="10, 0"
                 Header="Generation Preview">
                 <StackPanel Orientation="Horizontal"
                             Spacing="10">
