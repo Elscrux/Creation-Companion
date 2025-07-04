@@ -11,22 +11,22 @@ public partial class EnchantmentProvider(ILinkCacheProvider linkCacheProvider) {
     public int GetEnchantmentLevel(IMajorRecordGetter record) {
         switch (record) {
             case IEnchantableGetter enchantable:
-                if (enchantable.ObjectEffect.IsNull) return 0;
+                if (enchantable.ObjectEffect.IsNull) return -1;
 
                 var enchantment = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
-                if (enchantment is null) return 0;
+                if (enchantment is null) return -1;
 
                 var editorId = enchantment.EditorID;
-                if (editorId is null) return -1;
+                if (editorId is null) return 0;
 
                 var match = EnchantmentRegex.Match(editorId);
-                if (!match.Success) return -1;
+                if (!match.Success) return 0;
 
                 if (!int.TryParse(match.Value, out var level)) return -1;
 
                 return level;
             default:
-                return 0;
+                return -1;
         }
     }
 }

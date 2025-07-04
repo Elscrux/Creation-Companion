@@ -5,7 +5,7 @@ public record ListEntryDefinition(
     short Count = 1,
     int Amount = 1,
     short Interval = 0,
-    int EnchantmentLevel = 0
+    int EnchantmentLevel = -1
 ) {
     public ListEntryDefinition() : this(1) {}
 
