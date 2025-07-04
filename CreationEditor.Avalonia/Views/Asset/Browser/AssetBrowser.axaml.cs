@@ -168,7 +168,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
         var selectedItems = AssetTree.RowSelection!.SelectedItems;
 
-        if (!AssetTree.RowSelection!.SelectedItems.Contains(dataGridRow.Model)) {
+        if (!selectedItems.Contains(dataGridRow.Model)) {
             // We got an outdated selected items list - just use the current asset
             selectedItems = [dataGridRow.Model];
         }
