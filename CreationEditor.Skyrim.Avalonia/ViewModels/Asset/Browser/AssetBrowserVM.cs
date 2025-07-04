@@ -467,12 +467,24 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var assetReferences = new HashSet<DataRelativePath>();
 
         // Gather all references to all assets
-        foreach (var (_, dataRelativePath) in assets) {
-            var assetLink = AssetTypeService.GetAssetLink(dataRelativePath);
-            if (assetLink is null) continue;
+        foreach (var asset in assets) {
+            if (!asset.Exists()) continue;
 
-            assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
-            recordReferences.AddRange(_assetReferenceController.GetRecordReferences(assetLink));
+            if (asset.IsDirectory) {
+                foreach (var fileLink in asset.EnumerateFileLinks(true)) {
+                    AddReferences(fileLink);
+                }
+            } else {
+                AddReferences(asset);
+            }
+
+            void AddReferences(FileSystemLink link) {
+                var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
+                if (assetLink is null) return;
+
+                assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
+                recordReferences.AddRange(_assetReferenceController.GetRecordReferences(assetLink));
+            }
         }
 
         var references = assetReferences
