@@ -273,7 +273,10 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         var cache = GetCacheFor(fileLink);
         if (cache is null) return _ => {};
 
-        var before = cache.FindLinksToReference(fileLink.DataRelativePath).ToArray();
+        var dataRelativePath = fileLink.DataRelativePath;
+        var before = _nifDirectoryAssetReferenceCaches
+            .SelectMany(x => x.FindLinksToReference(dataRelativePath))
+            .ToArray();
 
         return newAsset => {
             var after = _nifFileAssetParser.ParseFile(newAsset).Select(result => result.AssetLink).ToArray();
@@ -303,15 +306,25 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterDeletion(FileSystemLink fileLink) {
-        var cache = GetCacheFor(fileLink);
-        if (cache is null) {
+        if (_nifDirectoryAssetReferenceCaches.Count == 0) {
             _assetDeletions.Enqueue(fileLink);
             return;
         }
 
-        ValidateAsset(fileLink);
+        var dataRelativePath = fileLink.DataRelativePath;
 
-        RemoveAssetReferences(cache, fileLink, _nifFileAssetParser.ParseFile(fileLink).Select(r => r.AssetLink));
+        foreach (var cache in _nifDirectoryAssetReferenceCaches) {
+            foreach (var value in cache.Cache.Values) {
+                foreach (var (link, references) in value) {
+                    lock (references) {
+                        if (references.Remove(dataRelativePath)) {
+                            var change = new Change<DataRelativePath>(ListChangeReason.Remove, dataRelativePath);
+                            _nifDirectoryAssetReferenceManager.Update(link, change);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void ValidateAsset(FileSystemLink fileLink) {
