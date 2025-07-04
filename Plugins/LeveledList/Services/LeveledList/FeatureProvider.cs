@@ -55,18 +55,33 @@ public sealed class FeatureProvider(
             SchoolOfMagic => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
-                    if (record is not IEnchantableGetter enchantable) return null;
+                    switch (record) {
+                        case IEnchantableGetter enchantable: {
+                            var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
+                            return objectEffect?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
+                        }
+                        case IBookGetter { Teaches: IBookSpellGetter bookSpell }: {
+                            var spell = bookSpell.Spell.TryResolve(linkCacheProvider.LinkCache);
+                            return spell?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
+                        }
+                        default: return null;
+                    }
 
-                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
-                    return objectEffect?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
                 }),
             MagicLevel => new FeatureWildcard(
                 featureWildcardIdentifier,
                 record => {
-                    if (record is not IEnchantableGetter enchantable) return null;
-
-                    var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
-                    return objectEffect?.GetMagicLevel(linkCacheProvider.LinkCache);
+                    switch (record) {
+                        case IEnchantableGetter enchantable: {
+                            var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
+                            return objectEffect?.GetMagicLevel(linkCacheProvider.LinkCache);
+                        }
+                        case IBookGetter { Teaches: IBookSpellGetter bookSpell }: {
+                            var spell = bookSpell.Spell.TryResolve(linkCacheProvider.LinkCache);
+                            return spell?.GetMagicLevel(linkCacheProvider.LinkCache);
+                        }
+                        default: return null;
+                    }
                 }),
             Enchantment => new FeatureWildcard(
                 featureWildcardIdentifier,
