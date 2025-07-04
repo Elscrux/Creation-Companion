@@ -1,23 +1,23 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraColumnsBuilder {
-    private readonly HashSet<ExtraColumn> _extraColumns = [];
+    private readonly HashSet<IUntypedExtraColumns> _extraColumns = [];
 
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
         _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
             .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumns)
-                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumns.SelectMany(c => c.CreateColumns()))
-                : TryGet<IEnumerable<ExtraColumn>>.Failure)
+                ? TryGet<IEnumerable<IUntypedExtraColumns>>.Succeed(extraColumns)
+                : TryGet<IEnumerable<IUntypedExtraColumns>>.Failure)
             .SelectMany(c => c));
 
         _extraColumns.AddRange(
             provider.AutoAttachingExtraColumnsCache
-                .Where(c => c.CanAttachTo(recordType))
-                .SelectMany(x => x.CreateColumns()));
+                .Where(c => c.CanAttachTo(recordType)));
 
         return this;
     }
@@ -29,7 +29,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IExtraColumnsBuilder AddColumnType(Type columnType) {
         if (Activator.CreateInstance(columnType) is IUntypedExtraColumns extraColumns) {
-            _extraColumns.AddRange(extraColumns.CreateColumns());
+            _extraColumns.Add(extraColumns);
         }
 
         return this;
@@ -42,6 +42,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IEnumerable<DataGridColumn> Build() {
         var finalColumns = _extraColumns
+            .SelectMany(c => Dispatcher.UIThread.Invoke(() => c.CreateColumns().ToArray()))
             .OrderByDescending(c => c.Priority)
             .Select(c => c.Column)
             .ToList();
