@@ -27,7 +27,11 @@ public class LeveledListRecordTypeProvider(ITierController tierController) : ILe
 
     public ListRecordType? GetListRecordType(IMajorRecordGetter record) {
         if (record is IArmorGetter) return ListRecordType.Armor;
-        if (record is IWeaponGetter) return ListRecordType.Weapon;
+        if (record is IWeaponGetter weapon) {
+            return weapon.Data is { AnimationType: WeaponAnimationType.Staff }
+                ? ListRecordType.Staff
+                : ListRecordType.Weapon;
+        }
         if (record is IAmmunitionGetter) return ListRecordType.Weapon; // Ammunition is treated as a weapon
         if (record is IIngestibleGetter ingestible) {
             if (ingestible.IsPoison()) return ListRecordType.Poison;
