@@ -6,6 +6,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
@@ -15,6 +16,7 @@ using CreationEditor.Services.Filter;
 using CreationEditor.Services.State;
 using DynamicData;
 using DynamicData.Binding;
+using FluentAvalonia.UI.Controls;
 using LeveledList.Model.List;
 using LeveledList.Resources;
 using LeveledList.Services.LeveledList;
@@ -30,6 +32,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IEditorEnvironment _editorEnvironment;
+    private readonly ITierController _tierController;
     private readonly LeveledListGenerator _generator;
 
     private readonly IObservableCollection<LeveledListTreeNode> _leveledLists = new ObservableCollectionExtended<LeveledListTreeNode>();
@@ -50,11 +53,13 @@ public sealed partial class ListsVM : ValidatableViewModel {
         IFileSystem fileSystem,
         IEditorEnvironment editorEnvironment,
         ISearchFilter searchFilter,
+        ITierController tierController,
         LeveledListGenerator generator) {
         ModPickerVM = modPickerVM;
         _logger = logger;
         _fileSystem = fileSystem;
         _editorEnvironment = editorEnvironment;
+        _tierController = tierController;
         _generator = generator;
 
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
@@ -174,6 +179,39 @@ public sealed partial class ListsVM : ValidatableViewModel {
             foreach (var (listName, list) in listTypeDefinition.Lists) {
                 yield return new ExtendedListDefinition(fileName, listTypeDefinition, listName, list);
             }
+        }
+    }
+
+    public void ContextMenu(object? sender, ContextRequestedEventArgs e) {
+        if (e.Source is not Control control) return;
+
+        var treeDataGrid = control.FindAncestorOfType<TreeDataGrid>();
+        if (treeDataGrid?.RowSelection is null) return;
+
+        var records = treeDataGrid.RowSelection.SelectedItems
+            .OfType<LeveledListTreeNode>()
+            .Select(x => x.Entry?.Item.Record)
+            .WhereNotNull()
+            .ToList();
+
+        if (records.Count > 0) {
+            var contextFlyout = new MenuFlyout {
+                Items = {
+                    new MenuItem {
+                        Header = "Remove from Tier",
+                        Icon = new SymbolIcon { Symbol = Symbol.Remove },
+                        Command = ReactiveCommand.Create(() => {
+                            foreach (var record in records) {
+                                _tierController.RemoveRecordTier(record);
+                            }
+
+                            UpdateListsShowcase(SelectedList, ModPickerVM.SelectedMod);
+                        })
+                    },
+                },
+            };
+
+            contextFlyout.ShowAt(control, true);
         }
     }
 }

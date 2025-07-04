@@ -71,8 +71,10 @@
 
             <Grid Grid.Row="2">
                 <TreeDataGrid
+                    ContextRequested="Control_OnContextRequested"
                     Height="{Binding $parent.Bounds.Height}"
-                    Source="{Binding LeveledListSource}"/>
+                    Source="{Binding LeveledListSource}">
+                </TreeDataGrid>
             </Grid>
         </Grid>
     </Grid>
