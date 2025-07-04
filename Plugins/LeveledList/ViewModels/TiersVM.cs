@@ -40,14 +40,11 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
         this.WhenAnyValue(x => x.SelectedTierType)
             .Select(tierController.GetTiers)
-            .ObserveOnTaskpool()
+            .ObserveOnGui()
             .Subscribe(tiers => {
-                var vm = GetRecordListVM();
-                Dispatcher.UIThread.Post(() => {
-                    SelectedTier = null;
-                    Tiers.Load(tiers.Select(tier => new TierItem { Identifier = tier }));
-                    RecordListVM = vm;
-                });
+                var tierItems = tiers.Select(tier => new TierItem { Identifier = tier }).ToArray();
+                SelectedTier = tierItems.FirstOrDefault();
+                Tiers.Load(tierItems);
             })
             .DisposeWith(this);
 
