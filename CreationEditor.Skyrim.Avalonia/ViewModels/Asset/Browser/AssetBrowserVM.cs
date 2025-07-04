@@ -869,6 +869,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+        _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
 
         var value = ItemsField.GetValue(childRows);
         if (value is not TreeDataGridItemsSourceView view) return;
@@ -884,6 +885,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (childRows.All(r => !Equals(r.Model, link))) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+        _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
 
         var value = ItemsField.GetValue(childRows);
         if (value is not TreeDataGridItemsSourceView view) return;
