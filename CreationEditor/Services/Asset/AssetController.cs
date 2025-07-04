@@ -149,11 +149,24 @@ public sealed class AssetController(
             var newDestinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name);
             destination = new FileSystemLink(destination.DataSource, newDestinationPath); 
 
+            var remaps = directoryLink
+                .EnumerateFileLinks(true)
+                .Select(fileLink => {
+                    var relativePath =
+                        directoryLink.FileSystem.Path.GetRelativePath(directoryLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
+                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name, relativePath);
+                    var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
+                    return (fileLink, linkDestination);
+                })
+                .ToArray();
+
             // Move the asset
             if (!FileSystemMove(directoryLink, destination, copy, innerToken)) return;
 
             if (doRemap) {
-                RemapDirectoryReferences(directoryLink, destination);
+                foreach (var (fileLink, linkDestination) in remaps) {
+                    RemapFileReferences(fileLink, linkDestination);
+                }
             }
         }
     }
