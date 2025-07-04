@@ -157,6 +157,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         linearNotifier.Stop();
+
+        _logger.Here().Information("Loaded Asset References for {Count} Mods", _modAssetCaches.Count);
     }
 
     private async Task InitNifDirectoryReferences(IReadOnlyList<FileSystemDataSource> fileSystemDataSources) {
@@ -188,6 +190,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         while (_assetDeletions.TryDequeue(out var asset)) RegisterDeletion(asset);
 
         linearNotifier.Stop();
+
+        _logger.Here().Information("Loaded Asset References for {Count} Directories", _nifDirectoryAssetReferenceCaches.Count);
     }
 
     private async Task InitNifArchiveReferences(IReadOnlyList<ArchiveDataSource> archiveDataSources) {
@@ -221,7 +225,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
         linearNotifier.Stop();
 
-        _logger.Here().Information("Loaded Nif References for {Count} Archives", _nifArchiveAssetCaches.Count);
+        _logger.Here().Information("Loaded Asset References for {Count} Archives", _nifArchiveAssetCaches.Count);
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
