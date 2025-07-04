@@ -162,6 +162,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         foreach (var file in _fileSystem.Directory.EnumerateFiles(directoryPath, "*.yaml", SearchOption.AllDirectories)) {
             var fileStream = _fileSystem.File.Open(file, FileMode.Open);
+            var fileName = _fileSystem.Path.GetFileNameWithoutExtension(file);
 
             ListTypeDefinition listTypeDefinition;
             try {
@@ -171,7 +172,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             }
 
             foreach (var (listName, list) in listTypeDefinition.Lists) {
-                yield return new ExtendedListDefinition(listTypeDefinition, listName, list);
+                yield return new ExtendedListDefinition(fileName, listTypeDefinition, listName, list);
             }
         }
     }
