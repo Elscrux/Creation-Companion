@@ -9,8 +9,8 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
         _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
-            .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumn)
-                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumn.CreateColumns())
+            .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumns)
+                ? TryGet<IEnumerable<ExtraColumn>>.Succeed(extraColumns.SelectMany(c => c.CreateColumns()))
                 : TryGet<IEnumerable<ExtraColumn>>.Failure)
             .SelectMany(c => c));
 
