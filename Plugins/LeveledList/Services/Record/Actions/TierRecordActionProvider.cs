@@ -1,11 +1,9 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.Actions;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace LeveledList.Services.Record.Actions;
@@ -17,7 +15,6 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
     private readonly ReactiveCommand<(RecordListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
 
     public TierRecordActionProvider(
-        IRecordDecorationController recordDecorationController,
         ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
         ITierController tierController) {
         _leveledListRecordTypeProvider = leveledListRecordTypeProvider;
@@ -25,7 +22,7 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
 
         _addToTierCommand = ReactiveCommand.Create<(RecordListContext Context, TierIdentifier Tier)>(x => {
             foreach (var record in x.Context.SelectedRecords) {
-                recordDecorationController.Update(record.Record.ToFormLinkInformation(), new Tier(x.Tier));
+                _tierController.SetRecordTier(record.Record, x.Tier);
             }
         });
 
