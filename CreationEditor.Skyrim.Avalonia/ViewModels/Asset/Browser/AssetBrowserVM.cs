@@ -414,7 +414,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private async Task AddAssetFolder(FileSystemLink dir) {
-        var textBox = new TextBox { Text = "New Folder" };
+        var textBox = new TextBox { Text = string.Empty, Watermark = "New folder" };
         var relativePath = dir.DataRelativePath.Path;
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
