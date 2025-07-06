@@ -22,36 +22,6 @@ public sealed class FeatureProvider(
     public const FeatureWildcardIdentifier ArmorType = "ArmorType";
     public const FeatureWildcardIdentifier AmmunitionType = "AmmunitionType";
 
-    public IEnumerable<FeatureWildcardIdentifier> GetApplicableFeatureWildcards(Type t) {
-        if (t.IsAssignableTo(typeof(IEnchantableGetter))) {
-            yield return SchoolOfMagic;
-            yield return MagicLevel;
-            yield return Enchantment;
-        }
-
-        if (t.IsAssignableTo(typeof(IBookGetter))) {
-            yield return SchoolOfMagic;
-            yield return MagicLevel;
-        }
-
-        if (t.IsAssignableTo(typeof(IWeaponGetter))) {
-            yield return WeaponType;
-        }
-
-        if (t.IsAssignableTo(typeof(IArmorGetter))) {
-            yield return ArmorSlot;
-            yield return ArmorType;
-        }
-
-        if (t.IsAssignableTo(typeof(IAmmunitionGetter))) {
-            yield return AmmunitionType;
-        }
-
-        if (t.IsAssignableTo(typeof(IMajorRecordGetter))) {
-            yield return Tier;
-        }
-    }
-
     public FeatureWildcard GetFeatureWildcard(FeatureWildcardIdentifier featureWildcardIdentifier) {
         return featureWildcardIdentifier switch {
             Tier => new FeatureWildcard(
