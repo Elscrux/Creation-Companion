@@ -30,7 +30,8 @@
             <basic:LabeledContentControl
                 Grid.Row="2"
                 Header="List Definitions">
-                <DataGrid 
+                <DataGrid
+                    x:Name="ListsDataGrid"
                     ItemsSource="{Binding ListTypeDefinitions}"
                     SelectedItem="{Binding SelectedList}"
                     Margin="5"
@@ -39,6 +40,13 @@
                     IsReadOnly="True"
                     GridLinesVisibility="None"
                     Classes="NoCellSelection">
+                    <DataGrid.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Open File"
+                                      Click="OpenFile"/>
+                        </MenuFlyout>
+                    </DataGrid.ContextFlyout>
+
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="File" Binding="{Binding FileName}"/>
                         <DataGridTextColumn Header="Type" Binding="{Binding TypeDefinition.Type}"/>
