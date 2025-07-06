@@ -21,6 +21,8 @@ public sealed class FeatureProvider(
     public const FeatureWildcardIdentifier ArmorSlot = "ArmorSlot";
     public const FeatureWildcardIdentifier ArmorType = "ArmorType";
     public const FeatureWildcardIdentifier AmmunitionType = "AmmunitionType";
+    public const FeatureWildcardIdentifier PotionType = "PotionType";
+    public const FeatureWildcardIdentifier PoisonType = "PoisonType";
 
     public FeatureWildcard GetFeatureWildcard(FeatureWildcardIdentifier featureWildcardIdentifier) {
         return featureWildcardIdentifier switch {
@@ -127,8 +129,23 @@ public sealed class FeatureProvider(
                         ? "arrow"
                         : "bolt";
                 }),
+            PotionType => new FeatureWildcard(
+                featureWildcardIdentifier,
+                GetFirstEffectName),
+            PoisonType => new FeatureWildcard(
+                featureWildcardIdentifier,
+                GetFirstEffectName),
             _ => throw new ArgumentOutOfRangeException(nameof(featureWildcardIdentifier), featureWildcardIdentifier, null)
         };
+    }
+
+    private string? GetFirstEffectName(IMajorRecordGetter record) {
+        if (record is not IIngestibleGetter { Effects.Count: > 0 } ingestible) return null;
+
+        var magicEffect = ingestible.Effects[0].BaseEffect.TryResolve(linkCacheProvider.LinkCache);
+        if (magicEffect is not { Name.String: {} magicEffectName }) return null;
+
+        return magicEffectName.Replace(" ", string.Empty);
     }
 
     private static string? GetByKeyword<T>(IMajorRecordGetter record, string prefix, ILinkCache linkCache)
