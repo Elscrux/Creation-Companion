@@ -8,7 +8,7 @@ public sealed record RecordAction(
     Func<RecordListContext, bool> IsVisible,
     int Priority,
     RecordActionGroup Group,
-    ReactiveCommand<RecordListContext, Unit> Command,
+    ReactiveCommand<RecordListContext, Unit>? Command,
     Func<RecordListContext, MenuItem> MenuItemFactory,
     Func<KeyGesture?>? HotKeyFactory = null,
     bool IsPrimary = false);

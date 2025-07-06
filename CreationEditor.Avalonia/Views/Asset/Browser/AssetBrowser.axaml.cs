@@ -166,9 +166,8 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         var dataGridRow = visual.FindAncestorOfType<TreeDataGridRow>();
         if (dataGridRow is null) return;
 
-        var selectedItems = AssetTree.RowSelection!.SelectedItems;
-
-        if (!AssetTree.RowSelection!.SelectedItems.Contains(dataGridRow.Model)) {
+        var selectedItems = AssetTree.RowSelection!.SelectedItems.ToHashSet();
+        if (!selectedItems.Contains(dataGridRow.Model)) {
             // We got an outdated selected items list - just use the current asset
             selectedItems = [dataGridRow.Model];
         }

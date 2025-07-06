@@ -4,7 +4,7 @@ using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Services.Mutagen.References.Record;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
-public class TypeExtraColumns : IUntypedExtraColumns {
+public sealed class TypeExtraColumns : IUntypedExtraColumns {
     public IEnumerable<ExtraColumn> CreateColumns() {
         yield return new ExtraColumn(
             new DataGridTextColumn {

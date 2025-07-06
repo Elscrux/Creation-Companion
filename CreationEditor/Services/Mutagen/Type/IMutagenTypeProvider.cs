@@ -13,6 +13,15 @@ public interface IMutagenTypeProvider {
     /// <param name="typeName">Name of the type</param>
     /// <returns>Type of name and game</returns>
     /// <exception cref="ArgumentException">Thrown when the type could not be found</exception>
+    System.Type GetType(ReadOnlySpan<char> gameName, ReadOnlySpan<char> typeName);
+
+    /// <summary>
+    /// Retrieve a mutagen type from a game name and type name
+    /// </summary>
+    /// <param name="gameName">Name of the game</param>
+    /// <param name="typeName">Name of the type</param>
+    /// <returns>Type of name and game</returns>
+    /// <exception cref="ArgumentException">Thrown when the type could not be found</exception>
     System.Type GetType(string gameName, string typeName);
 
     /// <summary>
@@ -37,6 +46,13 @@ public interface IMutagenTypeProvider {
     /// <param name="record">Record to retrieve the game name for</param>
     /// <returns>Game name of a record</returns>
     string GetGameName(IMajorRecordGetter record);
+
+    /// <summary>
+    /// Returns the game name of a record type
+    /// </summary>
+    /// <param name="recordType">Type of the record to retrieve the game name for</param>
+    /// <returns>Game name of a record type</returns>
+    string GetGameName(System.Type recordType);
 
     /// <summary>
     /// Returns the type name of a record

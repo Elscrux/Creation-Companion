@@ -41,7 +41,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
                 this.WhenAnyValue(x => x.Identifiers),
                 (linkCache, idents) => (LinkCache: linkCache, Identifiers: idents))
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(w => w.Do(x => {
+            .WrapInProgressMarker(w => w.Do(x => {
                     _referencesDisposable.Clear();
 
                     RecordCache.Clear();

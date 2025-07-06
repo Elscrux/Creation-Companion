@@ -65,7 +65,7 @@ public sealed class AssetController(
 
     private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, bool copy, CancellationToken token) {
         if (!origin.Exists()) {
-            // logger.Here().Warning("Cannot move {Path} because it does not exist", origin);
+            logger.Here().Warning("Cannot move {Path} because it does not exist", origin);
             return;
         }
 
@@ -132,7 +132,7 @@ public sealed class AssetController(
             if (!FileSystemMove(fileLink, newPath, copy, innerToken)) return;
 
             if (doRemap) {
-                RemapReferences(fileLink, newPath);
+                RemapFileReferences(fileLink, newPath);
             }
         }
 
@@ -149,30 +149,43 @@ public sealed class AssetController(
             var newDestinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name);
             destination = new FileSystemLink(destination.DataSource, newDestinationPath); 
 
+            var remaps = directoryLink
+                .EnumerateFileLinks(true)
+                .Select(fileLink => {
+                    var relativePath =
+                        directoryLink.FileSystem.Path.GetRelativePath(directoryLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
+                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
+                    var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
+                    return (fileLink, linkDestination);
+                })
+                .ToArray();
+
             // Move the asset
             if (!FileSystemMove(directoryLink, destination, copy, innerToken)) return;
 
             if (doRemap) {
-                RemapReferences(directoryLink, destination);
+                foreach (var (fileLink, linkDestination) in remaps) {
+                    RemapFileReferences(fileLink, linkDestination);
+                }
             }
         }
     }
 
-    public void RemapReferences(FileSystemLink oldLink, FileSystemLink newLink) {
-        if (oldLink.IsDirectory && oldLink.Exists()) {
-            foreach (var fileLink in oldLink.EnumerateFileLinks(true)) {
-                var relativePath = oldLink.FileSystem.Path.GetRelativePath(oldLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-                var destinationPath = newLink.FileSystem.Path.Combine(newLink.DataRelativePath.Path, oldLink.Name, relativePath);
-                var linkDestination = new FileSystemLink(newLink.DataSource, destinationPath);
-                RemapReferences(fileLink, linkDestination);
-            }
-        } else {
-            // Remap references in records
-            RemapRecordReferences(oldLink, newLink);
-
-            // Remap references in NIFs
-            RemapAssetReferences(oldLink, newLink);
+    public void RemapDirectoryReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+        foreach (var fileLink in oldLink.EnumerateFileLinks(true)) {
+            var relativePath = oldLink.FileSystem.Path.GetRelativePath(oldLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
+            var destinationPath = newLink.FileSystem.Path.Combine(newLink.DataRelativePath.Path, oldLink.Name, relativePath);
+            var linkDestination = new FileSystemLink(newLink.DataSource, destinationPath);
+            RemapFileReferences(fileLink, linkDestination);
         }
+    }
+
+    public void RemapFileReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+        // Remap references in records
+        RemapRecordReferences(oldLink, newLink);
+
+        // Remap references in NIFs
+        RemapAssetReferences(oldLink, newLink);
     }
 
     private void RemapAssetReferences(FileSystemLink oldLink, FileSystemLink newLink) {

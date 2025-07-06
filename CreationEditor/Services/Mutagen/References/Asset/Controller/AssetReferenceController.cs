@@ -157,6 +157,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         while (_recordDeletions.TryDequeue(out var record)) RegisterDeletion(record);
 
         linearNotifier.Stop();
+
+        _logger.Here().Information("Loaded Asset References for {Count} Mods", _modAssetCaches.Count);
     }
 
     private async Task InitNifDirectoryReferences(IReadOnlyList<FileSystemDataSource> fileSystemDataSources) {
@@ -188,6 +190,8 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         while (_assetDeletions.TryDequeue(out var asset)) RegisterDeletion(asset);
 
         linearNotifier.Stop();
+
+        _logger.Here().Information("Loaded Asset References for {Count} Directories", _nifDirectoryAssetReferenceCaches.Count);
     }
 
     private async Task InitNifArchiveReferences(IReadOnlyList<ArchiveDataSource> archiveDataSources) {
@@ -221,7 +225,7 @@ public sealed class AssetReferenceController : IAssetReferenceController {
 
         linearNotifier.Stop();
 
-        _logger.Here().Information("Loaded Nif References for {Count} Archives", _nifArchiveAssetCaches.Count);
+        _logger.Here().Information("Loaded Asset References for {Count} Archives", _nifArchiveAssetCaches.Count);
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
@@ -269,7 +273,10 @@ public sealed class AssetReferenceController : IAssetReferenceController {
         var cache = GetCacheFor(fileLink);
         if (cache is null) return _ => {};
 
-        var before = cache.FindLinksToReference(fileLink.DataRelativePath).ToArray();
+        var dataRelativePath = fileLink.DataRelativePath;
+        var before = _nifDirectoryAssetReferenceCaches
+            .SelectMany(x => x.FindLinksToReference(dataRelativePath))
+            .ToArray();
 
         return newAsset => {
             var after = _nifFileAssetParser.ParseFile(newAsset).Select(result => result.AssetLink).ToArray();
@@ -299,15 +306,25 @@ public sealed class AssetReferenceController : IAssetReferenceController {
     }
 
     public void RegisterDeletion(FileSystemLink fileLink) {
-        var cache = GetCacheFor(fileLink);
-        if (cache is null) {
+        if (_nifDirectoryAssetReferenceCaches.Count == 0) {
             _assetDeletions.Enqueue(fileLink);
             return;
         }
 
-        ValidateAsset(fileLink);
+        var dataRelativePath = fileLink.DataRelativePath;
 
-        RemoveAssetReferences(cache, fileLink, _nifFileAssetParser.ParseFile(fileLink).Select(r => r.AssetLink));
+        foreach (var cache in _nifDirectoryAssetReferenceCaches) {
+            foreach (var value in cache.Cache.Values) {
+                foreach (var (link, references) in value) {
+                    lock (references) {
+                        if (references.Remove(dataRelativePath)) {
+                            var change = new Change<DataRelativePath>(ListChangeReason.Remove, dataRelativePath);
+                            _nifDirectoryAssetReferenceManager.Update(link, change);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void ValidateAsset(FileSystemLink fileLink) {

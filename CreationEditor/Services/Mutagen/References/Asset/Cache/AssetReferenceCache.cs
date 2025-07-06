@@ -1,7 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
-using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Asset.Cache;
 
 public sealed class AssetReferenceCache<TSource, TReference>
@@ -12,18 +11,17 @@ public sealed class AssetReferenceCache<TSource, TReference>
     /// <summary>
     /// Asset for all asset types mapped to a list of their usages
     /// </summary>
-    public Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>> Cache { get; }
+    public ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> Cache { get; }
 
     internal AssetReferenceCache(
         TSource source,
-        Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>> cache) {
+        ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> cache) {
         Source = source;
         Cache = cache;
     }
 
     public IEnumerable<IAssetLinkGetter> GetAssets(IAssetType assetType) {
         if (!Cache.TryGetValue(assetType, out var assetDictionary)) yield break;
-
         foreach (var asset in assetDictionary.Keys) {
             yield return asset;
         }
@@ -52,37 +50,36 @@ public sealed class AssetReferenceCache<TSource, TReference>
     }
 
     public bool RemoveReference(IAssetLinkGetter asset, TReference oldReference) {
-        if (!TryGetReferences(asset, out var references)) return false;
+        if (!Cache.TryGetValue(asset.Type, out var assetDictionary)) return false;
+        if (!assetDictionary.TryGetValue(asset, out var references)) return false;
 
-        var removed = references.Remove(oldReference);
+        bool removed;
+        lock (references) {
+            removed = references.Remove(oldReference);
+        }
         if (references.Count == 0) {
-            Cache[asset.Type].Remove(asset);
+            Cache[asset.Type].TryRemove(asset, out _);
         }
 
         return removed;
     }
 
     public bool AddReference(IAssetLinkGetter asset, TReference newReference) {
-        var assetDictionary = Cache.GetOrAdd(asset.Type);
-        var references = assetDictionary.GetOrAdd(asset);
-        return references.Add(newReference);
-    }
-
-    private bool TryGetReferences(IAssetLinkGetter asset, [MaybeNullWhen(false)] out HashSet<TReference> references) {
-        if (!Cache.TryGetValue(asset.Type, out var assetDictionary)) {
-            references = null;
-            return false;
+        var assetDictionary = Cache.GetOrAdd(asset.Type, _ => new ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>());
+        var references = assetDictionary.GetOrAdd(asset, _ => []);
+        lock (references) {
+            return references.Add(newReference);
         }
-
-        references = assetDictionary.GetOrAdd(asset);
-
-        return true;
     }
 
     public IEnumerable<IAssetLinkGetter> FindLinksToReference(TReference reference) {
         foreach (var assetDictionary in Cache.Values) {
             foreach (var (assetLink, references) in assetDictionary) {
-                if (references.Contains(reference)) {
+                bool contains;
+                lock (references) {
+                    contains = references.Contains(reference);
+                }
+                if (contains) {
                     yield return assetLink;
                 }
             }

@@ -36,7 +36,7 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
         Records = RecordProvider.RecordCache
             .Connect()
             .SubscribeOn(RxApp.TaskpoolScheduler)
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => {
                     var observable = x.Filter(RecordProvider.Filter, false);
                     if (customFilter is not null) observable = observable.Filter(customFilter);
@@ -48,19 +48,12 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
         IsBusy = isFiltering
             .CombineLatest(
                 RecordProvider.IsBusy,
-                (filtering, busy) => (Filtering: filtering, Busy: busy))
-            .ObserveOnGui()
-            .Select(list => list.Filtering || list.Busy);
+                (filtering, busy) => filtering || busy)
+            .ObserveOnGui();
 
         PrimaryCommand = ReactiveCommand.Create<RecordListContext>(context => {
             RecordContextMenuProvider.ExecutePrimary(context);
         });
-    }
-
-    public IEnumerable<object> GetContextMenuItems(IReadOnlyList<IReferencedRecord> referencedRecords) {
-        var recordListContext = GetRecordListContext(referencedRecords);
-
-        return RecordContextMenuProvider.GetMenuItems(recordListContext);
     }
 
     public RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {

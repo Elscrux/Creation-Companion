@@ -229,7 +229,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     GetFilteredFileSystemChildren,
                     link => link.IsDirectory),
                 new TemplateColumn<FileSystemLink>(
-                    "Count",
+                    "References",
                     new FuncDataTemplate<FileSystemLink>((asset, _) => {
                         if (asset is null) return null;
 
@@ -237,7 +237,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (assetLink is null) return null;
 
                         var referenceCount = assetReferenceController.GetReferenceCount(assetLink);
-                        return new TextBlock { Text = referenceCount.ToString() };
+                        return new TextBlock { Text = referenceCount.ToString(), VerticalAlignment = VerticalAlignment.Center};
                     }),
                     null,
                     new GridLength(),
@@ -268,6 +268,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         return new SymbolIcon {
                             Symbol = Symbol.ImportantFilled,
                             Foreground = StandardBrushes.InvalidBrush,
+                            VerticalAlignment = VerticalAlignment.Center,
                             [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath.Path)),
                         };
                     })),
@@ -414,7 +415,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private async Task AddAssetFolder(FileSystemLink dir) {
-        var textBox = new TextBox { Text = "New Folder" };
+        var textBox = new TextBox { Text = string.Empty, Watermark = "New folder" };
         var relativePath = dir.DataRelativePath.Path;
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
@@ -467,12 +468,24 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var assetReferences = new HashSet<DataRelativePath>();
 
         // Gather all references to all assets
-        foreach (var (_, dataRelativePath) in assets) {
-            var assetLink = AssetTypeService.GetAssetLink(dataRelativePath);
-            if (assetLink is null) continue;
+        foreach (var asset in assets) {
+            if (!asset.Exists()) continue;
 
-            assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
-            recordReferences.AddRange(_assetReferenceController.GetRecordReferences(assetLink));
+            if (asset.IsDirectory) {
+                foreach (var fileLink in asset.EnumerateFileLinks(true)) {
+                    AddReferences(fileLink);
+                }
+            } else {
+                AddReferences(asset);
+            }
+
+            void AddReferences(FileSystemLink link) {
+                var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
+                if (assetLink is null) return;
+
+                assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
+                recordReferences.AddRange(_assetReferenceController.GetRecordReferences(assetLink));
+            }
         }
 
         var references = assetReferences
@@ -564,9 +577,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     public IEnumerable<Control> GetContextMenuItems(FileSystemLink asset) {
-        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems;
-
-        if (!AssetTreeSource.RowSelection!.SelectedItems.Contains(asset)) {
+        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems.ToArray();
+        if (!selectedItems.Contains(asset)) {
             // We got an outdated selected items list - just use the current asset
             selectedItems = [asset];
         }
@@ -857,6 +869,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+        _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
 
         var value = ItemsField.GetValue(childRows);
         if (value is not TreeDataGridItemsSourceView view) return;
@@ -872,6 +885,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (childRows.All(r => !Equals(r.Model, link))) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+        _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
 
         var value = ItemsField.GetValue(childRows);
         if (value is not TreeDataGridItemsSourceView view) return;

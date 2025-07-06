@@ -27,5 +27,5 @@ public sealed class SearchPlugin<TMod, TModGetter>(
 
     public Control GetControl() => new TextSearchView(textSearchVMFactory());
 
-    public object GetIcon() => new SymbolIcon { Symbol = Symbol.Find };
+    public object GetIcon() => new FontIcon { Glyph = "🔍" };
 }

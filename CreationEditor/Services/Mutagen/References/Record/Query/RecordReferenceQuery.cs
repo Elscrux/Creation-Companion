@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.Mod;
@@ -141,7 +142,7 @@ public sealed class RecordReferenceQuery(
     /// <returns>reference cache of mod</returns>
     public ModReferenceCache BuildReferenceCache(IModGetter mod) {
         // Fill modCache
-        var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>();
+        var modCache = new ConcurrentDictionary<FormKey, HashSet<IFormLinkIdentifier>>();
         var records = new HashSet<FormKey>();
 
         using (var counter = new CountingNotifier(notificationService, "Parsing Records", (int) modInfoProvider.GetRecordCount(mod))) {
@@ -220,7 +221,7 @@ public sealed class RecordReferenceQuery(
 
             // Read references
             var formCount = reader.ReadInt32();
-            var modCache = new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(formCount);
+            var modCache = new ConcurrentDictionary<FormKey, HashSet<IFormLinkIdentifier>>();
             using (var counter = new CountingNotifier(notificationService, "Reading Cache", formCount)) {
                 for (var i = 0; i < formCount; i++) {
                     counter.NextStep();
@@ -234,7 +235,7 @@ public sealed class RecordReferenceQuery(
                         references.Add(new FormLinkInformation(referenceFormKey, type));
                     }
 
-                    modCache.Add(formKey, references);
+                    modCache.TryAdd(formKey, references);
                 }
             }
 

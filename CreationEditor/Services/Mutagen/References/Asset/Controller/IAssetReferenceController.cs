@@ -21,21 +21,21 @@ public interface IAssetReferenceController : IReferenceController<RecordModPair>
     /// <summary>
     /// Get the record references for this asset at the current time.
     /// </summary>
-    /// <param name="assetLink">Asset link to get referenced asset version of</param>
+    /// <param name="assetLink">Asset link to get references for</param>
     /// <returns>Record references for this asset</returns>
     IEnumerable<IFormLinkIdentifier> GetRecordReferences(IAssetLinkGetter assetLink);
 
     /// <summary>
     /// Get the asset references for this asset at the current time.
     /// </summary>
-    /// <param name="assetLink">Asset link to get referenced asset version of</param>
+    /// <param name="assetLink">Asset link to get references for</param>
     /// <returns>Asset references for this asset</returns>
     IEnumerable<DataRelativePath> GetAssetReferences(IAssetLinkGetter assetLink);
 
     /// <summary>
     /// Gets the number of references for this asset at the current time.
     /// </summary>
-    /// <param name="assetLink">Asset link to get referenced asset version of</param>
+    /// <param name="assetLink">Asset link to get reference count for</param>
     /// <returns>Number of references for this asset</returns>   
     int GetReferenceCount(IAssetLinkGetter assetLink);
 

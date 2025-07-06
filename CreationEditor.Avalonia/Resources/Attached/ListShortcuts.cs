@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Avalonia;
@@ -116,7 +117,10 @@ public sealed class ListShortcuts : AvaloniaObject {
 
             addButton.IsVisible = true;
             addButton.Command = args.NewValue.GetValueOrDefault();
-            addButton[!Button.CommandParameterProperty] = c.GetObservable(AddParameterProperty).ToBinding();
+            addButton[!Button.CommandParameterProperty] = c.GetObservable(AddParameterProperty)
+                .Select(x => x as IObservable<object> ?? Observable.Return(x))
+                .Switch()
+                .ToBinding();
         }
     }
 
@@ -130,11 +134,11 @@ public sealed class ListShortcuts : AvaloniaObject {
                 },
                 Content = new SymbolIcon { Symbol = Symbol.Delete },
                 Foreground = Brushes.Red,
+                Padding = new Thickness(0),
                 Classes = { "Transparent" },
                 Command = command,
                 CommandParameter = new ArrayList { o },
-                HorizontalAlignment = HorizontalAlignment.Left,
-                HorizontalContentAlignment = HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Center,
             }
             : null);
     }
@@ -189,11 +193,12 @@ public sealed class ListShortcuts : AvaloniaObject {
 
         // Add key bindings
         if (newCommand is not null) {
-            control.KeyBindings.Add(new KeyBinding {
+            var item = new KeyBinding {
                 Command = newCommand,
                 Gesture = gesture,
-                CommandParameter = parameter!,
-            });
+            };
+            item.Bind(KeyBinding.CommandParameterProperty, parameter);
+            control.KeyBindings.Add(item);
         } else {
             control.KeyBindings.RemoveWhere(keyBinding => ReferenceEquals(keyBinding.Gesture, gesture));
         }
@@ -213,12 +218,13 @@ public sealed class ListShortcuts : AvaloniaObject {
             if (list.OfType<MenuItem>().Any(x => x.Command == newCommand)) return;
 
             if (newCommand is not null) {
-                list.Add(new MenuItem {
+                var menuItem = new MenuItem {
                     Icon = new SymbolIcon { Symbol = menuIcon },
                     Header = header,
                     Command = newCommand,
-                    CommandParameter = parameter,
-                });
+                };
+                menuItem.Bind(MenuItem.CommandParameterProperty, parameter);
+                list.Add(menuItem);
             } else {
                 for (var i = list.Count - 1; i >= 0; i--) {
                     if (list[i] is MenuItem menuItem && ReferenceEquals(menuItem.Header, header)) {

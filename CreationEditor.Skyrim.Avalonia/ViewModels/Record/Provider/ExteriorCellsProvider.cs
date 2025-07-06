@@ -46,7 +46,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
                 (linkCache, worldspaceFormKey) => (LinkCache: linkCache, WorldspaceFormKey: worldspaceFormKey))
             .ThrottleMedium()
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => x.Do(y => {
                     _referencesDisposable.Clear();
 

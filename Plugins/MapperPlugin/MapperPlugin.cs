@@ -2,7 +2,6 @@
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using FluentAvalonia.UI.Controls;
-using HarfBuzzSharp;
 using MapperPlugin.ViewModels;
 using MapperPlugin.Views;
 using Mutagen.Bethesda.Skyrim;
@@ -18,5 +17,5 @@ public sealed class MapperPlugin(
     public Control GetControl() => new MapperView(mapperVM());
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new FontIcon { Glyph = "🗺️" };
+    public object GetIcon() => new FontIcon { Glyph = "🗺️️" };
 }

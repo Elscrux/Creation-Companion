@@ -1,10 +1,7 @@
 ﻿using System.Reactive.Disposables;
-using Avalonia.Data.Converters;
 using Avalonia.ReactiveUI;
-using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.ViewModels.Query;
 using CreationEditor.Services.Query.From;
-using CreationEditor.Services.Query.Select;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Query;
 

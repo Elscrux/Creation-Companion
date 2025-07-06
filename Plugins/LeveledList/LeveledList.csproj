@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\CreationEditor.Skyrim.Avalonia\CreationEditor.Skyrim.Avalonia.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\Record\List\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Services\LeveledList\FeatureProvider.cs">
+        <DependentUpon>IFeatureProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\LeveledList\TierController.cs">
+        <DependentUpon>ITierController.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\LeveledListRecordTypeProvider.cs">
+        <DependentUpon>ILeveledListRecordTypeProvider.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins"/>
+    </Target>
+
+</Project>

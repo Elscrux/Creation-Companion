@@ -12,7 +12,7 @@ public class IconFolderPicker : AFolderPicker {
     public const string DropButton = "PART_DropButton";
 
     public static readonly StyledProperty<bool> ShowIconProperty
-        = AvaloniaProperty.Register<IconFolderPicker, bool>(nameof(ShowIcon));
+        = AvaloniaProperty.Register<IconFolderPicker, bool>(nameof(ShowIcon), true);
 
     public bool ShowIcon {
         get => GetValue(ShowIconProperty);

@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Asset;
+﻿using System.Collections.Concurrent;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Asset.Query;
 using Mutagen.Bethesda.Assets;
@@ -32,7 +33,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             cache = await TryParseCache(cacheable);
         } else {
             // Parse assets
-            var parseDictionary = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
+            var parseDictionary = new ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>>();
             ParseSource(source, parseDictionary);
             cache = new AssetReferenceCache<TSource, TReference>(source, parseDictionary);
         }
@@ -42,7 +43,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
         query.AssetCaches.Add(source, cache);
         return cache;
 
-        void ParseSource(TSource s, IDictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>> dict) {
+        void ParseSource(TSource s, ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> dict) {
             foreach (var result in query.ParseAssets(s)) {
                 var typeCache = dict.GetOrAdd(result.AssetLink.Type, CreateNewEntry);
                 var references = typeCache.GetOrAdd(result.AssetLink);
@@ -50,7 +51,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             }
         }
 
-        Dictionary<IAssetLinkGetter, HashSet<TReference>> CreateNewEntry() => new(AssetLinkEqualityComparer.Instance);
+        ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>> CreateNewEntry() => new(AssetLinkEqualityComparer.Instance);
 
         async Task<AssetReferenceCache<TSource, TReference>> TryParseCache(
             IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
@@ -81,7 +82,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
         }
 
         AssetReferenceCache<TSource, TReference> FullyParseCache(IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
-            var parseDictionary = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
+            var parseDictionary = new ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>>();
             ParseSource(source, parseDictionary);
             cache = new AssetReferenceCache<TSource, TReference>(source, parseDictionary);
             assetReferenceCacheableQuery.Serialization.Serialize(source, assetReferenceCacheableQuery, cache);
@@ -135,7 +136,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
             Task<AssetReferenceCache<TSource, TReference>> deserializationTask,
             IAssetReferenceCacheableQuery<TSource, TReference> assetReferenceCacheableQuery) {
 
-            var newParseCache = new Dictionary<IAssetType, Dictionary<IAssetLinkGetter, HashSet<TReference>>>();
+            var newParseCache = new ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>>();
             var parseTask = Task.Run(() => {
                 foreach (var invalidatedContent in validationResult.InvalidatedContent) {
                     var newSource = query.ReferenceToSource(invalidatedContent);
@@ -153,7 +154,7 @@ public sealed class AssetReferenceCacheBuilder(ILogger logger) {
                 foreach (var (assetLink, references) in assetReferences) {
                     references.ExceptWith(validationResult.InvalidatedContent);
                     if (references.Count == 0) {
-                        assetReferences.Remove(assetLink);
+                        assetReferences.TryRemove(assetLink, out _);
                     }
                 }
             }

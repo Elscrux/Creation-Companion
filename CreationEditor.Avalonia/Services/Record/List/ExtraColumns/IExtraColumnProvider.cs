@@ -5,5 +5,10 @@ public interface IExtraColumnProvider {
     /// <summary>
     /// Extra columns per type
     /// </summary>
-    IReadOnlyDictionary<Type, IExtraColumns> ExtraColumnsCache { get; }
+    Dictionary<Type, List<IExtraColumns>> ExtraColumnsCache { get; }
+
+    /// <summary>
+    /// Extra columns that are automatically attached if a function evaluates to true.
+    /// </summary>
+    IReadOnlyList<IConditionalExtraColumns> AutoAttachingExtraColumnsCache { get; }
 }

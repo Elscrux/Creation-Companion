@@ -12,34 +12,47 @@ public sealed class MutableRecordReferenceCache(
     private readonly ConcurrentDictionary<ModKey, ModReferenceCache> _mutableModReferenceCaches = new(mutableModReferenceCaches);
 
     public bool AddRecord(IMod mod, IMajorRecordGetter record) {
-        return _mutableModReferenceCaches[mod.ModKey].FormKeys.Add(record.FormKey);
+        var formKeys = _mutableModReferenceCaches[mod.ModKey].FormKeys;
+        lock (formKeys) {
+            return formKeys.Add(record.FormKey);
+        }
     }
 
     public bool RemoveReference(IMod mod, FormKey formKey, IFormLinkIdentifier oldReference) {
         // when the record was not part of the MUTABLE MOD before we need to reevaluate all old form from the other one too  
 
-        return _mutableModReferenceCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)
-         && references.Remove(oldReference);
+        if (!_mutableModReferenceCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)) return false;
+
+        lock (references) { 
+            return references.Remove(oldReference);
+        }
     }
 
     public void RemoveReferences(IMod mod, FormKey formKey, IEnumerable<IFormLinkIdentifier> oldReferences) {
         if (!_mutableModReferenceCaches[mod.ModKey].Cache.TryGetValue(formKey, out var references)) return;
 
-        foreach (var oldReference in oldReferences) {
-            references.Remove(oldReference);
+        lock (references) {
+            foreach (var oldReference in oldReferences) {
+                references.Remove(oldReference);
+            }
         }
     }
 
     public bool AddReference(IMod mod, FormKey formKey, IFormLinkIdentifier newReference) {
         var references = _mutableModReferenceCaches[mod.ModKey].Cache.GetOrAdd(formKey);
 
-        return references.Add(newReference);
+        lock (references) {
+            return references.Add(newReference);
+        }
     }
 
     public void AddReferences(IMod mod, FormKey formKey, IEnumerable<IFormLinkIdentifier> newReferences) {
         var references = _mutableModReferenceCaches[mod.ModKey].Cache.GetOrAdd(formKey);
-        foreach (var newReference in newReferences) {
-            references.Add(newReference);
+
+        lock (references) {
+            foreach (var newReference in newReferences) {
+                references.Add(newReference);
+            }
         }
     }
 

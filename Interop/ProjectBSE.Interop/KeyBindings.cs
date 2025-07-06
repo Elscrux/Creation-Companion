@@ -19,13 +19,17 @@ public static partial class Interop {
 
     [LibraryImport(DllName, EntryPoint = "getKeybindings")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial void GetKeyBindings_Native(ref KeyBindings bindings);
-    public static KeyBindings GetKeyBindings() {
-        var bindings = new KeyBindings {
-            BindingList = new IOFunctionBinding[IOFunctionCount]
-        };
-        GetKeyBindings_Native(ref bindings);
-        return bindings;
+    private static partial void GetKeyBindings_Native(IntPtr bindings);
+    public static IOFunctionBinding[] GetKeyBindings() {
+        var x = new IOFunctionBinding[IOFunctionCount];
+        var y = new IOFunctionBinding();
+        var unmanagedMemory = x.ToUnmanagedMemory();
+        // var bindings = new KeyBindings {
+        //     BindingList = new IOFunctionBinding[IOFunctionCount]
+        // };
+        GetKeyBindings_Native(unmanagedMemory);
+        var ioFunctionBindings = unmanagedMemory.ToArray<IOFunctionBinding>(19);
+        return x;
     }
 
     [LibraryImport(DllName, EntryPoint = "enumerateKeyBindingNames", StringMarshalling = StringMarshalling.Utf8)]
@@ -44,6 +48,8 @@ public static partial class Interop {
         Scroll,
         None,
     }
+
+    private const int IOFunctionCountConst = 19;
 
     /// <summary>
     /// Represents the different input/output functions that can be bound to keys or mouse actions.

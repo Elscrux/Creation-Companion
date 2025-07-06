@@ -6,7 +6,6 @@ using CreationEditor.Skyrim.Tests.AutoData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Tests.Test;
 

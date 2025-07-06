@@ -1,0 +1,111 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
+             xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder;assembly=CreationEditor.Avalonia"
+             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="LeveledList.Views.ListsView"
+             x:DataType="viewModels:ListsVM">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition MinWidth="200"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid RowDefinitions="Auto,10,*"
+            Grid.Column="0">
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal">
+                <folder:TextFolderPicker
+                    x:Name="FolderPicker"
+                    Watermark="Select Leveled List Folder"
+                    MinWidth="250"
+                    HorizontalAlignment="Left"
+                    FolderPath="{Binding LeveledListFolderPath, Mode=TwoWay}"
+                    Margin="5"/>
+
+                <Button Command="{Binding ReloadLists}"
+                        IsVisible="{Binding LeveledListFolderPath, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <controls:SymbolIcon
+                        Symbol="Refresh"/>
+                </Button>
+            </StackPanel>
+
+            <basic:LabeledContentControl
+                Grid.Row="2"
+                Header="List Definitions">
+                <DataGrid
+                    x:Name="ListsDataGrid"
+                    ItemsSource="{Binding ListTypeDefinitions}"
+                    SelectionMode="Extended"
+                    Margin="5"
+                    VerticalAlignment="Top"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    GridLinesVisibility="None"
+                    Classes="NoCellSelection">
+                    <DataGrid.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Open File"
+                                      Click="OpenFile"/>
+                        </MenuFlyout>
+                    </DataGrid.ContextFlyout>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="File" Binding="{Binding FileName}"/>
+                        <DataGridTextColumn Header="Type" Binding="{Binding TypeDefinition.Type}"/>
+                        <DataGridTextColumn Header="Identifier" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="EditorID" Binding="{Binding ListDefinition.Name}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </basic:LabeledContentControl>
+        </Grid>
+
+        <GridSplitter Grid.Column="1"/>
+
+        <Grid Grid.Column="2"
+              RowDefinitions="Auto,10,*">
+            <basic:LabeledContentControl
+                Grid.Row="0"
+                Margin="10, 0"
+                Header="Generation Preview">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="10">
+                    <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
+
+                    <TextBox
+                        Text="{Binding LeveledListFilter}"
+                        Watermark="Filter"
+                        HorizontalAlignment="Left"
+                        MinWidth="100"/>
+                </StackPanel>
+            </basic:LabeledContentControl>
+
+            <Grid Grid.Row="2">
+                <TreeDataGrid
+                    ContextRequested="Control_OnContextRequested"
+                    Height="{Binding $parent.Bounds.Height}"
+                    Source="{Binding LeveledListSource}">
+                </TreeDataGrid>
+
+                <avaloniaProgressRing:ProgressRing
+                    IsActive="{Binding IsBusy^}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="100" Height="100"/>
+                    
+                <Button Content="Generate All"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right"
+                        Background="{StaticResource AccentButtonBackground}"
+                        Margin="10"
+                        Command="{Binding GenerateSelectedLists}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

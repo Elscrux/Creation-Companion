@@ -1,4 +1,5 @@
-﻿using AutoFixture;
+﻿using System.Collections.Concurrent;
+using AutoFixture;
 using AutoFixture.Kernel;
 using CreationEditor.Services.Mutagen.References.Record.Cache;
 using CreationEditor.Services.Mutagen.References.Record.Query;
@@ -12,7 +13,7 @@ public sealed class EmptyRecordReferenceCacheFactory(ISpecimenBuilder builder) :
     public Task<ImmutableRecordReferenceCache> GetImmutableRecordReferenceCache(IReadOnlyList<IModGetter> mods) {
         return Task.FromResult(new ImmutableRecordReferenceCache(
             mods.ToDictionary(x => x.ModKey,
-                _ => new ModReferenceCache(new Dictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []))));
+                _ => new ModReferenceCache(new ConcurrentDictionary<FormKey, HashSet<IFormLinkIdentifier>>(), []))));
     }
 
     public Task<ImmutableRecordReferenceCache> GetImmutableRecordReferenceCache(ImmutableRecordReferenceCache immutableRecordReferenceCache) {
