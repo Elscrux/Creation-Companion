@@ -6,6 +6,7 @@
              xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
              xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder;assembly=CreationEditor.Avalonia"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="LeveledList.Views.ListsView"
              x:DataType="viewModels:ListsVM">
@@ -33,7 +34,7 @@
                 <DataGrid
                     x:Name="ListsDataGrid"
                     ItemsSource="{Binding ListTypeDefinitions}"
-                    SelectedItem="{Binding SelectedList}"
+                    SelectionMode="Extended"
                     Margin="5"
                     VerticalAlignment="Top"
                     AutoGenerateColumns="False"
@@ -83,6 +84,18 @@
                     Height="{Binding $parent.Bounds.Height}"
                     Source="{Binding LeveledListSource}">
                 </TreeDataGrid>
+
+                <avaloniaProgressRing:ProgressRing
+                    IsActive="{Binding IsBusy^}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="100" Height="100"/>
+                    
+                <Button Content="Generate All"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right"
+                        Background="{StaticResource AccentButtonBackground}"
+                        Margin="10"
+                        Command="{Binding GenerateSelectedLists}"/>
             </Grid>
         </Grid>
     </Grid>

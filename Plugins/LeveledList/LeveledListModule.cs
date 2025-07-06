@@ -13,7 +13,12 @@ public class LeveledListModule : ExtensionModule {
             .AsSelf();
 
         builder.RegisterType<LeveledListGenerator>()
-            .AsSelf();
+            .AsSelf()
+            .SingleInstance();
+
+        builder.RegisterType<LeveledListImplementer>()
+            .AsSelf()
+            .SingleInstance();
 
         builder.RegisterType<LeveledListVM>()
             .AsSelf();
@@ -23,10 +28,6 @@ public class LeveledListModule : ExtensionModule {
 
         builder.RegisterType<TiersVM>()
             .AsSelf();
-
-        builder.RegisterType<LeveledListGenerator>()
-            .AsSelf()
-            .SingleInstance();
 
         builder.RegisterType<FeatureProvider>()
             .As<IFeatureProvider>()
