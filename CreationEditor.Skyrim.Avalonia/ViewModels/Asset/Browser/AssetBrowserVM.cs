@@ -229,7 +229,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     GetFilteredFileSystemChildren,
                     link => link.IsDirectory),
                 new TemplateColumn<FileSystemLink>(
-                    "Count",
+                    "References",
                     new FuncDataTemplate<FileSystemLink>((asset, _) => {
                         if (asset is null) return null;
 
@@ -237,7 +237,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (assetLink is null) return null;
 
                         var referenceCount = assetReferenceController.GetReferenceCount(assetLink);
-                        return new TextBlock { Text = referenceCount.ToString() };
+                        return new TextBlock { Text = referenceCount.ToString(), VerticalAlignment = VerticalAlignment.Center};
                     }),
                     null,
                     new GridLength(),
@@ -268,6 +268,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         return new SymbolIcon {
                             Symbol = Symbol.ImportantFilled,
                             Foreground = StandardBrushes.InvalidBrush,
+                            VerticalAlignment = VerticalAlignment.Center,
                             [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath.Path)),
                         };
                     })),
