@@ -29,6 +29,11 @@ public sealed class FeatureProvider(
             yield return Enchantment;
         }
 
+        if (t.IsAssignableTo(typeof(IBookGetter))) {
+            yield return SchoolOfMagic;
+            yield return MagicLevel;
+        }
+
         if (t.IsAssignableTo(typeof(IWeaponGetter))) {
             yield return WeaponType;
         }
