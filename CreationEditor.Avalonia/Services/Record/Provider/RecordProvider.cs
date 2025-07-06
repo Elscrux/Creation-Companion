@@ -35,7 +35,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(x => x.Do(linkCache => {
+            .WrapInProgressMarker(x => x.Do(linkCache => {
                     _referencesDisposable.Clear();
 
                     RecordCache.Clear();

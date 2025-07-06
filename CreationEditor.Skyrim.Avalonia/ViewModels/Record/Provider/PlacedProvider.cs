@@ -39,7 +39,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
 
         this.WhenAnyValue(x => x.CellFormKey)
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => x.Do(_ => {
                     _referencesDisposable.Clear();
 

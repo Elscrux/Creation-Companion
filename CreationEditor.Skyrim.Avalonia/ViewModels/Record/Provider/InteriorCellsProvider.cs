@@ -33,7 +33,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => x.Do(linkCache => {
                     _referencesDisposable.Clear();
 

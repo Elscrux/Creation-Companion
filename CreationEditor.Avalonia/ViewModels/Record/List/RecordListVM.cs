@@ -36,7 +36,7 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
         Records = RecordProvider.RecordCache
             .Connect()
             .SubscribeOn(RxApp.TaskpoolScheduler)
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => {
                     var observable = x.Filter(RecordProvider.Filter, false);
                     if (customFilter is not null) observable = observable.Filter(customFilter);

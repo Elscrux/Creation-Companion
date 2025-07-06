@@ -241,7 +241,7 @@ public static class ObservableExtension {
             .ToObservableCollection(selector, disposable);
     }
 
-    public static IObservable<TResult> WrapInInProgressMarker<T, TResult>(
+    public static IObservable<TResult> WrapInProgressMarker<T, TResult>(
         this IObservable<T> changeSet,
         Func<IObservable<T>, IObservable<TResult>> wrapped,
         out IObservable<bool> isWorkingObservable) {

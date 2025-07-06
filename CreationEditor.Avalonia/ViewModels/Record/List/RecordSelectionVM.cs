@@ -20,7 +20,7 @@ public sealed class RecordSelectionVM : ViewModel {
         Records = RecordProvider.RecordCache
             .Connect()
             .SubscribeOn(RxApp.TaskpoolScheduler)
-            .WrapInInProgressMarker(
+            .WrapInProgressMarker(
                 x => x.Filter(RecordProvider.Filter, false),
                 out var isFiltering)
             .ToObservableCollection(this);
