@@ -35,6 +35,7 @@ public partial record ListDefinition(
     bool CalculateForEach = true,
     bool CalculateFromAllLevels = true,
     bool SpecialLoot = false) {
+    public const char TierGroupSeparator = '/';
 
     public ListDefinition() : this(string.Empty) {}
 
@@ -56,12 +57,31 @@ public partial record ListDefinition(
             var value = feature.Key.ToString();
             if (value is null) continue;
 
+            var span = new Span<char>(value.ToCharArray());
+
+            // Remove all text before final group
+            var lastGroupIndex = span.LastIndexOf(TierGroupSeparator);
+            span = span[(lastGroupIndex + 1)..];
+
             // Make sure the first character is uppercase
-            if (char.IsLower(value, 0)) {
-                value = char.ToUpper(value[0]) + value[1..];
+            if (char.IsLower(span[0])) {
+                span[0] = char.ToUpper(span[0]);
             }
 
-            name = name.Replace($"[{feature.Wildcard.Identifier}]", value);
+            // Remove - and make character after it uppercase
+            var dashIndex = span.IndexOf('-');
+            while (dashIndex != -1) {
+                if (dashIndex + 1 < span.Length && char.IsLower(span[dashIndex + 1])) {
+                    span[dashIndex + 1] = char.ToUpper(span[dashIndex + 1]);
+                }
+                span[dashIndex] = ' '; // Replace dash with space
+                dashIndex = span.IndexOf('-');
+            }
+
+            // Remove all spaces
+            span = new Span<char>(span.ToArray().Where(c => c != ' ').ToArray());
+
+            name = name.Replace($"[{feature.Wildcard.Identifier}]", span.ToString());
         }
 
         if (name.Contains('[')) {

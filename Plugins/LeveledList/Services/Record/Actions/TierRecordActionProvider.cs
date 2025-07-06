@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Record.Actions;
 using FluentAvalonia.UI.Controls;
+using LeveledList.Model.List;
 using LeveledList.Model.Tier;
 using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Skyrim;
@@ -60,9 +61,8 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
         var listRecordType = _leveledListRecordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
         if (listRecordType is null || context.SelectedRecords.Any(r => _leveledListRecordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
 
-        const char separator = '/';
         var tiers = _tierController.GetTiers(listRecordType.Value);
-        var tierGroup = new TierGroup(string.Empty, tiers, separator);
+        var tierGroup = new TierGroup(string.Empty, tiers, ListDefinition.TierGroupSeparator);
         return MenuItems(tierGroup, string.Empty);
 
         IEnumerable<MenuItem> MenuItems(TierGroup group, string prefix) {
@@ -84,7 +84,7 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
             string JoinPrefix(string subPrefix) {
                 return string.IsNullOrEmpty(prefix)
                     ? subPrefix
-                    : prefix + separator + subPrefix;
+                    : prefix + ListDefinition.TierGroupSeparator + subPrefix;
             }
         }
     }
