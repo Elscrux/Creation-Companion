@@ -56,12 +56,6 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
         });
     }
 
-    public IEnumerable<object> GetContextMenuItems(IReadOnlyList<IReferencedRecord> referencedRecords) {
-        var recordListContext = GetRecordListContext(referencedRecords);
-
-        return RecordContextMenuProvider.GetMenuItems(recordListContext);
-    }
-
     public RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
         return new RecordListContext(referencedRecords, RecordProvider.RecordTypes.ToList(), _settings);
     }
