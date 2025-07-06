@@ -576,9 +576,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     public IEnumerable<Control> GetContextMenuItems(FileSystemLink asset) {
-        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems;
-
-        if (!AssetTreeSource.RowSelection!.SelectedItems.Contains(asset)) {
+        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems.ToArray();
+        if (!selectedItems.Contains(asset)) {
             // We got an outdated selected items list - just use the current asset
             selectedItems = [asset];
         }
