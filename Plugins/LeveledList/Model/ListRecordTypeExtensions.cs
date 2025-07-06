@@ -10,6 +10,7 @@ public static class ListRecordTypeExtensions {
             ListRecordType.Potion => new[] { typeof(IIngestibleGetter) },
             ListRecordType.SpellTome => new[] { typeof(IBookGetter) },
             ListRecordType.Staff => new[] { typeof(IWeaponGetter) },
+            ListRecordType.Ingredient => new[] { typeof(IIngredientGetter) },
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

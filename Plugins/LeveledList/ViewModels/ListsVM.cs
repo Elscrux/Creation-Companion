@@ -38,7 +38,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     private readonly LeveledListGenerator _generator;
     private readonly LeveledListImplementer _implementer;
 
-    private readonly IObservableCollection<LeveledListTreeNode> _leveledLists = new ObservableCollectionExtended<LeveledListTreeNode>();
+    private readonly ObservableCollectionExtended<LeveledListTreeNode> _leveledLists = new();
     public ReadOnlyObservableCollection<LeveledListTreeNode> LeveledLists { get; }
     public IObservableCollection<ExtendedListDefinition> ListTypeDefinitions { get; } = new ObservableCollectionExtended<ExtendedListDefinition>();
 

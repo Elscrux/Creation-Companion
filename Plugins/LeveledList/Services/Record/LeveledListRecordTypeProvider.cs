@@ -22,6 +22,7 @@ public class LeveledListRecordTypeProvider(ITierController tierController) : ILe
                 .Where(b => b.Teaches is IBookSpellGetter),
             ListRecordType.Staff => mod.EnumerateMajorRecords<IWeaponGetter>()
                 .Where(w => w.Data is { AnimationType: WeaponAnimationType.Staff }),
+            ListRecordType.Ingredient => mod.EnumerateMajorRecords<IIngredientGetter>(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -41,6 +42,7 @@ public class LeveledListRecordTypeProvider(ITierController tierController) : ILe
         if (record is IBookGetter book) {
             return book.Teaches is IBookSpellGetter ? ListRecordType.SpellTome : ListRecordType.Staff;
         }
+        if (record is IIngredientGetter) return ListRecordType.Ingredient;
 
         return null;
     }
