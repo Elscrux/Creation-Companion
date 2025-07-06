@@ -7,6 +7,7 @@
              xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder;assembly=CreationEditor.Avalonia"
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="LeveledList.Views.ListsView"
              x:DataType="viewModels:ListsVM">
@@ -19,14 +20,22 @@
 
         <Grid RowDefinitions="Auto,10,*"
             Grid.Column="0">
-            <folder:TextFolderPicker
-                Grid.Row="0"
-                x:Name="FolderPicker"
-                Watermark="Select Leveled List Folder"
-                MinWidth="250"
-                HorizontalAlignment="Left"
-                FolderPath="{Binding LeveledListFolderPath, Mode=TwoWay}"
-                Margin="5"/>
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal">
+                <folder:TextFolderPicker
+                    x:Name="FolderPicker"
+                    Watermark="Select Leveled List Folder"
+                    MinWidth="250"
+                    HorizontalAlignment="Left"
+                    FolderPath="{Binding LeveledListFolderPath, Mode=TwoWay}"
+                    Margin="5"/>
+
+                <Button Command="{Binding ReloadLists}"
+                        IsVisible="{Binding LeveledListFolderPath, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <controls:SymbolIcon
+                        Symbol="Refresh"/>
+                </Button>
+            </StackPanel>
 
             <basic:LabeledContentControl
                 Grid.Row="2"

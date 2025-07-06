@@ -49,6 +49,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
     public SingleModPickerVM ModPickerVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateSelectedLists { get; }
+    public ReactiveCommand<Unit, Unit> ReloadLists { get; }
 
     private readonly Subject<bool> _isBusy = new();
     public IObservable<bool> IsBusy => _isBusy;
@@ -89,6 +90,11 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .ToObservableCollection(this);
 
         GenerateSelectedLists = ReactiveCommand.Create(GenerateLeveledLists);
+        ReloadLists = ReactiveCommand.Create(() => {
+            if (LeveledListFolderPath is null) return;
+
+            ListTypeDefinitions.Load(GetDefinitions(LeveledListFolderPath));
+        });
 
         LeveledListSource = new HierarchicalTreeDataGridSource<LeveledListTreeNode>(LeveledLists) {
             Columns = {
