@@ -11,6 +11,15 @@
         <PackageReference Include="ReactiveUI.SourceGenerators" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Models\FormLinkIdentifier.cs">
+        <DependentUpon>ILinkIdentifier.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Models\AssetLinkIdentifier.cs">
+        <DependentUpon>ILinkIdentifier.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
     </Target>

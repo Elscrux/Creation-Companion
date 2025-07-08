@@ -7,6 +7,8 @@
              xmlns:viewModels="clr-namespace:ModCleaner.ViewModels"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource;assembly=CreationEditor.Avalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ModCleaner.Views.ModCleanerView"
              x:Name="Control"
@@ -26,18 +28,24 @@
                                                  ConverterParameter=0}"/>
             </ScrollViewer.Effect>
 
-            <StackPanel Spacing="5" Margin="5">
-                <TextBlock Text="Select mod to clean"/>
+            <StackPanel Spacing="10" Margin="5">
+                <basic:LabeledContentControl Header="Select Data Source to Clean">
+                    <dataSource:DataSourcePicker
+                        DataContext="{Binding CleaningDataSourcePicker}"/>
+                </basic:LabeledContentControl>
 
-                <mod:ModPicker
-                    DataContext="{Binding CleaningModPickerVM}"
-                    MaxHeight="500"/>
+                <basic:LabeledContentControl Header="Select Mod to Clean">
+                    <mod:ModPicker
+                        DataContext="{Binding CleaningModPickerVM}"
+                        MaxHeight="500"/>
+                </basic:LabeledContentControl>
 
-                <TextBlock Text="Select dependent mods that should be considered in the cleaning process - usually that should be all mods listed here"/>
-
-                <mod:ModPicker
-                    DataContext="{Binding DependenciesModPickerVM}"
-                    MaxHeight="500"/>
+                <basic:LabeledContentControl
+                    Header="Select dependent mods that should be considered in the cleaning process - usually that should be all mods listed here">
+                    <mod:ModPicker
+                        DataContext="{Binding DependenciesModPickerVM}"
+                        MaxHeight="500"/>
+                </basic:LabeledContentControl>
 
                 <StackPanel>
                     <avaloniaProgressRing:ProgressRing
@@ -51,7 +59,7 @@
                         Content="Run"
                         Command="{Binding Run}"
                         IsVisible="{Binding !IsLoading^}"
-                        IsEnabled="{Binding !!CleaningModPickerVM.HasModSelected^}"/>
+                        IsEnabled="{Binding CanRun^}"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
