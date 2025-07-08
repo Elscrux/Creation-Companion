@@ -135,6 +135,9 @@
         <Compile Update="Resources\Attached\DragDrop\DataGridDragDropHandler.cs">
           <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
         </Compile>
+        <Compile Update="ViewModels\DataSource\SingleDataSourcePickerVM.cs">
+          <DependentUpon>IDataSourcePickerVM.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

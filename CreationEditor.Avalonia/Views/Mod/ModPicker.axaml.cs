@@ -7,7 +7,7 @@ public partial class ModPicker : ReactiveUserControl<IModPickerVM> {
         InitializeComponent();
     }
 
-    public ModPicker(MultiModPickerVM vm) : this() {
+    public ModPicker(IModPickerVM vm) : this() {
         DataContext = vm;
     }
 }
