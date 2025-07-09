@@ -14,7 +14,7 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
 
     public CacheLocationProvider(
         IFileSystem fileSystem,
-        params string[] subDirectories) {
+        params IReadOnlyList<string> subDirectories) {
         _fileSystem = fileSystem;
 
         var baseDir = _fileSystem.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), CacheDirectory);
@@ -26,18 +26,18 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
             });
     }
 
-    private string GetIdentifierPath(string[] identifiers) {
-        if (identifiers.Length == 0) throw new ArgumentException("Must provide at least one identifier", nameof(identifiers));
+    private string GetIdentifierPath(IReadOnlyList<string> identifiers) {
+        if (identifiers.Count == 0) throw new ArgumentException("Must provide at least one identifier", nameof(identifiers));
 
         var path = _cacheDirPath;
-        for (var i = 0; i < identifiers.Length - 1; i++) {
+        for (var i = 0; i < identifiers.Count - 1; i++) {
             path = _fileSystem.Path.Combine(path, IllegalFileNameRegex.Replace(identifiers[i], string.Empty));
         }
 
         return path;
     }
 
-    public string CacheFile(params string[] identifiers) {
+    public string CacheFile(params IReadOnlyList<string> identifiers) {
         var sanitizedName = IllegalFileNameRegex.Replace($"{identifiers[^1]}.{CacheExtension}", string.Empty);
         return _fileSystem.Path.Combine(GetIdentifierPath(identifiers), sanitizedName);
     }

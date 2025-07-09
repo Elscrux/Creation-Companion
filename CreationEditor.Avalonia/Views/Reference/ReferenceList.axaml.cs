@@ -15,11 +15,7 @@ public partial class ReferenceList : UserControl {
         InitializeComponent();
     }
 
-    public ReferenceList(params TabItem[] tabs) : this() {
-        Tabs = tabs;
-    }
-
-    public ReferenceList(IEnumerable<TabItem> tabs) : this() {
+    public ReferenceList(params IEnumerable<TabItem> tabs) : this() {
         Tabs = tabs;
     }
 }

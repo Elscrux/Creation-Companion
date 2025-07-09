@@ -35,7 +35,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
     public ReactiveCommand<Unit, Unit> RemapReferences { get; }
 
     public ReferenceBrowserVM(
-        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserFactory,
+        Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserFactory,
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
         ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
@@ -44,7 +44,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
         object? context = null,
-        params IReferenceVM[] references) {
+        params IReadOnlyList<IReferenceVM> references) {
         _menuItemProvider = menuItemProvider;
         Context = context;
 

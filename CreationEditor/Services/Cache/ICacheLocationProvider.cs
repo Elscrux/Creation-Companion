@@ -6,5 +6,5 @@ public interface ICacheLocationProvider {
     /// </summary>
     /// <param name="identifiers">Identifiers to build a path from</param>
     /// <returns>Full path for the cache file</returns>
-    string CacheFile(params string[] identifiers);
+    string CacheFile(params IReadOnlyList<string> identifiers);
 }

@@ -1,15 +1,12 @@
 ﻿namespace CreationEditor.Services.Notification;
 
-public sealed class ChainedNotifier : ANotifier, IDisposable {
-    private readonly IEnumerator<string> _stepEnumerator;
-    private readonly float _countFloat;
+public sealed class ChainedNotifier(
+    INotificationService notificationService,
+    params IReadOnlyList<string> steps)
+    : ANotifier(notificationService), IDisposable {
+    private readonly IEnumerator<string> _stepEnumerator = steps.AsEnumerable().GetEnumerator();
+    private readonly float _countFloat = steps.Count;
     private int _currentStep;
-
-    public ChainedNotifier(INotificationService notificationService, params string[] steps)
-        : base(notificationService) {
-        _countFloat = steps.Length;
-        _stepEnumerator = steps.AsEnumerable().GetEnumerator();
-    }
 
     public void NextStep() {
         if (_stepEnumerator.MoveNext()) {

@@ -43,7 +43,7 @@ using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
-    private readonly Func<object?, IReferenceVM[], ReferenceBrowserVM> _referenceBrowserVMFactory;
+    private readonly Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
     private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
@@ -101,7 +101,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
 
     public AssetBrowserVM(
-        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserVMFactory,
+        Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserVMFactory,
         IDataSourceWatcherProvider dataSourceWatcherProvider,
         IDataSourceService dataSourceService,
         IMenuItemProvider menuItemProvider,
@@ -463,7 +463,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    private ReferenceBrowserVM? GetReferenceBrowserVM(params FileSystemLink[] assets) {
+    private ReferenceBrowserVM? GetReferenceBrowserVM(params IReadOnlyList<FileSystemLink> assets) {
         var recordReferences = new HashSet<IFormLinkIdentifier>(FormLinkIdentifierEqualityComparer.Instance);
         var assetReferences = new HashSet<DataRelativePath>();
 
@@ -496,7 +496,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         if (references.Length == 0) return null;
 
-        return _referenceBrowserVMFactory(assets.Length == 1 ? assets[0] : assets, references);
+        return _referenceBrowserVMFactory(assets.Count == 1 ? assets[0] : assets, references);
     }
 
     public async Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo) {

@@ -13,7 +13,7 @@ public sealed class GenericRecordActionsProvider : IRecordActionsProvider {
     private readonly IList<RecordAction> _actions;
 
     public GenericRecordActionsProvider(
-        Func<object?, IReferenceVM[], ReferenceBrowserVM> referenceBrowserFactory,
+        Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserFactory,
         ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
         IRecordReferenceController recordReferenceController,
