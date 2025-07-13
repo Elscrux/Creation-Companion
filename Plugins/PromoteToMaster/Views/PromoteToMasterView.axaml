@@ -168,10 +168,10 @@
                                       IsReadOnly="True">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data Source"
-                                                        Binding="{Binding FileSystemLink.DataSource.Name}"
+                                                        Binding="{Binding DataSourceLink.DataSource.Name}"
                                                         x:DataType="viewModels:AssetPromotionChange"/>
                                     <DataGridTextColumn Header="Path"
-                                                        Binding="{Binding FileSystemLink.DataRelativePath.Path}"
+                                                        Binding="{Binding DataSourceLink.DataRelativePath.Path}"
                                                         x:DataType="viewModels:AssetPromotionChange"/>
                                     <DataGridTextColumn Header="Change"
                                                         Binding="{Binding ChangeType}"

@@ -12,29 +12,29 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
 
     public IDataSource DataSource { get; }
 
-    public IObservable<FileSystemLink> Created => _createdFile.Merge(_createdDirectory);
-    public IObservable<FileSystemLink> CreatedFile => _createdFile;
-    public IObservable<FileSystemLink> CreatedDirectory => _createdDirectory;
-    private readonly Subject<FileSystemLink> _createdFile = new();
-    private readonly Subject<FileSystemLink> _createdDirectory = new();
+    public IObservable<DataSourceLink> Created => _createdFile.Merge(_createdDirectory);
+    public IObservable<DataSourceLink> CreatedFile => _createdFile;
+    public IObservable<DataSourceLink> CreatedDirectory => _createdDirectory;
+    private readonly Subject<DataSourceLink> _createdFile = new();
+    private readonly Subject<DataSourceLink> _createdDirectory = new();
 
-    public IObservable<FileSystemLink> Deleted => _deletedFile.Merge(_deletedDirectory);
-    public IObservable<FileSystemLink> DeletedFile => _deletedFile;
-    public IObservable<FileSystemLink> DeletedDirectory => _deletedDirectory;
-    private readonly Subject<FileSystemLink> _deletedFile = new();
-    private readonly Subject<FileSystemLink> _deletedDirectory = new();
+    public IObservable<DataSourceLink> Deleted => _deletedFile.Merge(_deletedDirectory);
+    public IObservable<DataSourceLink> DeletedFile => _deletedFile;
+    public IObservable<DataSourceLink> DeletedDirectory => _deletedDirectory;
+    private readonly Subject<DataSourceLink> _deletedFile = new();
+    private readonly Subject<DataSourceLink> _deletedDirectory = new();
 
-    public IObservable<FileSystemLink> Changed => _changedFile.Merge(_changedDirectory);
-    public IObservable<FileSystemLink> ChangedFile => _changedFile;
-    public IObservable<FileSystemLink> ChangedDirectory => _changedDirectory;
-    private readonly Subject<FileSystemLink> _changedFile = new();
-    private readonly Subject<FileSystemLink> _changedDirectory = new();
+    public IObservable<DataSourceLink> Changed => _changedFile.Merge(_changedDirectory);
+    public IObservable<DataSourceLink> ChangedFile => _changedFile;
+    public IObservable<DataSourceLink> ChangedDirectory => _changedDirectory;
+    private readonly Subject<DataSourceLink> _changedFile = new();
+    private readonly Subject<DataSourceLink> _changedDirectory = new();
 
-    public IObservable<(FileSystemLink Old, FileSystemLink New)> Renamed => _renamedFile.Merge(_renamedDirectory);
-    public IObservable<(FileSystemLink Old, FileSystemLink New)> RenamedFile => _renamedFile;
-    public IObservable<(FileSystemLink Old, FileSystemLink New)> RenamedDirectory => _renamedDirectory;
-    private readonly Subject<(FileSystemLink Old, FileSystemLink New)> _renamedFile = new();
-    private readonly Subject<(FileSystemLink Old, FileSystemLink New)> _renamedDirectory = new();
+    public IObservable<(DataSourceLink Old, DataSourceLink New)> Renamed => _renamedFile.Merge(_renamedDirectory);
+    public IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedFile => _renamedFile;
+    public IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedDirectory => _renamedDirectory;
+    private readonly Subject<(DataSourceLink Old, DataSourceLink New)> _renamedFile = new();
+    private readonly Subject<(DataSourceLink Old, DataSourceLink New)> _renamedDirectory = new();
 
     public FileSystemDataSourceWatcher(
         IDataSource dataSource,
@@ -47,22 +47,22 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
         watcher.EnableRaisingEvents = true;
 
         var fileSystemWatcherEvents = watcher.Events();
-        HandleFileSystemEvent(fileSystemWatcherEvents.Created, _createdFile, _createdDirectory, ToFileSystemLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Deleted, _deletedFile, _deletedDirectory, ToFileSystemLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Changed, _changedFile, _changedDirectory, ToFileSystemLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Renamed, _renamedFile, _renamedDirectory, ToUpdatedFileSystemLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Created, _createdFile, _createdDirectory, ToDataSourceLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Deleted, _deletedFile, _deletedDirectory, ToDataSourceLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Changed, _changedFile, _changedDirectory, ToDataSourceLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Renamed, _renamedFile, _renamedDirectory, ToUpdatedDataSourceLink);
 
-        FileSystemLink ToFileSystemLink(FileSystemEventArgs arg) {
-            if (DataSource.TryGetFileSystemLink(arg.FullPath, out var link)) {
+        DataSourceLink ToDataSourceLink(FileSystemEventArgs arg) {
+            if (DataSource.TryGetLink(arg.FullPath, out var link)) {
                 return link;
             }
 
             throw new InvalidOperationException($"File system link for path '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
         }
 
-        (FileSystemLink Old, FileSystemLink New) ToUpdatedFileSystemLink(RenamedEventArgs arg) {
-            if (DataSource.TryGetFileSystemLink(arg.OldFullPath, out var oldLink) &&
-                DataSource.TryGetFileSystemLink(arg.FullPath, out var newLink)) {
+        (DataSourceLink Old, DataSourceLink New) ToUpdatedDataSourceLink(RenamedEventArgs arg) {
+            if (DataSource.TryGetLink(arg.OldFullPath, out var oldLink) &&
+                DataSource.TryGetLink(arg.FullPath, out var newLink)) {
                 return (Old: oldLink, New: newLink);
             }
 

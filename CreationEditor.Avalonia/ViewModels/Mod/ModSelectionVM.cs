@@ -205,7 +205,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
-    private IEnumerable<FileSystemLink> GetModsFromDataSources() {
+    private IEnumerable<DataSourceLink> GetModsFromDataSources() {
         return Enum.GetValues<ModType>()
             .SelectMany(modType => _dataSourceService.EnumerateFileLinksInAllDataSources(
                 string.Empty,
@@ -213,7 +213,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                 "*" + modType.ToFileExtension()));
     }
 
-    private ModInfo? ConvertToModInfo(FileSystemLink link) {
+    private ModInfo? ConvertToModInfo(DataSourceLink link) {
         if (!link.Exists()) return null;
 
         var modKey = ModKey.FromFileName(link.Name);

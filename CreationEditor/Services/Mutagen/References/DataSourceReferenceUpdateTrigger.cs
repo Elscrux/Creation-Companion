@@ -11,15 +11,15 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
     ILogger logger,
     IDataSourceService dataSourceService,
     IDataSourceWatcherProvider dataSourceWatcherProvider)
-    : IReferenceUpdateTrigger<IDataSource, FileSystemLink, TCache, TLink, DataRelativePath, TSubscriber>
+    : IReferenceUpdateTrigger<IDataSource, DataSourceLink, TCache, TLink, DataRelativePath, TSubscriber>
     where TCache : IReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull
     where TSubscriber : IReferenced {
     private readonly CompositeDisposable _dataSourceUpdatedDisposables = new();
-    public DataRelativePath ToReference(FileSystemLink element) => element.DataRelativePath;
-    public IDataSource GetSourceFor(FileSystemLink reference) => reference.DataSource;
+    public DataRelativePath ToReference(DataSourceLink element) => element.DataRelativePath;
+    public IDataSource GetSourceFor(DataSourceLink reference) => reference.DataSource;
     public void SetupSubscriptions(
-        ReferenceController<IDataSource, FileSystemLink, TCache, TLink, DataRelativePath, TSubscriber> referenceController,
+        ReferenceController<IDataSource, DataSourceLink, TCache, TLink, DataRelativePath, TSubscriber> referenceController,
         CompositeDisposable disposables) {
 
         dataSourceService.DataSourcesChanged

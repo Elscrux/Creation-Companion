@@ -192,14 +192,14 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
         if (AssetTargets is not [var assetTarget]) return;
         foreach (var promotion in AssetPromotionChanges) {
-            var targetLink = new FileSystemLink(assetTarget, promotion.FileSystemLink.DataRelativePath);
+            var targetLink = new DataSourceLink(assetTarget, promotion.DataSourceLink.DataRelativePath);
             
             switch (promotion.ChangeType) {
                 case AssetPromotionChangeType.Moved:
-                    _assetController.Move(promotion.FileSystemLink, targetLink);
+                    _assetController.Move(promotion.DataSourceLink, targetLink);
                     break;
                 case AssetPromotionChangeType.Copied:
-                    _assetController.Copy(promotion.FileSystemLink, targetLink);
+                    _assetController.Copy(promotion.DataSourceLink, targetLink);
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -267,11 +267,11 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             var dataSource = AssetOrigins.FirstOrDefault(dataSource => dataSource.FileExists(assetLink.DataRelativePath));
             if (dataSource is null) continue;
 
-            var fileSystemLink = new FileSystemLink(dataSource, assetLink.DataRelativePath);
+            var dataSourceLink = new DataSourceLink(dataSource, assetLink.DataRelativePath);
 
             switch (AssetPromotionMode) {
                 case AssetPromotionMode.Copy:
-                    yield return new AssetPromotionChange(fileSystemLink, AssetPromotionChangeType.Copied);
+                    yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Copied);
 
                     break;
                 case AssetPromotionMode.Move:
@@ -284,14 +284,14 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                         .All(recordIdentifiers.Contains);
 
                     if (allAssetRefsIncluded && allRecordRefsIncluded) {
-                        yield return new AssetPromotionChange(fileSystemLink, AssetPromotionChangeType.Moved);
+                        yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Moved);
                     } else {
-                        yield return new AssetPromotionChange(fileSystemLink, AssetPromotionChangeType.Copied);
+                        yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Copied);
                     }
 
                     break;
                 case AssetPromotionMode.ForceMove:
-                    yield return new AssetPromotionChange(fileSystemLink, AssetPromotionChangeType.Moved);
+                    yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Moved);
 
                     break;
             }
@@ -300,7 +300,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 }
 
 public sealed record RecordPromotionChange(IMajorRecordGetter Record, RecordPromotionChangeType ChangeType);
-public sealed record AssetPromotionChange(FileSystemLink FileSystemLink, AssetPromotionChangeType ChangeType);
+public sealed record AssetPromotionChange(DataSourceLink DataSourceLink, AssetPromotionChangeType ChangeType);
 
 public enum RecordPromotionChangeType {
     Modified,

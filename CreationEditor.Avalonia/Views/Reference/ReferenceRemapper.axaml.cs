@@ -23,26 +23,26 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                 .Subscribe(vm => {
                     vm?.ShowReferenceRemapDialog
                         .Subscribe(_ => {
-                            if (vm.FileSystemLink is not null && vm.AssetType is not null) {
+                            if (vm.DataSourceLink is not null && vm.AssetType is not null) {
                                 var filePicker = new TextFilePicker {
                                     [AFilePicker.FilterProperty] = new FilePickerFileType(vm.AssetType.BaseFolder) {
                                         Patterns = vm.AssetType.FileExtensions.Select(extension => "*" + extension).ToArray(),
                                     }.AsEnumerable().ToArray(),
                                     [Interaction.BehaviorsProperty] = new BehaviorCollection {
-                                        new ContextDropBehavior { Handler = new CustomDragDropDataHandler<AssetLinkDragDrop, AssetFileSystemLink>() }
+                                        new ContextDropBehavior { Handler = new CustomDragDropDataHandler<AssetLinkDragDrop, AssetDataSourceLink>() }
                                     },
                                     [DragDropExtended.AllowDropProperty] = true,
                                     [AssetLinkDragDrop.CanSetAssetLinkProperty]
-                                        = new Func<AssetFileSystemLink, bool>((link => link.AssetLink.AssetTypeInstance == vm.AssetType)),
+                                        = new Func<AssetDataSourceLink, bool>((link => link.AssetLink.AssetTypeInstance == vm.AssetType)),
                                 };
-                                filePicker[AssetLinkDragDrop.SetAssetLinkProperty] = new Action<AssetFileSystemLink?>((link => {
+                                filePicker[AssetLinkDragDrop.SetAssetLinkProperty] = new Action<AssetDataSourceLink?>((link => {
                                     if (link is not null) {
-                                        filePicker.FilePath = link.FileSystemLink.DataRelativePath.Path;
+                                        filePicker.FilePath = link.DataSourceLink.DataRelativePath.Path;
                                     }
                                 }));
 
                                 var dialog = new TaskDialog {
-                                    Header = "Remap References for " + vm.FileSystemLink.Name,
+                                    Header = "Remap References for " + vm.DataSourceLink.Name,
                                     Content = filePicker,
                                     XamlRoot = this,
                                     Buttons = {

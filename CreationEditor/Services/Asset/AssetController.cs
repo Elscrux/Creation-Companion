@@ -20,12 +20,12 @@ public sealed class AssetController(
     ILogger logger)
     : IAssetController {
 
-    private FileSystemLink CreateDeletePath(FileSystemLink link) {
+    private DataSourceLink CreateDeletePath(DataSourceLink link) {
         var deletePath = link.FileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, link.DataRelativePath.Path);
-        return new FileSystemLink(link.DataSource, deletePath);
+        return new DataSourceLink(link.DataSource, deletePath);
     }
 
-    public void Open(FileSystemLink link) {
+    public void Open(DataSourceLink link) {
         if (!link.Exists()) return;
 
         // Open the file via the standard program
@@ -37,7 +37,7 @@ public sealed class AssetController(
         });
     }
 
-    public void Delete(FileSystemLink link, CancellationToken token = default) {
+    public void Delete(DataSourceLink link, CancellationToken token = default) {
         try {
             MoveInternal(link, CreateDeletePath(link), true, false, false, token);
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Copy(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
+    public void Copy(DataSourceLink origin, DataSourceLink destination, CancellationToken token = default) {
         try {
             MoveInternal(origin, destination, false, true, true, token);
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Move(FileSystemLink origin, FileSystemLink destination, CancellationToken token = default) {
+    public void Move(DataSourceLink origin, DataSourceLink destination, CancellationToken token = default) {
         try {
             MoveInternal(origin, destination, false, true, false, token);
         } catch (Exception e) {
@@ -61,11 +61,11 @@ public sealed class AssetController(
         }
     }
 
-    public void Rename(FileSystemLink origin, string newName, CancellationToken token = default) {
+    public void Rename(DataSourceLink origin, string newName, CancellationToken token = default) {
         var directoryPath = origin.FileSystem.Path.GetDirectoryName(origin.DataRelativePath.Path);
 
         if (directoryPath is not null) {
-            var destination = new FileSystemLink(origin.DataSource, origin.FileSystem.Path.Combine(directoryPath, newName));
+            var destination = new DataSourceLink(origin.DataSource, origin.FileSystem.Path.Combine(directoryPath, newName));
             try {
                 MoveInternal(origin, destination, true, true, false, token);
             } catch (Exception e) {
@@ -76,7 +76,7 @@ public sealed class AssetController(
         }
     }
 
-    private void MoveInternal(FileSystemLink origin, FileSystemLink destination, bool rename, bool doRemap, bool copy, CancellationToken token) {
+    private void MoveInternal(DataSourceLink origin, DataSourceLink destination, bool rename, bool doRemap, bool copy, CancellationToken token) {
         if (!origin.Exists()) {
             logger.Here().Warning("Cannot move {Path} because it does not exist", origin);
             return;
@@ -110,7 +110,7 @@ public sealed class AssetController(
             MoveDirectory(origin, token);
         }
 
-        void MoveFile(FileSystemLink fileLink, CancellationToken innerToken) {
+        void MoveFile(DataSourceLink fileLink, CancellationToken innerToken) {
             // Calculate the full path of that the file should be moved to
             DataRelativePath newDataRelativePath;
             if (destinationIsFile) {
@@ -136,7 +136,7 @@ public sealed class AssetController(
 
                 newDataRelativePath = destination.FileSystem.Path.Combine(adjustedBasePath, nestedPath);
             }
-            var newPath = new FileSystemLink(destination.DataSource, newDataRelativePath);
+            var newPath = new DataSourceLink(destination.DataSource, newDataRelativePath);
 
             // Reaching point of no return - after this alterations will be made 
             if (innerToken.IsCancellationRequested) return;
@@ -149,7 +149,7 @@ public sealed class AssetController(
             }
         }
 
-        void MoveDirectory(FileSystemLink directoryLink, CancellationToken innerToken) {
+        void MoveDirectory(DataSourceLink directoryLink, CancellationToken innerToken) {
             if (destinationIsFile) {
                 logger.Here().Warning("Cannot move directory {Path} to file {Destination}, skipping", directoryLink, destination);
                 return;
@@ -160,7 +160,7 @@ public sealed class AssetController(
 
             // Add directory name to the destination path
             var newDestinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, directoryLink.Name);
-            destination = new FileSystemLink(destination.DataSource, newDestinationPath); 
+            destination = new DataSourceLink(destination.DataSource, newDestinationPath); 
 
             var remaps = directoryLink
                 .EnumerateFileLinks(true)
@@ -168,7 +168,7 @@ public sealed class AssetController(
                     var relativePath =
                         directoryLink.FileSystem.Path.GetRelativePath(directoryLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
                     var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
-                    var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
+                    var linkDestination = new DataSourceLink(destination.DataSource, destinationPath);
                     return (fileLink, linkDestination);
                 })
                 .ToArray();
@@ -184,16 +184,16 @@ public sealed class AssetController(
         }
     }
 
-    public void RemapDirectoryReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+    public void RemapDirectoryReferences(DataSourceLink oldLink, DataSourceLink newLink) {
         foreach (var fileLink in oldLink.EnumerateFileLinks(true)) {
             var relativePath = oldLink.FileSystem.Path.GetRelativePath(oldLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
             var destinationPath = newLink.FileSystem.Path.Combine(newLink.DataRelativePath.Path, oldLink.Name, relativePath);
-            var linkDestination = new FileSystemLink(newLink.DataSource, destinationPath);
+            var linkDestination = new DataSourceLink(newLink.DataSource, destinationPath);
             RemapFileReferences(fileLink, linkDestination);
         }
     }
 
-    public void RemapFileReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+    public void RemapFileReferences(DataSourceLink oldLink, DataSourceLink newLink) {
         // Remap references in records
         RemapRecordReferences(oldLink, newLink);
 
@@ -201,7 +201,7 @@ public sealed class AssetController(
         RemapAssetReferences(oldLink, newLink);
     }
 
-    private void RemapAssetReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+    private void RemapAssetReferences(DataSourceLink oldLink, DataSourceLink newLink) {
         var assetLink = assetTypeService.GetAssetLink(oldLink.DataRelativePath);
         if (assetLink is null) {
             logger.Here().Warning("Couldn't find asset type for {Path}", oldLink.DataRelativePath);
@@ -220,7 +220,7 @@ public sealed class AssetController(
         }
     }
 
-    private void RemapRecordReferences(FileSystemLink oldLink, FileSystemLink newLink) {
+    private void RemapRecordReferences(DataSourceLink oldLink, DataSourceLink newLink) {
         var assetLink = assetTypeService.GetAssetLink(oldLink.DataRelativePath);
         if (assetLink is null) {
             logger.Here().Warning("Couldn't find asset type for {Path}", oldLink.DataRelativePath);
@@ -241,7 +241,7 @@ public sealed class AssetController(
         }
     }
 
-    private bool FileSystemMove(FileSystemLink origin, FileSystemLink destination, bool copy, CancellationToken token) {
+    private bool FileSystemMove(DataSourceLink origin, DataSourceLink destination, bool copy, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
@@ -266,7 +266,7 @@ public sealed class AssetController(
                         foreach (var link in origin.EnumerateAllLinks(true)) {
                             var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, link.DataRelativePath.Path);
                             var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
-                            var linkDestination = new FileSystemLink(destination.DataSource, destinationPath);
+                            var linkDestination = new DataSourceLink(destination.DataSource, destinationPath);
                             FileSystemMove(link, linkDestination, copy, token);
                         }
                         

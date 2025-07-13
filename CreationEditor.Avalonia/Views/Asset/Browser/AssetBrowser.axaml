@@ -6,7 +6,7 @@
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid"
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:fileSystemLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
+             xmlns:dataSourceLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
              xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
@@ -36,7 +36,7 @@
                 IsTextSearchEnabled="True"
                 ItemsSource="{Binding DataSourceSelections}"
                 SelectedItem="{Binding DataSource}"
-                DisplayMemberBinding="{Binding Name, DataType=fileSystemLink:IDataSource}"/>
+                DisplayMemberBinding="{Binding Name, DataType=dataSourceLink:IDataSource}"/>
 
             <Button ToolTip.Tip="Filters"
                     HorizontalAlignment="Stretch"
@@ -180,8 +180,8 @@
                 KeyDown="AssetTree_OnKeyDown">
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
-                    <treeDataGrid:ExpandAllChildren x:TypeArguments="fileSystemLink:FileSystemLink"/>
-                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="fileSystemLink:FileSystemLink"/>
+                    <treeDataGrid:ExpandAllChildren x:TypeArguments="dataSourceLink:DataSourceLink"/>
+                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="dataSourceLink:DataSourceLink"/>
                 </Interaction.Behaviors>
             </TreeDataGrid>
 

@@ -48,12 +48,12 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly MainWindow _mainWindow;
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
-    private FileSystemLink _rootDirectory = null!;
+    private DataSourceLink _rootDirectory = null!;
 
-    private readonly Dictionary<string, IReadOnlyList<FileSystemLink>> _filteredFileSystemChildrenCache = [];
+    private readonly Dictionary<string, IReadOnlyList<DataSourceLink>> _filteredFileSystemChildrenCache = [];
     private readonly IReferenceService _referenceService;
 
-    public IObservableCollection<FileSystemLink> RootItems { get; } = new ObservableCollectionExtended<FileSystemLink>();
+    public IObservableCollection<DataSourceLink> RootItems { get; } = new ObservableCollectionExtended<DataSourceLink>();
 
     public IDataSourceService DataSourceService { get; }
     public ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
@@ -88,14 +88,14 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public ReactiveCommand<Unit, Unit> Undo { get; }
     public ReactiveCommand<Unit, Unit> Redo { get; }
 
-    public ReactiveCommand<IReadOnlyList<FileSystemLink?>, Unit> Open { get; }
-    public ReactiveCommand<IReadOnlyList<FileSystemLink?>, Unit> Delete { get; }
-    public ReactiveCommand<FileSystemLink, Unit> Rename { get; }
-    public ReactiveCommand<FileSystemLink, Unit> CopyPath { get; }
-    public ReactiveCommand<FileSystemLink, Unit> OpenReferences { get; }
-    public ReactiveCommand<FileSystemLink, Unit> AddFolder { get; }
+    public ReactiveCommand<IReadOnlyList<DataSourceLink?>, Unit> Open { get; }
+    public ReactiveCommand<IReadOnlyList<DataSourceLink?>, Unit> Delete { get; }
+    public ReactiveCommand<DataSourceLink, Unit> Rename { get; }
+    public ReactiveCommand<DataSourceLink, Unit> CopyPath { get; }
+    public ReactiveCommand<DataSourceLink, Unit> OpenReferences { get; }
+    public ReactiveCommand<DataSourceLink, Unit> AddFolder { get; }
 
-    public HierarchicalTreeDataGridSource<FileSystemLink> AssetTreeSource { get; }
+    public HierarchicalTreeDataGridSource<DataSourceLink> AssetTreeSource { get; }
 
     public AssetBrowserVM(
         Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserVMFactory,
@@ -149,12 +149,12 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Select(x => x.OfType<FileSystemDataSource>().Cast<IDataSource>())
             .ToObservableCollection(this);
 
-        AssetTreeSource = new HierarchicalTreeDataGridSource<FileSystemLink>(RootItems) {
+        AssetTreeSource = new HierarchicalTreeDataGridSource<DataSourceLink>(RootItems) {
             Columns = {
-                new HierarchicalExpanderColumn<FileSystemLink>(
-                    new TemplateColumn<FileSystemLink>(
+                new HierarchicalExpanderColumn<DataSourceLink>(
+                    new TemplateColumn<DataSourceLink>(
                         "Name",
-                        new FuncDataTemplate<FileSystemLink>((asset, _) => {
+                        new FuncDataTemplate<DataSourceLink>((asset, _) => {
                             if (asset is null) return null;
 
                             // Name
@@ -207,7 +207,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         }),
                         null,
                         new GridLength(),
-                        new TemplateColumnOptions<FileSystemLink> {
+                        new TemplateColumnOptions<DataSourceLink> {
                             CanUserResizeColumn = true,
                             CanUserSortColumn = true,
                             IsTextSearchEnabled = true,
@@ -223,9 +223,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         }),
                     GetFilteredFileSystemChildren,
                     link => link.IsDirectory),
-                new TemplateColumn<FileSystemLink>(
+                new TemplateColumn<DataSourceLink>(
                     "References",
-                    new FuncDataTemplate<FileSystemLink>((asset, _) => {
+                    new FuncDataTemplate<DataSourceLink>((asset, _) => {
                         if (asset is null) return null;
 
                         var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
@@ -236,7 +236,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     }),
                     null,
                     new GridLength(),
-                    new TemplateColumnOptions<FileSystemLink> {
+                    new TemplateColumnOptions<DataSourceLink> {
                         CanUserResizeColumn = true,
                         CanUserSortColumn = true,
                         CompareAscending = (x, y) => {
@@ -248,9 +248,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             return -(checkNull ?? x!.CompareTo(y));
                         },
                     }),
-                new TemplateColumn<FileSystemLink>(
+                new TemplateColumn<DataSourceLink>(
                     "Flags",
-                    new FuncDataTemplate<FileSystemLink>((asset, _) => {
+                    new FuncDataTemplate<DataSourceLink>((asset, _) => {
                         if (asset is null) return null;
                         if (asset.IsDirectory) return null;
 
@@ -340,9 +340,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         Undo = ReactiveCommand.Create(() => _assetController.Undo());
         Redo = ReactiveCommand.Create(() => _assetController.Redo());
 
-        Open = ReactiveCommand.Create<IReadOnlyList<FileSystemLink?>>(OpenAssets);
+        Open = ReactiveCommand.Create<IReadOnlyList<DataSourceLink?>>(OpenAssets);
 
-        Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<FileSystemLink?>>(async assets => {
+        Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<DataSourceLink?>>(async assets => {
             var deleteAssets = assets.WhereNotNull().ToArray();
             Control? content = null;
 
@@ -368,11 +368,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             }
         });
 
-        Rename = ReactiveCommand.CreateFromTask<FileSystemLink>(RenameAsset);
+        Rename = ReactiveCommand.CreateFromTask<DataSourceLink>(RenameAsset);
 
-        CopyPath = ReactiveCommand.Create<FileSystemLink>(CopyAssetPath);
+        CopyPath = ReactiveCommand.Create<DataSourceLink>(CopyAssetPath);
 
-        OpenReferences = ReactiveCommand.Create<FileSystemLink>(OpenAssetReferences,
+        OpenReferences = ReactiveCommand.Create<DataSourceLink>(OpenAssetReferences,
             this.WhenAnyValue(x => x.AssetTreeSource.RowSelection!.SelectedItem)
                 .Select(link => {
                     if (link is null) return false;
@@ -384,10 +384,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 })
         );
 
-        AddFolder = ReactiveCommand.CreateFromTask<FileSystemLink>(AddAssetFolder);
+        AddFolder = ReactiveCommand.CreateFromTask<DataSourceLink>(AddAssetFolder);
     }
 
-    private IEnumerable<string> GetMissingLinks(FileSystemLink link, IAssetLinkGetter assetLink) {
+    private IEnumerable<string> GetMissingLinks(DataSourceLink link, IAssetLinkGetter assetLink) {
         if (assetLink.AssetTypeInstance != SkyrimModelAssetType.Instance) return [];
 
         // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
@@ -397,20 +397,20 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Concat(_referenceService.GetMissingRecordLinks(link));
     }
 
-    private HierarchicalRow<FileSystemLink>? FindParentRow(FileSystemLink link) {
+    private HierarchicalRow<DataSourceLink>? FindParentRow(DataSourceLink link) {
         var parentPath = link.ParentDirectory?.DataRelativePath;
         return AssetTreeSource.Rows
-            .OfType<HierarchicalRow<FileSystemLink>>()
+            .OfType<HierarchicalRow<DataSourceLink>>()
             .FirstOrDefault(row => row.Model.DataRelativePath == parentPath);
     }
 
-    private IEnumerable<FileSystemLink> GetAllRootItems() {
+    private IEnumerable<DataSourceLink> GetAllRootItems() {
         return _rootDirectory
             .EnumerateAllLinks(false)
             .Where(dir => ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(dir.DataRelativePath));
     }
 
-    private async Task AddAssetFolder(FileSystemLink dir) {
+    private async Task AddAssetFolder(DataSourceLink dir) {
         var textBox = new TextBox { Text = string.Empty, Watermark = "New folder" };
         var relativePath = dir.DataRelativePath.Path;
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
@@ -421,7 +421,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    private void OpenAssetReferences(FileSystemLink asset) {
+    private void OpenAssetReferences(DataSourceLink asset) {
         var referenceBrowserVM = GetReferenceBrowserVM(asset);
         var relativePath = asset.DataRelativePath.Path;
 
@@ -429,13 +429,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         referenceWindow.Show(_mainWindow);
     }
 
-    private void CopyAssetPath(FileSystemLink asset) {
+    private void CopyAssetPath(DataSourceLink asset) {
         var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
 
         clipboard?.SetTextAsync(asset.DataRelativePath.Path);
     }
 
-    private async Task RenameAsset(FileSystemLink asset) {
+    private async Task RenameAsset(DataSourceLink asset) {
         if (asset.IsDirectory) return;
 
         var nameWithoutExtension = asset.NameWithoutExtension;
@@ -459,7 +459,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    private ReferenceBrowserVM? GetReferenceBrowserVM(params IReadOnlyList<FileSystemLink> assets) {
+    private ReferenceBrowserVM? GetReferenceBrowserVM(params IReadOnlyList<DataSourceLink> assets) {
         var recordReferences = new HashSet<IFormLinkIdentifier>(FormLinkIdentifierEqualityComparer.Instance);
         var assetReferences = new HashSet<DataRelativePath>();
 
@@ -475,7 +475,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 AddReferences(asset);
             }
 
-            void AddReferences(FileSystemLink link) {
+            void AddReferences(DataSourceLink link) {
                 var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
                 if (assetLink is null) return;
 
@@ -495,14 +495,14 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return _referenceBrowserVMFactory(assets.Count == 1 ? assets[0] : assets, references);
     }
 
-    public async Task Drop(FileSystemLink dstDirectory, DragInfo dragInfo) {
+    public async Task Drop(DataSourceLink dstDirectory, DragInfo dragInfo) {
         var draggedAssets = dragInfo.Indexes
             .Select(indexPath => {
                 var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
                 var row = dragInfo.Source.Rows[rowIndex];
                 return row.Model;
             })
-            .OfType<FileSystemLink>()
+            .OfType<DataSourceLink>()
             .ToArray();
 
         var firstDraggedAsset = draggedAssets.FirstOrDefault();
@@ -572,7 +572,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
     }
 
-    public IEnumerable<Control> GetContextMenuItems(FileSystemLink asset) {
+    public IEnumerable<Control> GetContextMenuItems(DataSourceLink asset) {
         var selectedItems = AssetTreeSource.RowSelection!.SelectedItems.ToArray();
         if (!selectedItems.Contains(asset)) {
             // We got an outdated selected items list - just use the current asset
@@ -597,8 +597,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             var assetReferences = _referenceService.GetAssetReferences(assetLink);
             var recordReferences = _referenceService.GetRecordReferences(assetLink);
             if (assetReferences.Any() || recordReferences.Any()) {
-                var fileSystemLink = new FileSystemLink(asset.DataSource, asset.DataRelativePath);
-                items.Add(_menuItemProvider.References(OpenReferences, fileSystemLink));
+                var dataSourceLink = new DataSourceLink(asset.DataSource, asset.DataRelativePath);
+                items.Add(_menuItemProvider.References(OpenReferences, dataSourceLink));
             }
         }
 
@@ -646,7 +646,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return assetDialog;
     }
 
-    private TaskDialog CreateAssetDialog(IEnumerable<FileSystemLink> footerAssets, string header, Control? content = null) {
+    private TaskDialog CreateAssetDialog(IEnumerable<DataSourceLink> footerAssets, string header, Control? content = null) {
         var dialog = CreateAssetDialog(header, content);
 
         var fileLinks = footerAssets.ToArray();
@@ -654,7 +654,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
             dialog.Footer = new ItemsControl {
                 ItemsSource = fileLinks,
-                ItemTemplate = new FuncDataTemplate<FileSystemLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
+                ItemTemplate = new FuncDataTemplate<DataSourceLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
             };
         }
 
@@ -663,7 +663,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     private void MoveToPath(DataRelativePath path) {
         var pathIndices = new IndexPath();
-        FileSystemLink? currentNode;
+        DataSourceLink? currentNode;
         var items = AssetTreeSource.Items.ToList();
         do {
             currentNode = items.Find(a => path.Path.StartsWith(a.DataRelativePath.Path, DataRelativePath.PathComparison));
@@ -679,7 +679,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             indexPathPart = indexPathPart.Append(pathIndex);
 
             var rowIndex = AssetTreeSource.Rows.ModelIndexToRowIndex(indexPathPart);
-            if (AssetTreeSource.Rows[rowIndex] is HierarchicalRow<FileSystemLink> hierarchicalRow) {
+            if (AssetTreeSource.Rows[rowIndex] is HierarchicalRow<DataSourceLink> hierarchicalRow) {
                 hierarchicalRow.IsExpanded = true;
             } else {
                 break;
@@ -690,14 +690,14 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         AssetTreeSource.RowSelection.Select(pathIndices);
     }
 
-    public void OpenAssets(IReadOnlyList<FileSystemLink?> assets) {
+    public void OpenAssets(IReadOnlyList<DataSourceLink?> assets) {
         foreach (var asset in assets.WhereNotNull()) {
             _assetController.Open(asset);
         }
     }
 
-    public IAssetLinkGetter? GetAssetLink(FileSystemLink fileSystemLink) {
-        return AssetTypeService.GetAssetLink(fileSystemLink.DataRelativePath);
+    public IAssetLinkGetter? GetAssetLink(DataSourceLink dataSourceLink) {
+        return AssetTypeService.GetAssetLink(dataSourceLink.DataRelativePath);
     }
 
     private string SearchTextPattern() {
@@ -707,7 +707,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Trim() + '*';
     }
 
-    private IEnumerable<FileSystemLink> GetFilteredFileSystemChildren(FileSystemLink directory) {
+    private IEnumerable<DataSourceLink> GetFilteredFileSystemChildren(DataSourceLink directory) {
         if (_filteredFileSystemChildrenCache.TryGetValue(directory.DataRelativePath.Path, out var cachedChildren)) return cachedChildren;
 
         var removeChars = directory.DataRelativePath.Path.Length + 1;
@@ -748,16 +748,16 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return filteredFileSystemChildren;
     }
 
-    private bool SearchAndFilterFile(FileSystemLink fileLink) {
+    private bool SearchAndFilterFile(DataSourceLink fileLink) {
         return _searchFilter.Filter(fileLink.DataRelativePath.Path, SearchTextPattern()) && FilterLink(fileLink);
     }
 
-    private bool SearchAndFilterDirectory(FileSystemLink directoryLink) {
+    private bool SearchAndFilterDirectory(DataSourceLink directoryLink) {
         return (ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(directoryLink.DataRelativePath))
          && (ShowEmptyDirectories || GetFilteredFileSystemChildren(directoryLink).Any());
     }
 
-    private bool FilterLink(FileSystemLink link) {
+    private bool FilterLink(DataSourceLink link) {
         var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
         if (assetLink is not null) {
             switch (assetLink.Type) {
@@ -832,19 +832,19 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return true;
     }
 
-    private static IEnumerable<FileSystemLink> GetAllFileSystemChildren(FileSystemLink directory) {
+    private static IEnumerable<DataSourceLink> GetAllFileSystemChildren(DataSourceLink directory) {
         return directory.EnumerateDirectoryLinks(false)
             .Concat(directory.EnumerateFileLinks(false));
     }
 
-    private static Type RowsType => typeof(SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>>);
+    private static Type RowsType => typeof(SortableRowsBase<DataSourceLink, HierarchicalRow<DataSourceLink>>);
     private static MethodInfo OnItemsCollectionChangedMethod =>
         RowsType.GetMethod("OnItemsCollectionChanged", BindingFlags.Instance | BindingFlags.NonPublic)
      ?? throw new InvalidOperationException("Could not find OnItemsCollectionChanged method on childRows.");
     private static FieldInfo ItemsField => RowsType.GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)
      ?? throw new InvalidOperationException("Could not find _items field on childRows.");
 
-    private void Tree_AddLink(FileSystemLink link) {
+    private void Tree_AddLink(DataSourceLink link) {
         if (link.IsFile) {
             if (!FilterLink(link)) return;
         } else {
@@ -852,7 +852,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var parentRow = FindParentRow(link);
-        if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
+        if (parentRow?.Children is not SortableRowsBase<DataSourceLink, HierarchicalRow<DataSourceLink>> childRows) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
         _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
@@ -865,9 +865,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
     }
 
-    private void Tree_RemoveLink(FileSystemLink link) {
+    private void Tree_RemoveLink(DataSourceLink link) {
         var parentRow = FindParentRow(link);
-        if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
+        if (parentRow?.Children is not SortableRowsBase<DataSourceLink, HierarchicalRow<DataSourceLink>> childRows) return;
         if (childRows.All(r => !Equals(r.Model, link))) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
@@ -881,19 +881,19 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
     }
 
-    private void Tree_RenameLink((FileSystemLink Old, FileSystemLink New) rename) {
+    private void Tree_RenameLink((DataSourceLink Old, DataSourceLink New) rename) {
         Tree_RemoveLink(rename.Old);
         Tree_AddLink(rename.New);
     }
 
-    private void Tree_UpdateFileLink(FileSystemLink fileLink) {
+    private void Tree_UpdateFileLink(DataSourceLink fileLink) {
         if (!SearchAndFilterFile(fileLink)) {
             Tree_RemoveLink(fileLink);
             return;
         }
 
         var parentRow = FindParentRow(fileLink);
-        if (parentRow?.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) return;
+        if (parentRow?.Children is not SortableRowsBase<DataSourceLink, HierarchicalRow<DataSourceLink>> childRows) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
 
@@ -911,7 +911,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private void Tree_UpdateAll() {
         _filteredFileSystemChildrenCache.Clear();
 
-        var rows = AssetTreeSource.Rows.OfType<HierarchicalRow<FileSystemLink>>().ToList();
+        var rows = AssetTreeSource.Rows.OfType<HierarchicalRow<DataSourceLink>>().ToList();
         foreach (var row in rows) {
             // Handle removing of root items
             if (row.ModelIndexPath.Count == 1) {
@@ -927,19 +927,19 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 }
             }
 
-            if (row.Children is not SortableRowsBase<FileSystemLink, HierarchicalRow<FileSystemLink>> childRows) continue;
+            if (row.Children is not SortableRowsBase<DataSourceLink, HierarchicalRow<DataSourceLink>> childRows) continue;
 
             var value = ItemsField.GetValue(childRows);
             if (value is not TreeDataGridItemsSourceView view) continue;
 
-            var fileSystemLinks = GetFilteredFileSystemChildren(row.Model).ToArray();
-            var oldLinks = view.Inner.OfType<FileSystemLink>().Except(fileSystemLinks).ToHashSet();
-            var newLinks = fileSystemLinks.Except(view.Inner.OfType<FileSystemLink>()).ToArray();
+            var dataSourceLinks = GetFilteredFileSystemChildren(row.Model).ToArray();
+            var oldLinks = view.Inner.OfType<DataSourceLink>().Except(dataSourceLinks).ToHashSet();
+            var newLinks = dataSourceLinks.Except(view.Inner.OfType<DataSourceLink>()).ToArray();
 
             if (oldLinks.Count > 0) {
                 if (oldLinks.Count > 100) {
                     // If there are too many links to remove, we can just reset the collection
-                    if (view.Inner is IList<FileSystemLink> list) {
+                    if (view.Inner is IList<DataSourceLink> list) {
                         list.Remove(oldLinks);
                     } else {
                         foreach (var oldLink in oldLinks) view.Inner.Remove(oldLink);

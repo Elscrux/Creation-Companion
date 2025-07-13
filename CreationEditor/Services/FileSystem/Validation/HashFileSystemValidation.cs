@@ -36,7 +36,7 @@ public sealed class HashFileSystemValidation(
                 fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.Path);
             });
 
-        async IAsyncEnumerable<FileSystemLink> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, FileSystemLink directoryPath, int level) {
+        async IAsyncEnumerable<DataSourceLink> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, DataSourceLink directoryPath, int level) {
             var nextLevel = level + 1;
 
             // Use DFS to search for new or changed files in all subdirectories 
@@ -70,7 +70,7 @@ public sealed class HashFileSystemValidation(
                 }
             }
 
-            async IAsyncEnumerable<FileSystemLink> DirectoryParse(FileSystemLink subDirectoryPath) {
+            async IAsyncEnumerable<DataSourceLink> DirectoryParse(DataSourceLink subDirectoryPath) {
                 var subDirectoryCache = hashDirectoryCache.SubDirectories
                     .FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, subDirectoryPath.Name));
 
@@ -92,7 +92,7 @@ public sealed class HashFileSystemValidation(
 
     private static void UpdateCache(
         HashFileSystemCacheData fileSystemCacheData,
-        IEnumerable<FileSystemLink> invalidatedFiles,
+        IEnumerable<DataSourceLink> invalidatedFiles,
         IDataSource dataSource) {
         foreach (var fileLink in invalidatedFiles) {
             var relativePath = fileLink.FileSystem.Path.GetRelativePath(dataSource.Path, fileLink.FullPath);
@@ -127,7 +127,7 @@ public sealed class HashFileSystemValidation(
 
         return new HashFileSystemCacheData(rootDirectoryPath.FileSystem.GetHashBytesLength(), rootDirectory);
 
-        async Task<HashDirectoryCacheData?> BuildDirectoryCache(FileSystemLink directoryPath, int level) {
+        async Task<HashDirectoryCacheData?> BuildDirectoryCache(DataSourceLink directoryPath, int level) {
             var nextLevel = level + 1;
 
             // Build directories

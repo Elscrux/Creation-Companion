@@ -14,7 +14,7 @@ public sealed class ArchiveService(
     IArchiveExtensionProvider archiveExtensionProvider,
     IEditorEnvironment editorEnvironment)
     : IArchiveService {
-    private readonly Dictionary<FileSystemLink, IArchiveReader> _archiveReaders = new();
+    private readonly Dictionary<DataSourceLink, IArchiveReader> _archiveReaders = new();
     private readonly Dictionary<IArchiveReader, IReadOnlyList<string>> _archiveDirectories = new();
 
     public string GetExtension() => archiveExtensionProvider.Get();
@@ -32,7 +32,7 @@ public sealed class ArchiveService(
         }
     }
 
-    public IArchiveReader GetReader(FileSystemLink link) {
+    public IArchiveReader GetReader(DataSourceLink link) {
         if (_archiveReaders.TryGetValue(link, out var reader)) return reader;
 
         var archiveReader =

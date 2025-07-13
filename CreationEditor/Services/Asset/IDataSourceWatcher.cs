@@ -10,52 +10,52 @@ public interface IDataSourceWatcher : IDisposable {
     /// <summary>
     /// Emits the event args of a newly created file or directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> Created { get; }
+    IObservable<DataSourceLink> Created { get; }
     /// <summary>
     /// Emits the event args of a newly created file in the data source.
     /// </summary>
-    IObservable<FileSystemLink> CreatedFile { get; }
+    IObservable<DataSourceLink> CreatedFile { get; }
     /// <summary>
     /// Emits the event args of a newly created directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> CreatedDirectory { get; }
+    IObservable<DataSourceLink> CreatedDirectory { get; }
 
     /// <summary>
     /// Emits the event args of a deleted file or directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> Deleted { get; }
+    IObservable<DataSourceLink> Deleted { get; }
     /// <summary>
     /// Emits the event args of a deleted file in the data source.
     /// </summary>
-    IObservable<FileSystemLink> DeletedFile { get; }
+    IObservable<DataSourceLink> DeletedFile { get; }
     /// <summary>
     /// Emits the event args of a deleted directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> DeletedDirectory { get; }
+    IObservable<DataSourceLink> DeletedDirectory { get; }
 
     /// <summary>
     /// Emits the event args of a changed file or directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> Changed { get; }
+    IObservable<DataSourceLink> Changed { get; }
     /// <summary>
     /// Emits the event args of a changed file in the data source.
     /// </summary>
-    IObservable<FileSystemLink> ChangedFile { get; }
+    IObservable<DataSourceLink> ChangedFile { get; }
     /// <summary>
     /// Emits the event args of a changed directory in the data source.
     /// </summary>
-    IObservable<FileSystemLink> ChangedDirectory { get; }
+    IObservable<DataSourceLink> ChangedDirectory { get; }
 
     /// <summary>
     /// Emits the event args of a renamed file or directory in the data source.
     /// </summary>
-    IObservable<(FileSystemLink Old, FileSystemLink New)> Renamed { get; }
+    IObservable<(DataSourceLink Old, DataSourceLink New)> Renamed { get; }
     /// <summary>
     /// Emits the event args of a renamed file in the data source.
     /// </summary>
-    IObservable<(FileSystemLink Old, FileSystemLink New)> RenamedFile { get; }
+    IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedFile { get; }
     /// <summary>
     /// Emits the event args of a renamed directory in the data source.
     /// </summary>
-    IObservable<(FileSystemLink Old, FileSystemLink New)> RenamedDirectory { get; }
+    IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedDirectory { get; }
 }

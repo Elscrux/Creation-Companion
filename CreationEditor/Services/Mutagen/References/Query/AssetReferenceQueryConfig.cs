@@ -16,7 +16,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     IArchiveService archiveService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, FileSystemLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter>
+    : IReferenceQueryConfig<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter>
     where TFileParser : IFileParser<IAssetLinkGetter> {
     private readonly FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifFileSystemQuery = new(fileParser, dataSourceService);
     private readonly ArchiveQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifArchiveQuery = new(fileParser, archiveService);
@@ -33,7 +33,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
         return referenceCacheBuilder.BuildCache(source, _nifFileSystemQuery, serialization, _cacheValidation);
     }
 
-    public IEnumerable<IAssetLinkGetter> GetLinks(FileSystemLink element) {
+    public IEnumerable<IAssetLinkGetter> GetLinks(DataSourceLink element) {
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }

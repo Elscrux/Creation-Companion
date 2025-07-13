@@ -21,7 +21,7 @@ public interface IArchiveService {
     /// </summary>
     /// <param name="link">File system link to the archive</param>
     /// <returns>Archive reader</returns>
-    IArchiveReader GetReader(FileSystemLink link);
+    IArchiveReader GetReader(DataSourceLink link);
 
     /// <summary>
     /// Get files of archives inside a directory.

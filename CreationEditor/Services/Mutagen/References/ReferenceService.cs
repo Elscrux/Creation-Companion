@@ -23,13 +23,13 @@ public sealed class ReferenceService : IReferenceService {
 
     // Asset reference controllers
     private readonly ReferenceController<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset> _recordAssetReferenceController;
-    private readonly ReferenceController<IDataSource, FileSystemLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _nifTextureReferenceController;
-    private readonly ReferenceController<IDataSource, FileSystemLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _scriptAssetReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _nifTextureReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _scriptAssetReferenceController;
 
     // Record reference controllers
     private readonly ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceController;
-    private readonly ReferenceController<IDataSource, FileSystemLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord> _nifSoundReferenceController;
-    private readonly ReferenceController<IDataSource, FileSystemLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord> _nifSoundReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
 
     private readonly ReferenceSubscriptionManager<IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<string, DataRelativePath, IReferencedRecord> _assetRecordReferenceSubscriptionManager;
@@ -126,7 +126,7 @@ public sealed class ReferenceService : IReferenceService {
                 _recordAssetReferenceSubscriptionManager);
 
         _nifAddonNodeReferenceController =
-            new ReferenceController<IDataSource, FileSystemLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord>(
+            new ReferenceController<IDataSource, DataSourceLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord>(
                 notificationService,
                 addonNodeReferenceUpdateTrigger,
                 intDictionaryRecordReferenceCacheController,
@@ -134,7 +134,7 @@ public sealed class ReferenceService : IReferenceService {
                 _nifAddonNodeReferenceSubscriptionManager);
 
         _nifTextureReferenceController =
-            new ReferenceController<IDataSource, FileSystemLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
+            new ReferenceController<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
                 IReferencedAsset>(
                 notificationService,
                 dataSourceReferenceUpdateTrigger,
@@ -143,7 +143,7 @@ public sealed class ReferenceService : IReferenceService {
                 _assetReferenceSubscriptionManager);
 
         _nifSoundReferenceController =
-            new ReferenceController<IDataSource, FileSystemLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
+            new ReferenceController<IDataSource, DataSourceLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
                 notificationService,
                 soundRecordReferenceUpdateTrigger,
                 stringDictionaryRecordReferenceCacheController,
@@ -151,7 +151,7 @@ public sealed class ReferenceService : IReferenceService {
                 _assetRecordReferenceSubscriptionManager);
 
         _scriptAssetReferenceController =
-            new ReferenceController<IDataSource, FileSystemLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
+            new ReferenceController<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
                 IReferencedAsset>(
                 notificationService,
                 dataSourceReferenceUpdateTrigger,
@@ -236,7 +236,7 @@ public sealed class ReferenceService : IReferenceService {
         return nifTextureReferences.Concat(scriptReferences);
     }
 
-    public IEnumerable<string> GetMissingRecordLinks(FileSystemLink fileLink) {
+    public IEnumerable<string> GetMissingRecordLinks(DataSourceLink fileLink) {
         var addonNodeIndices = _nifAddonNodeReferenceController.GetLinks(fileLink).ToHashSet();
 
         if (addonNodeIndices.Count > 0) {
@@ -263,7 +263,7 @@ public sealed class ReferenceService : IReferenceService {
         }
     }
 
-    public IEnumerable<IAssetLinkGetter> GetAssetLinks(FileSystemLink fileLink) {
+    public IEnumerable<IAssetLinkGetter> GetAssetLinks(DataSourceLink fileLink) {
         return _nifTextureReferenceController.GetLinks(fileLink)
             .Concat(_scriptAssetReferenceController.GetLinks(fileLink));
     }

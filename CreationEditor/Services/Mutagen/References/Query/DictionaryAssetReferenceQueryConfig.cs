@@ -15,7 +15,7 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     IArchiveService archiveService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, FileSystemLink, TCache, TLink>
+    : IReferenceQueryConfig<IDataSource, DataSourceLink, TCache, TLink>
     where TFileParser : IFileParser<TLink>
     where TCache : IDictionaryReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull {
@@ -35,7 +35,7 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
         return referenceCacheBuilder.BuildCache(source, _nifFileSystemQuery, _serialization, _cacheValidation);
     }
 
-    public IEnumerable<TLink> GetLinks(FileSystemLink element) {
+    public IEnumerable<TLink> GetLinks(DataSourceLink element) {
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }

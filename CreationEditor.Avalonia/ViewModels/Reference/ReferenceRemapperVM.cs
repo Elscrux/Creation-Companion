@@ -19,7 +19,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public ILinkCacheProvider LinkCacheProvider { get; }
     public object? Context { get; }
 
-    public FileSystemLink? FileSystemLink { get; }
+    public DataSourceLink? DataSourceLink { get; }
     public IAssetType? AssetType { get; }
 
     public IReferencedRecord? ReferencedRecordContext { get; }
@@ -32,7 +32,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
     public ReactiveCommand<FormKey, Unit> RemapRecordReferences { get; }
-    public ReactiveCommand<FileSystemLink, Unit> RemapAssetReferences { get; }
+    public ReactiveCommand<DataSourceLink, Unit> RemapAssetReferences { get; }
 
     public ReferenceRemapperVM(
         IDataSourceService dataSourceService,
@@ -45,10 +45,10 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
         LinkCacheProvider = linkCacheProvider;
         Context = context;
 
-        FileSystemLink = ParseAssetContext(context);
-        if (FileSystemLink is not null) {
+        DataSourceLink = ParseAssetContext(context);
+        if (DataSourceLink is not null) {
             ContextCanBeRemapped = true;
-            var assetLink = assetTypeService.GetAssetLink(FileSystemLink.DataRelativePath);
+            var assetLink = assetTypeService.GetAssetLink(DataSourceLink.DataRelativePath);
             if (assetLink is not null) {
                 AssetType = assetLink.AssetTypeInstance;
             }
@@ -73,20 +73,20 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
             });
         });
 
-        RemapAssetReferences = ReactiveCommand.Create<FileSystemLink>(fileSystemLink => {
-            if (FileSystemLink is null || AssetType is null) return;
+        RemapAssetReferences = ReactiveCommand.Create<DataSourceLink>(dataSourceLink => {
+            if (DataSourceLink is null || AssetType is null) return;
 
             IsRemapping = true;
             Task.Run(() => {
-                assetController.RemapFileReferences(FileSystemLink, fileSystemLink);
+                assetController.RemapFileReferences(DataSourceLink, dataSourceLink);
                 Dispatcher.UIThread.Post(() => IsRemapping = false);
             });
         });
     }
 
-    private static FileSystemLink? ParseAssetContext(object? context) {
+    private static DataSourceLink? ParseAssetContext(object? context) {
         return context switch {
-            FileSystemLink fileSystemLink => fileSystemLink,
+            DataSourceLink dataSourceLink => dataSourceLink,
             _ => null,
         };
     }

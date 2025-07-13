@@ -16,8 +16,8 @@ public interface IReferenceService {
     IEnumerable<IFormLinkIdentifier> GetRecordReferences(IAssetLinkGetter assetLink);
     IEnumerable<DataRelativePath> GetAssetReferences(IFormLinkIdentifier formLink);
     IEnumerable<DataRelativePath> GetAssetReferences(IAssetLinkGetter assetLink);
-    IEnumerable<string> GetMissingRecordLinks(FileSystemLink fileLink);
-    IEnumerable<IAssetLinkGetter> GetAssetLinks(FileSystemLink fileLink);
+    IEnumerable<string> GetMissingRecordLinks(DataSourceLink fileLink);
+    IEnumerable<IAssetLinkGetter> GetAssetLinks(DataSourceLink fileLink);
     int GetReferenceCount(IAssetLink assetLink);
     int GetReferenceCount(IFormLinkIdentifier formLink);
 }

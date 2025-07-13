@@ -5,8 +5,8 @@ using Noggog;
 namespace CreationEditor.Services.DataSource;
 
 [DebuggerDisplay("{ToString()}")]
-public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath dataRelativePath)
-    : IComparable<FileSystemLink>, IEquatable<FileSystemLink> {
+public sealed class DataSourceLink(IDataSource dataSource, DataRelativePath dataRelativePath)
+    : IComparable<DataSourceLink>, IEquatable<DataSourceLink> {
     public string FullPath => FileSystem.Path.Combine(DataSource.Path, DataRelativePath.Path);
     public IFileSystem FileSystem => DataSource.FileSystem;
 
@@ -22,12 +22,12 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
     public string NameWithoutExtension => FileSystem.Path.GetFileNameWithoutExtension(DataRelativePath.Path);
     public string Extension => FileSystem.Path.GetExtension(DataRelativePath.Path);
 
-    public FileSystemLink? ParentDirectory {
+    public DataSourceLink? ParentDirectory {
         get {
             var parentDirectoryPath = FileSystem.Path.GetDirectoryName(DataRelativePath.Path);
             if (parentDirectoryPath is null) return null;
 
-            return new FileSystemLink(DataSource, parentDirectoryPath);
+            return new DataSourceLink(DataSource, parentDirectoryPath);
         }
     }
 
@@ -38,21 +38,21 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
         ? FileSystem.File.Exists(FullPath)
         : FileSystem.Directory.Exists(FullPath);
 
-    public bool Contains(FileSystemLink fileSystemLink) {
-        if (!fileSystemLink.DataSource.Equals(DataSource)) return false;
+    public bool Contains(DataSourceLink dataSourceLink) {
+        if (!dataSourceLink.DataSource.Equals(DataSource)) return false;
 
         return IsFile
-            ? fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison)
+            ? dataSourceLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path, DataRelativePath.PathComparison)
             : DataRelativePath.Path.IsNullOrEmpty()
-         || fileSystemLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar,
+         || dataSourceLink.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar,
                 DataRelativePath.PathComparison);
     }
 
-    public IEnumerable<FileSystemLink> EnumerateFileLinks(bool includeSubDirectories) {
+    public IEnumerable<DataSourceLink> EnumerateFileLinks(bool includeSubDirectories) {
         return EnumerateFileLinks("*", includeSubDirectories);
     }
 
-    public IEnumerable<FileSystemLink> EnumerateFileLinks(string searchPattern, bool includeSubDirectories) {
+    public IEnumerable<DataSourceLink> EnumerateFileLinks(string searchPattern, bool includeSubDirectories) {
         if (!FileSystem.Directory.Exists(FullPath)) yield break;
 
         var files = FileSystem.Directory.EnumerateFiles(
@@ -62,15 +62,15 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            yield return new FileSystemLink(DataSource, new DataRelativePath(relativePath));
+            yield return new DataSourceLink(DataSource, new DataRelativePath(relativePath));
         }
     }
 
-    public IEnumerable<FileSystemLink> EnumerateDirectoryLinks(bool includeSubDirectories) {
+    public IEnumerable<DataSourceLink> EnumerateDirectoryLinks(bool includeSubDirectories) {
         return EnumerateDirectoryLinks("*", includeSubDirectories);
     }
 
-    public IEnumerable<FileSystemLink> EnumerateDirectoryLinks(string searchPattern, bool includeSubDirectories) {
+    public IEnumerable<DataSourceLink> EnumerateDirectoryLinks(string searchPattern, bool includeSubDirectories) {
         if (!FileSystem.Directory.Exists(FullPath)) yield break;
 
         var files = FileSystem.Directory.EnumerateDirectories(
@@ -80,11 +80,11 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            yield return new FileSystemLink(DataSource, new DataRelativePath(relativePath));
+            yield return new DataSourceLink(DataSource, new DataRelativePath(relativePath));
         }
     }
 
-    public IEnumerable<FileSystemLink> EnumerateAllLinks(bool includeSubDirectories) {
+    public IEnumerable<DataSourceLink> EnumerateAllLinks(bool includeSubDirectories) {
         return EnumerateFileLinks(includeSubDirectories)
             .Concat(EnumerateDirectoryLinks(includeSubDirectories));
     }
@@ -98,10 +98,10 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
     }
 
     public override bool Equals(object? obj) {
-        return Equals(obj as FileSystemLink);
+        return Equals(obj as DataSourceLink);
     }
 
-    public bool Equals(FileSystemLink? other) {
+    public bool Equals(DataSourceLink? other) {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
 
@@ -110,7 +110,7 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
 
     public override int GetHashCode() => HashCode.Combine(DataSource, DataRelativePath);
 
-    public int CompareTo(FileSystemLink? other) {
+    public int CompareTo(DataSourceLink? other) {
         if (ReferenceEquals(this, other)) return 0;
         if (other is null) return 1;
 
@@ -121,7 +121,7 @@ public sealed class FileSystemLink(IDataSource dataSource, DataRelativePath data
         return DataRelativePath.PathComparer.Compare(DataSource.Path, other.DataSource.Path);
     }
 
-    public int CompareToDirectoriesFirst(FileSystemLink? other) {
+    public int CompareToDirectoriesFirst(DataSourceLink? other) {
         if (ReferenceEquals(this, other)) return 0;
         if (other is null) return 1;
 
