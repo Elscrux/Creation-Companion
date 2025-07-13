@@ -61,8 +61,9 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(directoryLink, dest);
-                    FileSystemCopy(directoryLink, dest, token);
-                    RemapLinks(links);
+                    if (FileSystemCopy(directoryLink, dest, token)) {
+                        RemapLinks(links);
+                    }
                     break;
                 }
                 case DataSourceFileLink fileLink: {
@@ -75,8 +76,9 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
-                    FileSystemCopy(fileLink, dest, token);
-                    RemapLinks(links);
+                    if (FileSystemCopy(fileLink, dest, token)) {
+                        RemapLinks(links);
+                    }
                     break;
                 }
             }
@@ -95,8 +97,9 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(directoryLink, dest);
-                    FileSystemMove(directoryLink, dest, token);
-                    RemapLinks(links);
+                    if (FileSystemMove(directoryLink, dest, token)) {
+                        RemapLinks(links);
+                    }
                     break;
                 }
                 case DataSourceFileLink fileLink: {
@@ -109,8 +112,9 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
-                    FileSystemMove(fileLink, dest, token);
-                    RemapLinks(links);
+                    if (FileSystemMove(fileLink, dest, token)) {
+                        RemapLinks(links);
+                    }
                     break;
                 }
             }
@@ -129,15 +133,17 @@ public sealed class AssetController(
                     case DataSourceFileLink fileLink: {
                         var destinationFileLink = new DataSourceFileLink(fileLink.DataSource, newPath);
                         var links = GetRemapLinks(fileLink, destinationFileLink);
-                        FileSystemMove(fileLink, destinationFileLink, token);
-                        RemapLinks(links);
+                        if (FileSystemMove(fileLink, destinationFileLink, token)) {
+                            RemapLinks(links);
+                        }
                         break;
                     }
                     case DataSourceDirectoryLink directoryLink: {
                         var destinationDirectoryLink = new DataSourceDirectoryLink(directoryLink.DataSource, newPath);
                         var links = GetRemapLinks(directoryLink, destinationDirectoryLink);
-                        FileSystemMove(directoryLink, destinationDirectoryLink, token);
-                        RemapLinks(links);
+                        if (FileSystemMove(directoryLink, destinationDirectoryLink, token)) {
+                            RemapLinks(links);
+                        }
                         break;
                     }
                 }
@@ -297,11 +303,11 @@ public sealed class AssetController(
         return true;
     }
 
-    private IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) {
+    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) {
         return [new Update<DataSourceFileLink>(origin, destination)];
     }
 
-    private IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
+    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
         return origin
             .EnumerateFileLinks(true)
             .Select(fileLink => {
