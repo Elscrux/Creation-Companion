@@ -1,26 +1,36 @@
-﻿using DynamicData.Binding;
+﻿using System.Reactive.Linq;
+using DynamicData.Binding;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
-namespace CreationEditor.Services.Mutagen.References.Record;
+namespace CreationEditor.Services.Mutagen.References;
 
 public sealed partial class ReferencedRecord<TMajorRecordGetter> : ReactiveObject, IReferencedRecord<TMajorRecordGetter>
     where TMajorRecordGetter : IMajorRecordIdentifierGetter {
 
     [Reactive] public partial TMajorRecordGetter Record { get; set; }
 
-    public IObservableCollection<DataRelativePath> AssetReferences { get; } = new ObservableCollectionExtended<DataRelativePath>();
+    public IObservableCollection<DataRelativePath> AssetReferences { get; }
     public IObservableCollection<IFormLinkIdentifier> RecordReferences { get; }
+    public IObservable<int> ReferenceCount { get; } 
+    public bool HasReferences => RecordReferences.Count > 0 || AssetReferences.Count > 0;
 
     public ReferencedRecord(
         TMajorRecordGetter record,
-        IEnumerable<IFormLinkIdentifier>? references = null) {
+        IEnumerable<IFormLinkIdentifier> recordReferences,
+        IEnumerable<DataRelativePath> assetReferences) {
         Record = record;
-        RecordReferences = references is null
-            ? []
-            : new ObservableCollectionExtended<IFormLinkIdentifier>(references);
+        RecordReferences =  new ObservableCollectionExtended<IFormLinkIdentifier>(recordReferences);
+        AssetReferences = new ObservableCollectionExtended<DataRelativePath>(assetReferences);
+
+        ReferenceCount = new[] {
+                this.WhenAnyValue(x => x.RecordReferences.Count),
+                this.WhenAnyValue(x => x.AssetReferences.Count),
+            }
+            .CombineLatest()
+            .Select(x => x.Sum());
     }
 
     public override bool Equals(object? obj) {

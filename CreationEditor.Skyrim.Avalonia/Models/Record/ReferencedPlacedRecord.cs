@@ -38,4 +38,6 @@ public sealed class ReferencedPlacedRecord : ReactiveObject, IReferencedRecord<I
 
     public IObservableCollection<DataRelativePath> AssetReferences { get; } = new ObservableCollectionExtended<DataRelativePath>();
     public IObservableCollection<IFormLinkIdentifier> RecordReferences => _referencedRecord.RecordReferences;
+    public IObservable<int> ReferenceCount => _referencedRecord.ReferenceCount;
+    public bool HasReferences => _referencedRecord.HasReferences;
 }
