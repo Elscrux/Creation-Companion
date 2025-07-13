@@ -3,7 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
 using Avalonia.Controls.Templates;
+using Avalonia.Input;
 using Avalonia.VisualTree;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Views;
@@ -18,7 +20,7 @@ using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed partial class ReferenceBrowserVM : ViewModel {
-    private readonly IMenuItemProvider _menuItemProvider;
+    private readonly IContextMenuProvider _contextMenuProvider;
 
     public object? Context { get; }
     public ReferenceRemapperVM? ReferenceRemapperVM { get; }
@@ -38,14 +40,15 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserFactory,
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
         ILinkCacheProvider linkCacheProvider,
+        IContextMenuProvider contextMenuProvider,
         IMenuItemProvider menuItemProvider,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceControllerManager referenceControllerManager,
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
         object? context = null,
         params IReadOnlyList<IReferenceVM> references) {
-        _menuItemProvider = menuItemProvider;
+        _contextMenuProvider = contextMenuProvider;
         Context = context;
 
         if (Context is not null) {
@@ -143,7 +146,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
 
             var recordReferences = records
                 .SelectMany(record => record.RecordReferences)
-                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, recordReferenceController))
+                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, referenceControllerManager))
                 .Cast<IReferenceVM>()
                 .ToArray();
 
@@ -163,11 +166,38 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         RemapReferences = ReactiveCommand.Create(() => ReferenceRemapperVM?.Remap());
     }
 
-    public void ContextMenu(object? sender, ContextRequestedEventArgs e) {
+    public void ContextMenu(ContextRequestedEventArgs e) {
         if (e.Source is not Control control) return;
 
+        var recordListContext = GetRecordListContext(control);
+        if (recordListContext is null) return;
+
+        e.Handled = true;
+
+        var menuItems = _contextMenuProvider.GetMenuItems(recordListContext);
+
+        var contextFlyout = new MenuFlyout();
+        foreach (var menuItem in menuItems) {
+            contextFlyout.Items.Add(menuItem);
+        }
+
+        contextFlyout.ShowAt(control, true);
+    }
+
+    public void Primary(TappedEventArgs e) {
+        if (e.Source is not Control control) return;
+
+        var recordListContext = GetRecordListContext(control);
+        if (recordListContext is null) return;
+
+        e.Handled = true;
+
+        _contextMenuProvider.ExecutePrimary(recordListContext);
+    }
+
+    private static SelectedListContext? GetRecordListContext(Control control) {
         var treeDataGrid = control.FindAncestorOfType<TreeDataGrid>();
-        if (treeDataGrid?.RowSelection is null) return;
+        if (treeDataGrid?.RowSelection is null) return null;
 
         var selectedAssetReferences = treeDataGrid.RowSelection.SelectedItems
             .OfType<AssetReferenceVM>()
@@ -177,28 +207,10 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
             .OfType<RecordReferenceVM>()
             .ToList();
 
-        if (selectedRecordReferences.Count > 0) {
-            var records = selectedRecordReferences.Select(reference => reference.Record);
-            var contextFlyout = new MenuFlyout {
-                Items = {
-                    _menuItemProvider.Edit(EditRecord, records),
-                    _menuItemProvider.Duplicate(DuplicateRecord, records),
-                    _menuItemProvider.Delete(DeleteRecord, records),
-                },
-            };
+        if (selectedRecordReferences.Count == 0 && selectedAssetReferences.Count == 0) return null;
 
-            if (selectedRecordReferences.Exists(reference => reference.ReferencedRecord.RecordReferences.Count > 0)) {
-                var references = _menuItemProvider.References(OpenReferences, selectedRecordReferences.Select(record => record.ReferencedRecord));
-                contextFlyout.Items.Add(references);
-            }
-
-            contextFlyout.ShowAt(control, true);
-        }
-
-        if (selectedAssetReferences.Count > 0) {
-            // TODO: Implement asset reference context menu
-        }
-
-        e.Handled = true;
+        var recordReferences = selectedRecordReferences.Select(x => x.ReferencedRecord).ToArray();
+        var assetReferences = selectedAssetReferences.Select(x => x.ReferencedAsset).ToArray();
+        return new SelectedListContext(recordReferences, assetReferences);
     }
 }

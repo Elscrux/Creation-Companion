@@ -1,5 +1,5 @@
-﻿using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Actions;
+﻿using CreationEditor.Avalonia.Services.Actions;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
@@ -7,8 +7,8 @@ using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
-public sealed class PlacedActionsProvider : IRecordActionsProvider {
-    private readonly IList<RecordAction> _actions;
+public sealed class PlacedActionsProvider : IContextActionsProvider {
+    private readonly IList<ContextAction> _actions;
 
     public PlacedActionsProvider(
         IMenuItemProvider menuItemProvider,
@@ -16,7 +16,7 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
         IRecordEditorController recordEditorController,
         IRecordController recordController) {
 
-        var editBaseCommand = ReactiveCommand.Create<RecordListContext>(context => {
+        var editBaseCommand = ReactiveCommand.Create<SelectedListContext>(context => {
             if (context.SelectedRecords[0].Record is not IPlacedObjectGetter placedObject) return;
 
             var placeable = placedObject.Base.TryResolve(linkCacheProvider.LinkCache);
@@ -27,9 +27,9 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(context => context.SelectedRecords is [{ Record: IPlacedObjectGetter }],
+            new ContextAction(context => context is { SelectedRecords: [{ Record: IPlacedObjectGetter }], SelectedAssets.Count: 0 },
                 45,
-                RecordActionGroup.Modification,
+                ContextActionGroup.Modification,
                 editBaseCommand,
                 context => menuItemProvider.View(editBaseCommand, context),
                 () => menuItemProvider.View(editBaseCommand).HotKey),
@@ -37,5 +37,5 @@ public sealed class PlacedActionsProvider : IRecordActionsProvider {
 
     }
 
-    public IEnumerable<RecordAction> GetActions() => _actions;
+    public IEnumerable<ContextAction> GetActions() => _actions;
 }

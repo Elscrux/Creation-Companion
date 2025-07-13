@@ -4,7 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using CreationEditor.Avalonia.ViewModels.Record.List;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record;
@@ -77,7 +77,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
 
         var recordListContext = ViewModel.GetRecordListContext(selectedRecords);
         var contextFlyout = new MenuFlyout {
-            ItemsSource = ViewModel?.RecordContextMenuProvider.GetMenuItems(recordListContext),
+            ItemsSource = ViewModel?.ContextMenuProvider.GetMenuItems(recordListContext),
         };
 
         contextFlyout.ShowAt(control, true);
@@ -106,7 +106,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         if (dataGrid.SelectedItems is null) return;
 
         var keyGesture = new KeyGesture(e.Key, e.KeyModifiers);
-        ViewModel.RecordContextMenuProvider.TryToExecuteHotkey(
+        ViewModel.ContextMenuProvider.TryToExecuteHotkey(
             keyGesture,
             () => {
                 var selectedRecords = dataGrid.SelectedItems

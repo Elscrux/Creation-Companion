@@ -1,9 +1,0 @@
-﻿namespace CreationEditor.Avalonia.Services.Record.Actions;
-
-public sealed record RecordActionGroup(string Keyword, int Priority) {
-    public static RecordActionGroup Misc { get; } = new("Misc", 25);
-    public static RecordActionGroup Linking { get; } = new("Linking", 50);
-    public static RecordActionGroup Inspection { get; } = new("Inspecting", 75);
-    public static RecordActionGroup Modification { get; } = new("Modification", 100);
-    public static RecordActionGroup Viewing { get; } = new("Viewing", 125);
-}

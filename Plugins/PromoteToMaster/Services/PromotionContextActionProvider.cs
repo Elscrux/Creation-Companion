@@ -1,6 +1,6 @@
 ﻿using CreationEditor;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -11,15 +11,15 @@ using PromoteToMaster.Views;
 using ReactiveUI;
 namespace PromoteToMaster.Services;
 
-public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
-    private readonly IList<RecordAction> _actions;
-    public PromotionRecordActionProvider(
+public sealed class PromotionContextActionProvider : IContextActionsProvider {
+    private readonly IList<ContextAction> _actions;
+    public PromotionContextActionProvider(
         ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
         Func<IReadOnlyList<IReferencedRecord>, PromoteToMasterVM> promoteToMasterVMFactory,
         MainWindow mainWindow) {
 
-        var promoteCommand = ReactiveCommand.Create<RecordListContext>(context => {
+        var promoteCommand = ReactiveCommand.Create<SelectedListContext>(context => {
             var referenceWindow = new PromotionWindow {
                 DataContext = promoteToMasterVMFactory(context.SelectedRecords),
             };
@@ -28,9 +28,11 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(
+            new ContextAction(
                 // Only visible if any selected record has a master that is not a vanilla master
                 context => {
+                    if (context.SelectedAssets.Count > 0) return false;
+
                     return context.SelectedRecords
                         .Any(record => {
                             var modKey = record.FormKey.ModKey;
@@ -40,7 +42,7 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
                         });
                 },
                 0,
-                RecordActionGroup.Modification,
+                ContextActionGroup.Modification,
                 promoteCommand,
                 context => menuItemProvider.Custom(
                     promoteCommand,
@@ -51,5 +53,5 @@ public sealed class PromotionRecordActionProvider : IRecordActionsProvider {
         ];
     }
 
-    public IEnumerable<RecordAction> GetActions() => _actions;
+    public IEnumerable<ContextAction> GetActions() => _actions;
 }

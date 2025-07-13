@@ -22,10 +22,12 @@ public partial class ReferenceBrowser : ReactiveUserControl<ReferenceBrowserVM> 
         var expanderCell = visual.FindAncestorOfType<TreeDataGridExpanderCell>();
         if (expanderCell is not null) {
             expanderCell.IsExpanded = !expanderCell.IsExpanded;
+        } else {
+            ViewModel?.Primary(e);
         }
     }
 
     private void ReferenceDataGrid_OnContextRequested(object? sender, ContextRequestedEventArgs e) {
-        ViewModel?.ContextMenu(sender, e);
+        ViewModel?.ContextMenu(e);
     }
 }

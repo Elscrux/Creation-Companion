@@ -1,6 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Actions;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model.List;
 using LeveledList.Model.Tier;
@@ -9,39 +9,41 @@ using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace LeveledList.Services.Record.Actions;
 
-public sealed class TierRecordActionProvider : IRecordActionsProvider {
+public sealed class TierContextActionProvider : IContextActionsProvider {
     private readonly ILeveledListRecordTypeProvider _leveledListRecordTypeProvider;
     private readonly ITierController _tierController;
-    private readonly IList<RecordAction> _actions;
-    private readonly ReactiveCommand<(RecordListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
+    private readonly IList<ContextAction> _actions;
+    private readonly ReactiveCommand<(SelectedListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
 
-    public TierRecordActionProvider(
+    public TierContextActionProvider(
         ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
         ITierController tierController) {
         _leveledListRecordTypeProvider = leveledListRecordTypeProvider;
         _tierController = tierController;
 
-        _addToTierCommand = ReactiveCommand.Create<(RecordListContext Context, TierIdentifier Tier)>(x => {
+        _addToTierCommand = ReactiveCommand.Create<(SelectedListContext Context, TierIdentifier Tier)>(x => {
             foreach (var record in x.Context.SelectedRecords) {
                 _tierController.SetRecordTier(record.Record, x.Tier);
             }
         });
 
         _actions = [
-            new RecordAction(
-                context => context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
+            new ContextAction(
+                context => context.SelectedAssets.Count == 0
+                 && context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
-                RecordActionGroup.Misc,
+                ContextActionGroup.Misc,
                 null,
                 context => new MenuItem {
                     Header = "Add to Tier",
                     Icon = new SymbolIcon { Symbol = Symbol.Add },
                     ItemsSource = GetMenuItems(context),
                 }),
-            new RecordAction(
-                context => context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
+            new ContextAction(
+                context => context.SelectedAssets.Count == 0 
+                 && context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
-                RecordActionGroup.Misc,
+                ContextActionGroup.Misc,
                 null,
                 context => new MenuItem {
                     Header = "Remove from Tier",
@@ -55,7 +57,7 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
         ];
     }
 
-    private IEnumerable<MenuItem> GetMenuItems(RecordListContext context) {
+    private IEnumerable<MenuItem> GetMenuItems(SelectedListContext context) {
         if (context.SelectedRecords.Count == 0) return [];
 
         var listRecordType = _leveledListRecordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
@@ -89,5 +91,5 @@ public sealed class TierRecordActionProvider : IRecordActionsProvider {
         }
     }
 
-    public IEnumerable<RecordAction> GetActions() => _actions;
+    public IEnumerable<ContextAction> GetActions() => _actions;
 }

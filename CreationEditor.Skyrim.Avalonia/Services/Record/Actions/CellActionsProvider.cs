@@ -1,20 +1,20 @@
 ﻿using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
-public sealed class CellActionsProvider : IRecordActionsProvider {
-    private readonly IList<RecordAction> _actions;
+public sealed class CellActionsProvider : IContextActionsProvider {
+    private readonly IList<ContextAction> _actions;
 
     public CellActionsProvider(
         IMenuItemProvider menuItemProvider,
         IDockFactory dockFactory) {
 
-        var viewCommand = ReactiveCommand.CreateFromTask<RecordListContext>(async context => {
+        var viewCommand = ReactiveCommand.CreateFromTask<SelectedListContext>(async context => {
             if (context.SelectedRecords[0].Record is not ICellGetter cell) return;
 
             var cellLoadStrategy = context.GetSetting<ICellLoadStrategy>();
@@ -29,9 +29,9 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(context => context.SelectedRecords is [{ Record: ICellGetter }],
+            new ContextAction(context => context is { SelectedRecords: [{ Record: ICellGetter }], SelectedAssets.Count: 0 },
                 100,
-                RecordActionGroup.Viewing,
+                ContextActionGroup.Viewing,
                 viewCommand,
                 context => menuItemProvider.View(viewCommand, context),
                 () => menuItemProvider.View(viewCommand).HotKey,
@@ -39,5 +39,5 @@ public sealed class CellActionsProvider : IRecordActionsProvider {
         ];
     }
 
-    public IEnumerable<RecordAction> GetActions() => _actions;
+    public IEnumerable<ContextAction> GetActions() => _actions;
 }

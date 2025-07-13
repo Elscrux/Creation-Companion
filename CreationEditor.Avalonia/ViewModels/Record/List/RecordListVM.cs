@@ -2,7 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
-using CreationEditor.Avalonia.Services.Record.Actions;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Services.Mutagen.References.Record;
 using DynamicData;
@@ -17,8 +17,8 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
 
     public IRecordProvider RecordProvider { get; }
     [Reactive] public partial IReferencedRecord? SelectedRecord { get; set; }
-    public IRecordContextMenuProvider RecordContextMenuProvider { get; }
-    public ReactiveCommand<RecordListContext, Unit> PrimaryCommand { get; }
+    public IContextMenuProvider ContextMenuProvider { get; }
+    public ReactiveCommand<SelectedListContext, Unit> PrimaryCommand { get; }
 
     public IObservableCollection<DataGridColumn> Columns { get; } = new ObservableCollectionExtended<DataGridColumn>();
 
@@ -28,10 +28,10 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
 
     public RecordListVM(
         IRecordProvider recordProvider,
-        IRecordContextMenuProvider recordContextMenuProvider,
+        IContextMenuProvider contextMenuProvider,
         IObservable<Func<IReferencedRecord, bool>>? customFilter = null) {
         RecordProvider = recordProvider.DisposeWith(this);
-        RecordContextMenuProvider = recordContextMenuProvider;
+        ContextMenuProvider = contextMenuProvider;
 
         Records = RecordProvider.RecordCache
             .Connect()
@@ -51,13 +51,13 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
                 (filtering, busy) => filtering || busy)
             .ObserveOnGui();
 
-        PrimaryCommand = ReactiveCommand.Create<RecordListContext>(context => {
-            RecordContextMenuProvider.ExecutePrimary(context);
+        PrimaryCommand = ReactiveCommand.Create<SelectedListContext>(context => {
+            ContextMenuProvider.ExecutePrimary(context);
         });
     }
 
-    public RecordListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
-        return new RecordListContext(referencedRecords, RecordProvider.RecordTypes.ToList(), _settings);
+    public SelectedListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
+        return new SelectedListContext(referencedRecords, [], RecordProvider.RecordTypes.ToList(), _settings);
     }
 
     public IRecordListVM AddSetting<T>(T t) {

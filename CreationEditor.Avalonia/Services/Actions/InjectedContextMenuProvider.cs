@@ -1,13 +1,13 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
-namespace CreationEditor.Avalonia.Services.Record.Actions;
+namespace CreationEditor.Avalonia.Services.Actions;
 
-public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvider {
-    private readonly Dictionary<RecordActionGroup, List<RecordAction>> _groups;
-    private readonly Dictionary<KeyGesture, List<RecordAction>> _hotKeys = [];
+public sealed class InjectedContextMenuProvider : IContextMenuProvider {
+    private readonly Dictionary<ContextActionGroup, List<ContextAction>> _groups;
+    private readonly Dictionary<KeyGesture, List<ContextAction>> _hotKeys = [];
 
-    public InjectedRecordContextMenuProvider(IEnumerable<IRecordActionsProvider> recordActionsProvider) {
-        _groups = recordActionsProvider
+    public InjectedContextMenuProvider(IEnumerable<IContextActionsProvider> contextActionProviders) {
+        _groups = contextActionProviders
             .Select(p => p.GetActions())
             .SelectMany(x => x)
             .GroupBy(x => x.Group)
@@ -18,24 +18,24 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
             .GroupBy(x => x.HotKeyFactory?.Invoke())) {
             if (actions.Key is null) continue;
 
-            var recordActions = actions
+            var contextAction = actions
                 .OrderByDescending(x => x.Priority)
                 .ToList();
 
-            _hotKeys.Add(actions.Key, recordActions);
+            _hotKeys.Add(actions.Key, contextAction);
         }
     }
 
-    public void TryToExecuteHotkey(KeyGesture keyGesture, Func<RecordListContext> contextFactory) {
-        if (!_hotKeys.TryGetValue(keyGesture, out var recordActions)) return;
+    public void TryToExecuteHotkey(KeyGesture keyGesture, Func<SelectedListContext> contextFactory) {
+        if (!_hotKeys.TryGetValue(keyGesture, out var contextActions)) return;
 
-        var recordAction = recordActions.FirstOrDefault();
-        if (recordAction is null) return;
+        var contextAction = contextActions.FirstOrDefault();
+        if (contextAction is null) return;
 
-        using var disposable = recordAction.Command?.Execute(contextFactory()).Subscribe();
+        using var disposable = contextAction.Command?.Execute(contextFactory()).Subscribe();
     }
 
-    public IEnumerable<object> GetMenuItems(RecordListContext context) {
+    public IEnumerable<object> GetMenuItems(SelectedListContext context) {
         var groups = _groups.OrderByDescending(x => x.Key.Priority)
             // Get all the menu items for each group
             .Select(p => p.Value
@@ -60,7 +60,7 @@ public sealed class InjectedRecordContextMenuProvider : IRecordContextMenuProvid
         }
     }
 
-    public void ExecutePrimary(RecordListContext context) {
+    public void ExecutePrimary(SelectedListContext context) {
         var primary = _groups
             .SelectMany(x => x.Value)
             .FirstOrDefault(x => x.IsPrimary && x.IsVisible(context));

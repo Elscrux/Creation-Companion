@@ -2,23 +2,23 @@
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Actions;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
-public class AssetRecordActionsProvider : IRecordActionsProvider {
-    private readonly IList<RecordAction> _actions;
+public class AssetContextActionsProvider : IContextActionsProvider {
+    private readonly IList<ContextAction> _actions;
 
-    public AssetRecordActionsProvider(
+    public AssetContextActionsProvider(
         IFileSystem fileSystem,
         IDockFactory dockFactory,
         IMenuItemProvider menuItemProvider) {
 
-        var goToAsset = ReactiveCommand.CreateFromTask<RecordListContext>(async context => {
+        var goToAsset = ReactiveCommand.CreateFromTask<SelectedListContext>(async context => {
             if (context.SelectedRecords[0].Record is not IModeledGetter { Model.File.DataRelativePath: var dataRelativePath }) return;
 
             var assetBrowser = await dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
@@ -28,11 +28,11 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
         });
 
         _actions = [
-            new RecordAction(
-                context => context.SelectedRecords is [{ Record: IModeledGetter { Model.File.DataRelativePath: var rawFilePath } }]
+            new ContextAction(
+                context => context is { SelectedRecords: [{ Record: IModeledGetter { Model.File.DataRelativePath: var rawFilePath } }], SelectedAssets.Count: 0 }
                  && !string.IsNullOrWhiteSpace(rawFilePath.Path),
                 50,
-                RecordActionGroup.Linking,
+                ContextActionGroup.Linking,
                 goToAsset,
                 context => {
                     var dataRelativePath = (context.SelectedRecords[0].Record as IModeledGetter)!.Model!.File.DataRelativePath;
@@ -47,5 +47,5 @@ public class AssetRecordActionsProvider : IRecordActionsProvider {
         ];
     }
 
-    public IEnumerable<RecordAction> GetActions() => _actions;
+    public IEnumerable<ContextAction> GetActions() => _actions;
 }

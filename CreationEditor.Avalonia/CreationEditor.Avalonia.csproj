@@ -99,11 +99,11 @@
         <Compile Update="Services\Avalonia\MenuItemProvider.cs">
           <DependentUpon>IMenuItemProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Record\Actions\GenericRecordActionsProvider.cs">
-          <DependentUpon>IRecordActionsProvider.cs</DependentUpon>
+        <Compile Update="Services\Record\Actions\GenericContextActionsProvider.cs">
+          <DependentUpon>IContextActionsProvider.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Record\Actions\InjectedRecordContextMenuProvider.cs">
-          <DependentUpon>IRecordContextMenuProvider.cs</DependentUpon>
+        <Compile Update="Services\Record\Actions\InjectedContextMenuProvider.cs">
+          <DependentUpon>IContextMenuProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Mod\SingleModPickerVM.cs">
           <DependentUpon>IModPickerVM.cs</DependentUpon>
