@@ -33,8 +33,9 @@ public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvi
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(IReadOnlyDictionary<IModGetter, RecordReferenceCache> caches, IFormLinkIdentifier link) {
+        var modKeys = caches.Keys.Select(x => x.ModKey).ToArray();
         var priorityOrderedCaches = caches
-            .OrderBy(x => editorEnvironment.LinkCache.PriorityOrder.IndexOf(x.Key))
+            .OrderBy(x => modKeys.IndexOf(x.Key.ModKey))
             .ToArray();
 
         foreach (var (mod, cache) in priorityOrderedCaches) {
