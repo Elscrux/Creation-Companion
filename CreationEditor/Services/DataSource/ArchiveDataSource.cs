@@ -30,6 +30,8 @@ public sealed class ArchiveDataSource : IDataSource {
         return new DataSourceMemento(DataSourceType.Archive, Name, Path, IsReadOnly);
     }
 
+    public FileSystemLink GetRootLink() => ArchiveLink;
+
     public string GetFullPath(DataRelativePath path) {
         return FileSystem.Path.Combine(Path, path.Path);
     }

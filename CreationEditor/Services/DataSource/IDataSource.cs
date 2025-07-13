@@ -13,6 +13,7 @@ public interface IDataSource : IMementoProvider<DataSourceMemento> {
 
     IFileSystem FileSystem { get; }
 
+    FileSystemLink GetRootLink();
     string GetFullPath(DataRelativePath path);
     bool FileExists(DataRelativePath path);
     bool DirectoryExists(DataRelativePath path);
