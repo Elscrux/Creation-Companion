@@ -3,4 +3,4 @@ using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.FileSystem.Validation;
 
-public interface IFileSystemValidation : IInternalCacheValidation<IDataSource, DataRelativePath>;
+public interface IFileSystemValidation : IInternalCacheValidation<FileSystemDataSource, DataRelativePath>;

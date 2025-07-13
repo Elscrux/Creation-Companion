@@ -21,7 +21,7 @@ public sealed class DataSourceService : IDataSourceService {
     /// <summary>
     /// Orders archives based on the load order of the archive files in the data directory.
     /// </summary>
-    private readonly IComparer<DataSourceLink> _archivePriorityComparer;
+    private readonly IComparer<DataSourceFileLink> _archivePriorityComparer;
 
     private readonly ReplaySubject<IReadOnlyList<IDataSource>> _dataSourcesChanged = new(1);
     private readonly IStateRepository<DataSourceMemento, DataSourceMemento, NamedGuid> _stateRepository;
@@ -37,7 +37,7 @@ public sealed class DataSourceService : IDataSourceService {
         _archiveService = archiveService;
         _stateRepository = stateRepositoryFactory.Create("DataSource");
 
-        _archivePriorityComparer = new FuncComparer<DataSourceLink>((x, y) => {
+        _archivePriorityComparer = new FuncComparer<DataSourceFileLink>((x, y) => {
             // Collect archive files in the data directory and sort them based on the load order
             var archiveLoadOrder = archiveService.GetArchiveLoadOrder().ToArray();
 
@@ -60,7 +60,7 @@ public sealed class DataSourceService : IDataSourceService {
         DataSourceComparer = new FuncComparer<IDataSource>((s1, s2) => {
             return s1 switch {
                 ArchiveDataSource a1 => s2 switch {
-                    ArchiveDataSource a2 => _archivePriorityComparer.Compare(a1.ArchiveLink, a2.ArchiveLink),
+                    ArchiveDataSource a2 => _archivePriorityComparer.Compare(a1.ArchiveFileLink, a2.ArchiveFileLink),
                     _ => -1,
                 },
                 FileSystemDataSource => s2 switch {
@@ -118,7 +118,7 @@ public sealed class DataSourceService : IDataSourceService {
             var dataSource = fileSystemDataSources.FirstOrDefault(dataSource => dataSource.Path == archiveDataSourcePath);
             if (dataSource is null) continue;
 
-            var archiveLink = new DataSourceLink(dataSource, _fileSystem.Path.GetFileName(path));
+            var archiveLink = new DataSourceFileLink(dataSource, _fileSystem.Path.GetFileName(path));
             if (archiveLink.Exists()) {
                 var archiveDataSource = new ArchiveDataSource(_fileSystem, path, _archiveService.GetReader(archiveLink), archiveLink);
                 archiveDataSources.Add(archiveDataSource);
@@ -133,29 +133,29 @@ public sealed class DataSourceService : IDataSourceService {
         return dataSource is not null;
     }
 
-    public DataSourceLink? GetFileLink(string path) {
+    public DataSourceFileLink? GetFileLink(string path) {
         if (!_fileSystem.Path.IsPathRooted(path)) return GetFileLink(new DataRelativePath(path));
 
         var dataSource = PriorityOrder.FirstOrDefault(d => path.StartsWith(d.Path, DataRelativePath.PathComparison));
         if (dataSource is null) return null;
 
         var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, path);
-        return new DataSourceLink(dataSource, relativePath);
+        return new DataSourceFileLink(dataSource, relativePath);
     }
 
-    public DataSourceLink? GetFileLink(DataRelativePath dataRelativePath) {
+    public DataSourceFileLink? GetFileLink(DataRelativePath dataRelativePath) {
         var firstMatch = PriorityOrder.FirstOrDefault(d => d.FileExists(dataRelativePath));
         if (firstMatch is null) return null;
 
-        return new DataSourceLink(firstMatch, dataRelativePath);
+        return new DataSourceFileLink(firstMatch, dataRelativePath);
     }
 
-    public bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out DataSourceLink? link) {
+    public bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out DataSourceFileLink? link) {
         link = GetFileLink(dataRelativePath);
         return link is not null;
     }
 
-    public IEnumerable<DataSourceLink> EnumerateFileLinksInAllDataSources(
+    public IEnumerable<DataSourceFileLink> EnumerateFileLinksInAllDataSources(
         DataRelativePath directoryPath,
         bool includeSubDirectories,
         string searchPattern = "*") {
@@ -169,7 +169,7 @@ public sealed class DataSourceService : IDataSourceService {
             foreach (var dataRelativePath in files) {
                 if (!referencedFiles.Add(dataRelativePath)) continue;
 
-                yield return new DataSourceLink(dataSource, dataRelativePath);
+                yield return new DataSourceFileLink(dataSource, dataRelativePath);
             }
         }
     }
@@ -189,7 +189,7 @@ public sealed class DataSourceService : IDataSourceService {
         archiveDataSources = archiveDataSources
             .Concat(GetNestedArchiveDataSources(fileSystemDataSources))
             .DistinctBy(x => x.Path)
-            .OrderBy(dataSource => dataSource.ArchiveLink, _archivePriorityComparer)
+            .OrderBy(dataSource => dataSource.ArchiveFileLink, _archivePriorityComparer)
             .ToList();
 
         // Create order where archives are loaded first, and then overwritten by file system data sources
@@ -232,7 +232,7 @@ public sealed class DataSourceService : IDataSourceService {
         _dataSourcesChanged.OnNext(ListedOrder);
     }
 
-    private IEnumerable<DataSourceLink> GetArchives(IEnumerable<FileSystemDataSource> dataSources) {
+    private IEnumerable<DataSourceFileLink> GetArchives(IEnumerable<FileSystemDataSource> dataSources) {
         return dataSources
             .SelectMany(dataSource => dataSource.GetRootLink()
                 .EnumerateFileLinks("*" + _archiveService.GetExtension(), false));

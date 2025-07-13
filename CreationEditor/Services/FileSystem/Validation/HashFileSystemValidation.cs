@@ -14,7 +14,7 @@ public sealed class HashFileSystemValidation(
     /// </summary>
     private const int MaxParallelLevel = 2;
 
-    public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(IDataSource source) {
+    public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(FileSystemDataSource source) {
         var validate = fileSystemValidationSerialization.Validate(source.Path);
         if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.Path, out var fileSystemCacheData)) {
             var buildCache = await BuildCache(source);
@@ -36,20 +36,23 @@ public sealed class HashFileSystemValidation(
                 fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.Path);
             });
 
-        async IAsyncEnumerable<DataSourceLink> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, DataSourceLink directoryPath, int level) {
+        async IAsyncEnumerable<DataSourceFileLink> ValidateDirectoryRec(
+            HashDirectoryCacheData hashDirectoryCache,
+            DataSourceDirectoryLink directoryLink,
+            int level) {
             var nextLevel = level + 1;
 
             // Use DFS to search for new or changed files in all subdirectories 
             // For levels up until MaxParallelLevel, we can use run this recursive search in parallel
             if (level > MaxParallelLevel) {
-                foreach (var subDirectoryName in directoryPath.EnumerateDirectoryLinks(false)) {
+                foreach (var subDirectoryName in directoryLink.EnumerateDirectoryLinks(false)) {
                     await foreach (var fileLink in DirectoryParse(subDirectoryName)) {
                         yield return fileLink;
                     }
                 }
             } else {
                 var directoryResults = await Task.WhenAll(
-                    directoryPath.EnumerateDirectoryLinks(false)
+                    directoryLink.EnumerateDirectoryLinks(false)
                         .Select(subDirectoryName => Task.Run(() => DirectoryParse(subDirectoryName))));
 
                 foreach (var files in directoryResults) {
@@ -61,7 +64,7 @@ public sealed class HashFileSystemValidation(
 
             // Check all files in this directory and compare their hashes with the cache
             foreach (var fileExtension in fileExtensions) {
-                foreach (var fileLink in directoryPath.EnumerateFileLinks('*' + fileExtension, false)) {
+                foreach (var fileLink in directoryLink.EnumerateFileLinks('*' + fileExtension, false)) {
                     var fileCache = hashDirectoryCache.Files.FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, fileLink.Name));
 
                     if (fileCache is null || !fileLink.FileSystem.IsFileHashValid(fileLink.FullPath, fileCache.Hash)) {
@@ -70,19 +73,19 @@ public sealed class HashFileSystemValidation(
                 }
             }
 
-            async IAsyncEnumerable<DataSourceLink> DirectoryParse(DataSourceLink subDirectoryPath) {
+            async IAsyncEnumerable<DataSourceFileLink> DirectoryParse(DataSourceDirectoryLink subDirectoryLink) {
                 var subDirectoryCache = hashDirectoryCache.SubDirectories
-                    .FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, subDirectoryPath.Name));
+                    .FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, subDirectoryLink.Name));
 
                 if (subDirectoryCache is null) {
                     // No cache exists for this subdirectory, return all new files in this directory as invalid
                     foreach (var fileExtension in fileExtensions) {
-                        foreach (var filePath in subDirectoryPath.EnumerateFileLinks('*' + fileExtension, true)) {
+                        foreach (var filePath in subDirectoryLink.EnumerateFileLinks('*' + fileExtension, true)) {
                             yield return filePath;
                         }
                     }
                 } else {
-                    await foreach (var filePath in ValidateDirectoryRec(subDirectoryCache, subDirectoryPath, nextLevel)) {
+                    await foreach (var filePath in ValidateDirectoryRec(subDirectoryCache, subDirectoryLink, nextLevel)) {
                         yield return filePath;
                     }
                 }
@@ -92,8 +95,8 @@ public sealed class HashFileSystemValidation(
 
     private static void UpdateCache(
         HashFileSystemCacheData fileSystemCacheData,
-        IEnumerable<DataSourceLink> invalidatedFiles,
-        IDataSource dataSource) {
+        IEnumerable<DataSourceFileLink> invalidatedFiles,
+        FileSystemDataSource dataSource) {
         foreach (var fileLink in invalidatedFiles) {
             var relativePath = fileLink.FileSystem.Path.GetRelativePath(dataSource.Path, fileLink.FullPath);
 
@@ -121,28 +124,28 @@ public sealed class HashFileSystemValidation(
         }
     }
 
-    private async Task<HashFileSystemCacheData> BuildCache(IDataSource rootDirectoryPath) {
-        var rootDirectory = await BuildDirectoryCache(rootDirectoryPath.GetRootLink(), 1)
-         ?? new HashDirectoryCacheData(rootDirectoryPath.Name, [], []);
+    private async Task<HashFileSystemCacheData> BuildCache(FileSystemDataSource source) {
+        var rootDirectory = await BuildDirectoryCache(source.GetRootLink(), 1)
+         ?? new HashDirectoryCacheData(source.Name, [], []);
 
-        return new HashFileSystemCacheData(rootDirectoryPath.FileSystem.GetHashBytesLength(), rootDirectory);
+        return new HashFileSystemCacheData(source.FileSystem.GetHashBytesLength(), rootDirectory);
 
-        async Task<HashDirectoryCacheData?> BuildDirectoryCache(DataSourceLink directoryPath, int level) {
+        async Task<HashDirectoryCacheData?> BuildDirectoryCache(DataSourceDirectoryLink directoryLink, int level) {
             var nextLevel = level + 1;
 
             // Build directories
             IList<HashDirectoryCacheData> subDirectories;
             if (level > MaxParallelLevel) {
                 var d = new List<HashDirectoryCacheData>();
-                foreach (var subDirectoryPath in directoryPath.EnumerateDirectoryLinks(false)) {
-                    var hashDirectoryCacheData = await BuildDirectoryCache(subDirectoryPath, nextLevel);
+                foreach (var subDirectoryLink in directoryLink.EnumerateDirectoryLinks(false)) {
+                    var hashDirectoryCacheData = await BuildDirectoryCache(subDirectoryLink, nextLevel);
                     if (hashDirectoryCacheData is not null) {
                         d.Add(hashDirectoryCacheData);
                     }
                 }
                 subDirectories = d;
             } else {
-                var hashDirectoryCacheData = await Task.WhenAll(directoryPath.EnumerateDirectoryLinks(false)
+                var hashDirectoryCacheData = await Task.WhenAll(directoryLink.EnumerateDirectoryLinks(false)
                     .Select(dir => Task.Run(() => BuildDirectoryCache(dir, nextLevel))));
 
                 subDirectories = hashDirectoryCacheData.WhereNotNull().ToArray();
@@ -151,7 +154,7 @@ public sealed class HashFileSystemValidation(
             // Build files
             var files = new List<HashFileCacheData>();
             foreach (var fileExtension in fileExtensions) {
-                foreach (var filePath in directoryPath.EnumerateFileLinks('*' + fileExtension, false)) {
+                foreach (var filePath in directoryLink.EnumerateFileLinks('*' + fileExtension, false)) {
                     var hash = filePath.FileSystem.GetFileHash(filePath.FullPath);
 
                     files.Add(new HashFileCacheData(filePath.Name, hash));
@@ -161,7 +164,7 @@ public sealed class HashFileSystemValidation(
             // Finalize cache
             if (subDirectories.Count == 0 && files.Count == 0) return null;
 
-            return new HashDirectoryCacheData(directoryPath.Name, subDirectories, files);
+            return new HashDirectoryCacheData(directoryLink.Name, subDirectories, files);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Cache;
 using CreationEditor.Services.Mutagen.References.Parser;
@@ -7,19 +8,23 @@ namespace CreationEditor.Services.Mutagen.References.Query;
 
 public sealed class ArchiveQuery<TCache, TLink>(
     IFileParser<TLink> fileParser,
+    IAssetTypeService assetTypeService,
     IArchiveService archiveService)
-    : IReferenceQuery<IDataSource, TCache, TLink, DataRelativePath>
+    : IReferenceQuery<ArchiveDataSource, TCache, TLink, DataRelativePath>
     where TCache : IReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull {
     public string Name => fileParser.Name + " (Archive)";
-    public string GetSourceName(IDataSource source) => source.Name;
-    public IDataSource? ReferenceToSource(DataRelativePath reference) => null;
-    public void FillCache(IDataSource source, TCache cache) {
+    public string GetSourceName(ArchiveDataSource source) => source.Name;
+    public ArchiveDataSource? ReferenceToSource(DataRelativePath reference) => null;
+    public void FillCache(ArchiveDataSource source, TCache cache) {
         var archiveReader = archiveService.GetReader(source.GetRootLink());
 
         foreach (var archiveFile in archiveReader.Files) {
+            var assetType = assetTypeService.GetAssetType(archiveFile.Path);
+            if (fileParser.AssetType != assetType) continue;
+
             var extension = source.FileSystem.Path.GetExtension(archiveFile.Path);
-            if (!fileParser.FileExtensions.Contains(extension, DataRelativePath.PathComparer)) continue;
+            if (!fileParser.AssetType.FileExtensions.Contains(extension, DataRelativePath.PathComparer)) continue;
 
             var fileSystem = source.FileSystem;
             var tempPath = fileSystem.Path.Combine(fileSystem.Path.GetTempPath(), fileSystem.Path.GetRandomFileName());

@@ -13,11 +13,9 @@ public sealed class NifTextureParser(
     : IFileParser<IAssetLinkGetter> {
 
     public string Name => "Nif Textures";
-    public IEnumerable<string> FileExtensions => assetTypeService.Provider.Model.FileExtensions;
+    public IAssetType AssetType => assetTypeService.Provider.Model;
 
     public IEnumerable<IAssetLinkGetter> ParseFile(string filePath, IFileSystem fileSystem) {
-        if (assetTypeService.GetAssetType(filePath) != assetTypeService.Provider.Model) return [];
-
         var results = new HashSet<IAssetLinkGetter>();
         if (!fileSystem.File.Exists(filePath)) return results;
 

@@ -4,7 +4,7 @@ using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
-public sealed record AssetDataSourceLink(DataSourceLink DataSourceLink, IAssetLinkGetter AssetLink);
+public sealed record AssetDataSourceLink(IDataSourceLink DataSourceLink, IAssetLinkGetter AssetLink);
 
 public sealed class AssetLinkDragDrop : AvaloniaObject, ICustomDragDropData<AssetDataSourceLink> {
     public static readonly AttachedProperty<Func<object?, AssetDataSourceLink>?> GetAssetLinkProperty =

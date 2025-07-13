@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
 public interface IFileParser<out TLink> {
@@ -8,9 +9,9 @@ public interface IFileParser<out TLink> {
     string Name { get; }
 
     /// <summary>
-    /// File extension of the files to parse.
+    /// Asset type that this parser is responsible for.
     /// </summary>
-    IEnumerable<string> FileExtensions { get; }
+    IAssetType AssetType { get; }
 
     /// <summary>
     /// Parses the given file into a list of asset references.

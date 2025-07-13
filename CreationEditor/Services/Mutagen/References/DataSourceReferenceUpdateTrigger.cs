@@ -11,15 +11,15 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
     ILogger logger,
     IDataSourceService dataSourceService,
     IDataSourceWatcherProvider dataSourceWatcherProvider)
-    : IReferenceUpdateTrigger<IDataSource, DataSourceLink, TCache, TLink, DataRelativePath, TSubscriber>
+    : IReferenceUpdateTrigger<IDataSource, DataSourceFileLink, TCache, TLink, DataRelativePath, TSubscriber>
     where TCache : IReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull
     where TSubscriber : IReferenced {
     private readonly CompositeDisposable _dataSourceUpdatedDisposables = new();
-    public DataRelativePath ToReference(DataSourceLink element) => element.DataRelativePath;
-    public IDataSource GetSourceFor(DataSourceLink reference) => reference.DataSource;
+    public DataRelativePath ToReference(DataSourceFileLink element) => element.DataRelativePath;
+    public IDataSource GetSourceFor(DataSourceFileLink reference) => reference.DataSource;
     public void SetupSubscriptions(
-        ReferenceController<IDataSource, DataSourceLink, TCache, TLink, DataRelativePath, TSubscriber> referenceController,
+        ReferenceController<IDataSource, DataSourceFileLink, TCache, TLink, DataRelativePath, TSubscriber> referenceController,
         CompositeDisposable disposables) {
 
         dataSourceService.DataSourcesChanged
@@ -57,7 +57,7 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
                         })
                         .DisposeWith(_dataSourceUpdatedDisposables);
 
-                    watcher.Changed
+                    watcher.ChangedFile
                         .Subscribe(link => {
                             var registerUpdate = referenceController.RegisterUpdate(link);
                             registerUpdate(link);

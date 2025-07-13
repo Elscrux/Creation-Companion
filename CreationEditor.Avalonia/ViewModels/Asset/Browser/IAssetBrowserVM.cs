@@ -34,24 +34,24 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     ReactiveCommand<Unit, Unit> Undo { get; }
     ReactiveCommand<Unit, Unit> Redo { get; }
 
-    ReactiveCommand<IReadOnlyList<DataSourceLink?>, Unit> Open { get; }
-    ReactiveCommand<IReadOnlyList<DataSourceLink?>, Unit> Delete { get; }
-    ReactiveCommand<DataSourceLink, Unit> Rename { get; }
-    ReactiveCommand<DataSourceLink, Unit> OpenReferences { get; }
+    ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Open { get; }
+    ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Delete { get; }
+    ReactiveCommand<IDataSourceLink, Unit> Rename { get; }
+    ReactiveCommand<DataSourceFileLink, Unit> OpenReferences { get; }
     ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
-    ReactiveCommand<DataSourceLink, Unit> AddFolder { get; }
+    ReactiveCommand<DataSourceDirectoryLink, Unit> AddFolder { get; }
 
     bool IsBusyLoadingAssets { get; set; }
     bool IsBusyLoadingReferences { get; set; }
 
-    HierarchicalTreeDataGridSource<DataSourceLink> AssetTreeSource { get; }
+    HierarchicalTreeDataGridSource<IDataSourceLink> AssetTreeSource { get; }
     IDataSource DataSource { get; set; }
     ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
 
     IAssetTypeService AssetTypeService { get; }
     IAssetIconService AssetIconService { get; }
 
-    IAssetLinkGetter? GetAssetLink(DataSourceLink dataSourceLink);
-    Task Drop(DataSourceLink dstDirectory, DragInfo dragInfo);
-    IEnumerable<Control> GetContextMenuItems(DataSourceLink asset);
+    IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink);
+    Task Drop(DataSourceDirectoryLink dstDirectory, DragInfo dragInfo);
+    IEnumerable<Control> GetContextMenuItems(IDataSourceLink asset);
 }

@@ -14,7 +14,7 @@ public sealed class ArchiveService(
     IArchiveExtensionProvider archiveExtensionProvider,
     IEditorEnvironment editorEnvironment)
     : IArchiveService {
-    private readonly Dictionary<DataSourceLink, IArchiveReader> _archiveReaders = new();
+    private readonly Dictionary<DataSourceFileLink, IArchiveReader> _archiveReaders = new();
     private readonly Dictionary<IArchiveReader, IReadOnlyList<string>> _archiveDirectories = new();
 
     public string GetExtension() => archiveExtensionProvider.Get();
@@ -32,12 +32,12 @@ public sealed class ArchiveService(
         }
     }
 
-    public IArchiveReader GetReader(DataSourceLink link) {
-        if (_archiveReaders.TryGetValue(link, out var reader)) return reader;
+    public IArchiveReader GetReader(DataSourceFileLink fileLink) {
+        if (_archiveReaders.TryGetValue(fileLink, out var reader)) return reader;
 
         var archiveReader =
-            global::Mutagen.Bethesda.Archives.Archive.CreateReader(editorEnvironment.GameEnvironment.GameRelease, link.FullPath, link.FileSystem);
-        _archiveReaders.Add(link, archiveReader);
+            global::Mutagen.Bethesda.Archives.Archive.CreateReader(editorEnvironment.GameEnvironment.GameRelease, fileLink.FullPath, fileLink.FileSystem);
+        _archiveReaders.Add(fileLink, archiveReader);
         return archiveReader;
     }
 

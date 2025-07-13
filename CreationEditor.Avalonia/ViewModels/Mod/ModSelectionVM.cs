@@ -205,7 +205,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
     }
 
-    private IEnumerable<DataSourceLink> GetModsFromDataSources() {
+    private IEnumerable<DataSourceFileLink> GetModsFromDataSources() {
         return Enum.GetValues<ModType>()
             .SelectMany(modType => _dataSourceService.EnumerateFileLinksInAllDataSources(
                 string.Empty,
@@ -213,14 +213,14 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                 "*" + modType.ToFileExtension()));
     }
 
-    private ModInfo? ConvertToModInfo(DataSourceLink link) {
-        if (!link.Exists()) return null;
+    private ModInfo? ConvertToModInfo(DataSourceFileLink fileLink) {
+        if (!fileLink.Exists()) return null;
 
-        var modKey = ModKey.FromFileName(link.Name);
-        var binaryReadParameters = new BinaryReadParameters { FileSystem = link.FileSystem };
-        var modPath = new ModPath(modKey, link.FullPath);
+        var modKey = ModKey.FromFileName(fileLink.Name);
+        var binaryReadParameters = new BinaryReadParameters { FileSystem = fileLink.FileSystem };
+        var modPath = new ModPath(modKey, fileLink.FullPath);
         var parsingMeta = ParsingMeta.Factory(binaryReadParameters, _editorEnvironment.GameEnvironment.GameRelease, modPath);
-        var stream = new MutagenBinaryReadStream(link.FullPath, parsingMeta);
+        var stream = new MutagenBinaryReadStream(fileLink.FullPath, parsingMeta);
         using var frame = new MutagenFrame(stream);
         return SelectedModDetails.GetModInfo(modKey, frame);
     }

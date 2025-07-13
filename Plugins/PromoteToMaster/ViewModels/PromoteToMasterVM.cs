@@ -191,15 +191,16 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             ForceDelete);
 
         if (AssetTargets is not [var assetTarget]) return;
+
         foreach (var promotion in AssetPromotionChanges) {
-            var targetLink = new DataSourceLink(assetTarget, promotion.DataSourceLink.DataRelativePath);
-            
+            var targetLink = new DataSourceFileLink(assetTarget, promotion.FileLink.DataRelativePath);
+
             switch (promotion.ChangeType) {
                 case AssetPromotionChangeType.Moved:
-                    _assetController.Move(promotion.DataSourceLink, targetLink);
+                    _assetController.Move(promotion.FileLink, targetLink);
                     break;
                 case AssetPromotionChangeType.Copied:
-                    _assetController.Copy(promotion.DataSourceLink, targetLink);
+                    _assetController.Copy(promotion.FileLink, targetLink);
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -267,7 +268,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             var dataSource = AssetOrigins.FirstOrDefault(dataSource => dataSource.FileExists(assetLink.DataRelativePath));
             if (dataSource is null) continue;
 
-            var dataSourceLink = new DataSourceLink(dataSource, assetLink.DataRelativePath);
+            var dataSourceLink = new DataSourceFileLink(dataSource, assetLink.DataRelativePath);
 
             switch (AssetPromotionMode) {
                 case AssetPromotionMode.Copy:
@@ -300,7 +301,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 }
 
 public sealed record RecordPromotionChange(IMajorRecordGetter Record, RecordPromotionChangeType ChangeType);
-public sealed record AssetPromotionChange(DataSourceLink DataSourceLink, AssetPromotionChangeType ChangeType);
+public sealed record AssetPromotionChange(DataSourceFileLink FileLink, AssetPromotionChangeType ChangeType);
 
 public enum RecordPromotionChangeType {
     Modified,

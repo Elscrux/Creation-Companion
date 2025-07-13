@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.FileSystem.Validation;
@@ -12,28 +13,34 @@ namespace CreationEditor.Services.Mutagen.References.Query;
 public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     Func<IEnumerable<string>, IFileSystemValidation> fileSystemValidationFactory,
     IDataSourceService dataSourceService,
-    AssetReferenceCacheSerialization<IDataSource, DataRelativePath> serialization,
+    AssetReferenceCacheSerialization<FileSystemDataSource, DataRelativePath> fileSystemSerialization,
+    AssetReferenceCacheSerialization<ArchiveDataSource, DataRelativePath> archiveSerialization,
     IArchiveService archiveService,
+    IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, DataSourceLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter>
+    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter>
     where TFileParser : IFileParser<IAssetLinkGetter> {
-    private readonly FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifFileSystemQuery = new(fileParser, dataSourceService);
-    private readonly ArchiveQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifArchiveQuery = new(fileParser, archiveService);
-    private readonly IInternalCacheValidation<IDataSource, DataRelativePath> _cacheValidation = fileSystemValidationFactory(fileParser.FileExtensions);
+    private readonly FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifFileSystemQuery =
+        new(fileParser, assetTypeService, dataSourceService);
+    private readonly ArchiveQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifArchiveQuery =
+        new(fileParser, assetTypeService, archiveService);
+    private readonly IInternalCacheValidation<FileSystemDataSource, DataRelativePath> _cacheValidation =
+        fileSystemValidationFactory(fileParser.AssetType.FileExtensions);
 
     public bool CanGetLinksFromDeletedElement => false;
     public string Name => fileParser.Name;
 
     public Task<AssetReferenceCache<DataRelativePath>> BuildCache(IDataSource source) {
-        if (source is ArchiveDataSource archiveDataSource) {
-            return referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, serialization, _cacheValidation);
-        }
-
-        return referenceCacheBuilder.BuildCache(source, _nifFileSystemQuery, serialization, _cacheValidation);
+        return source switch {
+            FileSystemDataSource fileSystemDataSource =>
+                referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, fileSystemSerialization, _cacheValidation),
+            ArchiveDataSource archiveDataSource =>
+                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, archiveSerialization),
+        };
     }
 
-    public IEnumerable<IAssetLinkGetter> GetLinks(DataSourceLink element) {
+    public IEnumerable<IAssetLinkGetter> GetLinks(DataSourceFileLink element) {
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }

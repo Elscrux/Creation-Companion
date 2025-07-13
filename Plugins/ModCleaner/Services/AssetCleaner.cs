@@ -57,7 +57,7 @@ public sealed class AssetCleaner(
     public void CleanDataSource(IDataSource dataSource, IReadOnlyList<IAssetLinkGetter> assetsToClean) {
         foreach (var assetLinkGetter in assetsToClean) {
             try {
-                var fileLink = new DataSourceLink(dataSource, assetLinkGetter.DataRelativePath);
+                var fileLink = new DataSourceFileLink(dataSource, assetLinkGetter.DataRelativePath);
                 assetController.Delete(fileLink);
             } catch (Exception e) {
                 logger.Here().Error(e, "Error deleting asset {Asset}", assetLinkGetter.DataRelativePath);

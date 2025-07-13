@@ -8,11 +8,11 @@ public sealed class NifModificationService(
     ILogger logger)
     : IModelModificationService {
 
-    public void RemapLinks(DataSourceLink dataSourceLink, Func<string, bool> shouldReplaceLink, DataRelativePath newLink) {
-        if (!dataSourceLink.Exists()) return;
+    public void RemapLinks(DataSourceFileLink fileLink, Func<string, bool> shouldReplaceLink, DataRelativePath newLink) {
+        if (!fileLink.Exists()) return;
 
         using var nif = new NifFile();
-        nif.Load(dataSourceLink.FullPath);
+        nif.Load(fileLink.FullPath);
 
         if (!nif.IsValid()) return;
 
@@ -111,9 +111,9 @@ public sealed class NifModificationService(
 
         if (modifiedNif) {
             try {
-                nif.Save(dataSourceLink.FullPath);
+                nif.Save(fileLink.FullPath);
             } catch (Exception e) {
-                logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", dataSourceLink, e.Message);
+                logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", fileLink, e.Message);
             }
         }
     }

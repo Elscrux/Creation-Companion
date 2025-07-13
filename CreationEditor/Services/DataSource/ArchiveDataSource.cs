@@ -11,16 +11,16 @@ public sealed class ArchiveDataSource : IDataSource {
     private readonly WildcardSearchFilter _searchFilter = new();
 
     public IArchiveReader ArchiveReader { get; }
-    public DataSourceLink ArchiveLink { get; }
+    public DataSourceFileLink ArchiveFileLink { get; }
 
     public string Name { get; }
     public string Path { get; }
     public bool IsReadOnly => true;
     public IFileSystem FileSystem { get; }
 
-    public ArchiveDataSource(IFileSystem fileSystem, string fullPath, IArchiveReader archiveReader, DataSourceLink archiveLink) {
+    public ArchiveDataSource(IFileSystem fileSystem, string fullPath, IArchiveReader archiveReader, DataSourceFileLink archiveFileLink) {
         ArchiveReader = archiveReader;
-        ArchiveLink = archiveLink;
+        ArchiveFileLink = archiveFileLink;
         FileSystem = fileSystem;
         Name = FileSystem.Path.GetFileName(fullPath);
         Path = fullPath;
@@ -30,7 +30,7 @@ public sealed class ArchiveDataSource : IDataSource {
         return new DataSourceMemento(DataSourceType.Archive, Name, Path, IsReadOnly);
     }
 
-    public DataSourceLink GetRootLink() => ArchiveLink;
+    public DataSourceFileLink GetRootLink() => ArchiveFileLink;
 
     public string GetFullPath(DataRelativePath path) {
         return FileSystem.Path.Combine(Path, path.Path);

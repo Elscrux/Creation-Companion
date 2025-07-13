@@ -22,8 +22,8 @@ public sealed class FileSystemDataSource : IDataSource {
         return new DataSourceMemento(DataSourceType.FileSystem, Name, Path, IsReadOnly);
     }
 
-    public DataSourceLink GetRootLink() {
-        return new DataSourceLink(this, string.Empty);
+    public DataSourceDirectoryLink GetRootLink() {
+        return new DataSourceDirectoryLink(this, string.Empty);
     }
 
     public string GetFullPath(DataRelativePath path) {

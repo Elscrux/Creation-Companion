@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using CreationEditor.Services.Asset;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
@@ -11,11 +12,9 @@ public sealed partial class ScriptFileParser(IAssetTypeService assetTypeService)
     private static partial Regex ScriptNameRegex { get; }
 
     public string Name => "Scripts";
-    public IEnumerable<string> FileExtensions => assetTypeService.Provider.ScriptSource.FileExtensions;
+    public IAssetType AssetType => assetTypeService.Provider.ScriptSource;
 
     public IEnumerable<IAssetLinkGetter> ParseFile(string filePath, IFileSystem fileSystem) {
-        if (assetTypeService.GetAssetType(filePath) != assetTypeService.Provider.ScriptSource) return [];
-
         var results = new HashSet<IAssetLinkGetter>();
         if (!fileSystem.File.Exists(filePath)) return results;
 

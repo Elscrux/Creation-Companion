@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.FileSystem.Validation;
@@ -9,33 +10,40 @@ using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Query;
 
 public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLink>(
-    Func<IReadOnlyList<string>, DictionaryReferenceCacheSerialization<IDataSource, TCache, TLink, DataRelativePath>> serializationFactory,
+    Func<IReadOnlyList<string>, DictionaryReferenceCacheSerialization<FileSystemDataSource, TCache, TLink, DataRelativePath>> fileSystemSerializationFactory,
+    Func<IReadOnlyList<string>, DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath>> archiveSerializationFactory,
     Func<IEnumerable<string>, IFileSystemValidation> fileSystemValidationFactory,
     IDataSourceService dataSourceService,
     IArchiveService archiveService,
+    IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, DataSourceLink, TCache, TLink>
+    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, TCache, TLink>
     where TFileParser : IFileParser<TLink>
     where TCache : IDictionaryReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull {
-    private readonly FileSystemQuery<TCache, TLink> _nifFileSystemQuery = new(fileParser, dataSourceService);
-    private readonly ArchiveQuery<TCache, TLink> _nifArchiveQuery = new(fileParser, archiveService);
-    private readonly DictionaryReferenceCacheSerialization<IDataSource, TCache, TLink, DataRelativePath> _serialization = serializationFactory(["References"]);
-    private readonly IInternalCacheValidation<IDataSource, DataRelativePath> _cacheValidation = fileSystemValidationFactory(fileParser.FileExtensions);
+    private readonly FileSystemQuery<TCache, TLink> _nifFileSystemQuery = new(fileParser, assetTypeService, dataSourceService);
+    private readonly ArchiveQuery<TCache, TLink> _nifArchiveQuery = new(fileParser, assetTypeService, archiveService);
+    private readonly DictionaryReferenceCacheSerialization<FileSystemDataSource, TCache, TLink, DataRelativePath> _fileSystemSerializationFactory =
+        fileSystemSerializationFactory(["References"]);
+    private readonly DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath> _archiveSerializationFactory =
+        archiveSerializationFactory(["References"]);
+    private readonly IInternalCacheValidation<FileSystemDataSource, DataRelativePath> _cacheValidation =
+        fileSystemValidationFactory(fileParser.AssetType.FileExtensions);
 
     public bool CanGetLinksFromDeletedElement => false;
     public string Name => fileParser.Name;
 
     public Task<TCache> BuildCache(IDataSource source) {
-        if (source is ArchiveDataSource archiveDataSource) {
-            return referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _serialization, _cacheValidation);
-        }
-
-        return referenceCacheBuilder.BuildCache(source, _nifFileSystemQuery, _serialization, _cacheValidation);
+        return source switch {
+            FileSystemDataSource fileSystemDataSource =>
+                referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, _fileSystemSerializationFactory, _cacheValidation),
+            ArchiveDataSource archiveDataSource =>
+                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerializationFactory)
+        };
     }
 
-    public IEnumerable<TLink> GetLinks(DataSourceLink element) {
+    public IEnumerable<TLink> GetLinks(DataSourceFileLink element) {
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }

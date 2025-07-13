@@ -19,7 +19,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public ILinkCacheProvider LinkCacheProvider { get; }
     public object? Context { get; }
 
-    public DataSourceLink? DataSourceLink { get; }
+    public DataSourceFileLink? DataSourceLink { get; }
     public IAssetType? AssetType { get; }
 
     public IReferencedRecord? ReferencedRecordContext { get; }
@@ -32,7 +32,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
     public ReactiveCommand<FormKey, Unit> RemapRecordReferences { get; }
-    public ReactiveCommand<DataSourceLink, Unit> RemapAssetReferences { get; }
+    public ReactiveCommand<DataSourceFileLink, Unit> RemapAssetReferences { get; }
 
     public ReferenceRemapperVM(
         IDataSourceService dataSourceService,
@@ -73,7 +73,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
             });
         });
 
-        RemapAssetReferences = ReactiveCommand.Create<DataSourceLink>(dataSourceLink => {
+        RemapAssetReferences = ReactiveCommand.Create<DataSourceFileLink>(dataSourceLink => {
             if (DataSourceLink is null || AssetType is null) return;
 
             IsRemapping = true;
@@ -84,9 +84,9 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
         });
     }
 
-    private static DataSourceLink? ParseAssetContext(object? context) {
+    private static DataSourceFileLink? ParseAssetContext(object? context) {
         return context switch {
-            DataSourceLink dataSourceLink => dataSourceLink,
+            DataSourceFileLink dataSourceLink => dataSourceLink,
             _ => null,
         };
     }

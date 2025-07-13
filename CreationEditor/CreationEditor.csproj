@@ -277,5 +277,11 @@
         <Compile Update="Services\Mutagen\References\Cache\Serialization\IReferenceCacheSerializationConfigLink.cs">
           <DependentUpon>IReferenceCacheSerializationConfig.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\DataSource\DataSourceDirectoryLink.cs">
+          <DependentUpon>IDataSourceLink.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\DataSource\DataSourceFileLink.cs">
+          <DependentUpon>IDataSourceLink.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

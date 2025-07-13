@@ -56,7 +56,7 @@ public interface IDataSourceService {
     /// </summary>
     /// <param name="path">Path to the file.</param>
     /// <returns>File system link to the file if found, null otherwise.</returns>
-    DataSourceLink? GetFileLink(string path);
+    DataSourceFileLink? GetFileLink(string path);
 
     /// <summary>
     /// Tries to get the file system link for the given data relative path.
@@ -64,7 +64,7 @@ public interface IDataSourceService {
     /// </summary>
     /// <param name="dataRelativePath">Data relative path to the file.</param>
     /// <returns>File system link to the file if found, null otherwise.</returns>
-    DataSourceLink? GetFileLink(DataRelativePath dataRelativePath);
+    DataSourceFileLink? GetFileLink(DataRelativePath dataRelativePath);
 
     /// <summary>
     /// Tries to get the file system link for the given data relative path.
@@ -73,7 +73,7 @@ public interface IDataSourceService {
     /// <param name="dataRelativePath">Data relative path to the file.</param>
     /// <param name="link">File system link to the file if found, null otherwise.</param>
     /// <returns>>True if the file system link was found in any data source, false otherwise.</returns>
-    bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out DataSourceLink? link);
+    bool TryGetFileLink(DataRelativePath dataRelativePath, [NotNullWhen(true)] out DataSourceFileLink? link);
 
     /// <summary>
     /// Enumerates all file system links in the given directory.
@@ -83,7 +83,7 @@ public interface IDataSourceService {
     /// <param name="includeSubDirectories">Whether to include subdirectories.</param>
     /// <param name="searchPattern">Search pattern to filter files.</param>
     /// <returns>File system links in the given directory.</returns>
-    IEnumerable<DataSourceLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories, string searchPattern = "*");
+    IEnumerable<DataSourceFileLink> EnumerateFileLinksInAllDataSources(DataRelativePath directoryPath, bool includeSubDirectories, string searchPattern = "*");
 
     /// <summary>
     /// Checks if the given data relative path exists in any data source.

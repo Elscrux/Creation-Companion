@@ -5,6 +5,13 @@ using Noggog;
 using ReactiveMarbles.ObservableEvents;
 namespace CreationEditor.Services.Asset;
 
+public interface IUpdate<out T> {
+    T Old { get; }
+    T New { get; }
+}
+
+public sealed record Update<T>(T Old, T New) : IUpdate<T>;
+
 public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
     private readonly DisposableBucket _disposables = new();
 
@@ -12,29 +19,29 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
 
     public IDataSource DataSource { get; }
 
-    public IObservable<DataSourceLink> Created => _createdFile.Merge(_createdDirectory);
-    public IObservable<DataSourceLink> CreatedFile => _createdFile;
-    public IObservable<DataSourceLink> CreatedDirectory => _createdDirectory;
-    private readonly Subject<DataSourceLink> _createdFile = new();
-    private readonly Subject<DataSourceLink> _createdDirectory = new();
+    public IObservable<IDataSourceLink> Created => CreatedFile.Merge<IDataSourceLink>(CreatedDirectory);
+    public IObservable<DataSourceFileLink> CreatedFile => _createdFile;
+    public IObservable<DataSourceDirectoryLink> CreatedDirectory => _createdDirectory;
+    private readonly Subject<DataSourceFileLink> _createdFile = new();
+    private readonly Subject<DataSourceDirectoryLink> _createdDirectory = new();
 
-    public IObservable<DataSourceLink> Deleted => _deletedFile.Merge(_deletedDirectory);
-    public IObservable<DataSourceLink> DeletedFile => _deletedFile;
-    public IObservable<DataSourceLink> DeletedDirectory => _deletedDirectory;
-    private readonly Subject<DataSourceLink> _deletedFile = new();
-    private readonly Subject<DataSourceLink> _deletedDirectory = new();
+    public IObservable<IDataSourceLink> Deleted => _deletedFile.Merge<IDataSourceLink>(_deletedDirectory);
+    public IObservable<DataSourceFileLink> DeletedFile => _deletedFile;
+    public IObservable<DataSourceDirectoryLink> DeletedDirectory => _deletedDirectory;
+    private readonly Subject<DataSourceFileLink> _deletedFile = new();
+    private readonly Subject<DataSourceDirectoryLink> _deletedDirectory = new();
 
-    public IObservable<DataSourceLink> Changed => _changedFile.Merge(_changedDirectory);
-    public IObservable<DataSourceLink> ChangedFile => _changedFile;
-    public IObservable<DataSourceLink> ChangedDirectory => _changedDirectory;
-    private readonly Subject<DataSourceLink> _changedFile = new();
-    private readonly Subject<DataSourceLink> _changedDirectory = new();
+    public IObservable<IDataSourceLink> Changed => _changedFile.Merge<IDataSourceLink>(_changedDirectory);
+    public IObservable<DataSourceFileLink> ChangedFile => _changedFile;
+    public IObservable<DataSourceDirectoryLink> ChangedDirectory => _changedDirectory;
+    private readonly Subject<DataSourceFileLink> _changedFile = new();
+    private readonly Subject<DataSourceDirectoryLink> _changedDirectory = new();
 
-    public IObservable<(DataSourceLink Old, DataSourceLink New)> Renamed => _renamedFile.Merge(_renamedDirectory);
-    public IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedFile => _renamedFile;
-    public IObservable<(DataSourceLink Old, DataSourceLink New)> RenamedDirectory => _renamedDirectory;
-    private readonly Subject<(DataSourceLink Old, DataSourceLink New)> _renamedFile = new();
-    private readonly Subject<(DataSourceLink Old, DataSourceLink New)> _renamedDirectory = new();
+    public IObservable<IUpdate<IDataSourceLink>> Renamed => RenamedFile.Merge<IUpdate<IDataSourceLink>>(RenamedDirectory);
+    public IObservable<IUpdate<DataSourceFileLink>> RenamedFile => _renamedFile;
+    public IObservable<IUpdate<DataSourceDirectoryLink>> RenamedDirectory => _renamedDirectory;
+    private readonly Subject<IUpdate<DataSourceFileLink>> _renamedFile = new();
+    private readonly Subject<IUpdate<DataSourceDirectoryLink>> _renamedDirectory = new();
 
     public FileSystemDataSourceWatcher(
         IDataSource dataSource,
@@ -47,23 +54,41 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
         watcher.EnableRaisingEvents = true;
 
         var fileSystemWatcherEvents = watcher.Events();
-        HandleFileSystemEvent(fileSystemWatcherEvents.Created, _createdFile, _createdDirectory, ToDataSourceLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Deleted, _deletedFile, _deletedDirectory, ToDataSourceLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Changed, _changedFile, _changedDirectory, ToDataSourceLink);
-        HandleFileSystemEvent(fileSystemWatcherEvents.Renamed, _renamedFile, _renamedDirectory, ToUpdatedDataSourceLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Created, _createdFile, _createdDirectory, ToDataSourceFileLink, ToDataSourceDirectoryLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Deleted, _deletedFile, _deletedDirectory, ToDataSourceFileLink, ToDataSourceDirectoryLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Changed, _changedFile, _changedDirectory, ToDataSourceFileLink, ToDataSourceDirectoryLink);
+        HandleFileSystemEvent(fileSystemWatcherEvents.Renamed, _renamedFile, _renamedDirectory, ToUpdatedDataSourceFileLink, ToUpdatedDataSourceDirectoryLink);
 
-        DataSourceLink ToDataSourceLink(FileSystemEventArgs arg) {
-            if (DataSource.TryGetLink(arg.FullPath, out var link)) {
+        DataSourceFileLink ToDataSourceFileLink(FileSystemEventArgs arg) {
+            if (DataSource.TryGetFileLink(arg.FullPath, out var link)) {
                 return link;
             }
 
             throw new InvalidOperationException($"File system link for path '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
         }
 
-        (DataSourceLink Old, DataSourceLink New) ToUpdatedDataSourceLink(RenamedEventArgs arg) {
-            if (DataSource.TryGetLink(arg.OldFullPath, out var oldLink) &&
-                DataSource.TryGetLink(arg.FullPath, out var newLink)) {
-                return (Old: oldLink, New: newLink);
+        DataSourceDirectoryLink ToDataSourceDirectoryLink(FileSystemEventArgs arg) {
+            if (DataSource.TryGetDirectoryLink(arg.FullPath, out var link)) {
+                return link;
+            }
+
+            throw new InvalidOperationException($"File system link for path '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
+        }
+
+        IUpdate<DataSourceFileLink> ToUpdatedDataSourceFileLink(RenamedEventArgs arg) {
+            if (DataSource.TryGetFileLink(arg.OldFullPath, out var oldLink) &&
+                DataSource.TryGetFileLink(arg.FullPath, out var newLink)) {
+                return new Update<DataSourceFileLink>(oldLink, newLink);
+            }
+
+            throw new InvalidOperationException(
+                $"File system link for path '{arg.OldFullPath}' or '{arg.FullPath}' not found in data source '{DataSource.Name}'.");
+        }
+
+        IUpdate<DataSourceDirectoryLink> ToUpdatedDataSourceDirectoryLink(RenamedEventArgs arg) {
+            if (DataSource.TryGetDirectoryLink(arg.OldFullPath, out var oldLink) &&
+                DataSource.TryGetDirectoryLink(arg.FullPath, out var newLink)) {
+                return new Update<DataSourceDirectoryLink>(oldLink, newLink);
             }
 
             throw new InvalidOperationException(
@@ -71,19 +96,20 @@ public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
         }
     }
 
-    private void HandleFileSystemEvent<TEvent, T>(
+    private void HandleFileSystemEvent<TEvent, TFile, TDirectory>(
         IObservable<TEvent> observable,
-        IObserver<T> fileObserver,
-        IObserver<T> directoryObserver,
-        Func<TEvent, T> select)
+        Subject<TFile> fileObserver,
+        Subject<TDirectory> directoryObserver,
+        Func<TEvent, TFile> selectFile,
+        Func<TEvent, TDirectory> selectDir)
         where TEvent : FileSystemEventArgs {
         observable
             .Where(Filter)
             .Subscribe(x => {
                 if (DataSource.FileSystem.Directory.Exists(x.FullPath)) {
-                    directoryObserver.OnNext(select(x));
+                    directoryObserver.OnNext(selectDir(x));
                 } else {
-                    fileObserver.OnNext(select(x));
+                    fileObserver.OnNext(selectFile(x));
                 }
             })
             .DisposeWith(_disposables);

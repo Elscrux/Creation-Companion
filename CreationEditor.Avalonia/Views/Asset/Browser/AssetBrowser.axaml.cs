@@ -88,10 +88,10 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void ContextRequestHandler(object? sender, ContextRequestedEventArgs e) {
-        if (e.Source is not Control { DataContext: DataSourceLink asset } control) return;
+        if (e.Source is not Control { DataContext: IDataSourceLink link } control) return;
 
         var contextFlyout = new MenuFlyout {
-            ItemsSource = ViewModel?.GetContextMenuItems(asset),
+            ItemsSource = ViewModel?.GetContextMenuItems(link),
         };
 
         contextFlyout.ShowAt(control, true);
@@ -100,7 +100,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnRowDragStarted(object? sender, TreeDataGridRowDragStartedEventArgs e) {
-        e.AllowedEffects = e.Models.ToArray().OfType<DataSourceLink>().Any(x => x.DataSource.IsReadOnly)
+        e.AllowedEffects = e.Models.ToArray().OfType<IDataSourceLink>().Any(x => x.DataSource.IsReadOnly)
             ? DragDropEffects.None
             : DragDropEffects.Move;
     }
@@ -110,7 +110,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
         e.Inner.DragEffects = DragDropEffects.Move;
 
-        if (e.TargetRow.Model is DataSourceLink { IsDirectory: true } directoryLink
+        if (e.TargetRow.Model is DataSourceDirectoryLink directoryLink
          && e.Position is not (TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before)) {
             if (e.Inner.Data.Get(DragInfo.DataFormat) is DragInfo dragInfo) {
                 var assets = dragInfo.Indexes
@@ -119,7 +119,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                         var row = dragInfo.Source.Rows[rowIndex];
                         return row.Model;
                     })
-                    .OfType<DataSourceLink>();
+                    .OfType<DataSourceDirectoryLink>();
 
                 if (assets.Any(asset => asset == directoryLink || asset.ParentDirectory == directoryLink)) {
                     e.Inner.DragEffects = DragDropEffects.None;
@@ -133,7 +133,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     private void TrySetDragData(TreeDataGridRowDragEventArgs e) {
         // Set drag data on first drag over - needed to integrate into the editor wide drag and drop system
         var dragEventArgs = e.Inner;
-        if (e.TargetRow.DataContext is DataSourceLink dataSourceLink
+        if (e.TargetRow.DataContext is IDataSourceLink dataSourceLink
          && dragEventArgs.Data is DataObject dataObject
          && !dragEventArgs.Data.Contains(ContextDropBehaviorBase.DataFormat)
          && ViewModel is not null) {
@@ -153,7 +153,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         // Never allow the tree to drop things, changes are handled by file system watchers
         e.Inner.DragEffects = DragDropEffects.None;
 
-        if (e.TargetRow.Model is not DataSourceLink { IsDirectory: true } directoryLink) return;
+        if (e.TargetRow.Model is not DataSourceDirectoryLink directoryLink) return;
         if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
 
         ViewModel?.Drop(directoryLink, dragInfo);
@@ -179,19 +179,19 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                 break;
             // Open references
             case Key.R when (e.KeyModifiers & KeyModifiers.Control) != 0:
-                if (dataGridRow.Model is DataSourceLink item) {
+                if (dataGridRow.Model is DataSourceFileLink item) {
                     await ViewModel.OpenReferences.Execute(item);
                 }
                 break;
             // Rename
             case Key.F2:
-                if (dataGridRow.Model is DataSourceLink dataSourceLink) {
+                if (dataGridRow.Model is IDataSourceLink dataSourceLink) {
                     await ViewModel.Rename.Execute(dataSourceLink);
                 }
                 break;
             // Delete
             case Key.Delete:
-                await ViewModel.Delete.Execute(selectedItems.OfType<DataSourceLink?>().ToList());
+                await ViewModel.Delete.Execute(selectedItems.OfType<IDataSourceLink?>().ToList());
                 break;
         }
     }
@@ -206,7 +206,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         var dataGridRow = visual.FindAncestorOfType<TreeDataGridRow>();
         if (dataGridRow is null) return;
 
-        if (dataGridRow.Model is DataSourceLink { IsFile: true } fileLink) {
+        if (dataGridRow.Model is DataSourceFileLink fileLink) {
             // Open file
             await ViewModel.Open.Execute([fileLink]);
         } else {

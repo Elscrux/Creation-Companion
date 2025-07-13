@@ -1,15 +1,14 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
+using Mutagen.Bethesda.Assets;
 using nifly;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
 public sealed class NifAddonNodeLinkParser(IAssetTypeService assetTypeService) : IFileParser<int> {
     public string Name => "Nif Addon Nodes";
-    public IEnumerable<string> FileExtensions => assetTypeService.Provider.Model.FileExtensions;
+    public IAssetType AssetType => assetTypeService.Provider.Model;
 
     public IEnumerable<int> ParseFile(string filePath, IFileSystem fileSystem) {
-        if (assetTypeService.GetAssetType(filePath) != assetTypeService.Provider.Model) return [];
-
         var results = new HashSet<int>();
 
         if (!fileSystem.File.Exists(filePath)) return results;

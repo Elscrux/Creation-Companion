@@ -180,8 +180,8 @@
                 KeyDown="AssetTree_OnKeyDown">
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
-                    <treeDataGrid:ExpandAllChildren x:TypeArguments="dataSourceLink:DataSourceLink"/>
-                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="dataSourceLink:DataSourceLink"/>
+                    <treeDataGrid:ExpandAllChildren x:TypeArguments="dataSourceLink:IDataSourceLink"/>
+                    <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="dataSourceLink:IDataSourceLink"/>
                 </Interaction.Behaviors>
             </TreeDataGrid>
 

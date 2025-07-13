@@ -3,14 +3,25 @@ using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.DataSource;
 
 public static class DataSourceExtensions {
-    public static bool TryGetLink(this IDataSource dataSource, string fullPath, [MaybeNullWhen(false)] out DataSourceLink link) {
+    public static bool TryGetFileLink(this IDataSource dataSource, string fullPath, [MaybeNullWhen(false)] out DataSourceFileLink fileLink) {
         if (!fullPath.StartsWith(dataSource.Path, DataRelativePath.PathComparison)) {
-            link = null;
+            fileLink = null;
             return false;
         }
 
         var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, fullPath);
-        link = new DataSourceLink(dataSource, relativePath);
+        fileLink = new DataSourceFileLink(dataSource, relativePath);
+        return true;
+    }
+
+    public static bool TryGetDirectoryLink(this IDataSource dataSource, string fullPath, [MaybeNullWhen(false)] out DataSourceDirectoryLink directoryLink) {
+        if (!fullPath.StartsWith(dataSource.Path, DataRelativePath.PathComparison)) {
+            directoryLink = null;
+            return false;
+        }
+
+        var relativePath = dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, fullPath);
+        directoryLink = new DataSourceDirectoryLink(dataSource, relativePath);
         return true;
     }
 
