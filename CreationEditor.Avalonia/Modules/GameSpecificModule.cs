@@ -14,6 +14,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
+using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Plugin;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments.DI;
@@ -26,6 +27,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
     protected abstract GameRelease GameRelease { get; }
 
+    protected abstract IReg<IMutagenCommonAspectsProvider> MutagenCommonTypeProvider { get; }
     protected abstract IReg<IModInfoProvider<TModGetter>> ModInfoProvider { get; }
     protected abstract IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider { get; }
     protected abstract IReg<IRecordProviderFactory> RecordProviderFactory { get; }
@@ -77,6 +79,9 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
         Register(builder, ApplicationIconProvider)
             .As<IApplicationIconProvider>()
             .SingleInstance();
+
+        Register(builder, MutagenCommonTypeProvider)
+            .As<IMutagenCommonAspectsProvider>();
 
         Register(builder, ModInfoProvider)
             .As<IModInfoProvider<IModGetter>>()

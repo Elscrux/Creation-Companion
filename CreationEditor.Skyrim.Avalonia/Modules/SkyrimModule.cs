@@ -13,6 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Avalonia;
@@ -20,6 +21,7 @@ using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
+using CreationEditor.Skyrim.Avalonia.Services.Types;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
@@ -38,6 +40,7 @@ namespace CreationEditor.Skyrim.Avalonia.Modules;
 public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGetter> {
     protected override GameRelease GameRelease => GameRelease.SkyrimSE;
 
+    protected override IReg<IMutagenCommonAspectsProvider> MutagenCommonTypeProvider => Register<SkyrimCommonAspectsProvider>();
     protected override IReg<IModInfoProvider<ISkyrimModGetter>> ModInfoProvider => Register<SkyrimModInfoProvider>();
     protected override IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider => Register<SkyrimRecordBrowserGroupProvider>();
     protected override IReg<IRecordProviderFactory> RecordProviderFactory => Register<SkyrimRecordProviderFactory>();
