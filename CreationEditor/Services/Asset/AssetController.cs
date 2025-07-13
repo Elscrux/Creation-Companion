@@ -298,10 +298,7 @@ public sealed class AssetController(
     }
 
     private IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) {
-        var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, origin.DataRelativePath.Path);
-        var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
-        var linkDestination = new DataSourceFileLink(destination.DataSource, destinationPath);
-        return [new Update<DataSourceFileLink>(origin, linkDestination)];
+        return [new Update<DataSourceFileLink>(origin, destination)];
     }
 
     private IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
