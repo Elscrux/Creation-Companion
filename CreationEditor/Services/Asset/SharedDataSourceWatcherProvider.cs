@@ -3,6 +3,7 @@ using Noggog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class SharedDataSourceWatcherProvider : IDataSourceWatcherProvider, IDisposable {
+    private readonly Lock _lock = new();
     private readonly DisposableBucket _disposables = new();
 
     private readonly List<IDataSourceWatcher> _dataSourceWatchers = [];
@@ -15,13 +16,15 @@ public sealed class SharedDataSourceWatcherProvider : IDataSourceWatcherProvider
 
         dataSourceService.DataSourcesChanged
             .Subscribe(dataSources => {
-                var invalidWatchers = _dataSourceWatchers
-                    .Where(watcher => !dataSources.Contains(watcher.DataSource))
-                    .ToArray();
+                lock (_lock) {
+                    var invalidWatchers = _dataSourceWatchers
+                        .Where(watcher => !dataSources.Contains(watcher.DataSource))
+                        .ToArray();
 
-                foreach (var watcher in invalidWatchers) {
-                    watcher.Dispose();
-                    _dataSourceWatchers.Remove(watcher);
+                    foreach (var watcher in invalidWatchers) {
+                        watcher.Dispose();
+                        _dataSourceWatchers.Remove(watcher);
+                    }
                 }
             })
             .DisposeWith(_disposables);
@@ -29,13 +32,15 @@ public sealed class SharedDataSourceWatcherProvider : IDataSourceWatcherProvider
 
 
     public IDataSourceWatcher GetWatcher(IDataSource dataSource) {
-        var watcher = _dataSourceWatchers.FirstOrDefault(w => Equals(w.DataSource, dataSource));
-        if (watcher is not null) return watcher;
+        lock (_lock) {
+            var watcher = _dataSourceWatchers.FirstOrDefault(w => Equals(w.DataSource, dataSource));
+            if (watcher is not null) return watcher;
 
-        watcher = _dataSourceWatcherFactory(dataSource);
-        _dataSourceWatchers.Add(watcher);
+            watcher = _dataSourceWatcherFactory(dataSource);
+            _dataSourceWatchers.Add(watcher);
 
-        return watcher;
+            return watcher;
+        }
     }
 
     public void Dispose() {
