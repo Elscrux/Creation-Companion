@@ -213,17 +213,16 @@ public sealed class ReferenceService : IReferenceService {
     }
 
     public IEnumerable<DataRelativePath> GetAssetReferences(IFormLinkIdentifier formLink) {
-        if (_editorEnvironment.LinkCache.TryResolve(formLink, out var record)) {
+        if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.AddonNodeRecordType, out var addonNode)) {
             // Record is an addon node
-            var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(record);
+            var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(addonNode);
             if (addonNodeIndex is not null) {
                 return _nifAddonNodeReferenceController.GetReferences(addonNodeIndex.Value);
             }
-
+        } else if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.SoundDescriptorRecordType, out var soundDescriptor)
+         && soundDescriptor is { EditorID: {} editorId }) {
             // Record is a sound
-            if (record is { EditorID: {} editorId }) {
-                return _nifSoundReferenceController.GetReferences(editorId);
-            }
+            return _nifSoundReferenceController.GetReferences(editorId);
         }
 
         return [];
