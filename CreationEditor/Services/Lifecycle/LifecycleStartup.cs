@@ -1,7 +1,6 @@
 using System.Reactive.Subjects;
-using CreationEditor.Services.Lifecycle;
 using Serilog;
-namespace CreationEditor.Avalonia.Services.Lifecycle;
+namespace CreationEditor.Services.Lifecycle;
 
 public sealed class LifecycleStartup(
     IReadOnlyList<ILifecycleTask> tasks,
