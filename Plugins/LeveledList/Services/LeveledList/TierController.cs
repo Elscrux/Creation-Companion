@@ -1,4 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References.Record.Controller;
+﻿using CreationEditor.Services.Mutagen.Decorations;
 using CreationEditor.Services.State;
 using LeveledList.Model;
 using LeveledList.Model.Tier;

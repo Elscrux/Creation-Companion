@@ -5,7 +5,7 @@ using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-namespace CreationEditor.Services.Mutagen.References.Record.Controller;
+namespace CreationEditor.Services.Mutagen.Decorations;
 
 public sealed class RecordDecorationController(ILifetimeScope lifetimeScope) : IRecordDecorationController {
     private readonly Dictionary<string, IStateRepository<object, object, IFormLinkGetter>> _decorationStateRepos = new();

@@ -1,6 +1,6 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace CreationEditor.Services.Mutagen.References.Record.Controller;
+namespace CreationEditor.Services.Mutagen.Decorations;
 
 public interface IRecordDecorationController {
     void Register<TDecoration>() where TDecoration : class;

@@ -5,7 +5,7 @@ using Avalonia.Controls.Templates;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.Decorations;
 using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
