@@ -27,7 +27,7 @@
     <Style Selector="controls|LabeledContentControl">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid RowDefinitions="Auto,*">
+                <Grid RowDefinitions="Auto,2,*">
                     <StackPanel Grid.Row="0"
                                 Spacing="5"
                                 Orientation="Horizontal"
@@ -57,7 +57,7 @@
                     </StackPanel>
 
                     <ContentPresenter
-                        Grid.Row="1"
+                        Grid.Row="2"
                         x:Name="PART_ContentPresenter"
                         Content="{TemplateBinding Content}"
                         ContentTemplate="{TemplateBinding ContentTemplate}"
