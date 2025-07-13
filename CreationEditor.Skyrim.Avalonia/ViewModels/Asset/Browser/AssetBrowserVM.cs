@@ -696,17 +696,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public void OpenAssets(IReadOnlyList<FileSystemLink?> assets) {
         foreach (var asset in assets.WhereNotNull()) {
-            if (!asset.Exists()) return;
-
-            var openPath = asset.FullPath;
-
-            // Open the file via the standard program
-            Process.Start(new ProcessStartInfo {
-                FileName = openPath,
-                WorkingDirectory = asset.ParentDirectory?.FullPath,
-                UseShellExecute = true,
-                Verb = "open",
-            });
+            _assetController.Open(asset);
         }
     }
 

@@ -3,6 +3,12 @@ namespace CreationEditor.Services.Asset;
 
 public interface IAssetController {
     /// <summary>
+    /// Open a file or directory.
+    /// </summary>
+    /// <param name="link">Link to the file or directory that should be opened</param>
+    void Open(FileSystemLink link);
+
+    /// <summary>
     /// Move a file or directory to a new location.
     /// </summary>
     /// <param name="origin">Link to the file or directory that should be moved</param>

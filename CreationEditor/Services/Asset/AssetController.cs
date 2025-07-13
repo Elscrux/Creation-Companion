@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.DataSource;
+﻿using System.Diagnostics;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Asset.Controller;
@@ -22,6 +23,18 @@ public sealed class AssetController(
     private FileSystemLink CreateDeletePath(FileSystemLink link) {
         var deletePath = link.FileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, link.DataRelativePath.Path);
         return new FileSystemLink(link.DataSource, deletePath);
+    }
+
+    public void Open(FileSystemLink link) {
+        if (!link.Exists()) return;
+
+        // Open the file via the standard program
+        Process.Start(new ProcessStartInfo {
+            FileName = link.FullPath,
+            WorkingDirectory = link.ParentDirectory?.FullPath,
+            UseShellExecute = true,
+            Verb = "open",
+        });
     }
 
     public void Delete(FileSystemLink link, CancellationToken token = default) {
