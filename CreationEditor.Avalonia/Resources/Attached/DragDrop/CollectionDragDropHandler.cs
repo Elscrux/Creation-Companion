@@ -280,7 +280,7 @@ public abstract class CollectionDragDropHandler<TControl, TElement> : DropHandle
             : StandardBrushes.InvalidBrush;
     }
 
-    private void SetTranslateTransform(Control control, double x, double y) {
+    private static void SetTranslateTransform(Control control, double x, double y) {
         var transformBuilder = new TransformOperations.Builder(1);
         transformBuilder.AppendTranslate(x, y);
         control.RenderTransform = transformBuilder.Build();
@@ -382,11 +382,7 @@ public abstract class CollectionDragDropHandler<TControl, TElement> : DropHandle
                     dragContext.Data[DragDropExtended.DataCurrentIndex] = targetIndex;
                 }
             } else {
-                if (orientation == Orientation.Horizontal) {
-                    SetTranslateTransform(targetContainer, 0, 0);
-                } else {
-                    SetTranslateTransform(targetContainer, 0, 0);
-                }
+                SetTranslateTransform(targetContainer, 0, 0);
             }
 
             i++;
