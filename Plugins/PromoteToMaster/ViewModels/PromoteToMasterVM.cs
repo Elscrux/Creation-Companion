@@ -8,9 +8,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using CreationEditor.Skyrim.Definitions;
 using DynamicData.Binding;
@@ -27,12 +25,11 @@ public sealed partial class PromoteToMasterVM : ViewModel {
     public static readonly IReadOnlyList<AssetPromotionMode> AssetPromotionModes = Enum.GetValues<AssetPromotionMode>();
 
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
-    private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
 
     public IReadOnlyList<IReferencedRecord> RecordsToPromote { get; }
 
-    public IRecordReferenceController RecordReferenceController { get; }
+    public IReferenceService ReferenceService { get; }
     public IRecordController RecordController { get; }
     public SingleModPickerVM InjectedRecordCreationMod { get; }
     public SingleModPickerVM InjectToMod { get; }
@@ -57,19 +54,17 @@ public sealed partial class PromoteToMasterVM : ViewModel {
     public PromoteToMasterVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         IDataSourceService dataSourceService,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IRecordController recordController,
-        IAssetReferenceController assetReferenceController,
         IAssetController assetController,
         SingleModPickerVM injectToMod,
         SingleModPickerVM injectedRecordCreationMod,
         SingleModPickerVM editMod,
         IReadOnlyList<IReferencedRecord> recordsToPromote) {
         _editorEnvironment = editorEnvironment;
-        _assetReferenceController = assetReferenceController;
         _assetController = assetController;
         RecordsToPromote = recordsToPromote;
-        RecordReferenceController = recordReferenceController;
+        ReferenceService = referenceService;
         RecordController = recordController;
 
         InjectToMod = injectToMod;
@@ -141,7 +136,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             .DisposeWith(this);
     }
 
-    private bool FilterDataSources(IDataSource dataSource) {
+    private static bool FilterDataSources(IDataSource dataSource) {
         return !dataSource.IsReadOnly;
     }
 
@@ -243,7 +238,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         // References will relink to the promoted records
         var includedFormKeys = includedRecords.Select(x => x.FormKey).ToArray();
         foreach (var record in recordsToBePromoted) {
-            var references = RecordReferenceController.GetReferences(record.FormKey).ToArray();
+            var references = ReferenceService.GetRecordReferences(record).ToArray();
             if (references.Length == 0) continue;
 
             foreach (var reference in references) {
@@ -280,11 +275,11 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
                     break;
                 case AssetPromotionMode.Move:
-                    var allAssetRefsIncluded = _assetReferenceController
+                    var allAssetRefsIncluded = ReferenceService
                         .GetAssetReferences(assetLink)
                         .All(path => allReferencedDataRelativePaths.Contains(path));
 
-                    var allRecordRefsIncluded = _assetReferenceController
+                    var allRecordRefsIncluded = ReferenceService
                         .GetRecordReferences(assetLink)
                         .All(recordIdentifiers.Contains);
 

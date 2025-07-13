@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -29,8 +28,7 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.FormLink;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
@@ -45,16 +43,15 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> _referenceBrowserVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
-    private readonly IAssetReferenceController _assetReferenceController;
     private readonly IAssetController _assetController;
     private readonly ILinkCacheProvider _linkCacheProvider;
-    private readonly IRecordReferenceController _recordReferenceController;
     private readonly MainWindow _mainWindow;
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
     private FileSystemLink _rootDirectory = null!;
 
     private readonly Dictionary<string, IReadOnlyList<FileSystemLink>> _filteredFileSystemChildrenCache = [];
+    private readonly IReferenceService _referenceService;
 
     public IObservableCollection<FileSystemLink> RootItems { get; } = new ObservableCollectionExtended<FileSystemLink>();
 
@@ -105,12 +102,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IDataSourceWatcherProvider dataSourceWatcherProvider,
         IDataSourceService dataSourceService,
         IMenuItemProvider menuItemProvider,
-        IAssetReferenceController assetReferenceController,
+        IReferenceService referenceService,
         IAssetController assetController,
         IAssetTypeService assetTypeService,
         IAssetIconService assetIconService,
         ILinkCacheProvider linkCacheProvider,
-        IRecordReferenceController recordReferenceController,
         MainWindow mainWindow,
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter) {
@@ -118,12 +114,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         SearchText = "";
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _menuItemProvider = menuItemProvider;
-        _assetReferenceController = assetReferenceController;
+        _referenceService = referenceService;
         _assetController = assetController;
         AssetTypeService = assetTypeService;
         AssetIconService = assetIconService;
         _linkCacheProvider = linkCacheProvider;
-        _recordReferenceController = recordReferenceController;
         _mainWindow = mainWindow;
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _searchFilter = searchFilter;
@@ -183,7 +178,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                                 if (assetType is not null
                                  && AssetTypeService.GetAssetLink(asset.DataRelativePath, assetType) is {} assetLink
-                                 && _assetReferenceController.GetReferencedAsset(assetLink, out var referencedAsset) is {} disposable) {
+                                 && _referenceService.GetReferencedAsset(assetLink, out var referencedAsset) is {} disposable) {
                                     icon[!FAIconElement.ForegroundProperty] = referencedAsset.ReferenceCount
                                         .Select(c => StandardBrushes.GetStatusBrush(c > 0))
                                         .ToBinding();
@@ -236,7 +231,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
                         if (assetLink is null) return null;
 
-                        var referenceCount = assetReferenceController.GetReferenceCount(assetLink);
+                        var referenceCount = _referenceService.GetReferenceCount(assetLink);
                         return new TextBlock { Text = referenceCount.ToString(), VerticalAlignment = VerticalAlignment.Center};
                     }),
                     null,
@@ -262,24 +257,23 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
                         if (assetLink is null) return null;
 
-                        var assetLinks = GetMissingAssets(asset, assetLink).ToArray();
-                        if (assetLinks.Length == 0) return null;
+                        var missingLinks = GetMissingLinks(asset, assetLink).ToArray();
+                        if (missingLinks.Length == 0) return null;
 
                         return new SymbolIcon {
                             Symbol = Symbol.ImportantFilled,
                             Foreground = StandardBrushes.InvalidBrush,
                             VerticalAlignment = VerticalAlignment.Center,
-                            [ToolTip.TipProperty] = "Missing Assets\n" + string.Join(",\n", assetLinks.Select(x => x.DataRelativePath.Path)),
+                            [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
                         };
                     })),
             },
         };
 
-        _assetReferenceController.IsLoading
+        _referenceService.IsLoading
             .ObserveOnGui()
             .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
             .DisposeWith(this);
-
 
         Observable.CombineLatest(
                 this.WhenAnyValue(x => x.ShowTextures),
@@ -333,7 +327,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                 Dispatcher.UIThread.Post(() => {
                     IsBusyLoadingAssets = true;
-                    _rootDirectory = new FileSystemLink(DataSource, string.Empty);
+                    _rootDirectory = DataSource.GetRootLink();
                     RootItems.Load(GetAllRootItems());
                     AssetTreeSource.RowSelection!.SingleSelect = false;
                     AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);
@@ -386,19 +380,21 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
                     if (assetLink is null) return false;
 
-                    return assetReferenceController.GetReferenceCount(assetLink) > 0;
+                    return _referenceService.GetReferenceCount(assetLink) > 0;
                 })
         );
 
         AddFolder = ReactiveCommand.CreateFromTask<FileSystemLink>(AddAssetFolder);
     }
 
-    private IEnumerable<IAssetLinkGetter> GetMissingAssets(FileSystemLink link, IAssetLinkGetter assetLink) {
+    private IEnumerable<string> GetMissingLinks(FileSystemLink link, IAssetLinkGetter assetLink) {
         if (assetLink.AssetTypeInstance != SkyrimModelAssetType.Instance) return [];
 
         // Missing Assets - todo move this to (nif/file) analyzer system which we can hook into here
-        return _assetReferenceController.GetAssetLinksFrom(link)
-            .Where(path => !DataSourceService.FileExists(path.DataRelativePath));
+        return _referenceService.GetAssetLinks(link)
+            .Where(path => !DataSourceService.FileExists(path.DataRelativePath))
+            .Select(x => x.DataRelativePath.Path)
+            .Concat(_referenceService.GetMissingRecordLinks(link));
     }
 
     private HierarchicalRow<FileSystemLink>? FindParentRow(FileSystemLink link) {
@@ -483,15 +479,15 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
                 if (assetLink is null) return;
 
-                assetReferences.AddRange(_assetReferenceController.GetAssetReferences(assetLink));
-                recordReferences.AddRange(_assetReferenceController.GetRecordReferences(assetLink));
+                assetReferences.AddRange(_referenceService.GetAssetReferences(assetLink));
+                recordReferences.AddRange(_referenceService.GetRecordReferences(assetLink));
             }
         }
 
         var references = assetReferences
-            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, AssetTypeService, _assetReferenceController, _recordReferenceController))
+            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, AssetTypeService, _referenceService))
             .Cast<IReferenceVM>()
-            .Combine(recordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _recordReferenceController)))
+            .Combine(recordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _referenceService)))
             .ToArray();
 
         if (references.Length == 0) return null;
@@ -598,8 +594,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
         if (assetLink is not null) {
-            var assetReferences = _assetReferenceController.GetAssetReferences(assetLink);
-            var recordReferences = _assetReferenceController.GetRecordReferences(assetLink);
+            var assetReferences = _referenceService.GetAssetReferences(assetLink);
+            var recordReferences = _referenceService.GetRecordReferences(assetLink);
             if (assetReferences.Any() || recordReferences.Any()) {
                 var fileSystemLink = new FileSystemLink(asset.DataSource, asset.DataRelativePath);
                 items.Add(_menuItemProvider.References(OpenReferences, fileSystemLink));
@@ -815,8 +811,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     break;
             }
 
-            var hasReferences = _assetReferenceController.GetAssetReferences(assetLink).Any()
-             || _assetReferenceController.GetRecordReferences(assetLink).Any();
+            var hasReferences = _referenceService.GetAssetReferences(assetLink).Any()
+             || _referenceService.GetRecordReferences(assetLink).Any();
 
             if (hasReferences) {
                 if (!ShowReferencedFiles) {

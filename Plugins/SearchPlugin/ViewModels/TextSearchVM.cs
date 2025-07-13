@@ -14,8 +14,6 @@ using CreationEditor.Avalonia.Models.GroupCollection;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
 using DynamicData;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Records;
@@ -51,8 +49,6 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
     public StringComparison ComparisonType => CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
     public TextSearchVM(
-        IAssetReferenceController assetReferenceController,
-        IRecordReferenceController referenceController,
         IEditorEnvironment<TMod, TModGetter> editorEnvironment) {
         _editorEnvironment = editorEnvironment;
 

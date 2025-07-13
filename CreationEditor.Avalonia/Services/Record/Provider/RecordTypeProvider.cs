@@ -3,8 +3,7 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -27,7 +26,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
         IEnumerable<Type> types,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController) {
+        IReferenceService referenceService) {
         Types = types.ToList();
         RecordBrowserSettings = recordBrowserSettings;
 
@@ -42,7 +41,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     RecordCache.Edit(updater => {
                         foreach (var type in Types) {
                             foreach (var record in linkCache.PriorityOrder.WinningOverrides(type)) {
-                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                                 updater.AddOrUpdate(referencedRecord);
                             }
@@ -65,7 +64,7 @@ public sealed class RecordTypeProvider : ViewModel, IRecordProvider<IReferencedR
                     listRecord.Record = x.Record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(x.Record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(x.Record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 

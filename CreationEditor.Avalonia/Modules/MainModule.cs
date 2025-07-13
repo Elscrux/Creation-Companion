@@ -5,7 +5,6 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
-using CreationEditor.Avalonia.Services.Lifecycle;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.Provider;
@@ -94,8 +93,7 @@ public sealed class MainModule : Module {
 
         builder.RegisterDecorator<AutoSaveService, IModSaveService>();
         builder.RegisterType<AutoSaveService>()
-            .As<IAutoSaveService>()
-            .SingleInstance();
+            .As<IAutoSaveService>();
 
         // Provider
         builder.RegisterType<PluginsFolderAssemblyProvider>()
@@ -201,6 +199,12 @@ public sealed class MainModule : Module {
             .AsSelf();
 
         builder.RegisterType<ReferenceRemapperVM>()
+            .AsSelf();
+
+        builder.RegisterType<RecordReferenceVM>()
+            .AsSelf();
+
+        builder.RegisterType<AssetReferenceVM>()
             .AsSelf();
 
         builder.RegisterType<SingleDataSourcePickerVM>()

@@ -2,7 +2,8 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using CreationEditor.Services.Mutagen.References.Record;
+using Avalonia.Data;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;

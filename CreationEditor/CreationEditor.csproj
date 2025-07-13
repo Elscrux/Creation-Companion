@@ -95,15 +95,6 @@
         <Compile Update="Services\Asset\AssetController.cs">
           <DependentUpon>IAssetController.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Controller\AssetReferenceController.cs">
-          <DependentUpon>IAssetReferenceController.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Controller\RecordReferenceController.cs">
-          <DependentUpon>IRecordReferenceController.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\ReferencedAsset.cs">
-          <DependentUpon>IReferencedAsset.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Asset\DeleteDirectoryProvider.cs">
           <DependentUpon>IDeleteDirectoryProvider.cs</DependentUpon>
         </Compile>
@@ -146,59 +137,11 @@
         <Compile Update="Services\State\JsonStateRepository.cs">
           <DependentUpon>IStateRepository.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\DirectoryAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableValidatableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\FileSystemAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableValidatableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\NifAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableValidatableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\ArchiveAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\NifArchiveAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\ModAssetQuery.cs">
-          <DependentUpon>IAssetReferenceCacheableQuery.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Query\ModelAssetQuery.cs">
-          <DependentUpon>IAssetReferenceQuery.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\FileSystem\Validation\HashFileSystemValidation.cs">
           <DependentUpon>IFileSystemValidation.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\FileSystem\Validation\BinaryFileSystemValidationSerialization.cs">
           <DependentUpon>IHashFileSystemValidationSerialization.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Cache\Serialization\BinaryAssetReferenceSerialization.cs">
-          <DependentUpon>IAssetReferenceSerialization.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Cache\AssetReferenceCacheFactory.cs">
-          <DependentUpon>IAssetReferenceCacheFactory.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Parser\NifFileAssetParser.cs">
-          <DependentUpon>IFileAssetParser.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Parser\FileAssetParser.cs">
-          <DependentUpon>IFileAssetParser.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Asset\Parser\NifArchiveAssetParser.cs">
-          <DependentUpon>IArchiveAssetParser.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Cache\ImmutableRecordReferenceCache.cs">
-          <DependentUpon>IRecordReferenceCache.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Cache\RecordReferenceCacheFactory.cs">
-          <DependentUpon>IRecordReferenceCacheFactory.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Cache\MutableRecordReferenceCache.cs">
-          <DependentUpon>IRecordReferenceCache.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Mutagen\References\Record\Query\RecordReferenceQuery.cs">
-          <DependentUpon>IRecordReferenceQuery.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Query\Select\QueryFieldSelectorCollection.cs">
           <DependentUpon>IQueryFieldSelectorCollection.cs</DependentUpon>
@@ -237,6 +180,102 @@
         </Compile>
         <Compile Update="Services\State\CachedStateRepository.cs">
           <DependentUpon>ICachedStateRepository.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\ReferenceService.cs">
+          <DependentUpon>IReferenceService.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\AssetDictionaryReferenceCache.cs">
+          <DependentUpon>IDictionaryReferenceCache.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\DictionaryReferenceCache.cs">
+          <DependentUpon>IDictionaryReferenceCache.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\RecordReferenceCache.cs">
+          <DependentUpon>IReferenceCache.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\AssetReferenceCache.cs">
+          <DependentUpon>IReferenceCache.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\IDictionaryReferenceCache.cs">
+          <DependentUpon>IReferenceCache.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\AssetReferenceCacheController.cs">
+          <DependentUpon>IReferenceCacheController.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\RecordReferenceCacheController.cs">
+          <DependentUpon>IReferenceCacheController.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\DictionaryRecordReferenceCacheController.cs">
+          <DependentUpon>IReferenceCacheController.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\DataSourceReferenceUpdateTrigger.cs">
+          <DependentUpon>IReferenceUpdateTrigger.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\ModReferenceUpdateTrigger.cs">
+          <DependentUpon>IReferenceUpdateTrigger.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfigInt.cs">
+          <DependentUpon>IReferenceCacheSerializationConfigLink.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfigString.cs">
+          <DependentUpon>IReferenceCacheSerializationConfigLink.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfig.cs">
+          <DependentUpon>IReferenceCacheSerializationConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\RecordReferenceCacheSerialization.cs">
+          <DependentUpon>IReferenceCacheSerialization.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerialization.cs">
+          <DependentUpon>IReferenceCacheSerialization.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\DictionaryReferenceCacheSerialization.cs">
+          <DependentUpon>IReferenceCacheSerialization.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordAssetReferenceQueryConfig.cs">
+          <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordReferenceQueryConfig.cs">
+          <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\FileSystemQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\ArchiveQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\AssetReferenceQueryConfig.cs">
+          <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\ModAssetSerializableQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordReferenceQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\DictionaryAssetReferenceQueryConfig.cs">
+          <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\NifAddonNodeLinkParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\NifSoundLinkParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\ModAssetReferenceCacheSerializationConfig.cs">
+          <DependentUpon>IReferenceCacheSerializationConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\IReferencedRecord.cs">
+          <DependentUpon>IReferencedRecordIdentifier.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\ReferencedRecord.cs">
+          <DependentUpon>IReferencedRecordIdentifier.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\ReferencedAsset.cs">
+          <DependentUpon>IReferencedAsset.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\IReferenceCacheSerializationConfigLink.cs">
+          <DependentUpon>IReferenceCacheSerializationConfig.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 </Project>

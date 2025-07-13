@@ -6,7 +6,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Noggog;

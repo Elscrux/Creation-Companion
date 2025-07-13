@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Record.Provider;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;

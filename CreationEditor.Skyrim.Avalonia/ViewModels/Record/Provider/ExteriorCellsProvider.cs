@@ -5,8 +5,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -30,7 +29,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
 
     public ExteriorCellsProvider(
         ILinkCacheProvider linkCacheProvider,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IRecordController recordController,
         IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
@@ -53,7 +52,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
                     RecordCache.Clear();
                     RecordCache.Edit(updater => {
                         foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
-                            recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -84,7 +83,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
                     if (worldspace.FormKey != WorldspaceFormKey) return;
 
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(cell, out var outListRecord).DisposeWith(this);
+                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
 
                     // Force update

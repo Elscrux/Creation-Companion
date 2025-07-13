@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Comparer;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 
 public sealed class TypeExtraColumns : IUntypedExtraColumns {

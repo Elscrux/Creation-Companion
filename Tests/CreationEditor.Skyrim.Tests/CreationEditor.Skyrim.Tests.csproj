@@ -17,4 +17,8 @@
       <ProjectReference Include="..\..\CreationEditor.Skyrim\CreationEditor.Skyrim.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Mock\" />
+    </ItemGroup>
+
 </Project>

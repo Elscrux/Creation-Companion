@@ -6,8 +6,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
@@ -16,9 +15,7 @@ using Serilog;
 namespace ModCleaner.ViewModels;
 
 public sealed partial class ModCleanerVM : ViewModel {
-    public IObservable<bool> IsLoading => RecordReferenceController.IsLoading.CombineLatest(AssetReferenceController.IsLoading, (a, b) => a || b);
-    public IRecordReferenceController RecordReferenceController { get; }
-    public IAssetReferenceController AssetReferenceController { get; }
+    public IReferenceService ReferenceService { get; }
     public SingleDataSourcePickerVM CleaningDataSourcePicker { get; }
     public SingleModPickerVM CleaningModPickerVM { get; }
     public MultiModPickerVM DependenciesModPickerVM { get; }
@@ -33,13 +30,11 @@ public sealed partial class ModCleanerVM : ViewModel {
         ILogger logger,
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         Services.ModCleaner modCleaner,
-        IRecordReferenceController recordReferenceController,
-        IAssetReferenceController assetReferenceController,
+        IReferenceService referenceService,
         SingleDataSourcePickerVM cleaningDataSourcePicker,
         SingleModPickerVM cleaningModPickerVM,
         MultiModPickerVM dependenciesModPickerVM) {
-        RecordReferenceController = recordReferenceController;
-        AssetReferenceController = assetReferenceController;
+        ReferenceService = referenceService;
         CleaningModPickerVM = cleaningModPickerVM;
         DependenciesModPickerVM = dependenciesModPickerVM;
         CleaningDataSourcePicker = cleaningDataSourcePicker;

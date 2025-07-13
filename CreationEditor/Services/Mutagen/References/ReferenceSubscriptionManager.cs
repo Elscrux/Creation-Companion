@@ -3,16 +3,17 @@ using DynamicData;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References;
 
-public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference>(
+public sealed class ReferenceSubscriptionManager<TLink, TReference, TSubscriber>(
+    Predicate<TSubscriber> isOutdated,
     Action<TSubscriber, Change<TReference>> changeAction,
-    Action<TSubscriber, IReadOnlyList<TReference>> changeAllAction,
-    Func<TSubscriber, TIdentifier> identifierSelector,
-    IEqualityComparer<TIdentifier>? comparer = null)
-    where TIdentifier : notnull
+    Action<TSubscriber, IReadOnlyList<TReference>> addAllAction,
+    Func<TSubscriber, TLink> identifierSelector,
+    IEqualityComparer<TLink>? comparer = null)
+    where TLink : notnull
     where TReference : notnull {
 
     private readonly Lock _lockObject = new();
-    private readonly ConcurrentDictionary<TIdentifier, ConcurrentDictionary<ReferenceSubscription, byte>> _identifierSubscriptions = new(comparer);
+    private readonly ConcurrentDictionary<TLink, ConcurrentDictionary<ReferenceSubscription, byte>> _identifierSubscriptions = new(comparer);
 
     public IDisposable Register(TSubscriber subscriber) {
         var identifier = identifierSelector(subscriber);
@@ -29,17 +30,17 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
         _identifierSubscriptions.Clear();
     }
 
-    public void Unregister(TIdentifier identifier, TSubscriber subscriber) {
-        if (!_identifierSubscriptions.TryGetValue(identifier, out var subscriptions)) return;
+    public void Unregister(TLink link, TSubscriber subscriber) {
+        if (!_identifierSubscriptions.TryGetValue(link, out var subscriptions)) return;
 
         var unregisteredKeys = subscriptions.Keys.Where(s => Equals(s.Subscriber, subscriber)).ToList();
         subscriptions.Remove(unregisteredKeys);
     }
 
-    public void UnregisterWhere(Predicate<TSubscriber> removePredicate) {
-        var emptyIdents = new List<TIdentifier>();
+    public void UnregisterOutdated() {
+        var emptyIdents = new List<TLink>();
         foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
-            var unregisteredKeys = subscriptions.Keys.Where(s => removePredicate(s.Subscriber)).ToList();
+            var unregisteredKeys = subscriptions.Keys.Where(s => isOutdated(s.Subscriber)).ToList();
             subscriptions.Remove(unregisteredKeys);
 
             if (subscriptions.IsEmpty) {
@@ -50,8 +51,8 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
         _identifierSubscriptions.Remove(emptyIdents);
     }
 
-    public bool Update(TIdentifier identifier, Change<TReference> change) {
-        if (!_identifierSubscriptions.TryGetValue(identifier, out var subscriptions)) return false;
+    public bool Update(TLink link, Change<TReference> change) {
+        if (!_identifierSubscriptions.TryGetValue(link, out var subscriptions)) return false;
         if (subscriptions.IsEmpty) return true;
 
         lock (_lockObject) {
@@ -63,29 +64,29 @@ public sealed class ReferenceSubscriptionManager<TIdentifier, TSubscriber, TRefe
         return true;
     }
 
-    public void UpdateAll(Func<TIdentifier, IEnumerable<TReference>> newReferencesSelector) {
+    public void UpdateAll(Func<TLink, IEnumerable<TReference>> newReferencesSelector) {
         foreach (var (identifier, subscriptions) in _identifierSubscriptions) {
             if (subscriptions.IsEmpty) continue;
 
             var references = newReferencesSelector(identifier).ToList();
 
             foreach (var subscription in subscriptions) {
-                changeAllAction(subscription.Key.Subscriber, references);
+                addAllAction(subscription.Key.Subscriber, references);
             }
         }
     }
 
     public sealed record ReferenceSubscription(
-        ReferenceSubscriptionManager<TIdentifier, TSubscriber, TReference> ReferenceSubscriptionManager,
-        TIdentifier Identifier,
+        ReferenceSubscriptionManager<TLink, TReference, TSubscriber> ReferenceSubscriptionManager,
+        TLink Link,
         TSubscriber Subscriber) : IDisposable {
         public void Dispose() {
-            if (!ReferenceSubscriptionManager._identifierSubscriptions.TryGetValue(Identifier, out var subscriptions)) return;
+            if (!ReferenceSubscriptionManager._identifierSubscriptions.TryGetValue(Link, out var subscriptions)) return;
 
             subscriptions.TryRemove(this, out _);
 
             if (subscriptions.IsEmpty) {
-                ReferenceSubscriptionManager._identifierSubscriptions.TryRemove(Identifier, out _);
+                ReferenceSubscriptionManager._identifierSubscriptions.TryRemove(Link, out _);
             }
         }
     }

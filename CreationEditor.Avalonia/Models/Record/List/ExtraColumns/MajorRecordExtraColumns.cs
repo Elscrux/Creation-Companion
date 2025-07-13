@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Comparer;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 

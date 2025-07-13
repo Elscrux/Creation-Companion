@@ -1,5 +1,5 @@
 ﻿using Avalonia.Data.Converters;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Converter;
 

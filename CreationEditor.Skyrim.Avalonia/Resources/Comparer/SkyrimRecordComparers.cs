@@ -1,5 +1,5 @@
 ﻿using CreationEditor.Resources.Comparer;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;

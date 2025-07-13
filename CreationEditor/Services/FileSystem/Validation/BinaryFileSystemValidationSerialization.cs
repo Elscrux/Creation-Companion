@@ -1,17 +1,16 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using CreationEditor.Services.Cache;
-using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using Serilog;
 namespace CreationEditor.Services.FileSystem.Validation;
 
 public sealed class BinaryFileSystemValidationSerialization(
     ILogger logger,
-    Func<string[], ICacheLocationProvider> cacheLocationProviderFactory,
+    Func<IReadOnlyList<string>, ICacheLocationProvider> cacheLocationProviderFactory,
     IFileSystem fileSystem)
     : IHashFileSystemValidationSerialization {
 
-    private static readonly string[] CacheLocation = ["Validation", "FileSystem"];
+    private static readonly IReadOnlyList<string> CacheLocation = ["Validation", "FileSystem"];
     private readonly ICacheLocationProvider _cacheLocationProvider = cacheLocationProviderFactory(CacheLocation);
     private readonly Version _version = new(1, 0);
 

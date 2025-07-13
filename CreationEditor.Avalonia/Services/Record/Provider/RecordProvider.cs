@@ -3,8 +3,7 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -27,7 +26,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
     public RecordProvider(
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
 
@@ -41,7 +40,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     RecordCache.Clear();
                     RecordCache.Edit(updater => {
                         foreach (var record in linkCache.PriorityOrder.WinningOverrides<TMajorRecordGetter>()) {
-                            recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -63,7 +62,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
                     listRecord.Record = record;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(record, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 

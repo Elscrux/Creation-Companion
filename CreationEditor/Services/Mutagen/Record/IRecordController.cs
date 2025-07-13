@@ -1,5 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+﻿using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Record;
@@ -218,10 +217,10 @@ public interface IRecordController {
     /// </summary>
     /// <param name="record">Record to mark for deletion</param>
     /// <param name="mod">Mod to delete the record from</param>
-    /// <param name="recordReferenceController">Record reference controller to update references</param>
+    /// <param name="referenceService">Record reference controller to update references</param>
     /// <param name="forceDelete">If true, the record will be deleted even if it is referenced by other records</param>
     /// <returns>True if the record was marked for deletion, false if it was not possible to delete the record</returns>
-    bool MarkForDeletion(IMajorRecordGetter record, IMod mod, IRecordReferenceController recordReferenceController, bool forceDelete = false);
+    bool MarkForDeletion(IMajorRecordGetter record, IMod mod, IReferenceService referenceService, bool forceDelete = false);
 
     /// <summary>
     /// Marks a record for deletion in the given mod.

@@ -12,8 +12,7 @@ using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -43,7 +42,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         IContextMenuProvider contextMenuProvider,
         IMenuItemProvider menuItemProvider,
         IRecordController recordController,
-        IReferenceControllerManager referenceControllerManager,
+        IReferenceService referenceService,
         IRecordEditorController recordEditorController,
         MainWindow mainWindow,
         object? context = null,
@@ -146,7 +145,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
 
             var recordReferences = records
                 .SelectMany(record => record.RecordReferences)
-                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, referenceControllerManager))
+                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, referenceService))
                 .Cast<IReferenceVM>()
                 .ToArray();
 

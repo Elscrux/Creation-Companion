@@ -2,9 +2,8 @@
 using AutoFixture.Kernel;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record.Cache;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Notification;
-using CreationEditor.Skyrim.Tests.Mock;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Environments.DI;
@@ -28,9 +27,9 @@ public sealed class EditorEnvironmentCustomization(
 
         // Custom customizations
         fixture.Register<INotificationService>(fixture.Create<NotificationService>);
-        fixture.Register<IRecordReferenceCacheFactory>(() => new EmptyRecordReferenceCacheFactory(fixture));
         fixture.Register<Func<IEditorEnvironmentUpdater>>(() => fixture.Create<EditorEnvironmentUpdater<ISkyrimMod, ISkyrimModGetter>>);
         fixture.Customizations.Add(new SingletonBuilder<IRecordController, RecordController<ISkyrimMod, ISkyrimModGetter>>(fixture));
+        fixture.Customizations.Add(new SingletonBuilder<IReferenceService, ReferenceService>(fixture));
 
         var builder = fixture.Create<Func<IEditorEnvironmentUpdater>>();
         var gameReleaseContext = fixture.Create<IGameReleaseContext>();

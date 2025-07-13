@@ -1,7 +1,7 @@
 ﻿using CreationEditor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins;
@@ -14,7 +14,7 @@ namespace ModCleaner.Services;
 public sealed class RecordCleaner(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     IRecordController recordController,
-    IRecordReferenceController recordReferenceController) {
+    IReferenceService referenceService) {
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
@@ -25,7 +25,7 @@ public sealed class RecordCleaner(
                 var current = queue.Dequeue();
                 graph.AddVertex(new FormLinkIdentifier(current));
 
-                foreach (var currentReference in recordReferenceController.GetReferences(current.FormKey)) {
+                foreach (var currentReference in referenceService.GetRecordReferences(current)) {
                     // This just checks if the reference was defined in the mod or one of its dependencies. Update if needed.
                     var modKey = currentReference.FormKey.ModKey;
                     if (modKey != mod.ModKey
@@ -43,7 +43,7 @@ public sealed class RecordCleaner(
         }
     }
 
-    public IReadOnlyList<IFormLinkIdentifier> GetRecordsToClean(
+    public static IReadOnlyList<IFormLinkIdentifier> GetRecordsToClean(
         HashSet<ILinkIdentifier> includedLinks,
         IModGetter mod) {
 
@@ -152,7 +152,7 @@ public sealed class RecordCleaner(
         typeof(IDialogViewGetter),
     ];
 
-    public void FinalIncludeLinks(
+    public static void FinalIncludeLinks(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         HashSet<ILinkIdentifier> included,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {

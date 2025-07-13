@@ -1,8 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.Type;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -329,16 +328,16 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public bool MarkForDeletion(
         IMajorRecordGetter record,
         IMod mod,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         bool forceDelete = false) {
-        return MarkForDeletion(record, CastOrThrow<TMod>(mod), () => recordReferenceController.GetReferences(record.FormKey), forceDelete);
+        return MarkForDeletion(record, CastOrThrow<TMod>(mod), () => referenceService.GetRecordReferences(record), forceDelete);
     }
     public bool MarkForDeletion(
         IMajorRecordGetter record,
         TMod mod,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         bool forceDelete = false) {
-        return MarkForDeletion(record, mod, () => recordReferenceController.GetReferences(record.FormKey), forceDelete);
+        return MarkForDeletion(record, mod, () => referenceService.GetRecordReferences(record), forceDelete);
     }
 
     public bool MarkForDeletion(

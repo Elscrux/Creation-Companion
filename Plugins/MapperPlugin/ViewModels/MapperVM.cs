@@ -9,7 +9,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Query;
 using CreationEditor.Core;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Query.From;
 using CreationEditor.Services.State;
@@ -70,7 +70,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         IStateRepositoryFactory<MapperMemento, MapperMemento, NamedGuid> stateRepositoryFactory,
         ILogger logger,
         IGameReleaseContext gameReleaseContext,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IMutagenTypeProvider mutagenTypeProvider,
         ILinkCacheProvider linkCacheProvider) {
         _queryVMFactory = queryVMFactory;
@@ -154,7 +154,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .DoTask(async worldspace => await HeatmapCreator.CalculateSpots(
                 Mappings,
                 LinkCacheProvider.LinkCache,
-                recordReferenceController,
+                referenceService,
                 worldspace))
             .ObserveOnGui()
             .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))

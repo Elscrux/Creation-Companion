@@ -10,6 +10,7 @@ public sealed class EditorModule : Module {
         builder.RegisterModule<QueryModule>();
         builder.RegisterModule<AssetModule>();
         builder.RegisterModule<RecordModule>();
+        builder.RegisterModule<ReferenceModule>();
         builder.RegisterModule<NewtonsoftJsonModule>();
         builder.RegisterModule<LoggingModule>();
         builder.RegisterModule<SettingsModule>();

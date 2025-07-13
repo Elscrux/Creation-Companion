@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Reactive;
 using Avalonia.Controls;
-using CreationEditor.Services.Mutagen.References.Record;
 using CreationEditor.Avalonia.Services.Actions;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;

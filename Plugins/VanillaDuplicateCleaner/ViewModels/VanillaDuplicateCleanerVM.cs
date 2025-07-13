@@ -9,7 +9,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Definitions;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -24,7 +24,7 @@ namespace VanillaDuplicateCleaner.ViewModels;
 public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
     private readonly IRecordController _recordController;
-    public IRecordReferenceController RecordReferenceController { get; }
+    public IReferenceService ReferenceService { get; }
     public SingleModPickerVM ModPickerVM { get; }
     public ObservableCollection<SelectableRecordDiff> Records { get; } = [];
 
@@ -35,11 +35,11 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
     public VanillaDuplicateCleanerVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         SingleModPickerVM modPickerVM) {
         _editorEnvironment = editorEnvironment;
         _recordController = recordController;
-        RecordReferenceController = recordReferenceController;
+        ReferenceService = referenceService;
         ModPickerVM = modPickerVM;
         ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
 
@@ -110,7 +110,7 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
 
         // Replace mod references of records to be replaced with vanilla records
         foreach (var recordReplacement in recordReplacements) {
-            var references = RecordReferenceController.GetReferences(recordReplacement.RecordDiff.Old.FormKey).ToArray();
+            var references = ReferenceService.GetRecordReferences(recordReplacement.RecordDiff.Old).ToArray();
 
             // Clean references
             foreach (var reference in references) {

@@ -3,8 +3,7 @@ using System.Reactive.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
@@ -30,7 +29,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
         IEnumerable<IFormLinkIdentifier> identifiers,
         IRecordBrowserSettings recordBrowserSettings,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         ILogger logger) {
         Identifiers = identifiers;
         RecordBrowserSettings = recordBrowserSettings;
@@ -50,7 +49,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
                             var formKey = identifier.FormKey;
                             _recordTypes.Add(identifier.Type);
                             if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                                 updater.AddOrUpdate(referencedRecord);
                             } else {

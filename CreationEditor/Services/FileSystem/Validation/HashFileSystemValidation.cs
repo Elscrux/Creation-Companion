@@ -1,13 +1,12 @@
 ﻿using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
-using CreationEditor.Services.Mutagen.References.Asset.Cache;
 using Mutagen.Bethesda.Assets;
 using Noggog;
 namespace CreationEditor.Services.FileSystem.Validation;
 
 public sealed class HashFileSystemValidation(
     IHashFileSystemValidationSerialization fileSystemValidationSerialization,
-    string searchPattern = "*.*")
+    IEnumerable<string> fileExtensions)
     : IFileSystemValidation {
 
     /// <summary>
@@ -15,26 +14,26 @@ public sealed class HashFileSystemValidation(
     /// </summary>
     private const int MaxParallelLevel = 2;
 
-    public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(FileSystemLink source) {
-        var validate = fileSystemValidationSerialization.Validate(source.FullPath);
-        if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.FullPath, out var fileSystemCacheData)) {
+    public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(IDataSource source) {
+        var validate = fileSystemValidationSerialization.Validate(source.Path);
+        if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.Path, out var fileSystemCacheData)) {
             var buildCache = await BuildCache(source);
-            fileSystemValidationSerialization.Serialize(buildCache, source.FullPath);
+            fileSystemValidationSerialization.Serialize(buildCache, source.Path);
 
             return CacheValidationResult<DataRelativePath>.FullyInvalid(() => {
-                fileSystemValidationSerialization.Serialize(buildCache, source.FullPath);
+                fileSystemValidationSerialization.Serialize(buildCache, source.Path);
             });
         }
 
-        var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source, 1).ToArrayAsync();
+        var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source.GetRootLink(), 1).ToArrayAsync();
         if (invalidatedFiles.Length == 0) return CacheValidationResult<DataRelativePath>.Valid();
 
         return CacheValidationResult<DataRelativePath>.PartlyInvalid(invalidatedFiles
-                .Select(file => new DataRelativePath(source.FileSystem.Path.GetRelativePath(source.FullPath, file.FullPath)))
+                .Select(file => new DataRelativePath(source.FileSystem.Path.GetRelativePath(source.Path, file.FullPath)))
                 .ToArray(),
             () => {
                 UpdateCache(fileSystemCacheData, invalidatedFiles, source);
-                fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.FullPath);
+                fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.Path);
             });
 
         async IAsyncEnumerable<FileSystemLink> ValidateDirectoryRec(HashDirectoryCacheData hashDirectoryCache, FileSystemLink directoryPath, int level) {
@@ -61,13 +60,11 @@ public sealed class HashFileSystemValidation(
             }
 
             // Check all files in this directory and compare their hashes with the cache
-            foreach (var fileLink in directoryPath.EnumerateFileLinks(searchPattern, false)) {
-                var fileCache = hashDirectoryCache.Files.FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, fileLink.Name));
+            foreach (var fileExtension in fileExtensions) {
+                foreach (var fileLink in directoryPath.EnumerateFileLinks('*' + fileExtension, false)) {
+                    var fileCache = hashDirectoryCache.Files.FirstOrDefault(d => DataRelativePath.PathComparer.Equals(d.Name, fileLink.Name));
 
-                if (fileCache is null) {
-                    yield return fileLink;
-                } else {
-                    if (!fileLink.FileSystem.IsFileHashValid(fileLink.FullPath, fileCache.Hash)) {
+                    if (fileCache is null || !fileLink.FileSystem.IsFileHashValid(fileLink.FullPath, fileCache.Hash)) {
                         yield return fileLink;
                     }
                 }
@@ -79,8 +76,10 @@ public sealed class HashFileSystemValidation(
 
                 if (subDirectoryCache is null) {
                     // No cache exists for this subdirectory, return all new files in this directory as invalid
-                    foreach (var filePath in subDirectoryPath.EnumerateFileLinks(searchPattern, true)) {
-                        yield return filePath;
+                    foreach (var fileExtension in fileExtensions) {
+                        foreach (var filePath in subDirectoryPath.EnumerateFileLinks('*' + fileExtension, true)) {
+                            yield return filePath;
+                        }
                     }
                 } else {
                     await foreach (var filePath in ValidateDirectoryRec(subDirectoryCache, subDirectoryPath, nextLevel)) {
@@ -91,9 +90,12 @@ public sealed class HashFileSystemValidation(
         }
     }
 
-    private void UpdateCache(HashFileSystemCacheData fileSystemCacheData, IEnumerable<FileSystemLink> invalidatedFiles, FileSystemLink rootDirectoryPath) {
+    private static void UpdateCache(
+        HashFileSystemCacheData fileSystemCacheData,
+        IEnumerable<FileSystemLink> invalidatedFiles,
+        IDataSource dataSource) {
         foreach (var fileLink in invalidatedFiles) {
-            var relativePath = fileLink.FileSystem.Path.GetRelativePath(rootDirectoryPath.FullPath, fileLink.FullPath);
+            var relativePath = fileLink.FileSystem.Path.GetRelativePath(dataSource.Path, fileLink.FullPath);
 
             var currentDirectory = fileSystemCacheData.RootDirectory;
             var strings = relativePath.Split(fileLink.FileSystem.Path.DirectorySeparatorChar, fileLink.FileSystem.Path.AltDirectorySeparatorChar);
@@ -119,8 +121,8 @@ public sealed class HashFileSystemValidation(
         }
     }
 
-    private async Task<HashFileSystemCacheData> BuildCache(FileSystemLink rootDirectoryPath) {
-        var rootDirectory = await BuildDirectoryCache(rootDirectoryPath, 1)
+    private async Task<HashFileSystemCacheData> BuildCache(IDataSource rootDirectoryPath) {
+        var rootDirectory = await BuildDirectoryCache(rootDirectoryPath.GetRootLink(), 1)
          ?? new HashDirectoryCacheData(rootDirectoryPath.Name, [], []);
 
         return new HashFileSystemCacheData(rootDirectoryPath.FileSystem.GetHashBytesLength(), rootDirectory);
@@ -148,10 +150,12 @@ public sealed class HashFileSystemValidation(
 
             // Build files
             var files = new List<HashFileCacheData>();
-            foreach (var filePath in directoryPath.EnumerateFileLinks(searchPattern, false)) {
-                var hash = filePath.FileSystem.GetFileHash(filePath.FullPath);
+            foreach (var fileExtension in fileExtensions) {
+                foreach (var filePath in directoryPath.EnumerateFileLinks('*' + fileExtension, false)) {
+                    var hash = filePath.FileSystem.GetFileHash(filePath.FullPath);
 
-                files.Add(new HashFileCacheData(filePath.Name, hash));
+                    files.Add(new HashFileCacheData(filePath.Name, hash));
+                }
             }
 
             // Finalize cache

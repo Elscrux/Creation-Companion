@@ -4,8 +4,7 @@ using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -25,7 +24,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
 
     public InteriorCellsProvider(
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
 
@@ -42,7 +41,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                         foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                             if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                            recordReferenceController.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -67,7 +66,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                     if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) return;
 
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(cell, out var outListRecord).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWith(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 

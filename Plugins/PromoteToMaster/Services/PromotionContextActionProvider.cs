@@ -3,7 +3,7 @@ using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Record;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Definitions;
 using FluentAvalonia.UI.Controls;
 using PromoteToMaster.ViewModels;

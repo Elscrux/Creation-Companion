@@ -1,7 +1,7 @@
 ﻿using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
@@ -18,7 +18,7 @@ public sealed class AssetCleaner(
     IAssetTypeProvider assetTypeProvider,
     IAssetTypeService assetTypeService,
     IAssetController assetController,
-    IAssetReferenceController assetReferenceController,
+    IReferenceService referenceService,
     IDataSourceService dataSourceService) {
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
@@ -29,13 +29,13 @@ public sealed class AssetCleaner(
             var assetLinkIdentifier = new AssetLinkIdentifier(assetLink);
             graph.AddVertex(assetLinkIdentifier);
 
-            foreach (var recordReference in assetReferenceController.GetRecordReferences(assetLink)) {
+            foreach (var recordReference in referenceService.GetRecordReferences(assetLink)) {
                 if (mod.ModKey == recordReference.FormKey.ModKey || dependencies.Contains(recordReference.FormKey.ModKey)) {
                     graph.AddEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(recordReference), assetLinkIdentifier));
                 }
             }
 
-            foreach (var nifReference in assetReferenceController.GetAssetReferences(assetLink)) {
+            foreach (var nifReference in referenceService.GetAssetReferences(assetLink)) {
                 try {
                     var nifLink = new AssetLinkGetter<SkyrimModelAssetType>(nifReference);
                     graph.AddEdge(new Edge<ILinkIdentifier>(new AssetLinkIdentifier(nifLink), assetLinkIdentifier));

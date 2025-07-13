@@ -1,4 +1,4 @@
-﻿using CreationEditor.Services.Mutagen.References.Record;
+﻿using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;

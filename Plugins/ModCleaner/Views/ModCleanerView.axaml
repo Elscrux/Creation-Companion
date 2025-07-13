@@ -51,14 +51,14 @@
                     <avaloniaProgressRing:ProgressRing
                         ToolTip.Tip="Loading References"
                         HorizontalAlignment="Left"
-                        IsVisible="{Binding IsLoading^}"
+                        IsVisible="{Binding ReferenceService.IsLoading^}"
                         Foreground="{DynamicResource SystemAccentColor}"
                         Width="20" Height="20"/>
 
                     <Button
                         Content="Run"
                         Command="{Binding Run}"
-                        IsVisible="{Binding !IsLoading^}"
+                        IsVisible="{Binding !ReferenceService.IsLoading^}"
                         IsEnabled="{Binding CanRun^}"/>
                 </StackPanel>
             </StackPanel>

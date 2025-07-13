@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.Media;
 using CreationEditor.Avalonia;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using MapperPlugin.ViewModels;
 using Mutagen.Bethesda;
@@ -86,7 +86,7 @@ public sealed class HeatmapCreator {
     public async Task CalculateSpots(
         IEnumerable<MarkingMapping> mappings,
         ILinkCache linkCache,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         FormKey worldspace) {
         var spotsPerMapping = new Dictionary<MarkingMapping, MappingSpots>();
 
@@ -108,7 +108,7 @@ public sealed class HeatmapCreator {
             if (_spotsCache.TryGetValue(record, out var cachedSpots)) return (record, cachedSpots);
 
             var spots = new Dictionary<Point, int>();
-            foreach (var reference in recordReferenceController.GetReferences(record.FormKey)) {
+            foreach (var reference in referenceService.GetRecordReferences(record)) {
                 if (!reference.Type.InheritsFrom(typeof(IPlacedGetter))) continue;
                 if (!linkCache.TryResolveSimpleContext(reference, out var referenceRecordContext)) continue;
                 if (referenceRecordContext.Record is not IPlacedGetter { IsDeleted: false, Placement: not null } placed) continue;

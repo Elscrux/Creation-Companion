@@ -1,8 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
@@ -11,7 +10,7 @@ namespace CreationEditor.Avalonia.ViewModels.Reference;
 public sealed class RecordReferenceVM(
     IFormLinkIdentifier formLinkIdentifier,
     ILinkCacheProvider linkCacheProvider,
-    IRecordReferenceController recordReferenceController)
+    IReferenceService referenceService)
     : IReferenceVM, IDisposable {
 
     private readonly DisposableBucket _disposables = new();
@@ -29,7 +28,7 @@ public sealed class RecordReferenceVM(
     public IReferencedRecord ReferencedRecord {
         get {
             if (field is null) {
-                recordReferenceController
+                referenceService
                     .GetReferencedRecord(Record, out var referencedRecord)
                     .DisposeWith(_disposables);
 
@@ -48,7 +47,7 @@ public sealed class RecordReferenceVM(
     private ReadOnlyObservableCollection<IReferenceVM> LoadChildren() {
         return ReferencedRecord.RecordReferences
             .SelectObservableCollectionSync(
-                IReferenceVM (identifier) => new RecordReferenceVM(identifier, linkCacheProvider, recordReferenceController),
+                IReferenceVM (identifier) => new RecordReferenceVM(identifier, linkCacheProvider, referenceService),
                 _disposables);
     }
 

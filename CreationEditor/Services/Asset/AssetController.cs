@@ -2,7 +2,7 @@
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Asset.Controller;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Noggog;
@@ -13,7 +13,7 @@ public sealed class AssetController(
     IDeleteDirectoryProvider deleteDirectoryProvider,
     IAssetTypeService assetTypeService,
     IDataSourceService dataSourceService,
-    IAssetReferenceController assetReferenceController,
+    IReferenceService referenceService,
     IModelModificationService modelModificationService,
     ILinkCacheProvider linkCacheProvider,
     IRecordController recordController,
@@ -208,7 +208,7 @@ public sealed class AssetController(
             return;
         }
 
-        foreach (var reference in assetReferenceController.GetAssetReferences(assetLink)) {
+        foreach (var reference in referenceService.GetAssetReferences(assetLink)) {
             if (dataSourceService.TryGetFileLink(reference, out var referenceFileLink)) {
                 modelModificationService.RemapLinks(
                     referenceFileLink,
@@ -231,7 +231,7 @@ public sealed class AssetController(
         // i.e. Change meshes\clutter\test\test.nif to clutter\test.nif
         var shortenedDataRelativePath = oldLink.FileSystem.Path.GetRelativePath(assetLink.Type.BaseFolder, newLink.DataRelativePath.Path);
 
-        foreach (var formLink in assetReferenceController.GetRecordReferences(assetLink)) {
+        foreach (var formLink in referenceService.GetRecordReferences(assetLink)) {
             if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
 
             var recordOverride = recordController.GetOrAddOverride(record);

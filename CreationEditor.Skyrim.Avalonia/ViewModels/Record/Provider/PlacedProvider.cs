@@ -5,8 +5,7 @@ using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References.Record;
-using CreationEditor.Services.Mutagen.References.Record.Controller;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Avalonia.Models.Record;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
@@ -31,7 +30,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
     public PlacedProvider(
         ILinkCacheProvider linkCacheProvider,
         IRecordController recordController,
-        IRecordReferenceController recordReferenceController,
+        IReferenceService referenceService,
         IRecordBrowserSettings recordBrowserSettings) {
         RecordBrowserSettings = recordBrowserSettings;
 
@@ -55,7 +54,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
                             foreach (var record in cell.GetAllPlaced(linkCacheProvider.LinkCache)) {
                                 if (!refFormKeys.Add(record.FormKey)) continue;
 
-                                recordReferenceController.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
                                 var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, linkCacheProvider.LinkCache);
 
                                 updater.AddOrUpdate(referencedPlacedRecord);
@@ -79,7 +78,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
                     referencedPlaced.Record = placed;
                 } else {
                     // Create new entry
-                    recordReferenceController.GetReferencedRecord(placed, out var outReferencedPlaced).DisposeWith(this);
+                    referenceService.GetReferencedRecord(placed, out var outReferencedPlaced).DisposeWith(_referencesDisposable);
                     referencedPlaced = outReferencedPlaced;
                 }
 
