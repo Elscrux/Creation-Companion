@@ -47,7 +47,7 @@ public class LeveledListGenerator(
         }
     }
 
-    public FeatureNode? GroupByFeatureWildcard(
+    public static FeatureNode? GroupByFeatureWildcard(
         ListDefinition listDefinition,
         IEnumerable<RecordWithTier> records,
         List<FeatureWildcard> featureWildcards,

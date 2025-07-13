@@ -50,7 +50,7 @@ public sealed class BinaryFileSystemValidationSerialization(
         }
     }
 
-    public HashFileSystemCacheData Deserialize(BinaryReader reader) {
+    public static HashFileSystemCacheData Deserialize(BinaryReader reader) {
         // Skip serialization version
         reader.ReadString();
 

@@ -149,11 +149,11 @@ public sealed class BSERuntimeService : IViewportRuntimeService, IDisposable {
         }
     }
 
-    private void UnloadCell(ExteriorCellRuntimeSettings cell) {
+    private static void UnloadCell(ExteriorCellRuntimeSettings cell) {
         DeleteReferences(cell.References.Select(x => x.FormKey).ToArray());
     }
 
-    private void UnloadCell(InteriorCellRuntimeSettings cell) {
+    private static void UnloadCell(InteriorCellRuntimeSettings cell) {
         DeleteReferences(cell.References.Select(x => x.FormKey).ToArray());
     }
 

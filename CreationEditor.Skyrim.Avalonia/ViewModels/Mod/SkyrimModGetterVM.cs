@@ -29,7 +29,7 @@ public sealed partial class SkyrimModGetterVM : ViewModel, IModGetterVM<ISkyrimM
         Description = string.Empty;
     }
 
-    public ModInfo GetModInfo(ModKey modKey, ISkyrimModHeaderGetter modHeader) {
+    public static ModInfo GetModInfo(ModKey modKey, ISkyrimModHeaderGetter modHeader) {
         return new ModInfo(
             modKey,
             modHeader.Author,

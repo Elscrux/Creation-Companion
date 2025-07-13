@@ -29,7 +29,7 @@ public sealed class SkyrimAssetIconService : IAssetIconService {
         }
     }
 
-    public FAIconElement GetGlyphIcon(string glyph, string? tooltip = null) {
+    public static FAIconElement GetGlyphIcon(string glyph, string? tooltip = null) {
         return new FontIcon {
             Glyph = glyph,
             VerticalAlignment = VerticalAlignment.Center,
