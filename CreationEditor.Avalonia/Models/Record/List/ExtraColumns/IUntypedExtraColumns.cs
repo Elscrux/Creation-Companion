@@ -17,5 +17,12 @@ public interface IUntypedExtraColumns {
         });
     }
 
+    static FuncDataTemplate<IReferencedRecord> GetTextCellTemplate(Func<IReferencedRecord, IBinding> bindingSelector) {
+        return new FuncDataTemplate<IReferencedRecord>((record, _) => new TextBlock {
+            Name = "CellTextBlock",
+            [!TextBlock.TextProperty] = bindingSelector(record)
+        });
+    }
+
     IEnumerable<ExtraColumn> CreateColumns();
 }

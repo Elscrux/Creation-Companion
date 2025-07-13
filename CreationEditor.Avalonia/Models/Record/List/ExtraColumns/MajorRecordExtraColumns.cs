@@ -1,4 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Comparer;
 using CreationEditor.Services.Mutagen.References.Record;
@@ -28,11 +30,14 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
             210);
 
         yield return new ExtraColumn(
-            new DataGridTextColumn {
+            new DataGridTemplateColumn {
                 Header = "References",
-                Binding = new Binding(nameof(IReferencedRecord.RecordReferences) + '.' + nameof(IReferencedRecord.RecordReferences.Count), BindingMode.OneWay),
+                CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(r =>
+                    r.ReferenceCount
+                        .Select(x => x.ToString())
+                        .ToBinding()),
                 CanUserSort = true,
-                CustomSortComparer = ReferencedRecordComparers.RecordReferenceCountComparer,
+                CustomSortComparer = ReferencedRecordComparers.ReferenceCountComparer,
             },
             200);
     }
