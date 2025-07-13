@@ -61,7 +61,8 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
             .Where(source => !_caches.ContainsKey(source))
             .ToDictionary(source => Task.Run(() => _queryConfig.BuildCache(source)), source => source);
 
-        for (var i = 0; i < sources.Count; i++) {
+        var cachesCount = caches.Count;
+        for (var i = 0; i < cachesCount; i++) {
             var task = await Task.WhenAny(caches.Keys);
             var source = caches[task];
             _caches.Add(source, task.Result);
