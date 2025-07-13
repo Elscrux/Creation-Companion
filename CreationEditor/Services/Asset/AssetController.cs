@@ -249,7 +249,6 @@ public sealed class AssetController(
             if (token.IsCancellationRequested) return false;
 
             origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
-
         } catch (Exception e) {
             logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e.Message);
             return false;
@@ -268,19 +267,25 @@ public sealed class AssetController(
 
             if (destination.Exists()) {
                 // If the destination directory already exists, integrate the contents with recursive FileSystemMove calls
-                origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
-
-                // foreach (var link in origin.EnumerateAllLinks(true)) {
-                //     var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, link.DataRelativePath.Path);
-                //     var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
-                //     var linkDestination = new DataSourceFileLink(destination.DataSource, destinationPath);
-                //     FileSystemMove(link, linkDestination, token);
-                // }
+                foreach (var link in origin.EnumerateAllLinks(true)) {
+                    var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, link.DataRelativePath.Path);
+                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
+                    switch (link) {
+                        case DataSourceFileLink fileLink:
+                            var destinationFileLink = new DataSourceFileLink(destination.DataSource, destinationPath);
+                            FileSystemMove(fileLink, destinationFileLink, token);
+                            break;
+                        case DataSourceDirectoryLink directoryLink:
+                            var destinationDirectoryLink = new DataSourceDirectoryLink(destination.DataSource, destinationPath);
+                            FileSystemMove(directoryLink, destinationDirectoryLink, token);
+                            break;
+                    }
+                }
 
                 // If directory is empty after moving files, delete it
-                // if (!origin.EnumerateAllLinks(true).Any()) {
-                //     origin.FileSystem.Directory.Delete(origin.FullPath, true);
-                // }
+                if (!origin.EnumerateAllLinks(true).Any()) {
+                    origin.FileSystem.Directory.Delete(origin.FullPath, true);
+                }
             } else {
                 origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
             }
