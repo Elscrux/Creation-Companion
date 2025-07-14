@@ -37,6 +37,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
                 referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, fileSystemSerialization, _cacheValidation),
             ArchiveDataSource archiveDataSource =>
                 referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, archiveSerialization),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
     }
 

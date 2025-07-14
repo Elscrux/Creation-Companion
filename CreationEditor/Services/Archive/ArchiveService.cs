@@ -60,7 +60,8 @@ public sealed class ArchiveService(
         var archiveFile = GetArchiveFile(archiveReader, filePath);
         if (archiveFile is null) return null;
 
-        var tempFilePath = fileSystem.Path.GetTempFileName() + fileSystem.Path.GetExtension(filePath.Path);
+        var tempPath = fileSystem.Path.Combine(fileSystem.Path.GetTempPath(), fileSystem.Path.GetRandomFileName());
+        var tempFilePath = tempPath + fileSystem.Path.GetExtension(filePath.Path);
         using var tempFileStream = fileSystem.File.Create(tempFilePath);
         archiveFile.AsStream().CopyTo(tempFileStream);
 

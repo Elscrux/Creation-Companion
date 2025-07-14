@@ -73,6 +73,7 @@ public sealed class AssetController(
                             new DataSourceFileLink(
                                 destinationDirectoryLink.DataSource,
                                 destinationDirectoryLink.FileSystem.Path.Combine(destinationDirectoryLink.DataRelativePath.Path, fileLink.Name)),
+                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null)
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
@@ -109,6 +110,7 @@ public sealed class AssetController(
                             new DataSourceFileLink(
                                 destinationDirectoryLink.DataSource,
                                 destinationDirectoryLink.FileSystem.Path.Combine(destinationDirectoryLink.DataRelativePath.Path, fileLink.Name)),
+                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null)
                     };
 
                     var links = GetRemapLinks(fileLink, dest);

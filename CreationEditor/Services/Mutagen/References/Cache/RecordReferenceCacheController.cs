@@ -1,11 +1,9 @@
-﻿using CreationEditor.Services.Environment;
-using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvironment)
-    : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
+public sealed class RecordReferenceCacheController : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
     public void AddLink(RecordReferenceCache cache, IFormLinkIdentifier reference, IEnumerable<IFormLinkIdentifier> linksToAdd) {
         foreach (var link in linksToAdd) {
             var references = cache.Cache.GetOrAdd(link.FormKey);

@@ -39,7 +39,8 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
             FileSystemDataSource fileSystemDataSource =>
                 referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, _fileSystemSerializationFactory, _cacheValidation),
             ArchiveDataSource archiveDataSource =>
-                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerializationFactory)
+                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerializationFactory),
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
     }
 
