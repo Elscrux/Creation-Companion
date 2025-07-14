@@ -1,4 +1,5 @@
 ﻿using CreationEditor;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -8,12 +9,15 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
 namespace ModCleaner.Services;
 
 public sealed class RecordCleaner(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
+    ILogger logger,
     IRecordController recordController,
+    IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
@@ -39,11 +43,28 @@ public sealed class RecordCleaner(
 
                     graph.AddEdge(new Edge<ILinkIdentifier>(currentReferenceLink, new FormLinkIdentifier(current)));
                 }
+
+                foreach (var assetReference in referenceService.GetAssetReferences(current)) {
+                    try {
+                        var assetLink = assetTypeService.GetAssetLink(assetReference);
+                        if (assetLink is null) continue;
+
+                        var assetLinkIdentifier = new AssetLinkIdentifier(assetLink);
+                        if (!graph.Vertices.Contains(assetLinkIdentifier)) {
+                            graph.AddVertex(assetLinkIdentifier);
+                        }
+
+                        graph.AddEdge(new Edge<ILinkIdentifier>(assetLinkIdentifier, new FormLinkIdentifier(current)));
+                    } catch (Exception e) {
+                        // Log the error but continue processing other records
+                        logger.Here().Error(e, "Error creating asset link for {Asset}", assetReference);
+                    }
+                }
             }
         }
     }
 
-    public static IReadOnlyList<IFormLinkIdentifier> GetRecordsToClean(
+    public IReadOnlyList<IFormLinkIdentifier> GetRecordsToClean(
         HashSet<ILinkIdentifier> includedLinks,
         IModGetter mod) {
 

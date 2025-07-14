@@ -19,7 +19,7 @@ public sealed class ModCleaner(
 
         var included = FindRetainedRecords(graph, mod, dependencies);
 
-        var recordsToClean = RecordCleaner.GetRecordsToClean(included, mod);
+        var recordsToClean = recordCleaner.GetRecordsToClean(included, mod);
         var assetsToClean = assetCleaner.GetAssetsToClean(included, dataSource);
 
         var m = string.Join("\n", assetsToClean.Select(x => x.DataRelativePath.Path));

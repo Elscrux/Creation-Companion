@@ -7,7 +7,6 @@ using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
 using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
@@ -36,12 +35,13 @@ public sealed class AssetCleaner(
             }
 
             foreach (var nifReference in referenceService.GetAssetReferences(assetLink)) {
-                try {
-                    var nifLink = new AssetLinkGetter<SkyrimModelAssetType>(nifReference);
-                    graph.AddEdge(new Edge<ILinkIdentifier>(new AssetLinkIdentifier(nifLink), assetLinkIdentifier));
-                } catch (Exception e) {
-                    logger.Here().Error(e, "Error creating asset link for {Asset}", nifReference);
+                var nifLink = assetTypeService.GetAssetLink(nifReference);
+                if (nifLink is null) {
+                    logger.Here().Error("Error creating asset link for {Asset}", nifReference);
+                    continue;
                 }
+
+                graph.AddEdge(new Edge<ILinkIdentifier>(new AssetLinkIdentifier(nifLink), assetLinkIdentifier));
             }
         }
     }
