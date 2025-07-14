@@ -7,6 +7,8 @@ namespace CreationEditor.Services.Mutagen.References.Query;
 public sealed class RecordReferenceQuery : IReferenceQuery<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
     public string Name => "Mod Form Links";
 
+    public string GetSourceName(IModGetter source) => source.ModKey.FileName;
+
     public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
 
     public void FillCache(IModGetter source, RecordReferenceCache cache) {

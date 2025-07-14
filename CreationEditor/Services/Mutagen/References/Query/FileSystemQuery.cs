@@ -14,7 +14,7 @@ public sealed class FileSystemQuery<TCache, TLink>(
     where TLink : notnull {
     public string Name => fileParser.Name;
 
-    public string GetSourceName(IDataSource source) => source.Path;
+    public string GetSourceName(FileSystemDataSource source) => source.Path;
 
     public FileSystemDataSource? ReferenceToSource(DataRelativePath reference) {
         return dataSourceService.TryGetDataSource(reference.Path, out var dataSource) ? dataSource as FileSystemDataSource : null;

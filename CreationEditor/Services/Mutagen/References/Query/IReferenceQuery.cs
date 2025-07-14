@@ -17,7 +17,7 @@ public interface IReferenceQuery<TSource, TCache, TLink, TReference>
     /// </summary>
     /// <param name="source">Source to get the name of</param>
     /// <returns>Name of the given source</returns>
-    string GetSourceName(TSource source) => source.ToString() ?? string.Empty;
+    string GetSourceName(TSource source);
 
     /// <summary>
     /// Attempts to convert a reference to a source.
