@@ -47,7 +47,7 @@ public sealed class NifSoundLinkParser(IAssetTypeService assetTypeService) : IFi
         void TryAddAssetFromString(string soundEditorId) {
             if (string.IsNullOrEmpty(soundEditorId)) return;
 
-            results.Add(soundEditorId);
+            results.Add(soundEditorId.Trim());
         }
     }
 }
