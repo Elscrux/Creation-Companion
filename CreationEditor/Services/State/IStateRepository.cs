@@ -13,5 +13,7 @@ public interface IStateRepository<out TStateOut, TState, TIdentifier>
 
     bool Save(TState state, TIdentifier id);
 
+    bool Update(Func<TState?, TState> state, TIdentifier id);
+
     void Delete(TIdentifier id);
 }

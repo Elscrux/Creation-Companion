@@ -119,6 +119,12 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
         return true;
     }
 
+    public bool Update(Func<TState?, TState> state, TIdentifier id) {
+        var currentState = Load(id);
+        var newState = state(currentState);
+        return Save(newState, id);
+    }
+
     public void Delete(TIdentifier id) {
         var filePath = GetFileInfo(id);
         if (!filePath.Exists) return;

@@ -31,6 +31,7 @@ public sealed class CachedStateRepository<TStateOut, TState, TIdentifier>(
         _cache[id] = stateT;
         return _wrappedRepo.Save(state, id);
     }
+    public bool Update(Func<TState?, TState> state, TIdentifier id) => _wrappedRepo.Update(state, id);
     public void Delete(TIdentifier id) {
         _cache.Remove(id);
 
