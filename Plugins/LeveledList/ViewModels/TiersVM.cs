@@ -25,7 +25,7 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
     [Reactive] public partial ListRecordType SelectedTierType { get; set; } = ListRecordType.Armor;
     [Reactive] public partial TierItem? SelectedTier { get; set; }
-    [Reactive] public partial IRecordListVM RecordListVM { get; set; }
+    [Reactive] public partial IRecordListVM? RecordListVM { get; set; }
 
     public ReactiveCommand<Unit, Unit> SaveTiers { get; }
     public ReactiveCommand<string, Unit> AddTier { get; }
@@ -36,7 +36,7 @@ public sealed partial class TiersVM : ValidatableViewModel {
         IRecordListVMBuilder recordListVMBuilder,
         IExtraColumnsBuilder extraColumnsBuilder,
         ITierController tierController) {
-        RecordListVM = GetRecordListVM();
+        Task.Run(() => RecordListVM = GetRecordListVM());
 
         this.WhenAnyValue(x => x.SelectedTierType)
             .Select(tierController.GetTiers)
