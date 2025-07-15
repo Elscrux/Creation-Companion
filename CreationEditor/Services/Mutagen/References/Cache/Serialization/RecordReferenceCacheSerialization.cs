@@ -57,7 +57,7 @@ public sealed class RecordReferenceCacheSerialization(
         var game = GetGameName(cacheFilePath);
 
         // Read mod cache file
-        var fileStream = fileSystem.File.OpenRead(cacheFilePath);
+        using var fileStream = fileSystem.File.OpenRead(cacheFilePath);
         var zip = new GZipInputStream(fileStream);
         using var reader = new BinaryReader(zip);
 
