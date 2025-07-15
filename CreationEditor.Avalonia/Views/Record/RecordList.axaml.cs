@@ -51,18 +51,17 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
     }
 
     private void ScrollToItem(IReferencedRecord? referencedRecord) {
-        if (RecordGrid is not { Columns.Count: 0 } || referencedRecord is null) return;
+        if (RecordGrid is not { Columns: [var firstColumn, ..] } || referencedRecord is null) return;
 
         RecordGrid.SelectedItem = referencedRecord;
-        RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, RecordGrid.Columns.First());
+        RecordGrid.ScrollIntoView(RecordGrid.SelectedItem, firstColumn);
     }
 
     private void Sort() {
-        if (!RecordGrid.Columns.Any()) return;
+        if (RecordGrid is not { Columns: [var firstColumn, ..] } ) return;
 
-        var column = RecordGrid.Columns.First();
-        column.ClearSort();
-        column.Sort();
+        firstColumn.ClearSort();
+        firstColumn.Sort();
     }
 
     private void RecordGrid_ContextRequested(object? sender, ContextRequestedEventArgs e) {
