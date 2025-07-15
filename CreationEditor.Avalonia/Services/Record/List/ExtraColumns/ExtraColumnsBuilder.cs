@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System.Collections.Concurrent;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using Mutagen.Bethesda.Plugins.Records;
@@ -6,18 +7,21 @@ using Noggog;
 namespace CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 
 public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraColumnsBuilder {
-    private readonly HashSet<IUntypedExtraColumns> _extraColumns = [];
+    private readonly ConcurrentDictionary<IUntypedExtraColumns, byte> _extraColumns = [];
 
     public IExtraColumnsBuilder AddRecordType(Type recordType) {
-        _extraColumns.AddRange(recordType.AsEnumerable().Concat(recordType.GetInterfaces())
-            .SelectWhere(@interface => provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumns)
-                ? TryGet<IEnumerable<IUntypedExtraColumns>>.Succeed(extraColumns)
-                : TryGet<IEnumerable<IUntypedExtraColumns>>.Failure)
-            .SelectMany(c => c));
+        foreach (var @interface in recordType.AsEnumerable().Concat(recordType.GetInterfaces())) {
+            if (!provider.ExtraColumnsCache.TryGetValue(@interface, out var extraColumns)) continue;
 
-        _extraColumns.AddRange(
-            provider.AutoAttachingExtraColumnsCache
-                .Where(c => c.CanAttachTo(recordType)));
+            foreach (var extraColumn in extraColumns) {
+                _extraColumns.TryAdd(extraColumn, 0);
+            }
+        }
+
+        foreach (var extraColumn in provider.AutoAttachingExtraColumnsCache
+            .Where(c => c.CanAttachTo(recordType))) {
+            _extraColumns.TryAdd(extraColumn, 0);
+        }
 
         return this;
     }
@@ -29,7 +33,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IExtraColumnsBuilder AddColumnType(Type columnType) {
         if (Activator.CreateInstance(columnType) is IUntypedExtraColumns extraColumns) {
-            _extraColumns.Add(extraColumns);
+            _extraColumns.TryAdd(extraColumns, 0);
         }
 
         return this;
@@ -42,6 +46,7 @@ public sealed class ExtraColumnsBuilder(IExtraColumnProvider provider) : IExtraC
 
     public IEnumerable<DataGridColumn> Build() {
         var finalColumns = _extraColumns
+            .Select(x => x.Key)
             .SelectMany(c => Dispatcher.UIThread.Invoke(() => c.CreateColumns().ToArray()))
             .OrderByDescending(c => c.Priority)
             .Select(c => c.Column)
