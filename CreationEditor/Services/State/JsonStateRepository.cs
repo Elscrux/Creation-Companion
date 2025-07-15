@@ -31,16 +31,16 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
         },
     };
 
+    private readonly string _directoryPath =  fileSystem.Path.Combine([
+        AppDomain.CurrentDomain.BaseDirectory,
+        RootPath,
+        ..stateIds
+    ]);
+
     private string GetDirectoryPath() {
-        var directoryPath = fileSystem.Path.Combine([
-            AppDomain.CurrentDomain.BaseDirectory,
-            RootPath,
-            ..stateIds
-        ]);
+        fileSystem.Directory.CreateDirectory(_directoryPath);
 
-        fileSystem.Directory.CreateDirectory(directoryPath);
-
-        return directoryPath;
+        return _directoryPath;
     }
 
     private IEnumerable<string> EnumerateStateFiles() => fileSystem.Directory
