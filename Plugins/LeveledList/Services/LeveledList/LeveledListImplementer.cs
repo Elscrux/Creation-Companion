@@ -12,8 +12,6 @@ public sealed class LeveledListImplementer(
     IRecordController recordController) {
 
     public IReadOnlyList<LeveledItem> ImplementLeveledLists(IMod mod, IReadOnlyList<Model.List.LeveledList> leveledLists) {
-        var group = mod.GetTopLevelGroup(typeof(ILeveledItemGetter));
-
         var leveledListEditorIDs = new Dictionary<string, LeveledItem>();
 
         foreach (var list in leveledLists) {
@@ -28,7 +26,7 @@ public sealed class LeveledListImplementer(
         LeveledItem AddLeveledList(Model.List.LeveledList leveledList) {
             LeveledItem leveledItem;
             if (editorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(leveledList.EditorID, out var leveledItemGetter)) {
-                leveledItem = recordController.GetOrAddOverride<LeveledItem, ILeveledItemGetter>(leveledItemGetter);
+                leveledItem = recordController.GetOrAddOverride<LeveledItem, ILeveledItemGetter>(leveledItemGetter, mod);
                 if (leveledItem.Entries is null) {
                     leveledItem.Entries = [];
                 } else {
@@ -37,11 +35,10 @@ public sealed class LeveledListImplementer(
                 leveledItem.Flags = 0;
                 leveledItem.ChanceNone = new Percent((100 - leveledList.Chance) / 100);
             } else {
-                leveledItem = new LeveledItem(mod.GetNextFormKey(), mod.GameRelease.ToSkyrimRelease()) {
-                    EditorID = leveledList.EditorID,
-                    ChanceNone = new Percent((100 - leveledList.Chance) / 100),
-                    Entries = [],
-                };
+                leveledItem = recordController.CreateRecord<LeveledItem, ILeveledItemGetter>(mod);
+                leveledItem.Entries = [];
+                leveledItem.ChanceNone = new Percent((100 - leveledList.Chance) / 100);
+                leveledItem.EditorID = leveledList.EditorID;
             }
 
             if (leveledList.UseAll) {
@@ -76,10 +73,6 @@ public sealed class LeveledListImplementer(
                         Reference = new FormLink<IItemGetter>(formKey),
                     },
                 });
-            }
-
-            if (!group.ContainsKey(leveledItem.FormKey)) {
-                group.AddUntyped(leveledItem);
             }
 
             return leveledItem;

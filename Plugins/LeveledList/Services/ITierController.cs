@@ -2,7 +2,7 @@
 using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace LeveledList.Services.LeveledList;
+namespace LeveledList.Services;
 
 public interface ITierController {
     IReadOnlyDictionary<IFormLinkGetter, Tier> GetAllRecordTiers();
@@ -10,6 +10,7 @@ public interface ITierController {
     void SetRecordTier(IMajorRecordGetter record, TierIdentifier tier);
     void RemoveRecordTier(IMajorRecordGetter record);
 
-    IEnumerable<TierIdentifier> GetTiers(ListRecordType type);
-    void SetTiers(ListRecordType type, IEnumerable<TierIdentifier> tiers);
+    Dictionary<TierIdentifier, TierData> GetTiers(ListRecordType type);
+    TierData? GetTierData(ListRecordType type, TierIdentifier tier);
+    void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers);
 }

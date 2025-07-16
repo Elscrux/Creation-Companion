@@ -4,7 +4,7 @@ using LeveledList.Model;
 using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
-namespace LeveledList.Services.LeveledList;
+namespace LeveledList.Services;
 
 public sealed class TierController : ITierController {
     private readonly IStateRepository<TierDefinitions, TierDefinitions, string> _stateRepository;
@@ -35,13 +35,18 @@ public sealed class TierController : ITierController {
             .GetAllDecorations<Tier>();
     }
 
-    public IEnumerable<TierIdentifier> GetTiers(ListRecordType type) {
+    public Dictionary<TierIdentifier, TierData> GetTiers(ListRecordType type) {
         var state = _stateRepository.Load(GetTypeKey(type));
-        return state?.Tiers ?? [];
+        return state?.Tiers ?? new Dictionary<TierIdentifier, TierData>();
     }
 
-    public void SetTiers(ListRecordType type, IEnumerable<TierIdentifier> tiers) {
-        _stateRepository.Save(new TierDefinitions(tiers.ToList()), GetTypeKey(type));
+    public TierData? GetTierData(ListRecordType type, TierIdentifier tier) {
+        var state = _stateRepository.Load(GetTypeKey(type));
+        return state?.Tiers.GetValueOrDefault(tier);
+    }
+
+    public void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers) {
+        _stateRepository.Save(new TierDefinitions(tiers), GetTypeKey(type));
     }
 
     private static string GetTypeKey(ListRecordType type) => type.ToString();

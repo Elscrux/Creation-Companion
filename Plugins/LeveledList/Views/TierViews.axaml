@@ -54,6 +54,9 @@ Use the record browser to assign records to tiers.">
                         <DataGridTextColumn
                             Header="Name"
                             Binding="{Binding Identifier, DataType=tier:TierItem}"/>
+                        <DataGridTextColumn
+                            Header="Enchantment Levels"
+                            Binding="{Binding EnchantmentLevels, DataType=tier:TierItem}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </basic:LabeledContentControl>

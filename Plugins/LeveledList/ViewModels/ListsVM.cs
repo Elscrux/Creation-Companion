@@ -19,8 +19,10 @@ using CreationEditor.Services.State;
 using DynamicData;
 using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
+using LeveledList.Model;
 using LeveledList.Model.List;
 using LeveledList.Resources;
+using LeveledList.Services;
 using LeveledList.Services.LeveledList;
 using Noggog;
 using ReactiveUI;
@@ -76,7 +78,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
         var leveledListMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
         LeveledListFolderPath = leveledListMemento.Value?.LeveledListFolderPath;
 
-        var leveledListObservable = this.WhenAnyValue(x => x.LeveledListFilter)
+        var filter = this.WhenAnyValue(x => x.LeveledListFilter)
             .NotNull()
             .Select<string, Func<LeveledListTreeNode, bool>>(filter =>
                 node => searchFilter.Filter(node.LeveledList?.EditorID ?? string.Empty, filter))
@@ -86,14 +88,14 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .ObserveCollectionChanges()
             .Select(_ => _leveledLists.AsObservableChangeSet())
             .Switch()
-            .Filter(leveledListObservable)
+            .Filter(filter)
             .ToObservableCollection(this);
 
-        GenerateSelectedLists = ReactiveCommand.Create(GenerateLeveledLists);
+        GenerateSelectedLists = ReactiveCommand.CreateRunInBackground(GenerateLeveledLists);
         ReloadLists = ReactiveCommand.Create(() => {
             if (LeveledListFolderPath is null) return;
 
-            ListTypeDefinitions.Load(GetDefinitions(LeveledListFolderPath));
+            ListTypeDefinitions.LoadOptimized(GetDefinitions(LeveledListFolderPath));
         });
 
         LeveledListSource = new HierarchicalTreeDataGridSource<LeveledListTreeNode>(LeveledLists) {
@@ -127,9 +129,11 @@ public sealed partial class ListsVM : ValidatableViewModel {
         this.WhenAnyValue(x => x.LeveledListFolderPath)
             .NotNull()
             .Subscribe(path => {
-                ListTypeDefinitions.Load(GetDefinitions(path));
-                stateRepository.Save(
-                    new LeveledListMemento(path),
+                ListTypeDefinitions.LoadOptimized(GetDefinitions(path));
+                stateRepository.Update(
+                    memento => memento is null
+                        ? new LeveledListMemento(path, string.Empty)
+                        : memento with { LeveledListFolderPath = path },
                     leveledListMemento.Value is null
                         ? Guid.NewGuid()
                         : leveledListMemento.Key);
@@ -138,6 +142,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         this.WhenAnyValue(x => x.SelectedLists)
             .CombineLatest(ModPickerVM.SelectedModChanged, (def, mod) => (Definitions: def, SelectedMod: mod))
+            .ThrottleShort()
             .ObserveOnTaskpool()
             .Subscribe(x => UpdateListsShowcase(x.Definitions, x.SelectedMod))
             .DisposeWith(this);
@@ -193,7 +198,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                 .ToArray();
 
             Dispatcher.UIThread.Post(() => {
-                _leveledLists.Load(lists);
+                _leveledLists.LoadOptimized(lists);
                 _isBusy.OnNext(false);
             });
         } catch (Exception e) {
@@ -216,7 +221,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .Build();
 
         foreach (var file in _fileSystem.Directory.EnumerateFiles(directoryPath, "*.yaml", SearchOption.AllDirectories)) {
-            var fileStream = _fileSystem.File.Open(file, FileMode.Open);
+            using var fileStream = _fileSystem.File.OpenRead(file);
             var fileName = _fileSystem.Path.GetFileNameWithoutExtension(file);
 
             ListTypeDefinition listTypeDefinition;

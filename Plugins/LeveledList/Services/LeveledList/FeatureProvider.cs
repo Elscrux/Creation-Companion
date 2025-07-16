@@ -33,6 +33,8 @@ public sealed class FeatureProvider(
                 featureWildcardIdentifier,
                 record => {
                     switch (record) {
+                        case IWeaponGetter { Data.AnimationType: WeaponAnimationType.Staff } staff:
+                            return staff.Data.Skill;
                         case IEnchantableGetter enchantable: {
                             var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
                             return objectEffect?.GetSchoolOfMagic(linkCacheProvider.LinkCache);

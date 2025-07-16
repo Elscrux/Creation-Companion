@@ -4,7 +4,6 @@ using CreationEditor.Avalonia.Services.Actions;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model.List;
 using LeveledList.Model.Tier;
-using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
 namespace LeveledList.Services.Record.Actions;
@@ -64,7 +63,7 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
         if (listRecordType is null || context.SelectedRecords.Any(r => _leveledListRecordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
 
         var tiers = _tierController.GetTiers(listRecordType.Value);
-        var tierGroup = new TierGroup(string.Empty, tiers, ListDefinition.TierGroupSeparator);
+        var tierGroup = new TierGroup(string.Empty, tiers.Keys, ListDefinition.TierGroupSeparator);
         return MenuItems(tierGroup, string.Empty);
 
         IEnumerable<MenuItem> MenuItems(TierGroup group, string prefix) {

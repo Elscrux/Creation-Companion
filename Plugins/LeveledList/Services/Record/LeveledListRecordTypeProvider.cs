@@ -1,7 +1,6 @@
 ﻿using CreationEditor.Skyrim;
 using LeveledList.Model;
 using LeveledList.Model.Tier;
-using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;

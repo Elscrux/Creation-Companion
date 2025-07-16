@@ -12,7 +12,7 @@ using DynamicData;
 using DynamicData.Binding;
 using LeveledList.Model;
 using LeveledList.Model.Tier;
-using LeveledList.Services.LeveledList;
+using LeveledList.Services;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -42,9 +42,14 @@ public sealed partial class TiersVM : ValidatableViewModel {
             .Select(tierController.GetTiers)
             .ObserveOnGui()
             .Subscribe(tiers => {
-                var tierItems = tiers.Select(tier => new TierItem { Identifier = tier }).ToArray();
+                var tierItems = tiers
+                    .Select(tier => new TierItem {
+                        Identifier = tier.Key,
+                        EnchantmentLevels = string.Join(", ", tier.Value.Levels),
+                    })
+                    .ToArray();
                 SelectedTier = tierItems.FirstOrDefault();
-                Tiers.Load(tierItems);
+                Tiers.LoadOptimized(tierItems);
             })
             .DisposeWith(this);
 
@@ -58,8 +63,8 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
         SaveTiers = ReactiveCommand.Create(() => {
             var tierIdentifiers = Tiers
-                .Select(x => x.Identifier)
-                .Where(x => !x.IsNullOrEmpty());
+                .Where(x => !string.IsNullOrEmpty(x.Identifier))
+                .ToDictionary(x => x.Identifier, x => new TierData(x.GetEnchantmentLevels()));
 
             tierController.SetTiers(SelectedTierType, tierIdentifiers);
 
@@ -78,7 +83,10 @@ public sealed partial class TiersVM : ValidatableViewModel {
         });
 
         IRecordListVM GetRecordListVM() {
-            var tiers = tierController.GetTiers(SelectedTierType).ToHashSet();
+            var tiers = tierController
+                .GetTiers(SelectedTierType)
+                .Select(x => x.Key)
+                .ToHashSet();
 
             var records = tierController.GetAllRecordTiers()
                 .Where(x => tiers.Contains(x.Value.TierIdentifier))

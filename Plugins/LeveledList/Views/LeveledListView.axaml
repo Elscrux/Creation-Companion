@@ -12,6 +12,10 @@
             <views:ListsView DataContext="{Binding ListsVM}"/>
         </TabItem>
 
+        <TabItem Header="Enchantments">
+            <views:EnchantmentsView DataContext="{Binding EnchantmentsVM}"/>
+        </TabItem>
+
         <TabItem Header="Tiers">
             <views:TiersView DataContext="{Binding TiersVM}"/>
         </TabItem>

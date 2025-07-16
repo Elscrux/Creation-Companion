@@ -18,11 +18,15 @@
       <Compile Update="Services\LeveledList\FeatureProvider.cs">
         <DependentUpon>IFeatureProvider.cs</DependentUpon>
       </Compile>
-      <Compile Update="Services\LeveledList\TierController.cs">
-        <DependentUpon>ITierController.cs</DependentUpon>
-      </Compile>
       <Compile Update="Services\Record\LeveledListRecordTypeProvider.cs">
         <DependentUpon>ILeveledListRecordTypeProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Views\EnchantmentsView.axaml.cs">
+        <DependentUpon>EnchantmentView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Services\TierController.cs">
+        <DependentUpon>ITierController.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 
