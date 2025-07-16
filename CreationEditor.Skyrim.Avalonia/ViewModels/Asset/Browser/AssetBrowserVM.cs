@@ -328,7 +328,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     IsBusyLoadingAssets = true;
                     _rootDirectory = (DataSource as FileSystemDataSource)?.GetRootLink()
                      ?? throw new InvalidOperationException("Only FileSystemDataSource is supported currently.");
-                    RootItems.Load(GetAllRootItems());
+                    RootItems.LoadOptimized(GetAllRootItems());
                     AssetTreeSource.RowSelection!.SingleSelect = false;
                     AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);
                     IsBusyLoadingAssets = false;

@@ -83,8 +83,8 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             .DataSourcesChanged
             .Subscribe(dataSources => {
                 dataSources = dataSources.Where(FilterDataSources).ToList();
-                AssetOrigins.Load(dataSources.Except(AssetTargets));
-                AssetTargets.Load(dataSources.Intersect(AssetTargets));
+                AssetOrigins.LoadOptimized(dataSources.Except(AssetTargets));
+                AssetTargets.LoadOptimized(dataSources.Intersect(AssetTargets));
             })
             .DisposeWith(this);
 
@@ -100,7 +100,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                 if (RecordPromotionChanges.Count == 0) {
                     var injectionTarget = _editorEnvironment.GetMod(InjectToMod.SelectedMod.ModKey);
                     recordPromotionChanges = GetAffectedRecords(RecordsToPromote, injectionTarget).ToList();
-                    Dispatcher.UIThread.Post(() => RecordPromotionChanges.Load(recordPromotionChanges));
+                    Dispatcher.UIThread.Post(() => RecordPromotionChanges.LoadOptimized(recordPromotionChanges));
                 } else {
                     recordPromotionChanges = RecordPromotionChanges.ToList();
                 }
@@ -110,7 +110,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                     .Select(x => x.Record)
                     .ToArray();
                 var assetPromotionChanges = GetAffectedAssets(promotedRecords).ToList();
-                Dispatcher.UIThread.Post(() => AssetPromotionChanges.Load(assetPromotionChanges));
+                Dispatcher.UIThread.Post(() => AssetPromotionChanges.LoadOptimized(assetPromotionChanges));
             },
             allModsSelected
         );

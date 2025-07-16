@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq.Expressions;
@@ -9,7 +10,7 @@ using DynamicData.Binding;
 using Noggog;
 namespace CreationEditor;
 
-public static class ObservableCollectionExtension {
+public static class ObservableCollectionExtension{
     public static ReadOnlyObservableCollection<TTarget> SelectObservableCollection<TSource, TTarget>(
         this IObservableCollection<TSource> source,
         Expression<Func<TSource, TTarget>> selector,
@@ -73,7 +74,7 @@ public static class ObservableCollectionExtension {
             .Merge()
             .Subscribe(e => {
                 if (e.EventArgs.Action == NotifyCollectionChangedAction.Reset) {
-                    internalCollection.Load(lhs);
+                    internalCollection.LoadOptimized(lhs);
                     foreach (var rhs in rhsList) {
                         internalCollection.AddRange(rhs);
                     }
@@ -162,13 +163,7 @@ public static class ObservableCollectionExtension {
         }
         if (smallestIndex is null) return;
 
-        var propertyChanged = typeof(ObservableCollection<T>).GetMethod("OnPropertyChanged", BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var collectionChanged = typeof(ObservableCollection<T>).GetMethod("OnCollectionChanged",
-            BindingFlags.NonPublic | BindingFlags.Instance,
-            [typeof(NotifyCollectionChangedEventArgs)])!;
-        propertyChanged.Invoke(collection, [new PropertyChangedEventArgs(nameof(ObservableCollection<T>.Count))]);
-        propertyChanged.Invoke(collection, [new PropertyChangedEventArgs("Item[]")]);
-        collectionChanged.Invoke(collection, [new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, list, smallestIndex.Value)]);
+        ObservableCollectionHelper<T>.NotifyChanges(collection);
     }
 
     public static void Sort<T, TKey>(this IObservableCollection<T> collection, Func<T, TKey> selector) =>
@@ -186,7 +181,7 @@ public static class ObservableCollectionExtension {
             collection.Move(collection.IndexOf(sortedOrder[i]), i);
         }
     }
-    
+
     public static void ApplyOrderNoMove<T>(this IObservableCollection<T> collection, IOrderedEnumerable<T> order) {
         var sortedOrder = order.ToList();
 
@@ -196,6 +191,46 @@ public static class ObservableCollectionExtension {
 
             collection.RemoveAt(collection.IndexOf(item));
             collection.Insert(i, item);
+        }
+    }
+
+    public static void LoadOptimized<T>(this IObservableCollection<T> collection, IEnumerable<T> source) {
+        var newItems = source.ToArray();
+
+        if (ObservableCollectionHelper<T>.ItemsField.GetValue(collection) is IList items) {
+            items.Clear();
+            foreach (var newItem in newItems) {
+                items.Add(newItem);
+            }
+
+            ObservableCollectionHelper<T>.NotifyChanges(collection);
+        } else {
+            collection.Load(newItems);
+        }
+    }
+
+    private static class ObservableCollectionHelper<T> {
+        public static readonly object[] CountPropertyChanged = [new PropertyChangedEventArgs(nameof(ObservableCollection<>.Count))];
+        public static readonly object[] IndexerPropertyChanged = [new PropertyChangedEventArgs("Item[]")];
+        public static readonly object[] ResetCollectionChanged = [new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)];
+
+        public static readonly MethodInfo OnPropertyChanged = typeof(ObservableCollection<T>).GetMethod(
+            "OnPropertyChanged",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        public static readonly MethodInfo OnCollectionChanged = typeof(ObservableCollection<T>).GetMethod(
+            "OnCollectionChanged",
+            BindingFlags.NonPublic | BindingFlags.Instance,
+            [typeof(NotifyCollectionChangedEventArgs)])!;
+
+        public static readonly FieldInfo ItemsField = typeof(Collection<T>).GetField(
+            "items",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        public static void NotifyChanges(IObservableCollection<T> collection) {
+            OnPropertyChanged.Invoke(collection, CountPropertyChanged);
+            OnPropertyChanged.Invoke(collection, IndexerPropertyChanged);
+            OnCollectionChanged.Invoke(collection, ResetCollectionChanged);
         }
     }
 }
