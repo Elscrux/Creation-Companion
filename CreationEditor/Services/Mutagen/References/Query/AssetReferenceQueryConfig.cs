@@ -42,6 +42,9 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     }
 
     public IEnumerable<IAssetLinkGetter> GetLinks(DataSourceFileLink element) {
+        var extension = element.Extension;
+        if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
+
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }

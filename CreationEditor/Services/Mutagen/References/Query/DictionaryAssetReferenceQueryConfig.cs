@@ -45,6 +45,9 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     }
 
     public IEnumerable<TLink> GetLinks(DataSourceFileLink element) {
+        var extension = element.Extension;
+        if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
+
         return fileParser.ParseFile(element.FullPath, element.FileSystem);
     }
 }
