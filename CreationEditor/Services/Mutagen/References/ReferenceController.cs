@@ -24,7 +24,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
     private readonly ConcurrentQueue<TSourceElement> _pendingCreations = new();
     private readonly ConcurrentQueue<TSourceElement> _pendingDeletions = new();
 
-    private readonly Dictionary<TSource, TCache> _caches = [];
+    private readonly ConcurrentDictionary<TSource, TCache> _caches = [];
 
     private readonly BehaviorSubject<bool> _isLoading = new(true);
     public IObservable<bool> IsLoading => _isLoading;
@@ -50,7 +50,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
 
         // Remove references from sources that are no longer present
         foreach (var source in _caches.Keys.Where(source => !sources.Contains(source))) {
-            _caches.Remove(source);
+            _caches.TryRemove(source, out _);
         }
 
         _referenceSubscriptionManager.UnregisterOutdated();
@@ -65,7 +65,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         for (var i = 0; i < cachesCount; i++) {
             var task = await Task.WhenAny(caches.Keys);
             var source = caches[task];
-            _caches.Add(source, task.Result);
+            _caches.TryAdd(source, task.Result);
             caches.Remove(task);
             countingNotifier.NextStep();
         }
