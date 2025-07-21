@@ -180,13 +180,16 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         var newRecordMod = _editorEnvironment.GetMutableMod(InjectedRecordCreationMod.SelectedMod.ModKey);
         var editMod = _editorEnvironment.GetMutableMod(EditMod.SelectedMod.ModKey);
 
-        var recordReferenceDictionary = RecordsToPromote.ToDictionary(x => x.FormKey, x => x);
+        var recordsToInject = RecordPromotionChanges
+            .Where(r => r.ChangeType == RecordPromotionChangeType.Deleted)
+            .Select(r => r.Record)
+            .ToList();
         RecordController.InjectRecords(
-            RecordsToPromote.Select(r => r.Record).ToList(),
+            recordsToInject,
             injectionTarget,
             newRecordMod,
             editMod,
-            formKey => recordReferenceDictionary[formKey].RecordReferences,
+            ReferenceService.GetRecordReferences,
             editorIdMapper,
             ForceDelete);
 
