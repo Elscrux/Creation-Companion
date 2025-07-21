@@ -255,7 +255,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         IModGetter injectionTarget,
         IMod newRecordMod,
         IMod editMod,
-        Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
+        Func<IFormLinkIdentifier, IEnumerable<IFormLinkIdentifier>> referenceGetter,
         Func<IMajorRecordGetter, string?> editorIdMapper,
         bool forceDelete = false) {
         return InjectRecords(
@@ -273,7 +273,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         TModGetter injectionTarget,
         TMod newRecordMod,
         TMod editMod,
-        Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
+        Func<IFormLinkIdentifier, IEnumerable<IFormLinkIdentifier>> referenceGetter,
         Func<IMajorRecordGetter, string?> editorIdMapper,
         bool forceDelete = false) {
 
@@ -304,9 +304,14 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
             newRecords.Add(duplicate);
         }
 
+        // Force remap references in the new records
+        foreach (var newRecord in newRecords) {
+            RegisterUpdate(newRecord, editMod, () => newRecord.RemapLinks(remapData));
+        }
+
         // Remap references to use the new injected records
         foreach (var record in records) {
-            var references = referenceGetter(record.FormKey).ToArray();
+            var references = referenceGetter(record).ToArray();
 
             // Remap references to use the new injected records
             foreach (var reference in references) {

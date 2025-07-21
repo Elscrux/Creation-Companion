@@ -206,7 +206,7 @@ public interface IRecordController {
         IModGetter injectionTarget,
         IMod newRecordMod,
         IMod editMod,
-        Func<FormKey, IEnumerable<IFormLinkIdentifier>> referenceGetter,
+        Func<IFormLinkIdentifier, IEnumerable<IFormLinkIdentifier>> referenceGetter,
         Func<IMajorRecordGetter, string?> editorIdMapper,
         bool forceDelete = false);
     #endregion
