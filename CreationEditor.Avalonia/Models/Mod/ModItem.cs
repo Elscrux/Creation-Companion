@@ -8,4 +8,6 @@ namespace CreationEditor.Avalonia.Models.Mod;
 public partial class ModItem(ModKey modKey) : ReactiveObject, ISelectableModKey, IReactiveSelectable {
     [Reactive] public partial bool IsSelected { get; set; }
     public ModKey ModKey { get; } = modKey;
+
+    public override string ToString() => ModKey.ToString();
 }

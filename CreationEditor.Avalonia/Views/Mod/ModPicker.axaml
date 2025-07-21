@@ -54,8 +54,7 @@
                         IsTextSearchEnabled="True"
                         ItemsSource="{Binding Mods}"
                         SelectedItem="{Binding SelectedMod, Mode=TwoWay}"
-                        Text="{Binding SelectionText, Mode=OneWayToSource}"
-                        DisplayMemberBinding="{Binding ModKey.FileName.String, DataType=model:OrderedModItem}"/>
+                        Text="{Binding SelectionText, Mode=OneWayToSource}"/>
 
                     <Button IsVisible="{Binding CanCreateNewMod}"
                             VerticalAlignment="Stretch"
