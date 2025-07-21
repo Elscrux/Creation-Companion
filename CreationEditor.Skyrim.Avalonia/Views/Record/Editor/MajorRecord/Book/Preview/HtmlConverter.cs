@@ -8,6 +8,7 @@ using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using HtmlAgilityPack;
 using Mutagen.Bethesda.Fonts;
+using Mutagen.Bethesda.Fonts.DI;
 using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
 
@@ -16,9 +17,9 @@ public sealed record HtmlConverterOptions(Language Language, double Width, doubl
 public sealed class HtmlConverter(
     IImageLoader imageLoader,
     IGameFontLoader gameFontLoader,
-    Func<Language, IFontProvider> fontProviderFactory,
+    IFontProviderFactory fontProviderFactory,
     HtmlConverterOptions htmlConverterOptions) {
-    private readonly IFontProvider _fontProvider = fontProviderFactory(htmlConverterOptions.Language);
+    private readonly IFontProvider _fontProvider = fontProviderFactory.Create(htmlConverterOptions.Language);
 
     public IEnumerable<Control> GenerateControls(string text) {
         var currentStackPanel = new StackPanel();
