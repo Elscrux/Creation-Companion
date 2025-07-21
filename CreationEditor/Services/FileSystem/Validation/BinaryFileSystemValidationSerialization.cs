@@ -21,7 +21,7 @@ public sealed class BinaryFileSystemValidationSerialization(
         if (!fileSystem.File.Exists(cacheFile)) return false;
 
         try {
-            using var fileSystemStream = fileSystem.File.OpenRead(cacheFile);
+            using var fileSystemStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var reader = new BinaryReader(fileSystemStream);
 
             // Read serialization version
@@ -39,7 +39,7 @@ public sealed class BinaryFileSystemValidationSerialization(
     public bool TryDeserialize(string rootDirectoryPath, [MaybeNullWhen(false)] out HashFileSystemCacheData hashFileSystemCacheData) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
 
-        using var fileSystemStream = fileSystem.File.OpenRead(cacheFile);
+        using var fileSystemStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
         try {
             hashFileSystemCacheData = Deserialize(new BinaryReader(fileSystemStream));
             return true;

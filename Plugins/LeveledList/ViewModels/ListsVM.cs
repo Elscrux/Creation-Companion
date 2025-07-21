@@ -221,7 +221,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .Build();
 
         foreach (var file in _fileSystem.Directory.EnumerateFiles(directoryPath, "*.yaml", SearchOption.AllDirectories)) {
-            using var fileStream = _fileSystem.File.OpenRead(file);
+            using var fileStream = _fileSystem.File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
             var fileName = _fileSystem.Path.GetFileNameWithoutExtension(file);
 
             ListTypeDefinition listTypeDefinition;

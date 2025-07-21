@@ -32,7 +32,7 @@ public sealed class DictionaryReferenceCacheSerialization<TSource, TCache, TLink
 
         try {
             // Open cache reader
-            using var fileStream = fileSystem.File.OpenRead(cacheFile);
+            using var fileStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var zip = new GZipInputStream(fileStream);
             using var reader = new BinaryReader(zip);
 
@@ -56,7 +56,7 @@ public sealed class DictionaryReferenceCacheSerialization<TSource, TCache, TLink
 
         // Read cache file
         var cache = TCache.CreateNew();
-        using var fileStream = fileSystem.File.OpenRead(cacheFile);
+        using var fileStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var zip = new GZipInputStream(fileStream);
         using var reader = new BinaryReader(zip);
 

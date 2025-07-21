@@ -38,7 +38,7 @@ public sealed class AssetReferenceCacheSerialization<TSource, TReference>(
 
         try {
             // Open cache reader
-            using var fileStream = fileSystem.File.OpenRead(cacheFile);
+            using var fileStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var zip = new GZipInputStream(fileStream);
             using var reader = new BinaryReader(zip);
 
@@ -64,7 +64,7 @@ public sealed class AssetReferenceCacheSerialization<TSource, TReference>(
 
         // Read cache file
         var cache = new ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>>();
-        using var fileStream = fileSystem.File.OpenRead(cacheFile);
+        using var fileStream = fileSystem.File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var zip = new GZipInputStream(fileStream);
         using (var reader = new BinaryReader(zip)) {
             try {

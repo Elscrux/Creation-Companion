@@ -20,7 +20,7 @@ public class FileSystemFontCollection(Uri collectionKey, Uri sourceDirectory) : 
 
     public override void Initialize(IFontManagerImpl fontManager) {
         foreach (var loadFontAsset in Directory.EnumerateFiles(sourceDirectory.AbsolutePath, "*.ttf")) {
-            using var stream = File.OpenRead(loadFontAsset);
+            using var stream = File.Open(loadFontAsset, FileMode.Open, FileAccess.Read, FileShare.Read);
             var methodInfo = fontManager.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                 .Where(x => x.Name.Contains("TryCreateGlyphTypeface")).Skip(1).First();
             object?[] parameters = [stream, FontSimulations.None, null];

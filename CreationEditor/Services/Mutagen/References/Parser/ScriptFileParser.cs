@@ -18,7 +18,7 @@ public sealed partial class ScriptFileParser(IAssetTypeService assetTypeService)
         var results = new HashSet<IAssetLinkGetter>();
         if (!fileSystem.File.Exists(filePath)) return results;
 
-        using var stream = fileSystem.File.OpenRead(filePath);
+        using var stream = fileSystem.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var reader = new StreamReader(stream);
         var line = reader.ReadLine();
         while (line is not null) {

@@ -4,7 +4,7 @@ namespace CreationEditor;
 
 public static class FileSystemExtension {
     public static byte[] GetFileHash(this IFileSystem fileSystem, string path) {
-        using var fileStream = fileSystem.File.OpenRead(path);
+        using var fileStream = fileSystem.File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var hashAlgorithm = new XxHash3();
         hashAlgorithm.Append(fileStream);

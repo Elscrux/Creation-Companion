@@ -28,7 +28,7 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
     public Stream? ReadFile() {
         if (!FileSystem.File.Exists(FullPath)) return null;
 
-        return FileSystem.File.OpenRead(FullPath);
+        return FileSystem.File.Open(FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
     }
 
     public override bool Equals(object? obj) {
