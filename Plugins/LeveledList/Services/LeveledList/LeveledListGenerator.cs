@@ -1,4 +1,5 @@
 ﻿using CreationEditor;
+using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Services.Environment;
 using LeveledList.Model.Feature;
 using LeveledList.Model.List;
@@ -12,6 +13,7 @@ namespace LeveledList.Services.LeveledList;
 public class LeveledListGenerator(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
+    IRecordPrefixService recordPrefixService,
     IFeatureProvider featureProvider) {
     public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IModGetter modToLookAt) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
@@ -38,6 +40,7 @@ public class LeveledListGenerator(
                 var leveledItem = listDefinition.CreateLeveledItem(
                     featureNode,
                     enchantmentProvider,
+                    recordPrefixService,
                     identifier => createdListsPerDefinition[identifier]);
 
                 createdLists.Add(leveledItem);

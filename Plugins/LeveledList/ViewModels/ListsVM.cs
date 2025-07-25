@@ -11,8 +11,10 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
+using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.ViewModels.Record.Prefix;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.State;
@@ -39,6 +41,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     private readonly ITierController _tierController;
     private readonly LeveledListGenerator _generator;
     private readonly LeveledListImplementer _implementer;
+    private readonly IRecordPrefixService _recordPrefixService;
 
     private readonly ObservableCollectionExtended<LeveledListTreeNode> _leveledLists = new();
     public ReadOnlyObservableCollection<LeveledListTreeNode> LeveledLists { get; }
@@ -50,6 +53,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
     public SingleModPickerVM ModPickerVM { get; }
+    public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateSelectedLists { get; }
     public ReactiveCommand<Unit, Unit> ReloadLists { get; }
 
@@ -59,20 +63,24 @@ public sealed partial class ListsVM : ValidatableViewModel {
     public ListsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
         SingleModPickerVM modPickerVM,
+        RecordPrefixVM recordPrefixVM,
         ILogger logger,
         IFileSystem fileSystem,
         IEditorEnvironment editorEnvironment,
         ISearchFilter searchFilter,
         ITierController tierController,
         LeveledListGenerator generator,
-        LeveledListImplementer implementer) {
+        LeveledListImplementer implementer,
+        IRecordPrefixService recordPrefixService) {
         ModPickerVM = modPickerVM;
+        RecordPrefixVM = recordPrefixVM;
         _logger = logger;
         _fileSystem = fileSystem;
         _editorEnvironment = editorEnvironment;
         _tierController = tierController;
         _generator = generator;
         _implementer = implementer;
+        _recordPrefixService = recordPrefixService;
 
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
         var leveledListMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
@@ -232,7 +240,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             }
 
             foreach (var (listName, list) in listTypeDefinition.Lists) {
-                yield return new ExtendedListDefinition(file, fileName, listTypeDefinition, listName, list);
+                yield return new ExtendedListDefinition(file, fileName, listTypeDefinition, listName, list, _recordPrefixService);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using CreationEditor.Avalonia.Services.Record.Prefix;
 using LeveledList.Model.Feature;
 using EnchantmentProvider = LeveledList.Services.LeveledList.EnchantmentProvider;
 namespace LeveledList.Model.List;
@@ -94,9 +95,10 @@ public partial record ListDefinition(
     public LeveledList CreateLeveledItem(
         FeatureNode featureNode,
         EnchantmentProvider enchantmentProvider,
+        IRecordPrefixService recordPrefixService,
         Func<ListDefinitionIdentifier, List<LeveledList>> listsProvider) {
-        var fullName = GetFullName(featureNode.Features);
-        var leveledList = new LeveledList(featureNode.Features, fullName, [], Chance, UseAll, CalculateForEach, CalculateFromAllLevels, SpecialLoot);
+        var editorID = recordPrefixService.Prefix + GetFullName(featureNode.Features);
+        var leveledList = new LeveledList(featureNode.Features, editorID, [], Chance, UseAll, CalculateForEach, CalculateFromAllLevels, SpecialLoot);
 
         if (Tiers is not null) {
             foreach (var record in featureNode.Records) {

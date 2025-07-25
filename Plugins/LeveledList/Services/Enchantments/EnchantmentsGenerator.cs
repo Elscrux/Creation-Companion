@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Environment;
+﻿using CreationEditor.Avalonia.Services.Record.Prefix;
+using CreationEditor.Services.Environment;
 using LeveledList.Model;
 using LeveledList.Model.Enchantments;
 using LeveledList.Model.Feature;
@@ -15,6 +16,7 @@ public class EnchantmentsGenerator(
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     ITierController tierController,
     IFeatureProvider featureProvider,
+    IRecordPrefixService recordPrefixService,
     EnchantmentProvider enchantmentProvider) {
     public IEnumerable<EnchantedItem> Generate(ListRecordType type, EnchantmentItem enchantment, IModGetter modToLookAt) {
         foreach (var record in leveledListRecordTypeProvider.GetRecords(modToLookAt, type)) {
@@ -73,9 +75,9 @@ public class EnchantmentsGenerator(
 
                 string editorId;
                 if (type == ListRecordType.Staff) {
-                    editorId = "Staff" + enchantment.Suffix;
+                    editorId = recordPrefixService.Prefix + "Staff" + enchantment.Suffix;
                 } else {
-                    editorId = "Ench" + enchantable.EditorID + enchantment.Suffix + enchantmentLevel.ToString("D2");
+                    editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID + enchantment.Suffix + enchantmentLevel.ToString("D2");
                 }
 
                 yield return new EnchantedItem(

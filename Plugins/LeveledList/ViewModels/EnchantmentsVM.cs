@@ -12,6 +12,7 @@ using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.ViewModels.Record.Prefix;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.State;
@@ -46,6 +47,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
 
     public FlatTreeDataGridSource<EnchantedItem> EnchantmentsSource { get; }
     public SingleModPickerVM ModPickerVM { get; }
+    public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateEnchantments { get; }
     public ReactiveCommand<Unit, Unit> ReloadLists { get; }
 
@@ -55,6 +57,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
     public EnchantmentsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
         SingleModPickerVM modPickerVM,
+        RecordPrefixVM recordPrefixVM,
         ILogger logger,
         IFileSystem fileSystem,
         IEditorEnvironment editorEnvironment,
@@ -62,6 +65,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
         EnchantmentsGenerator generator,
         EnchantmentsImplementer implementer) {
         ModPickerVM = modPickerVM;
+        RecordPrefixVM = recordPrefixVM;
         _logger = logger;
         _fileSystem = fileSystem;
         _editorEnvironment = editorEnvironment;
