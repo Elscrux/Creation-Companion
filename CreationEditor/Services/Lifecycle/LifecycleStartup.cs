@@ -7,7 +7,7 @@ public sealed class LifecycleStartup(
     ILogger logger)
     : ILifecycleStartup {
 
-    public IReadOnlyList<ILifecycleTask> LifecycleTasks { get; } = tasks;
+    public IReadOnlyList<ILifecycleTask> LifecycleTasks { get; } = tasks.DistinctBy(x => x.GetType()).ToArray();
 
     public void PreStartup() {
         logger.Here().Debug("Run {Count} Lifecycle Task(s) pre startup", LifecycleTasks.Count);
