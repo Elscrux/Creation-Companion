@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public sealed class DictionaryRecordReferenceCacheController<TLink>
+public sealed class AssetDictionaryReferenceCacheController<TLink>
     : IReferenceCacheController<IDataSource, AssetDictionaryReferenceCache<TLink>, TLink, DataRelativePath>
     where TLink : notnull {
     public void AddLink(

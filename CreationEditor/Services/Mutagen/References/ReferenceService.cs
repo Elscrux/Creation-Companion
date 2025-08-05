@@ -28,10 +28,12 @@ public sealed class ReferenceService : IReferenceService {
 
     // Record reference controllers
     private readonly ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceController;
+    private readonly ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceController;
     private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord> _nifSoundReferenceController;
     private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
 
     private readonly ReferenceSubscriptionManager<IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceSubscriptionManager;
+    private readonly ReferenceSubscriptionManager<string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<string, DataRelativePath, IReferencedRecord> _assetRecordReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset> _recordAssetReferenceSubscriptionManager;
@@ -47,6 +49,7 @@ public sealed class ReferenceService : IReferenceService {
         INotificationService notificationService,
         IMutagenCommonAspectsProvider mutagenCommonAspectsProvider,
         // Update Triggers
+        ModReferenceUpdateTrigger<DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IReferencedRecord> stringModReferenceUpdateTrigger,
         ModReferenceUpdateTrigger<RecordReferenceCache, IFormLinkIdentifier, IReferencedRecord> modReferenceUpdateTrigger,
         ModReferenceUpdateTrigger<AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IReferencedAsset> modAssetReferenceUpdateTrigger,
         DataSourceReferenceUpdateTrigger<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, IReferencedAsset> dataSourceReferenceUpdateTrigger,
@@ -56,10 +59,12 @@ public sealed class ReferenceService : IReferenceService {
         RecordReferenceCacheController recordReferenceCacheController,
         AssetReferenceCacheController<IModGetter, IFormLinkIdentifier> recordAssetReferenceCacheController,
         AssetReferenceCacheController<IDataSource, DataRelativePath> assetAssetReferenceCacheController,
-        DictionaryRecordReferenceCacheController<string> stringDictionaryRecordReferenceCacheController,
-        DictionaryRecordReferenceCacheController<int> intDictionaryRecordReferenceCacheController,
+        DictionaryReferenceCacheController<IModGetter, string, IFormLinkIdentifier> stringModDictionaryReferenceCacheController,
+        AssetDictionaryReferenceCacheController<string> stringAssetDictionaryReferenceCacheController,
+        AssetDictionaryReferenceCacheController<int> intAssetDictionaryReferenceCacheController,
         // Query Configs
         RecordReferenceQueryConfig recordReferenceQueryConfig,
+        RecordGlobalVariableReferenceQueryConfig recordGlobalVariableReferenceQueryConfig,
         RecordAssetReferenceQueryConfig recordAssetReferenceQueryConfig,
         DictionaryAssetReferenceQueryConfig<NifAddonNodeLinkParser, AssetDictionaryReferenceCache<int>, int> nifAddonNodeReferenceQueryConfig,
         DictionaryAssetReferenceQueryConfig<NifSoundLinkParser, AssetDictionaryReferenceCache<string>, string> nifSoundReferenceQueryConfig,
@@ -74,6 +79,13 @@ public sealed class ReferenceService : IReferenceService {
                 (record, change) => record.RecordReferences.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
                 (record, newData) => record.RecordReferences.AddRange(newData),
                 asset => asset.Record);
+
+        _recordGlobalVariableReferenceSubscriptionManager =
+            new ReferenceSubscriptionManager<string, IFormLinkIdentifier, IReferencedRecord>(
+                record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
+                (record, change) => record.RecordReferences.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
+                (record, newData) => record.RecordReferences.AddRange(newData),
+                record => record.Record.EditorID ?? string.Empty);
 
         _assetRecordReferenceSubscriptionManager = new ReferenceSubscriptionManager<string, DataRelativePath, IReferencedRecord>(
             record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
@@ -116,6 +128,14 @@ public sealed class ReferenceService : IReferenceService {
                 recordReferenceQueryConfig,
                 _recordReferenceSubscriptionManager);
 
+        _recordGlobalVariableReferenceController =
+            new ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord>(
+                notificationService,
+                stringModReferenceUpdateTrigger,
+                stringModDictionaryReferenceCacheController,
+                recordGlobalVariableReferenceQueryConfig,
+                _recordGlobalVariableReferenceSubscriptionManager);
+
         _recordAssetReferenceController =
             new ReferenceController<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier,
                 IReferencedAsset>(
@@ -129,7 +149,7 @@ public sealed class ReferenceService : IReferenceService {
             new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord>(
                 notificationService,
                 addonNodeReferenceUpdateTrigger,
-                intDictionaryRecordReferenceCacheController,
+                intAssetDictionaryReferenceCacheController,
                 nifAddonNodeReferenceQueryConfig,
                 _nifAddonNodeReferenceSubscriptionManager);
 
@@ -146,7 +166,7 @@ public sealed class ReferenceService : IReferenceService {
             new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
                 notificationService,
                 soundRecordReferenceUpdateTrigger,
-                stringDictionaryRecordReferenceCacheController,
+                stringAssetDictionaryReferenceCacheController,
                 nifSoundReferenceQueryConfig,
                 _assetRecordReferenceSubscriptionManager);
 
@@ -165,9 +185,10 @@ public sealed class ReferenceService : IReferenceService {
                 (a, b, c) => a || b || c);
 
         IsLoadingRecordReferences = _recordReferenceController.IsLoading
-            .CombineLatest(_nifSoundReferenceController.IsLoading,
+            .CombineLatest(_recordGlobalVariableReferenceController.IsLoading, 
+                _nifSoundReferenceController.IsLoading,
                 _nifAddonNodeReferenceController.IsLoading,
-                (a, b, c) => a || b || c);
+                (a, b, c, d) => a || b || c || d);
 
         IsLoading = IsLoadingAssetReferences.CombineLatest(IsLoadingRecordReferences, (a, b) => a || b);
     }
@@ -190,6 +211,10 @@ public sealed class ReferenceService : IReferenceService {
         where TMajorRecordGetter : IMajorRecordGetter {
         var recordReferences = _recordReferenceController.GetReferences(record);
         var editorId = record.EditorID;
+        if (editorId is not null) {
+            recordReferences = recordReferences.Concat(_recordGlobalVariableReferenceController.GetReferences(editorId));
+        }
+
         var assetReferences = editorId is not null ? _nifSoundReferenceController.GetReferences(editorId) : [];
         var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(record);
         if (addonNodeIndex is not null) {
@@ -205,7 +230,13 @@ public sealed class ReferenceService : IReferenceService {
     }
 
     public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IFormLinkIdentifier formLink) {
-        return _recordReferenceController.GetReferences(formLink);
+        var references = _recordReferenceController.GetReferences(formLink);
+
+        if (_editorEnvironment.LinkCache.TryResolveIdentifier(formLink, out var identifier) && identifier is not null) {
+            references = references.Concat(_recordGlobalVariableReferenceController.GetReferences(identifier));
+        }
+
+        return references;
     }
 
     public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IAssetLinkGetter assetLink) {

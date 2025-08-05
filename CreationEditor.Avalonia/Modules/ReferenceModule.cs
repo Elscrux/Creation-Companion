@@ -20,7 +20,11 @@ public sealed class ReferenceModule : Module {
         builder.RegisterType<RecordReferenceCacheController>()
             .AsSelf();
 
-        builder.RegisterGeneric(typeof(DictionaryRecordReferenceCacheController<>))
+        builder.RegisterGeneric(typeof(DictionaryReferenceCacheController<,,>))
+            .AsImplementedInterfaces()
+            .AsSelf();
+
+        builder.RegisterGeneric(typeof(AssetDictionaryReferenceCacheController<>))
             .AsImplementedInterfaces()
             .AsSelf();
 
@@ -44,6 +48,10 @@ public sealed class ReferenceModule : Module {
 
         builder.RegisterGeneric(typeof(AssetReferenceCacheSerializationConfigInt<>))
             .AsImplementedInterfaces();
+
+        builder.RegisterType<ReferenceCacheSerializationConfigLink>()
+            .AsImplementedInterfaces()
+            .AsSelf();
 
         builder.RegisterType<AssetReferenceCacheSerializationConfig>()
             .AsImplementedInterfaces();
@@ -71,6 +79,12 @@ public sealed class ReferenceModule : Module {
             .AsSelf();
 
         builder.RegisterType<RecordReferenceQueryConfig>()
+            .AsSelf();
+
+        builder.RegisterType<RecordGlobalVariableReferenceQuery>()
+            .AsSelf();
+
+        builder.RegisterType<RecordGlobalVariableReferenceQueryConfig>()
             .AsSelf();
 
         builder.RegisterType<RecordAssetReferenceQueryConfig>()
