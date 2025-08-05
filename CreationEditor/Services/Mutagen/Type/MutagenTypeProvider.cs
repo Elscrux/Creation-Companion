@@ -9,6 +9,8 @@ namespace CreationEditor.Services.Mutagen.Type;
 
 public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     private const string BaseNamespace = "Mutagen.Bethesda.";
+    private const string GetterSuffix = "Getter";
+    private const char InterfacePrefix = 'I';
 
     private readonly ConcurrentDictionary<string, System.Type> _typeCache = new();
 
@@ -71,8 +73,17 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
         // Selecting the type name from the name
         var name = formLinkIdentifier.Type.Name.AsSpan();
 
-        // Cutting of the "I" and the "Getter" part of the type name
-        return name[1..^6].ToString();
+        // Cutting starting interface prefix if it exists
+        if (name.StartsWith(InterfacePrefix)) {
+            name = name[1..];
+        }
+
+        // Cutting ending getter suffix if it exists
+        if (name.EndsWith(GetterSuffix)) {
+            name = name[..^6];
+        }
+
+        return name.ToString();
     }
 
     public IEnumerable<System.Type> GetRecordClassTypes(GameRelease gameRelease) {
@@ -98,15 +109,15 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public System.Type GetRecordGetterType(System.Type type) {
-        if (type.Name.EndsWith("Getter")) return type;
+        if (type.Name.EndsWith(GetterSuffix)) return type;
 
         var nameSpan = type.FullName.AsSpan();
         var lastIndexOfDot = nameSpan.LastIndexOf('.') + 1;
         var namespacePart = nameSpan[..lastIndexOfDot];
         var typePart = nameSpan[lastIndexOfDot..];
-        var getterTypeName = typePart.StartsWith('I')
-            ? namespacePart.ToString() + typePart.ToString() + "Getter"
-            : namespacePart.ToString() + "I" + typePart.ToString() + "Getter";
+        var getterTypeName = typePart.StartsWith(InterfacePrefix)
+            ? namespacePart.ToString() + typePart.ToString() + GetterSuffix
+            : namespacePart.ToString() + InterfacePrefix + typePart.ToString() + GetterSuffix;
 
         var registration = LoquiRegistration.GetRegisterByFullName(getterTypeName)
          ?? throw new ArgumentException("Cannot find getter type for " + type.FullName, nameof(type));
