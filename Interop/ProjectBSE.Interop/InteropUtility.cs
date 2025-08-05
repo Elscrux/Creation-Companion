@@ -14,33 +14,18 @@ public static class InteropUtility {
         return managedArray;
     }
 
-    public static string?[] ToStringArray(this IntPtr pointer, int count) {
-        var result = new string?[count];
+    public static string[] ToStringArray(this IntPtr pointer, int count) {
+        var result = new string[count];
 
         for (var i = 0; i < count; i++) {
             var ptr = Marshal.ReadIntPtr(pointer, i * IntPtr.Size);
-            result[i] = Marshal.PtrToStringAnsi(ptr);
+            result[i] = Marshal.PtrToStringAnsi(ptr) ?? string.Empty;
         }
 
         return result;
     }
 
-    public static string[] ToStringArrayDirectly(this IntPtr pointer, int count) {
-        var result = new string[count];
- 
-        var offset = 0;
-        for (var i = 0; i < count; i++) {
-            var str = Marshal.PtrToStringAnsi(pointer + offset);
-            if (str is not { Length: > 0 }) return result;
-
-            result[i] = str;
-            offset += str.Length + 1;
-        }
-
-        return result;
-    }
-
-    public static string[] ToStringArray(this IList<FormKey> formKeys) {
+    public static string[] ToStringArray(this IReadOnlyList<FormKey> formKeys) {
         var strings = new string[formKeys.Count];
         for (var i = 0; i < formKeys.Count; i++) {
             strings[i] = formKeys[i].ToString();
@@ -53,7 +38,7 @@ public static class InteropUtility {
 
         var sizeOf = Marshal.SizeOf<T>();
         for (var i = 0; i < count; i++) {
-            var ptr = Marshal.ReadIntPtr(pointer, i * sizeOf);
+            var ptr = pointer + i * sizeOf;
             result[i] = Marshal.PtrToStructure<T>(ptr);
         }
 

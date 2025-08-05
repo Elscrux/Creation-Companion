@@ -19,27 +19,19 @@ public static partial class Interop {
 
     [LibraryImport(DllName, EntryPoint = "getKeybindings")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial void GetKeyBindings_Native(IntPtr bindings);
+    private static partial IntPtr GetKeyBindings_Native();
     public static IOFunctionBinding[] GetKeyBindings() {
-        var x = new IOFunctionBinding[IOFunctionCount];
-        var y = new IOFunctionBinding();
-        var unmanagedMemory = x.ToUnmanagedMemory();
-        // var bindings = new KeyBindings {
-        //     BindingList = new IOFunctionBinding[IOFunctionCount]
-        // };
-        GetKeyBindings_Native(unmanagedMemory);
-        var ioFunctionBindings = unmanagedMemory.ToArray<IOFunctionBinding>(19);
-        return x;
+        var pointer = GetKeyBindings_Native();
+        var ioFunctionBindings = pointer.ToArray<IOFunctionBinding>(IOFunctionCount);
+        return ioFunctionBindings;
     }
 
     [LibraryImport(DllName, EntryPoint = "enumerateKeyBindingNames", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial void EnumerateKeyBindingNames_Native(ref IntPtr stringsToWrite, ref ulong amount);
+    private static partial KeyBindingList EnumerateKeyBindingNames_Native();
     public static string[] EnumerateKeyBindingNames() {
-        var intPtr = IntPtr.Zero;
-        ulong amount = 0;
-        EnumerateKeyBindingNames_Native(ref intPtr, ref amount);
-        return intPtr.ToStringArrayDirectly(IOFunctionCount);
+        var x = EnumerateKeyBindingNames_Native();
+        return x.Names;
     }
 
     public enum IOFunctionBindingType : uint {
@@ -91,6 +83,40 @@ public static partial class Interop {
         Select,
     }
 
+    #region KeyBindingList
+    [NativeMarshalling(typeof(KeyBindingListMarshaller))]
+    public struct KeyBindingList {
+        public string[] Names;
+    }
+
+    public static int KeyBindingListSize => Marshal.SizeOf<KeyBindingListMarshaller.KeyBindingListUnmanaged>();
+
+    [CustomMarshaller(typeof(KeyBindingList), MarshalMode.Default, typeof(KeyBindingListMarshaller))]
+    internal static unsafe class KeyBindingListMarshaller {
+        public static KeyBindingListUnmanaged ConvertToUnmanaged(KeyBindingList managed) {
+            return new KeyBindingListUnmanaged {
+                Amount = (ulong) managed.Names.Length,
+                Names = managed.Names.ToUnmanagedMemory(),
+            };
+        }
+
+        public static KeyBindingList ConvertToManaged(KeyBindingListUnmanaged unmanaged) {
+            return new KeyBindingList {
+                Names = unmanaged.Names.ToStringArray((int) unmanaged.Amount) ?? throw new ArgumentException("Names is null"),
+            };
+        }
+
+        public static void Free(KeyBindingListUnmanaged unmanaged) {
+            // Nothing to free
+        }
+
+        internal struct KeyBindingListUnmanaged {
+            public ulong Amount;
+            public IntPtr Names;
+        }
+    }
+    #endregion
+
     #region IOFunctionBinding
     [NativeMarshalling(typeof(IOFunctionBindingMarshaller))]
     public struct IOFunctionBinding {
@@ -133,7 +159,7 @@ public static partial class Interop {
         public IOFunctionBinding[] BindingList { get; set; } // size is count of IOFunction enum members (pass by pointer)
     }
 
-    private static int IOFunctionCount => Enum.GetValues<IOFunction>().Length;
+    public static int IOFunctionCount => Enum.GetValues<IOFunction>().Length;
     public static int KeyBindingsSize => IOFunctionBindingSize * IOFunctionCount;
 
     [CustomMarshaller(typeof(KeyBindings), MarshalMode.Default, typeof(KeyBindingsMarshaller))]
