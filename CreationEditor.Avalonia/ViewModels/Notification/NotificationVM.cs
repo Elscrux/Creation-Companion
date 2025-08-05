@@ -19,10 +19,9 @@ public sealed class NotificationVM : ViewModel, INotificationVM {
 
         _loadingItems = notificationService.Notifications
             .ToObservableChangeSet(x => x.ID)
-            .Filter(x => x.LoadText is not null)
             .Buffer(UpdateInterval)
             .FlattenBufferResult()
+            .Filter(x => x.LoadText is not null)
             .ToObservableCollection(this);
-
     }
 }
