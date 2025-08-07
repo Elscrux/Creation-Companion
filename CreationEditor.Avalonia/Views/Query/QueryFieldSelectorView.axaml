@@ -26,15 +26,13 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="select:IQueryFieldSelector">
-                    <ComboBox
+                    <controls:FAComboBox
+                        IsEditable="True"
+                        IsTextSearchEnabled="True"
                         ItemsSource="{Binding RecordType, Converter={StaticResource Extractor}}"
-                        SelectedItem="{Binding SelectedField}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate DataType="select:IQueryField">
-                                <TextBlock Text="{Binding Name}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                        SelectedItem="{Binding SelectedField}"
+                        DisplayMemberBinding="{Binding Name, DataType=select:IQueryField}">
+                    </controls:FAComboBox>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

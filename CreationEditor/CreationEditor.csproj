@@ -205,7 +205,7 @@
         <Compile Update="Services\Mutagen\References\Cache\RecordReferenceCacheController.cs">
           <DependentUpon>IReferenceCacheController.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Cache\DictionaryRecordReferenceCacheController.cs">
+        <Compile Update="Services\Mutagen\References\Cache\AssetDictionaryReferenceCacheController.cs">
           <DependentUpon>IReferenceCacheController.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Mutagen\References\DataSourceReferenceUpdateTrigger.cs">
@@ -250,9 +250,6 @@
         <Compile Update="Services\Mutagen\References\Query\ModAssetSerializableQuery.cs">
           <DependentUpon>IReferenceQuery.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Query\RecordReferenceQuery.cs">
-          <DependentUpon>IReferenceQuery.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\Mutagen\References\Query\DictionaryAssetReferenceQueryConfig.cs">
           <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
         </Compile>
@@ -274,14 +271,35 @@
         <Compile Update="Services\Mutagen\References\ReferencedAsset.cs">
           <DependentUpon>IReferencedAsset.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Cache\Serialization\IReferenceCacheSerializationConfigLink.cs">
-          <DependentUpon>IReferenceCacheSerializationConfig.cs</DependentUpon>
-        </Compile>
         <Compile Update="Services\DataSource\DataSourceDirectoryLink.cs">
           <DependentUpon>IDataSourceLink.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\DataSource\DataSourceFileLink.cs">
           <DependentUpon>IDataSourceLink.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Asset\NifModificationService.cs">
+          <DependentUpon>IModelModificationService.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\ScriptFileParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\NifTextureParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordReferenceQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordGlobalVariableReferenceQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\DictionaryReferenceCacheController.cs">
+          <DependentUpon>IReferenceCacheController.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Query\RecordGlobalVariableReferenceQueryConfig.cs">
+          <DependentUpon>IReferenceQueryConfig.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\ReferenceCacheSerializationConfigLink.cs">
+          <DependentUpon>IReferenceCacheSerializationConfigLink.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 </Project>

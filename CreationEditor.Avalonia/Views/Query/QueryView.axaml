@@ -5,6 +5,7 @@
              xmlns:view="clr-namespace:CreationEditor.Avalonia.Views.Query"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Query"
              xmlns:from="clr-namespace:CreationEditor.Services.Query.From;assembly=CreationEditor"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Query.QueryView"
              x:DataType="vm:QueryVM"
@@ -14,12 +15,12 @@
         <StackPanel Grid.Row="0"
                     Orientation="Horizontal">
             <TextBlock Text="From all "/>
-            <AutoCompleteBox x:Name="FromAutoCompleteBox"
-                             ItemsSource="{Binding QueryRunner.QueryFrom.Items}"
-                             IsTextCompletionEnabled="True"
-                             FilterMode="ContainsOrdinal"
-                             MaxDropDownHeight="750"
-                             ValueMemberBinding="{Binding Name, DataType=from:QueryFromItem}"/>
+            <controls:FAComboBox
+                x:Name="FromAutoCompleteBox"
+                ItemsSource="{Binding QueryRunner.QueryFrom.Items}"
+                IsEditable="True"
+                IsTextSearchEnabled="True"
+                DisplayMemberBinding="{Binding Name, DataType=from:QueryFromItem}"/>
             <TextBlock Text=" records"/>
         </StackPanel>
 

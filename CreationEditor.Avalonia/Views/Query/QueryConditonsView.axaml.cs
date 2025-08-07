@@ -13,6 +13,7 @@ using CreationEditor.Services.Query;
 using CreationEditor.Services.Query.Select;
 using CreationEditor.Services.Query.Where;
 using DynamicData.Binding;
+using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Cache;
 using Noggog;
 using ReactiveUI;
@@ -104,14 +105,12 @@ public partial class QueryConditionsView : ActivatableUserControl {
                         if (condition is null) return null;
 
                         var queryFieldProvider = new ReflectionIQueryFieldProvider();
-                        return new ComboBox {
+                        return new FAComboBox {
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             DataContext = condition,
-                            ItemTemplate = new FuncDataTemplate<IQueryField>((field, _) => {
-                                if (field is null) return null;
-
-                                return new TextBlock { Text = field.Name };
-                            }),
+                            IsEditable = true,
+                            IsTextSearchEnabled = true,
+                            DisplayMemberBinding = new Binding(nameof(IQueryField.Name)),
                             ItemsSource = queryFieldProvider.FromType(condition.FieldSelector.RecordType),
                             [!SelectingItemsControl.SelectedItemProperty] =
                                 new Binding($"{nameof(IQueryCondition.FieldSelector)}.{nameof(IQueryCondition.FieldSelector.SelectedField)}"),

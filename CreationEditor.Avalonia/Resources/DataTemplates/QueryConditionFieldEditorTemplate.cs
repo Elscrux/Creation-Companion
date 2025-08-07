@@ -75,8 +75,10 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 [!NumericUpDown.ValueProperty] = binding,
             };
         } else if (valueQuery.TypeClass == typeof(Enum)) {
-            control = new ComboBox {
+            control = new FAComboBox {
                 ItemsSource = Enum.GetValues(valueQuery.ActualType).Cast<Enum>().OrderBy(x => x.ToString()).ToArray(),
+                IsEditable = true,
+                IsTextSearchEnabled = true,
                 [!SelectingItemsControl.SelectedItemProperty] = binding,
             };
         } else if (valueQuery.TypeClass == typeof(FormKey)) {
