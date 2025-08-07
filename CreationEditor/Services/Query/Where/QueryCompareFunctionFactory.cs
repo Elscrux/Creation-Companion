@@ -160,7 +160,7 @@ public sealed class QueryCompareFunctionFactory : IQueryCompareFunctionFactory {
         // Enum
         RegisterCompareFunction([
                 new QueryCompareFunction<Enum, Enum>(
-                    "Equals",
+                    "Has Flag",
                     (e, flag) => e.HasFlag(flag)),
             ],
             type => type.IsEnum && type.GetCustomAttribute<FlagsAttribute>() is not null,
