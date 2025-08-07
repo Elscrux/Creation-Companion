@@ -9,10 +9,12 @@ public interface IMutagenCommonAspectsProvider {
     System.Type MessageType { get; }
     System.Type DialogTopic { get; }
     System.Type DialogResponses { get; }
+    System.Type QuestType { get; }
 
     int? GetAddonNodeIndex(IMajorRecordGetter record);
     ITranslatedStringGetter? GetBookText(IMajorRecordGetter record);
     ITranslatedStringGetter? GetMessageDescription(IMajorRecordGetter record);
     ITranslatedStringGetter? GetDialogTopicName(IMajorRecordGetter record);
     ITranslatedStringGetter? GetDialogResponsesPrompt(IMajorRecordGetter record);
+    IEnumerable<ITranslatedStringGetter?>? GetObjectivesTexts(IMajorRecordGetter record);
 }

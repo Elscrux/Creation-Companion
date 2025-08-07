@@ -11,6 +11,7 @@ public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider 
     public Type MessageType { get; } = typeof(IMessageGetter);
     public Type DialogTopic { get; } = typeof(IDialogTopicGetter);
     public Type DialogResponses { get; } = typeof(IDialogResponsesGetter);
+    public Type QuestType { get; } = typeof(IQuestGetter);
 
     public int? GetAddonNodeIndex(IMajorRecordGetter record) {
         if (record is IAddonNodeGetter addonNode) {
@@ -47,6 +48,14 @@ public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider 
     public ITranslatedStringGetter? GetDialogResponsesPrompt(IMajorRecordGetter record) {
         if (record is IDialogResponsesGetter dialogResponses) {
             return dialogResponses.Prompt;
+        }
+
+        return null;
+    }
+
+    public IEnumerable<ITranslatedStringGetter?>? GetObjectivesTexts(IMajorRecordGetter record) {
+        if (record is IQuestGetter quest) {
+            return quest.Objectives.Select(x => x.DisplayText);
         }
 
         return null;
