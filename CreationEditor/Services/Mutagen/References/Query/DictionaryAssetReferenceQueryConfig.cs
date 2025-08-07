@@ -24,9 +24,9 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     where TLink : notnull {
     private readonly FileSystemQuery<TCache, TLink> _nifFileSystemQuery = new(fileParser, assetTypeService, dataSourceService);
     private readonly ArchiveQuery<TCache, TLink> _nifArchiveQuery = new(fileParser, assetTypeService, archiveService);
-    private readonly DictionaryReferenceCacheSerialization<FileSystemDataSource, TCache, TLink, DataRelativePath> _fileSystemSerializationFactory =
+    private readonly DictionaryReferenceCacheSerialization<FileSystemDataSource, TCache, TLink, DataRelativePath> _fileSystemSerialization =
         fileSystemSerializationFactory(["References"]);
-    private readonly DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath> _archiveSerializationFactory =
+    private readonly DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath> _archiveSerialization =
         archiveSerializationFactory(["References"]);
     private readonly IInternalCacheValidation<FileSystemDataSource, DataRelativePath> _cacheValidation =
         fileSystemValidationFactory(fileParser.AssetType.FileExtensions);
@@ -37,9 +37,9 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     public Task<TCache> BuildCache(IDataSource source) {
         return source switch {
             FileSystemDataSource fileSystemDataSource =>
-                referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, _fileSystemSerializationFactory, _cacheValidation),
+                referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, _fileSystemSerialization, _cacheValidation),
             ArchiveDataSource archiveDataSource =>
-                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerializationFactory),
+                referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerialization),
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
     }
