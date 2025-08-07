@@ -14,7 +14,8 @@ public sealed partial class ReflectionQueryFieldSelector : ReactiveObject, IQuer
         this.WhenAnyValue(x => x.RecordType)
             .Subscribe(_ => {
                 var props = RecordType.GetAllMemberInfos<PropertyInfo>().ToArray();
-                SelectedField = props.FirstOrDefault()?.ToQueryField();
+                var editorIdProperty = props.FirstOrDefault(x => x.Name == "EditorID");
+                SelectedField = (editorIdProperty ?? props.FirstOrDefault())?.ToQueryField();
             })
             .DisposeWith(_disposables);
     }
