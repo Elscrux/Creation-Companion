@@ -12,7 +12,7 @@ public sealed partial class RecordGlobalVariableReferenceQuery(IMutagenCommonAsp
     [GeneratedRegex(@"<Global(?:\.(?:Hour12|Minutes|Month|MonthWord|Day|WeekDay|Year|TimeSpan|Meridiem|Time))?=(\w+)>", RegexOptions.IgnoreCase)]
     public static partial Regex GlobalVariableRegex { get; }
 
-    public string Name => "Record Global Variable Links";
+     public string Name => "Mod Global Variable Links";
 
     public string GetSourceName(IModGetter source) => source.ModKey.FileName;
     public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
