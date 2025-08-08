@@ -29,6 +29,14 @@ public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider 
         return null;
     }
 
+    public ITranslatedStringGetter? GetMessageTitle(IMajorRecordGetter record) {
+        if (record is IMessageGetter message) {
+            return message.Name;
+        }
+
+        return null;
+    }
+
     public ITranslatedStringGetter? GetMessageDescription(IMajorRecordGetter record) {
         if (record is IMessageGetter message) {
             return message.Description;

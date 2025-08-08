@@ -13,6 +13,7 @@ public interface IMutagenCommonAspectsProvider {
 
     int? GetAddonNodeIndex(IMajorRecordGetter record);
     ITranslatedStringGetter? GetBookText(IMajorRecordGetter record);
+    ITranslatedStringGetter? GetMessageTitle(IMajorRecordGetter record);
     ITranslatedStringGetter? GetMessageDescription(IMajorRecordGetter record);
     ITranslatedStringGetter? GetDialogTopicName(IMajorRecordGetter record);
     ITranslatedStringGetter? GetDialogResponsesPrompt(IMajorRecordGetter record);
