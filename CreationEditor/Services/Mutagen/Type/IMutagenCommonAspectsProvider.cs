@@ -17,4 +17,5 @@ public interface IMutagenCommonAspectsProvider {
     ITranslatedStringGetter? GetDialogTopicName(IMajorRecordGetter record);
     ITranslatedStringGetter? GetDialogResponsesPrompt(IMajorRecordGetter record);
     IEnumerable<ITranslatedStringGetter?>? GetObjectivesTexts(IMajorRecordGetter record);
+    IEnumerable<ITranslatedStringGetter?>? GetLogEntries(IMajorRecordGetter record);
 }

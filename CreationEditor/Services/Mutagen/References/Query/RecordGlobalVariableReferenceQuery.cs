@@ -34,12 +34,21 @@ public sealed partial class RecordGlobalVariableReferenceQuery(IMutagenCommonAsp
 
         foreach (var quest in source.EnumerateMajorRecords(commonAspectsProvider.QuestType)) {
             var objectiveTexts = commonAspectsProvider.GetObjectivesTexts(quest);
-            if (objectiveTexts is null) continue;
+            if (objectiveTexts is not null) {
+                foreach (var text in objectiveTexts) {
+                    if (text is null) continue;
 
-            foreach (var text in objectiveTexts) {
-                if (text is null) continue;
+                    ProcessTranslatedText(text, quest);
+                }
+            }
 
-                ProcessTranslatedText(text, quest);
+            var logEntries = commonAspectsProvider.GetLogEntries(quest);
+            if (logEntries is not null) {
+                foreach (var entry in logEntries) {
+                    if (entry is null) continue;
+
+                    ProcessTranslatedText(entry, quest);
+                }
             }
         }
 
@@ -75,6 +84,7 @@ public sealed partial class RecordGlobalVariableReferenceQuery(IMutagenCommonAsp
         globalNames = globalNames.Concat(ParseTranslatedString(commonAspectsProvider.GetDialogTopicName(record)));
         globalNames = globalNames.Concat(ParseTranslatedString(commonAspectsProvider.GetDialogResponsesPrompt(record)));
         globalNames = globalNames.Concat(commonAspectsProvider.GetObjectivesTexts(record)?.SelectMany(ParseTranslatedString) ?? []);
+        globalNames = globalNames.Concat(commonAspectsProvider.GetLogEntries(record)?.SelectMany(ParseTranslatedString) ?? []);
         return globalNames;
 
         IEnumerable<string> ParseTranslatedString(ITranslatedStringGetter? translatedString) {

@@ -60,4 +60,11 @@ public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider 
 
         return null;
     }
+    public IEnumerable<ITranslatedStringGetter?>? GetLogEntries(IMajorRecordGetter record) {
+        if (record is IQuestGetter quest) {
+            return quest.Stages.SelectMany(x => x.LogEntries).Select(x => x.Entry);
+        }
+
+        return null;
+    }
 }
