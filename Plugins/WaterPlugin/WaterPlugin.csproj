@@ -15,11 +15,6 @@
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Program.cs" />
-      <Compile Remove="App.axaml.cs" />
-    </ItemGroup>
-
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins" />
     </Target>
