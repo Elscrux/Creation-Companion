@@ -226,7 +226,8 @@ public sealed class ReferenceService : IReferenceService {
         var nifAddonNodeDisposable = _nifAddonNodeReferenceSubscriptionManager.Register(outReferencedRecord);
         var assetRecordDisposable = _assetRecordReferenceSubscriptionManager.Register(outReferencedRecord);
         var recordDisposable = _recordReferenceSubscriptionManager.Register(outReferencedRecord);
-        return new CompositeDisposable(nifAddonNodeDisposable, assetRecordDisposable, recordDisposable);
+        var globalVariableDisposable = _recordGlobalVariableReferenceSubscriptionManager.Register(outReferencedRecord);
+        return new CompositeDisposable(nifAddonNodeDisposable, assetRecordDisposable, recordDisposable, globalVariableDisposable);
     }
 
     public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IFormLinkIdentifier formLink) {
