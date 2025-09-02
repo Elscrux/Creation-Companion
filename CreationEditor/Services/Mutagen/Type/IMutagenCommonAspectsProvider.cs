@@ -5,6 +5,7 @@ namespace CreationEditor.Services.Mutagen.Type;
 public interface IMutagenCommonAspectsProvider {
     System.Type AddonNodeRecordType { get; }
     System.Type SoundDescriptorRecordType { get; }
+    System.Type SoundMarkerRecordType { get; }
     System.Type BookType { get; }
     System.Type MessageType { get; }
     System.Type DialogTopic { get; }

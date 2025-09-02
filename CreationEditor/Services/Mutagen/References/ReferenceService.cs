@@ -251,9 +251,13 @@ public sealed class ReferenceService : IReferenceService {
                 return _nifAddonNodeReferenceController.GetReferences(addonNodeIndex.Value);
             }
         } else if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.SoundDescriptorRecordType, out var soundDescriptor)
-         && soundDescriptor is { EditorID: {} editorId }) {
+         && soundDescriptor is { EditorID: {} soundDescriptorEditorId }) {
             // Record is a sound
-            return _nifSoundReferenceController.GetReferences(editorId);
+            return _nifSoundReferenceController.GetReferences(soundDescriptorEditorId);
+        } else if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.SoundMarkerRecordType, out var soundMarker)
+         && soundMarker is { EditorID: {} soundMarkerEditorId }) {
+            // Record is a sound
+            return _nifSoundReferenceController.GetReferences(soundMarkerEditorId);
         }
 
         return [];
@@ -287,6 +291,7 @@ public sealed class ReferenceService : IReferenceService {
         if (soundEditorIds.Length > 0) {
             foreach (var soundEditorId in soundEditorIds) {
                 if (_editorEnvironment.LinkCache.TryResolve(soundEditorId, _mutagenCommonAspectsProvider.SoundDescriptorRecordType, out _)) continue;
+                if (_editorEnvironment.LinkCache.TryResolve(soundEditorId, _mutagenCommonAspectsProvider.SoundMarkerRecordType, out _)) continue;
 
                 yield return "Sound: " + soundEditorId;
             }
