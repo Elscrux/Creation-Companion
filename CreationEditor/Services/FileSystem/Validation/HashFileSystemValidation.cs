@@ -1,7 +1,9 @@
-﻿using CreationEditor.Services.Cache.Validation;
+﻿using System.Collections.Concurrent;
+using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using Noggog;
+using Noggog.Utility;
 namespace CreationEditor.Services.FileSystem.Validation;
 
 public sealed class HashFileSystemValidation(
@@ -14,7 +16,17 @@ public sealed class HashFileSystemValidation(
     /// </summary>
     private const int MaxParallelLevel = 2;
 
+    private readonly Lock _lock = new();
+    private readonly ConcurrentDictionary<string, AsyncLock> _dataSourceLocks = [];
+
     public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(FileSystemDataSource source) {
+        AsyncLock asyncLock;
+        lock (_lock) {
+            asyncLock = _dataSourceLocks.GetOrAdd(source.Path, _ => new AsyncLock());
+        }
+
+        using var disposable = await asyncLock.WaitAsync();
+
         var validate = fileSystemValidationSerialization.Validate(source.Path);
         if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.Path, out var fileSystemCacheData)) {
             var buildCache = await BuildCache(source);
