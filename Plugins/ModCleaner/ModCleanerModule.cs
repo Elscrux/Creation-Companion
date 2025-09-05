@@ -21,5 +21,13 @@ public class ModCleanerModule : Module {
 
         builder.RegisterType<RecordCleaner>()
             .AsSelf();
+
+        builder.RegisterType<FeatureFlagService>()
+            .AsImplementedInterfaces()
+            .AsSelf();
+
+        builder.RegisterType<EssentialRecordProvider>()
+            .AsImplementedInterfaces()
+            .AsSelf();
     }
 }

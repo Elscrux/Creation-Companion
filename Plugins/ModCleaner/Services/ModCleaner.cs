@@ -18,14 +18,50 @@ public sealed class ModCleaner(
         var graph = BuildGraph(mod, dependencies);
 
         var included = FindRetainedRecords(graph, mod, dependencies);
+        
+        var edges = new StreamWriter(@"C:\Users\nickp\Downloads\edges-test2.csv");
+        foreach (var link in included) {
+            if (link is not FormLinkIdentifier l) continue;
+
+            if (graph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
+                foreach (var edge in outgoing) {
+                    if (included.Contains(edge.Target) && edge.Target is FormLinkIdentifier t) {
+                        edges.WriteLine($"'{l.FormLink.FormKey} - {l.FormLink.Type}','{t.FormLink.FormKey} - {t.FormLink.Type}'");
+                    }
+                }
+            }
+        }
+        
+        var x = included.OfType<FormLinkIdentifier>().FirstOrDefault(x => x.ToString().Contains("05330B"));
+        if (x is not null) {
+            Console.WriteLine();
+        }
+        var y = included.OfType<FormLinkIdentifier>().FirstOrDefault(x => x.ToString().Contains("0532FD")); 
+        if (y is not null) {
+            Console.WriteLine();
+        }
+        var z = included.OfType<FormLinkIdentifier>().FirstOrDefault(x => x.ToString().Contains("05DC35")); 
+        if (z is not null) {
+            Console.WriteLine();
+        }
 
         var recordsToClean = recordCleaner.GetRecordsToClean(included, mod);
         var assetsToClean = assetCleaner.GetAssetsToClean(included, dataSource);
+        if (recordsToClean.Any(x => x.FormKey.ToString().Contains("05330B"))) {
+            Console.WriteLine();
+        }
+        if (recordsToClean.Any(x => x.FormKey.ToString().Contains("0532FD"))) {
+            Console.WriteLine();
+        }
+        if (recordsToClean.Any(x => x.FormKey.ToString().Contains("05DC35"))) {
+            Console.WriteLine();
+        }
+
 
         var m = string.Join("\n", assetsToClean.Select(x => x.DataRelativePath.Path));
         logger.Here().Information("Cleaning assets: {Assets}", m);
 
-        assetCleaner.CleanDataSource(dataSource, assetsToClean);
+        // assetCleaner.CleanDataSource(dataSource, assetsToClean);
         recordCleaner.CreatedCleanerOverrideMod(mod, recordsToClean);
     }
 
