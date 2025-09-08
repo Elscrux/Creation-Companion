@@ -8,7 +8,6 @@ public sealed class SavePipeline : ISavePipeline {
     public SavePipeline() {
         AddStep(new IdenticalToMasterRemoveStep());
         AddStep(new DeletedNewRecordRemoveStep());
-        AddStep(new RemoveCompressionStep());
     }
 
     public void AddStep(ISaveStep step) {
