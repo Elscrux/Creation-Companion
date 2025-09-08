@@ -3,5 +3,5 @@ namespace CreationEditor.Avalonia.ViewModels.Notification;
 
 public interface INotificationVM {
     IList<NotificationItem> LoadingItems { get; }
-    IObservable<NotificationItem> LatestNotification { get; }
+    IObservable<NotificationItem?> LatestNotification { get; }
 }

@@ -10,18 +10,27 @@ public sealed class NotificationVM : ViewModel, INotificationVM {
 
     private static readonly TimeSpan UpdateInterval = TimeSpan.FromMilliseconds(500);
 
-    public IObservable<NotificationItem> LatestNotification { get; }
+    private readonly SourceCache<NotificationItem, Guid> _currentNotifications = new(x => x.Id);
+
+    public IObservable<NotificationItem?> LatestNotification => _currentNotifications.Connect()
+        .ToCollection()
+        .Select(x => x.FirstOrDefault());
 
     public NotificationVM(INotificationService notificationService) {
-        LatestNotification = notificationService.Notifications
-            .Where(x => x.LoadText is not null)
-            .Sample(UpdateInterval);
+        notificationService.Notifications
+            .Subscribe(notification => {
+                if (notification.IsDone) {
+                    _currentNotifications.Remove(notification);
+                } else {
+                    _currentNotifications.AddOrUpdate(notification);
+                }
+            });
 
         _loadingItems = notificationService.Notifications
-            .ToObservableChangeSet(x => x.ID)
+            .ToObservableChangeSet(x => x.Id)
             .Buffer(UpdateInterval)
             .FlattenBufferResult()
-            .Filter(x => x.LoadText is not null)
+            .Filter(x => x.IsLive)
             .ToObservableCollection(this);
     }
 }
