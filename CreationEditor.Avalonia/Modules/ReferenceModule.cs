@@ -11,9 +11,11 @@ public sealed class ReferenceModule : Module {
     protected override void Load(ContainerBuilder builder) {
         // Validation
         builder.RegisterType<HashFileSystemValidation>()
+            .SingleInstance()
             .As<IFileSystemValidation>();
 
         builder.RegisterType<BinaryFileSystemValidationSerialization>()
+            .SingleInstance()
             .As<IHashFileSystemValidationSerialization>();
 
         // Cache Controllers

@@ -1,9 +1,7 @@
-﻿using System.Collections.Concurrent;
-using CreationEditor.Services.Cache.Validation;
+﻿using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using Noggog;
-using Noggog.Utility;
 namespace CreationEditor.Services.FileSystem.Validation;
 
 public sealed class HashFileSystemValidation(
@@ -17,36 +15,60 @@ public sealed class HashFileSystemValidation(
     private const int MaxParallelLevel = 2;
 
     private readonly Lock _lock = new();
-    private readonly ConcurrentDictionary<string, AsyncLock> _dataSourceLocks = [];
+    private readonly Dictionary<string, Task<CacheValidationResult<DataRelativePath>>> _dataSourceTasks = [];
+    private readonly Dictionary<string, int> _dataSourceLockRefCount = [];
 
     public async Task<CacheValidationResult<DataRelativePath>> GetInvalidatedContent(FileSystemDataSource source) {
-        AsyncLock asyncLock;
+        // In case multiple threads with the same source enter this method at the same time, only compute the invalidated content once and use the result for all
+        // Use ref counting to see when no thread with the same source is in this method anymore, then we can remove the shared task 
+        Task<CacheValidationResult<DataRelativePath>> task;
         lock (_lock) {
-            asyncLock = _dataSourceLocks.GetOrAdd(source.Path, _ => new AsyncLock());
+            task = _dataSourceTasks.GetOrAdd<string, Task<CacheValidationResult<DataRelativePath>>>(source.Path, _ => Validate());
+
+            if (_dataSourceLockRefCount.TryGetValue(source.Path, out var refCount)) {
+                _dataSourceLockRefCount[source.Path] = refCount + 1;
+            } else {
+                _dataSourceLockRefCount[source.Path] = 1;
+            }
         }
 
-        using var disposable = await asyncLock.WaitAsync();
+        var result = await task;
 
-        var validate = fileSystemValidationSerialization.Validate(source.Path);
-        if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.Path, out var fileSystemCacheData)) {
-            var buildCache = await BuildCache(source);
-            fileSystemValidationSerialization.Serialize(buildCache, source.Path);
+        lock (_lock) {
+            var refCount = _dataSourceLockRefCount.GetValueOrDefault(source.Path, 1);
+            refCount--;
+            _dataSourceLockRefCount[source.Path] = refCount;
 
-            return CacheValidationResult<DataRelativePath>.FullyInvalid(() => {
+            if (refCount == 0) {
+                _dataSourceTasks.Remove(source.Path);
+            }
+        }
+
+        return result;
+
+        async Task<CacheValidationResult<DataRelativePath>> Validate() {
+            var validate = fileSystemValidationSerialization.Validate(source.Path);
+            if (!validate || !fileSystemValidationSerialization.TryDeserialize(source.Path, out var fileSystemCacheData)) {
+                var buildCache = await BuildCache(source);
                 fileSystemValidationSerialization.Serialize(buildCache, source.Path);
-            });
+
+                return CacheValidationResult<DataRelativePath>.FullyInvalid(() => {
+                    fileSystemValidationSerialization.Serialize(buildCache, source.Path);
+                });
+            }
+
+            var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source.GetRootLink(), 1).ToArrayAsync();
+            if (invalidatedFiles.Length == 0) return CacheValidationResult<DataRelativePath>.Valid();
+
+            return CacheValidationResult<DataRelativePath>.PartlyInvalid(invalidatedFiles
+                    .Select(file => new DataRelativePath(source.FileSystem.Path.GetRelativePath(source.Path, file.FullPath)))
+                    .ToArray(),
+                () => {
+                    UpdateCache(fileSystemCacheData, invalidatedFiles, source);
+                    fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.Path);
+                });
+
         }
-
-        var invalidatedFiles = await ValidateDirectoryRec(fileSystemCacheData.RootDirectory, source.GetRootLink(), 1).ToArrayAsync();
-        if (invalidatedFiles.Length == 0) return CacheValidationResult<DataRelativePath>.Valid();
-
-        return CacheValidationResult<DataRelativePath>.PartlyInvalid(invalidatedFiles
-                .Select(file => new DataRelativePath(source.FileSystem.Path.GetRelativePath(source.Path, file.FullPath)))
-                .ToArray(),
-            () => {
-                UpdateCache(fileSystemCacheData, invalidatedFiles, source);
-                fileSystemValidationSerialization.Serialize(fileSystemCacheData, source.Path);
-            });
 
         async IAsyncEnumerable<DataSourceFileLink> ValidateDirectoryRec(
             HashDirectoryCacheData hashDirectoryCache,
