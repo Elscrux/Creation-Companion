@@ -16,7 +16,7 @@
 
     <!-- Based visuals on https://github.com/amwx/FluentAvalonia -->
     <Border
-        Background="#2B2B2B"
+        Background="{DynamicResource SolidBackgroundFillColorQuarternaryBrush}"
         BorderBrush="{DynamicResource ButtonBackground}"
         BorderThickness="1"
         MaxHeight="750" MaxWidth="1000"
@@ -40,7 +40,7 @@
             </Border>
 
             <Border Grid.Row="1"
-                    Background="#202020"
+                    Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
                     CornerRadius="0,0,20,20"
                     Padding="25">
                 <Grid ColumnDefinitions="*,25,*"
