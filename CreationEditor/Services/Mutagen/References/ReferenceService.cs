@@ -14,6 +14,7 @@ using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 using ScriptFileParser = CreationEditor.Services.Mutagen.References.Parser.ScriptFileParser;
 namespace CreationEditor.Services.Mutagen.References;
 
@@ -233,7 +234,8 @@ public sealed class ReferenceService : IReferenceService {
     public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IFormLinkIdentifier formLink) {
         var references = _recordReferenceController.GetReferences(formLink);
 
-        if (_editorEnvironment.LinkCache.TryResolveIdentifier(formLink, out var identifier) && identifier is not null) {
+        if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.GlobalVariableType)
+         && _editorEnvironment.LinkCache.TryResolveIdentifier(formLink.FormKey, _mutagenCommonAspectsProvider.GlobalVariableType, out var identifier) && identifier is not null) {
             references = references.Concat(_recordGlobalVariableReferenceController.GetReferences(identifier));
         }
 
@@ -245,17 +247,20 @@ public sealed class ReferenceService : IReferenceService {
     }
 
     public IEnumerable<DataRelativePath> GetAssetReferences(IFormLinkIdentifier formLink) {
-        if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.AddonNodeRecordType, out var addonNode)) {
+        if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.AddonNodeRecordType)
+          && _editorEnvironment.LinkCache.TryResolve(formLink, out var addonNode)) {
             // Record is an addon node
             var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(addonNode);
             if (addonNodeIndex is not null) {
                 return _nifAddonNodeReferenceController.GetReferences(addonNodeIndex.Value);
             }
-        } else if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.SoundDescriptorRecordType, out var soundDescriptor)
+        } else if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.SoundDescriptorRecordType)
+         && _editorEnvironment.LinkCache.TryResolve(formLink, out var soundDescriptor)
          && soundDescriptor is { EditorID: {} soundDescriptorEditorId }) {
             // Record is a sound
             return _nifSoundReferenceController.GetReferences(soundDescriptorEditorId);
-        } else if (_editorEnvironment.LinkCache.TryResolve(formLink.FormKey, _mutagenCommonAspectsProvider.SoundMarkerRecordType, out var soundMarker)
+        } else if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.SoundMarkerRecordType)
+         && _editorEnvironment.LinkCache.TryResolve(formLink, out var soundMarker)
          && soundMarker is { EditorID: {} soundMarkerEditorId }) {
             // Record is a sound
             return _nifSoundReferenceController.GetReferences(soundMarkerEditorId);
