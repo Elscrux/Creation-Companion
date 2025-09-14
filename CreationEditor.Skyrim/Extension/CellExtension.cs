@@ -79,4 +79,15 @@ public static class CellExtension {
             }
         }
     }
+
+    public static IWorldspaceGetter? GetWorldspace(this ICellGetter cell, ILinkCache linkCache) {
+        if (cell.Flags.HasFlag(Cell.Flag.IsInteriorCell)) return null;
+        if (!linkCache.TryResolveSimpleContext(cell, out var cellContext)) return null;
+
+        if (cellContext.Parent?.Parent?.Parent?.Record is IWorldspaceGetter worldspace) {
+            return worldspace;
+        }
+
+        return null;
+    }
 }
