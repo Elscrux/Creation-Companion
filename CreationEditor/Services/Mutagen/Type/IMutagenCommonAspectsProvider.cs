@@ -11,6 +11,7 @@ public interface IMutagenCommonAspectsProvider {
     System.Type DialogTopic { get; }
     System.Type DialogResponses { get; }
     System.Type QuestType { get; }
+    System.Type GlobalVariableType { get; }
 
     int? GetAddonNodeIndex(IMajorRecordGetter record);
     ITranslatedStringGetter? GetBookText(IMajorRecordGetter record);
