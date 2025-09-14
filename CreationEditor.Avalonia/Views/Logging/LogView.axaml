@@ -17,7 +17,7 @@
             x:Key="LogLevelToToBrushConverter"
             VerboseBrush="CornflowerBlue"
             DebugBrush="ForestGreen"
-            MessageBrush="White"
+            MessageBrush="{DynamicResource TextFillColorPrimary}"
             WarningBrush="Yellow"
             ErrorBrush="Orange"
             FatalBrush="Red"/>
