@@ -1,15 +1,20 @@
-﻿using CreationEditor;
+﻿using System.IO.Abstractions;
+using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
+using DynamicData;
 using ModCleaner.Models;
+using ModCleaner.Services;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using Noggog.IO;
 using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
 namespace ModCleaner.Services;
@@ -22,7 +27,7 @@ public sealed class RecordCleaner(
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
 
-    private readonly IEnumerable<FormLinkInformation> _essentialRecords = essentialRecordProvider.GetEssentialRecords().ToHashSet();
+    private readonly Lazy<IReadOnlySet<FormLinkInformation>> _essentialRecords = new(() => essentialRecordProvider.GetEssentialRecords().ToHashSet());
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
@@ -65,19 +70,28 @@ public sealed class RecordCleaner(
                 if (!processedRecords.Add(current.FormKey)) {
                     continue;
                 }
-                
+
                 graph.AddVertex(new FormLinkIdentifier(current));
 
                 foreach (var currentReference in referenceService.GetRecordReferences(current)) {
                     // This just checks if the reference was defined in the mod or one of its dependencies. Update if needed.
                     var modKey = currentReference.FormKey.ModKey;
                     if (modKey != mod.ModKey
-                     && !masters.Contains(modKey)
+                        // && !masters.Contains(modKey) // If it is part of a master we're not interested in it further, it will never be cleaned and it can't reference something from our mod that might need to be cleaned
                      && !dependencies.Contains(modKey)) continue;
 
+                    // Remove these connections and fix them manually
+                    // Removing references from location to something - potentially not needed (clearing crime factions list might have fixed it) / too broad
                     if (currentReference.Type == typeof(ILocationGetter)) continue;
+
+                    // Is regenerated
                     if (currentReference.Type == typeof(INavigationMeshInfoMapGetter)) continue;
+
+                    // Removing references from worldspaces to something like large refs or all recursive nodes from cells etc
                     if (currentReference.Type == typeof(IWorldspaceGetter)) continue;
+
+                    // Navmesh to navmesh links will connect all cells in the worldspace which we don't want - re-finalize navmesh after cleaning!
+                    if (current.Type == typeof(INavigationMeshGetter) && currentReference.Type == typeof(INavigationMeshGetter)) continue;
 
                     var currentReferenceLink = new FormLinkIdentifier(currentReference);
                     if (!graph.Vertices.Contains(currentReferenceLink)) {
@@ -110,53 +124,63 @@ public sealed class RecordCleaner(
     public IReadOnlyList<IFormLinkIdentifier> GetRecordsToClean(
         HashSet<ILinkIdentifier> includedLinks,
         IModGetter mod) {
-
-        var formLinkInformations = mod.EnumerateMajorRecords()
+        return mod.EnumerateMajorRecords()
             .Select(r => r.ToFormLinkInformation())
-            .ToHashSet();
-        var array = includedLinks.OfType<FormLinkIdentifier>().Select(x => x.FormLink).ToHashSet();
-        var x = formLinkInformations.FirstOrDefault(x => x.ToString().Contains("05330B"));
-        if (x is not null) {
-            Console.WriteLine();
-        }
-        var y = formLinkInformations.FirstOrDefault(x => x.ToString().Contains("0532FD"));
-        if (y is not null) {
-            Console.WriteLine();
-        }
-        var z = formLinkInformations.FirstOrDefault(x => x.ToString().Contains("05DC35"));
-        if (z is not null) {
-            Console.WriteLine();
-        }
-        var xx = array.FirstOrDefault(x => x.ToString()!.Contains("05330B"));
-        if (xx is not null) {
-            Console.WriteLine();
-        }
-        var yyy = array.Where(x => x.ToString()!.Contains("0532FD")).ToArray();
-        var yy = array.FirstOrDefault(x => x.ToString()!.Contains("0532FD"));
-        if (yy is not null) {
-            Console.WriteLine();
-        }
-        var zz = array.FirstOrDefault(x => x.ToString()!.Contains("05DC35"));
-        if (zz is not null) {
-            Console.WriteLine();
-        }
-        return formLinkInformations
-            .Except(array)
+            .Except(includedLinks
+                .OfType<FormLinkIdentifier>()
+                .Select(x => x.FormLink))
             .ToArray();
     }
 
-    public void CreatedCleanedMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
-        var cleanMod = editorEnvironment.AddNewMutableMod(ModKey.FromFileName(mod.ModKey.Name + "Cleaned.esm"));
+    public void CreatedCleanedMod(ISkyrimModGetter mod, IReadOnlyList<IFormLinkIdentifier> recordsToClean) {
+        var oldModKey = mod.ModKey;
+        var fileSystem = new FileSystem();
+        using var tmp = TempFolder.Factory();
+        var fileSystemRoot = tmp.Dir;
+        var oldModPath = new ModPath(oldModKey, fileSystem.Path.Combine(fileSystemRoot, oldModKey.FileName.String));
 
-        foreach (var record in recordsToClean) {
-            cleanMod.Remove(new FormKey(cleanMod.ModKey, record.FormKey.ID));
+        // Write mod to file system
+        mod.WriteToBinary(oldModPath,
+            BinaryWriteParameters.Default with {
+                FileSystem = fileSystem
+            });
+
+        // Rename mod file
+        var newModKey = ModKey.FromFileName("Clean" + mod.ModKey.FileName);
+        var newModPath = new ModPath(newModKey, fileSystem.Path.Combine(fileSystemRoot, newModKey.FileName.String));
+        fileSystem.File.Move(oldModPath, newModPath);
+
+        // Read renamed mod as new mod
+        var duplicate = ModInstantiator.ImportSetter(newModPath,
+            mod.GameRelease,
+            BinaryReadParameters.Default with {
+                FileSystem = fileSystem
+            });
+        // return duplicateInto;
+        // var duplicate = mod.Duplicate(ModKey.FromFileName("Clean" + mod.ModKey.FileName));
+
+        for (var index = 0; index < recordsToClean.Count; index++) {
+            var record = recordsToClean[index];
+            Console.WriteLine(index + " " + record.Type.Name);
+            duplicate.Remove(new FormKey(duplicate.ModKey, record.FormKey.ID), record.Type);
         }
+
+        editorEnvironment.Update(updater => updater
+            .LoadOrder.AddMutableMods(duplicate)
+            .Build());
     }
 
     public void CreatedCleanerOverrideMod(ISkyrimModGetter mod, IEnumerable<IFormLinkIdentifier> recordsToClean) {
         var cleanMod = editorEnvironment.AddNewMutableMod(ModKey.FromFileName($"Clean{mod.ModKey.Name}.esp"));
 
+        var placedObjectType = typeof(IPlacedObjectGetter);
+        var placedType = typeof(IPlacedGetter);
         foreach (var record in recordsToClean) {
+            if (record.Type == placedObjectType) continue; // TODO: temporary to make this faster
+            if (record.Type == placedType) continue; // TODO: temporary to make this faster
+
+            // if (record.Type == typeof(ILandscapeGetter)) continue; // TODO: temporary to make this faster
+            // if (record.Type == typeof(INavigationMeshGetter)) continue; // TODO: temporary to make this faster
             var recordOverride = recordController.GetOrAddOverride(record, cleanMod);
             recordOverride.IsDeleted = true;
         }
@@ -180,17 +204,18 @@ public sealed class RecordCleaner(
         IReadOnlyList<ModKey> dependencies,
         FormLinkIdentifier formLinkIdentifier,
         HashSet<ILinkIdentifier> included,
+        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         var formLink = formLinkIdentifier.FormLink;
         if (formLink.FormKey.ModKey != mod.ModKey
-         || _essentialRecords.Contains(formLink)
-         || editorEnvironment.LinkCache.ResolveAllSimpleContexts(formLink).Any(c => dependencies.Contains(c.ModKey))) {
+         || _essentialRecords.Value.Contains(formLink)
+         || (dependencies.Count > 0 && editorEnvironment.LinkCache.ResolveAllSimpleContexts(formLink).Any(c => dependencies.Contains(c.ModKey)))) {
             // Retain overrides of records from other mods
             // Retain records that are essential and all their transitive dependencies
             // Retain placeholder records that are going to be replaced by Creation Club records via patch
             // Retain things that are overridden by dependencies
             included.Add(formLinkIdentifier);
-            // var iLinkIdentifier = included.FirstOrDefault(x => x is FormLinkIdentifier a && a.FormLink.FormKey.ToString().Contains("000F0A"))
+            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, formLinkIdentifier));
 
             if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
 
@@ -200,50 +225,47 @@ public sealed class RecordCleaner(
             var queue = new Queue<ILinkIdentifier>([formLinkIdentifier]);
             while (queue.Count > 0) {
                 var current = queue.Dequeue();
+                dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, formLinkIdentifier));
                 if (!included.Add(current)) continue;
                 if (!graph.IncomingEdges.TryGetValue(current, out var currentEdges)) continue;
 
                 queue.Enqueue(currentEdges.Select(x => x.Target)
                     .Where(t => formLink.Type.InheritsFromAny(SelfRetainedRecordTypes)));
             }
-        } else if (formLink.Type == typeof(IDialogTopicGetter)) {
-            // Only custom and scene dialog topics can be unused, everything else is implicitly retained
-            var record = editorEnvironment.LinkCache.Resolve<IDialogTopicGetter>(formLink.FormKey);
-            if (record.SubtypeName.Type is not "CUST" and not "SCEN") {
-                included.Add(formLinkIdentifier);
-
-                if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
-
-                retainOutgoingEdges(edges);
-            }
-        } else if (formLink.Type == typeof(ISceneGetter)) {
-            // Retain scenes that begin on quest start
-            var record = editorEnvironment.LinkCache.Resolve<ISceneGetter>(formLink.FormKey);
-            if (record.Flags is not null && record.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) {
-                included.Add(formLinkIdentifier);
-
-                if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
-
-                retainOutgoingEdges(edges);
-            }
         }
+        // else if (formLink.Type == typeof(IDialogTopicGetter)) {
+        //     // Only custom and scene dialog topics can be unused, everything else is implicitly retained
+        //     var record = editorEnvironment.LinkCache.Resolve<IDialogTopicGetter>(formLink.FormKey);
+        //     if (record.SubtypeName.Type is not "CUST" and not "SCEN") {
+        //         included.Add(formLinkIdentifier);
+        // 
+        //         if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
+        // 
+        //         retainOutgoingEdges(edges);
+        //     }
+        // } 
     }
 
+    /// <summary>
+    /// If what I link to is retained, I am also retained.
+    /// </summary>
     private static readonly Type[] ImplicitRetainedRecordTypes = [
         typeof(IConstructibleObjectGetter),
         typeof(IRelationshipGetter),
         typeof(IStoryManagerQuestNodeGetter),
-        typeof(IStoryManagerBranchNodeGetter),
-        typeof(IStoryManagerEventNodeGetter),
-        typeof(IDialogBranchGetter),
-        typeof(IDialogTopicGetter),
         typeof(IDialogViewGetter),
-        typeof(IWorldspaceGetter),
     ];
+    // typeof(IStoryManagerQuestNodeGetter),
+    // typeof(IStoryManagerBranchNodeGetter),
+    // typeof(IStoryManagerEventNodeGetter),
+    // typeof(IDialogBranchGetter),
+    // typeof(IDialogTopicGetter),
+    // typeof(IWorldspaceGetter),
 
-    public static void FinalIncludeLinks(
+    public void FinalIncludeLinks(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         HashSet<ILinkIdentifier> included,
+        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
@@ -251,31 +273,77 @@ public sealed class RecordCleaner(
             foreach (var vertex in graph.Vertices) {
                 if (vertex is not FormLinkIdentifier formLinkIdentifier) continue;
                 if (formLinkIdentifier.FormLink.Type != implicitType) continue;
-
-                if (formLinkIdentifier.FormLink.FormKey.ToString().Contains("05330B")) {
-                    Console.WriteLine("");
-                }
-
-                if (formLinkIdentifier.FormLink.FormKey.ToString().Contains("0532FD")) {
-                    Console.WriteLine("");
-                }
-                if (formLinkIdentifier.FormLink.FormKey.ToString().Contains("05DC35")) {
-                    Console.WriteLine("");
-                }
-
                 if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
+
+                if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)) {
+                    edges = edges
+                        .Where(x => x.Target is FormLinkIdentifier f
+                         && f.FormLink.Type != typeof(IStoryManagerQuestNodeGetter)
+                         && f.FormLink.Type != typeof(IStoryManagerBranchNodeGetter))
+                        .ToHashSet();
+                }
+
                 if (edges.Count == 0) continue;
-                if (edges.All(x => !included.Contains(x.Target))) continue;
+
+                // Changed to Any() instead of All() - probably a problem? Explain this choice in a comment
+                if (edges.Any(x => !included.Contains(x.Target))) continue;
+
+                // Keep parent nodes of quest nodes
+                if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)
+                 && editorEnvironment.LinkCache.TryResolve<IStoryManagerQuestNodeGetter>(formLinkIdentifier.FormLink.FormKey, out var questNode)) {
+                    var parentNode = questNode.Parent.TryResolve(editorEnvironment.LinkCache);
+                    while (parentNode is not null) {
+                        included.Add(new FormLinkIdentifier(parentNode));
+                        dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(vertex, new FormLinkIdentifier(parentNode)));
+                        parentNode = parentNode.Parent.TryResolve(editorEnvironment.LinkCache);
+                    }
+                }
 
                 included.Add(vertex);
 
                 retainOutgoingEdges(edges);
             }
         }
+
+        foreach (var vertex in graph.Vertices) {
+            if (vertex is not FormLinkIdentifier { FormLink: var formLink } formLinkIdentifier) continue;
+
+            if (formLink.Type == typeof(ISceneGetter)) {
+                // Retain scenes that begin on quest start                                                                       
+
+                var scene = editorEnvironment.LinkCache.Resolve<ISceneGetter>(formLink.FormKey);
+                if (scene.Flags is null || !scene.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) continue;
+                if (!included.Contains(new FormLinkIdentifier(scene.Quest))) continue;
+
+                included.Add(formLinkIdentifier);
+
+                if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
+
+                retainOutgoingEdges(edges);
+            } else if (formLink.Type == typeof(IDialogTopicGetter)) {
+                // Only custom and scene dialog topics can be unused, everything else is implicitly retained
+                var topic = editorEnvironment.LinkCache.Resolve<IDialogTopicGetter>(formLink.FormKey);
+                if (topic.SubtypeName.Type is not "CUST" and not "SCEN") {
+                    if (!included.Contains(new FormLinkIdentifier(topic.Quest))) continue;
+
+                    included.Add(formLinkIdentifier);
+
+                    if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
+
+                    retainOutgoingEdges(edges);
+                }
+            }
+        }
     }
 }
 
-public sealed record FeatureFlag(string Name, ModKey ModKey, List<WorldspacePatch> WorldspacePatches, List<FormLinkInformation> EssentialRecords);
+// TODO: OR USE Regions instead of patches?
+public sealed record FeatureFlag(
+    string Name,
+    ModKey ModKey,
+    Dictionary<IFormLinkGetter<IWorldspaceGetter>, List<IFormLinkGetter<IRegionGetter>>> AllowedRegions,
+    List<FormLinkInformation> EssentialRecords);
+
 public sealed record WorldspacePatch(FormLinkInformation Worldspace, P2Int BottomLeft, P2Int TopRight);
 
 public interface IFeatureFlagService {
@@ -288,6 +356,7 @@ public interface IFeatureFlagService {
 
 public interface IEssentialRecordProvider {
     IEnumerable<FormLinkInformation> GetEssentialRecords();
+    bool IsInvalidExteriorCell(IFormLinkGetter<IWorldspaceGetter> worldspace, ICellGetter cell);
 }
 
 public sealed class EssentialRecordProvider(
@@ -300,27 +369,32 @@ public sealed class EssentialRecordProvider(
                 yield return essentialRecord;
             }
 
-            foreach (var worldspacePatch in featureFlag.WorldspacePatches) {
-                if (!worldspacePatch.Worldspace.TryResolve<IWorldspaceGetter>(editorEnvironment.LinkCache, out var worldspace)) continue;
+            foreach (var (worldspaceLink, regions) in featureFlag.AllowedRegions) {
+                if (!worldspaceLink.TryResolve(editorEnvironment.LinkCache, out var worldspace)) continue;
 
                 yield return worldspace.ToFormLinkInformation();
 
-                for (var x = worldspacePatch.BottomLeft.X; x <= worldspacePatch.TopRight.X; x++) {
-                    for (var y = worldspacePatch.BottomLeft.Y; y <= worldspacePatch.TopRight.Y; y++) {
-                        var cell = worldspace.GetCell(new P2Int(x, y));
-                        if (cell is null) continue;
-
-                        yield return cell.ToFormLinkInformation();
-                    }
+                foreach (var cell in worldspace.EnumerateCells()
+                    .Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any())) {
+                    yield return cell.ToFormLinkInformation();
                 }
             }
         }
     }
+
+    public bool IsInvalidExteriorCell(IFormLinkGetter<IWorldspaceGetter> worldspace, ICellGetter cell) {
+        var allowedRegions = featureFlagService.EnabledFeatureFlags
+            .SelectMany(f => f.AllowedRegions.TryGetValue(worldspace, out var allowedRegions) ? allowedRegions : [])
+            .ToArray();
+
+        // When there is no reference of the worldspace in any feature flag, all cells are valid
+        if (allowedRegions.Length == 0) return false;
+
+        return cell.Regions is null || !cell.Regions.Intersect(allowedRegions).Any();
+    }
 }
 
-public sealed class FeatureFlagService(
-    ILogger logger,
-    IEditorEnvironment editorEnvironment) : IFeatureFlagService {
+public sealed class FeatureFlagService : IFeatureFlagService {
 
     private static readonly Type QuestType = typeof(IQuestGetter);
 
@@ -329,15 +403,15 @@ public sealed class FeatureFlagService(
             new FeatureFlag(
                 "Bruma",
                 ModKey.FromFileName("BSHeartland.esm"),
+                new Dictionary<IFormLinkGetter<IWorldspaceGetter>, List<IFormLinkGetter<IRegionGetter>>> {
+                    {
+                        new FormLink<IWorldspaceGetter>(FormKey.Factory("0A764B:BSHeartland.esm")),
+                        [
+                            new FormLink<IRegionGetter>(FormKey.Factory("0CBCDD:BSHeartland.esm")),
+                        ]
+                    }
+                },
                 [
-                    new WorldspacePatch(
-                        new FormLinkInformation(FormKey.Factory("0A764B:BSHeartland.esm"), typeof(IWorldspaceGetter)),
-                        new P2Int(5, 40),
-                        new P2Int(41, 65)
-                    )
-                ],
-                [
-                    new FormLinkInformation(FormKey.Factory("0D2631:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("072648:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06E785:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07A9C6:BSHeartland.esm"), QuestType),
@@ -345,6 +419,7 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("067877:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("079E6A:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("079E6E:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("0E7CC8:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("003A57:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0D3796:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("003A55:BSHeartland.esm"), QuestType),
@@ -391,26 +466,15 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("06513C:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07CAAF:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06F9B8:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED8:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DA55:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D781:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D783:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D78E:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0947AC:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED7:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED6:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED5:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED4:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DED3:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D6CC9:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D378D:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06FF70:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D2622:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("002089:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07CACE:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07CAD3:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0C9B15:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0F0D6A:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("003A54:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07434C:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0D6CCA:BSHeartland.esm"), QuestType),
@@ -472,11 +536,9 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("00196C:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("08BEF5:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("078168:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D26A0:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("08ACB3:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06D945:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06E77B:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06D946:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DB85:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0781AA:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D7AC:BSHeartland.esm"), QuestType),
@@ -486,12 +548,7 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("06506C:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07CA96:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0D5401:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEC8:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DA56:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEC4:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0FA857:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEC0:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEBF:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07456C:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("063C6F:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07456B:BSHeartland.esm"), QuestType),
@@ -521,12 +578,6 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("06DEB5:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DEB4:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DEB1:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06E775:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D263D:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0E591F:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0E5911:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0E5912:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0C8AF9:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0D3740:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0650CD:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0B057E:BSHeartland.esm"), QuestType),
@@ -537,17 +588,10 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("06F9A9:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0650D4:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07CADF:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEAC:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEAB:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06DA53:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D790:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D797:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("07D799:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEA4:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DA54:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEA3:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("06DEA2:BSHeartland.esm"), QuestType),
-                    new FormLinkInformation(FormKey.Factory("0D5404:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0B2257:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("094805:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0C7E6D:BSHeartland.esm"), QuestType),
@@ -585,6 +629,13 @@ public sealed class FeatureFlagService(
                     new FormLinkInformation(FormKey.Factory("06EDF6:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("0C9A88:BSHeartland.esm"), QuestType),
                     new FormLinkInformation(FormKey.Factory("06507E:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("0D3740:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("20ED0C:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("20ED0B:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("20ED0A:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("16EB40:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("1C622C:BSHeartland.esm"), QuestType),
+                    new FormLinkInformation(FormKey.Factory("1C622D:BSHeartland.esm"), QuestType),
                 ]),
             true
         }

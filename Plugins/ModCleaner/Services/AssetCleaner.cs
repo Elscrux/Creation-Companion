@@ -75,6 +75,7 @@ public sealed class AssetCleaner(
         IReadOnlyList<ModKey> dependencies,
         AssetLinkIdentifier assetLinkIdentifier,
         HashSet<ILinkIdentifier> included,
+        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         if (_selfRetainingAssetTypes.Contains(assetLinkIdentifier.AssetLink.Type)) {
             // Always retain behavior assets
