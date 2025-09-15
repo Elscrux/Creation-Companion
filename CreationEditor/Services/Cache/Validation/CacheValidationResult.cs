@@ -1,17 +1,17 @@
 ﻿namespace CreationEditor.Services.Cache.Validation;
 
 public struct CacheValidationResult<TContent> {
+    private readonly Action _updateCache;
+
+    private int _hasUpdatedCache;
+
     public bool CacheFullyInvalidated { get; }
     public IReadOnlyList<TContent> InvalidatedContent { get; }
-    /// <summary>
-    /// Receiver is responsible for calling this action to update the cache
-    /// </summary>
-    public Action UpdateCache { get; set; }
 
     private CacheValidationResult(bool cacheFullyInvalidated, IReadOnlyList<TContent> invalidatedContent, Action updateCache) {
         CacheFullyInvalidated = cacheFullyInvalidated;
         InvalidatedContent = invalidatedContent;
-        UpdateCache = updateCache;
+        _updateCache = updateCache;
     }
 
     public static CacheValidationResult<TContent> FullyInvalid(Action updateCache) {
@@ -25,4 +25,13 @@ public struct CacheValidationResult<TContent> {
     public static CacheValidationResult<TContent> Valid() {
         return new CacheValidationResult<TContent>(false, [], () => {});
     }
+
+    /// <summary>
+    /// Receiver is responsible for calling this action to update the cache
+    /// </summary>
+    public void UpdateCache() {
+        if (Interlocked.Exchange(ref _hasUpdatedCache, 1) == 0) return;
+
+        _updateCache();
+    } 
 }
