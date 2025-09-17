@@ -6,7 +6,6 @@ public sealed class SavePipeline : ISavePipeline {
     private readonly List<ISaveStep> _steps = [];
 
     public SavePipeline() {
-        AddStep(new IdenticalToMasterRemoveStep());
         AddStep(new DeletedNewRecordRemoveStep());
     }
 
