@@ -7,7 +7,7 @@ namespace CreationEditor.Services.Mutagen.Mod.Save;
 /// </summary>
 public sealed class DeletedNewRecordRemoveStep : ISaveStep {
     public void Execute(ILinkCache linkCache, IMod mod) {
-        foreach (var record in (mod as IModGetter).EnumerateMajorRecords().ToArray()) {
+        foreach (var record in (mod as IModGetter).EnumerateMajorRecords()) {
             if (record.IsDeleted && record.FormKey.ModKey == mod.ModKey) {
                 mod.Remove(record);
             }
