@@ -1,9 +1,10 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using CreationEditor.Services.Environment;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public sealed class RecordReferenceCacheController : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
+public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvironment) : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
     public void AddLink(RecordReferenceCache cache, IFormLinkIdentifier reference, IEnumerable<IFormLinkIdentifier> linksToAdd) {
         foreach (var link in linksToAdd) {
             var references = cache.Cache.GetOrAdd(link.FormKey);
@@ -31,7 +32,7 @@ public sealed class RecordReferenceCacheController : IReferenceCacheController<I
     }
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(IReadOnlyDictionary<IModGetter, RecordReferenceCache> caches, IFormLinkIdentifier link) {
-        var modKeys = caches.Keys.Select(x => x.ModKey).ToArray();
+        var modKeys = editorEnvironment.LinkCache.PriorityOrder.Select(x => x.ModKey).ToArray();
         var priorityOrderedCaches = caches
             .OrderBy(x => modKeys.IndexOf(x.Key.ModKey))
             .ToArray();
