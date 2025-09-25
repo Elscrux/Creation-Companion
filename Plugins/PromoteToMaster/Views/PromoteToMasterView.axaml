@@ -148,6 +148,9 @@
                                     <DataGridTextColumn Header="FormKey"
                                                         Binding="{Binding Record.FormKey}"
                                                         x:DataType="viewModels:RecordPromotionChange"/>
+                                    <DataGridTextColumn Header="Type"
+                                                        Binding="{Binding Record.Registration.Name}"
+                                                        x:DataType="viewModels:RecordPromotionChange"/>
                                     <DataGridTextColumn Header="Change"
                                                         Binding="{Binding ChangeType}"
                                                         x:DataType="viewModels:RecordPromotionChange"/>
