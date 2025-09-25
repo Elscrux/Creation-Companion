@@ -276,6 +276,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         Func<IFormLinkIdentifier, IEnumerable<IFormLinkIdentifier>> referenceGetter,
         Func<IMajorRecordGetter, string?> editorIdMapper,
         bool forceDelete = false) {
+        var uniqueRecords = records.DistinctBy(x => x.FormKey).ToArray();
 
         // Find free IDs in the injection target mod
         var range = (int) Math.Pow(16, 6);
@@ -288,7 +289,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         // Inject records into newRecordMod
         var remapData = new Dictionary<FormKey, FormKey>();
         var newRecords = new List<IMajorRecord>();
-        foreach (var record in records) {
+        foreach (var record in uniqueRecords) {
             // Select a random free ID for the new record
             var newId = freeIds.ElementAt(Random.Shared.Next(freeIds.Count));
             freeIds.Remove(newId);
@@ -310,7 +311,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         }
 
         // Remap references to use the new injected records
-        foreach (var record in records) {
+        foreach (var record in uniqueRecords) {
             var references = referenceGetter(record).ToArray();
 
             // Remap references to use the new injected records
