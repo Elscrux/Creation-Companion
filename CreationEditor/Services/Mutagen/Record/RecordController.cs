@@ -365,10 +365,10 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         if (forceDelete || !referenceGetter().Any()) {
             // No references available - we can delete this record
-            DeleteRecord(setter);
+            DeleteRecord(setter, mod);
         } else {
             // Otherwise mark record for deletion
-            RegisterUpdate(setter, () => setter.EditorID = "xDELETE" + setter.EditorID);
+            RegisterUpdate(setter, mod, () => setter.EditorID = "xDELETE" + setter.EditorID);
         }
 
         return true;
