@@ -1,30 +1,29 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Asset;
 using Mutagen.Bethesda.Assets;
-using nifly;
+using NiflySharp;
+using NiflySharp.Blocks;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
-public sealed class NifAddonNodeLinkParser(IAssetTypeService assetTypeService) : IFileParser<int> {
+public sealed class NifAddonNodeLinkParser(
+    IAssetTypeService assetTypeService,
+    ILogger logger) : IFileParser<uint> {
     public string Name => "Nif Addon Nodes";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<int> ParseFile(string filePath, IFileSystem fileSystem) {
-        var results = new HashSet<int>();
-
+    public IEnumerable<uint> ParseFile(string filePath, IFileSystem fileSystem) {
+        var results = new HashSet<uint>();
         if (!fileSystem.File.Exists(filePath)) return results;
 
-        using var nif = new NifFile();
-        nif.Load(filePath);
-
-        if (!nif.IsValid()) return results;
-
-        using var niHeader = nif.GetHeader();
-        using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-        for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
-            using var valueNode = blockCache.EditableBlockById<BSValueNode>(blockId);
-            if (valueNode is not null) {
-                results.Add(valueNode.value);
+        try {
+            using var fileStream = fileSystem.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var nifFile = new NifFile(fileStream);
+            foreach (var bsValueNode in nifFile.Blocks.OfType<BSValueNode>()) {
+                results.Add(bsValueNode.Value);
             }
+        } catch (Exception e) {
+            logger.Here().Error(e, "Failed to parse nif file {FilePath} for addon nodes", filePath);
         }
 
         return results;
