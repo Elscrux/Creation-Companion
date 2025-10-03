@@ -51,7 +51,7 @@ public sealed partial class WaterMapVM : ViewModel {
         LeftCell = -64;
         RightCell = 64;
         ReflectivityAmount = 0.3f;
-        ReflectionMagnitude = 0.3f;
+        ReflectionMagnitude = 0.4f;
         LinkCacheProvider = linkCacheProvider;
 
         // A worldspace must be selected
