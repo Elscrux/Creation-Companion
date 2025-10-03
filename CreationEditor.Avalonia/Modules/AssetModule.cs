@@ -17,5 +17,8 @@ public sealed class AssetModule : Module {
 
         builder.RegisterType<NifModificationService>()
             .As<IModelModificationService>();
+
+        builder.RegisterType<NifService>()
+            .As<IModelService>();
     }
 }

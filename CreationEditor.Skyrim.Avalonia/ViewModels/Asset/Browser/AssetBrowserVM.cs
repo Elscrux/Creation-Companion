@@ -107,6 +107,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IAssetTypeService assetTypeService,
         IAssetIconService assetIconService,
         ILinkCacheProvider linkCacheProvider,
+        IModelService modelService,
         MainWindow mainWindow,
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter) {
@@ -257,14 +258,33 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (assetLink is null) return null;
 
                         var missingLinks = GetMissingLinks(fileLink, assetLink).ToArray();
-                        if (missingLinks.Length == 0) return null;
+                        var stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
 
-                        return new SymbolIcon {
-                            Symbol = Symbol.ImportantFilled,
-                            Foreground = StandardBrushes.InvalidBrush,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
-                        };
+                        if (missingLinks.Length > 0) {
+                            stackPanel.Children.Add(
+                                new SymbolIcon {
+                                    Symbol = Symbol.ImportantFilled,
+                                    Foreground = StandardBrushes.InvalidBrush,
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
+                                }
+                            );
+                        }
+
+                        if (assetLink.Type == SkyrimModelAssetType.Instance) {
+                            if (modelService.HasCollision(fileLink)) {
+                                // For models, we show the missing links in a tooltip
+                                stackPanel.Children.Add(
+                                    new FontIcon {
+                                        Glyph = "⟟",
+                                        VerticalAlignment = VerticalAlignment.Center,
+                                        [ToolTip.TipProperty] = "Has Collision",
+                                    }
+                                );
+                            }
+                        }
+
+                        return stackPanel;
                     })),
             },
         };
