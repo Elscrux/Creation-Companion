@@ -31,12 +31,12 @@ public sealed class ReferenceService : IReferenceService {
     private readonly ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceController;
     private readonly ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceController;
     private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord> _nifSoundReferenceController;
-    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<uint>, uint, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
 
     private readonly ReferenceSubscriptionManager<IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<string, DataRelativePath, IReferencedRecord> _assetRecordReferenceSubscriptionManager;
-    private readonly ReferenceSubscriptionManager<int, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceSubscriptionManager;
+    private readonly ReferenceSubscriptionManager<uint, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset> _recordAssetReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, DataRelativePath, IReferencedAsset> _assetReferenceSubscriptionManager;
 
@@ -54,7 +54,7 @@ public sealed class ReferenceService : IReferenceService {
         ModReferenceUpdateTrigger<RecordReferenceCache, IFormLinkIdentifier, IReferencedRecord> modReferenceUpdateTrigger,
         ModReferenceUpdateTrigger<AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IReferencedAsset> modAssetReferenceUpdateTrigger,
         DataSourceReferenceUpdateTrigger<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, IReferencedAsset> dataSourceReferenceUpdateTrigger,
-        DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<int>, int, IReferencedRecord> addonNodeReferenceUpdateTrigger,
+        DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<uint>, uint, IReferencedRecord> addonNodeReferenceUpdateTrigger,
         DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<string>, string, IReferencedRecord> soundRecordReferenceUpdateTrigger,
         // Cache Controllers
         RecordReferenceCacheController recordReferenceCacheController,
@@ -62,12 +62,12 @@ public sealed class ReferenceService : IReferenceService {
         AssetReferenceCacheController<IDataSource, DataRelativePath> assetAssetReferenceCacheController,
         DictionaryReferenceCacheController<IModGetter, string, IFormLinkIdentifier> stringModDictionaryReferenceCacheController,
         AssetDictionaryReferenceCacheController<string> stringAssetDictionaryReferenceCacheController,
-        AssetDictionaryReferenceCacheController<int> intAssetDictionaryReferenceCacheController,
+        AssetDictionaryReferenceCacheController<uint> intAssetDictionaryReferenceCacheController,
         // Query Configs
         RecordReferenceQueryConfig recordReferenceQueryConfig,
         RecordGlobalVariableReferenceQueryConfig recordGlobalVariableReferenceQueryConfig,
         RecordAssetReferenceQueryConfig recordAssetReferenceQueryConfig,
-        DictionaryAssetReferenceQueryConfig<NifAddonNodeLinkParser, AssetDictionaryReferenceCache<int>, int> nifAddonNodeReferenceQueryConfig,
+        DictionaryAssetReferenceQueryConfig<NifAddonNodeLinkParser, AssetDictionaryReferenceCache<uint>, uint> nifAddonNodeReferenceQueryConfig,
         DictionaryAssetReferenceQueryConfig<NifSoundLinkParser, AssetDictionaryReferenceCache<string>, string> nifSoundReferenceQueryConfig,
         AssetReferenceCacheQueryConfig<NifTextureParser> nifTextureReferenceQueryConfig,
         AssetReferenceCacheQueryConfig<ScriptFileParser> scriptAssetReferenceQueryConfig) {
@@ -94,11 +94,11 @@ public sealed class ReferenceService : IReferenceService {
             (record, newData) => record.AssetReferences.AddRange(newData),
             record => record.Record.EditorID ?? string.Empty);
 
-        _nifAddonNodeReferenceSubscriptionManager = new ReferenceSubscriptionManager<int, DataRelativePath, IReferencedRecord>(
+        _nifAddonNodeReferenceSubscriptionManager = new ReferenceSubscriptionManager<uint, DataRelativePath, IReferencedRecord>(
             record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
             (record, change) => record.AssetReferences.Apply(change),
             (record, newData) => record.AssetReferences.AddRange(newData),
-            record => mutagenCommonAspectsProvider.GetAddonNodeIndex(record.Record) ?? -1);
+            record => mutagenCommonAspectsProvider.GetAddonNodeIndex(record.Record) ?? 0);
 
         _recordAssetReferenceSubscriptionManager = new ReferenceSubscriptionManager<IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset>(
             asset => !dataSourceService.FileExists(asset.AssetLink.DataRelativePath),
@@ -147,7 +147,7 @@ public sealed class ReferenceService : IReferenceService {
                 _recordAssetReferenceSubscriptionManager);
 
         _nifAddonNodeReferenceController =
-            new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<int>, int, DataRelativePath, IReferencedRecord>(
+            new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<uint>, uint, DataRelativePath, IReferencedRecord>(
                 notificationService,
                 addonNodeReferenceUpdateTrigger,
                 intAssetDictionaryReferenceCacheController,

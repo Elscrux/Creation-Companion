@@ -48,7 +48,7 @@ public sealed class ReferenceModule : Module {
         builder.RegisterGeneric(typeof(AssetReferenceCacheSerializationConfigString<>))
             .AsImplementedInterfaces();
 
-        builder.RegisterGeneric(typeof(AssetReferenceCacheSerializationConfigInt<>))
+        builder.RegisterGeneric(typeof(AssetReferenceCacheSerializationConfigUInt32<>))
             .AsImplementedInterfaces();
 
         builder.RegisterType<ReferenceCacheSerializationConfigLink>()

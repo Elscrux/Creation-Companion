@@ -13,7 +13,7 @@ public interface IMutagenCommonAspectsProvider {
     System.Type QuestType { get; }
     System.Type GlobalVariableType { get; }
 
-    int? GetAddonNodeIndex(IMajorRecordGetter record);
+    uint? GetAddonNodeIndex(IMajorRecordGetter record);
     ITranslatedStringGetter? GetBookText(IMajorRecordGetter record);
     ITranslatedStringGetter? GetMessageTitle(IMajorRecordGetter record);
     ITranslatedStringGetter? GetMessageDescription(IMajorRecordGetter record);

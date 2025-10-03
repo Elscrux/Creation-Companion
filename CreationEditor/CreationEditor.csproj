@@ -215,7 +215,7 @@
         <Compile Update="Services\Mutagen\References\ModReferenceUpdateTrigger.cs">
           <DependentUpon>IReferenceUpdateTrigger.cs</DependentUpon>
         </Compile>
-        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfigInt.cs">
+        <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfigUInt32.cs">
           <DependentUpon>IReferenceCacheSerializationConfigLink.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Mutagen\References\Cache\Serialization\AssetReferenceCacheSerializationConfigString.cs">

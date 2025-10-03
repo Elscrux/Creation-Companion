@@ -15,9 +15,9 @@ public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider 
     public Type QuestType { get; } = typeof(IQuestGetter);
     public Type GlobalVariableType { get; } = typeof(IGlobalGetter);
 
-    public int? GetAddonNodeIndex(IMajorRecordGetter record) {
+    public uint? GetAddonNodeIndex(IMajorRecordGetter record) {
         if (record is IAddonNodeGetter addonNode) {
-            return addonNode.NodeIndex;
+            return (uint?) addonNode.NodeIndex;
         }
 
         return null;
