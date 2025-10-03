@@ -17,7 +17,7 @@ public class ImageLoader(
         }
 
         // Get stream
-        using var stream = link.ReadFile();
+        using var stream = link.ReadFileStream();
         if (stream is null) return null;
 
         // Create bitmap

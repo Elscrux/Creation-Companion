@@ -25,7 +25,7 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
 
     public bool Exists() => FileSystem.File.Exists(FullPath);
 
-    public Stream? ReadFile() {
+    public Stream? ReadFileStream() {
         if (!FileSystem.File.Exists(FullPath)) return null;
 
         return FileSystem.File.Open(FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
