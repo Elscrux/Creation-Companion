@@ -95,8 +95,8 @@ public sealed partial class WaterMapVM : ViewModel {
         _generator.Generate(
             WorldspaceFormKey,
             waterPresets,
-            new P2Int(-65, -70),
-            new P2Int(96, 64),
+            new P2Int(LeftCell, BottomCell),
+            new P2Int(RightCell, TopCell),
             ReflectivityAmount,
             ReflectionMagnitude,
             ShallowWaterMap.FilePath!,
