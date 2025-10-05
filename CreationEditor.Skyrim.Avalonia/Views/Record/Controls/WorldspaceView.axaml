@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:converters="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:zoomBorder="clr-namespace:CreationEditor.Avalonia.Behavior.ZoomBorder;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels1="clr-namespace:CreationEditor.Skyrim.Avalonia.ViewModels.Record.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.Controls.WorldspaceView"
+             x:DataType="viewModels1:WorldspaceViewVM"
+             x:Name="View">
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="500"
+                              MinWidth="450"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto,5,*,5"
+              VerticalAlignment="Top"
+              MinHeight="200">
+            <Border
+                Grid.Column="0"
+                Grid.Row="1" Grid.RowSpan="3"
+                Margin="5"
+                BorderThickness="5"
+                BorderBrush="{DynamicResource SystemAccentColor}"
+                CornerRadius="5">
+                <Grid>
+                    <ZoomBorder
+                        Stretch="None" ZoomSpeed="1.2"
+                        ClipToBounds="True" Focusable="True"
+                        VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <Interaction.Behaviors>
+                            <zoomBorder:LimitPanAndZoomToSize/>
+                        </Interaction.Behaviors>
+
+                        <Grid>
+                            <Grid.Resources>
+                                <converters:ReturnParameterIfTrueConverter
+                                    x:Key="IfTrueConverter"
+                                    x:TypeArguments="system:Double"
+                                    DefaultValue="5"/>
+                            </Grid.Resources>
+
+                            <Grid.Effect>
+                                <BlurEffect
+                                    Radius="{Binding !IsBusy,
+                                                 Converter={StaticResource IfTrueConverter},
+                                                 ConverterParameter=0}"/>
+                            </Grid.Effect>
+
+                            <Image x:Name="Drawings"
+                                   Source="{Binding DrawingsImage}"/>
+
+                            <avaloniaProgressRing:ProgressRing
+                                IsActive="{Binding IsBusy}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Width="200" Height="200"/>
+                        </Grid>
+
+                    </ZoomBorder>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Column="1"/>
+
+        <Grid Grid.Column="2"
+              RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
+            <controls:CommandBar
+                Grid.Row="0"
+                DefaultLabelPosition="Right">
+                <controls:CommandBar.PrimaryCommands>
+                    <controls:CommandBarButton
+                        IconSource="Share"
+                        Label="Export"
+                        IsCompact="False"/>
+
+                    <controls:CommandBarSeparator/>
+
+                    <controls:CommandBarButton
+                        IconSource="Save"
+                        Label="Save"
+                        IsCompact="False">
+                        <controls:CommandBarButton.Flyout>
+                            <Flyout>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox x:Name="MapName" Watermark="Enter a name"/>
+                                </StackPanel>
+                            </Flyout>
+                        </controls:CommandBarButton.Flyout>
+                    </controls:CommandBarButton>
+                </controls:CommandBar.PrimaryCommands>
+            </controls:CommandBar>
+        </Grid>
+    </Grid>
+</UserControl>
