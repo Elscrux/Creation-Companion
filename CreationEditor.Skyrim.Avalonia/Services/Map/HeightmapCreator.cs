@@ -1,8 +1,9 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using Size = Avalonia.Size;
-namespace MapperPlugin.Services;
+namespace CreationEditor.Skyrim.Avalonia.Services.Map;
 
 public sealed class HeightmapCreator {
     public readonly record struct HeightEntry(P2Int Position, float Height);
@@ -10,6 +11,11 @@ public sealed class HeightmapCreator {
     private readonly WorldMapCreator _creator = new(GetHeightColors);
 
     private static IEnumerable<HeightEntry> GetHeightValues(IWorldspaceGetter worldspace) {
+        var heightValues = new List<HeightEntry>(
+            (int) (worldspace.ObjectBoundsMax.Y - worldspace.ObjectBoundsMin.Y
+              * (int) (worldspace.ObjectBoundsMax.X - worldspace.ObjectBoundsMin.X)
+              * WorldMapCreator.LandscapePoints * WorldMapCreator.LandscapePoints));
+
         foreach (var cell in worldspace.EnumerateMajorRecords<ICellGetter>()) {
             if (cell.Landscape is null) continue;
             if (cell.Grid is null) continue;
@@ -18,9 +24,11 @@ public sealed class HeightmapCreator {
             var cellPosition = cell.Grid.Point * WorldMapCreator.LandscapePoints;
             foreach (var height in cell.Landscape.VertexHeightMap.HeightMap) {
                 var heightValue = cell.Landscape.VertexHeightMap.Offset + height.Value * 8;
-                yield return new HeightEntry(cellPosition + height.Key, heightValue);
+                heightValues.Add(new HeightEntry(cellPosition + height.Key, heightValue));
             }
         }
+
+        return heightValues;
     }
 
     private static IEnumerable<ColorEntry> GetHeightColors(IWorldspaceGetter worldspace) {
@@ -37,8 +45,9 @@ public sealed class HeightmapCreator {
         var range = maxHeight - minHeight;
 
         foreach (var (position, height) in heightValues) {
-            var color = new P3Float(1, 1, 1) * ((height - minHeight) / range);
-            yield return new ColorEntry(position, new P3UInt8((byte) (color.X * 255), (byte) (color.Y * 255), (byte) (color.Z * 255)));
+            var color = ((height - minHeight) / range);
+            var value = (byte) (color * 255);
+            yield return new ColorEntry(position, Color.FromRgb(value, value, value));
         }
     }
 

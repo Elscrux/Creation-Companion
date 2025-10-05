@@ -14,6 +14,7 @@ using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Query.From;
 using CreationEditor.Services.State;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;
+using CreationEditor.Skyrim.Avalonia.Services.Map;
 using DynamicData.Binding;
 using MapperPlugin.Model;
 using MapperPlugin.Services;
@@ -40,6 +41,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
 
     [Reactive] public partial FormKey WorldspaceFormKey { get; set; }
 
+    [Reactive] public partial bool ShowRegions { get; set; }
     [Reactive] public partial bool ShowVertexColor { get; set; }
     [Reactive] public partial bool ShowHeightmap { get; set; }
 
@@ -51,6 +53,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     [Reactive] public partial int MarkingSize { get; set; }
 
     [Reactive] public partial DrawingImage? DrawingsImage { get; set; }
+    [Reactive] public partial DrawingImage? RegionsImage { get; set; }
     [Reactive] public partial IImage? VertexColorImage { get; set; }
     [Reactive] public partial IImage? HeightmapImage { get; set; }
     [Reactive] public partial IImage? ImageSource { get; set; }
@@ -69,6 +72,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         Func<QueryVM> queryVMFactory,
         IStateRepositoryFactory<MapperMemento, MapperMemento, NamedGuid> stateRepositoryFactory,
         ILogger logger,
+        RegionMapCreator regionMapCreator,
         IGameReleaseContext gameReleaseContext,
         IReferenceService referenceService,
         IMutagenTypeProvider mutagenTypeProvider,
@@ -158,6 +162,42 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
                 worldspace))
             .ObserveOnGui()
             .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))
+            .Do(_ => BusyTasks--)
+            .Subscribe()
+            .DisposeWith(this);
+
+        this.WhenAnyValue(
+                x => x.ShowRegions,
+                x => x.WorldspaceFormKey,
+                (showRegions, worldspace) => (Show: showRegions, WorldspaceFormKey: worldspace))
+            .CombineLatest(gridUpdates, (x, grid) => (x.Show, x.WorldspaceFormKey, Grid: grid))
+            .ObserveOnGui()
+            .Do(_ => BusyTasks++)
+            .ObserveOnTaskpool()
+            .Select(x => {
+                if (!x.Show || !LinkCacheProvider.LinkCache.TryResolve<IWorldspaceGetter>(x.WorldspaceFormKey, out var worldspace)) {
+                    return Task.FromCanceled<DrawingGroup>(CancellationToken.None);
+                }
+
+                var cellSize = ImageSource!.Size.Width / (RightCell - LeftCell);
+                return regionMapCreator.GetRegionMap(worldspace, LeftCell, TopCell, RightCell, BottomCell, (int) cellSize);
+            })
+            .ObserveOnGui()
+            .Do(async void (newImage) => {
+                try {
+                    if (newImage.IsCanceled) return;
+
+                    try {
+                        var drawingGroup = await newImage;
+                        drawingGroup.Opacity = 0.5;
+                        RegionsImage = new DrawingImage(drawingGroup);
+                    } catch (Exception e) {
+                        logger.Here().Error(e, "Failed to create region map: {Exception}", e.Message);
+                    }
+                } catch (Exception e) {
+                    logger.Here().Error(e, "Failed to create region map: {Exception}", e.Message);
+                }
+            })
             .Do(_ => BusyTasks--)
             .Subscribe()
             .DisposeWith(this);

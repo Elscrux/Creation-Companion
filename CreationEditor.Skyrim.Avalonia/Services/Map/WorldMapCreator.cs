@@ -6,7 +6,7 @@ using Noggog;
 using SkiaSharp;
 using BitmapWithTopLeftCell = (SkiaSharp.SKBitmap Bitmap, Noggog.P2Int TopLeftCell);
 using Size = Avalonia.Size;
-namespace MapperPlugin.Services;
+namespace CreationEditor.Skyrim.Avalonia.Services.Map;
 
 public sealed class WorldMapCreator(Func<IWorldspaceGetter, IEnumerable<ColorEntry>> getColorEntries) {
     public const int LandscapePoints = 33;
@@ -31,7 +31,7 @@ public sealed class WorldMapCreator(Func<IWorldspaceGetter, IEnumerable<ColorEnt
         var bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
 
         foreach (var (position, color) in vertexColor) {
-            bitmap.SetPixel(position.X - minX, maxY - position.Y, new SKColor(color.X, color.Y, color.Z));
+            bitmap.SetPixel(position.X - minX, maxY - position.Y, new SKColor(color.R, color.G, color.B));
         }
 
         return (bitmap, new P2Int(minX / LandscapePoints, maxY / LandscapePoints));

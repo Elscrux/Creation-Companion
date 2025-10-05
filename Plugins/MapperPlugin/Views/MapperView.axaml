@@ -141,6 +141,9 @@
                                 <Image x:Name="Heightmap"
                                        Source="{Binding HeightmapImage}"/>
 
+                                <Image x:Name="Regions"
+                                       Source="{Binding RegionsImage}"/>
+
                                 <Image x:Name="VertexColors"
                                        Source="{Binding VertexColorImage}"/>
 
@@ -162,7 +165,7 @@
         <GridSplitter Grid.Column="1"/>
 
         <Grid Grid.Column="2"
-              RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
+              RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,Auto,5,*">
             <controls:CommandBar
                 Grid.Row="0"
                 DefaultLabelPosition="Right">
@@ -226,19 +229,25 @@
             </controls:CommandBar>
 
             <CheckBox
-                Grid.Row="2"
-                Margin="5,0"
-                IsChecked="{Binding ShowVertexColor}"
-                Content="Show Vertex Color"/>
-
-            <CheckBox
-                Grid.Row="4"
+                Grid.Row="6"
                 Margin="5,0"
                 IsChecked="{Binding ShowHeightmap}"
                 Content="Show Heightmap"/>
 
+            <CheckBox
+                Grid.Row="2"
+                Margin="5,0"
+                IsChecked="{Binding ShowRegions}"
+                Content="Show Regions"/>
+
+            <CheckBox
+                Grid.Row="4"
+                Margin="5,0"
+                IsChecked="{Binding ShowVertexColor}"
+                Content="Show Vertex Color"/>
+
             <Grid
-                Grid.Row="6"
+                Grid.Row="8"
                 ColumnDefinitions="Auto,5,Auto"
                 Margin="5"
                 VerticalAlignment="Top">
@@ -257,7 +266,7 @@
             </Grid>
 
             <DataGrid
-                Grid.Row="8"
+                Grid.Row="10"
                 ItemsSource="{Binding Mappings}"
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="True"

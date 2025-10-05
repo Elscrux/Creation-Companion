@@ -17,6 +17,7 @@ using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
 using CreationEditor.Skyrim.Avalonia.Services.Avalonia;
+using CreationEditor.Skyrim.Avalonia.Services.Map;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
@@ -79,6 +80,9 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
         // Service
         builder.RegisterType<BSERuntimeService>()
             .As<IViewportRuntimeService>();
+
+        builder.RegisterType<RegionMapCreator>()
+            .AsSelf();
 
         // View Model
         builder.RegisterType<InteriorCellsVM>()

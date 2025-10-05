@@ -1,10 +1,8 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 using Size = Avalonia.Size;
-namespace MapperPlugin.Services;
-
-public readonly record struct ColorEntry(P2Int Position, P3UInt8 Color);
+namespace CreationEditor.Skyrim.Avalonia.Services.Map;
 
 public sealed class VertexColorMapCreator {
     private readonly WorldMapCreator _creator = new(GetVertexColor);
@@ -17,7 +15,9 @@ public sealed class VertexColorMapCreator {
 
             var cellPosition = cell.Grid.Point * WorldMapCreator.LandscapePoints;
             foreach (var vertexColor in cell.Landscape.VertexColors) {
-                yield return new ColorEntry(cellPosition + vertexColor.Key, vertexColor.Value);
+                if (vertexColor.Value is { X: 255, Y: 255, Z: 255 }) continue;
+
+                yield return new ColorEntry(cellPosition + vertexColor.Key, Color.FromRgb(vertexColor.Value.X, vertexColor.Value.Y, vertexColor.Value.Z));
             }
         }
     }

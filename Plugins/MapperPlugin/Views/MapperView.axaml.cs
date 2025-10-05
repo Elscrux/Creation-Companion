@@ -25,24 +25,28 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
     public async Task ExportImage() {
         if (Map?.Source is null) return;
 
-        var drawing = Drawings?.Source is DrawingImage dImage ? dImage.Drawing : null;
         var heightmap = Heightmap?.Source;
+        var regions = Regions.Source is DrawingImage rImage ? rImage.Drawing : null;
         var vertexColor = VertexColors?.Source;
+        var drawing = Drawings?.Source is DrawingImage dImage ? dImage.Drawing : null;
 
         var topLevel = TopLevel.GetTopLevel(this);
         if (topLevel is null) return;
 
         var includeMap = true;
-        var includeMappings = drawing is not null;
         var includeHeightmap = heightmap is not null;
+        var includeRegions = regions is not null;
         var includeVertexColor = vertexColor is not null;
+        var includeMappings = drawing is not null;
 
         var mapImage = new ReplaySubject<IImage?>();
         mapImage.OnNext(Map.Source);
-        var vertexColorsImage = new ReplaySubject<IImage?>();
-        vertexColorsImage.OnNext(vertexColor);
         var heightmapImage = new ReplaySubject<IImage?>();
         heightmapImage.OnNext(heightmap);
+        var regionsImage = new ReplaySubject<IImage?>();
+        regionsImage.OnNext(Regions?.Source);
+        var vertexColorsImage = new ReplaySubject<IImage?>();
+        vertexColorsImage.OnNext(vertexColor);
         var drawingsImage = new ReplaySubject<IImage?>();
         drawingsImage.OnNext(Drawings?.Source);
 
@@ -58,8 +62,9 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 Width = Map.Source.Size.Width / Map.Source.Size.Height * 450,
                                 Children = {
                                     new Image { [!Image.SourceProperty] = mapImage.ToBinding() },
-                                    new Image { [!Image.SourceProperty] = vertexColorsImage.ToBinding() },
                                     new Image { [!Image.SourceProperty] = heightmapImage.ToBinding() },
+                                    new Image { [!Image.SourceProperty] = regionsImage.ToBinding() },
+                                    new Image { [!Image.SourceProperty] = vertexColorsImage.ToBinding() },
                                     new Image { [!Image.SourceProperty] = drawingsImage.ToBinding() },
                                 }
                             },
@@ -72,15 +77,6 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 IsChecked = includeMap,
                             },
                             new CheckBox {
-                                Content = "Include Mappings",
-                                Command = ReactiveCommand.Create(() => {
-                                    includeMappings = !includeMappings;
-                                    drawingsImage.OnNext(includeMappings ? Drawings?.Source : null);
-                                }),
-                                IsChecked = includeMappings,
-                                IsEnabled = includeMappings,
-                            },
-                            new CheckBox {
                                 Content = "Include Heightmap",
                                 Command = ReactiveCommand.Create(() => {
                                     includeHeightmap = !includeHeightmap;
@@ -90,6 +86,15 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 IsEnabled = includeHeightmap,
                             },
                             new CheckBox {
+                                Content = "Include Regions",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeRegions = !includeRegions;
+                                    regionsImage.OnNext(includeRegions ? Regions?.Source : null);
+                                }),
+                                IsChecked = includeRegions,
+                                IsEnabled = includeRegions,
+                            },
+                            new CheckBox {
                                 Content = "Include Vertex Color",
                                 Command = ReactiveCommand.Create(() => {
                                     includeVertexColor = !includeVertexColor;
@@ -97,6 +102,15 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
                                 }),
                                 IsChecked = includeVertexColor,
                                 IsEnabled = includeVertexColor,
+                            },
+                            new CheckBox {
+                                Content = "Include Mappings",
+                                Command = ReactiveCommand.Create(() => {
+                                    includeMappings = !includeMappings;
+                                    drawingsImage.OnNext(includeMappings ? Drawings?.Source : null);
+                                }),
+                                IsChecked = includeMappings,
+                                IsEnabled = includeMappings,
                             },
                         }
                     }
@@ -133,6 +147,7 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
 
         if (includeMap) Map.Source.Draw(drawingContext, bounds, bounds);
         if (includeHeightmap) heightmap?.Draw(drawingContext, bounds, bounds);
+        if (includeRegions) regions?.Draw(drawingContext);
         if (includeVertexColor) vertexColor?.Draw(drawingContext, bounds, bounds);
         if (includeMappings) drawing?.Draw(drawingContext);
 
