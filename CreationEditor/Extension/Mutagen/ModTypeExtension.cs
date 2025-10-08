@@ -2,9 +2,9 @@
 namespace CreationEditor;
 
 public static class ModTypeExtension {
-    private const string MasterFileExtension = ".esm";
-    private const string PluginFileExtension = ".esp";
-    private const string LightPluginFileExtension = ".esl";
+    public const string MasterFileExtension = ".esm";
+    public const string PluginFileExtension = ".esp";
+    public const string LightPluginFileExtension = ".esl";
 
     public static string ToFileExtension(this ModType modType) => modType switch {
         ModType.Master => MasterFileExtension,

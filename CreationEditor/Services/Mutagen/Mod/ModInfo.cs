@@ -1,5 +1,5 @@
 ﻿using Mutagen.Bethesda.Plugins;
-namespace CreationEditor.Avalonia.Models.Mod;
+namespace CreationEditor.Services.Mutagen.Mod;
 
 public sealed record ModInfo(
     ModKey ModKey,

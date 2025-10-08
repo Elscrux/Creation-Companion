@@ -11,14 +11,13 @@ using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using DynamicData;
 using DynamicData.Binding;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Binary.Parameters;
-using Mutagen.Bethesda.Plugins.Binary.Streams;
 using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using ReactiveUI;
@@ -41,6 +40,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     private readonly IRecordEditorController _recordEditorController;
     private readonly IModSaveService _modSaveService;
     private readonly IDataSourceService _dataSourceService;
+    public IModInfoProvider ModInfoProvider { get; }
     public IModGetterVM SelectedModDetails { get; init; }
     public ModCreationVM ModCreationVM { get; }
     public bool MissingPluginsFile { get; }
@@ -73,6 +73,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         IDataSourceService dataSourceService,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
+        IModInfoProvider modInfoProvider,
         IModGetterVM modGetterVM,
         ModCreationVM modCreationVM,
         ILoadOrderListingsProvider listingsProvider,
@@ -82,6 +83,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         _recordEditorController = recordEditorController;
         _modSaveService = modSaveService;
         _dataSourceService = dataSourceService;
+        ModInfoProvider = modInfoProvider;
         SelectedModDetails = modGetterVM;
         ModCreationVM = modCreationVM;
         PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease);
@@ -99,18 +101,18 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         var listedModInfos = listedMods.CombineLatest(dataSourceMods,
                 (listed, dataSource) => listed.Concat(dataSource).DistinctBy(x => x.Name)
             )
-            .Select(x => x.Select(ConvertToModInfo).WhereNotNull().ToArray());
+            .Select(x => x.Select(ModInfoProvider.GetModInfo).WhereNotNull().ToArray());
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
-            .Select(x => x.ListedOrder.Select(modGetterVM.GetModInfo).WhereNotNull())
+            .Select(x => x.ListedOrder.Select(ModInfoProvider.GetModInfo).WhereNotNull())
             .StartWith(Array.Empty<ModInfo>());
 
         _mods = listedModInfos
             .CombineLatest(loadOrderModInfos, (listed, loadOrder) => (Listed: listed, LoadOrder: loadOrder.ToList()))
             .Select(x => {
                 var mods = x.Listed.Concat(x.LoadOrder).DistinctBy(info => info.ModKey).ToList();
-                var masterInfos = GetMasterInfos(mods);
+                var masterInfos = modInfoProvider.GetMasterInfos(mods);
                 var activeModKey = _editorEnvironment.ActiveMod.ModKey;
                 return mods
                     .Select((modInfo, i) => {
@@ -211,55 +213,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
                 string.Empty,
                 false,
                 "*" + modType.ToFileExtension()));
-    }
-
-    private ModInfo? ConvertToModInfo(DataSourceFileLink fileLink) {
-        if (!fileLink.Exists()) return null;
-
-        var modKey = ModKey.FromFileName(fileLink.Name);
-        var binaryReadParameters = new BinaryReadParameters { FileSystem = fileLink.FileSystem };
-        var modPath = new ModPath(modKey, fileLink.FullPath);
-        var parsingMeta = ParsingMeta.Factory(binaryReadParameters, _editorEnvironment.GameEnvironment.GameRelease, modPath);
-        var stream = new MutagenBinaryReadStream(fileLink.FullPath, parsingMeta);
-        using var frame = new MutagenFrame(stream);
-        return SelectedModDetails.GetModInfo(modKey, frame);
-    }
-
-    /// <summary>
-    /// Build Dictionary _masterInfos with all masters of a single plugin recursively
-    /// </summary>
-    /// <param name="mods">List of all mods</param>
-    private static Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)> GetMasterInfos(IReadOnlyList<ModInfo> mods) {
-        var masterInfos = new Dictionary<ModKey, (HashSet<ModKey> Masters, bool Valid)>();
-        var modKeyIndices = mods
-            .Select((mod, i) => (mod.ModKey, i))
-            .ToDictionary(x => x.ModKey, x => x.i);
-
-        foreach (var mod in mods) {
-            var masters = new HashSet<ModKey>(mod.Masters);
-            var valid = true;
-
-            //Check that all masters are valid and compile list of all recursive masters
-            foreach (var master in mod.Masters) {
-                if (masterInfos.TryGetValue(master, out var masterInfo) && masterInfo.Valid) {
-                    masters.Add(masterInfo.Masters);
-                    continue;
-                }
-
-                valid = false;
-                break;
-            }
-
-            if (valid) {
-                masters = masters.OrderBy(key => modKeyIndices[key]).ToHashSet();
-            } else {
-                masters.Clear();
-            }
-
-            masterInfos.Add(mod.ModKey, (masters, valid));
-        }
-
-        return masterInfos;
     }
 
     public void RefreshListings() => _refreshListings.OnNext(Unit.Default);

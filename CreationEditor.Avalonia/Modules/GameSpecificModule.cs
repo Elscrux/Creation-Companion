@@ -84,7 +84,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
             .As<IMutagenCommonAspectsProvider>();
 
         Register(builder, ModInfoProvider)
-            .As<IModInfoProvider<IModGetter>>()
+            .As<IModInfoProvider>()
             .As<IModInfoProvider<TModGetter>>();
 
         Register(builder, RecordBrowserGroupProvider)

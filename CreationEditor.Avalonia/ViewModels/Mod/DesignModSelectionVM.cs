@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
+using CreationEditor.Services.Mutagen.Mod;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using ReactiveUI;

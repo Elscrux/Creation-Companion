@@ -27,7 +27,6 @@ using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.DataSource;
-using CreationEditor.Skyrim.Avalonia.ViewModels.Mod;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
@@ -36,6 +35,7 @@ using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Previe
 using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
+using SkyrimModGetterVM = CreationEditor.Avalonia.ViewModels.Mod.SkyrimModGetterVM;
 namespace CreationEditor.Skyrim.Avalonia.Modules;
 
 public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGetter> {
@@ -46,7 +46,7 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
     protected override IReg<IRecordBrowserGroupProvider> RecordBrowserGroupProvider => Register<SkyrimRecordBrowserGroupProvider>();
     protected override IReg<IRecordProviderFactory> RecordProviderFactory => Register<SkyrimRecordProviderFactory>();
     protected override IReg<IRecordEditorFactory> RecordEditorFactory => Register<SkyrimRecordEditorFactory>();
-    protected override IReg<IModGetterVM<ISkyrimModGetter>> ModGetterVM => Register<SkyrimModGetterVM>();
+    protected override IReg<IModGetterVM> ModGetterVM => Register<SkyrimModGetterVM>();
 
     protected override IReg<ICellBrowserFactory> CellBrowserFactory => Register<SkyrimCellBrowserFactory>();
     protected override IReg<IApplicationIconProvider> ApplicationIconProvider => Register<SkyrimApplicationIconProvider>();

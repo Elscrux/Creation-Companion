@@ -138,6 +138,9 @@
         <Compile Update="ViewModels\DataSource\SingleDataSourcePickerVM.cs">
           <DependentUpon>IDataSourcePickerVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="ViewModels\Mod\ModGetterVM.cs">
+          <DependentUpon>IModGetterVM.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
