@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim;
@@ -84,10 +85,69 @@ public static class CellExtension {
         if (cell.Flags.HasFlag(Cell.Flag.IsInteriorCell)) return null;
         if (!linkCache.TryResolveSimpleContext(cell, out var cellContext)) return null;
 
-        if (cellContext.Parent?.Parent?.Parent?.Record is IWorldspaceGetter worldspace) {
+        if (cellContext.TryGetParent<IWorldspaceGetter>(out var worldspace)) {
             return worldspace;
         }
 
         return null;
+    }
+
+    public static bool IsInteriorCell(this ICellGetter cell)
+    {
+        return (cell.Flags & Cell.Flag.IsInteriorCell) != 0;
+    }
+
+    public static bool IsExteriorCell(this ICellGetter cell)
+    {
+        return (cell.Flags & Cell.Flag.IsInteriorCell) == 0;
+    }
+
+    public static bool IsPublic(this ICellGetter cell)
+    {
+        return (cell.Flags & Cell.Flag.PublicArea) != 0;
+    }
+
+    /// <summary>
+    /// Finds all doors from a given interior cell to the next exterior cell.
+    /// Linked interior cells are traversed recursively until an exterior cell is found.
+    /// </summary>
+    /// <param name="cell">Interior cell to start from</param>
+    /// <param name="linkCache">Link cache to resolve cell links</param>
+    /// <returns>All doors leading to an exterior cell</returns>
+    public static IEnumerable<IModContext<IPlacedObjectGetter>> GetExteriorDoorsGoingIntoInteriorRecursively(this ICellGetter cell, ILinkCache linkCache)
+    {
+        HashSet<FormKey> visitedCells = [cell.FormKey];
+        var queue = new Queue<ICellGetter>();
+        queue.Enqueue(cell);
+
+        while (queue.Count > 0)
+        {
+            var currentCell = queue.Dequeue();
+
+            foreach (var placedObject in currentCell.GetAllPlaced(linkCache).OfType<IPlacedObjectGetter>())
+            {
+                // Has a teleport destination
+                if (placedObject.TeleportDestination is null || placedObject.TeleportDestination.Door.IsNull) continue;
+
+                // Teleport destination is a door
+                if (!linkCache.TryResolve<IDoorGetter>(placedObject.Base.FormKey, out _)) continue;
+
+                if (placedObject.TeleportDestination.Door.TryResolveSimpleContext(linkCache, out var destinationDoor)
+                 && destinationDoor.Parent?.Record is ICellGetter destinationCell)
+                {
+                    if (destinationCell.IsInteriorCell())
+                    {
+                        if (visitedCells.Add(destinationCell.FormKey))
+                        {
+                            queue.Enqueue(destinationCell);
+                        }
+                    }
+                    else
+                    {
+                        yield return destinationDoor;
+                    }
+                }
+            }
+        }
     }
 }
