@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Disposables;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using LeveledList.Model.Enchantments;
-using LeveledList.Model.List;
 using LeveledList.ViewModels;
 using ReactiveUI;
 
