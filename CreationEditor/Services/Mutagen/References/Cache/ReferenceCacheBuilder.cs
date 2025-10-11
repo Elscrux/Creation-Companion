@@ -1,4 +1,4 @@
-﻿using CreationEditor.Services.Cache.Validation;
+﻿ using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Query;
 using Serilog;
@@ -56,7 +56,7 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
                 updateValidationCache = serializationValidation.GetInvalidatedContent(source);
             }
 
-            logger.Here().Debug("Invalid cache for {Source}, parsing everything", sourceName);
+            logger.Here().Debug("Invalid {QueryName} cache for {Source}, parsing everything", query.Name, sourceName);
             var referenceCache = FullyParseCache();
 
             // In case of a validation cache, update it only after the cache has been fully parsed
@@ -82,7 +82,7 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
             if (serializationValidation is not null) return ParseValidatableCache();
 
             // No internal cache validation, just deserialize
-            logger.Here().Debug("Valid cache, no cache content validation needed for {Source}, deserializing cache", sourceName);
+            logger.Here().Debug("Valid {QueryName} cache, no cache content validation needed for {Source}, deserializing cache", query.Name, sourceName);
             return Task.Run(() => serialization.Deserialize(source, query));
         }
 
@@ -92,7 +92,7 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
 
             // If fully invalidated, parse from the ground up
             if (validationResult.CacheFullyInvalidated) {
-                logger.Here().Debug("Fully invalidated cache content for {Source}, parsing everything", sourceName);
+                logger.Here().Debug("Fully invalidated {QueryName} cache content for {Source}, parsing everything", query.Name, sourceName);
                 return FullyParseCache();
             }
 
@@ -107,7 +107,8 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
 
             // Otherwise, parse invalidated elements and merge with deserialized cache
             logger.Here().Debug(
-                "Partly invalidated cache content for {Source}, parsing invalidated elements and using {ValidatedContentCount} validated elements",
+                "Partly invalidated {QueryName} cache content for {Source}, parsing invalidated elements and using {ValidatedContentCount} validated elements",
+                query.Name,
                 sourceName,
                 validationResult.InvalidatedContent.Count);
             return await MergeCacheAndParsed(validationResult, deserializationTask);
