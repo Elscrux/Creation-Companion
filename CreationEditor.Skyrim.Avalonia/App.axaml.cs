@@ -20,17 +20,6 @@ using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public class App : Application {
-    public App() {
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnFirstChanceException;
-    }
-
-    private static void CurrentDomainOnFirstChanceException(object sender, UnhandledExceptionEventArgs e) {
-        var exception = (Exception) e.ExceptionObject;
-
-        using var log = new StreamWriter(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CrashLog.txt"), false);
-        log.WriteLine(exception);
-    }
-
     public override void Initialize() {
         this.EnableHotReload();
         AvaloniaXamlLoader.Load(this);
