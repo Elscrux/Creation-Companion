@@ -5,3 +5,9 @@ public interface ICommandLineEntryPoint {
 
     Task<int> Run(string[] args);
 }
+
+public interface IDataSourceArguments {
+    string ActiveDataSourcePath { get; }
+    IEnumerable<string> AdditionalDataSourcePaths { get; }
+    bool IncludeDataDirectoryDataSource { get; }
+}
