@@ -10,7 +10,7 @@ internal static class Program {
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) {
+    public static async Task Main(string[] args) {
         AppDomain.CurrentDomain.UnhandledException += LogCrashes;
 
         switch (args) {
@@ -26,7 +26,7 @@ internal static class Program {
 
                 // If found run the entry point and exit
                 if (entryPoint is not null) {
-                    entryPoint.Run(args);
+                    await entryPoint.Run(args);
 
                     Console.WriteLine("Done, press enter to exit");
                     Console.ReadLine();
