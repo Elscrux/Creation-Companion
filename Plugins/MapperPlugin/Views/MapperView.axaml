@@ -286,7 +286,9 @@
                     <DataGridTemplateColumn Header="Record">
                         <DataTemplate x:DataType="viewModels:MarkingMapping">
                             <StackPanel Orientation="Horizontal">
-                                <CheckBox IsChecked="{Binding UseQuery}"/>
+                                <ToggleButton
+                                    Content="Use Query"
+                                    IsChecked="{Binding UseQuery}"/>
 
                                 <record:FormKeyPicker
                                     IsVisible="{Binding !UseQuery}"
