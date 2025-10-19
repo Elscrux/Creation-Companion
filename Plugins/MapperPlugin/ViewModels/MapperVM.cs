@@ -176,7 +176,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .ObserveOnTaskpool()
             .Select(x => {
                 if (!x.Show || !LinkCacheProvider.LinkCache.TryResolve<IWorldspaceGetter>(x.WorldspaceFormKey, out var worldspace)) {
-                    return Task.FromCanceled<DrawingGroup>(CancellationToken.None);
+                    return Task.FromCanceled<DrawingGroup>(new CancellationToken(true));
                 }
 
                 var cellSize = ImageSource!.Size.Width / (RightCell - LeftCell);
