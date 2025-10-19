@@ -9,7 +9,8 @@
     <Style Selector="folder|TextFolderPicker">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid ColumnDefinitions="*,Auto,Auto"
+                <Grid ColumnDefinitions="Auto,Auto,Auto"
+                      MinWidth="100"
                       MaxHeight="27">
                     <Border Grid.Column="0"
                             x:Name="Border"
@@ -18,7 +19,7 @@
                             BorderBrush="{DynamicResource ButtonBorderBrush}"
                             CornerRadius="4,0,0,4"
                             VerticalAlignment="Center">
-                        <Grid MaxWidth="{Binding #Border.Bounds.Width}">
+                        <Grid>
                             <TextBlock
                                 IsVisible="{TemplateBinding FolderPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
                                 Text="{TemplateBinding Watermark}"

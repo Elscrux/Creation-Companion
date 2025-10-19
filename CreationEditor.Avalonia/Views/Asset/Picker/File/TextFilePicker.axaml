@@ -3,13 +3,16 @@
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File">
     <Design.PreviewWith>
-        <file:TextFilePicker/>
+        <StackPanel Height="100" Width="1000">
+            <file:TextFilePicker FilePath="some/file/path/which/is/very.interesting"/>
+        </StackPanel>
     </Design.PreviewWith>
 
     <Style Selector="file|TextFilePicker">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid ColumnDefinitions="*,Auto,Auto"
+                <Grid ColumnDefinitions="Auto,Auto,Auto"
+                      MinWidth="100"
                       MaxHeight="27">
                     <Border Grid.Column="0"
                             x:Name="Border"
@@ -18,7 +21,7 @@
                             BorderBrush="{DynamicResource ButtonBorderBrush}"
                             CornerRadius="4,0,0,4"
                             VerticalAlignment="Center">
-                        <Grid MaxWidth="{Binding #Border.Bounds.Width}">
+                        <Grid>
                             <TextBlock
                                 IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
                                 Text="{TemplateBinding Watermark}"
