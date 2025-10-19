@@ -92,9 +92,10 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
         // Mods listed in the plugins file
         var listedMods = _refreshListings
+            .ObserveOnTaskpool()
             .Select(_ => listingsProvider.Get()
-            .Select(loadOrderListing => _dataSourceService.GetFileLink(loadOrderListing.FileName))
-            .WhereNotNull());
+                .Select(loadOrderListing => _dataSourceService.GetFileLink(loadOrderListing.FileName))
+                .WhereNotNull());
 
         var dataSourceMods = _dataSourceService.DataSourcesChanged.Select(_ => GetModsFromDataSources());
 
