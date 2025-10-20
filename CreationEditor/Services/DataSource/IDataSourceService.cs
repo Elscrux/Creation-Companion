@@ -37,6 +37,11 @@ public interface IDataSourceService {
     IDataSource ActiveDataSource { get; }
 
     /// <summary>
+    /// Data source that represents the actual data directory of the game.
+    /// </summary>
+    FileSystemDataSource DataDirectoryDataSource { get; }
+
+    /// <summary>
     /// Ensures load order of data sources based on certain rules.
     /// </summary>
     FuncComparer<IDataSource> DataSourceComparer { get; }

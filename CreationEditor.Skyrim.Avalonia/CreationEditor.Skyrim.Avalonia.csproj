@@ -12,6 +12,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CsvHelper" />
+        <PackageReference Include="DocumentFormat.OpenXml" />
         <PackageReference Include="Mutagen.Bethesda.Autofac" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.SourceGenerators" />

@@ -27,6 +27,8 @@ public sealed class DataSourceService : IDataSourceService {
     private readonly IStateRepository<DataSourceMemento, DataSourceMemento, NamedGuid> _stateRepository;
     public IObservable<IReadOnlyList<IDataSource>> DataSourcesChanged => _dataSourcesChanged;
 
+    public FileSystemDataSource DataDirectoryDataSource { get; }
+
     public DataSourceService(
         IFileSystem fileSystem,
         IDataDirectoryProvider dataDirectoryProvider,
@@ -90,7 +92,7 @@ public sealed class DataSourceService : IDataSourceService {
 
         fileSystemDataSources.Insert(0, dataDirectoryDataSource);
 
-        ActiveDataSource = dataDirectoryDataSource;
+        ActiveDataSource = DataDirectoryDataSource = dataDirectoryDataSource;
 
         UpdateDataSources(archiveDataSources.Concat<IDataSource>(fileSystemDataSources).ToArray(), ActiveDataSource);
     }
