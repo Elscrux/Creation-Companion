@@ -123,7 +123,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
             return new ModListing<TModGetter>(mod, listing.Enabled, listing.GhostSuffix);
         }
 
-        if (!listing.ExistsOnDisk) {
+        if (!listing.ModExists) {
             _logger.Here().Error("Failed to load mod listing for {FileName} from any data source {DataSources}",
                 listing.FileName,
                 _dataSourceService.ListedOrder.Select(x => x.Name));
