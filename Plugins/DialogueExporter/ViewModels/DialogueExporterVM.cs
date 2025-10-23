@@ -13,6 +13,8 @@ using ReactiveUI.SourceGenerators;
 namespace DialogueExporter.ViewModels;
 
 public sealed partial class DialogueExporterVM : ViewModel {
+    public IReadOnlyList<string> VocoderOptions { get; } = ["hifi", "quickanddirty", "waveglow", "waveglowBIGq"];
+
     [Reactive] public partial string VoiceLineOutputFolder { get; set; } = string.Empty;
     [Reactive] public partial string VaSynthOutputFile { get; set; } = string.Empty;
     [Reactive] public partial string VoiceTypeMappingCsvFile { get; set; } = string.Empty;
@@ -55,6 +57,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
                 .CombineLatest(ExportModPickerVM.HasModSelected, (a, b) => a && b));
 
         var csvValid = this.WhenAnyValue(x => x.VoiceTypeMappingCsvFile).Select(csv => fileSystem.File.Exists(csv));
+        var vocoderValid = this.WhenAnyValue(x => x.Vocoder).Select(vocoder => !vocoder.IsNullOrEmpty());
 
         ExportVaSynth = ReactiveCommand.CreateRunInBackground(() => {
                 var selectedMod = editorEnvironment.ResolveMod(ExportModPickerVM.SelectedMod?.ModKey);
@@ -77,7 +80,8 @@ public sealed partial class DialogueExporterVM : ViewModel {
                 .CombineLatest(
                     ExportModPickerVM.HasModSelected,
                     csvValid,
+                    vocoderValid,
                     voiceTypeMappingCsvValid,
-                    (a, b, c, d) => a && b && c && d));
+                    (a, b, c, d, e) => a && b && c && d && e));
     }
 }
