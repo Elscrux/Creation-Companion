@@ -1,11 +1,12 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Skyrim;
-using DialogueExporter.Cli.Args;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Mutagen.Bethesda.Skyrim;
+using Serilog;
 using Alignment = DocumentFormat.OpenXml.Spreadsheet.Alignment;
 using Cell = DocumentFormat.OpenXml.Spreadsheet.Cell;
 using Fill = DocumentFormat.OpenXml.Spreadsheet.Fill;
@@ -16,8 +17,12 @@ using PatternFill = DocumentFormat.OpenXml.Spreadsheet.PatternFill;
 using TopBorder = DocumentFormat.OpenXml.Spreadsheet.TopBorder;
 namespace DialogueExporter.Services.VoiceSheets.Writer;
 
-public sealed class WriteXlsx(IEditorEnvironment editorEnvironment, IFileSystem fileSystem) {
+public sealed class WriteXlsx(
+    ILogger logger,
+    IEditorEnvironment editorEnvironment,
+    IFileSystem fileSystem) {
     public void Write(IEnumerable<ExportLine> lines, string outputDirectory) {
+        logger.Here().Verbose("Start writing voice sheets to {OutputDirectory}", outputDirectory);
         var linkCache = editorEnvironment.LinkCache;
 
         foreach (var voiceTypeGrouping in lines.GroupBy(l => l.VoiceType)) {
@@ -568,6 +573,8 @@ public sealed class WriteXlsx(IEditorEnvironment editorEnvironment, IFileSystem 
             // Save the changes
             workbookPart.Workbook.Save();
         }
+
+        logger.Here().Verbose("Finished writing voice sheets to {OutputDirectory}", outputDirectory);
     }
 
     private static Cell CreateCell(string text, uint? styleId = null) {

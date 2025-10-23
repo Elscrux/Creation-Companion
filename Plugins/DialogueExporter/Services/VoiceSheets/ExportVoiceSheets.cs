@@ -20,6 +20,8 @@ public class ExportVoiceSheets(
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
     public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool includeAlreadyVoiced) {
+        logger.Here().Verbose("Start finding voice lines for mod {Mod}", currentMod.ModKey);
+
         var linkCache = editorEnvironment.LinkCache;
 
         var assetLinkCache = linkCache.CreateImmutableAssetLinkCache();
@@ -90,6 +92,8 @@ public class ExportVoiceSheets(
                 }
             }
         }
+
+        logger.Here().Verbose("Finished finding voice lines for mod {Mod}", currentMod.ModKey);
 
         (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction) GetContext(
             IQuestGetter quest,

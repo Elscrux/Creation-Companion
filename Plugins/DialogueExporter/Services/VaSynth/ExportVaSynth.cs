@@ -17,6 +17,12 @@ public sealed class ExportVaSynth(
     IDataSourceService dataSourceService,
     IEditorEnvironment environment) {
     public void Export(IModGetter mod, string voiceTypeMappingCsvFile, string outputDirectory, string questEditorRegex = ".*", string vocoder = "hifi") {
+        logger.Here().Verbose("Start exporting VA Synth of quests matching RegEx {Quest} in mod {Mod} with voice type mapping {VoiceTypeMapping} to {OutputDirectory}",
+            questEditorRegex,
+            mod.ModKey,
+            voiceTypeMappingCsvFile,
+            outputDirectory);
+
         var linkCache = environment.LinkCache;
 
         using var streamReader = new StreamReader(voiceTypeMappingCsvFile);
@@ -97,5 +103,11 @@ public sealed class ExportVaSynth(
                 }
             }
         }
+
+        logger.Here().Verbose("Finished exporting VA Synth of quests matching RegEx {Quest} in mod {Mod} with voice type mapping {VoiceTypeMapping} to {OutputDirectory}",
+            questEditorRegex,
+            mod.ModKey,
+            voiceTypeMappingCsvFile,
+            outputDirectory);
     }
 }
