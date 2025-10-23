@@ -8,81 +8,105 @@
              xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
              xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File;assembly=CreationEditor.Avalonia"
              xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DialogueExporter.Views.DialogueExporterView"
              x:DataType="viewModels:DialogueExporterVM">
     <TabControl>
         <TabItem Header="Voice Line Export">
-            <StackPanel Spacing="10">
-                <TextBlock
-                    Text="Voice line export specifically crafted to be easy for voice actors to record line by line with enough context to easily understand the context and how to deliver the line."
-                    TextWrapping="Wrap"/>
+            <Grid IsEnabled="{Binding !ExportVaSynth.IsExecuting^}">
+                <StackPanel Spacing="10">
+                    <TextBlock
+                        Text="Voice line export specifically crafted to be easy for voice actors to record line by line with enough context to easily understand the context and how to deliver the line. All lines tied to a voice type coming from the selected mod will be included."
+                        TextWrapping="Wrap"/>
 
-                <folder:TextFolderPicker
-                    Watermark="Select Output Folder"
-                    ToolTip.Tip="Folder to output the exported voice line files per voice type."
-                    MinWidth="250"
-                    HorizontalAlignment="Left"
-                    FolderPath="{Binding VoiceLineOutputFolder, Mode=TwoWay}"
-                    Margin="5"/>
+                    <folder:TextFolderPicker
+                        Watermark="Select Output Folder"
+                        ToolTip.Tip="Folder to output the exported voice line files per voice type."
+                        MinWidth="250"
+                        HorizontalAlignment="Left"
+                        FolderPath="{Binding VoiceLineOutputFolder, Mode=TwoWay}"
+                        Margin="5"/>
 
-                <basic:LabeledContentControl Header="Export mod">
-                    <mod:ModPicker DataContext="{Binding ExportModPickerVM}"/>
-                </basic:LabeledContentControl>
+                    <basic:LabeledContentControl
+                        Header="Export mod"
+                        HeaderToolTip="Determines which mod's voice types will be exported.">
+                        <mod:ModPicker DataContext="{Binding ExportModPickerVM}"/>
+                    </basic:LabeledContentControl>
 
-                <CheckBox Content="Skip Already Voiced Lines"
-                          IsChecked="{Binding SkipAlreadyVoiced}"
-                          ToolTip.Tip="If checked, voice lines whose files are available in any data source will be skipped during export."/>
+                    <CheckBox Content="Skip Already Voiced Lines"
+                              IsChecked="{Binding SkipAlreadyVoiced}"
+                              ToolTip.Tip="If checked, voice lines whose files are available in any data source will be skipped during export."/>
 
-                <Button Content="Export"
-                        Command="{Binding ExportVoiceSheets}"/>
-            </StackPanel>
+                    <Button Content="Export"
+                            Command="{Binding ExportVoiceSheets}"/>
+                </StackPanel>
+
+                <avaloniaProgressRing:ProgressRing
+                    IsActive="{Binding ExportVoiceSheets.IsExecuting^}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="200" Height="200"/>
+            </Grid>
         </TabItem>
 
         <TabItem Header="VA Synth Export">
-            <StackPanel Spacing="10">
-                <TextBlock
-                    Text="Export for the tool xVASynth, which can generate placeholder voice lines using AI voice synthesis. Load the resulting export into "
-                    TextWrapping="Wrap"/>
+            <Grid IsEnabled="{Binding !ExportVaSynth.IsExecuting^}">
+                <StackPanel Spacing="10">
+                    <TextBlock
+                        Text="Export for the tool xVASynth, which can generate placeholder voice lines using AI voice synthesis. Load the resulting export into "
+                        TextWrapping="Wrap"/>
 
-                <file:TextFilePicker
-                    Watermark="Set Output File Path"
-                    ToolTip.Tip="CSV file to output the xVASynth export to."
-                    MinWidth="250"
-                    HorizontalAlignment="Left"
-                    AllowTextEdit="True"
-                    Filter="{x:Static constants:StandardFileTypes.Csv}"
-                    FilePath="{Binding VaSynthOutputFile, Mode=TwoWay}"
-                    Margin="5"/>
+                    <file:TextFilePicker
+                        Watermark="Set Output File Path"
+                        ToolTip.Tip="CSV file to output the xVASynth export to."
+                        MinWidth="250"
+                        HorizontalAlignment="Left"
+                        AllowTextEdit="True"
+                        Filter="{x:Static constants:StandardFileTypes.Csv}"
+                        FilePath="{Binding VaSynthOutputFile, Mode=TwoWay}"
+                        Margin="5"/>
 
-                <file:TextFilePicker
-                    Watermark="Select VoiceType Mapping File"
-                    ToolTip.Tip="CSV file mapping voice types to xVASynth voice models. Should have format 'VoiceType,xVASynth model'."
-                    MinWidth="250"
-                    HorizontalAlignment="Left"
-                    Filter="{x:Static constants:StandardFileTypes.Csv}"
-                    FilePath="{Binding VoiceTypeMappingCsvFile, Mode=TwoWay}"
-                    Margin="5"/>
+                    <file:TextFilePicker
+                        Watermark="Select VoiceType Mapping File"
+                        ToolTip.Tip="CSV file mapping voice types to xVASynth voice models. Should have format 'VoiceType,xVASynth model'."
+                        MinWidth="250"
+                        HorizontalAlignment="Left"
+                        Filter="{x:Static constants:StandardFileTypes.Csv}"
+                        FilePath="{Binding VoiceTypeMappingCsvFile, Mode=TwoWay}"
+                        Margin="5"/>
 
-                <basic:LabeledContentControl Header="Export mod">
-                    <mod:ModPicker DataContext="{Binding ExportModPickerVM}"/>
-                </basic:LabeledContentControl>
+                    <basic:LabeledContentControl Header="Export mod">
+                        <mod:ModPicker DataContext="{Binding ExportModPickerVM}"/>
+                    </basic:LabeledContentControl>
 
-                <basic:LabeledContentControl
-                    Header="Quest Filter Regex"
-                    ToolTip.Tip="Regular expression to filter quests to be included in the export via their Editor IDs. Use .* to include all quests.">
-                    <TextBox Text="{Binding QuestFilterRegex}"/>
-                </basic:LabeledContentControl>
+                    <basic:LabeledContentControl
+                        Header="Quest Filter Regex"
+                        ToolTip.Tip="Regular expression to filter quests to be included in the export via their Editor IDs. Use .* to include all quests.">
+                        <TextBox Text="{Binding QuestFilterRegex}"/>
+                    </basic:LabeledContentControl>
 
-                <basic:LabeledContentControl
-                    Header="Vocoder"
-                    ToolTip.Tip="Vocoder to use in xVASynth for speech synthesis. Options are 'hifi', 'quickanddirty', 'waveglow', and 'waveglowBIG'.">
-                    <TextBox Text="{Binding Vocoder}"/>
-                </basic:LabeledContentControl>
+                    <basic:LabeledContentControl
+                        Header="Vocoder"
+                        ToolTip.Tip="Vocoder to use in xVASynth for speech synthesis.">
+                        <controls:FAComboBox
+                            ItemsSource="{Binding VocoderOptions}"
+                            SelectedItem="{Binding Vocoder}"
+                            SelectedIndex="0"
+                            IsEditable="True"
+                            IsTextSearchEnabled="True">
+                        </controls:FAComboBox>
+                    </basic:LabeledContentControl>
 
-                <Button Content="Export"
-                        Command="{Binding ExportVaSynth}"/>
-            </StackPanel>
+                    <Button Content="Export"
+                            Command="{Binding ExportVaSynth}"/>
+                </StackPanel>
+
+                <avaloniaProgressRing:ProgressRing
+                    IsActive="{Binding ExportVaSynth.IsExecuting^}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="200" Height="200"/>
+            </Grid>
         </TabItem>
     </TabControl>
 </UserControl>
