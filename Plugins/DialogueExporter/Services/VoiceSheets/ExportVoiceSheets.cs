@@ -1,6 +1,7 @@
 ﻿using CreationEditor;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using Mutagen.Bethesda;
@@ -16,6 +17,7 @@ namespace DialogueExporter.Services.VoiceSheets;
 
 public class ExportVoiceSheets(
     ILogger logger,
+    IModInfoProvider modInfoProvider,
     IReferenceService referenceService,
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
@@ -29,7 +31,19 @@ public class ExportVoiceSheets(
 
         var voiceTypes = currentMod.EnumerateMajorRecords<IVoiceTypeGetter>().Select(v => v.EditorID).WhereNotNull().ToHashSet();
 
-        foreach (var mod in linkCache.ListedOrder) {
+        var masterInfos = modInfoProvider.GetMasterInfos(editorEnvironment.LinkCache);
+        if (!masterInfos.TryGetValue(currentMod.ModKey, out var currentModMasterInfo) || !currentModMasterInfo.Valid) {
+            logger.Here().Error("Could not find master info for mod {Mod}", currentMod.ModKey);
+            yield break;
+        }
+
+        foreach (var modKey in currentModMasterInfo.Masters.Append(currentMod.ModKey)) {
+            var mod = editorEnvironment.LinkCache.ResolveMod(modKey);
+            if (mod is null) {
+                logger.Here().Error("Could not find mod {Mod} in link cache", modKey);
+                continue;
+            }
+
             foreach (var questGroup in mod.EnumerateMajorRecords<IDialogTopicGetter>().GroupBy(t => t.Quest.FormKey)) {
                 if (!linkCache.TryResolve<IQuestGetter>(questGroup.Key, out var quest)) {
                     logger.Here().Error("Quest {Quest} not found in mod, skipping topics {Topics}", questGroup.Key, string.Join(", ", questGroup.Select(t => t.FormKey)));
