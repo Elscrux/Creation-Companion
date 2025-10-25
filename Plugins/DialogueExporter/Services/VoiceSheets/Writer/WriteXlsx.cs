@@ -111,7 +111,6 @@ public sealed class WriteXlsx(
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Top),
                             WrapText = true,
-                            TextRotation = 90,
                         },
                     },
                     // Quest Border
@@ -123,7 +122,6 @@ public sealed class WriteXlsx(
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Top),
                             WrapText = true,
-                            TextRotation = 90
                         },
                     },
                     // Non-Bold - Blue
