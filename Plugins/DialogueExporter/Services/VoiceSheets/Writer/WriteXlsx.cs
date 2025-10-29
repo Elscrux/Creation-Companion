@@ -408,7 +408,7 @@ public sealed class WriteXlsx(
                 var row = new Row { CustomHeight = true, Height = new DoubleValue(18.0) };
                 var npc = speaker.FirstOrDefault()?.Npc;
                 var npcInfo = $"You are voicing {speaker.Key}";
-                if (npc is not null) {
+                if (npc is not null && !npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)) {
                     var race = npc.Race.TryResolve(linkCache);
                     var sex = npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Female) ? "female" : "male";
                     npcInfo += $" who is a {sex} {race?.Name?.String}";
