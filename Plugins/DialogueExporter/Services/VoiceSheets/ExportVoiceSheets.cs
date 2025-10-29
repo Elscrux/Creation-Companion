@@ -119,6 +119,7 @@ public class ExportVoiceSheets(
                 DialogTopic.SubtypeEnum.AcceptYield => "You accept the player's yield in a fight",
                 DialogTopic.SubtypeEnum.Agree => "You are a follower and agree to do something for the player",
                 DialogTopic.SubtypeEnum.AlertIdle => "You are searching for any enemy",
+                DialogTopic.SubtypeEnum.AllyKilled => "You notice that an allied npc died",
                 DialogTopic.SubtypeEnum.AlertToCombat => "You find an enemy after searching for them",
                 DialogTopic.SubtypeEnum.AlertToNormal => "You fail to find an enemy after searching for them",
                 DialogTopic.SubtypeEnum.AssaultNC => "You see an assault and don't care about it",
@@ -259,7 +260,7 @@ public class ExportVoiceSheets(
                 }
             }
 
-            logger.Here().Error("Could not determine context for topic {Topic} with subtype {Subtype}", topic.FormKey, topic.SubtypeName.ToDialogTopicSubtype());
+            logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}", responses.FormKey, topic.SubtypeName.ToDialogTopicSubtype());
             return ("", null, null);
 
             string? GetPromptFromBranchingDialog(IDialogTopicGetter t, IDialogResponsesGetter r) {
