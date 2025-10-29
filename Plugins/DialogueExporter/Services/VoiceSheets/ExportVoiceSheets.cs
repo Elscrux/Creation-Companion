@@ -345,7 +345,9 @@ public class ExportVoiceSheets(
                 }
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is IGetIsAliasRefConditionDataGetter);
+            condition = conditions
+                .OfType<IConditionFloatGetter>()
+                .FirstOrDefault(x => x.Data is IGetIsAliasRefConditionDataGetter);
             if (condition?.Data is IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference
              && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
                 var aliasNpc = GetAliasNpc(quest, getIsAliasReference.ReferenceAliasIndex, responses);
@@ -369,17 +371,17 @@ public class ExportVoiceSheets(
                 }
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is IGetIsVoiceTypeConditionDataGetter);
-            if (condition?.Data.RunOnType == Condition.RunOnType.Subject && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
-                return (null, "Any NPC using voice type " + voiceTypeName);
-            }
-
             condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is GetInFactionConditionData);
             if (condition?.Data is GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject } getInFaction
              && linkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)
              && getInFaction.RunOnType == Condition.RunOnType.Subject
              && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
                 return (null, "Member of faction " + GetNameOrEditorID(faction));
+            }
+
+            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is IGetIsVoiceTypeConditionDataGetter);
+            if (condition?.Data.RunOnType == Condition.RunOnType.Subject && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
+                return (null, "Any NPC using voice type " + voiceTypeName);
             }
 
             logger.Here().Error("Could not determine speaker for quest {Quest} topic {Topic} responses {Responses}", quest.FormKey, topic.FormKey, responses.FormKey);
