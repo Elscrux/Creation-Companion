@@ -15,7 +15,7 @@
              x:DataType="viewModels:DialogueExporterVM">
     <TabControl>
         <TabItem Header="Voice Line Export">
-            <Grid IsEnabled="{Binding !ExportVaSynth.IsExecuting^}">
+            <Grid IsEnabled="{Binding !ExportVoiceSheets.IsExecuting^}">
                 <StackPanel Spacing="10">
                     <TextBlock
                         Text="Voice line export specifically crafted to be easy for voice actors to record line by line with enough context to easily understand the context and how to deliver the line. All lines tied to a voice type coming from the selected mod will be included."
