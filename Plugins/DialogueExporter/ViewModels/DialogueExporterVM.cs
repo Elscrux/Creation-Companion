@@ -1,9 +1,11 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
+using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References;
 using DialogueExporter.Services.VaSynth;
 using DialogueExporter.Services.VoiceSheets;
 using DialogueExporter.Services.VoiceSheets.Writer;
@@ -29,6 +31,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
 
     public DialogueExporterVM(
         IFileSystem fileSystem,
+        IReferenceService referenceService,
         IEditorEnvironment editorEnvironment,
         ExportVaSynth exportVaSynth,
         ExportVoiceSheets exportVoiceSheets,
@@ -39,6 +42,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
         var voiceLineOutputValid = this.WhenAnyValue(x => x.VoiceLineOutputFolder).Select(x => !x.IsNullOrWhitespace());
         var xVaSynthOutputValid = this.WhenAnyValue(x => x.VaSynthOutputFile).Select(x => !x.IsNullOrWhitespace());
         var voiceTypeMappingCsvValid = this.WhenAnyValue(x => x.VoiceTypeMappingCsvFile).Select(x => !x.IsNullOrWhitespace());
+        var referencesLoaded = referenceService.IsLoadingRecordReferences.Negate();
 
         ExportVoiceSheets = ReactiveCommand.CreateRunInBackground(() => {
                 var selectedMod = editorEnvironment.ResolveMod(ExportModPickerVM.SelectedMod?.ModKey);
@@ -53,8 +57,11 @@ public sealed partial class DialogueExporterVM : ViewModel {
                 var lines = exportVoiceSheets.GetLines(selectedMod, SkipAlreadyVoiced);
                 writeXlsx.Write(lines, VoiceLineOutputFolder);
             },
-            voiceLineOutputValid
-                .CombineLatest(ExportModPickerVM.HasModSelected, (a, b) => a && b));
+            referencesLoaded
+                .CombineLatest(
+                    ExportModPickerVM.HasModSelected,
+                    voiceLineOutputValid,
+                    (a, b, c) => a && b && c));
 
         var csvValid = this.WhenAnyValue(x => x.VoiceTypeMappingCsvFile).Select(csv => fileSystem.File.Exists(csv));
         var vocoderValid = this.WhenAnyValue(x => x.Vocoder).Select(vocoder => !vocoder.IsNullOrEmpty());
@@ -76,12 +83,13 @@ public sealed partial class DialogueExporterVM : ViewModel {
 
                 exportVaSynth.Export(selectedMod, VoiceTypeMappingCsvFile, VaSynthOutputFile, QuestFilterRegex, Vocoder);
             },
-            xVaSynthOutputValid
+            referencesLoaded
                 .CombineLatest(
                     ExportModPickerVM.HasModSelected,
+                    xVaSynthOutputValid,
                     csvValid,
                     vocoderValid,
                     voiceTypeMappingCsvValid,
-                    (a, b, c, d, e) => a && b && c && d && e));
+                    (a, b, c, d, e, f) => a && b && c && d && e && f));
     }
 }
