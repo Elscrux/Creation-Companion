@@ -372,16 +372,19 @@ public class ExportVoiceSheets(
                 }
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is GetInFactionConditionData);
-            if (condition?.Data is GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject } getInFaction
-             && linkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)
-             && getInFaction.RunOnType == Condition.RunOnType.Subject
-             && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
+            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
+                x.Data is GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject }
+             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+
+            if (condition?.Data is GetInFactionConditionData getInFaction && linkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) {
                 return (null, "Member of faction " + GetNameOrEditorID(faction));
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x => x.Data is IGetIsVoiceTypeConditionDataGetter);
-            if (condition?.Data.RunOnType == Condition.RunOnType.Subject && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
+            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
+                x.Data is IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
+             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+
+            if (condition is not null) {
                 return (null, "Any NPC using voice type " + voiceTypeName);
             }
 
