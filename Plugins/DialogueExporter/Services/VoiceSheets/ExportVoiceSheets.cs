@@ -296,14 +296,14 @@ public class ExportVoiceSheets(
 
                 var rootBranch = GetRootBranch(t);
                 if (rootBranch?.Flags is not null
-                 && !rootBranch.Flags.Value.HasFlag(DialogBranch.Flag.TopLevel)) {
+                 && !rootBranch.Flags.Value.HasFlag(DialogBranch.Flag.TopLevel)
+                 && rootBranch.StartingTopic.FormKey == t.FormKey) {
                     return "You initiate a conversation with the player";
                 }
 
                 return null;
             }
         }
-
 
         (INpcGetter? npc, string speaker) GetSpeakerWithSeparateCombatLines(
             IQuestGetter quest,
