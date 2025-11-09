@@ -10,10 +10,11 @@ namespace CreationEditor.Services.Mutagen.References;
 public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
     ILogger logger,
     IEditorEnvironment editorEnvironment)
-    : IReferenceUpdateTrigger<IModGetter, RecordModPair, TCache, TLink, IFormLinkIdentifier, TSubscriber>
+    : IDisposable, IReferenceUpdateTrigger<IModGetter, RecordModPair, TCache, TLink, IFormLinkIdentifier, TSubscriber>
     where TCache : IReferenceCache<TCache, TLink, IFormLinkIdentifier>
     where TLink : notnull
     where TSubscriber : IReferenced {
+    private CancellationTokenSource _tokenSource = new();
     public IFormLinkIdentifier ToReference(RecordModPair element) => element.Record;
     public IModGetter GetSourceFor(RecordModPair element) => element.Mod;
     public void SetupSubscriptions(
@@ -22,8 +23,11 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
         editorEnvironment.LoadOrderChanged
             .ObserveOnTaskpool()
             .Subscribe(_ => {
+                _tokenSource.Cancel();
+
                 Task.Run(async () => {
-                        await referenceController.UpdateSources(editorEnvironment.LinkCache.ListedOrder);
+                        _tokenSource = new CancellationTokenSource();
+                        await referenceController.UpdateSources(editorEnvironment.LinkCache.ListedOrder, _tokenSource.Token);
                         logger.Here().Information("Loaded all {Name} References for {Count} Mods",
                             referenceController.Name,
                             editorEnvironment.LinkCache.ListedOrder.Count);
@@ -36,4 +40,6 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
             })
             .DisposeWith(disposables);
     }
+
+    public void Dispose() => _tokenSource.Dispose();
 }

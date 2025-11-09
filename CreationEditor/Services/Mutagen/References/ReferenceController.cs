@@ -45,7 +45,9 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         _updateTrigger.SetupSubscriptions(this, _disposables);
     }
 
-    public async Task UpdateSources(IReadOnlyList<TSource> sources) {
+    public async Task UpdateSources(IReadOnlyList<TSource> sources, CancellationToken cancellationToken) {
+        if (cancellationToken.IsCancellationRequested) return;
+
         _isLoading.OnNext(true);
 
         // Remove references from sources that are no longer present
@@ -59,10 +61,12 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         var countingNotifier = new CountingNotifier(_notificationService, $"Loading {_queryConfig.Name} References ", sources.Count);
         var caches = sources
             .Where(source => !_caches.ContainsKey(source))
-            .ToDictionary(source => Task.Run(() => _queryConfig.BuildCache(source)), source => source);
+            .ToDictionary(source => Task.Run(() => _queryConfig.BuildCache(source), cancellationToken), source => source);
 
         var cachesCount = caches.Count;
         for (var i = 0; i < cachesCount; i++) {
+            if (cancellationToken.IsCancellationRequested) break;
+
             var task = await Task.WhenAny(caches.Keys);
             var source = caches[task];
             _caches.TryAdd(source, task.Result);

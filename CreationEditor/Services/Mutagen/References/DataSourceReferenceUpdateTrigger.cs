@@ -11,10 +11,11 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
     ILogger logger,
     IDataSourceService dataSourceService,
     IDataSourceWatcherProvider dataSourceWatcherProvider)
-    : IReferenceUpdateTrigger<IDataSource, DataSourceFileLink, TCache, TLink, DataRelativePath, TSubscriber>
+    : IDisposable, IReferenceUpdateTrigger<IDataSource, DataSourceFileLink, TCache, TLink, DataRelativePath, TSubscriber>
     where TCache : IReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull
     where TSubscriber : IReferenced {
+    private CancellationTokenSource _tokenSource = new();
     private readonly CompositeDisposable _dataSourceUpdatedDisposables = new();
     public DataRelativePath ToReference(DataSourceFileLink element) => element.DataRelativePath;
     public IDataSource GetSourceFor(DataSourceFileLink reference) => reference.DataSource;
@@ -25,10 +26,13 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
         dataSourceService.DataSourcesChanged
             .ObserveOnTaskpool()
             .Subscribe(dataSources => {
+                _tokenSource.Cancel();
+
                 _dataSourceUpdatedDisposables.Clear();
 
                 Task.Run(async () => {
-                        await referenceController.UpdateSources(dataSources);
+                        _tokenSource = new CancellationTokenSource();
+                        await referenceController.UpdateSources(dataSources, _tokenSource.Token);
 
                         logger.Here().Information("Loaded all {Name} References for {Count} Data Sources",
                             referenceController.Name,
@@ -68,4 +72,6 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
             })
             .DisposeWith(disposables);
     }
+
+    public void Dispose() => _tokenSource.Dispose();
 }
