@@ -77,7 +77,7 @@ public class EnchantmentsGenerator(
                 if (type == ListRecordType.Staff) {
                     editorId = recordPrefixService.Prefix + "Staff" + enchantment.Suffix;
                 } else {
-                    editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID + enchantment.Suffix + enchantmentLevel.ToString("D2");
+                    editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID.TrimStart(recordPrefixService.Prefix).ToString() + enchantment.Suffix + enchantmentLevel.ToString("D2");
                 }
 
                 yield return new EnchantedItem(
