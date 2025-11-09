@@ -154,11 +154,10 @@ public partial record ListDefinition(
         // If there is a wildcard tier, return all possible tiers
         if (Tiers.TryGetValue("_", out var listedTier)) return listedTier;
 
-        // If the tier is found, return the specific tiers for that tier
-        if (Tiers.TryGetValue(tier, out var tiers)) return tiers;
-
-        // Otherwise, no tiers are available for this definition
-        return [];
+        // Return matching tiers
+        return Tiers
+            .Where(t => t.Key.FeatureIdentifierEquals((tier)))
+            .SelectMany(t => t.Value);
     }
 
     public bool Restricts(IReadOnlyList<Feature.Feature> features) {
