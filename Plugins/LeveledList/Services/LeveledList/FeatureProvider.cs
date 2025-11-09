@@ -11,12 +11,14 @@ namespace LeveledList.Services.LeveledList;
 
 public sealed class FeatureProvider(
     ILinkCacheProvider linkCacheProvider,
+    EnchantmentProvider enchantmentProvider,
     ITierController tierController)
     : IFeatureProvider {
     public const FeatureWildcardIdentifier Tier = "Tier";
     public const FeatureWildcardIdentifier SchoolOfMagic = "SchoolOfMagic";
     public const FeatureWildcardIdentifier MagicLevel = "MagicLevel";
     public const FeatureWildcardIdentifier Enchantment = "Enchantment";
+    public const FeatureWildcardIdentifier EnchantmentLevel = "EnchantmentLevel";
     public const FeatureWildcardIdentifier WeaponType = "WeaponType";
     public const FeatureWildcardIdentifier ArmorSlot = "ArmorSlot";
     public const FeatureWildcardIdentifier ArmorType = "ArmorType";
@@ -84,6 +86,14 @@ public sealed class FeatureProvider(
                         .Replace("Staff", string.Empty)
                         .Replace("Damage", string.Empty)
                         .Replace("Base", string.Empty);
+                }),
+            EnchantmentLevel => new FeatureWildcard(
+                featureWildcardIdentifier,
+                record => {
+                    var level = enchantmentProvider.GetEnchantmentLevel(record);
+                    if (level <= 0) return null;
+
+                    return level.ToString("D2");
                 }),
             WeaponType => new FeatureWildcard(
                 featureWildcardIdentifier,
