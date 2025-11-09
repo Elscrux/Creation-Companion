@@ -80,6 +80,7 @@ public sealed class FeatureProvider(
                     }
 
                     return enchantment.EditorID?
+                        .Replace("Fortify", string.Empty)
                         .Replace("Ench", string.Empty)
                         .Replace("Weapon", string.Empty)
                         .Replace("Armor", string.Empty)
