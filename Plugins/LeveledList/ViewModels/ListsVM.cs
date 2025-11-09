@@ -114,7 +114,17 @@ public sealed partial class ListsVM : ValidatableViewModel {
                         new FuncDataTemplate<LeveledListTreeNode>((r, _) => new TextBlock {
                             VerticalAlignment = VerticalAlignment.Center,
                             Text = r?.LeveledList?.EditorID ?? r?.Entry?.Item.EditorID
-                        })
+                        }),
+                        options: new TemplateColumnOptions<LeveledListTreeNode> {
+                            CompareAscending = (x, y) =>
+                                x?.LeveledList?.EditorID.CompareTo(y?.LeveledList?.EditorID, StringComparison.OrdinalIgnoreCase)
+                             ?? x?.Entry?.Item.EditorID.CompareTo(y?.Entry?.Item.EditorID, StringComparison.OrdinalIgnoreCase)
+                             ?? 0,
+                            CompareDescending = (x, y) =>
+                                y?.LeveledList?.EditorID.CompareTo(x?.LeveledList?.EditorID, StringComparison.OrdinalIgnoreCase)
+                             ?? y?.Entry?.Item.EditorID.CompareTo(x?.Entry?.Item.EditorID, StringComparison.OrdinalIgnoreCase)
+                             ?? 0,
+                        }
                     ),
                     item => SelectNodes(item.LeveledList)
                      ?? SelectNodes(item.Entry?.Item.List)
@@ -124,13 +134,21 @@ public sealed partial class ListsVM : ValidatableViewModel {
                     new FuncDataTemplate<LeveledListTreeNode>((x, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,
                         Text = x?.Entry?.Level.ToString()
-                    })),
+                    }),
+                    options: new TemplateColumnOptions<LeveledListTreeNode> {
+                        CompareAscending = (x, y) => x?.Entry?.Level.CompareTo(y?.Entry?.Level) ?? 0,
+                        CompareDescending = (x, y) => y?.Entry?.Level.CompareTo(x?.Entry?.Level) ?? 0,
+                    }),
                 new TemplateColumn<LeveledListTreeNode>(
                     "Count",
                     new FuncDataTemplate<LeveledListTreeNode>((x, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,
                         Text = x?.Entry?.Count.ToString()
-                    })),
+                    }),
+                    options: new TemplateColumnOptions<LeveledListTreeNode> {
+                        CompareAscending = (x, y) => x?.Entry?.Count.CompareTo(y?.Entry?.Count) ?? 0,
+                        CompareDescending = (x, y) => y?.Entry?.Count.CompareTo(x?.Entry?.Count) ?? 0,
+                    }),
             }
         };
 
