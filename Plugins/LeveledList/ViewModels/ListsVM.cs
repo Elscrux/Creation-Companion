@@ -26,6 +26,7 @@ using LeveledList.Model.List;
 using LeveledList.Resources;
 using LeveledList.Services;
 using LeveledList.Services.LeveledList;
+using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -108,6 +109,33 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         LeveledListSource = new HierarchicalTreeDataGridSource<LeveledListTreeNode>(LeveledLists) {
             Columns = {
+                new TemplateColumn<LeveledListTreeNode>(
+                    "Existing",
+                    new FuncDataTemplate<LeveledListTreeNode>((x, _) => new TextBlock {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Text = x?.ExistingLeveledItem is not null ? "✅" : string.Empty
+                    }),
+                    options: new TemplateColumnOptions<LeveledListTreeNode> {
+                        CompareAscending = (x, y) => {
+                            if (x is null && y is null) return 0;
+                            if (x is null) return -1;
+                            if (y is null) return 1;
+
+                            var xExists = x.ExistingLeveledItem is not null;
+                            var yExists = y.ExistingLeveledItem is not null;
+                            return xExists.CompareTo(yExists);
+                        },
+                        CompareDescending = (x, y) => {
+                            if (x is null && y is null) return 0;
+                            if (x is null) return 1;
+                            if (y is null) return -1;
+
+                            var xExists = x.ExistingLeveledItem is not null;
+                            var yExists = y.ExistingLeveledItem is not null;
+                            return yExists.CompareTo(xExists);
+                        }
+                    }
+                ),
                 new HierarchicalExpanderColumn<LeveledListTreeNode>(
                     new TemplateColumn<LeveledListTreeNode>(
                         "EditorID",
@@ -196,9 +224,14 @@ public sealed partial class ListsVM : ValidatableViewModel {
         _implementer.ImplementLeveledLists(_editorEnvironment.ActiveMod, leveledListToGenerate);
     }
 
-    private static IEnumerable<LeveledListTreeNode>? SelectNodes(Model.List.LeveledList? list) {
+    private IEnumerable<LeveledListTreeNode>? SelectNodes(Model.List.LeveledList? list) {
         return list?.Entries
-            .Select(entry => new LeveledListTreeNode(null, entry));
+            .Select(entry => new LeveledListTreeNode(
+                null,
+                entry.Item.EditorID is not null && _editorEnvironment.LinkCache.TryResolve<IItemGetter>(entry.Item.EditorID, out var existingLeveledItem)
+                    ? existingLeveledItem
+                    : null,
+                entry));
     }
 
     private void UpdateListsShowcase(IReadOnlyList<ExtendedListDefinition>? selectedLists, OrderedModItem? selectedMod) {
@@ -220,7 +253,12 @@ public sealed partial class ListsVM : ValidatableViewModel {
             // Filter leveled lists based on the selected list definitions
             var lists = generatedLists
                 .Where(x => selectedLists.Any(list => list.Matches(x)))
-                .Select(l => new LeveledListTreeNode(l, null))
+                .Select(l => new LeveledListTreeNode(
+                    l,
+                    _editorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(l.EditorID, out var existingLeveledItem)
+                        ? existingLeveledItem
+                        : null,
+                    null))
                 .ToArray();
 
             Dispatcher.UIThread.Post(() => {

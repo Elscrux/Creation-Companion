@@ -86,11 +86,14 @@ public class EnchantmentsGenerator(
                     editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID.TrimStart(recordPrefixService.Prefix).ToString() + enchantment.Suffix + enchantmentLevel.ToString("D2");
                 }
 
+                editorEnvironment.LinkCache.TryResolve<IEnchantableGetter>(editorId, out var existingEnchanted);
+
                 yield return new EnchantedItem(
                     editorId,
                     enchantmentTierData.GetFullName(enchantable),
                     enchantable,
                     objectEffect,
+                    existingEnchanted,
                     enchantmentLevel,
                     recordTier);
             }

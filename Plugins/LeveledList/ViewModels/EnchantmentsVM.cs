@@ -99,6 +99,33 @@ public sealed partial class EnchantmentsVM : ViewModel {
         EnchantmentsSource = new FlatTreeDataGridSource<EnchantedItem>(EnchantedItems) {
             Columns = {
                 new TemplateColumn<EnchantedItem>(
+                    "Existing",
+                    new FuncDataTemplate<EnchantedItem>((x, _) => new TextBlock {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Text = x?.ExistingEnchanted is not null ? "✅" : string.Empty
+                    }),
+                    options: new TemplateColumnOptions<EnchantedItem> {
+                        CompareAscending = (x, y) => {
+                            if (x is null && y is null) return 0;
+                            if (x is null) return -1;
+                            if (y is null) return 1;
+
+                            var xExists = x.ExistingEnchanted is not null;
+                            var yExists = y.ExistingEnchanted is not null;
+                            return xExists.CompareTo(yExists);
+                        },
+                        CompareDescending = (x, y) => {
+                            if (x is null && y is null) return 0;
+                            if (x is null) return 1;
+                            if (y is null) return -1;
+
+                            var xExists = x.ExistingEnchanted is not null;
+                            var yExists = y.ExistingEnchanted is not null;
+                            return yExists.CompareTo(xExists);
+                        }
+                    }
+                ),
+                new TemplateColumn<EnchantedItem>(
                     "EditorID",
                     new FuncDataTemplate<EnchantedItem>((r, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,

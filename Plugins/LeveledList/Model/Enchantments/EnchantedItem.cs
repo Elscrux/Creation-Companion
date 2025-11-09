@@ -6,5 +6,6 @@ public sealed record EnchantedItem(
     string Name,
     IEnchantableGetter Enchantable,
     IObjectEffectGetter Enchantment,
+    IEnchantableGetter? ExistingEnchanted,
     int EnchantmentLevel,
     TierIdentifier Tier);
