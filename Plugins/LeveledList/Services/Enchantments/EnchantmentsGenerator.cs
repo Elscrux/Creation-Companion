@@ -39,10 +39,16 @@ public class EnchantmentsGenerator(
             // Only generated enchanted items when the item tier has an enchantment for every level
             // For example iron has enchantment levels 1-3 but an enchantment that is only available for levels 3-6
             // doesn't cover the iron range properly - so it should not be generated for iron at all
+            // A further sanity check is made to prevent level ranges from 1-6 being blocked entirely
+            // by enchantments ini the range 3-6, which should still be included - so also check that if there are at least
+            // 3 shared levels between the enchantment and the tier, it's allowed
             if (type != ListRecordType.Staff) {
                 var minimumEnchantmentLevel = enchantment.Tiers.Min(x => x.Key);
                 var minimumTierLevel = tierData.Levels.Min();
-                if (minimumTierLevel < minimumEnchantmentLevel) continue;
+                if (minimumTierLevel < minimumEnchantmentLevel) {
+                    var sharedLevels = tierData.Levels.Intersect(enchantment.Tiers.Keys).ToArray();
+                    if (sharedLevels.Length < 3) continue;
+                }
             }
 
             var skip = false;
