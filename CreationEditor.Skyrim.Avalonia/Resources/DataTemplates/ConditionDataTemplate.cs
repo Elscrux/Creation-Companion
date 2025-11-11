@@ -166,7 +166,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
             control = GetFormKeyPicker(
                 data,
                 parameter.Name,
-                $"{nameof(FormLinkOrIndex<IMajorRecordGetter>.Link)}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Link.FormKey)}",
+                $"{nameof(FormLinkOrIndex<>.Link)}.{nameof(FormLinkOrIndex<>.Link.FormKey)}",
                 parameter.PropertyType.GenericTypeArguments);
         } else if (parameter.PropertyType.GetInterfaces().Contains(typeof(IFormLinkGetter))) {
             control = GetFormKeyPicker(
@@ -195,7 +195,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
             var placedPickerButton = new PlacedPickerButton {
                 DataContext = data,
                 [PlacedPickerButton.ScopedTypesProperty] = types,
-                [!PlacedPickerButton.PlacedProperty] = new Binding($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Link)}"),
+                [!PlacedPickerButton.PlacedProperty] = new Binding($"{parameter}.{nameof(FormLinkOrIndex<>.Link)}"),
                 [!PlacedPickerButton.LinkCacheProperty] = this[!LinkCacheProperty],
                 [ToolTip.TipProperty] = parameter,
             };
@@ -377,9 +377,9 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
         [Reactive] public partial sbyte? PackageDataIndex { get; set; }
 
         public IndexDataContext(ConditionData data, SubstituteUsageContext substituteUsageContext, string parameter) {
-            if (data.UseAliases && data.TryGetProperty<uint?>($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}", out var value)) {
+            if (data.UseAliases && data.TryGetProperty<uint?>($"{parameter}.{nameof(FormLinkOrIndex<>.Index)}", out var value)) {
                 AliasIndex = value;
-            } else if (data.UsePackageData && data.TryGetProperty($"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}", out value)) {
+            } else if (data.UsePackageData && data.TryGetProperty($"{parameter}.{nameof(FormLinkOrIndex<>.Index)}", out value)) {
                 PackageDataIndex = (sbyte?) value;
             }
 
@@ -406,7 +406,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
             Expression<Func<IndexDataContext, T>> indexExpression) {
 
             var setExpression = new Action<T>(index => data.TrySetProperty(
-                $"{parameter}.{nameof(FormLinkOrIndex<IMajorRecordGetter>.Index)}",
+                $"{parameter}.{nameof(FormLinkOrIndex<>.Index)}",
                 Convert.ToUInt32(Convert.ToInt32(index) < 0 ? 0 : index)));
 
             var substituteUsedChanged = substituteUsageContext.WhenAnyValue(useExpression);
