@@ -40,8 +40,7 @@ public abstract partial class TabbedDockVM : DockContainerVM {
     public override bool Focus(IDockedItem dockedItem) {
         if (!Tabs.Contains(dockedItem)) return false;
 
-        if (ActiveTab is not null) ActiveTab.IsSelected = false;
-
+        ActiveTab?.IsSelected = false;
         ActiveTab = dockedItem;
         dockedItem.IsSelected = true;
 
@@ -73,7 +72,7 @@ public abstract partial class TabbedDockVM : DockContainerVM {
                 if (dockedItem.Equals(ActiveTab)) {
                     Unfocus();
                     var newActiveTab = Tabs.FirstOrDefault(tab => !tab.Equals(dockedItem));
-                    if (newActiveTab is not null) newActiveTab.IsSelected = true;
+                    newActiveTab?.IsSelected = true;
                     ActiveTab = newActiveTab;
                 }
 

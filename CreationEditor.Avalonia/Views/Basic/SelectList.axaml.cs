@@ -33,9 +33,7 @@ public class SelectList : TemplatedControl {
         base.OnApplyTemplate(e);
 
         var itemsControl = e.NameScope.Find<ItemsControl>(ItemsControlName);
-        if (itemsControl is null) return;
-
-        itemsControl.ContextFlyout ??= new MenuFlyout {
+        itemsControl?.ContextFlyout ??= new MenuFlyout {
             ItemsSource = (MenuItem[]) [
                 new MenuItem {
                     Command = SelectableCommand.SelectAll,

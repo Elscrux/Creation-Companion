@@ -8,8 +8,7 @@ public sealed class SideDockVM(DockContainerVM dockParent) : TabbedDockVM(dockPa
     public override DockMode DockMode => DockMode.Side;
 
     protected override void Unfocus() {
-        if (ActiveTab is not null) ActiveTab.IsSelected = false;
-
+        ActiveTab?.IsSelected = false;
         ActiveTab = null;
     }
 }
