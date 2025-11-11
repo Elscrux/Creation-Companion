@@ -158,7 +158,7 @@ public partial record ListDefinition(
 
         // Return matching tiers
         return Tiers
-            .Where(t => t.Key.FeatureIdentifierEquals((tier)))
+            .Where(t => t.Key.FeatureIdentifierMatches((tier)))
             .SelectMany(t => t.Value);
     }
 
@@ -170,7 +170,7 @@ public partial record ListDefinition(
                 return true;
             }
 
-            return featureRestrictions.Any(feature => feature.FeatureIdentifierEquals(f.Key.ToString()));
+            return featureRestrictions.Any(feature => feature.FeatureIdentifierMatches(f.Key.ToString()));
         });
     }
 }

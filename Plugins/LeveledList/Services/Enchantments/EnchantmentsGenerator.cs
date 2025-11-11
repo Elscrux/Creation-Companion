@@ -55,7 +55,7 @@ public class EnchantmentsGenerator(
             foreach (var (filteredFeatureWildcardIdentifier, allowedFeatures) in enchantment.Filter) {
                 var featureWildcard = featureProvider.GetFeatureWildcard(filteredFeatureWildcardIdentifier);
                 var feature = featureWildcard.Selector(enchantable)?.ToString();
-                if (feature is null || allowedFeatures.Any(f => f.FeatureIdentifierEquals(feature))) continue;
+                if (feature is null || allowedFeatures.Any(f => f.FeatureIdentifierMatches(feature))) continue;
 
                 skip = true;
                 break;
