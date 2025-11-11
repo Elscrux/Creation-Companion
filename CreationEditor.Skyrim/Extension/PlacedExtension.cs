@@ -1,79 +1,67 @@
 ﻿using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 namespace CreationEditor.Skyrim;
 
 public static class PlacedExtension {
-    public static string? GetSelfOrBaseEditorID(this IPlacedGetter placed, ILinkCache linkCache) {
-        var editorId = placed.EditorID;
-        if (editorId is not null) return editorId;
+    extension(IPlacedGetter placed) {
+        public string? GetSelfOrBaseEditorID(ILinkCache linkCache) {
+            var editorId = placed.EditorID;
+            if (editorId is not null) return editorId;
 
-        switch (placed) {
-            case IPlacedObjectGetter placedObjectGetter:
-                if (linkCache.TryResolveIdentifier(placedObjectGetter.Base, out var obj)) {
-                    return obj;
-                }
-                break;
-            case IPlacedNpcGetter placedNpcGetter:
-                if (linkCache.TryResolveIdentifier(placedNpcGetter.Base, out var npc)) {
-                    return npc;
-                }
-                break;
-            case IPlacedArrowGetter placedArrowGetter:
-                if (linkCache.TryResolveIdentifier(placedArrowGetter.Projectile, out var projectile)) {
-                    return projectile;
-                }
-                break;
-            case IPlacedBarrierGetter placedBarrierGetter:
-                if (linkCache.TryResolveIdentifier(placedBarrierGetter.Projectile, out var barrier)) {
-                    return barrier;
-                }
-                break;
-            case IPlacedBeamGetter placedBeamGetter:
-                if (linkCache.TryResolveIdentifier(placedBeamGetter.Projectile, out var beam)) {
-                    return beam;
-                }
-                break;
-            case IPlacedConeGetter placedConeGetter:
-                if (linkCache.TryResolveIdentifier(placedConeGetter.Projectile, out var cone)) {
-                    return cone;
-                }
-                break;
-            case IPlacedFlameGetter placedFlameGetter:
-                if (linkCache.TryResolveIdentifier(placedFlameGetter.Projectile, out var flame)) {
-                    return flame;
-                }
-                break;
-            case IPlacedHazardGetter placedHazardGetter:
-                if (linkCache.TryResolveIdentifier(placedHazardGetter.Hazard, out var hazard)) {
-                    return hazard;
-                }
-                break;
-            case IPlacedMissileGetter placedMissileGetter:
-                if (linkCache.TryResolveIdentifier(placedMissileGetter.Projectile, out var missile)) {
-                    return missile;
-                }
-                break;
-            case IPlacedTrapGetter placedTrapGetter:
-                if (linkCache.TryResolveIdentifier(placedTrapGetter.Projectile, out var trap)) {
-                    return trap;
-                }
-                break;
+            switch (placed) {
+                case IPlacedObjectGetter placedObjectGetter:
+                    if (linkCache.TryResolveIdentifier(placedObjectGetter.Base, out var obj)) {
+                        return obj;
+                    }
+                    break;
+                case IPlacedNpcGetter placedNpcGetter:
+                    if (linkCache.TryResolveIdentifier(placedNpcGetter.Base, out var npc)) {
+                        return npc;
+                    }
+                    break;
+                case IPlacedArrowGetter placedArrowGetter:
+                    if (linkCache.TryResolveIdentifier(placedArrowGetter.Projectile, out var projectile)) {
+                        return projectile;
+                    }
+                    break;
+                case IPlacedBarrierGetter placedBarrierGetter:
+                    if (linkCache.TryResolveIdentifier(placedBarrierGetter.Projectile, out var barrier)) {
+                        return barrier;
+                    }
+                    break;
+                case IPlacedBeamGetter placedBeamGetter:
+                    if (linkCache.TryResolveIdentifier(placedBeamGetter.Projectile, out var beam)) {
+                        return beam;
+                    }
+                    break;
+                case IPlacedConeGetter placedConeGetter:
+                    if (linkCache.TryResolveIdentifier(placedConeGetter.Projectile, out var cone)) {
+                        return cone;
+                    }
+                    break;
+                case IPlacedFlameGetter placedFlameGetter:
+                    if (linkCache.TryResolveIdentifier(placedFlameGetter.Projectile, out var flame)) {
+                        return flame;
+                    }
+                    break;
+                case IPlacedHazardGetter placedHazardGetter:
+                    if (linkCache.TryResolveIdentifier(placedHazardGetter.Hazard, out var hazard)) {
+                        return hazard;
+                    }
+                    break;
+                case IPlacedMissileGetter placedMissileGetter:
+                    if (linkCache.TryResolveIdentifier(placedMissileGetter.Projectile, out var missile)) {
+                        return missile;
+                    }
+                    break;
+                case IPlacedTrapGetter placedTrapGetter:
+                    if (linkCache.TryResolveIdentifier(placedTrapGetter.Projectile, out var trap)) {
+                        return trap;
+                    }
+                    break;
+            }
+
+            return null;
         }
-
-        return null;
-    }
-}
-
-public static class PlacementExtension
-{
-    public static P2Int GetCellCoordinates(this IPlacementGetter placement)
-    {
-        const int cellLength = 4096;
-        var position = placement.Position;
-
-        return new P2Int(ToInt(position.X), ToInt(position.Y));
-
-        int ToInt(float pos) => (int)Math.Floor(pos / cellLength);
     }
 }

@@ -4,8 +4,10 @@ using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim;
 
 public static class FormLinkExtension {
-    public static string? GetSelfOrBaseEditorID(this IFormLinkGetter<IPlacedGetter> formLink, ILinkCache linkCache) {
-        var placed = formLink.TryResolve(linkCache);
-        return placed?.GetSelfOrBaseEditorID(linkCache);
+    extension(IFormLinkGetter<IPlacedGetter> formLink) {
+        public string? GetSelfOrBaseEditorID(ILinkCache linkCache) {
+            var placed = formLink.TryResolve(linkCache);
+            return placed?.GetSelfOrBaseEditorID(linkCache);
+        }
     }
 }

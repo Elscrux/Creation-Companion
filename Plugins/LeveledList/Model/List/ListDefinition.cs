@@ -5,23 +5,25 @@ using EnchantmentProvider = LeveledList.Services.LeveledList.EnchantmentProvider
 namespace LeveledList.Model.List;
 
 public static class ListDefinitionExtensions {
-    public static IReadOnlyList<FeatureWildcardIdentifier> GetFeatureWildcards(this ListDefinitionIdentifier identifier) {
-        var wildcards = new List<FeatureWildcardIdentifier>();
-        var readOnlySpan = identifier.AsSpan();
+    extension(ListDefinitionIdentifier identifier) {
+        public IReadOnlyList<FeatureWildcardIdentifier> GetFeatureWildcards() {
+            var wildcards = new List<FeatureWildcardIdentifier>();
+            var readOnlySpan = identifier.AsSpan();
 
-        var startIndex = identifier.AsSpan().IndexOf('[');
-        while (startIndex != -1) {
-            var endIndex = readOnlySpan.IndexOf(']');
-            if (endIndex < startIndex) break;
+            var startIndex = identifier.AsSpan().IndexOf('[');
+            while (startIndex != -1) {
+                var endIndex = readOnlySpan.IndexOf(']');
+                if (endIndex < startIndex) break;
 
-            var wildcard = readOnlySpan[(startIndex + 1)..endIndex];
-            wildcards.Add(new FeatureWildcardIdentifier(wildcard.ToString()));
+                var wildcard = readOnlySpan[(startIndex + 1)..endIndex];
+                wildcards.Add(new FeatureWildcardIdentifier(wildcard.ToString()));
 
-            readOnlySpan = readOnlySpan[(endIndex + 1)..];
-            startIndex = readOnlySpan.IndexOf('[');
+                readOnlySpan = readOnlySpan[(endIndex + 1)..];
+                startIndex = readOnlySpan.IndexOf('[');
+            }
+
+            return wildcards;
         }
-
-        return wildcards;
     }
 }
 

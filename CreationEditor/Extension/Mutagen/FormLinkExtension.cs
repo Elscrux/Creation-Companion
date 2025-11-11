@@ -5,8 +5,10 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor;
 
 public static class FormLinkExtension {
-    public static string? GetEditorID<T>(this IFormLinkGetter<T> formLink, ILinkCache linkCache)
+    extension<T>(IFormLinkGetter<T> formLink)
         where T : class, IMajorRecordGetter {
-        return formLink.TryResolveIdentifier(linkCache, out var editorID) ? editorID : null;
+        public string? GetEditorID(ILinkCache linkCache) {
+            return formLink.TryResolveIdentifier(linkCache, out var editorID) ? editorID : null;
+        }
     }
 }

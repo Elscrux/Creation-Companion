@@ -7,19 +7,21 @@ using Noggog;
 namespace CreationEditor.Avalonia;
 
 public static class SelectableExtension {
-    public static IObservable<Unit> SelectionChanged<T>(this ObservableCollection<T> observable)
-        where T : IReactiveSelectable {
-        return observable
-            .ToObservableChangeSet()
-            .WhenValueChanged(x => x.IsSelected)
-            .Unit();
+    extension<T>(ObservableCollection<T> observable) where T : IReactiveSelectable {
+        public IObservable<Unit> SelectionChanged() {
+            return observable
+                .ToObservableChangeSet()
+                .WhenValueChanged(x => x.IsSelected)
+                .Unit();
+        }
     }
 
-    public static IObservable<Unit> SelectionChanged<T>(this ReadOnlyObservableCollection<T> observable)
-        where T : IReactiveSelectable {
-        return observable
-            .ToObservableChangeSet()
-            .WhenValueChanged(x => x.IsSelected)
-            .Unit();
+    extension<T>(ReadOnlyObservableCollection<T> observable) where T : IReactiveSelectable {
+        public IObservable<Unit> SelectionChanged() {
+            return observable
+                .ToObservableChangeSet()
+                .WhenValueChanged(x => x.IsSelected)
+                .Unit();
+        }
     }
 }

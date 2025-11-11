@@ -1,153 +1,36 @@
 ﻿namespace CreationEditor;
 
 public static class ArrayExtensions {
-    #region Clear
-    public static void Clear<T>(this T[] t) {
-        Array.Clear(t, 0, t.Length);
+    extension<T>(T[] t) {
+        public void Clear() => Array.Clear(t, 0, t.Length);
+        public void Clear(int index, int length) => Array.Clear(t, index, length);
+        public void Copy(Array array, int length) => Array.Copy(t, array, length);
+        public void Copy(int index, Array array, int index2, int length) => Array.Copy(t, index, array, index2, length);
+        public TOutput[] ConvertAll<TOutput>(Converter<T, TOutput> converter) => Array.ConvertAll(t, converter);
+        public bool Exists(Predicate<T> predicate) => Array.Exists(t, predicate);
+        public T? Find(Predicate<T> predicate) => Array.Find(t, predicate);
+        public T[] FindAll(Predicate<T> predicate) => Array.FindAll(t, predicate);
+        public int FindIndex(Predicate<T> predicate) => Array.FindIndex(t, predicate);
+        public int FindIndex(int startIndex, Predicate<T> predicate) => Array.FindIndex(t, startIndex, predicate);
+        public int FindIndex(int startIndex, int count, Predicate<T> predicate) => Array.FindIndex(t, startIndex, count, predicate);
+        public T? FindLast(Predicate<T> predicate) => Array.FindLast(t, predicate);
+        public int FindLastIndex(Predicate<T> predicate) => Array.FindLastIndex(t, predicate);
+        public int FindLastIndex(int startIndex, Predicate<T> predicate) => Array.FindLastIndex(t, startIndex, predicate);
+        public int FindLastIndex(int startIndex, int count, Predicate<T> predicate) => Array.FindLastIndex(t, startIndex, count, predicate);
+        public void ForEach(Action<T> action) => Array.ForEach(t, action);
+        public int IndexOf(T value) => Array.IndexOf(t, value);
+        public int IndexOf(T value, int startIndex) => Array.IndexOf(t, value, startIndex);
+        public int IndexOf(T value, int startIndex, int count) => Array.IndexOf(t, value, startIndex, count);
+        public int LastIndexOf(T value) => Array.LastIndexOf(t, value);
+        public int LastIndexOf(T value, int startIndex) => Array.LastIndexOf(t, value, startIndex);
+        public int LastIndexOf(T value, int startIndex, int count) => Array.LastIndexOf(t, value, startIndex, count);
+        public void Reverse() => Array.Reverse((Array) t);
+        public void Reverse(int index, int length) => Array.Reverse((Array) t, index, length);
+        public void Sort() => Array.Sort((Array) t);
+        public void Sort(Comparison<T> comparison) => Array.Sort(t, comparison);
+        public void Sort(IComparer<T>? comparer) => Array.Sort(t, comparer);
+        public void Sort(int index, int length) => Array.Sort((Array) t, index, length);
+        public void Sort(int index, int length, IComparer<T>? comparer) => Array.Sort(t, index, length, comparer);
+        public bool TrueForAll(Predicate<T> predicate) => Array.TrueForAll(t, predicate);
     }
-
-    public static void Clear<T>(this T[] t, int index, int length) {
-        Array.Clear(t, index, length);
-    }
-    #endregion
-
-    #region Copy
-    public static void Copy<T>(this T[] t, Array array, int length) {
-        Array.Copy(t, array, length);
-    }
-
-    public static void Copy<T>(this T[] t, int index, Array array, int index2, int length) {
-        Array.Copy(t, index, array, index2, length);
-    }
-    #endregion
-
-    #region ConvertAll
-    public static TOutput[] ConvertAll<TInput, TOutput>(this TInput[] t, Converter<TInput, TOutput> converter) {
-        return Array.ConvertAll(t, converter);
-    }
-    #endregion
-
-    #region Exists
-    public static bool Exists<T>(this T[] t, Predicate<T> predicate) {
-        return Array.Exists(t, predicate);
-    }
-    #endregion
-
-    #region Find
-    public static T? Find<T>(this T[] t, Predicate<T> predicate) {
-        return Array.Find(t, predicate);
-    }
-    #endregion
-
-    #region FindAll
-    public static T[] FindAll<T>(this T[] t, Predicate<T> predicate) {
-        return Array.FindAll(t, predicate);
-    }
-    #endregion
-
-    #region FindIndex
-    public static int FindIndex<T>(this T[] t, Predicate<T> predicate) {
-        return Array.FindIndex(t, predicate);
-    }
-
-    public static int FindIndex<T>(this T[] t, int startIndex, Predicate<T> predicate) {
-        return Array.FindIndex(t, startIndex, predicate);
-    }
-
-    public static int FindIndex<T>(this T[] t, int startIndex, int count, Predicate<T> predicate) {
-        return Array.FindIndex(t, startIndex, count, predicate);
-    }
-    #endregion
-
-    #region FindLast
-    public static T? FindLast<T>(this T[] t, Predicate<T> predicate) {
-        return Array.FindLast(t, predicate);
-    }
-    #endregion
-
-    #region FindLastIndex
-    public static int FindLastIndex<T>(this T[] t, Predicate<T> predicate) {
-        return Array.FindLastIndex(t, predicate);
-    }
-
-    public static int FindLastIndex<T>(this T[] t, int startIndex, Predicate<T> predicate) {
-        return Array.FindLastIndex(t, startIndex, predicate);
-    }
-
-    public static int FindLastIndex<T>(this T[] t, int startIndex, int count, Predicate<T> predicate) {
-        return Array.FindLastIndex(t, startIndex, count, predicate);
-    }
-    #endregion
-
-    #region ForEach
-    public static void ForEach<T>(this T[] t, Action<T> action) {
-        Array.ForEach(t, action);
-    }
-    #endregion
-
-    #region IndexOf
-    public static int IndexOf<T>(this T[] t, T value) {
-        return Array.IndexOf(t, value);
-    }
-
-    public static int IndexOf<T>(this T[] t, T value, int startIndex) {
-        return Array.IndexOf(t, value, startIndex);
-    }
-
-    public static int IndexOf<T>(this T[] t, T value, int startIndex, int count) {
-        return Array.IndexOf(t, value, startIndex, count);
-    }
-    #endregion
-
-    #region LastIndexOf
-    public static int LastIndexOf<T>(this T[] t, T value) {
-        return Array.LastIndexOf(t, value);
-    }
-
-    public static int LastIndexOf<T>(this T[] t, T value, int startIndex) {
-        return Array.LastIndexOf(t, value, startIndex);
-    }
-
-    public static int LastIndexOf<T>(this T[] t, T value, int startIndex, int count) {
-        return Array.LastIndexOf(t, value, startIndex, count);
-    }
-    #endregion
-
-    #region Reverse
-    public static void Reverse<T>(this T[] t) {
-        Array.Reverse(t);
-    }
-
-    public static void Reverse<T>(this T[] t, int index, int length) {
-        Array.Reverse(t, index, length);
-    }
-    #endregion
-
-    #region Sort
-    public static void Sort<T>(this T[] t) {
-        Array.Sort(t);
-    }
-
-    public static void Sort<T>(this T[] t, Comparison<T> comparison) {
-        Array.Sort(t, comparison);
-    }
-
-    public static void Sort<T>(this T[] t, IComparer<T>? comparer) {
-        Array.Sort(t, comparer);
-    }
-
-    public static void Sort<T>(this T[] t, int index, int length) {
-        Array.Sort(t, index, length);
-    }
-
-    public static void Sort<T>(this T[] t, int index, int length, IComparer<T>? comparer) {
-        Array.Sort(t, index, length, comparer);
-    }
-    #endregion
-
-    #region TrueForAll
-    public static bool TrueForAll<T>(this T[] t, Predicate<T> predicate) {
-        return Array.TrueForAll(t, predicate);
-    }
-    #endregion
 }

@@ -6,12 +6,14 @@ public static class ModTypeExtension {
     public const string PluginFileExtension = ".esp";
     public const string LightPluginFileExtension = ".esl";
 
-    public static string ToFileExtension(this ModType modType) => modType switch {
-        ModType.Master => MasterFileExtension,
-        ModType.Light => LightPluginFileExtension,
-        ModType.Plugin => PluginFileExtension,
-        _ => throw new ArgumentOutOfRangeException(nameof(modType), modType, null),
-    };
+    extension(ModType modType) {
+        public string ToFileExtension() => modType switch {
+            ModType.Master => MasterFileExtension,
+            ModType.Light => LightPluginFileExtension,
+            ModType.Plugin => PluginFileExtension,
+            _ => throw new ArgumentOutOfRangeException(nameof(modType), modType, null),
+        };
+    }
 
     public static ModType FromFileExtension(string name) => name switch {
         MasterFileExtension => ModType.Master,

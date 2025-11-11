@@ -3,12 +3,14 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor;
 
 public static class MajorRecordQueryableGetterExtension {
-    public static string? GetHumanReadableName(this IMajorRecordQueryableGetter recordQueryable) {
-        return recordQueryable switch {
-            INamedGetter { Name: {} name } => name,
-            IMajorRecordGetter { EditorID: {} editorID } => editorID,
-            IFormKeyGetter formKeyGetter => formKeyGetter.FormKey.ToString(),
-            _ => recordQueryable.ToString(),
-        };
+    extension(IMajorRecordQueryableGetter recordQueryable) {
+        public string? GetHumanReadableName() {
+            return recordQueryable switch {
+                INamedGetter { Name: {} name } => name,
+                IMajorRecordGetter { EditorID: {} editorID } => editorID,
+                IFormKeyGetter formKeyGetter => formKeyGetter.FormKey.ToString(),
+                _ => recordQueryable.ToString(),
+            };
+        }
     }
 }

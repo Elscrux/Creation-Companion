@@ -5,18 +5,11 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public sealed class QuestFilter : RecordFilter<IQuestGetter> {
+public sealed class QuestFilter(ILinkCacheProvider linkCacheProvider) : RecordFilter<IQuestGetter> {
     private const char QuestFilterSeparator = '\\';
 
-    private readonly ILinkCacheProvider _linkCacheProvider;
-
-    public QuestFilter(
-        ILinkCacheProvider linkCacheProvider) {
-        _linkCacheProvider = linkCacheProvider;
-    }
-
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
-        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
-            .GetRecursiveListings(quest => quest.Filter, QuestFilterSeparator);
+        return linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<IQuestGetter>()
+            .GetRecursiveListings(quest => quest.Filter, [QuestFilterSeparator]);
     }
 }

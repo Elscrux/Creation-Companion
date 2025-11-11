@@ -11,7 +11,7 @@ public abstract class AssetFilter<T>(ILinkCacheProvider linkCacheProvider, IFile
     public IEnumerable<RecordFilterListing> GetListings(Type type) {
         var recordFilterListings = linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides(type)
             .OfType<T>()
-            .GetRecursiveListings(GetPaths, fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar)
+            .GetRecursiveListings(GetPaths, [fileSystem.Path.DirectorySeparatorChar, fileSystem.Path.AltDirectorySeparatorChar])
             .ToList();
 
         // Trim standalone folders

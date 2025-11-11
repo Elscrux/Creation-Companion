@@ -5,25 +5,18 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Browser.Filter;
 
-public sealed class LocationFilter : RecordFilter<ILocationGetter> {
+public sealed class LocationFilter(ILinkCacheProvider linkCacheProvider) : RecordFilter<ILocationGetter> {
     private const char Separator = '\\';
 
-    private readonly ILinkCacheProvider _linkCacheProvider;
-
-    public LocationFilter(
-        ILinkCacheProvider linkCacheProvider) {
-        _linkCacheProvider = linkCacheProvider;
-    }
-
     public override IEnumerable<RecordFilterListing> GetListings(Type type) {
-        return _linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
-            .GetRecursiveListings(GetParentLocationString, Separator);
+        return linkCacheProvider.LinkCache.PriorityOrder.WinningOverrides<ILocationGetter>()
+            .GetRecursiveListings(GetParentLocationString, [Separator]);
     }
 
     private string GetParentLocationString(ILocationGetter location) {
         return string.Join(Separator,
             location
-                .GetAllParentLocations(_linkCacheProvider.LinkCache)
+                .GetAllParentLocations(linkCacheProvider.LinkCache)
                 .Reverse()
                 .Select(l => l.EditorID));
     }
