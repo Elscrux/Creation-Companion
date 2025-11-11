@@ -46,7 +46,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
     [Reactive] public partial string? EnchantedItemsFilter { get; set; }
 
     public FlatTreeDataGridSource<EnchantedItem> EnchantmentsSource { get; }
-    public SingleModPickerVM ModPickerVM { get; }
+    public MultiModPickerVM ModPickerVM { get; }
     public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateEnchantments { get; }
     public ReactiveCommand<Unit, Unit> ReloadLists { get; }
@@ -56,7 +56,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
 
     public EnchantmentsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
-        SingleModPickerVM modPickerVM,
+        MultiModPickerVM modPickerVM,
         RecordPrefixVM recordPrefixVM,
         ILogger logger,
         IFileSystem fileSystem,
@@ -187,26 +187,22 @@ public sealed partial class EnchantmentsVM : ViewModel {
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedEnchantmentItems)
-            .CombineLatest(ModPickerVM.SelectedModChanged, (def, mod) => (Definitions: def, SelectedMod: mod))
+            .CombineLatest(ModPickerVM.SelectedMods, (def, mods) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
-            .Subscribe(x => UpdateEnchantmentsShowcase(x.Definitions, x.SelectedMod))
+            .Subscribe(x => UpdateEnchantmentsShowcase(x.Definitions, x.SelectedMods))
             .DisposeWith(this);
     }
 
     private void GenerateEnchantedItems() {
         if (SelectedEnchantmentItems is null) return;
-        if (ModPickerVM.SelectedMod is null) return;
-
-        var selectedMod = _editorEnvironment.ResolveMod(ModPickerVM.SelectedMod.ModKey);
-        if (selectedMod is null) return;
 
         _implementer.ImplementEnchantments(_editorEnvironment.ActiveMod, _enchantedItems);
     }
 
-    private void UpdateEnchantmentsShowcase(IReadOnlyList<ExtendedEnchantmentItem>? selectedLists, OrderedModItem? selectedMod) {
-        var mod = _editorEnvironment.ResolveMod(selectedMod?.ModKey);
-        if (mod is null || selectedLists is null) {
+    private void UpdateEnchantmentsShowcase(IReadOnlyList<ExtendedEnchantmentItem>? selectedLists, IReadOnlyCollection<OrderedModItem> selectedMods) {
+        var mods = _editorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
+        if (mods.Length == 0 || selectedLists is null) {
             Dispatcher.UIThread.Post(() => _enchantedItems.Clear());
             return;
         }
@@ -218,7 +214,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
                 var enchantedItems = _generator.Generate(
                     enchantmentsDefinition.EnchantmentsDefinition.Type,
                     enchantmentsDefinition.EnchantmentItem,
-                    mod);
+                    mods);
                 generatedLists.AddRange(enchantedItems);
             }
 

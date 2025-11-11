@@ -89,6 +89,7 @@
                             Text="{Binding EnchantedItemsFilter}"
                             Watermark="Filter"
                             HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
                             MinWidth="100"/>
                     </StackPanel>
                 </basic:LabeledContentControl>

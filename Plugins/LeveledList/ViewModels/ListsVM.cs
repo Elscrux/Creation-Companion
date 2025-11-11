@@ -53,7 +53,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     [Reactive] public partial string? LeveledListFilter { get; set; }
 
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
-    public SingleModPickerVM ModPickerVM { get; }
+    public MultiModPickerVM ModPickerVM { get; }
     public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateSelectedLists { get; }
     public ReactiveCommand<Unit, Unit> ReloadLists { get; }
@@ -63,7 +63,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
     public ListsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
-        SingleModPickerVM modPickerVM,
+        MultiModPickerVM modPickerVM,
         RecordPrefixVM recordPrefixVM,
         ILogger logger,
         IFileSystem fileSystem,
@@ -195,24 +195,26 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedLists)
-            .CombineLatest(ModPickerVM.SelectedModChanged, (def, mod) => (Definitions: def, SelectedMod: mod))
+            .CombineLatest(ModPickerVM.SelectedMods, (def, mods) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
-            .Subscribe(x => UpdateListsShowcase(x.Definitions, x.SelectedMod))
+            .Subscribe(x => UpdateListsShowcase(x.Definitions, x.SelectedMods))
             .DisposeWith(this);
     }
 
     private void GenerateLeveledLists() {
         if (SelectedLists is null) return;
-        if (ModPickerVM.SelectedMod is null) return;
 
-        var selectedMod = _editorEnvironment.ResolveMod(ModPickerVM.SelectedMod.ModKey);
-        if (selectedMod is null) return;
+        var selectedModsItems = ModPickerVM.GetSelectedMods();
+        if (selectedModsItems.Count == 0) return;
+
+        var selectedMods = _editorEnvironment.ResolveMods(selectedModsItems.Select(x => x.ModKey)).ToArray();
+        if (selectedMods.Length == 0) return;
 
         // Generate leveled list intermediate format based on type definition
         var generatedLists = new List<Model.List.LeveledList>();
         foreach (var listTypeDefinition in SelectedLists.Select(x => x.TypeDefinition).Distinct()) {
-            var leveledLists = _generator.Generate(listTypeDefinition, selectedMod);
+            var leveledLists = _generator.Generate(listTypeDefinition, selectedMods);
             generatedLists.AddRange(leveledLists);
         }
 
@@ -234,9 +236,9 @@ public sealed partial class ListsVM : ValidatableViewModel {
                 entry));
     }
 
-    private void UpdateListsShowcase(IReadOnlyList<ExtendedListDefinition>? selectedLists, OrderedModItem? selectedMod) {
-        var mod = _editorEnvironment.ResolveMod(selectedMod?.ModKey);
-        if (mod is null || selectedLists is null) {
+    private void UpdateListsShowcase(IReadOnlyList<ExtendedListDefinition>? selectedLists, IReadOnlyCollection<OrderedModItem> selectedMods) {
+        var mods = _editorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
+        if (mods.Length == 0 || selectedLists is null) {
             Dispatcher.UIThread.Post(() => _leveledLists.Clear());
             return;
         }
@@ -246,7 +248,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             // Generate leveled list intermediate format based on type definition
             var generatedLists = new List<Model.List.LeveledList>();
             foreach (var listTypeDefinition in selectedLists.Select(x => x.TypeDefinition).Distinct()) {
-                var leveledLists = _generator.Generate(listTypeDefinition, mod);
+                var leveledLists = _generator.Generate(listTypeDefinition, mods);
                 generatedLists.AddRange(leveledLists);
             }
 
@@ -324,7 +326,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                                 _tierController.RemoveRecordTier(record);
                             }
 
-                            UpdateListsShowcase(SelectedLists, ModPickerVM.SelectedMod);
+                            UpdateListsShowcase(SelectedLists, ModPickerVM.GetSelectedMods());
                         })
                     },
                 },

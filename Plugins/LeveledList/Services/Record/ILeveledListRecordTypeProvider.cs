@@ -5,5 +5,5 @@ namespace LeveledList.Services.Record;
 
 public interface ILeveledListRecordTypeProvider {
     ListRecordType? GetListRecordType(IMajorRecordGetter record);
-    IEnumerable<RecordWithTier> GetRecords(IModGetter mod, ListRecordType type);
+    IEnumerable<RecordWithTier> GetRecords(IEnumerable<IModGetter> mods, ListRecordType type);
 }

@@ -46,8 +46,9 @@ public class LeveledListRecordTypeProvider(ITierController tierController) : ILe
         return null;
     }
 
-    public IEnumerable<RecordWithTier> GetRecords(IModGetter mod, ListRecordType type) {
-        return GetRecordsOnly(mod, type)
+    public IEnumerable<RecordWithTier> GetRecords(IEnumerable<IModGetter> mods, ListRecordType type) {
+        return mods
+            .SelectMany(mod => GetRecordsOnly(mod, type))
             .Select(record => {
                 var tier = tierController.GetRecordTier(record);
                 if (tier is null) return null;

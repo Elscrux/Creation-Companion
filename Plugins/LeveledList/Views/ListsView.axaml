@@ -82,12 +82,13 @@
                     HeaderToolTip="To generate lists, assign items to tiers relevant to the leveled lists.">
                     <StackPanel Orientation="Horizontal"
                                 Spacing="10">
-                        <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
+                        <mod:ModPickerButton DataContext="{Binding ModPickerVM}"/>
 
                         <TextBox
                             Text="{Binding LeveledListFilter}"
                             Watermark="Filter"
                             HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
                             MinWidth="100"/>
                     </StackPanel>
                 </basic:LabeledContentControl>

@@ -15,9 +15,9 @@ public class LeveledListGenerator(
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     IRecordPrefixService recordPrefixService,
     IFeatureProvider featureProvider) {
-    public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IModGetter modToLookAt) {
+    public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IReadOnlyCollection<IModGetter> modsToLookAt) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
-        var records = leveledListRecordTypeProvider.GetRecords(modToLookAt, listTypeDefinition.Type).ToArray();
+        var records = leveledListRecordTypeProvider.GetRecords(modsToLookAt, listTypeDefinition.Type).ToArray();
 
         var createdListsPerDefinition = new Dictionary<ListDefinitionIdentifier, List<Model.List.LeveledList>>();
 
@@ -65,7 +65,7 @@ public class LeveledListGenerator(
         var groups = recordList.GroupBy(r => featureWildcard.Selector(r.Record));
         foreach (var group in groups) {
             if (group.Key is null) continue;
-            if (restrictions is not null && !restrictions.Any(r => r.FeatureIdentifierEquals(group.Key.ToString()))) continue;
+            if (restrictions is not null && !restrictions.Any(r => r.FeatureIdentifierMatches(group.Key.ToString()))) continue;
 
             var feature = new Feature(featureWildcard, group.Key);
             var newFeatures = features.Append(feature).ToList();

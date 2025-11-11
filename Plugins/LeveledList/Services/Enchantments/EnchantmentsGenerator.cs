@@ -18,8 +18,8 @@ public class EnchantmentsGenerator(
     IFeatureProvider featureProvider,
     IRecordPrefixService recordPrefixService,
     EnchantmentProvider enchantmentProvider) {
-    public IEnumerable<EnchantedItem> Generate(ListRecordType type, EnchantmentItem enchantment, IModGetter modToLookAt) {
-        foreach (var record in leveledListRecordTypeProvider.GetRecords(modToLookAt, type)) {
+    public IEnumerable<EnchantedItem> Generate(ListRecordType type, EnchantmentItem enchantment, IReadOnlyCollection<IModGetter> modsToLookAt) {
+        foreach (var record in leveledListRecordTypeProvider.GetRecords(modsToLookAt, type)) {
             if (record.Record is not (IEnchantableGetter enchantable and IKeywordedGetter { Keywords: {} keywords })) continue;
 
             var keywordFormKeys = keywords.Select(x => x.FormKey).ToHashSet();
