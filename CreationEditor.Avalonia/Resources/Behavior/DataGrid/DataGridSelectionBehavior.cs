@@ -167,6 +167,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     };
 
                     checkBox.WhenAnyValue(x => x.IsChecked)
+                        .Skip(1)
                         .Subscribe(isChecked => SelectAllItems(isChecked is true))
                         .DisposeWith(_attachedDisposable);
 
