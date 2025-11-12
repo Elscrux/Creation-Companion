@@ -42,7 +42,7 @@
                             Background="{DynamicResource SystemControlTransparentBrush}"
                             IsVisible="{TemplateBinding HeaderToolTip, Converter={x:Static ObjectConverters.IsNotNull}}">
                             <Ellipse
-                                Stroke="{DynamicResource TextControlForeground}"
+                                Stroke="{TemplateBinding Foreground}"
                                 StrokeThickness="1.5"
                                 Height="18"
                                 Width="18"/>
