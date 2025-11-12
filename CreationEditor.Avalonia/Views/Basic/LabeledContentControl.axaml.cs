@@ -1,11 +1,15 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Media;
 namespace CreationEditor.Avalonia.Views.Basic;
 
-[TemplatePart(LabelPart, typeof(TextBlock))]
+[TemplatePart(LabelPart, typeof(ContentPresenter))]
 public class LabeledContentControl : HeaderedContentControl {
     public const string LabelPart = "PART_Label";
 
@@ -17,9 +21,17 @@ public class LabeledContentControl : HeaderedContentControl {
         set => SetValue(HeaderToolTipProperty, value);
     }
 
+    public LabeledContentControl() {
+        HeaderTemplate = new FuncDataTemplate<object?>((_, _) => new TextBlock {
+            [!TextBlock.TextProperty] = new Binding(""),
+            FontSize = 16,
+            FontWeight = FontWeight.SemiBold,
+        });
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e) {
         base.OnApplyTemplate(e);
-        var label = e.NameScope.Find<TextBlock>(LabelPart);
+        var label = e.NameScope.Find<ContentPresenter>(LabelPart);
 
         if (label == null) return;
 

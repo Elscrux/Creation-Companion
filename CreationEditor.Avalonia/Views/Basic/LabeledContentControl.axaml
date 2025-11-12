@@ -32,11 +32,10 @@
                                 Spacing="5"
                                 Orientation="Horizontal"
                                 ToolTip.Tip="{TemplateBinding HeaderToolTip}">
-                        <TextBlock
+                        <ContentPresenter
                             x:Name="PART_Label"
-                            Text="{TemplateBinding Header}"
-                            FontSize="16"
-                            FontWeight="SemiBold"/>
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"/>
 
                         <Grid
                             Background="{DynamicResource SystemControlTransparentBrush}"
