@@ -160,14 +160,20 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             .AutoRefresh(modItem => modItem.IsActive);
 
         AnyModsActive = modActivated
-            .Select(collection => collection.Any(mod => mod is { Type: ChangeType.Item, Item.Current.IsActive: true }));
+            .Select(collection => 
+                collection.Any(mod => mod is { Type: ChangeType.Item, Item.Current.IsActive: true }) ||
+                collection.Any(mod => mod is { Type: ChangeType.Range, Reason: ListChangeReason.AddRange }
+                     && mod.Range.FirstOrDefault(i => i.IsActive) is not null));
 
         modActivated
             .CombineLatest(
                 _mods.ObserveCollectionChanges().Select(_ => _mods),
                 (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
             .Subscribe(x => {
-                var activeMod = x.ChangedMods.FirstOrDefault(mod => mod is { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current;
+                var activeMod = x.ChangedMods.FirstOrDefault(mod => mod is { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current
+                    ?? x.ChangedMods.Select(mod => mod is { Type: ChangeType.Range, Reason: ListChangeReason.AddRange }
+                     && mod.Range.FirstOrDefault(i => i.IsActive) is {} m ? m : null)
+                        .FirstOrDefault(m => m is not null);
                 if (activeMod is null) return;
 
                 foreach (var item in x.AllMods) {
