@@ -24,6 +24,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
     [Reactive] public partial string Vocoder { get; set; } = "hifi";
     [Reactive] public partial bool SkipAlreadyVoiced { get; set; } = true;
 
+    public IReferenceService ReferenceService { get; }
     public SingleModPickerVM ExportModPickerVM { get; }
 
     public ReactiveCommand<Unit, Unit> ExportVoiceSheets { get; }
@@ -37,6 +38,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
         ExportVoiceSheets exportVoiceSheets,
         WriteXlsx writeXlsx,
         SingleModPickerVM singleModPickerVM) {
+        ReferenceService = referenceService;
         ExportModPickerVM = singleModPickerVM;
 
         var voiceLineOutputValid = this.WhenAnyValue(x => x.VoiceLineOutputFolder).Select(x => !x.IsNullOrWhitespace());

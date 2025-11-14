@@ -39,8 +39,16 @@
                               IsChecked="{Binding SkipAlreadyVoiced}"
                               ToolTip.Tip="If checked, voice lines whose files are available in any data source will be skipped during export."/>
 
-                    <Button Content="Export"
-                            Command="{Binding ExportVoiceSheets}"/>
+                    <StackPanel>
+                        <Button Content="Export"
+                                IsVisible="{Binding !ReferenceService.IsLoadingRecordReferences^}"
+                                Command="{Binding ExportVoiceSheets}"/>
+
+                        <avaloniaProgressRing:ProgressRing
+                            IsActive="{Binding ReferenceService.IsLoadingRecordReferences^}"
+                            HorizontalAlignment="Left"
+                            Width="20" Height="20"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <avaloniaProgressRing:ProgressRing
@@ -98,8 +106,16 @@
                         </controls:FAComboBox>
                     </basic:LabeledContentControl>
 
-                    <Button Content="Export"
-                            Command="{Binding ExportVaSynth}"/>
+                    <StackPanel>
+                        <Button Content="Export"
+                                IsVisible="{Binding !ReferenceService.IsLoadingRecordReferences^}"
+                                Command="{Binding ExportVaSynth}"/>
+
+                        <avaloniaProgressRing:ProgressRing
+                            IsActive="{Binding ReferenceService.IsLoadingRecordReferences^}"
+                            HorizontalAlignment="Left"
+                            Width="20" Height="20"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <avaloniaProgressRing:ProgressRing
