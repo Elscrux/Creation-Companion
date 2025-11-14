@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
+using CreationEditor;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
@@ -9,6 +10,7 @@ using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
+using Serilog;
 namespace DialogueExporter.Cli.Args;
 
 public static class CommandLineContainerSetup {
@@ -23,6 +25,7 @@ public static class CommandLineContainerSetup {
         builder.RegisterInstance(args);
 
         var container = builder.Build();
+        var logger = container.Resolve<ILogger>();
 
         // how to load data sources and the load order usings args (reusable??)
         var dataSourceService = container.Resolve<IDataSourceService>();
@@ -46,7 +49,7 @@ public static class CommandLineContainerSetup {
 
         var modFileLink = dataSourceService.GetFileLink(modFilename);
         if (modFileLink is null) {
-            Console.WriteLine("Could not find mod " + modFilename + " in data sources");
+            logger.Here().Fatal("Could not find mod {Mod} in data sources", modFilename);
             return null;
         }
 
@@ -62,7 +65,7 @@ public static class CommandLineContainerSetup {
         var masterInfos = modInfoProvider.GetMasterInfos(allAvailableModInfos);
         var masterInfo = masterInfos[modKey];
         if (!masterInfo.Valid) {
-            Console.WriteLine("Not all masters for mod " + modFilename + " are available");
+            logger.Here().Fatal("Not all masters for mod {Mod} are available", modFilename);
             return container;
         }
 
