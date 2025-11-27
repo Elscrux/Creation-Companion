@@ -1,3 +1,4 @@
-﻿namespace ModCleaner.Models;
+﻿using QuickGraph;
+namespace ModCleaner.Models;
 
-public record Edge<TVertex>(TVertex Source, TVertex Target);
+public record Edge<TVertex>(TVertex Source, TVertex Target) : IEdge<TVertex>;

@@ -46,11 +46,11 @@ public sealed class AssetCleaner(
         }
     }
 
-    public IReadOnlyList<IAssetLinkGetter> GetAssetsToClean(HashSet<ILinkIdentifier> included, IDataSource dataSource) {
+    public IReadOnlyList<IAssetLinkGetter> GetAssetsToClean(HashSet<ILinkIdentifier> retained, IDataSource dataSource) {
         return dataSource.EnumerateFiles(new DataRelativePath(string.Empty), includeSubDirectories: true)
             .Select(assetTypeService.GetAssetLink)
             .WhereNotNull()
-            .Except(included.OfType<AssetLinkIdentifier>().Select(x => x.AssetLink))
+            .Except(retained.OfType<AssetLinkIdentifier>().Select(x => x.AssetLink))
             .ToArray();
     }
 
@@ -69,17 +69,18 @@ public sealed class AssetCleaner(
         assetTypeProvider.Behavior,
     ];
 
-    public void IncludeLinks(
+    public void RetainLinks(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
         AssetLinkIdentifier assetLinkIdentifier,
-        HashSet<ILinkIdentifier> included,
+        HashSet<ILinkIdentifier> retained,
+        IReadOnlySet<ILinkIdentifier> excluded,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         if (_selfRetainingAssetTypes.Contains(assetLinkIdentifier.AssetLink.Type)) {
             // Always retain behavior assets
-            included.Add(assetLinkIdentifier);
+            retained.Add(assetLinkIdentifier);
         }
     }
 }

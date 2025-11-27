@@ -1,62 +1,99 @@
 ﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CreationEditor;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
+using CreationEditor.Avalonia.Views;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
+using DynamicData;
+using DynamicData.Binding;
+using FluentAvalonia.UI.Controls;
 using ModCleaner.Models;
+using ModCleaner.Models.FeatureFlag;
 using ModCleaner.Services;
+using ModCleaner.Services.FeatureFlag;
+using ModCleaner.Views;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Serilog;
+using FeatureFlagItem = ModCleaner.Models.FeatureFlag.FeatureFlagItem;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
+using Key = Avalonia.Input.Key;
 namespace ModCleaner.ViewModels;
 
 public sealed record ExteriorCell(IWorldspaceGetter Worldspace, ICellGetter Cell);
 
+public sealed record FormLinkWithEditorID(FormLinkIdentifier Link, string? EditorID) : IFormLinkIdentifier {
+    public FormKey FormKey => Link.FormLink.FormKey;
+    public Type Type => Link.FormLink.Type;
+}
+
 public sealed partial class ModCleanerVM : ViewModel {
     private readonly ILogger _logger;
+    private readonly IEssentialRecordProvider _essentialRecordProvider;
+
+    private Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? _originalReferenceGraphOnlyRetained;
+    private HashSet<ILinkIdentifier>? _retainedLinks;
 
     public IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> EditorEnvironment { get; }
     public IReferenceService ReferenceService { get; }
     public SingleDataSourcePickerVM CleaningDataSourcePicker { get; }
     public SingleModPickerVM CleaningModPickerVM { get; }
     public MultiModPickerVM DependenciesModPickerVM { get; }
+    public IFeatureFlagService FeatureFlagService { get; }
+
+    public ReadOnlyObservableCollection<FeatureFlagItem> FeatureFlags { get; }
+    public IObservableCollection<ILinkIdentifier> ExcludedLinks { get; } = new ObservableCollectionExtended<ILinkIdentifier>();
 
     [Reactive] public partial Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? ReferenceGraph { get; set; }
     [Reactive] public partial Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? DependencyGraph { get; set; }
-    [Reactive] public partial List<IMajorRecordGetter>? RetainedRecords { get; set; }
-    [Reactive] public partial HashSet<ILinkIdentifier>? RetainedLinks { get; set; }
+    [Reactive] public partial List<FormLinkWithEditorID>? RetainedRecords { get; set; }
     [Reactive] public partial HashSet<ExteriorCell>? InvalidExteriorCells { get; set; }
+    [Reactive] public partial HashSet<ICellGetter>? InteriorCells { get; set; }
     [Reactive] public partial HashSet<IQuestGetter>? InvalidQuests { get; set; }
+    [Reactive] public partial HashSet<IVoiceTypeGetter>? InvalidVoiceTypes { get; set; }
     [Reactive] public partial List<ILinkIdentifier>? Path { get; set; }
-    [Reactive] public partial IMajorRecordGetter? SourceLink { get; set; }
-    [Reactive] public partial IMajorRecordGetter? TargetLink { get; set; }
+    [Reactive] public partial FormLinkWithEditorID? SourceLink { get; set; }
+    [Reactive] public partial FormLinkWithEditorID? TargetLink { get; set; }
+    [Reactive] public partial bool CleanAssets { get; set; }
 
     [Reactive] public partial bool IsBusy { get; set; }
 
-    public IObservable<bool> CanRun => CleaningModPickerVM.HasModSelected
-        .CombineLatest(CleaningDataSourcePicker.HasDataSourceSelected, (a, b) => a && b);
-
-    public ReactiveCommand<Unit, Unit> Run { get; }
+    public ReactiveCommand<Unit, Unit> BuildReferenceGraph { get; }
     public ReactiveCommand<Unit, Unit> BuildRetainedLinks { get; }
     public ReactiveCommand<Unit, Unit> CleanMod { get; }
-    public ReactiveCommand<IList, Unit> FindPath { get; }
-    public ReactiveCommand<IList, Unit> SetLinks { get; }
+    public ReactiveCommand<FormLinkIdentifier, Unit> ExcludeRecord { get; }
+    public ReactiveCommand<FormLinkIdentifier, Unit> RetainRecord { get; }
+    public ReactiveCommand<Unit, Unit> SearchForSelectedPath { get; }
+    public ReactiveCommand<IList, Unit> SearchForRecords { get; }
+    public ReactiveCommand<FeatureFlag, Unit> EditFeatureFlag { get; }
+    public ReactiveCommand<Unit, Unit> AddFeatureFlag { get; }
+    public ReactiveCommand<object?, Unit> DeleteFeatureFlags { get; }
+    public Func<FeatureFlag, FeatureFlagEditorVM> FeatureFlagEditorVMFactory { get; }
+
+    public IDataSource? SelectedDataSource => CleanAssets ? CleaningDataSourcePicker.SelectedDataSource : null;
 
     public ModCleanerVM(
+        Func<FeatureFlag, FeatureFlagEditorVM> featureFlagEditorVMFactory,
+        MainWindow mainWindow,
         ILogger logger,
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         Services.ModCleaner modCleaner,
@@ -64,14 +101,35 @@ public sealed partial class ModCleanerVM : ViewModel {
         IEssentialRecordProvider essentialRecordProvider,
         SingleDataSourcePickerVM cleaningDataSourcePicker,
         SingleModPickerVM cleaningModPickerVM,
-        MultiModPickerVM dependenciesModPickerVM) {
+        MultiModPickerVM dependenciesModPickerVM,
+        IFeatureFlagService featureFlagService) {
+        var mainWindow1 = mainWindow;
         _logger = logger;
+        _essentialRecordProvider = essentialRecordProvider;
         EditorEnvironment = editorEnvironment;
         ReferenceService = referenceService;
         CleaningModPickerVM = cleaningModPickerVM;
         DependenciesModPickerVM = dependenciesModPickerVM;
+        FeatureFlagEditorVMFactory = featureFlagEditorVMFactory;
+        FeatureFlagService = featureFlagService;
         CleaningDataSourcePicker = cleaningDataSourcePicker;
         CleaningDataSourcePicker.Filter = dataSource => !dataSource.IsReadOnly;
+
+        FeatureFlags = featureFlagService.FeatureFlagsChanged
+            .Select(_ => featureFlagService.FeatureFlags.Select(kv => new FeatureFlagItem(kv.Key, kv.Value)).AsObservableChangeSet())
+            .Switch()
+            .ToObservableCollection(this);
+
+        FeatureFlags
+            .ToObservableChangeSet()
+            .AutoRefresh(x => x.IsSelected)
+            .ToCollection()
+            .Subscribe(flags => {
+                foreach (var flag in flags) {
+                    featureFlagService.SetFeatureEnabled(flag.FeatureFlag, flag.IsSelected);
+                }
+            })
+            .DisposeWith(this);
 
         DependenciesModPickerVM.Filter = _ => false;
         CleaningModPickerVM.SelectedModChanged
@@ -81,164 +139,292 @@ public sealed partial class ModCleanerVM : ViewModel {
                     return;
                 }
 
-                DependenciesModPickerVM.Filter = dependency => editorEnvironment.Environment.ResolveMod(dependency.ModKey)?
+                DependenciesModPickerVM.Filter = dependency => EditorEnvironment.Environment.ResolveMod(dependency.ModKey)?
                     .ModHeader.MasterReferences.Any(m => cleanMod.ModKey == m.Master) is true;
 
                 // Set all dependencies to selected by default
                 foreach (var modItem in DependenciesModPickerVM.Mods) {
                     modItem.IsSelected = true;
                 }
+
+                foreach (var featureFlag in FeatureFlags.ToArray()) {
+                    featureFlag.IsSelected = featureFlag.FeatureFlag.ModKey == cleanMod.ModKey;
+                }
             })
             .DisposeWith(this);
 
-        Run = ReactiveCommand.CreateRunInBackground(() => {
-            if (!GetModAndDependencies(out var mod, out var dependencies)) return;
+        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(() => {
+                if (!GetModAndDependencies(out var mod, out var dependencies)) return;
 
-            Dispatcher.UIThread.Post(() => IsBusy = true);
-            var graph = modCleaner.BuildGraph(mod, dependencies);
-            Dispatcher.UIThread.Post(() => ReferenceGraph = graph);
-            Dispatcher.UIThread.Post(() => IsBusy = false);
-        });
+                Dispatcher.UIThread.Post(() => IsBusy = true);
+                var graph = modCleaner.BuildGraph(mod, dependencies);
+                Dispatcher.UIThread.Post(() => ReferenceGraph = graph);
+                Dispatcher.UIThread.Post(() => IsBusy = false);
+            },
+            CleaningModPickerVM.HasModSelected
+                .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x)));
 
         BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(() => {
-            if (CleaningModPickerVM.SelectedMod is null || CleaningDataSourcePicker.SelectedDataSource is null) return;
+            if (CleaningModPickerVM.SelectedMod is null) return;
             if (ReferenceGraph is null) return;
             if (!GetModAndDependencies(out var mod, out var dependencies)) return;
 
             Dispatcher.UIThread.Post(() => IsBusy = true);
 
-            var (includedLinks, dependencyGraph) = modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies);
-            var includedRecords = includedLinks
+            var (retainedLinks, dependencyGraph) = modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
+            _retainedLinks = retainedLinks;
+
+            var retainedRecords = retainedLinks
                 .OfType<FormLinkIdentifier>()
-                .Select(x => x.FormLink)
-                .Where(x => x.FormKey.ModKey == mod.ModKey)
-                .Select(link => editorEnvironment.LinkCache.TryResolve(link, out var record) ? record : null)
+                .Where(x => x.FormLink.FormKey.ModKey == mod.ModKey)
+                .Select(link => EditorEnvironment.LinkCache.TryResolveIdentifier(link.FormLink, out var editorId) && editorId is not null
+                    ? new FormLinkWithEditorID(link, editorId)
+                    : null)
                 .WhereNotNull()
-                .Where(r => r.EditorID is not null)
                 .OrderBy(r => r.EditorID)
                 .ToList();
 
-            Dispatcher.UIThread.Post(() => {
-                RetainedLinks = includedLinks;
-                RetainedRecords = includedRecords;
-            });
-
-            var counts = new Dictionary<string, int>();
-            using (var edges = new StreamWriter(@"C:\Users\nickp\Downloads\edges-test2.csv")) {
-                foreach (var link in includedLinks) {
-                    if (link is not FormLinkIdentifier l) continue;
-                    if (!ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) continue;
-
+            var referenceGraphOnlyRetained = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
+            foreach (var link in retainedLinks) {
+                if (ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
                     foreach (var edge in outgoing) {
-                        if (includedLinks.Contains(edge.Target) && edge.Target is FormLinkIdentifier t) {
-                            // Remove links that are irrelevant for understanding the links and where they come from
-                            if (l.FormLink.FormKey.ModKey == Skyrim.ModKey || t.FormLink.FormKey.ModKey == Skyrim.ModKey) continue;
-                            if (l.FormLink.FormKey.ModKey == Update.ModKey || t.FormLink.FormKey.ModKey == Update.ModKey) continue;
-                            if (l.FormLink.FormKey.ModKey == Dawnguard.ModKey || t.FormLink.FormKey.ModKey == Dawnguard.ModKey) continue;
-                            if (l.FormLink.FormKey.ModKey == HearthFires.ModKey || t.FormLink.FormKey.ModKey == HearthFires.ModKey) continue;
-                            if (l.FormLink.FormKey.ModKey == Dragonborn.ModKey || t.FormLink.FormKey.ModKey == Dragonborn.ModKey) continue;
-                            if (l.FormLink.Type.Name == "ICellGetter" && t.FormLink.Type.Name.StartsWith("IPlaced")) continue;
-                            if (l.FormLink.Type.Name == "IArmorAddonGetter" && t.FormLink.Type.Name.StartsWith("IRaceGetter")) continue;
-                            if (l.FormLink.Type.Name == "INpcGetter" && t.FormLink.Type.Name.StartsWith("IHeadPartGetter")) continue;
-                            if (l.FormLink.Type.Name == "IDialogTopicGetter" && t.FormLink.Type.Name.StartsWith("IDialogBranchGetter")) continue;
-
-                            edges.WriteLine($"{l.FormLink.FormKey} - {l.FormLink.Type.Name},{t.FormLink.FormKey} - {t.FormLink.Type.Name}");
-
-                            var typeName = l.FormLink.Type.Name + " - " + t.FormLink.Type.Name;
-                            counts[typeName] = counts.GetOrDefault(typeName) + 1;
-                        }
+                        referenceGraphOnlyRetained.AddEdge(edge);
                     }
                 }
             }
-            using (var edges = new StreamWriter(@"C:\Users\nickp\Downloads\dependency-graph.csv")) {
-                foreach (var (vertex, origins) in dependencyGraph.IncomingEdges) {
-                    edges.WriteLine($"{vertex} <- {string.Join(", ", origins.Select(x => x.Source.ToString()))}");
-                }
-            }
-            foreach (var (key, value) in counts.OrderByDescending(x => x.Value)) {
-                Console.WriteLine(key + ": " + value);
-            }
 
-            // Checking if there is any exterior cell included that shouldn't be included
-            var invalidExteriorCells = new HashSet<ExteriorCell>();
-            foreach (var linkIdentifier in includedLinks) {
-                if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
-                if (formLinkIdentifier.FormLink.Type != typeof(ICellGetter)) continue;
-                if (!editorEnvironment.LinkCache.TryResolve<ICellGetter>(formLinkIdentifier.FormLink.FormKey, out var cell)) continue;
-
-                var worldspace = cell.GetWorldspace(editorEnvironment.LinkCache);
-                if (worldspace is null || cell.Grid is null) continue;
-
-                if (essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), cell)) {
-                    invalidExteriorCells.Add(new ExteriorCell(worldspace, cell));
-                }
-            }
-
-            var invalidQuests = new HashSet<IQuestGetter>();
-            var essentialRecords = essentialRecordProvider.GetEssentialRecords().ToHashSet();
-            foreach (var linkIdentifier in includedLinks) {
-                if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
-                if (formLinkIdentifier.FormLink.FormKey.ModKey != mod.ModKey) continue;
-                if (formLinkIdentifier.FormLink.Type != typeof(IQuestGetter)) continue;
-                if (essentialRecords.Contains(formLinkIdentifier.FormLink)) continue;
-                if (!editorEnvironment.LinkCache.TryResolve<IQuestGetter>(formLinkIdentifier.FormLink.FormKey, out var quest)) continue;
-
-                invalidQuests.Add(quest);
-            }
+            _originalReferenceGraphOnlyRetained = referenceGraphOnlyRetained;
 
             Dispatcher.UIThread.Post(() => {
-                InvalidExteriorCells = invalidExteriorCells;
-                InvalidQuests = invalidQuests;
+                RetainedRecords = retainedRecords;
                 DependencyGraph = dependencyGraph;
+            });
+
+            UpdateInvalidRecords(retainedLinks);
+
+            Dispatcher.UIThread.Post(() => {
                 IsBusy = false;
             });
         });
 
         CleanMod = ReactiveCommand.CreateRunInBackground(() => {
-            if (ReferenceGraph is null || RetainedLinks is null) return;
-            if (CleaningDataSourcePicker.SelectedDataSource is null) return;
-            if (!GetModAndDependencies(out var mod, out _)) return;
+                if (_retainedLinks is null) return;
+                if (!GetModAndDependencies(out var mod, out _)) return;
 
-            Dispatcher.UIThread.Post(() => IsBusy = true);
-            modCleaner.Clean(mod, RetainedLinks, CleaningDataSourcePicker.SelectedDataSource);
-            Dispatcher.UIThread.Post(() => IsBusy = false);
+                Dispatcher.UIThread.Post(() => IsBusy = true);
+                modCleaner.Clean(mod, _retainedLinks, SelectedDataSource);
+                Dispatcher.UIThread.Post(() => IsBusy = false);
+            },
+            this.WhenAnyValue(x => x.CleanAssets)
+                .CombineLatest(
+                    CleaningDataSourcePicker.HasDataSourceSelected,
+                    (cleanAssets, dataSourceSelected) => !cleanAssets || dataSourceSelected));
+
+        ExcludeRecord = ReactiveCommand.CreateRunInBackground<FormLinkIdentifier>(link => {
+            if (!ExcludedLinks.Contains(link)) {
+                ExcludedLinks.Add(link);
+            }
+        });
+        RetainRecord = ReactiveCommand.CreateRunInBackground<FormLinkIdentifier>(link => ExcludedLinks.Remove(link));
+
+        SearchForSelectedPath = ReactiveCommand.CreateRunInBackground(SearchForPath);
+
+        SearchForRecords = ReactiveCommand.CreateRunInBackground<IList>(parameter => {
+            if (parameter is not [FormLinkIdentifier source, IMajorRecordGetter targetRecord]) return;
+
+            if (!EditorEnvironment.LinkCache.TryResolveIdentifier(source.FormLink, out var editorId)) return;
+
+            var target = new FormLinkIdentifier(targetRecord.ToStandardizedIdentifier());
+
+            Dispatcher.UIThread.Post(() => {
+                SourceLink = new FormLinkWithEditorID(source, editorId);
+                TargetLink = new FormLinkWithEditorID(target, targetRecord.EditorID);
+            });
+
+            FindShortestPath(source, target);
         });
 
-        FindPath = ReactiveCommand.CreateRunInBackground<IList>(parameter => {
-            if (ReferenceGraph is null) return;
-            if (parameter is not [IMajorRecordGetter source, IMajorRecordGetter target]) return;
+        EditFeatureFlag = ReactiveCommand.CreateFromTask<FeatureFlag>(async featureFlag => {
+            var flagEditorVM = FeatureFlagEditorVMFactory(featureFlag);
+            var assetDialog = new TaskDialog {
+                Title = $"Feature Flag {featureFlag.Name}",
+                Content = new FeatureFlagEditor(flagEditorVM) {
+                    Width = 1200
+                },
+                XamlRoot = mainWindow1,
+                Buttons = {
+                    new TaskDialogButton {
+                        Text = "Save",
+                        DialogResult = TaskDialogStandardResult.OK,
+                    },
+                    TaskDialogButton.CancelButton,
+                },
+                Classes = { "No" },
+                Styles = {
+                    new Style(x => x.OfType<TaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
+                        Setters = {
+                            new Setter(Layoutable.MaxWidthProperty, 1500.0),
+                        },
+                    },
+                },
+                MinWidth = 1200,
+                KeyBindings = {
+                    new KeyBinding {
+                        Gesture = new KeyGesture(Key.Enter),
+                        Command = TaskDialogButton.OKButton.Command,
+                    },
+                    new KeyBinding {
+                        Gesture = new KeyGesture(Key.Escape),
+                        Command = TaskDialogButton.CancelButton.Command,
+                    },
+                },
+            };
 
-            Dispatcher.UIThread.Post(() => IsBusy = true);
+            if (await assetDialog.ShowAsync() is TaskDialogStandardResult.OK) {
+                FeatureFlagService.RemoveFeatureFlag(featureFlag);
+                FeatureFlagService.AddFeatureFlag(flagEditorVM.GetFeatureFlag());
+            }
+        });
 
-            var sourceLink = new FormLinkIdentifier(source.ToStandardizedIdentifier());
-            var targetLink = new FormLinkIdentifier(target.ToStandardizedIdentifier());
-            var path = ReferenceGraph.CalculateShortestPath(sourceLink, targetLink);
+        AddFeatureFlag = ReactiveCommand.Create(() => {
+            FeatureFlagService.AddFeatureFlag(new FeatureFlag(
+                "NewFeatureFlag",
+                CleaningModPickerVM.SelectedMod?.ModKey ?? ModKey.Null,
+                [],
+                []));
+        });
 
-            Dispatcher.UIThread.Post(() => {
-                if (path is null || path.Count == 0) {
-                    Path = null;
-                } else {
-                    Path = path.Select(x => x.Item1).ToList();
+        DeleteFeatureFlags = ReactiveCommand.Create<object?>(o => {
+            if (o is not IList removeList) return;
+
+            foreach (var featureFlag in removeList.OfType<FeatureFlagItem>()) {
+                FeatureFlagService.RemoveFeatureFlag(featureFlag.FeatureFlag);
+            }
+        });
+    }
+
+    private void UpdateInvalidRecords(HashSet<ILinkIdentifier> retainedLinks) {
+        if (!GetModAndDependencies(out var mod, out _)) return;
+
+        // Checking if there is any exterior cell retained that shouldn't be retained
+        var (invalidExteriorCells, invalidInteriorCells) = GetInvalidCells(retainedLinks, mod);
+
+        var invalidQuests = GetInvalidQuests(retainedLinks, mod);
+
+        var voiceTypesWithoutSounds = GetVoiceTypesWithoutSounds(mod);
+
+        // Retain dialog without voiced lines?
+
+        Dispatcher.UIThread.Post(() => {
+            InvalidExteriorCells = invalidExteriorCells;
+            InteriorCells = invalidInteriorCells;
+            InvalidQuests = invalidQuests;
+            InvalidVoiceTypes = voiceTypesWithoutSounds;
+        });
+    }
+
+    private void SearchForPath() {
+        if (SourceLink is null || TargetLink is null) return;
+
+        FindShortestPath(SourceLink.Link, TargetLink.Link);
+    }
+
+    private (HashSet<ExteriorCell> invalidExteriorCells, HashSet<ICellGetter> invalidInteriorCells) GetInvalidCells(
+        HashSet<ILinkIdentifier> retainedLinks,
+        ISkyrimModGetter mod) {
+        var invalidExteriorCells = new HashSet<ExteriorCell>();
+        var interiorCells = new HashSet<ICellGetter>();
+        foreach (var linkIdentifier in retainedLinks) {
+            if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
+            if (formLinkIdentifier.FormLink.Type != typeof(ICellGetter)) continue;
+            if (!EditorEnvironment.LinkCache.TryResolve<ICellGetter>(formLinkIdentifier.FormLink.FormKey, out var cell)) continue;
+            if (cell.FormKey.ModKey != mod.ModKey) continue;
+
+            var worldspace = cell.GetWorldspace(EditorEnvironment.LinkCache);
+            if (worldspace is null || cell.Grid is null) {
+                if (cell.GetExteriorDoorsGoingIntoInteriorRecursively(EditorEnvironment.LinkCache)
+                    .All(placedContext => {
+                        if (placedContext.Record.Placement is null) return true;
+
+                        var cellCoordinates = placedContext.Record.Placement.GetCellCoordinates();
+                        if (!placedContext.TryGetParent<IWorldspaceGetter>(out var worldspace)) return true;
+
+                        var cell = worldspace.GetCell(cellCoordinates);
+                        if (cell is null) return true;
+
+                        return !retainedLinks.Contains(new FormLinkIdentifier(cell.ToFormLinkInformation()));
+                    })) {
+                    interiorCells.Add(cell);
                 }
+            } else if (_essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), cell)) {
+                var notInRangeOfValidCells = Enumerable.Range(-3, 3)
+                    .SelectMany(dx => Enumerable.Range(-3, 3).Select(dy => (dx, dy)))
+                    .Select(offset => worldspace.GetCell(new P2Int(cell.Grid.Point.X + offset.dx, cell.Grid.Point.Y + offset.dy)))
+                    .WhereNotNull()
+                    .All(neighborCell => _essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), neighborCell));
 
-                IsBusy = false;
-            });
-        }, CanRun);
+                if (notInRangeOfValidCells) {
+                    invalidExteriorCells.Add(new ExteriorCell(worldspace, cell));
+                }
+            }
+        }
 
-        SetLinks = ReactiveCommand.CreateRunInBackground<IList>(parameter => {
-            if (parameter is not [FormLinkIdentifier source, IMajorRecordGetter target]) return;
+        return (invalidExteriorCells, interiorCells);
+    }
 
-            Dispatcher.UIThread.Post(() => {
-                SourceLink = editorEnvironment.LinkCache.TryResolve(source.FormLink, out var sourceRecord)
-                    ? sourceRecord
-                    : null;
-                TargetLink = target;
-            });
-        }, CanRun);
+    private HashSet<IQuestGetter> GetInvalidQuests(
+        HashSet<ILinkIdentifier> retainedLinks,
+        ISkyrimModGetter mod) {
+        var invalidQuests = new HashSet<IQuestGetter>();
+        foreach (var linkIdentifier in retainedLinks) {
+            if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
+            if (_essentialRecordProvider.EssentialRecords.Contains(formLinkIdentifier.FormLink)) continue;
+            if (formLinkIdentifier.FormLink.FormKey.ModKey != mod.ModKey) continue;
+            if (formLinkIdentifier.FormLink.Type != typeof(IQuestGetter)) continue;
+            if (!EditorEnvironment.LinkCache.TryResolve<IQuestGetter>(formLinkIdentifier.FormLink.FormKey, out var quest)) continue;
+
+            invalidQuests.Add(quest);
+        }
+
+        return invalidQuests;
+    }
+
+    private HashSet<IVoiceTypeGetter> GetVoiceTypesWithoutSounds(ISkyrimModGetter mod) {
+        if (SelectedDataSource is null) return [];
+
+        var path = SelectedDataSource.FileSystem.Path;
+        var directory = path.Combine(SkyrimSoundAssetType.Instance.BaseFolder, "Voice");
+        if (!SelectedDataSource.FileSystem.Directory.Exists(directory)) return [];
+
+        var voiceTypesWithSounds = SelectedDataSource
+            .EnumerateDirectories(directory)
+            .Select(voiceTypePath => path.GetFileName(voiceTypePath.Path))
+            .Select(voiceType => EditorEnvironment.LinkCache.TryResolve<IVoiceTypeGetter>(voiceType, out var voiceTypeRecord)
+                ? voiceTypeRecord
+                : null)
+            .WhereNotNull()
+            .ToHashSet();
+
+        return mod.EnumerateMajorRecords<IVoiceTypeGetter>()
+            .Where(voiceType => !voiceTypesWithSounds.Contains(voiceType))
+            .ToHashSet();
+    }
+
+    private void FindShortestPath(ILinkIdentifier source, ILinkIdentifier target) {
+        if (_originalReferenceGraphOnlyRetained is null) return;
+
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+
+        var path = _originalReferenceGraphOnlyRetained.ShortestPath(source, target);
+
+        Dispatcher.UIThread.Post(() => {
+            Path = path;
+            IsBusy = false;
+        });
     }
 
     private bool GetModAndDependencies([MaybeNullWhen(false)] out ISkyrimModGetter mod, [MaybeNullWhen(false)] out List<ModKey> dependencies) {
-        if (CleaningModPickerVM.SelectedMod is null || CleaningDataSourcePicker.SelectedDataSource is null) {
+        if (CleaningModPickerVM.SelectedMod is null) {
             mod = null;
             dependencies = null;
             return false;

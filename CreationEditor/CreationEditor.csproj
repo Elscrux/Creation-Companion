@@ -8,6 +8,7 @@
         <PackageReference Include="niflysharp" />
         <PackageReference Include="Nifly" />
         <PackageReference Include="Noggog.Autofac" />
+        <PackageReference Include="QuickGraph" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.SourceGenerators" />

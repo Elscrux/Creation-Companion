@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
-using CreationEditor;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins.Cache;
 namespace ModCleaner.Resources.Converter;

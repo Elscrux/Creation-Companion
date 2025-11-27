@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ModCleaner.Services;
+using ModCleaner.Services.FeatureFlag;
 using ModCleaner.ViewModels;
 namespace ModCleaner;
 
@@ -16,6 +17,9 @@ public class ModCleanerModule : Module {
         builder.RegisterType<ModCleanerVM>()
             .AsSelf();
 
+        builder.RegisterType<FeatureFlagEditorVM>()
+            .AsSelf();
+
         builder.RegisterType<AssetCleaner>()
             .AsSelf();
 
@@ -24,10 +28,12 @@ public class ModCleanerModule : Module {
 
         builder.RegisterType<FeatureFlagService>()
             .AsImplementedInterfaces()
-            .AsSelf();
+            .AsSelf()
+            .SingleInstance();
 
         builder.RegisterType<EssentialRecordProvider>()
             .AsImplementedInterfaces()
-            .AsSelf();
+            .AsSelf()
+            .SingleInstance();
     }
 }
