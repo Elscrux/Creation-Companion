@@ -93,6 +93,7 @@ public sealed class ExportVaSynth(
                                 GameId = "skyrim",
                                 VoiceId = voiceId,
                                 Text = response.Text.String,
+                                VcStyle = response.Emotion + ": " + response.ScriptNotes,
                                 Vocoder = vocoder,
                                 OutPath = '.' + path.Replace('\\', '/').TrimStart("Sound/Voice", StringComparison.OrdinalIgnoreCase).Replace(".fuz", ".wav"),
                             });
