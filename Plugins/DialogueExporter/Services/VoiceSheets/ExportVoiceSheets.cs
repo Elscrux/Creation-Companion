@@ -52,10 +52,11 @@ public class ExportVoiceSheets(
 
                 foreach (var topic in questGroup) {
                     foreach (var responses in topic.Responses) {
-                        var paths = voiceTypeAssetLookup.GetVoiceTypePaths(responses).ToArray();
-                        if (paths.Length == 0) continue;
+                        var dataRelativePaths = voiceTypeAssetLookup.GetVoiceLineFilePaths(responses).ToArray();
+                        if (dataRelativePaths.Length == 0) continue;
 
-                        foreach (var path in paths) {
+                        foreach (var dataRelativePath in dataRelativePaths) {
+                            var path = dataRelativePath.Path;
                             var lastSeparator = path.LastIndexOf(Path.DirectorySeparatorChar);
                             var voiceTypeFolder = path[..lastSeparator];
                             lastSeparator = voiceTypeFolder.LastIndexOf(Path.DirectorySeparatorChar);

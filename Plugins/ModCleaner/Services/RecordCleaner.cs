@@ -216,7 +216,7 @@ public sealed class RecordCleaner(
         fileSystem.File.Move(oldModPath, newModPath);
 
         // Read renamed mod as new mod
-        var duplicate = ModInstantiator.ImportSetter(newModPath,
+        var duplicate = ModFactory.ImportSetter(newModPath,
             mod.GameRelease,
             BinaryReadParameters.Default with {
                 FileSystem = fileSystem

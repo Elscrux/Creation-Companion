@@ -49,7 +49,7 @@ public sealed class EditorEnvironment<TMod, TModGetter> : IEditorEnvironment<TMo
         _logger = logger;
         _resolver = resolver;
 
-        ActiveMod = ModInstantiator<TMod>.Activator(ModKey.Null, gameReleaseContext.Release, IEditorEnvironment.DefaultModVersion);
+        ActiveMod = ModFactory<TMod>.Activator(ModKey.Null, gameReleaseContext.Release, IEditorEnvironment.DefaultModVersion);
         ActiveModLinkCache = ActiveMod.ToMutableLinkCache<TMod, TModGetter>();
         _mutableMods = [ActiveMod];
 

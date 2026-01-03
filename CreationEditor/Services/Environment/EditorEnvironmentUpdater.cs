@@ -85,7 +85,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         }
 
         foreach (var newMutableMod in LoadOrder.NewMutableMods) {
-            var newMod = ModInstantiator<TMod>.Activator(newMutableMod, _gameReleaseContext.Release, IEditorEnvironment.DefaultModVersion);
+            var newMod = ModFactory<TMod>.Activator(newMutableMod, _gameReleaseContext.Release, IEditorEnvironment.DefaultModVersion);
             builder = builder.WithOutputMod(newMod, OutputModTrimming.Self);
         }
 
@@ -93,13 +93,13 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         var activeMod = ActiveMod.Mode switch {
             ActiveModBuilder.ActiveModMode.Existing => ActiveMod.LastMod is TMod lastMod && ActiveMod.ModKey == lastMod.ModKey
                 ? lastMod
-                : ModInstantiator<TMod>.Importer(
+                : ModFactory<TMod>.Importer(
                     new ModPath(_dataSourceService.GetFileLink(new DataRelativePath(ActiveMod.ModKey.FileName))?.FullPath
                      ?? throw new FileNotFoundException($"Active mod file {ActiveMod.ModKey.FileName} not found in any data source.")),
                     _gameReleaseContext.Release,
                     new BinaryReadParameters { FileSystem = _fileSystem }
                 ),
-            ActiveModBuilder.ActiveModMode.New => ModInstantiator<TMod>.Activator(
+            ActiveModBuilder.ActiveModMode.New => ModFactory<TMod>.Activator(
                 ActiveMod.ModKey,
                 _gameReleaseContext.Release,
                 IEditorEnvironment.DefaultModVersion),
@@ -115,7 +115,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
     private IModListingGetter<TModGetter> TryLoadListingFromDataSource(IModListingGetter<TModGetter> listing) {
         if (_dataSourceService.TryGetFileLink(listing.FileName, out var link)) {
             var modPath = new ModPath(link.FullPath);
-            var mod = ModInstantiator<TModGetter>.Importer(modPath,
+            var mod = ModFactory<TModGetter>.Importer(modPath,
                 _gameReleaseContext.Release,
                 new BinaryReadParameters {
                     FileSystem = _fileSystem

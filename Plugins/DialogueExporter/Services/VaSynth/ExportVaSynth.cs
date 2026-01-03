@@ -55,11 +55,12 @@ public sealed class ExportVaSynth(
 
             foreach (var topic in questGroup) {
                 foreach (var responses in topic.Responses) {
-                    var paths = voiceTypeAssetLookup.GetVoiceTypePaths(responses).ToArray();
-                    if (paths.Length == 0) continue;
+                    var dataRelativePaths = voiceTypeAssetLookup.GetVoiceLineFilePaths(responses).ToArray();
+                    if (dataRelativePaths.Length == 0) continue;
 
-                    foreach (var path in paths) {
-                        if (File.Exists(Path.Combine(dataSourceService.ActiveDataSource.Path, path))) continue;
+                    foreach (var dataRelativePath in dataRelativePaths) {
+                        var path = dataRelativePath.Path;
+                        if (dataSourceService.FileExists(path)) continue;
 
                         var lastSeparator = path.LastIndexOf(Path.DirectorySeparatorChar);
                         var voiceTypeFolder = path[..lastSeparator];
