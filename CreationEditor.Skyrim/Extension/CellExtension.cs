@@ -36,8 +36,10 @@ public static class CellExtension {
         /// <param name="linkCache">Link cache to determine the load order</param>
         /// <param name="includeDeleted">Whether to exclude deleted doors</param>
         /// <returns>All doors in the cell</returns>
-        public IEnumerable<IPlacedObjectGetter> GetDoors(ILinkCache linkCache, bool includeDeleted = false) {
+        public IEnumerable<IPlacedObjectGetter> GetTeleportDoors(ILinkCache linkCache, bool includeDeleted = false) {
             foreach (var placedObjectGetter in cell.GetAllPlaced(linkCache, includeDeleted).OfType<IPlacedObjectGetter>()) {
+                if (placedObjectGetter.TeleportDestination is null) continue;
+
                 var baseObject = placedObjectGetter.Base.TryResolve(linkCache);
                 if (baseObject is not IDoorGetter) continue;
 
@@ -65,7 +67,7 @@ public static class CellExtension {
             var currentCell = missingCells.Dequeue();
             searchedCells.Add(currentCell.FormKey);
 
-            foreach (var door in GetDoors(currentCell, linkCache)) {
+            foreach (var door in GetTeleportDoors(currentCell, linkCache)) {
                 if (door.TeleportDestination is null
                  || !linkCache.TryResolveSimpleContext<IPlacedObjectGetter>(door.TeleportDestination.Door.FormKey, out var destinationContext)
                  || destinationContext.Parent?.Record is not ICellGetter destinationCell) continue;
