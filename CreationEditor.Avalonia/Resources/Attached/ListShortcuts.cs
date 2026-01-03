@@ -61,7 +61,12 @@ public sealed class ListShortcuts : AvaloniaObject {
 
             switch (args.Sender) {
                 case Control c:
-                    ToggleAddButton(c, args);
+                    void AddButton(object? o, EffectiveViewportChangedEventArgs e) => ToggleAddButton(c, args);
+
+                    // Needs different event than Loaded to make sure that we can detect
+                    // child buttons in initially disabled controls as they don't render from the start
+                    c.EffectiveViewportChanged -= AddButton;
+                    c.EffectiveViewportChanged += AddButton;
                     break;
             }
         });
@@ -108,20 +113,15 @@ public sealed class ListShortcuts : AvaloniaObject {
     }
 
     private static void ToggleAddButton(Control c, AvaloniaPropertyChangedEventArgs<ICommand> args) {
-        c.Loaded -= Function;
-        c.Loaded += Function;
+        var addButton = c.FindDescendantOfType<Button>();
+        if (addButton is null) return;
 
-        void Function(object? sender, RoutedEventArgs routedEventArgs) {
-            var addButton = c.FindDescendantOfType<Button>();
-            if (addButton is null) return;
-
-            addButton.IsVisible = true;
-            addButton.Command = args.NewValue.GetValueOrDefault();
-            addButton[!Button.CommandParameterProperty] = c.GetObservable(AddParameterProperty)
-                .Select(x => x as IObservable<object> ?? Observable.Return(x))
-                .Switch()
-                .ToBinding();
-        }
+        addButton.IsVisible = true;
+        addButton.Command = args.NewValue.GetValueOrDefault();
+        addButton[!Button.CommandParameterProperty] = c.GetObservable(AddParameterProperty)
+            .Select(x => x as IObservable<object> ?? Observable.Return(x))
+            .Switch()
+            .ToBinding();
     }
 
     private static FuncDataTemplate<object> RemoveButtonTemplate<TRowType>(AvaloniaObject control, ICommand? command) {
