@@ -32,6 +32,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
 
     public HeatmapCreator HeatmapCreator { get; }
+    public IReferenceService ReferenceService { get; }
     public VertexColorMapCreator VertexColorMapCreator { get; }
     public HeightmapCreator HeightmapCreator { get; }
 
@@ -80,6 +81,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         _queryVMFactory = queryVMFactory;
         HeatmapCreator = new HeatmapCreator();
         VertexColorMapCreator = new VertexColorMapCreator();
+        ReferenceService = referenceService;
         HeightmapCreator = new HeightmapCreator();
         LinkCacheProvider = linkCacheProvider;
         var stateRepository = stateRepositoryFactory.Create("Heatmap");
@@ -158,7 +160,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .DoTask(async worldspace => await HeatmapCreator.CalculateSpots(
                 Mappings,
                 LinkCacheProvider.LinkCache,
-                referenceService,
+                ReferenceService,
                 worldspace))
             .ObserveOnGui()
             .Do(_ => DrawingsImage = HeatmapCreator.GetDrawing(ImageSource!.Size, MarkingSize, LeftCell, RightCell, TopCell, BottomCell))

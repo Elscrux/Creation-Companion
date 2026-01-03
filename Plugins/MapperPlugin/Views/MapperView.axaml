@@ -265,8 +265,16 @@
                     Value="{Binding MarkingSize}"/>
             </Grid>
 
+            <avaloniaProgressRing:ProgressRing
+                Grid.Row="10"
+                ToolTip.Tip="Loading References"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Width="200" Height="200"
+                IsVisible="{Binding ReferenceService.IsLoading^}"/>
+
             <DataGrid
                 Grid.Row="10"
+                IsVisible="{Binding !ReferenceService.IsLoading^}"
                 ItemsSource="{Binding Mappings}"
                 CanUserReorderColumns="False"
                 CanUserResizeColumns="True"
