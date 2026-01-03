@@ -52,7 +52,8 @@ public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<Ma
                 : this.WhenAnyValue(marking => marking.Record)
                     .Where(record => !record.IsNull)
                     .Unit())
-            .Switch();
+            .Switch()
+            .StartWith(Unit.Default);
 
         VisualUpdates = this.WhenAnyValue(
                 x => x.Enable,
