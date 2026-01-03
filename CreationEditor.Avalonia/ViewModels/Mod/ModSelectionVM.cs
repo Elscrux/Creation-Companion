@@ -237,7 +237,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             var modKey = missingMods.Dequeue();
             loadedMods.Add(modKey);
 
-            foreach (var master in mods[modKey].ModInfo.Masters.Where(masterMod => !loadedMods.Contains(masterMod))) {
+            foreach (var master in mods[modKey].ModInfo.DirectMasters.Where(masterMod => !loadedMods.Contains(masterMod))) {
                 missingMods.Enqueue(master);
             }
         }

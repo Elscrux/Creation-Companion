@@ -40,8 +40,8 @@ public sealed class SkyrimModInfoProvider(IEditorEnvironment editorEnvironment) 
         var sortedMods = modInfos
             .Order(new FuncComparer<ModInfo>((a, b) => {
                 // If one is a master of the other, it should come first
-                if (a.Masters.Contains(b.ModKey)) return 1;
-                if (b.Masters.Contains(a.ModKey)) return -1;
+                if (a.DirectMasters.Contains(b.ModKey)) return 1;
+                if (b.DirectMasters.Contains(a.ModKey)) return -1;
 
                 //If neither is a master of the other, keep original order
                 var aIndex = modInfos.IndexOf(a);
@@ -59,11 +59,11 @@ public sealed class SkyrimModInfoProvider(IEditorEnvironment editorEnvironment) 
 
         // Iterate in priority order
         foreach (var mod in sortedMods) {
-            var masters = new HashSet<ModKey>(mod.Masters);
+            var masters = new HashSet<ModKey>(mod.DirectMasters);
             var valid = true;
 
             // Check that all masters are valid and compile list of all recursive masters
-            foreach (var master in mod.Masters) {
+            foreach (var master in mod.DirectMasters) {
                 if (masterInfos.TryGetValue(master, out var masterInfo) && masterInfo.Valid) {
                     masters.AddRange(masterInfo.Masters);
                     continue;
