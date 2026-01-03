@@ -17,7 +17,7 @@ namespace DialogueExporter.Services.VoiceSheets;
 
 public class ExportVoiceSheets(
     ILogger logger,
-    IModInfoProvider modInfoProvider,
+    IModService modService,
     IReferenceService referenceService,
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
@@ -31,13 +31,12 @@ public class ExportVoiceSheets(
 
         var voiceTypes = currentMod.EnumerateMajorRecords<IVoiceTypeGetter>().Select(v => v.EditorID).WhereNotNull().ToHashSet();
 
-        var masterInfos = modInfoProvider.GetMasterInfos(editorEnvironment.LinkCache);
-        if (!masterInfos.TryGetValue(currentMod.ModKey, out var currentModMasterInfo) || !currentModMasterInfo.Valid) {
+        if (!modService.TryGetMastersTransitive(currentMod.ModKey, out var masters)) {
             logger.Here().Error("Could not find master info for mod {Mod}", currentMod.ModKey);
             yield break;
         }
 
-        foreach (var modKey in currentModMasterInfo.Masters.Append(currentMod.ModKey)) {
+        foreach (var modKey in masters.Append(currentMod.ModKey)) {
             var mod = editorEnvironment.LinkCache.ResolveMod(modKey);
             if (mod is null) {
                 logger.Here().Error("Could not find mod {Mod} in link cache", modKey);

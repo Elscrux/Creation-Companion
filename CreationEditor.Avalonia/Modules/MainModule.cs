@@ -24,6 +24,7 @@ using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
+using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Plugin;
@@ -87,6 +88,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<BusyService>()
             .As<IBusyService>()
+            .SingleInstance();
+
+        builder.RegisterType<ModService>()
+            .As<IModService>()
             .SingleInstance();
 
         builder.RegisterType<ModSaveService>()
