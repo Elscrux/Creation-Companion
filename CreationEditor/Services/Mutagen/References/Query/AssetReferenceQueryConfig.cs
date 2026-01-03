@@ -28,6 +28,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     private readonly IInternalCacheValidation<FileSystemDataSource, DataRelativePath> _cacheValidation =
         fileSystemValidationFactory(fileParser.AssetType.FileExtensions);
 
+    public IEqualityComparer<IDataSource> EqualityComparer { get; } = EqualityComparer<IDataSource>.Default;
     public bool CanGetLinksFromDeletedElement => false;
     public string Name => fileParser.Name;
 

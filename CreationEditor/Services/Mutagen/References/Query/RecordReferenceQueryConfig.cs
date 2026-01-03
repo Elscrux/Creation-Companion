@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Mutagen.References.Cache;
+﻿using CreationEditor.Resources.Comparer;
+using CreationEditor.Services.Mutagen.References.Cache;
 using CreationEditor.Services.Mutagen.References.Cache.Serialization;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -9,6 +10,7 @@ public sealed class RecordReferenceQueryConfig(
     RecordReferenceQuery recordReferenceQuery,
     RecordReferenceCacheSerialization serialization)
     : IReferenceQueryConfig<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier> {
+    public IEqualityComparer<IModGetter> EqualityComparer => ModComparer.Instance;
     public bool CanGetLinksFromDeletedElement => true;
     public string Name => recordReferenceQuery.Name;
 
@@ -19,4 +21,6 @@ public sealed class RecordReferenceQueryConfig(
     public IEnumerable<IFormLinkIdentifier> GetLinks(RecordModPair element) {
         return RecordReferenceQuery.ParseRecord(element.Record);
     }
+
+    public object GetSourceKey(IModGetter source) => source.ModKey;
 }

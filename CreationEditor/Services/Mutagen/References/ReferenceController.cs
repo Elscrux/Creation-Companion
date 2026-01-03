@@ -24,7 +24,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
     private readonly ConcurrentQueue<TSourceElement> _pendingCreations = new();
     private readonly ConcurrentQueue<TSourceElement> _pendingDeletions = new();
 
-    private readonly ConcurrentDictionary<TSource, TCache> _caches = [];
+    private readonly ConcurrentDictionary<TSource, TCache> _caches;
 
     private readonly BehaviorSubject<bool> _isLoading = new(true);
     public IObservable<bool> IsLoading => _isLoading;
@@ -42,6 +42,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         _referenceSubscriptionManager = referenceSubscriptionManager;
         _notificationService = notificationService;
 
+        _caches = new ConcurrentDictionary<TSource, TCache>([], _queryConfig.EqualityComparer);
         _updateTrigger.SetupSubscriptions(this, _disposables);
     }
 
@@ -51,7 +52,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         _isLoading.OnNext(true);
 
         // Remove references from sources that are no longer present
-        foreach (var source in _caches.Keys.Where(source => !sources.Contains(source))) {
+        foreach (var source in _caches.Keys.Where(source => !sources.Contains(source, _queryConfig.EqualityComparer))) {
             _caches.TryRemove(source, out _);
         }
 

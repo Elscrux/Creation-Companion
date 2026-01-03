@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Mutagen.References.Cache;
+﻿using CreationEditor.Resources.Comparer;
+using CreationEditor.Services.Mutagen.References.Cache;
 using CreationEditor.Services.Mutagen.References.Cache.Serialization;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -12,6 +13,7 @@ public sealed class RecordGlobalVariableReferenceQueryConfig(
     private readonly DictionaryReferenceCacheSerialization<IModGetter, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier> _serialization =
         serializationFactory(["References"]);
 
+    public IEqualityComparer<IModGetter> EqualityComparer => ModComparer.Instance;
     public bool CanGetLinksFromDeletedElement => true;
     public string Name => globalVariableReferenceQuery.Name;
 
@@ -22,4 +24,6 @@ public sealed class RecordGlobalVariableReferenceQueryConfig(
     public IEnumerable<string> GetLinks(RecordModPair element) {
         return globalVariableReferenceQuery.ParseRecord(element.Record);
     }
+
+    public object GetSourceKey(IModGetter source) => source.ModKey;
 }

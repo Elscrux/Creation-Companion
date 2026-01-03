@@ -5,8 +5,10 @@ public interface IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink>
     where TSourceElement : notnull
     where TCache : notnull
     where TLink : notnull {
+    IEqualityComparer<TSource> EqualityComparer { get; }
     bool CanGetLinksFromDeletedElement { get; }
     string Name { get; }
     Task<TCache> BuildCache(TSource source);
     IEnumerable<TLink> GetLinks(TSourceElement element);
+    object GetSourceKey(TSource source) => source;
 }
