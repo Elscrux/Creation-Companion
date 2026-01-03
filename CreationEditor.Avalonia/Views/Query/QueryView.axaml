@@ -17,6 +17,7 @@
             <TextBlock Text="From all "/>
             <controls:FAComboBox
                 x:Name="FromAutoCompleteBox"
+                SelectedItem="{Binding QueryRunner.QueryFrom.SelectedItem}"
                 ItemsSource="{Binding QueryRunner.QueryFrom.Items}"
                 IsEditable="True"
                 IsTextSearchEnabled="True"
