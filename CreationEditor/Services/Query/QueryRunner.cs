@@ -91,7 +91,10 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
             .Switch()
             .CombineLatest(selectionChanged, (conditions, _) => conditions)
             .ThrottleMedium()
-            .Select(CreateSummary);
+            .Select(CreateSummary)
+            // Make sure that the subscription doesn't dispose when the control is unloaded
+            .Replay(1)
+            .RefCount();
 
         this.WhenAnyValue(x => x.QueryFrom.SelectedItem)
             .NotNull()
