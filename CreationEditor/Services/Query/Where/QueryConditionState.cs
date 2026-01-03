@@ -49,7 +49,7 @@ public sealed partial class QueryConditionState : ReactiveObject {
         .StartWith(Array.Empty<string>());
 
     public string GetFullSummary(IList<string> summaries) {
-        if (summaries.Count > SubConditions.Count) return string.Empty;
+        if (summaries.Count == 0 || summaries.Count > SubConditions.Count) return string.Empty;
 
         var sb = new StringBuilder();
         for (var i = 0; i < summaries.Count - 1; i++) {
