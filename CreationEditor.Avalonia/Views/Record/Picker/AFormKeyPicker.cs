@@ -374,7 +374,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 }
             })
             .ThrottleShort()
-            .ObserveOn(RxApp.TaskpoolScheduler)
+            .ObserveOnTaskpool()
             .Select(x => {
                 try {
                     if (x.LinkCache is null) {
@@ -464,7 +464,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 }
             })
             .ThrottleShort()
-            .ObserveOn(RxApp.TaskpoolScheduler)
+            .ObserveOnTaskpool()
             .Select(x => {
                 try {
                     if (x.LinkCache is null) {
@@ -569,7 +569,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                 }
             })
             .ThrottleShort()
-            .ObserveOn(RxApp.TaskpoolScheduler)
+            .ObserveOnTaskpool()
             .Select(x => {
                 try {
                     if (string.IsNullOrWhiteSpace(x.Raw)) {
@@ -680,7 +680,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                 SelectedMods: selectedMods,
                                 Types: enabledTypes,
                                 ScopedRecords: scopedRecords))
-                    .ObserveOn(RxApp.TaskpoolScheduler)
+                    .ObserveOnTaskpool()
                     .Select(x => {
                         var enabledTypes = EnabledTypes(x.Types).ToArray();
                         if (enabledTypes is []) return Observable.Empty<IMajorRecordIdentifierGetter>();
@@ -707,7 +707,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                         });
                     })
                     .FlowSwitch(this.WhenAnyValue(x => x.InSearchMode), Observable.Empty<IMajorRecordIdentifierGetter>())
-                    .ObserveOn(RxApp.TaskpoolScheduler)
+                    .ObserveOnTaskpool()
                     .Select(x => x.ToObservableChangeSet())
                     .Switch()
                     .ObserveOnGui()
@@ -730,7 +730,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                                     Filter: filter,
                                                     NameSelector: nameSelector))
                                         .ThrottleMedium()
-                                        .ObserveOn(RxApp.TaskpoolScheduler)
+                                        .ObserveOnTaskpool()
                                         .Select(data => {
                                             return new Func<IMajorRecordIdentifierGetter, bool>(ident => {
                                                 if (data.Filter is not null && !data.Filter(ident.FormKey, ident.EditorID)) return false;
@@ -753,7 +753,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
                                 //
                                 // return formKeyStrChanged
                                 //     .ThrottleMedium()
-                                //     .ObserveOn(RxApp.TaskpoolScheduler)
+                                //     .ObserveOnTaskpool()
                                 //     .Select(rawStr => (RawStr: rawStr, FormKey: FormKey.TryFactory(rawStr), FormID: FormID.TryFactory(rawStr, false)))
                                 //     .Select<(string RawStr, FormKey? FormKey, FormID? ID), Func<IMajorRecordIdentifier, bool>>(term => ident => {
                                 //         var fk = ident.FormKey;
