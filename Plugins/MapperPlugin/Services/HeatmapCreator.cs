@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Media;
 using CreationEditor.Avalonia;
+using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using MapperPlugin.ViewModels;
@@ -16,13 +17,13 @@ namespace MapperPlugin.Services;
 using RecordSpots = (IFormLinkIdentifier Record, Dictionary<Point, int> Spots);
 using MappingSpots = Dictionary<IFormLinkIdentifier, Dictionary<Point, int>>;
 
-public sealed class HeatmapCreator {
+public sealed class HeatmapCreator(IModService modService) {
     private const int CellSize = 4096;
     private const int Clustering = CellSize / 4;
 
     private Dictionary<MarkingMapping, MappingSpots>? _spotsPerMapping;
 
-    private readonly ConcurrentDictionary<IFormLinkIdentifier, Dictionary<Point, int>> _spotsCache = new();
+    private readonly ConcurrentDictionary<FormKey, Dictionary<Point, int>> _spotsCache = new();
 
     private int _leftCoordinate;
     private int _topCoordinate;
@@ -105,29 +106,33 @@ public sealed class HeatmapCreator {
         _spotsPerMapping = spotsPerMapping;
 
         RecordSpots GetSpots(IFormLinkIdentifier record) {
-            if (_spotsCache.TryGetValue(record, out var cachedSpots)) return (record, cachedSpots);
+            if (_spotsCache.TryGetValue(record.FormKey, out var cachedSpots)) return (record, cachedSpots);
 
             var spots = new Dictionary<Point, int>();
             foreach (var reference in referenceService.GetRecordReferences(record)) {
                 if (!reference.Type.InheritsFrom(typeof(IPlacedGetter))) continue;
+
+                // If the reference's mod does not have access to the worldspace's mod, skip it
+                if (!modService.IsModOrHasMasterTransitive(reference.FormKey.ModKey, worldspace.ModKey)) continue;
+
                 if (!linkCache.TryResolveSimpleContext(reference, out var referenceRecordContext)) continue;
                 if (referenceRecordContext.Record is not IPlacedGetter { IsDeleted: false, Placement: not null } placed) continue;
                 if (referenceRecordContext.Parent?.Record is not ICellGetter parentCell) continue;
 
                 var position = placed.Placement.Position;
                 Point point;
-                if ((parentCell.Flags & Cell.Flag.IsInteriorCell) == 0) {
-                    // Exterior cell - make sure it's in the worldspace
-                    if (!referenceRecordContext.TryGetParent<IWorldspaceGetter>(out var parentWorldspace)) continue;
-                    if (parentWorldspace.FormKey != worldspace) continue;
-
-                    point = Cluster(position);
-                } else {
+                if (parentCell.Flags.HasFlag(Cell.Flag.IsInteriorCell)) {
                     // Interior cell - find first exit to worldspace
                     var doorInWorldspace = parentCell.GetDoorsToWorldspace(linkCache).FirstOrDefault();
                     if (doorInWorldspace?.Placement is null) continue;
 
                     point = Cluster(doorInWorldspace.Placement.Position);
+                } else {
+                    // Exterior cell - make sure it's in the worldspace
+                    if (!referenceRecordContext.TryGetParent<IWorldspaceGetter>(out var parentWorldspace)) continue;
+                    if (parentWorldspace.FormKey != worldspace) continue;
+
+                    point = Cluster(position);
                 }
 
                 if (spots.TryGetValue(point, out var count)) {
@@ -137,7 +142,7 @@ public sealed class HeatmapCreator {
                 }
             }
 
-            _spotsCache.TryAdd(record, spots);
+            _spotsCache.TryAdd(record.FormKey, spots);
             return (record, spots);
 
             Point Cluster(P3Float position) {

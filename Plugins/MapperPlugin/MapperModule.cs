@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Services.Plugin;
+using MapperPlugin.Services;
 using MapperPlugin.ViewModels;
 namespace MapperPlugin;
 
@@ -9,6 +10,9 @@ public class MapperModule : ExtensionModule {
             .AsSelf();
 
         builder.RegisterType<MapperVM>()
+            .AsSelf();
+
+        builder.RegisterType<HeatmapCreator>()
             .AsSelf();
     }
 }

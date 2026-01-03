@@ -74,12 +74,13 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         IStateRepositoryFactory<MapperMemento, MapperMemento, NamedGuid> stateRepositoryFactory,
         ILogger logger,
         RegionMapCreator regionMapCreator,
+        HeatmapCreator heatmapCreator,
         IGameReleaseContext gameReleaseContext,
         IReferenceService referenceService,
         IMutagenTypeProvider mutagenTypeProvider,
         ILinkCacheProvider linkCacheProvider) {
         _queryVMFactory = queryVMFactory;
-        HeatmapCreator = new HeatmapCreator();
+        HeatmapCreator = heatmapCreator;
         VertexColorMapCreator = new VertexColorMapCreator();
         ReferenceService = referenceService;
         HeightmapCreator = new HeightmapCreator();
