@@ -200,17 +200,6 @@ public sealed class WriteXlsx(
                             WrapText = true,
                         },
                     },
-                    // Line Start - Blue
-                    new CellFormat {
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
                     // Non-Bold - Green
                     new CellFormat {
                         FontId = 0,
@@ -286,17 +275,6 @@ public sealed class WriteXlsx(
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
                             WrapText = true,
                         },
-                    },
-                    // Line Start - Green
-                    new CellFormat {
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
                     }
                 ),
             };
@@ -312,7 +290,6 @@ public sealed class WriteXlsx(
             const uint topicStartCellFormatId = 7;
             const uint responsesStartCellFormatId = 8;
             const uint responseStartCellFormatId = 9;
-            const uint lineStartCellFormatId = 10;
 
             // Add Sheets to the Workbook
             var sheets = workbookPart.Workbook.AppendChild(new Sheets());
@@ -517,9 +494,9 @@ public sealed class WriteXlsx(
                                     for (var lineId = 0; lineId < responseArray.Length; lineId++) {
                                         var line = responseArray[lineId];
                                         uint styleId;
-                                        var offset = isBlue ? (uint) 7 : 0;
+                                        var offset = isBlue ? (uint) 6 : 0;
                                         if (lineId > 0) {
-                                            styleId = lineStartCellFormatId + offset;
+                                            styleId = blueNonBoldCellFormatId + offset;
                                         } else if (responseId > 0) {
                                             styleId = responseStartCellFormatId + offset;
                                         } else if (responsesId > 0) {
