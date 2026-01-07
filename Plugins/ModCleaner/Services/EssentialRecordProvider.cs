@@ -12,8 +12,18 @@ public sealed class EssentialRecordProvider(
     IEditorEnvironment editorEnvironment,
     IFeatureFlagService featureFlagService) : IEssentialRecordProvider {
 
+    public bool IsEssentialRecord(IFormLinkGetter formLink) {
+        if (EssentialRecords.Contains(formLink)) return true;
+
+        return FormKeysEssentialRecords.Contains(formLink.FormKey);
+    }
+
     [field: AllowNull, MaybeNull]
     public IReadOnlySet<FormLinkInformation> EssentialRecords => field ??= EnumerateEssentialRecords().ToHashSet();
+
+    private IReadOnlySet<FormKey> FormKeysEssentialRecords => field ??= EssentialRecords
+        .Select(fli => fli.FormKey)
+        .ToHashSet();
 
     private IEnumerable<FormLinkInformation> EnumerateEssentialRecords() {
         foreach (var featureFlag in featureFlagService.EnabledFeatureFlags) {

@@ -378,7 +378,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         var invalidQuests = new HashSet<IQuestGetter>();
         foreach (var linkIdentifier in retainedLinks) {
             if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
-            if (_essentialRecordProvider.EssentialRecords.Contains(formLinkIdentifier.FormLink)) continue;
+            if (_essentialRecordProvider.IsEssentialRecord(formLinkIdentifier.FormLink)) continue;
             if (formLinkIdentifier.FormLink.FormKey.ModKey != mod.ModKey) continue;
             if (formLinkIdentifier.FormLink.Type != typeof(IQuestGetter)) continue;
             if (!EditorEnvironment.LinkCache.TryResolve<IQuestGetter>(formLinkIdentifier.FormLink.FormKey, out var quest)) continue;
