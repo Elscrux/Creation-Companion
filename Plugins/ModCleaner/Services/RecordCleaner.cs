@@ -219,7 +219,8 @@ public sealed class RecordCleaner(
         var duplicate = ModFactory.ImportSetter(newModPath,
             mod.GameRelease,
             BinaryReadParameters.Default with {
-                FileSystem = fileSystem
+                FileSystem = fileSystem,
+                LinkCache = editorEnvironment.LinkCache,
             });
 
         foreach (var record in recordsToClean) {
