@@ -394,10 +394,11 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         var path = SelectedDataSource.FileSystem.Path;
         var directory = path.Combine(SkyrimSoundAssetType.Instance.BaseFolder, "Voice");
-        if (!SelectedDataSource.FileSystem.Directory.Exists(directory)) return [];
+        if (!SelectedDataSource.DirectoryExists(directory)) return [];
 
         var voiceTypesWithSounds = SelectedDataSource
             .EnumerateDirectories(directory)
+            .SelectMany(modPath => SelectedDataSource.EnumerateDirectories(modPath))
             .Select(voiceTypePath => path.GetFileName(voiceTypePath.Path))
             .Select(voiceType => EditorEnvironment.LinkCache.TryResolve<IVoiceTypeGetter>(voiceType, out var voiceTypeRecord)
                 ? voiceTypeRecord
