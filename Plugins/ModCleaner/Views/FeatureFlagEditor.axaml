@@ -111,7 +111,7 @@
 
             <basic:LabeledContentControl
                 Header="Essential Quests"
-                HeaderToolTip="These quests and all they need .">
+                HeaderToolTip="Keep all quests in this list when cleaning.">
                 <ListBox ItemsSource="{Binding EssentialQuests}"
                          dragDrop:DragDropExtended.AllowDrag="True"
                          dragDrop:DragDropExtended.AllowDrop="True"
@@ -144,7 +144,7 @@
 
             <basic:LabeledContentControl
                 Header="Essential Load Screens"
-                HeaderToolTip="Keep all quests that should be shown.">
+                HeaderToolTip="Keep all load screens in this list when cleaning.">
                 <ListBox ItemsSource="{Binding EssentialLoadScreens}"
                          dragDrop:DragDropExtended.AllowDrag="True"
                          dragDrop:DragDropExtended.AllowDrop="True"
