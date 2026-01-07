@@ -357,8 +357,8 @@ public sealed partial class ModCleanerVM : ViewModel {
                     interiorCells.Add(cell);
                 }
             } else if (_essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), cell)) {
-                var notInRangeOfValidCells = Enumerable.Range(-3, 3)
-                    .SelectMany(dx => Enumerable.Range(-3, 3).Select(dy => (dx, dy)))
+                var notInRangeOfValidCells = Enumerable.Range(-3, 7)
+                    .SelectMany(dx => Enumerable.Range(-3, 7).Select(dy => (dx, dy)))
                     .Select(offset => worldspace.GetCell(new P2Int(cell.Grid.Point.X + offset.dx, cell.Grid.Point.Y + offset.dy)))
                     .WhereNotNull()
                     .All(neighborCell => _essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), neighborCell));
