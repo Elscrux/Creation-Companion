@@ -9,6 +9,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 namespace LeveledList.Services.Enchantments;
 
 public class EnchantmentsGenerator(
@@ -83,7 +84,7 @@ public class EnchantmentsGenerator(
                 if (type == ListRecordType.Staff) {
                     editorId = recordPrefixService.Prefix + "Staff" + enchantment.Suffix;
                 } else {
-                    editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID.TrimStart(recordPrefixService.Prefix).ToString() + enchantment.Suffix + enchantmentLevel.ToString("D2");
+                    editorId = recordPrefixService.Prefix + "Ench" + enchantable.EditorID?.TrimStart(recordPrefixService.Prefix, StringComparison.OrdinalIgnoreCase) + enchantment.Suffix + enchantmentLevel.ToString("D2");
                 }
 
                 editorEnvironment.LinkCache.TryResolve<IEnchantableGetter>(editorId, out var existingEnchanted);
