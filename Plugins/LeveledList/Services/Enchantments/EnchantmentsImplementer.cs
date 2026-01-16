@@ -2,6 +2,7 @@
 using CreationEditor.Services.Mutagen.Record;
 using LeveledList.Model.Enchantments;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Enchantments;
@@ -23,6 +24,7 @@ public sealed class EnchantmentsImplementer(
             }
 
             enchantable.EditorID = enchantedItem.EditorID;
+            (enchantable as INamed)?.Name = enchantedItem.Name;
             enchantable.ObjectEffect.SetTo(enchantedItem.Enchantment);
 
             // Only weapons need to have the enchantment amount set
