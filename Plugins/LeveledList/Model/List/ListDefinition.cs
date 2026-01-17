@@ -149,8 +149,18 @@ public partial record ListDefinition(
                         if (feature is null) continue;
                         if (featureIdentifier != "_" && !featureIdentifier.FeatureIdentifierEquals(feature.Key.ToString())) continue;
 
-                        foreach (var wildcardTier in tiers) {
-                            var entries = wildcardTier.GetEntries(new LeveledListEntryItem(list, null));
+                        // Filter tier entries by the current enchantment level when available
+                        var filteredTierEntries = tierEntries;
+                        var enchantmentLevelFeature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier == FeatureProvider.EnchantmentLevel);
+                        if (enchantmentLevelFeature is not null && int.TryParse(enchantmentLevelFeature.Key.ToString(), out var enchantmentLevel)) {
+                            filteredTierEntries = filteredTierEntries
+                                .Where(t => t.EnchantmentLevel == enchantmentLevel)
+                                .ToList();
+                        }
+
+                        // Add entries for the list
+                        foreach (var wildcardTierEntry in filteredTierEntries) {
+                            var entries = wildcardTierEntry.GetEntries(new LeveledListEntryItem(list, null));
                             leveledList.Entries.AddRange(entries);
                         }
                     }
