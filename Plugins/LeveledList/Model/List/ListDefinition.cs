@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using CreationEditor.Avalonia.Services.Record.Prefix;
 using LeveledList.Model.Feature;
+using LeveledList.Services.LeveledList;
 using EnchantmentProvider = LeveledList.Services.LeveledList.EnchantmentProvider;
 namespace LeveledList.Model.List;
 
@@ -104,13 +105,26 @@ public partial record ListDefinition(
 
         if (Tiers is not null) {
             foreach (var record in featureNode.Records) {
+                // Get tier entries with matching enchantment level
                 var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record.Record);
 
-                var tiers = GetTiers(record.Tier)
-                    .Where(t => t.EnchantmentLevel == enchantmentLevel);
+                var tierEntries = GetTierEntries(record.Tier);
 
-                foreach (var listTierItem in tiers) {
-                    var entries = listTierItem.GetEntries(new LeveledListEntryItem(null, record.Record));
+                var feature = featureNode.Features.Find(f => f.Wildcard.Identifier == FeatureProvider.EnchantmentLevel);
+                if (int.TryParse(feature?.Key.ToString(), out var enchantmentLevelOverride)) {
+                    // If there is an enchantment level wildcard feature, this overrides the enchantment level of all tier entries
+                    if (enchantmentLevel != enchantmentLevelOverride) {
+                        tierEntries = [];
+                    }
+                } else {
+                    // Otherwise, filter tier entries by their defined enchantment level
+                    tierEntries = tierEntries
+                        .Where(t => t.EnchantmentLevel == enchantmentLevel);
+                }
+
+                // Add entries for the record
+                foreach (var tierEntry in tierEntries) {
+                    var entries = tierEntry.GetEntries(new LeveledListEntryItem(null, record.Record));
                     leveledList.Entries.AddRange(entries);
                 }
             }
@@ -150,7 +164,7 @@ public partial record ListDefinition(
         return leveledList;
     }
 
-    public IEnumerable<ListEntryDefinition> GetTiers(TierIdentifier tier) {
+    public IEnumerable<ListEntryDefinition> GetTierEntries(TierIdentifier tier) {
         if (Tiers is null) return [];
 
         // If there is a wildcard tier, return all possible tiers
