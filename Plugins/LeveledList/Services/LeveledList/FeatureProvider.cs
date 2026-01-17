@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Environment;
+﻿using CreationEditor.Avalonia.Services.Record.Prefix;
+using CreationEditor.Services.Environment;
 using CreationEditor.Skyrim;
 using LeveledList.Model.Feature;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
@@ -12,6 +13,7 @@ namespace LeveledList.Services.LeveledList;
 public sealed class FeatureProvider(
     ILinkCacheProvider linkCacheProvider,
     EnchantmentProvider enchantmentProvider,
+    IRecordPrefixService recordPrefixService,
     ITierController tierController)
     : IFeatureProvider {
     public const FeatureWildcardIdentifier Tier = "Tier";
@@ -80,6 +82,7 @@ public sealed class FeatureProvider(
                     }
 
                     return enchantment.EditorID?
+                        .TrimStart(recordPrefixService.Prefix, StringComparison.OrdinalIgnoreCase)
                         .Replace("Fortify", string.Empty)
                         .Replace("EnchArmor", string.Empty)
                         .Replace("EnchWeapon", string.Empty)
