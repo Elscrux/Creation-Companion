@@ -10,7 +10,8 @@ public sealed class TierController : ITierController {
     private readonly IStateRepository<TierDefinitions, TierDefinitions, string> _stateRepository;
     private readonly IRecordDecorationController _recordDecorationController;
 
-    public TierController(IRecordDecorationController recordDecorationController,
+    public TierController(
+        IRecordDecorationController recordDecorationController,
         IStateRepositoryFactory<TierDefinitions, TierDefinitions, string> stateRepositoryFactory) {
         _recordDecorationController = recordDecorationController;
         _recordDecorationController.Register<Tier>();
@@ -37,7 +38,16 @@ public sealed class TierController : ITierController {
 
     public Dictionary<TierIdentifier, TierData> GetTiers(ListRecordType type) {
         var state = _stateRepository.Load(GetTypeKey(type));
-        return state?.Tiers ?? new Dictionary<TierIdentifier, TierData>();
+        return state?.Tiers ?? [];
+    }
+
+    public Dictionary<TierIdentifier, TierIdentifier> GetTierAliases(ListRecordType type) {
+        var state = _stateRepository.Load(GetTypeKey(type));
+        return state?.TierAliases ?? [];
+    }
+
+    public TierDefinitions? GetTierDefinitions(ListRecordType type) {
+        return _stateRepository.Load(GetTypeKey(type));
     }
 
     public TierData? GetTierData(ListRecordType type, TierIdentifier tier) {
@@ -45,8 +55,8 @@ public sealed class TierController : ITierController {
         return state?.Tiers.GetValueOrDefault(tier);
     }
 
-    public void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers) {
-        _stateRepository.Save(new TierDefinitions(tiers), GetTypeKey(type));
+    public void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers, Dictionary<TierIdentifier, TierIdentifier> tierAliases) {
+        _stateRepository.Save(new TierDefinitions(tiers, tierAliases), GetTypeKey(type));
     }
 
     private static string GetTypeKey(ListRecordType type) => type.ToString();

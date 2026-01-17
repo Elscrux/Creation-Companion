@@ -10,13 +10,14 @@
              xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
              xmlns:tier="clr-namespace:LeveledList.Model.Tier"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Name="Control"
              x:Class="LeveledList.Views.TiersView"
              x:DataType="viewModels:TiersVM">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="300"/>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition MinWidth="200" Width="Auto"/>
+            <ColumnDefinition MinWidth="200" />
         </Grid.ColumnDefinitions>
 
         <StackPanel
@@ -31,35 +32,85 @@
                     SelectedItem="{Binding SelectedTierType}"/>
 
                 <Button Command="{Binding SaveTiers}"
-                        Content="Save Tiers"/>
+                        Content="Save Tiers"
+                        Background="{DynamicResource SystemAccentColor}"/>
             </StackPanel>
 
-            <basic:LabeledContentControl
-                Header="Create Tiers"
-                HeaderToolTip="Tiers represent a group of records that can be used in a leveled list. 
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="10">
+                <basic:LabeledContentControl
+                    Header="Create Tiers"
+                    HeaderToolTip="Tiers represent a group of records that can be used in a leveled list. 
 You can create nested tiers like 'heavy/iron' by adding a '/' to group them. 
 Use the record browser to assign records to tiers.">
-                <DataGrid
-                    Classes="NoCellSelection Mutable"
-                    Background="{DynamicResource SystemControlTransparentBrush}"
-                    CanUserSortColumns="False"
-                    AutoGenerateColumns="False"
-                    HorizontalAlignment="Left"
-                    ItemsSource="{Binding Tiers}"
-                    dragDrop:DragDropExtended.AllowDrag="True"
-                    dragDrop:DragDropExtended.AllowDrop="True"
-                    attached:ListShortcuts.Add="{Binding AddTier}"
-                    attached:ListShortcuts.Remove="{Binding RemoveTier}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Header="Name"
-                            Binding="{Binding Identifier, DataType=tier:TierItem}"/>
-                        <DataGridTextColumn
-                            Header="Enchantment Levels"
-                            Binding="{Binding EnchantmentLevels, DataType=tier:TierItem}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </basic:LabeledContentControl>
+                    <DataGrid
+                        Classes="NoCellSelection Mutable"
+                        Background="{DynamicResource SystemControlTransparentBrush}"
+                        CanUserSortColumns="False"
+                        AutoGenerateColumns="False"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{Binding Tiers}"
+                        dragDrop:DragDropExtended.AllowDrag="True"
+                        dragDrop:DragDropExtended.AllowDrop="True"
+                        attached:ListShortcuts.Add="{Binding AddTier}"
+                        attached:ListShortcuts.Remove="{Binding RemoveTier}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Header="Name"
+                                Binding="{Binding Identifier, DataType=tier:TierItem}"/>
+                            <DataGridTextColumn
+                                Header="Enchantment Levels"
+                                Binding="{Binding EnchantmentLevels, DataType=tier:TierItem}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </basic:LabeledContentControl>
+
+                <basic:LabeledContentControl
+                    Header="Create Tier Aliases"
+                    HeaderToolTip="Tier aliases allow you to create alternative names for existing tiers, which
+allows you to reuse the same tiers mentioned in list and enchantment definitions but under different names.
+For example, you could create a 'heavy/chitin' tier alias that points to the 'heavy/steel' tier,
+allowing you to generate chitin items at the same levels as it was defined for steel items.">
+                    <DataGrid
+                        Classes="NoCellSelection Mutable"
+                        Background="{DynamicResource SystemControlTransparentBrush}"
+                        CanUserSortColumns="False"
+                        AutoGenerateColumns="False"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{Binding TierAliases}"
+                        dragDrop:DragDropExtended.AllowDrag="True"
+                        dragDrop:DragDropExtended.AllowDrop="True"
+                        attached:ListShortcuts.Add="{Binding AddTierAlias}"
+                        attached:ListShortcuts.Remove="{Binding RemoveTierAlias}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Alias Tier">
+                                <DataTemplate DataType="tier:TierAliasItem">
+                                    <controls:FAComboBox
+                                        IsEditable="True"
+                                        IsTextSearchEnabled="True"
+                                        ItemsSource="{Binding #Control.ViewModel.Tiers}"
+                                        SelectedItem="{Binding Alias, Mode=TwoWay}"
+                                        Text="{Binding Alias, Mode=OneWayToSource}"
+                                        DisplayMemberBinding="{Binding Identifier}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Alias For">
+                                <DataTemplate DataType="tier:TierAliasItem">
+                                    <controls:FAComboBox
+                                        IsEditable="True"
+                                        IsTextSearchEnabled="True"
+                                        ItemsSource="{Binding #Control.ViewModel.Tiers}"
+                                        SelectedItem="{Binding Original, Mode=TwoWay}"
+                                        Text="{Binding Original, Mode=OneWayToSource}"
+                                        DisplayMemberBinding="{Binding Identifier}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </basic:LabeledContentControl>
+            </StackPanel>
         </StackPanel>
 
         <GridSplitter Grid.Column="1"/>

@@ -20,6 +20,7 @@ namespace LeveledList.ViewModels;
 
 public sealed partial class TiersVM : ValidatableViewModel {
     public IObservableCollection<TierItem> Tiers { get; } = new ObservableCollectionExtended<TierItem>();
+    public IObservableCollection<TierAliasItem> TierAliases { get; } = new ObservableCollectionExtended<TierAliasItem>();
 
     public IReadOnlyList<ListRecordType> TierRecordTypes { get; } = Enum.GetValues<ListRecordType>();
 
@@ -30,6 +31,8 @@ public sealed partial class TiersVM : ValidatableViewModel {
     public ReactiveCommand<Unit, Unit> SaveTiers { get; }
     public ReactiveCommand<string, Unit> AddTier { get; }
     public ReactiveCommand<IList, Unit> RemoveTier { get; }
+    public ReactiveCommand<Unit, Unit> AddTierAlias { get; }
+    public ReactiveCommand<IList, Unit> RemoveTierAlias { get; }
 
     public TiersVM(
         ILinkCacheProvider linkCacheProvider,
@@ -39,17 +42,26 @@ public sealed partial class TiersVM : ValidatableViewModel {
         Task.Run(() => RecordListVM = GetRecordListVM());
 
         this.WhenAnyValue(x => x.SelectedTierType)
-            .Select(tierController.GetTiers)
+            .Select(tierController.GetTierDefinitions)
             .ObserveOnGui()
-            .Subscribe(tiers => {
-                var tierItems = tiers
+            .Subscribe(tierDefinitions => {
+                var tierItems = tierDefinitions?.Tiers
                     .Select(tier => new TierItem {
                         Identifier = tier.Key,
                         EnchantmentLevels = string.Join(", ", tier.Value.Levels),
                     })
                     .ToArray();
-                SelectedTier = tierItems.FirstOrDefault();
-                Tiers.LoadOptimized(tierItems);
+
+                var tierAliases = tierDefinitions?.TierAliases?
+                    .Select(alias => new TierAliasItem {
+                        Alias = tierItems?.FirstOrDefault(x => x.Identifier == alias.Key),
+                        Original = tierItems?.FirstOrDefault(x => x.Identifier == alias.Value),
+                    })
+                    .ToArray();
+
+                SelectedTier = tierItems?.FirstOrDefault();
+                Tiers.LoadOptimized(tierItems ?? []);
+                TierAliases.LoadOptimized(tierAliases ?? []);
             })
             .DisposeWith(this);
 
@@ -66,7 +78,11 @@ public sealed partial class TiersVM : ValidatableViewModel {
                 .Where(x => !string.IsNullOrEmpty(x.Identifier))
                 .ToDictionary(x => x.Identifier, x => new TierData(x.GetEnchantmentLevels()));
 
-            tierController.SetTiers(SelectedTierType, tierIdentifiers);
+            var tierAliases = TierAliases
+                .Where(x => !string.IsNullOrEmpty(x.Original?.Identifier) && !string.IsNullOrEmpty(x.Alias?.Identifier))
+                .ToDictionary(x => x.Alias!.Identifier, x => x.Original!.Identifier);
+
+            tierController.SetTiers(SelectedTierType, tierIdentifiers, tierAliases);
 
             RecordListVM = GetRecordListVM();
         });
@@ -80,6 +96,17 @@ public sealed partial class TiersVM : ValidatableViewModel {
 
         RemoveTier = ReactiveCommand.Create<IList>(tiers => {
             Tiers.RemoveMany(tiers.OfType<TierItem>());
+        });
+
+        AddTierAlias = ReactiveCommand.Create(() => {
+            var tierAlias = new TierAliasItem();
+            if (TierAliases.Contains(tierAlias)) return;
+
+            TierAliases.Add(tierAlias);
+        });
+
+        RemoveTierAlias = ReactiveCommand.Create<IList>(tiers => {
+            TierAliases.RemoveMany(tiers.OfType<TierAliasItem>());
         });
 
         IRecordListVM GetRecordListVM() {

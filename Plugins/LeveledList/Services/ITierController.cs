@@ -11,6 +11,8 @@ public interface ITierController {
     void RemoveRecordTier(IMajorRecordGetter record);
 
     Dictionary<TierIdentifier, TierData> GetTiers(ListRecordType type);
+    Dictionary<TierIdentifier, TierIdentifier> GetTierAliases(ListRecordType type);
+    TierDefinitions? GetTierDefinitions(ListRecordType type);
     TierData? GetTierData(ListRecordType type, TierIdentifier tier);
-    void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers);
+    void SetTiers(ListRecordType type, Dictionary<TierIdentifier, TierData> tiers, Dictionary<TierIdentifier, TierIdentifier> tierAliases);
 }

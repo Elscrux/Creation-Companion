@@ -32,8 +32,7 @@ public partial record ListDefinition(
     ListDefinitionIdentifier Name,
     Dictionary<FeatureWildcardIdentifier, List<FeatureIdentifier>>? Restrict = null,
     Dictionary<TierIdentifier, List<ListEntryDefinition>>? Tiers = null,
-    Dictionary<ListDefinitionIdentifier, Dictionary<FeatureWildcardIdentifier, Dictionary<FeatureIdentifier, List<ListEntryDefinition>>>>?
-        IncludeLists = null,
+    Dictionary<ListDefinitionIdentifier, Dictionary<FeatureWildcardIdentifier, Dictionary<FeatureIdentifier, List<ListEntryDefinition>>>>? IncludeLists = null,
     float Chance = 100.0f,
     bool UseAll = false,
     bool CalculateForEach = true,
@@ -96,6 +95,7 @@ public partial record ListDefinition(
     }
 
     public LeveledList CreateLeveledItem(
+        Dictionary<TierIdentifier, TierIdentifier> tierAliases,
         FeatureNode featureNode,
         EnchantmentProvider enchantmentProvider,
         IRecordPrefixService recordPrefixService,
@@ -108,7 +108,7 @@ public partial record ListDefinition(
                 // Get tier entries with matching enchantment level
                 var enchantmentLevel = enchantmentProvider.GetEnchantmentLevel(record.Record);
 
-                var tierEntries = GetTierEntries(record.Tier);
+                var tierEntries = GetTierEntries(record.Tier, tierAliases);
 
                 var feature = featureNode.Features.Find(f => f.Wildcard.Identifier == FeatureProvider.EnchantmentLevel);
                 if (int.TryParse(feature?.Key.ToString(), out var enchantmentLevelOverride)) {
@@ -142,12 +142,16 @@ public partial record ListDefinition(
                         .All(featureNode.Features.Contains))
                     .ToArray();
 
+                // Create entries for lists with matching features
                 var (featureWildcardIdentifier, tierDefinition) = tierDefinitionsPerFeature.First();
-                foreach (var (featureIdentifier, tiers) in tierDefinition) {
+                foreach (var (featureIdentifier, tierEntries) in tierDefinition) {
                     foreach (var list in matchingLists) {
-                        var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier == featureWildcardIdentifier);
+                        // Check if the list has the required feature
+                        var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier.FeatureIdentifierMatches(featureWildcardIdentifier, tierAliases));
                         if (feature is null) continue;
-                        if (featureIdentifier != "_" && !featureIdentifier.FeatureIdentifierEquals(feature.Key.ToString())) continue;
+
+                        // Check if the feature matches the required identifier
+                        if (featureIdentifier != "_" && !featureIdentifier.FeatureIdentifierEquals(feature.Key.ToString(), tierAliases)) continue;
 
                         // Filter tier entries by the current enchantment level when available
                         var filteredTierEntries = tierEntries;
@@ -174,19 +178,19 @@ public partial record ListDefinition(
         return leveledList;
     }
 
-    public IEnumerable<ListEntryDefinition> GetTierEntries(TierIdentifier tier) {
+    public IEnumerable<ListEntryDefinition> GetTierEntries(TierIdentifier tier, Dictionary<TierIdentifier, TierIdentifier> tierAliases) {
         if (Tiers is null) return [];
 
-        // If there is a wildcard tier, return all possible tiers
+        // If there is a wildcard tier, return all possible tier entries
         if (Tiers.TryGetValue("_", out var listedTier)) return listedTier;
 
-        // Return matching tiers
+        // Return matching tier entries
         return Tiers
-            .Where(t => t.Key.FeatureIdentifierMatches((tier)))
+            .Where(t => t.Key.FeatureIdentifierMatches(tier, tierAliases))
             .SelectMany(t => t.Value);
     }
 
-    public bool Restricts(IReadOnlyList<Feature.Feature> features) {
+    public bool Restricts(IReadOnlyList<Feature.Feature> features, Dictionary<TierIdentifier, TierIdentifier> tierAliases) {
         if (features.Count == 0) return true;
 
         return features.All(f => {
@@ -194,7 +198,7 @@ public partial record ListDefinition(
                 return true;
             }
 
-            return featureRestrictions.Any(feature => feature.FeatureIdentifierMatches(f.Key.ToString()));
+            return featureRestrictions.Any(feature => feature.FeatureIdentifierMatches(f.Key.ToString(), tierAliases));
         });
     }
 }

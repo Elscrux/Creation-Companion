@@ -214,16 +214,13 @@ public sealed partial class ListsVM : ValidatableViewModel {
         // Generate leveled list intermediate format based on type definition
         var generatedLists = new List<Model.List.LeveledList>();
         foreach (var listTypeDefinition in SelectedLists.Select(x => x.TypeDefinition).Distinct()) {
+            var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
             var leveledLists = _generator.Generate(listTypeDefinition, selectedMods);
-            generatedLists.AddRange(leveledLists);
+            generatedLists.AddRange(leveledLists
+                .Where(x => SelectedLists.Any(list => list.Matches(x, tierAliases))));
         }
 
-        // Filter leveled lists based on the selected list definitions
-        var leveledListToGenerate = generatedLists
-            .Where(x => SelectedLists.Any(list => list.Matches(x)))
-            .ToArray();
-
-        _implementer.ImplementLeveledLists(_editorEnvironment.ActiveMod, leveledListToGenerate);
+        _implementer.ImplementLeveledLists(_editorEnvironment.ActiveMod, generatedLists);
     }
 
     private IEnumerable<LeveledListTreeNode>? SelectNodes(Model.List.LeveledList? list) {
@@ -246,25 +243,22 @@ public sealed partial class ListsVM : ValidatableViewModel {
         try {
             _isBusy.OnNext(true);
             // Generate leveled list intermediate format based on type definition
-            var generatedLists = new List<Model.List.LeveledList>();
+            var generatedLists = new List<LeveledListTreeNode>();
             foreach (var listTypeDefinition in selectedLists.Select(x => x.TypeDefinition).Distinct()) {
+                var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
                 var leveledLists = _generator.Generate(listTypeDefinition, mods);
-                generatedLists.AddRange(leveledLists);
+                generatedLists.AddRange(leveledLists
+                    .Where(x => selectedLists.Any(list => list.Matches(x, tierAliases)))
+                    .Select(l => new LeveledListTreeNode(
+                        l,
+                        _editorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(l.EditorID, out var existingLeveledItem)
+                            ? existingLeveledItem
+                            : null,
+                        null)));
             }
 
-            // Filter leveled lists based on the selected list definitions
-            var lists = generatedLists
-                .Where(x => selectedLists.Any(list => list.Matches(x)))
-                .Select(l => new LeveledListTreeNode(
-                    l,
-                    _editorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(l.EditorID, out var existingLeveledItem)
-                        ? existingLeveledItem
-                        : null,
-                    null))
-                .ToArray();
-
             Dispatcher.UIThread.Post(() => {
-                _leveledLists.LoadOptimized(lists);
+                _leveledLists.LoadOptimized(generatedLists);
                 _isBusy.OnNext(false);
             });
         } catch (Exception e) {

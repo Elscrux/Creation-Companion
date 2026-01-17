@@ -4,6 +4,18 @@
       <ProjectReference Include="..\..\CreationEditor.Skyrim.Avalonia\CreationEditor.Skyrim.Avalonia.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Services\LeveledList\FeatureProvider.cs">
+        <DependentUpon>IFeatureProvider.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\TierController.cs">
+        <DependentUpon>ITierController.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\Record\LeveledListRecordTypeProvider.cs">
+        <DependentUpon>ILeveledListRecordTypeProvider.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins"/>
     </Target>

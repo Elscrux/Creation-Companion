@@ -14,10 +14,12 @@ public class LeveledListGenerator(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     IRecordPrefixService recordPrefixService,
+    ITierController tierController,
     IFeatureProvider featureProvider) {
     public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IReadOnlyCollection<IModGetter> modsToLookAt) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
         var records = leveledListRecordTypeProvider.GetRecords(modsToLookAt, listTypeDefinition.Type).ToArray();
+        var tierAliases = tierController.GetTierAliases(listTypeDefinition.Type);
 
         var createdListsPerDefinition = new Dictionary<ListDefinitionIdentifier, List<Model.List.LeveledList>>();
 
@@ -28,9 +30,9 @@ public class LeveledListGenerator(
                 .Select(featureProvider.GetFeatureWildcard)
                 .ToList();
 
-            var rootFeatureNode = GroupByFeatureWildcard(listDefinition, records, featureWildcards, []) ?? new FeatureNode([], records);
+            var rootFeatureNode = GroupByFeatureWildcard(tierAliases, listDefinition, records, featureWildcards, []) ?? new FeatureNode([], records);
             var fullyFeaturedNodes = rootFeatureNode.GetTreeLeaves(c => c.Children)
-                .Where(node => listDefinition.Restricts(node.Features))
+                .Where(node => listDefinition.Restricts(node.Features, tierAliases))
                 .ToList();
 
             var createdLists = new List<Model.List.LeveledList>();
@@ -38,6 +40,7 @@ public class LeveledListGenerator(
 
             foreach (var featureNode in fullyFeaturedNodes) {
                 var leveledItem = listDefinition.CreateLeveledItem(
+                    tierAliases,
                     featureNode,
                     enchantmentProvider,
                     recordPrefixService,
@@ -51,6 +54,7 @@ public class LeveledListGenerator(
     }
 
     public static FeatureNode? GroupByFeatureWildcard(
+        Dictionary<TierIdentifier, TierIdentifier> tierAliases,
         ListDefinition listDefinition,
         IEnumerable<RecordWithTier> records,
         List<FeatureWildcard> featureWildcards,
@@ -65,11 +69,11 @@ public class LeveledListGenerator(
         var groups = recordList.GroupBy(r => featureWildcard.Selector(r.Record));
         foreach (var group in groups) {
             if (group.Key is null) continue;
-            if (restrictions is not null && !restrictions.Any(r => r.FeatureIdentifierMatches(group.Key.ToString()))) continue;
+            if (restrictions is not null && !restrictions.Any(r => r.FeatureIdentifierMatches(group.Key.ToString(), tierAliases))) continue;
 
             var feature = new Feature(featureWildcard, group.Key);
             var newFeatures = features.Append(feature).ToList();
-            var nestedNode = GroupByFeatureWildcard(listDefinition, group, featureWildcards, newFeatures, level: level + 1);
+            var nestedNode = GroupByFeatureWildcard(tierAliases, listDefinition, group, featureWildcards, newFeatures, level: level + 1);
             if (nestedNode is null) continue;
 
             featureNode.Children.Add(nestedNode);

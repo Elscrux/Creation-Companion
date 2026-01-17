@@ -7,13 +7,13 @@ public sealed record ExtendedListDefinition(
     ListTypeDefinition TypeDefinition,
     ListDefinitionIdentifier Name,
     ListDefinition ListDefinition,
-    IRecordPrefixService recordPrefixService) {
-    public bool Matches(LeveledList leveledList) {
+    IRecordPrefixService RecordPrefixService) {
+    public bool Matches(LeveledList leveledList, Dictionary<TierIdentifier, TierIdentifier> tierAliases) {
         var featureWildcards = ListDefinition.Name.GetFeatureWildcards().ToArray();
         if (leveledList.Features.Count != featureWildcards.Length) return false;
         if (leveledList.Features.Any(f => !featureWildcards.Contains(f.Wildcard.Identifier))) return false;
-        if (!ListDefinition.Restricts(leveledList.Features)) return false;
+        if (!ListDefinition.Restricts(leveledList.Features, tierAliases)) return false;
 
-        return leveledList.EditorID == recordPrefixService.Prefix + ListDefinition.GetFullName(leveledList.Features);
+        return leveledList.EditorID == RecordPrefixService.Prefix + ListDefinition.GetFullName(leveledList.Features);
     }
 }

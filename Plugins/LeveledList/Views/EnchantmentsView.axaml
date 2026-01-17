@@ -95,6 +95,23 @@
                 </basic:LabeledContentControl>
 
                 <record:RecordPrefixPicker DataContext="{Binding RecordPrefixVM}"/>
+
+                <basic:LabeledContentControl
+                    Margin="10, 0"
+                    Header="Generation Preview"
+                    HeaderToolTip="To generate enchantments, add enchantment levels to tiers, and assign items to tiers.">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
+
+                        <TextBox
+                            Text="{Binding EnchantedItemsFilter}"
+                            Watermark="Filter"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            MinWidth="100"/>
+                    </StackPanel>
+                </basic:LabeledContentControl>
             </StackPanel>
 
             <Grid Grid.Row="2">
