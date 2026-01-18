@@ -2,7 +2,7 @@
 using CreationEditor.Services.Mutagen.Record;
 using LeveledList.Model.Enchantments;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins.Aspects;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.Enchantments;
@@ -20,17 +20,29 @@ public sealed class EnchantmentsImplementer(
             if (editorEnvironment.LinkCache.TryResolve<IEnchantableGetter>(enchantedItem.EditorID, out var enchantableGetter)) {
                 enchantable = recordController.GetOrAddOverride<IEnchantable, IEnchantableGetter>(enchantableGetter, mod);
             } else {
-                enchantable = recordController.DuplicateRecord<IEnchantable, IEnchantableGetter>(enchantedItem.Enchantable, mod);
+                enchantable = recordController.DuplicateRecord<IEnchantable, IEnchantableGetter>(enchantedItem.Template, mod);
             }
 
             enchantable.EditorID = enchantedItem.EditorID;
-            (enchantable as INamed)?.Name = enchantedItem.Name;
             enchantable.ObjectEffect.SetTo(enchantedItem.Enchantment);
 
-            // Only weapons need to have the enchantment amount set
-            if (enchantable is IWeaponGetter) {
-                // Hard coding the enchantment amount to 500 per level as per Skyrim standard
-                enchantable.EnchantmentAmount = (ushort) (enchantedItem.EnchantmentLevel * 500);
+            switch (enchantable) {
+                case IArmor armor:
+                    armor.Name = enchantedItem.Name;
+                    if (enchantedItem.Template is IArmorGetter templateArmor) {
+                        armor.TemplateArmor = new FormLinkNullable<IArmorGetter>(templateArmor);
+                    }
+                    break;
+                case IWeapon weapon:
+                    // Only weapons need to have the enchantment amount set
+                    // Hard coding the enchantment amount to 500 per level as per Skyrim standard
+                    enchantable.EnchantmentAmount = (ushort) (enchantedItem.EnchantmentLevel * 500);
+
+                    weapon.Name = enchantedItem.Name;
+                    if (enchantedItem.Template is IWeaponGetter templateWeapon) {
+                        weapon.Template = new FormLinkNullable<IWeaponGetter>(templateWeapon);
+                    }
+                    break;
             }
 
             tierController.SetRecordTier(enchantable, enchantedItem.Tier);

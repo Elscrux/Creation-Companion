@@ -4,7 +4,7 @@ namespace LeveledList.Model.Enchantments;
 public sealed record EnchantedItem(
     string EditorID,
     string Name,
-    IEnchantableGetter Enchantable,
+    IEnchantableGetter Template,
     IObjectEffectGetter Enchantment,
     IEnchantableGetter? ExistingEnchanted,
     int EnchantmentLevel,
