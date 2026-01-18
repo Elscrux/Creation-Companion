@@ -1,10 +1,11 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections;
+using System.Collections.Specialized;
 namespace CreationEditor;
 
 public static class NotifyCollectionChangedEventArgsExtension {
     extension(NotifyCollectionChangedEventArgs e) {
-        public NotifyCollectionChangedEventArgs Transform<TSource, TTarget>(Func<TSource, TTarget?> selector) {
-            return e.Action switch {
+        public IEnumerable<NotifyCollectionChangedEventArgs> Transform<TSource, TTarget>(IList currentItems, IList? newItems, Func<TSource, TTarget?> selector) {
+            yield return e.Action switch {
                 NotifyCollectionChangedAction.Add =>
                     new NotifyCollectionChangedEventArgs(
                         NotifyCollectionChangedAction.Add,
@@ -15,12 +16,10 @@ public static class NotifyCollectionChangedEventArgsExtension {
                         NotifyCollectionChangedAction.Remove,
                         e.OldItems?.OfType<TSource>().Select(selector).Where(x => x is not null).ToList(),
                         e.OldStartingIndex),
-                NotifyCollectionChangedAction.Replace =>
-                    new NotifyCollectionChangedEventArgs(
-                        NotifyCollectionChangedAction.Replace,
-                        e.NewItems?.OfType<TSource>().Select(selector).Where(x => x is not null).ToList(),
-                        e.NewStartingIndex,
-                        e.OldStartingIndex),
+                NotifyCollectionChangedAction.Replace => new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Replace,
+                    e.NewItems!,
+                    e.OldItems!),
                 NotifyCollectionChangedAction.Move =>
                     new NotifyCollectionChangedEventArgs(
                         NotifyCollectionChangedAction.Move,
@@ -29,7 +28,16 @@ public static class NotifyCollectionChangedEventArgsExtension {
                         e.OldStartingIndex),
                 NotifyCollectionChangedAction.Reset =>
                     new NotifyCollectionChangedEventArgs(
-                        NotifyCollectionChangedAction.Reset),
+                        NotifyCollectionChangedAction.Remove,
+                        currentItems),
+                _ => throw new ArgumentOutOfRangeException(nameof(e)),
+            };
+
+            yield return e.Action switch {
+                NotifyCollectionChangedAction.Reset =>
+                    new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Add,
+                        newItems?.OfType<TSource>().Select(selector).Where(x => x is not null).ToList()),
                 _ => throw new ArgumentOutOfRangeException(nameof(e)),
             };
         }

@@ -39,7 +39,9 @@ public static class ObservableCollectionExtension {
 
             source.ObserveCollectionChanges()
                 .Subscribe(e => {
-                    internalCollection.Apply(e.EventArgs.Transform(selector));
+                    foreach (var newArgs in e.EventArgs.Transform(internalCollection, e.Sender as IList, selector)) {
+                        internalCollection.Apply(newArgs);
+                    }
                 })
                 .DisposeWith(disposable);
 

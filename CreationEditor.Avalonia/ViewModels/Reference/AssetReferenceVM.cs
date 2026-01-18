@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
@@ -83,7 +84,9 @@ public sealed class AssetReferenceVM : IReferenceVM, IDisposable {
                 }
             }
         } else {
-            _childrenCollection.Apply(e.EventArgs.Transform<IFormLinkGetter, RecordReferenceVM>(GetRecordReference));
+            foreach (var newArgs in e.EventArgs.Transform<IFormLinkGetter, RecordReferenceVM>(_childrenCollection, e.Sender as IList, GetRecordReference)) {
+                _childrenCollection.Apply(newArgs);
+            }
         }
     }
 
@@ -105,7 +108,9 @@ public sealed class AssetReferenceVM : IReferenceVM, IDisposable {
                 _childrenCollection.Add(reference);
             }
         } else {
-            _childrenCollection.Apply(e.EventArgs.Transform<DataRelativePath, AssetReferenceVM>(GetAssetReference));
+            foreach (var newArgs in e.EventArgs.Transform<DataRelativePath, AssetReferenceVM>(_childrenCollection, e.Sender as IList, GetAssetReference)) {
+                _childrenCollection.Apply(newArgs);
+            }
         }
     }
 
