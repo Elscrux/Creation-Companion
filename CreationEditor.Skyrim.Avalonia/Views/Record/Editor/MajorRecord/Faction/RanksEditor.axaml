@@ -32,12 +32,10 @@
                                    ToolTip.Tip="Male Title name, not visible in game"/>
                     </DataGridTemplateColumn.Header>
 
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="skyrim:Rank">
-                            <TextBox Text="{Binding Title.Male.String}"
-                                     Watermark="Male"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="skyrim:Rank">
+                        <TextBox Text="{Binding Title.Male.String}"
+                                 Watermark="Male"/>
+                    </DataTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn>
@@ -46,12 +44,10 @@
                                    ToolTip.Tip="Female Title name, not visible in game"/>
                     </DataGridTemplateColumn.Header>
 
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="skyrim:Rank">
-                            <TextBox Text="{Binding Title.Female.String}"
-                                     Watermark="Female"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="skyrim:Rank">
+                        <TextBox Text="{Binding Title.Female.String}"
+                                 Watermark="Female"/>
+                    </DataTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>

@@ -75,159 +75,149 @@
 
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Run On">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition">
-                        <Grid x:Name="Grid">
-                            <Grid.Resources>
-                                <converter1:ReturnParameterIfTrueConverter
-                                    x:Key="ReturnGridLengthPixelIfTrue"
-                                    x:TypeArguments="system:Double"
-                                    Converter="{x:Static converter1:DoubleConverters.ToGridLengthPixel}"
-                                    DefaultValue="0"/>
-                                <converter1:ReturnParameterIfTrueConverter
-                                    x:Key="ReturnGridLengthStarIfTrue"
-                                    x:TypeArguments="system:Double"
-                                    Converter="{x:Static converter1:DoubleConverters.ToGridLengthStar}"
-                                    DefaultValue="0"/>
-                                <converter1:ReturnParameterIfTrueConverter
-                                    x:Key="ReturnGridLengthAutoIfTrue"
-                                    x:TypeArguments="system:Double"
-                                    Converter="{x:Static converter1:DoubleConverters.ToGridLengthAuto}"
-                                    DefaultValueConverted="{x:Static GridLength.Star}"/>
-                            </Grid.Resources>
+                <DataTemplate DataType="model:EditableCondition">
+                    <Grid x:Name="Grid">
+                        <Grid.Resources>
+                            <converter1:ReturnParameterIfTrueConverter
+                                x:Key="ReturnGridLengthPixelIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter1:DoubleConverters.ToGridLengthPixel}"
+                                DefaultValue="0"/>
+                            <converter1:ReturnParameterIfTrueConverter
+                                x:Key="ReturnGridLengthStarIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter1:DoubleConverters.ToGridLengthStar}"
+                                DefaultValue="0"/>
+                            <converter1:ReturnParameterIfTrueConverter
+                                x:Key="ReturnGridLengthAutoIfTrue"
+                                x:TypeArguments="system:Double"
+                                Converter="{x:Static converter1:DoubleConverters.ToGridLengthAuto}"
+                                DefaultValueConverted="{x:Static GridLength.Star}"/>
+                        </Grid.Resources>
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition
-                                    Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthAutoIfTrue}, ConverterParameter=0}"/>
-                                <ColumnDefinition
-                                    Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthPixelIfTrue}, ConverterParameter=5}"/>
-                                <ColumnDefinition
-                                    Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthStarIfTrue}, ConverterParameter=1}"/>
-                            </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition
+                                Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthAutoIfTrue}, ConverterParameter=0}"/>
+                            <ColumnDefinition
+                                Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthPixelIfTrue}, ConverterParameter=5}"/>
+                            <ColumnDefinition
+                                Width="{Binding ShowMoreRunOn^, Converter={StaticResource ReturnGridLengthStarIfTrue}, ConverterParameter=1}"/>
+                        </Grid.ColumnDefinitions>
 
-                            <CheckBox Grid.Column="0"
-                                      ToolTip.Tip="Swap Subject and Target"
-                                      Classes="CheckmarkOnly"
-                                      IsChecked="{Binding SwapSubjectAndTarget}"
-                                      VerticalAlignment="Top"/>
+                        <CheckBox Grid.Column="0"
+                                  ToolTip.Tip="Swap Subject and Target"
+                                  Classes="CheckmarkOnly"
+                                  IsChecked="{Binding SwapSubjectAndTarget}"
+                                  VerticalAlignment="Top"/>
 
-                            <ComboBox Grid.Column="1"
-                                      MaxDropDownHeight="750"
-                                      ItemsSource="{Binding #Editor.RunOnTypes}"
-                                      SelectedItem="{Binding RunOnType}"
-                                      IsVisible="{Binding }"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Top"/>
+                        <ComboBox Grid.Column="1"
+                                  MaxDropDownHeight="750"
+                                  ItemsSource="{Binding #Editor.RunOnTypes}"
+                                  SelectedItem="{Binding RunOnType}"
+                                  IsVisible="{Binding }"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Top"/>
 
-                            <picker:PlacedPickerButton
-                                Grid.Column="3"
-                                Placed="{Binding ReferenceLink}"
-                                LinkCache="{Binding #Editor.LinkCache}"
-                                IsVisible="{Binding ShowReference^}"
-                                VerticalAlignment="Top"/>
+                        <picker:PlacedPickerButton
+                            Grid.Column="3"
+                            Placed="{Binding ReferenceLink}"
+                            LinkCache="{Binding #Editor.LinkCache}"
+                            IsVisible="{Binding ShowReference^}"
+                            VerticalAlignment="Top"/>
 
-                            <picker:QuestAliasPicker
-                                Grid.Column="3"
-                                Quest="{Binding #Editor.Context}"
-                                AliasIndex="{Binding QuestAlias, Mode=TwoWay}"
-                                IsVisible="{Binding ShowQuestAlias^}"
-                                ScopedAliasTypes="{x:Static constants:EnumConstants.ReferenceAliasTypes}"
-                                VerticalAlignment="Top"/>
+                        <picker:QuestAliasPicker
+                            Grid.Column="3"
+                            Quest="{Binding #Editor.Context}"
+                            AliasIndex="{Binding QuestAlias, Mode=TwoWay}"
+                            IsVisible="{Binding ShowQuestAlias^}"
+                            ScopedAliasTypes="{x:Static constants:EnumConstants.ReferenceAliasTypes}"
+                            VerticalAlignment="Top"/>
 
-                            <picker:PackageDataPicker
-                                Grid.Column="3"
-                                Package="{Binding #Editor.Context}"
-                                PackageDataIndex="{Binding PackageData, Mode=TwoWay}"
-                                LinkCache="{Binding #Editor.LinkCache}"
-                                IsVisible="{Binding ShowPackageData^}"
-                                ScopedTypes="{x:Static constants:RecordTypeConstants.PlacedTypes}"
-                                VerticalAlignment="Top"/>
+                        <picker:PackageDataPicker
+                            Grid.Column="3"
+                            Package="{Binding #Editor.Context}"
+                            PackageDataIndex="{Binding PackageData, Mode=TwoWay}"
+                            LinkCache="{Binding #Editor.LinkCache}"
+                            IsVisible="{Binding ShowPackageData^}"
+                            ScopedTypes="{x:Static constants:RecordTypeConstants.PlacedTypes}"
+                            VerticalAlignment="Top"/>
 
-                            <picker:EventDataPicker
-                                Grid.Column="3"
-                                Quest="{Binding #Editor.Context}"
-                                EventMember="{Binding EventData, Mode=TwoWay}"
-                                IsVisible="{Binding ShowEventData^}"
-                                VerticalAlignment="Top"/>
-                        </Grid>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                        <picker:EventDataPicker
+                            Grid.Column="3"
+                            Quest="{Binding #Editor.Context}"
+                            EventMember="{Binding EventData, Mode=TwoWay}"
+                            IsVisible="{Binding ShowEventData^}"
+                            VerticalAlignment="Top"/>
+                    </Grid>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Function"
                                     CellTemplate="{Binding #Editor.FunctionTemplate}"/>
 
             <DataGridTemplateColumn Header="Data">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition" x:DataType="model:EditableCondition">
-                        <ContentControl x:Name="VariablesContainer"
-                                        Content="{Binding Data}"
-                                        HorizontalAlignment="Stretch">
-                            <ContentControl.ContentTemplate>
-                                <dataTemplates:ConditionDataTemplate
-                                    Condition="{ReflectionBinding}"
-                                    ValueChanged="{ReflectionBinding DataChanged, Mode=TwoWay}"
-                                    Context="{Binding #Editor.Context}"
-                                    QuestContext="{Binding #Editor.QuestContext}"
-                                    LinkCache="{Binding #Editor.LinkCache}"/>
-                            </ContentControl.ContentTemplate>
-                        </ContentControl>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="model:EditableCondition" x:DataType="model:EditableCondition">
+                    <ContentControl x:Name="VariablesContainer"
+                                    Content="{Binding Data}"
+                                    HorizontalAlignment="Stretch">
+                        <ContentControl.ContentTemplate>
+                            <dataTemplates:ConditionDataTemplate
+                                Condition="{ReflectionBinding}"
+                                ValueChanged="{ReflectionBinding DataChanged, Mode=TwoWay}"
+                                Context="{Binding #Editor.Context}"
+                                QuestContext="{Binding #Editor.QuestContext}"
+                                LinkCache="{Binding #Editor.LinkCache}"/>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Compare">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition">
-                        <ComboBox ItemsSource="{x:Static constants:EnumConstants.CompareOperatorTypesString}"
-                                  HorizontalAlignment="Stretch"
-                                  SelectedItem="{Binding CompareOperator, Converter={x:Static converter:SkyrimEnumConverters.StringToCompareOperator}}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="model:EditableCondition">
+                    <ComboBox ItemsSource="{x:Static constants:EnumConstants.CompareOperatorTypesString}"
+                              HorizontalAlignment="Stretch"
+                              SelectedItem="{Binding CompareOperator, Converter={x:Static converter:SkyrimEnumConverters.StringToCompareOperator}}"/>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Value" MinWidth="113" Width="113">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <CheckBox Grid.Column="0"
-                                      ToolTip.Tip="Use Global"
-                                      Classes="CheckmarkOnly"
-                                      IsChecked="{Binding UseGlobal}"
-                                      VerticalAlignment="Top"/>
+                <DataTemplate DataType="model:EditableCondition">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <CheckBox Grid.Column="0"
+                                  ToolTip.Tip="Use Global"
+                                  Classes="CheckmarkOnly"
+                                  IsChecked="{Binding UseGlobal}"
+                                  VerticalAlignment="Top"/>
 
-                            <subrecord:ConditionValue
-                                Grid.Column="1"
-                                VerticalAlignment="Top"
-                                HorizontalAlignment="Stretch"
-                                IsVisible="{Binding !UseGlobal}"
-                                Condition="{Binding}"
-                                ConditionDataChanged="{Binding DataChanged, Mode=OneWay}"
-                                LinkCache="{Binding #Editor.LinkCache}"/>
+                        <subrecord:ConditionValue
+                            Grid.Column="1"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Stretch"
+                            IsVisible="{Binding !UseGlobal}"
+                            Condition="{Binding}"
+                            ConditionDataChanged="{Binding DataChanged, Mode=OneWay}"
+                            LinkCache="{Binding #Editor.LinkCache}"/>
 
-                            <picker1:FormKeyPicker
-                                Grid.Column="1"
-                                VerticalAlignment="Top"
-                                HorizontalAlignment="Stretch"
-                                IsVisible="{Binding UseGlobal}"
-                                LinkCache="{Binding #Editor.LinkCache}"
-                                ScopedTypes="{x:Static constants:RecordTypeConstants.GlobalVariableTypes}"
-                                ShowFormKeyBox="False"
-                                FormKey="{Binding GlobalValue}"/>
-                        </Grid>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                        <picker1:FormKeyPicker
+                            Grid.Column="1"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Stretch"
+                            IsVisible="{Binding UseGlobal}"
+                            LinkCache="{Binding #Editor.LinkCache}"
+                            ScopedTypes="{x:Static constants:RecordTypeConstants.GlobalVariableTypes}"
+                            ShowFormKeyBox="False"
+                            FormKey="{Binding GlobalValue}"/>
+                    </Grid>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Or" MinWidth="77">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="model:EditableCondition">
-                        <ComboBox ItemsSource="{x:Static constants:EnumConstants.AndOr}"
-                                  SelectedIndex="{Binding Or}"
-                                  HorizontalAlignment="Stretch"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="model:EditableCondition">
+                    <ComboBox ItemsSource="{x:Static constants:EnumConstants.AndOr}"
+                              SelectedIndex="{Binding Or}"
+                              HorizontalAlignment="Stretch"/>
+                </DataTemplate>
             </DataGridTemplateColumn>
         </DataGrid.Columns>
     </DataGrid>

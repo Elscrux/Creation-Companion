@@ -86,13 +86,11 @@
                                         x:DataType="model:LoadOrderModItem"/>
                     <DataGridTemplateColumn Header="Active"
                                             MinWidth="78">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="model:LoadOrderModItem">
-                                <CheckBox IsChecked="{Binding IsActive}"
-                                          HorizontalAlignment="Center"
-                                          Classes="CheckmarkOnly"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="model:LoadOrderModItem">
+                            <CheckBox IsChecked="{Binding IsActive}"
+                                      HorizontalAlignment="Center"
+                                      Classes="CheckmarkOnly"/>
+                        </DataTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>

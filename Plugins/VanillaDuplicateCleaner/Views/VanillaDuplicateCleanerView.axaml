@@ -36,13 +36,11 @@
 
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Mod FormKey">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="selectables:SelectableRecordDiff">
-                                        <TextBlock Text="{Binding RecordDiff.Old.FormKey}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="selectables:SelectableRecordDiff">
+                                    <TextBlock Text="{Binding RecordDiff.Old.FormKey}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn
@@ -51,23 +49,19 @@
                                 Binding="{Binding RecordDiff.Old.EditorID}"/>
 
                             <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="🡒"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="selectables:SelectableRecordDiff">
+                                    <TextBlock Text="🡒"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
                             </DataGridTemplateColumn>
 
                             <DataGridTemplateColumn Header="Vanilla FormKey">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="selectables:SelectableRecordDiff">
-                                        <TextBlock Text="{Binding RecordDiff.New.FormKey}"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="selectables:SelectableRecordDiff">
+                                    <TextBlock Text="{Binding RecordDiff.New.FormKey}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn

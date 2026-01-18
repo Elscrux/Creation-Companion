@@ -37,22 +37,20 @@
                                    ToolTip.Tip="Determines the combat reaction to members of the target faction"/>
                     </DataGridTemplateColumn.Header>
 
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="subrecord:EditableRelation">
-                            <ComboBox
-                                ItemsSource="{x:Static constants:EnumConstants.CombatReactions}"
-                                ToolTip.Tip="{Binding Reaction, Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"
-                                HorizontalAlignment="Stretch"
-                                SelectedItem="{Binding Reaction}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate DataType="skyrim:CombatReaction">
-                                        <TextBlock Text="{Binding}"
-                                                   ToolTip.Tip="{Binding Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate DataType="subrecord:EditableRelation">
+                        <ComboBox
+                            ItemsSource="{x:Static constants:EnumConstants.CombatReactions}"
+                            ToolTip.Tip="{Binding Reaction, Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"
+                            HorizontalAlignment="Stretch"
+                            SelectedItem="{Binding Reaction}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="skyrim:CombatReaction">
+                                    <TextBlock Text="{Binding}"
+                                               ToolTip.Tip="{Binding Converter={x:Static tooltips:ToolTipConverters.CombatReactionToString}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </DataTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn Width="400">
@@ -61,15 +59,13 @@
                                    ToolTip.Tip="Faction to set combat reaction for"/>
                     </DataGridTemplateColumn.Header>
 
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="subrecord:EditableRelation">
-                            <picker:FormKeyPicker
-                                BlacklistFormKeys="{Binding $parent[view:RelationsEditor].ViewModel.BlacklistedFormKeys}"
-                                FormKey="{Binding TargetFormKey}"
-                                ScopedTypes="{x:Static constants:RecordTypeConstants.RelatableTypes}"
-                                LinkCache="{Binding $parent[view:FactionEditor].ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate DataType="subrecord:EditableRelation">
+                        <picker:FormKeyPicker
+                            BlacklistFormKeys="{Binding $parent[view:RelationsEditor].ViewModel.BlacklistedFormKeys}"
+                            FormKey="{Binding TargetFormKey}"
+                            ScopedTypes="{x:Static constants:RecordTypeConstants.RelatableTypes}"
+                            LinkCache="{Binding $parent[view:FactionEditor].ViewModel.Core.LinkCacheProvider.LinkCacheChanged^}"/>
+                    </DataTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>

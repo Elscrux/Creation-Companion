@@ -18,37 +18,31 @@
               Classes="NoCellSelection Medium Mutable">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="docking1:StartupDock">
-                        <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
-                                  SelectedItem="{Binding DockElement}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate DataType="models:DockElement">
-                                    <TextBlock
-                                        Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="docking1:StartupDock">
+                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
+                              SelectedItem="{Binding DockElement}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="models:DockElement">
+                                <TextBlock
+                                    Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Dock Mode">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="docking1:StartupDock">
-                        <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockModeTypes}"
-                                  SelectedItem="{Binding DockMode}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="docking1:StartupDock">
+                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockModeTypes}"
+                              SelectedItem="{Binding DockMode}"/>
+                </DataTemplate>
             </DataGridTemplateColumn>
 
             <DataGridTemplateColumn Header="Dock Layout">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate DataType="docking1:StartupDock">
-                        <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockTypes}"
-                                  SelectedItem="{Binding Dock}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
+                <DataTemplate DataType="docking1:StartupDock">
+                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockTypes}"
+                              SelectedItem="{Binding Dock}"/>
+                </DataTemplate>
             </DataGridTemplateColumn>
         </DataGrid.Columns>
     </DataGrid>

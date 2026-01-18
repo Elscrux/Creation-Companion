@@ -28,13 +28,11 @@
 
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="FormKey">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="records:IMajorRecordGetter">
-                            <TextBlock Text="{Binding FormKey}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate DataType="records:IMajorRecordGetter">
+                        <TextBlock Text="{Binding FormKey}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </DataTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn
