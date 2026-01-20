@@ -117,10 +117,16 @@ public sealed class RecordCleaner(
                      && !masters.Contains(modKey)
                      && !dependencies.Contains(modKey)) continue;
 
-                    // Remove these connections and fix them manually
-                    // Removing references from location to something - potentially not needed (clearing crime factions list might have fixed it) / too broad
-                    if (currentReference.Type == typeof(ILocationGetter)) {
-                        if (current.Type != typeof(ILocationGetter)) continue;
+                    // Remove auto generated entries from locations, and only retain custom referenced record
+                    if (currentReference.Type == typeof(ILocationGetter) && editorEnvironment.LinkCache.TryResolve<ILocationGetter>(currentReference.FormKey, out var location)) {
+                        if (current.FormKey != location.ParentLocation.FormKey
+                         && current.FormKey != location.Music.FormKey
+                         && current.FormKey != location.UnreportedCrimeFaction.FormKey
+                         && current.FormKey != location.HorseMarkerRef.FormKey
+                         && current.FormKey != location.WorldLocationMarkerRef.FormKey
+                         && (location.Keywords is null || location.Keywords.Any(k => k.FormKey == current.FormKey))) {
+                            continue;
+                        }
                     }
 
                     // Is regenerated
@@ -223,6 +229,7 @@ public sealed class RecordCleaner(
                 LinkCache = editorEnvironment.LinkCache,
             });
 
+        // Clean remove children of cells, and remove them from the cleaning list because those are removed together with the cell
         foreach (var record in recordsToClean) {
             if (record.Type != typeof(ICellGetter)) continue;
             if (!editorEnvironment.LinkCache.TryResolve<ICellGetter>(record.FormKey, out var cell)) continue;
