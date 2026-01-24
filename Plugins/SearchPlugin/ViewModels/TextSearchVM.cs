@@ -65,7 +65,7 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
 
         TypeGroup = new Group<TextReference>(references => references.TextSearcher, true);
         RecordGroup = new Group<TextReference>(references => references.Record, true);
-        GroupCollection = new GroupCollection<TextReference>(References, TypeGroup, RecordGroup).DisposeWith(ActivatedDisposable);
+        GroupCollection = new GroupCollection<TextReference>(new ReadOnlyObservableCollection<TextReference>(References), TypeGroup, RecordGroup).DisposeWith(ActivatedDisposable);
 
         SearchCommand = ReactiveCommand.CreateFromTask(Search);
 
@@ -86,7 +86,7 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
                             },
                             GroupInstance groupInstance => new TextBlock {
                                 Text = groupInstance.Class is IMajorRecordQueryableGetter record ? record.GetHumanReadableName()
-                                    : groupInstance.Class.ToString(),
+                                    : groupInstance.Class?.ToString(),
                                 VerticalAlignment = VerticalAlignment.Center,
                             },
                             _ => null,

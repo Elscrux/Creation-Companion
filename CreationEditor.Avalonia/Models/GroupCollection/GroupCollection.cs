@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reactive.Linq;
 using DynamicData.Binding;
@@ -17,7 +18,7 @@ public sealed class GroupCollection<T> : IDisposable {
 
     public IObservableCollection<object> Items => _topLevelGroup.Items;
 
-    public GroupCollection(IObservableCollection<T> source, params IEnumerable<Group<T>> groups) {
+    public GroupCollection(ReadOnlyObservableCollection<T> source, params IEnumerable<Group<T>> groups) {
         _topLevelGroup = new GroupInstance(null!, new ObservableCollectionExtended<object>(source.OfType<object>()));
 
         foreach (var group in groups) {
