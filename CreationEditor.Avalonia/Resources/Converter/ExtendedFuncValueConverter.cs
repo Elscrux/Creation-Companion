@@ -31,4 +31,9 @@ public sealed class ExtendedFuncValueConverter<TIn, TOut, TPar> : IValueConverte
             ? _convertBack((TOut?) value, (TPar?) parameter)
             : AvaloniaProperty.UnsetValue;
     }
+
+    public TOut Convert(TIn? value, TPar? parameter) => _convert(value, parameter);
+    public TIn? ConvertBack(TOut? value, TPar? parameter) => _convertBack is not null
+        ? _convertBack(value, parameter)
+        : default;
 }
