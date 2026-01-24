@@ -6,10 +6,10 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 public sealed partial class Group<T> : ReactiveObject, IDisposableDropoff {
     private readonly DisposableBucket _disposables = new();
 
-    public Func<T, object> Selector { get; }
+    public Func<T, object?> Selector { get; }
     [Reactive] public partial bool IsGrouped { get; set; }
 
-    public Group(Func<T, object> selector, bool isGrouped) {
+    public Group(Func<T, object?> selector, bool isGrouped) {
         Selector = selector;
         IsGrouped = isGrouped;
     }

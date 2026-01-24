@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Models.GroupCollection;
 /// </summary>
 /// <param name="Class">Common class</param>
 /// <param name="Items">Items with common class</param>
-public sealed record GroupInstance(object Class, IObservableCollection<object> Items) {
+public sealed record GroupInstance(object? Class, IObservableCollection<object> Items) {
     private readonly Lock _modifyLock = new();
 
     /// <summary>
@@ -208,13 +208,13 @@ public sealed record GroupInstance(object Class, IObservableCollection<object> I
         Items.AddRange(mergedGroupInstances);
     }
 
-    private GroupInstance? GetClass(object @class) {
+    private GroupInstance? GetClass(object? @class) {
         return Items
             .OfType<GroupInstance>()
-            .FirstOrDefault(x => x.Class == @class);
+            .FirstOrDefault(x => x.Class?.Equals(@class) ?? false);
     }
 
     public override string ToString() {
-        return Class.ToString() ?? string.Empty;
+        return Class?.ToString() ?? string.Empty;
     }
 }
