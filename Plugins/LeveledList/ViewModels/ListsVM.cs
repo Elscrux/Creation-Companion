@@ -85,6 +85,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
         var leveledListMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
+        Guid? leveledListMementoGuid = leveledListMemento.Value is null ? null : leveledListMemento.Key;
         LeveledListFolderPath = leveledListMemento.Value?.LeveledListFolderPath;
 
         var filter = this.WhenAnyValue(x => x.LeveledListFilter)
@@ -188,9 +189,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                     memento => memento is null
                         ? new LeveledListMemento(path, string.Empty)
                         : memento with { LeveledListFolderPath = path },
-                    leveledListMemento.Value is null
-                        ? Guid.NewGuid()
-                        : leveledListMemento.Key);
+                    leveledListMementoGuid ??= Guid.NewGuid());
             })
             .DisposeWith(this);
 

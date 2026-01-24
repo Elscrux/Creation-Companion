@@ -14,4 +14,6 @@ public sealed partial class TierItem : ReactiveObject {
             .Where(x => x != -1)
             .ToList();
     }
+
+    public override string ToString() => Identifier;
 }

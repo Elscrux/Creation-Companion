@@ -1,6 +1,8 @@
-﻿namespace LeveledList.Model.Tier;
+﻿using ReactiveUI;
+using ReactiveUI.SourceGenerators;
+namespace LeveledList.Model.Tier;
 
-public sealed class TierAliasItem {
-    public TierItem? Alias { get; set; }
-    public TierItem? Original { get; set; }
+public sealed partial class TierAliasItem : ReactiveObject {
+    [Reactive] public partial TierItem? Alias { get; set; }
+    [Reactive] public partial TierItem? Original { get; set; }
 }

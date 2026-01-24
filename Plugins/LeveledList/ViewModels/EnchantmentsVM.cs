@@ -74,6 +74,8 @@ public sealed partial class EnchantmentsVM : ViewModel {
 
         var stateRepository = stateRepositoryFactory.Create("Enchantments");
         var enchantmentsMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
+        Guid? enchantmentsMementoGuid = enchantmentsMemento.Value is null ? null : enchantmentsMemento.Key;
+
         DefinitionsFolderPath = enchantmentsMemento.Value?.EnchantmentsFolderPath;
 
         var filter = this.WhenAnyValue(x => x.EnchantedItemsFilter)
@@ -180,9 +182,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
                     memento => memento is null
                         ? new LeveledListMemento(string.Empty, path)
                         : memento with { EnchantmentsFolderPath = path },
-                    enchantmentsMemento.Value is null
-                        ? Guid.NewGuid()
-                        : enchantmentsMemento.Key);
+                    enchantmentsMementoGuid ??= Guid.NewGuid());
             })
             .DisposeWith(this);
 
