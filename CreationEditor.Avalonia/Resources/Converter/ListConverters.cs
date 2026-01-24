@@ -6,6 +6,12 @@ public static class ListConverters {
     public static readonly ExtendedFuncValueConverter<IList, bool, object> Contains
         = new((list, e) => list is not null && list.Contains(e));
 
+    public static readonly ExtendedFuncValueConverter<IList, int, object> Count
+        = new((list, e) => list?.Count ?? 0);
+
+    public static readonly ExtendedFuncValueConverter<IList, bool, object> Any
+        = new((list, e) => (list?.Count ?? 0) > 0);
+
     public static readonly ExtendedFuncValueConverter<IEnumerable, string, object> JoinToString
         = new((enumerable, e) => {
             if (enumerable is null || e is not string s) return string.Empty;
