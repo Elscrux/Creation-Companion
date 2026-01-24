@@ -13,7 +13,7 @@
              x:Class="CreationEditor.Avalonia.Views.Logging.LogView"
              x:Name="Log">
     <UserControl.Resources>
-        <converter:LogLevelToToBrushConverter
+        <converter:LogLevelToBrushConverter
             x:Key="LogLevelToToBrushConverter"
             VerboseBrush="CornflowerBlue"
             DebugBrush="ForestGreen"
