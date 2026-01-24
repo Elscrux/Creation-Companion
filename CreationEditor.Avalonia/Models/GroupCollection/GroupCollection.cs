@@ -62,7 +62,10 @@ public sealed class GroupCollection<T> : IDisposable {
                     case NotifyCollectionChangedAction.Move:
                         break;
                     case NotifyCollectionChangedAction.Reset:
-                        Items.Clear();
+                        _topLevelGroup.Clear();
+                        if (x.Sender is IList list) {
+                            _topLevelGroup.Add(list.OfType<T>(), _activeGroups);
+                        }
                         break;
                 }
             });

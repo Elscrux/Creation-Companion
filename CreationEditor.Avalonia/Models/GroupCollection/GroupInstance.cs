@@ -103,6 +103,15 @@ public sealed record GroupInstance(object? Class, IObservableCollection<object> 
     }
 
     /// <summary>
+    /// Clear all items from the group instance
+    /// </summary>
+    public void Clear() {
+        lock (_modifyLock) {
+            Items.Clear();
+        }
+    }
+
+    /// <summary>
     /// Group items by the specified group
     /// </summary>
     /// <param name="group">Group to group items by</param>
