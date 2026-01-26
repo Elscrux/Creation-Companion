@@ -344,22 +344,20 @@ public sealed partial class AnalyzerVM : ViewModel {
             }
         };
 
-        Analyze = ReactiveCommand.CreateFromTask(async () => {
+        Analyze = ReactiveCommand.CreateFromTask(() => Task.Run(async () => {
                 var selectedMods = ModPickerVM.GetSelectedMods();
                 var notSelectedMods = _editorEnvironment.LinkCache.ListedOrder
                     .Select(mod => mod.ModKey)
                     .Except(selectedMods.Select(mod => mod.ModKey));
-                
-                Console.WriteLine($"Selected Mods: {string.Join(", ", notSelectedMods)}");
+
+                var selectedTopicIds = Topics
+                    .Where(t => t.IsActive)
+                    .Select(t => t.TopicDefinition.Id)
+                    .ToHashSet();
 
                 var selectedAnalyzers = analyzers
-                    .Where(a => a.Topics.Any(t => {
-                        var topic = Topics.FirstOrDefault(x => x.TopicDefinition.Id == t.Id);
-                        return topic is not null && topic.IsActive;
-                    }))
+                    .Where(a => a.Topics.Any(t => selectedTopicIds.Contains(t.Id)))
                     .ToList();
-                
-                Console.WriteLine($"Running {selectedAnalyzers.Count} analyzers on {selectedMods.Count} mods...");
 
                 var analyzer = AnalyzerRunnerBuilder.Create(GameRelease.SkyrimSE)
                     .WithLinkCache(_editorEnvironment.LinkCache)
@@ -368,15 +366,28 @@ public sealed partial class AnalyzerVM : ViewModel {
                     .WithMinimumSeverity(MinimumSeverity)
                     .WithFileSystem(fileSystem)
                     .Build();
-                
-                Console.WriteLine("Starting analysis...");
 
-                var results = await analyzer.Analyze().ToListAsync();
-                
-                Console.WriteLine($"Analysis complete. Found {results.Count} issues.");
+                var resultsObservable = analyzer.Analyze()
+                    .ToObservable()
+                    .Publish()
+                    .RefCount();
 
-                Dispatcher.UIThread.Post(() => Results.AddRange(results));
-            },
+                var disposableBucket = new DisposableBucket();
+
+                Dispatcher.UIThread.Post(void () => {
+                    Results.Clear();
+
+                    // Add results in batches to avoid UI freezing
+                    resultsObservable
+                        .Where(result => selectedTopicIds.Contains(result.Topic.TopicDefinition.Id))
+                        .Subscribe(result => Results.Add(result))
+                        // ReSharper disable once AccessToDisposedClosure - dispose called after await
+                        .DisposeWith(disposableBucket);
+                });
+
+                await resultsObservable;
+                disposableBucket.Dispose();
+            }),
             ModPickerVM.SelectedMods.Any());
     }
 
