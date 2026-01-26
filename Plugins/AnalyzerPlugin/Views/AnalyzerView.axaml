@@ -152,10 +152,10 @@
                         <StackPanel>
                             <controls:SymbolIcon
                                 Symbol="Pin"
-                                IsVisible="{Binding !ResultsSeverityGroup.IsGrouped}"/>
+                                IsVisible="{Binding !ResultsRecordTypeGroup.IsGrouped}"/>
                             <controls:SymbolIcon
                                 Symbol="MapPinFilled"
-                                IsVisible="{Binding ResultsSeverityGroup.IsGrouped}"/>
+                                IsVisible="{Binding ResultsRecordTypeGroup.IsGrouped}"/>
                         </StackPanel>
 
                         <Button.Flyout>
@@ -164,6 +164,9 @@
                                     <TextBlock Text="Group By"
                                                FontSize="12"/>
 
+                                    <CheckBox
+                                        Content="Record Type"
+                                        IsChecked="{Binding IsResultsGroupedByRecordType}"/>
                                     <CheckBox
                                         Content="Record"
                                         IsChecked="{Binding IsResultsGroupedByRecord}"/>

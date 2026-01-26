@@ -26,7 +26,6 @@ using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Analyzers;
-using Mutagen.Bethesda.Analyzers.Drivers;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
@@ -71,12 +70,14 @@ public sealed partial class AnalyzerVM : ViewModel {
     public ObservableCollectionExtended<AnalyzerResult> Results { get; } = [];
     public ReadOnlyObservableCollection<AnalyzerResult> FilteredResults { get; }
     public GroupCollection<AnalyzerResult> GroupedResults { get; }
+    public Group<AnalyzerResult> ResultsRecordTypeGroup { get; }
     public Group<AnalyzerResult> ResultsRecordGroup { get; }
     public Group<AnalyzerResult> ResultsSeverityGroup { get; }
     public Group<AnalyzerResult> ResultsTopicGroup { get; }
-    [Reactive] public partial bool IsResultsGroupedByRecord { get; set; } = true;
+    [Reactive] public partial bool IsResultsGroupedByRecordType { get; set; } = true;
+    [Reactive] public partial bool IsResultsGroupedByRecord { get; set; } = false;
     [Reactive] public partial bool IsResultsGroupedBySeverity { get; set; } = false;
-    [Reactive] public partial bool IsResultsGroupedByTopic { get; set; } = false;
+    [Reactive] public partial bool IsResultsGroupedByTopic { get; set; } = true;
 
     public HierarchicalTreeDataGridSource<object> TopicsTreeSource { get; }
     public HierarchicalTreeDataGridSource<object> ResultsTreeSource { get; }
@@ -98,6 +99,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         MultiModPickerVM multiModPickerVM) {
         _editorEnvironment = editorEnvironment;
         ModPickerVM = multiModPickerVM;
+        analyzers = analyzers.DistinctBy(x => x.Id).ToList();
 
         var analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
         var (guid, analyzersState) = analyzersStateRepo.LoadAllWithIdentifier().FirstOrDefault();
@@ -117,7 +119,6 @@ public sealed partial class AnalyzerVM : ViewModel {
             .DisposeWith(this);
 
         var topics = analyzers
-            .DistinctBy(x => x.Id)
             .SelectMany(analyzer => {
                 var genericArguments = analyzer.GetType().GetInterfaces().Select(i => i.GetGenericArguments()).FirstOrDefault(x => x.Length != 0);
                 var type = genericArguments?.Length > 0 ? genericArguments[0] : null;
@@ -199,9 +200,15 @@ public sealed partial class AnalyzerVM : ViewModel {
                  || result.Topic.FormattedTopic.FormattedMessage.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
             .ToObservableCollection(this);
 
+        ResultsRecordTypeGroup = new Group<AnalyzerResult>(result => result.Record?.Type.Name[1..^6], IsResultsGroupedByRecordType);
         ResultsRecordGroup = new Group<AnalyzerResult>(result => result.Record, IsResultsGroupedByRecord);
         ResultsSeverityGroup = new Group<AnalyzerResult>(result => result.Topic.Severity, IsResultsGroupedBySeverity);
         ResultsTopicGroup = new Group<AnalyzerResult>(result => result.Topic.TopicDefinition, IsResultsGroupedByTopic);
+
+        this.WhenAnyValue(x => x.IsResultsGroupedByRecordType)
+            .Subscribe(x => ResultsRecordTypeGroup.IsGrouped = ResultsSearchText.IsNullOrEmpty() && x)
+            .DisposeWith(this);
+
         this.WhenAnyValue(x => x.IsResultsGroupedByRecord)
             .Subscribe(x => ResultsRecordGroup.IsGrouped = ResultsSearchText.IsNullOrEmpty() && x)
             .DisposeWith(this);
@@ -219,17 +226,19 @@ public sealed partial class AnalyzerVM : ViewModel {
             .Subscribe(searchText => {
                 // This is done to work around issues with using a filtered collection in grouped collections
                 if (searchText.IsNullOrEmpty()) {
+                    ResultsRecordTypeGroup.IsGrouped = IsResultsGroupedByRecordType;
                     ResultsRecordGroup.IsGrouped = IsResultsGroupedByRecord;
                     ResultsSeverityGroup.IsGrouped = IsResultsGroupedBySeverity;
                     ResultsTopicGroup.IsGrouped = IsResultsGroupedByTopic;
                 } else {
+                    ResultsRecordTypeGroup.IsGrouped = false;
                     ResultsRecordGroup.IsGrouped = false;
                     ResultsSeverityGroup.IsGrouped = false;
                     ResultsTopicGroup.IsGrouped = false;
                 }
             });
 
-        GroupedResults = new GroupCollection<AnalyzerResult>(FilteredResults, ResultsRecordGroup, ResultsSeverityGroup, ResultsTopicGroup);
+        GroupedResults = new GroupCollection<AnalyzerResult>(FilteredResults, ResultsRecordTypeGroup, ResultsRecordGroup, ResultsSeverityGroup, ResultsTopicGroup);
 
         var setTopics = ReactiveCommand.Create<GroupInstance>(SetTopics);
         TopicsTreeSource = new HierarchicalTreeDataGridSource<object>(GroupedTopics.Items) {
@@ -304,7 +313,8 @@ public sealed partial class AnalyzerVM : ViewModel {
                                 TopicDefinition topicDefinition => GetTopicControl(topicDefinition),
                                 IFormLinkIdentifier formLinkIdentifier => GetRecordControl(formLinkIdentifier),
                                 Severity severity => GetSeverityControl(severity),
-                                _ => new TextBox {
+                                Type recordType => GetRecordTypeControl(recordType),
+                                _ => new TextBlock {
                                     Text = groupInstance.Class?.ToString(),
                                     VerticalAlignment = VerticalAlignment.Center,
                                 }
