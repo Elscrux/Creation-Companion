@@ -60,7 +60,7 @@
                         x:Name="PART_ContentPresenter"
                         Content="{TemplateBinding Content}"
                         ContentTemplate="{TemplateBinding ContentTemplate}"
-                        VerticalAlignment="Top"/>
+                        VerticalAlignment="Stretch"/>
                 </Grid>
             </ControlTemplate>
         </Setter>
