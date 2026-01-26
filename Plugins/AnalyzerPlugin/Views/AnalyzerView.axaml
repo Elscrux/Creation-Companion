@@ -140,7 +140,7 @@
 
         <basic:LabeledContentControl
             Grid.Row="8"
-            Header="Results">
+            Header="{Binding Results.Count, StringFormat='{}Results ({0})'}">
             <Grid RowDefinitions="Auto,5,*">
                 <StackPanel
                     Grid.Row="0"
@@ -190,7 +190,6 @@
                     <TreeDataGrid
                         x:Name="ResultsTree"
                         Height="{Binding $parent.Bounds.Height}"
-                        MinHeight="500"
                         Source="{Binding ResultsTreeSource}"/>
                 </Grid>
             </Grid>
