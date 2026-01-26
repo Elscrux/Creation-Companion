@@ -3,6 +3,7 @@
     <ItemGroup>
         <PackageReference Include="Autofac" />
         <PackageReference Include="CommandLineParser" />
+        <PackageReference Include="Mutagen.Bethesda.Analyzers" />
         <PackageReference Include="Mutagen.Bethesda.Core" />
         <PackageReference Include="Mutagen.Bethesda.Json" />
         <PackageReference Include="niflysharp" />

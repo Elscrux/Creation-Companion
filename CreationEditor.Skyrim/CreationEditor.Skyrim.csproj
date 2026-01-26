@@ -5,6 +5,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Mutagen.Bethesda.Analyzers.Skyrim" />
         <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" />
         <PackageReference Include="Mutagen.Bethesda.Skyrim" />
     </ItemGroup>
