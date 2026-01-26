@@ -15,6 +15,7 @@
         <PackageReference Include="ReactiveUI.SourceGenerators" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="System.IO.Hashing" />
+        <PackageReference Include="System.Linq.Async" />
         <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
