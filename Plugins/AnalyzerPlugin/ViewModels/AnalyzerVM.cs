@@ -104,6 +104,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         var analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
         var (guid, analyzersState) = analyzersStateRepo.LoadAllWithIdentifier().FirstOrDefault();
         Guid? analyzersStateGuid = analyzersState is null ? null : guid;
+        MinimumSeverity = analyzersState?.MinimumSeverity ?? Severity.None;
 
         this.WhenAnyValue(x => x.MinimumSeverity)
             .Skip(1)
