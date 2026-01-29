@@ -288,7 +288,7 @@ public sealed class RecordCleaner(
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         var formLink = formLinkIdentifier.FormLink;
         if (formLink.FormKey.ModKey != mod.ModKey
-         || essentialRecordProvider.EssentialRecords.Contains(formLink)
+         || essentialRecordProvider.IsEssentialRecord(formLink)
          || (dependencies.Count > 0 && editorEnvironment.LinkCache.ResolveAllSimpleContexts(formLink).Any(c => dependencies.Contains(c.ModKey)))) {
             // Retain overrides of records from other mods
             // Retain records that are essential and all their transitive dependencies

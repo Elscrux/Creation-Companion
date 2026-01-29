@@ -3,7 +3,6 @@ using Mutagen.Bethesda.Skyrim;
 namespace ModCleaner.Services;
 
 public interface IEssentialRecordProvider {
-    IReadOnlySet<FormLinkInformation> EssentialRecords { get; }
     bool IsEssentialRecord(IFormLinkGetter formLink);
     bool IsInvalidExteriorCell(IFormLinkGetter<IWorldspaceGetter> worldspace, ICellGetter cell);
 }
