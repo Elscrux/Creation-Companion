@@ -248,6 +248,8 @@ public sealed class RecordCleaner(
             // Retain placeholder records that are going to be replaced by Creation Club records via patch
             // Retain things that are overridden by dependencies
             retained.Add(formLinkIdentifier);
+            if (excluded.Contains(formLinkIdentifier)) return;
+
             dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, formLinkIdentifier));
 
             if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
@@ -287,7 +289,7 @@ public sealed class RecordCleaner(
         IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
-        RetainCellsAroundRegion(retained, graph, retainOutgoingEdges);
+        RetainCellsAroundRegion(retained, excludedLinks, graph, retainOutgoingEdges);
 
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
@@ -358,7 +360,11 @@ public sealed class RecordCleaner(
 
             if (formLink.Type == typeof(ISceneGetter)) {
                 // Retain scenes that begin on quest start                                                                       
-                var scene = editorEnvironment.LinkCache.Resolve<ISceneGetter>(formLink.FormKey);
+                if (!editorEnvironment.LinkCache.TryResolve<ISceneGetter>(formLink.FormKey, out var scene)) {
+                    logger.Here().Warning("Failed to resolve scene {Scene}", formLink.FormKey);
+                    continue;
+                }
+
                 if (scene.Flags is null || !scene.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) continue;
                 if (!retained.Contains(new FormLinkIdentifier(scene.Quest))) continue;
 
@@ -369,19 +375,19 @@ public sealed class RecordCleaner(
                 retainOutgoingEdges(edges);
             } else if (formLink.Type == typeof(IDialogTopicGetter)) {
                 // Only scene dialog topics can be unused, everything else is implicitly retained
-                try {
-                    var topic = editorEnvironment.LinkCache.Resolve<IDialogTopicGetter>(formLink.FormKey);
-                    if (topic.SubtypeName.ToDialogTopicSubtype() != DialogTopic.SubtypeEnum.Scene) {
-                        if (!retained.Contains(new FormLinkIdentifier(topic.Quest))) continue;
+                if (!editorEnvironment.LinkCache.TryResolve<IDialogTopicGetter>(formLink.FormKey, out var topic)) {
+                    logger.Here().Warning("Failed to resolve dialog topic {Topic}", formLink.FormKey);
+                    continue;
+                }
 
-                        retained.Add(formLinkIdentifier);
+                if (topic.SubtypeName.ToDialogTopicSubtype() != DialogTopic.SubtypeEnum.Scene) {
+                    if (!retained.Contains(new FormLinkIdentifier(topic.Quest))) continue;
 
-                        if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
+                    retained.Add(formLinkIdentifier);
 
-                        retainOutgoingEdges(edges);
-                    }
-                } catch (Exception e) {
-                    Console.WriteLine(e);
+                    if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
+
+                    retainOutgoingEdges(edges);
                 }
             }
         }
@@ -389,6 +395,7 @@ public sealed class RecordCleaner(
 
     public void RetainCellsAroundRegion(
         HashSet<ILinkIdentifier> retained,
+        IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         foreach (var (worldspaceFormKey, retainedCells) in featureFlagService.EnabledFeatureFlags.EnumerateRetainedCells(editorEnvironment.LinkCache)) {
@@ -413,8 +420,10 @@ public sealed class RecordCleaner(
                         var cell = worldspace.GetCell(position);
                         if (cell is null) continue;
 
-                        // Skip cells referencing everything their placed objects are referencing but we don't retain all of them
+                        // Skip cells referencing everything their placed objects are referencing, but we don't retain all of them
                         var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
+                        if (excludedLinks.Contains(cellLink)) continue;
+
                         dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
                         retainOutgoingEdges([
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)),
@@ -455,6 +464,8 @@ public sealed class RecordCleaner(
 
                 void Retain(IMajorRecordGetter record) {
                     var link = new FormLinkIdentifier(record.ToFormLinkInformation());
+                    if (excludedLinks.Contains(link)) return;
+
                     var edge = new Edge<ILinkIdentifier>(sourceLink, link);
                     dependencyGraph.AddEdge(edge);
                     retainOutgoingEdges([edge]);
