@@ -1,20 +1,16 @@
-﻿using System.IO.Abstractions;
-using CreationEditor;
+﻿using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
-using CreationEditor.Services.Notification;
 using CreationEditor.Skyrim;
 using ModCleaner.Models;
 using ModCleaner.Services.FeatureFlag;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
-using Noggog.IO;
 using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
 namespace ModCleaner.Services;
@@ -26,8 +22,7 @@ public sealed class RecordCleaner(
     IEssentialRecordProvider essentialRecordProvider,
     IRecordController recordController,
     IAssetTypeService assetTypeService,
-    IReferenceService referenceService,
-    INotificationService notificationService) {
+    IReferenceService referenceService) {
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
@@ -258,7 +253,6 @@ public sealed class RecordCleaner(
         } else if (formLink.Type.InheritsFromAny(SelfRetainedRecordTypes)) {
             // Retain records that are self-retained, and keep adding all other records that are linked to them
             var queue = new Queue<ILinkIdentifier>([formLinkIdentifier]);
-            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, formLinkIdentifier));
             while (queue.Count > 0) {
                 var current = queue.Dequeue();
                 dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, current));
@@ -311,17 +305,18 @@ public sealed class RecordCleaner(
 
                 if (edges.Count == 0) continue;
 
-                // If all referenced records are retained, retain this too
                 if (formLinkIdentifier.FormLink.Type == typeof(IConstructibleObjectGetter) || formLinkIdentifier.FormLink.Type == typeof(IRelationshipGetter)) {
+                    // Constructible objects and relationships should only be retained if all their references are retained
                     if (edges.Any(x => !retained.Contains(x.Target))) continue;
                 } else {
-                    if (edges.Any(x => !retained.Contains(x.Target))
-                     && edges.All(x => !retained.Contains(x.Target))) continue;
+                    // Other types should be retained if any of their references are retained
+                    if (!edges.Any(x => retained.Contains(x.Target))) continue;
                 }
 
                 // Keep parent nodes of quest nodes
                 if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)
                  && editorEnvironment.LinkCache.TryResolve<IStoryManagerQuestNodeGetter>(formLinkIdentifier.FormLink.FormKey, out var questNode)) {
+                    // Only keep quest edges for quests that are retained
                     var retainedQuests = questNode.Quests
                         .Select(x => x.Quest.ToStandardizedIdentifier())
                         .Where(x => retained.Contains(new FormLinkIdentifier(x)))
@@ -335,6 +330,7 @@ public sealed class RecordCleaner(
                          || retainedQuests.Contains(f.FormLink.ToStandardizedIdentifier()))
                         .ToHashSet();
 
+                    // Retain parent story manager nodes, they are required
                     var parentNode = questNode.Parent.TryResolve(editorEnvironment.LinkCache);
                     while (parentNode is not null) {
                         var link = new FormLinkIdentifier(parentNode.ToFormLinkInformation());
@@ -434,7 +430,9 @@ public sealed class RecordCleaner(
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)),
-                            ..cell.Regions is null ? [] : cell.Regions.Select(r => new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(r))),
+                            ..cell.Regions is null
+                                ? []
+                                : cell.Regions.Select(r => new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(r))),
                         ]);
                         retained.Add(cellLink);
 
