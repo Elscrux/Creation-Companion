@@ -166,5 +166,38 @@
                          Background="{DynamicResource ButtonBackground}"/>
             </basic:LabeledContentControl>
         </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10">
+            <StackPanel.DataTemplates>
+                <DataTemplate DataType="skyrim:IIdleAnimationGetter">
+                    <TextBlock Text="{Binding EditorID}"/>
+                </DataTemplate>
+            </StackPanel.DataTemplates>
+
+            <basic:LabeledContentControl
+                Header="Essential Idle Animations"
+                HeaderToolTip="Keep all idle animations in this list when cleaning.">
+                <ListBox ItemsSource="{Binding EssentialIdleAnimations}"
+                         dragDrop:DragDropExtended.AllowDrag="True"
+                         dragDrop:DragDropExtended.AllowDrop="True"
+                         SelectionMode="Multiple"
+                         Padding="10"
+                         Width="500"
+                         Height="500"
+                         Background="{DynamicResource ButtonBackground}"/>
+            </basic:LabeledContentControl>
+
+            <basic:LabeledContentControl Header="Unused Idle Animations">
+                <ListBox ItemsSource="{Binding UnusedIdleAnimations}"
+                         dragDrop:DragDropExtended.AllowDrag="True"
+                         dragDrop:DragDropExtended.AllowDrop="True"
+                         SelectionMode="Multiple"
+                         Padding="10"
+                         Width="500"
+                         Height="500"
+                         Background="{DynamicResource ButtonBackground}"/>
+            </basic:LabeledContentControl>
+        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -30,6 +30,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
     public IObservableCollection<IQuestGetter> UnusedQuests { get; }
     public IObservableCollection<ILoadScreenGetter> EssentialLoadScreens { get; }
     public IObservableCollection<ILoadScreenGetter> UnusedLoadScreens { get; }
+    public IObservableCollection<IIdleAnimationGetter> EssentialIdleAnimations { get; }
+    public IObservableCollection<IIdleAnimationGetter> UnusedIdleAnimations { get; }
     public IObservableCollection<ReactiveWorldspaceRegions> AllowedRegions { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
 
@@ -51,6 +53,9 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         EssentialLoadScreens = GetEssentialRecords<ILoadScreenGetter>();
         UnusedLoadScreens = GetUnusedRecords(EssentialLoadScreens, mod);
 
+        EssentialIdleAnimations = GetEssentialRecords<IIdleAnimationGetter>();
+        UnusedIdleAnimations = GetUnusedRecords(EssentialIdleAnimations, mod);
+
         AllowedRegions = new ObservableCollectionExtended<ReactiveWorldspaceRegions>(
             featureFlag.AllowedRegions.Select(wr => new ReactiveWorldspaceRegions {
                 Worldspace = wr.Worldspace.FormKey,
@@ -65,9 +70,11 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
                     var newMod = LinkCacheProvider.LinkCache.ResolveMod(modKey);
                     UnusedQuests.ReplaceWith(GetUnusedRecords(EssentialQuests, newMod));
                     UnusedLoadScreens.ReplaceWith(GetUnusedRecords(EssentialLoadScreens, newMod));
+                    UnusedIdleAnimations.ReplaceWith(GetUnusedRecords(EssentialIdleAnimations, newMod));
                 } else {
                     UnusedQuests.ReplaceWith([]);
                     UnusedLoadScreens.ReplaceWith([]);
+                    UnusedIdleAnimations.ReplaceWith([]);
                 }
             })
             .DisposeWith(this);
@@ -100,6 +107,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
             EssentialQuests
                 .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter)))
                 .Concat(EssentialLoadScreens
+                    .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
+                .Concat(EssentialIdleAnimations
                     .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
                 .ToList());
     }

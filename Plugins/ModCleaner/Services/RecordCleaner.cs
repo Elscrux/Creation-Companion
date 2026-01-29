@@ -220,7 +220,6 @@ public sealed class RecordCleaner(
     }
 
     private static readonly Type[] SelfRetainedRecordTypes = [
-        typeof(IIdleAnimationGetter),
         typeof(IAddonNodeGetter),
         typeof(IAnimatedObjectGetter),
     ];
