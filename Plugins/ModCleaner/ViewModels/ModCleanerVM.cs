@@ -48,6 +48,7 @@ public sealed record FormLinkWithEditorID(FormLinkIdentifier Link, string? Edito
 
 public sealed partial class ModCleanerVM : ViewModel {
     private readonly ILogger _logger;
+    private readonly Services.ModCleaner _modCleaner;
     private readonly IEssentialRecordProvider _essentialRecordProvider;
 
     private Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? _originalReferenceGraphOnlyRetained;
@@ -105,6 +106,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         IFeatureFlagService featureFlagService) {
         var mainWindow1 = mainWindow;
         _logger = logger;
+        _modCleaner = modCleaner;
         _essentialRecordProvider = essentialRecordProvider;
         EditorEnvironment = editorEnvironment;
         ReferenceService = referenceService;
@@ -153,68 +155,13 @@ public sealed partial class ModCleanerVM : ViewModel {
             })
             .DisposeWith(this);
 
-        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(() => {
-                if (!GetModAndDependencies(out var mod, out var dependencies)) return;
-
-                Dispatcher.UIThread.Post(() => IsBusy = true);
-                var graph = modCleaner.BuildGraph(mod, dependencies);
-                Dispatcher.UIThread.Post(() => ReferenceGraph = graph);
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            },
+        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(BuildRefGraph,
             CleaningModPickerVM.HasModSelected
                 .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x)));
 
-        BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(() => {
-            if (CleaningModPickerVM.SelectedMod is null) return;
-            if (ReferenceGraph is null) return;
-            if (!GetModAndDependencies(out var mod, out var dependencies)) return;
+        BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(BuildRetained);
 
-            Dispatcher.UIThread.Post(() => IsBusy = true);
-
-            var (retainedLinks, dependencyGraph) = modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
-            _retainedLinks = retainedLinks;
-
-            var retainedRecords = retainedLinks
-                .OfType<FormLinkIdentifier>()
-                .Where(x => x.FormLink.FormKey.ModKey == mod.ModKey)
-                .Select(link => EditorEnvironment.LinkCache.TryResolveIdentifier(link.FormLink, out var editorId) && editorId is not null
-                    ? new FormLinkWithEditorID(link, editorId)
-                    : null)
-                .WhereNotNull()
-                .OrderBy(r => r.EditorID)
-                .ToList();
-
-            var referenceGraphOnlyRetained = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
-            foreach (var link in retainedLinks) {
-                if (ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
-                    foreach (var edge in outgoing) {
-                        referenceGraphOnlyRetained.AddEdge(edge);
-                    }
-                }
-            }
-
-            _originalReferenceGraphOnlyRetained = referenceGraphOnlyRetained;
-
-            Dispatcher.UIThread.Post(() => {
-                RetainedRecords = retainedRecords;
-                DependencyGraph = dependencyGraph;
-            });
-
-            UpdateInvalidRecords(retainedLinks);
-
-            Dispatcher.UIThread.Post(() => {
-                IsBusy = false;
-            });
-        });
-
-        CleanMod = ReactiveCommand.CreateRunInBackground(() => {
-                if (_retainedLinks is null) return;
-                if (!GetModAndDependencies(out var mod, out _)) return;
-
-                Dispatcher.UIThread.Post(() => IsBusy = true);
-                modCleaner.Clean(mod, _retainedLinks, SelectedDataSource);
-                Dispatcher.UIThread.Post(() => IsBusy = false);
-            },
+        CleanMod = ReactiveCommand.CreateRunInBackground(Clean,
             this.WhenAnyValue(x => x.CleanAssets)
                 .CombineLatest(
                     CleaningDataSourcePicker.HasDataSourceSelected,
@@ -440,5 +387,72 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         dependencies = DependenciesModPickerVM.Mods.Select(x => x.ModKey).ToList();
         return true;
+    }
+
+    private void BuildRefGraph() {
+        if (!GetModAndDependencies(out var mod, out var dependencies)) return;
+
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+        var graph = _modCleaner.BuildGraph(mod, dependencies);
+        Dispatcher.UIThread.Post(() => ReferenceGraph = graph);
+        Dispatcher.UIThread.Post(() => IsBusy = false);
+    }
+
+    public void BuildRetained() {
+        if (CleaningModPickerVM.SelectedMod is null) return;
+        if (ReferenceGraph is null) return;
+        if (!GetModAndDependencies(out var mod, out var dependencies)) return;
+
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+
+        var (retainedLinks, dependencyGraph) = _modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
+        if (retainedLinks.Contains(new FormLinkIdentifier(new FormLinkInformation(FormKey.Factory("0D49FD:BSHeartland.esm"), typeof(IStoryManagerQuestNodeGetter))))) {
+            Console.WriteLine();
+        }
+        _retainedLinks = retainedLinks;
+
+        var retainedRecords = retainedLinks.OfType<FormLinkIdentifier>()
+            .Where(x => x.FormLink.FormKey.ModKey == mod.ModKey)
+            .Select(link => EditorEnvironment.LinkCache.TryResolveIdentifier(link.FormLink, out var editorId) && editorId is not null
+                ? new FormLinkWithEditorID(link, editorId) : null)
+            .WhereNotNull()
+            .OrderBy(r => r.EditorID)
+            .ToList();
+
+        var formKey = FormKey.Factory("0D49FD:BSHeartland.esm");
+        if (retainedRecords.Any(x => x.FormKey == formKey)) {
+            Console.WriteLine();
+        }
+
+        var referenceGraphOnlyRetained = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
+        foreach (var link in retainedLinks) {
+            if (ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
+                foreach (var edge in outgoing) {
+                    referenceGraphOnlyRetained.AddEdge(edge);
+                }
+            }
+        }
+
+        _originalReferenceGraphOnlyRetained = referenceGraphOnlyRetained;
+
+        Dispatcher.UIThread.Post(() => {
+            RetainedRecords = retainedRecords;
+            DependencyGraph = dependencyGraph;
+        });
+
+        UpdateInvalidRecords(retainedLinks);
+
+        Dispatcher.UIThread.Post(() => {
+            IsBusy = false;
+        });
+    }
+
+    private void Clean() {
+        if (_retainedLinks is null) return;
+        if (!GetModAndDependencies(out var mod, out _)) return;
+
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+        _modCleaner.Clean(mod, _retainedLinks, SelectedDataSource);
+        Dispatcher.UIThread.Post(() => IsBusy = false);
     }
 }
