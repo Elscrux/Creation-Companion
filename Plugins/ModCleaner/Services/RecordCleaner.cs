@@ -124,7 +124,7 @@ public sealed class RecordCleaner(
                          && current.FormKey != location.UnreportedCrimeFaction.FormKey
                          && current.FormKey != location.HorseMarkerRef.FormKey
                          && current.FormKey != location.WorldLocationMarkerRef.FormKey
-                         && (location.Keywords is null || location.Keywords.Any(k => k.FormKey == current.FormKey))) {
+                         && (location.Keywords is null || location.Keywords.All(k => k.FormKey != current.FormKey))) {
                             continue;
                         }
                     }
