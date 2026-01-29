@@ -204,58 +204,11 @@ public sealed class RecordCleaner(
     }
 
     public void CreatedCleanedMod(ISkyrimModGetter mod, HashSet<FormLinkInformation> recordsToClean) {
-        var oldModKey = mod.ModKey;
-        var fileSystem = new FileSystem();
-        using var tmp = TempFolder.Factory();
-        var fileSystemRoot = tmp.Dir;
-        var oldModPath = new ModPath(oldModKey, fileSystem.Path.Combine(fileSystemRoot, oldModKey.FileName.String));
+        var cleanedModKey = ModKey.FromFileName("Cleaned" + mod.ModKey.FileName);
+        var duplicate = mod.Duplicate(cleanedModKey);
 
-        // Write mod to file system
-        mod.WriteToBinary(oldModPath,
-            BinaryWriteParameters.Default with {
-                FileSystem = fileSystem
-            });
-
-        // Rename mod file
-        var newModKey = ModKey.FromFileName("Cleaned" + mod.ModKey.FileName);
-        var newModPath = new ModPath(newModKey, fileSystem.Path.Combine(fileSystemRoot, newModKey.FileName.String));
-        fileSystem.File.Move(oldModPath, newModPath);
-
-        // Read renamed mod as new mod
-        var duplicate = ModFactory.ImportSetter(newModPath,
-            mod.GameRelease,
-            BinaryReadParameters.Default with {
-                FileSystem = fileSystem,
-                LinkCache = editorEnvironment.LinkCache,
-            });
-
-        // Clean remove children of cells, and remove them from the cleaning list because those are removed together with the cell
-        foreach (var record in recordsToClean) {
-            if (record.Type != typeof(ICellGetter)) continue;
-            if (!editorEnvironment.LinkCache.TryResolve<ICellGetter>(record.FormKey, out var cell)) continue;
-
-            // For exterior cells we cannot remove the persistent placed records by removing the cells
-            // There they are stored in the global persistent cell per worldspace 
-            var placedToRemove = cell.IsInteriorCell() ? cell.Temporary.Concat(cell.Persistent) : cell.Temporary;
-            foreach (var placed in placedToRemove) {
-                recordsToClean.Remove(placed.ToFormLinkInformation());
-            }
-
-            if (cell.Landscape is not null) {
-                recordsToClean.Remove(cell.Landscape.ToFormLinkInformation());
-            }
-
-            foreach (var navmesh in cell.NavigationMeshes) {
-                recordsToClean.Remove(navmesh.ToFormLinkInformation());
-            }
-        }
-
-        using var countingNotifier = new CountingNotifier(notificationService, $"Cleaning Records from {mod.ModKey}", recordsToClean.Count);
-        foreach (var record in recordsToClean) {
-            countingNotifier.NextStep();
-            duplicate.Remove(new FormKey(duplicate.ModKey, record.FormKey.ID), record.Type);
-        }
-        countingNotifier.Stop();
+        var translatedRecordsToClean = recordsToClean.Select(x => new FormLinkInformation(new FormKey(duplicate.ModKey, x.FormKey.ID), x.Type)).ToHashSet();
+        duplicate.Remove(translatedRecordsToClean);
 
         editorEnvironment.Update(updater => updater
             .LoadOrder.AddMutableMods(duplicate)
