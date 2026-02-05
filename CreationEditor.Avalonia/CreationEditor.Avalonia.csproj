@@ -141,6 +141,9 @@
         <Compile Update="ViewModels\Mod\ModGetterVM.cs">
           <DependentUpon>IModGetterVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="Resources\Command\AddElementCustom.cs">
+          <DependentUpon>ListCommand.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
