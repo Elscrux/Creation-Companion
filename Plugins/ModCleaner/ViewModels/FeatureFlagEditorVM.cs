@@ -17,8 +17,17 @@ public sealed partial class ReactiveFormKey : ReactiveObject {
 }
 
 public sealed partial class ReactiveWorldspaceRegions : ReactiveObject {
+    public ReactiveWorldspaceRegions(ILinkCacheProvider linkCacheProvider) {
+        Filter = (formKey, _) => {
+            if (!linkCacheProvider.LinkCache.TryResolve<IRegionGetter>(formKey, out var region)) return false;
+
+            return region.Worldspace.FormKey == Worldspace;
+        };
+    }
+
     [Reactive] public partial FormKey Worldspace { get; set; }
     public IObservableCollection<ReactiveFormKey> Regions { get; init; } = new ObservableCollectionExtended<ReactiveFormKey>();
+    public Func<FormKey, string?, bool> Filter { get; }
 }
 
 public sealed partial class FeatureFlagEditorVM : ViewModel {
@@ -34,6 +43,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
     public IObservableCollection<IIdleAnimationGetter> UnusedIdleAnimations { get; }
     public IObservableCollection<ReactiveWorldspaceRegions> AllowedRegions { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
+    public Func<ReactiveWorldspaceRegions> ReactiveWorldspaceRegionsFactory { get; }
 
     public FeatureFlagEditorVM(
         FeatureFlag featureFlag,
@@ -47,6 +57,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
 
         var mod = LinkCacheProvider.LinkCache.ResolveMod(ModPickerVM.SelectedMod?.ModKey);
 
+        ReactiveWorldspaceRegionsFactory = () => new ReactiveWorldspaceRegions(LinkCacheProvider);
+
         EssentialQuests = GetEssentialRecords<IQuestGetter>();
         UnusedQuests = GetUnusedRecords(EssentialQuests, mod);
 
@@ -57,7 +69,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         UnusedIdleAnimations = GetUnusedRecords(EssentialIdleAnimations, mod);
 
         AllowedRegions = new ObservableCollectionExtended<ReactiveWorldspaceRegions>(
-            featureFlag.AllowedRegions.Select(wr => new ReactiveWorldspaceRegions {
+            featureFlag.AllowedRegions.Select(wr => new ReactiveWorldspaceRegions(LinkCacheProvider) {
                 Worldspace = wr.Worldspace.FormKey,
                 Regions = new ObservableCollectionExtended<ReactiveFormKey>(
                     wr.Regions.Select(r => new ReactiveFormKey { FormKey = r.FormKey })),

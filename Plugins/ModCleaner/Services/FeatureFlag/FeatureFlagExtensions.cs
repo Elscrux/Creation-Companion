@@ -25,6 +25,7 @@ public static class FeatureFlagExtensions {
 
             return retainedCells;
         }
+
         public IReadOnlyList<IFormLinkGetter<IRegionGetter>> GetAllowedRegions(IFormLinkGetter<IWorldspaceGetter> worldspace) {
             return featureFlags
                 .SelectMany(f => f.AllowedRegions.Find(ar => ar.Worldspace.Equals(worldspace))?.Regions ?? [])

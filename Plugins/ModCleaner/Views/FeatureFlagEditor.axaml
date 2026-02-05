@@ -58,6 +58,7 @@
                                                 <picker:FormKeyPicker
                                                     LinkCache="{Binding #Control.ViewModel.LinkCacheProvider.LinkCache}"
                                                     FormKey="{Binding FormKey}"
+                                                    Filter="{ReflectionBinding $parent[DataGrid].DataContext.Filter}"
                                                     ScopedTypes="{x:Static constants:RecordTypeConstants.RegionTypes}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn>
@@ -81,9 +82,10 @@
                 </DataGrid.Columns>
 
                 <attached:ListShortcuts.Add>
-                    <command:AddElement
+                    <command:AddElementCustom
                         x:TypeArguments="viewModels:ReactiveWorldspaceRegions"
-                        List="{Binding AllowedRegions}"/>
+                        List="{Binding AllowedRegions}"
+                        Factory="{Binding ReactiveWorldspaceRegionsFactory}"/>
                 </attached:ListShortcuts.Add>
 
                 <attached:ListShortcuts.Remove>
