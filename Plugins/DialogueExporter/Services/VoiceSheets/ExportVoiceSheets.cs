@@ -199,6 +199,7 @@ public class ExportVoiceSheets(
                             return GetContext(q, t, r.Record);
                         })
                         .Where(c => !c.Context.IsNullOrEmpty())
+                        .DistinctBy(x => x.Context)
                         .ToArray();
 
                     switch (results) {
