@@ -30,5 +30,7 @@ public interface IRecordProvider<TReferenced> : IRecordProvider
         recordBrowserSettingsVM.SettingsChanged
             .ThrottleMedium()
             .StartWith(Unit.Default)
-            .Select(_ => new Func<TReferenced, bool>(record => recordBrowserSettingsVM.Filter(record.Record)));
+            .Select(_ => new Func<TReferenced, bool>(record => recordBrowserSettingsVM.Filter(record.Record)))
+            .Publish()
+            .RefCount();
 }

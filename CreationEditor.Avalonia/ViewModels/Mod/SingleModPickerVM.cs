@@ -64,7 +64,9 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
         SelectedModChanged = this.WhenAnyValue(x => x.SelectedMod);
 
         HasModSelected = SelectedModChanged
-            .Select(mod => mod is not null && !mod.ModKey.IsNull);
+            .Select(mod => mod is not null && !mod.ModKey.IsNull)
+            .Publish()
+            .RefCount();
     }
 
     public bool SelectMod(ModKey modKey) {

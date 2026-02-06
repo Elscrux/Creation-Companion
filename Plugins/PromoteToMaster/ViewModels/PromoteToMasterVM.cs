@@ -124,7 +124,10 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
         var assetTargetCountChanges = this.WhenAnyValue(x => x.AssetTargets.Count);
 
-        NoAssetTarget = assetTargetCountChanges.Select(count => count == 0);
+        NoAssetTarget = assetTargetCountChanges
+            .Select(count => count == 0)
+            .Publish()
+            .RefCount();
 
         // Make sure there is only at max one target data source
         assetTargetCountChanges

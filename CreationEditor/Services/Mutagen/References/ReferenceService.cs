@@ -183,15 +183,21 @@ public sealed class ReferenceService : IReferenceService {
         IsLoadingAssetReferences = _recordAssetReferenceController.IsLoading
             .CombineLatest(_nifTextureReferenceController.IsLoading,
                 _scriptAssetReferenceController.IsLoading,
-                (a, b, c) => a || b || c);
+                (a, b, c) => a || b || c)
+            .Publish()
+            .RefCount();
 
         IsLoadingRecordReferences = _recordReferenceController.IsLoading
-            .CombineLatest(_recordGlobalVariableReferenceController.IsLoading, 
+            .CombineLatest(_recordGlobalVariableReferenceController.IsLoading,
                 _nifSoundReferenceController.IsLoading,
                 _nifAddonNodeReferenceController.IsLoading,
-                (a, b, c, d) => a || b || c || d);
+                (a, b, c, d) => a || b || c || d)
+            .Publish()
+            .RefCount();
 
-        IsLoading = IsLoadingAssetReferences.CombineLatest(IsLoadingRecordReferences, (a, b) => a || b);
+        IsLoading = IsLoadingAssetReferences.CombineLatest(IsLoadingRecordReferences, (a, b) => a || b)
+            .Publish()
+            .RefCount();
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
@@ -235,7 +241,8 @@ public sealed class ReferenceService : IReferenceService {
         var references = _recordReferenceController.GetReferences(formLink);
 
         if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.GlobalVariableType)
-         && _editorEnvironment.LinkCache.TryResolveIdentifier(formLink.FormKey, _mutagenCommonAspectsProvider.GlobalVariableType, out var identifier) && identifier is not null) {
+         && _editorEnvironment.LinkCache.TryResolveIdentifier(formLink.FormKey, _mutagenCommonAspectsProvider.GlobalVariableType, out var identifier)
+         && identifier is not null) {
             references = references.Concat(_recordGlobalVariableReferenceController.GetReferences(identifier));
         }
 
@@ -248,7 +255,7 @@ public sealed class ReferenceService : IReferenceService {
 
     public IEnumerable<DataRelativePath> GetAssetReferences(IFormLinkIdentifier formLink) {
         if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.AddonNodeRecordType)
-          && _editorEnvironment.LinkCache.TryResolve(formLink, out var addonNode)) {
+         && _editorEnvironment.LinkCache.TryResolve(formLink, out var addonNode)) {
             // Record is an addon node
             var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(addonNode);
             if (addonNodeIndex is not null) {

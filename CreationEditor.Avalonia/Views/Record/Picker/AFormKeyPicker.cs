@@ -327,7 +327,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .CombineLatest(SelectableTypes.SelectionChanged().StartWith(Unit.Default), (types, _) => types);
 
         AnyTypeSelected = selectedTypesChanged
-            .Select(x => x.Any(typeItem => typeItem.IsSelected));
+            .Select(x => x.Any(typeItem => typeItem.IsSelected))
+            .Publish()
+            .RefCount();
 
         SelectableMods = this.WhenAnyValue(x => x.LinkCache)
             .NotNull()
@@ -339,7 +341,9 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
             .CombineLatest(SelectableMods.SelectionChanged(), (mods, _) => mods);
 
         AnyModSelected = selectedModsChanged
-            .Select(x => x.Any(modItem => modItem.IsSelected));
+            .Select(x => x.Any(modItem => modItem.IsSelected))
+            .Publish()
+            .RefCount();
 
         var scopedRecordsCollection = this.WhenAnyValue(x => x.ScopedRecords)
             .Select(idents => (idents ?? []).AsObservableChangeSet())

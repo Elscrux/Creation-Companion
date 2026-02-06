@@ -29,6 +29,8 @@ public sealed class RecordSelectionVM : ViewModel {
             .CombineLatest(
                 RecordProvider.IsBusy,
                 (filtering, busy) => filtering || busy)
-            .ObserveOnGui();
+            .ObserveOnGui()
+            .Publish()
+            .RefCount();
     }
 }

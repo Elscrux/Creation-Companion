@@ -49,7 +49,9 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
             .CombineLatest(
                 RecordProvider.IsBusy,
                 (filtering, busy) => filtering || busy)
-            .ObserveOnGui();
+            .ObserveOnGui()
+            .Publish()
+            .RefCount();
 
         PrimaryCommand = ReactiveCommand.Create<SelectedListContext>(context => {
             ContextMenuProvider.ExecutePrimary(context);

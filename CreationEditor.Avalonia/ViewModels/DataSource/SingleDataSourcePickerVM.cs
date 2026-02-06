@@ -45,8 +45,13 @@ public sealed partial class SingleDataSourcePickerVM : ViewModel, IDataSourcePic
             })
             .DisposeWith(this);
 
-        HasDataSourceSelected = this.WhenAnyValue(x => x.SelectedDataSource).Select(dataSource => dataSource is not null);
-        SelectedDataSourceChanged = this.WhenAnyValue(x => x.SelectedDataSource);
+        HasDataSourceSelected = this.WhenAnyValue(x => x.SelectedDataSource)
+            .Select(dataSource => dataSource is not null)
+            .Publish()
+            .RefCount();
+        SelectedDataSourceChanged = this.WhenAnyValue(x => x.SelectedDataSource)
+            .Publish()
+            .RefCount();
     }
 
     public void SelectDataSource(IDataSource dataSource) {

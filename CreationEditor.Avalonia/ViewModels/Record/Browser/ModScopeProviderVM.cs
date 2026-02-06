@@ -56,7 +56,10 @@ public sealed partial class ModScopeProviderVM : ViewModel, IModScopeProviderVM 
             .Subscribe(UpdateScope)
             .DisposeWith(this);
 
-        ScopeChanged = _selectedMods.Connect().Unit();
+        ScopeChanged = _selectedMods.Connect()
+            .Unit()
+            .Publish()
+            .RefCount();
     }
 
     private void UpdateScope() {

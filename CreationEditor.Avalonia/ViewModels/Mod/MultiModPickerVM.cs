@@ -43,7 +43,9 @@ public sealed partial class MultiModPickerVM : ViewModel, IModPickerVM {
 
         SelectedMods = modSelected
             .ToCollection()
-            .Select(x => x.Where(m => m.IsSelected).ToList());
+            .Select(x => x.Where(m => m.IsSelected).ToList())
+            .Publish()
+            .RefCount();
     }
 
     public IReadOnlyCollection<OrderedModItem> GetSelectedMods() => Mods.Where(m => m.IsSelected).ToList();
