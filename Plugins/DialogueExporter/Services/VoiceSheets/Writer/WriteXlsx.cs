@@ -328,18 +328,18 @@ public sealed class WriteXlsx(
                         Width = 35,
                         CustomWidth = true
                     },
-                    // Facial Emotion
-                    new Column {
-                        Min = 5,
-                        Max = 5,
-                        Width = 15,
-                        CustomWidth = true
-                    },
                     // Filename
                     new Column {
                         Min = 6,
                         Max = 6,
                         Width = 50,
+                        CustomWidth = true
+                    },
+                    // Filecutting Note
+                    new Column {
+                        Min = 5,
+                        Max = 5,
+                        Width = 75,
                         CustomWidth = true
                     });
 
@@ -403,9 +403,9 @@ public sealed class WriteXlsx(
                     CreateCell("Quest", boldCellFormatId),
                     CreateCell("Context", boldCellFormatId),
                     CreateCell("Line to speak", boldCellFormatId),
-                    CreateCell("Acting Note", boldCellFormatId),
                     CreateCell("Facial Emotion", boldCellFormatId),
-                    CreateCell("Filename", boldCellFormatId)
+                    CreateCell("Filename", boldCellFormatId),
+                    CreateCell("Filecutting Note", boldCellFormatId)
                 );
                 sheetData.AppendChild(row);
 
@@ -523,8 +523,8 @@ public sealed class WriteXlsx(
                                             CreateCell(lineId > 0 ? string.Empty : line.Context, styleId),
                                             CreateCell(line.Line, styleId),
                                             CreateCell(line.VaNote, styleId),
-                                            CreateCell(line.Emotion.Contains("Neutral") ? string.Empty : line.Emotion, styleId),
-                                            CreateCell(Path.GetFileNameWithoutExtension(line.Path), styleId)
+                                            CreateCell(Path.GetFileNameWithoutExtension(line.Path), styleId),
+                                            CreateCell(string.Empty)
                                         );
 
                                         sheetData.AppendChild(row);
