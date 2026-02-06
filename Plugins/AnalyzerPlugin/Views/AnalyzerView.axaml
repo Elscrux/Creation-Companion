@@ -1,169 +1,249 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:AnalyzerPlugin.ViewModels"
-             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
-             xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid;assembly=CreationEditor.Avalonia"
-             xmlns:system="clr-namespace:System;assembly=System.Runtime"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
-             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
-             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
-             xmlns:topics="clr-namespace:Mutagen.Bethesda.Analyzers.SDK.Topics;assembly=Mutagen.Bethesda.Analyzers.SDK"
-             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="AnalyzerPlugin.Views.AnalyzerView"
-             x:DataType="viewModels:AnalyzerVM">
-    <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*" Margin="5">
-        <basic:LabeledContentControl
-            Grid.Row="0"
-            Header="Minimum Severity">
-            <ComboBox
-                ItemsSource="{x:Static viewModels:AnalyzerVM.AllSeverities}"
-                SelectedItem="{Binding MinimumSeverity}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate DataType="topics:Severity">
-                        <TextBlock
-                            Text="{Binding}"
-                            Foreground="{Binding Converter={x:Static viewModels:AnalyzerVM.SeverityToBrushConverter}}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-        </basic:LabeledContentControl>
+﻿<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:AnalyzerPlugin.ViewModels"
+    xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+    xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+    xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
+    xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+    xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+    xmlns:topics="clr-namespace:Mutagen.Bethesda.Analyzers.SDK.Topics;assembly=Mutagen.Bethesda.Analyzers.SDK"
+    xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+    xmlns:views="clr-namespace:AnalyzerPlugin.Views"
+    mc:Ignorable="d"
+    d:DesignWidth="1400"
+    d:DesignHeight="800"
+    x:Class="AnalyzerPlugin.Views.AnalyzerView"
+    x:DataType="viewModels:AnalyzerVM">
 
-        <basic:LabeledContentControl
-            Grid.Row="2"
-            Header="Active Mods">
-            <basic:LabeledContentControl.Resources>
-                <converter:ReturnParameterIfTrueConverter
-                    x:Key="IfTrueConverter"
-                    x:TypeArguments="system:Double"
-                    Converter="{x:Static converter:DoubleConverters.ToThickness}"
-                    DefaultValue="0"/>
-            </basic:LabeledContentControl.Resources>
+    <Grid
+        ColumnDefinitions="1*,2*"
+        RowDefinitions="*"
+        Margin="16">
+        <!-- Left Sidebar with right margin for spacing -->
+        <Border
+            Grid.Column="0"
+            Classes="Card"
+            Margin="0,0,24,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="10">
+                    <!-- Configuration Header -->
+                    <basic:LabeledContentControl Header="Analysis Configuration"/>
 
-            <mod:ModPickerButton
-                BorderBrush="{x:Static constants:StandardBrushes.InvalidBrush}"
-                BorderThickness="{Binding !SelectedMods^.Count, Converter={StaticResource IfTrueConverter}, ConverterParameter=2}"
-                HorizontalAlignment="Left"
-                CornerRadius="5"
-                DataContext="{Binding ModPickerVM}"/>
-        </basic:LabeledContentControl>
+                    <!-- Mods Selection Card -->
+                    <basic:LabeledContentControl
+                        Header="Mods to Analyze"
+                        HeaderToolTip="Select which mods to analyze">
+                        <StackPanel
+                            Spacing="8">
+                            <mod:ModPickerButton
+                                CornerRadius="8"
+                                DataContext="{Binding ModPickerVM}"/>
 
-        <basic:LabeledContentControl
-            Grid.Row="4"
-            Header="Active Topics">
-            <Button>
-                <TextBlock Text="{Binding ActiveTopicCount^, StringFormat='{}{0} Active Topics'}"/>
-
-                <Button.Flyout>
-                    <Flyout FlyoutPresenterClasses="Flyout750x250">
-                        <StackPanel Spacing="5">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <Button ToolTip.Tip="Group By"
-                                        VerticalAlignment="Stretch">
-                                    <StackPanel>
-                                        <controls:SymbolIcon
-                                            Symbol="Pin"
-                                            IsVisible="{Binding !TopicsRecordTypeGroup.IsGrouped}"/>
-                                        <controls:SymbolIcon
-                                            Symbol="MapPinFilled"
-                                            IsVisible="{Binding TopicsRecordTypeGroup.IsGrouped}"/>
-                                    </StackPanel>
-
-                                    <Button.Flyout>
-                                        <Flyout>
-                                            <StackPanel>
-                                                <TextBlock Text="Group By"
-                                                           FontSize="12"/>
-
-                                                <CheckBox
-                                                    Content="Severity"
-                                                    IsChecked="{Binding IsTopicsGroupedBySeverity}"/>
-                                                <CheckBox
-                                                    Content="Record Type"
-                                                    IsChecked="{Binding IsTopicsGroupedByRecordType}"/>
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-
-                                <TextBox Text="{Binding TopicSearchText}"
-                                         MinWidth="200"
-                                         Watermark="Search..."/>
-                            </StackPanel>
-
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto">
-                                <TreeDataGrid
-                                    x:Name="TopicsTree"
-                                    MinHeight="500"
-                                    Height="{Binding $parent.Bounds.Height}"
-                                    Source="{Binding TopicsTreeSource}">
-                                    <Interaction.Behaviors>
-                                        <treeDataGrid:ScrollToSelection/>
-                                        <treeDataGrid:ExpandAllChildren x:TypeArguments="system:Object"/>
-                                        <treeDataGrid:AutoExpandSingleChildren x:TypeArguments="system:Object"/>
-                                    </Interaction.Behaviors>
-                                </TreeDataGrid>
-                            </ScrollViewer>
+                            <Grid
+                                Height="18">
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{x:Static constants:StandardBrushes.InvalidBrush}"
+                                    IsVisible="{Binding !ModPickerVM.SelectedMods^.Count}"
+                                    Text="Select at least one mod to continue"/>
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{DynamicResource TextFillColorTertiary}"
+                                    IsVisible="{Binding ModPickerVM.SelectedMods^.Count}"
+                                    Text="{Binding ModPickerVM.SelectedMods^.Count, StringFormat='{}{0} mod(s) selected'}"/>
+                            </Grid>
                         </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-        </basic:LabeledContentControl>
+                    </basic:LabeledContentControl>
 
-        <Button
-            Grid.Row="6"
-            Background="{x:Static constants:StandardBrushes.HighlightBrush}"
-            Command="{Binding Analyze}">
-            <Button.IsEnabled>
-                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                    <Binding Path="ModPickerVM.SelectedMods^" Converter="{x:Static converter:ListConverters.Any}"/>
-                    <Binding Path="!!ActiveTopicCount^"/>
-                </MultiBinding>
-            </Button.IsEnabled>
+                    <!-- Divider -->
+                    <Separator
+                        Height="1"
+                        Margin="0,8"/>
 
-            <Button.Content>
-                <Grid>
+                    <!-- Severity Filter Card -->
+                    <basic:LabeledContentControl
+                        Header="Minimum Severity"
+                        HeaderToolTip="Display issues at or above this severity level">
+                        <ComboBox
+                            ItemsSource="{x:Static viewModels:AnalyzerVM.AllSeverities}"
+                            SelectedItem="{Binding MinimumSeverity}"
+                            Padding="12,10"
+                            CornerRadius="8">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate
+                                    DataType="topics:Severity">
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="12">
+                                        <Rectangle
+                                            Width="12"
+                                            Height="12"
+                                            RadiusX="2"
+                                            RadiusY="2"
+                                            Fill="{Binding Converter={x:Static viewModels:AnalyzerVM.SeverityToBrushConverter}}"
+                                            VerticalAlignment="Center"/>
+                                        <TextBlock
+                                            Text="{Binding}"
+                                            VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </basic:LabeledContentControl>
+
+                    <!-- Divider -->
+                    <Separator
+                        Height="1"
+                        Margin="0,8"/>
+
+                    <!-- Topics Selection Card -->
+                    <basic:LabeledContentControl
+                        Header="Analysis Topics"
+                        HeaderToolTip="{Binding ActiveTopicCount^, StringFormat='{}Select topics to analyze ({0} active)'}">
+                        <StackPanel Spacing="8">
+                            <Button
+                                Padding="12,10"
+                                CornerRadius="8"
+                                Background="{DynamicResource ButtonBackground}"
+                                BorderBrush="{DynamicResource ButtonBorderBrush}"
+                                BorderThickness="1">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock
+                                        Text="Browse Topics"
+                                        VerticalAlignment="Center"/>
+                                    <controls:SymbolIcon
+                                        Grid.Column="1"
+                                        Symbol="ChevronRight"
+                                        Margin="8,0,0,0"/>
+                                </Grid>
+
+                                <Button.Flyout>
+                                    <Flyout FlyoutPresenterClasses="Flyout750x300">
+                                        <views:TopicSelection/>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+
+                            <Grid Height="18">
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{DynamicResource TextFillColorSecondary}"
+                                    IsVisible="{Binding !ActiveTopicCount^}"
+                                    Text="Select at least one topic to continue"/>
+                                <TextBlock
+                                    FontSize="12"
+                                    Foreground="{DynamicResource TextFillColorTertiary}"
+                                    IsVisible="{Binding !!ActiveTopicCount^}"
+                                    Text="{Binding ActiveTopicCount^, StringFormat='{}{0} topic(s) selected'}"/>
+                            </Grid>
+                        </StackPanel>
+                    </basic:LabeledContentControl>
+
+                    <!-- Divider -->
+                    <Separator
+                        Height="1"
+                        Margin="0,8"/>
+
+                    <!-- Primary Action Button -->
+                    <Button
+                        Classes="Accent"
+                        FontWeight="SemiBold"
+                        Command="{Binding Analyze}">
+                        <Button.IsEnabled>
+                            <MultiBinding
+                                Converter="{x:Static BoolConverters.And}">
+                                <Binding
+                                    Path="ModPickerVM.SelectedMods^"
+                                    Converter="{x:Static converter:ListConverters.Any}"/>
+                                <Binding
+                                    Path="!!ActiveTopicCount^"/>
+                            </MultiBinding>
+                        </Button.IsEnabled>
+
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            HorizontalAlignment="Center">
+                            <TextBlock
+                                Grid.Column="0"
+                                Text="Start Analysis"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0"/>
+                            <avaloniaProgressRing:ProgressRing
+                                Grid.Column="1"
+                                IsVisible="{Binding Analyze.IsExecuting^}"
+                                Width="18"
+                                Height="18"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- Help Text -->
                     <TextBlock
-                        Text="Analyze"
-                        IsVisible="{Binding !Analyze.IsExecuting^}"/>
+                        FontSize="11"
+                        Foreground="{DynamicResource TextFillColorTertiary}"
+                        Text="Configure settings, then click Start to analyze your mods"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
 
-                    <avaloniaProgressRing:ProgressRing
-                        IsActive="{Binding Analyze.IsExecuting^}"
-                        HorizontalAlignment="Left"
-                        Width="20" Height="20"/>
-                </Grid>
-            </Button.Content>
-        </Button>
+        <!-- Right Panel: Results -->
+        <Grid
+            Grid.Column="1"
+            RowDefinitions="Auto,16,*">
 
-        <basic:LabeledContentControl
-            Grid.Row="8"
-            Header="{Binding Results.Count, StringFormat='{}Results ({0})'}">
-            <Grid RowDefinitions="Auto,5,*">
+            <!-- Results Header -->
+            <basic:LabeledContentControl
+                Grid.Row="0"
+                Header="Analysis Results">
+                <TextBlock 
+                    Text="{Binding Results.Count, StringFormat='{}{0} issues found'}"
+                    Foreground="{DynamicResource TextFillColorTertiary}"/>
+            </basic:LabeledContentControl>
+
+            <!-- Results Content -->
+            <Grid
+                Grid.Row="2"
+                RowDefinitions="Auto,12,*">
+
+                <!-- Results Toolbar -->
                 <StackPanel
                     Grid.Row="0"
                     Orientation="Horizontal"
-                    Spacing="5">
-                    <Button HorizontalAlignment="Left"
-                            VerticalAlignment="Stretch"
-                            ToolTip.Tip="Group By">
-                        <StackPanel>
+                    Spacing="12"
+                    IsVisible="{Binding Results.Count}">
+                    <!-- Search Box -->
+                    <TextBox
+                        MinWidth="280"
+                        Text="{Binding ResultsSearchText}"
+                        Watermark="Search results..."
+                        Padding="12,8"
+                        CornerRadius="6"/>
+
+                    <!-- Group By Button -->
+                    <Button
+                        ToolTip.Tip="Group results by different categories"
+                        Padding="10,8"
+                        CornerRadius="6">
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8">
                             <controls:SymbolIcon
                                 Symbol="Pin"
-                                IsVisible="{Binding !ResultsRecordTypeGroup.IsGrouped}"/>
-                            <controls:SymbolIcon
-                                Symbol="MapPinFilled"
-                                IsVisible="{Binding ResultsRecordTypeGroup.IsGrouped}"/>
+                                FontSize="16"/>
+                            <TextBlock
+                                Text="Group"/>
                         </StackPanel>
 
                         <Button.Flyout>
-                            <Flyout>
-                                <StackPanel>
-                                    <TextBlock Text="Group By"
-                                               FontSize="12"/>
-
+                            <Flyout Placement="Bottom">
+                                <StackPanel
+                                    Spacing="12"
+                                    Margin="12">
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Text="Group Results By"/>
                                     <CheckBox
                                         Content="Record Type"
                                         IsChecked="{Binding IsResultsGroupedByRecordType}"/>
@@ -180,19 +260,66 @@
                             </Flyout>
                         </Button.Flyout>
                     </Button>
-
-                    <TextBox Text="{Binding ResultsSearchText}"
-                             MinWidth="200"
-                             Watermark="Search..."/>
                 </StackPanel>
 
-                <Grid Grid.Row="2">
-                    <TreeDataGrid
-                        x:Name="ResultsTree"
-                        Height="{Binding $parent.Bounds.Height}"
-                        Source="{Binding ResultsTreeSource}"/>
-                </Grid>
+                <!-- Empty State -->
+                <StackPanel
+                    Grid.Row="2"
+                    IsVisible="{Binding !Results.Count}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="16">
+                    <controls:SymbolIcon
+                        Symbol="List"
+                        FontSize="64"
+                        Foreground="{DynamicResource TextFillColorDisabled}"/>
+                    <StackPanel
+                        Spacing="8"
+                        HorizontalAlignment="Center">
+                        <TextBlock
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Text="No Analysis Results"
+                            TextAlignment="Center"
+                            Foreground="{DynamicResource TextFillColorPrimary}"/>
+                        <TextBlock
+                            FontSize="13"
+                            Foreground="{DynamicResource TextFillColorSecondary}"
+                            TextAlignment="Center"
+                            Text="Run an analysis to see results here"/>
+
+                        <!-- Step-by-step guidance -->
+                        <StackPanel
+                            Spacing="6"
+                            Margin="0,16,0,0">
+                            <TextBlock
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="{DynamicResource TextFillColorSecondary}"
+                                Text="Quick Start:"/>
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="{DynamicResource TextFillColorTertiary}"
+                                Text="1. Select mods on the left sidebar"/>
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="{DynamicResource TextFillColorTertiary}"
+                                Text="2. Choose analysis topics via &quot;Browse Topics&quot;"/>
+                            <TextBlock
+                                FontSize="11"
+                                Foreground="{DynamicResource TextFillColorTertiary}"
+                                Text="3. Click &quot;Start Analysis&quot; to begin"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Results Tree -->
+                <TreeDataGrid
+                    Grid.Row="2"
+                    x:Name="ResultsTree"
+                    IsVisible="{Binding Results.Count}"
+                    Source="{Binding ResultsTreeSource}"/>
             </Grid>
-        </basic:LabeledContentControl>
+        </Grid>
     </Grid>
 </UserControl>

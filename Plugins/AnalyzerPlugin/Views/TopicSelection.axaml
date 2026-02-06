@@ -1,0 +1,77 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:AnalyzerPlugin.ViewModels"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:treeDataGrid="clr-namespace:CreationEditor.Avalonia.Behavior.TreeDataGrid;assembly=CreationEditor.Avalonia"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d"
+             d:DesignWidth="1400"
+             d:DesignHeight="800"
+             x:DataType="viewModels:AnalyzerVM"
+             x:Class="AnalyzerPlugin.Views.TopicSelection">
+    <Grid RowDefinitions="Auto,12,*">
+        <!-- Toolbar -->
+        <StackPanel
+            Grid.Row="0"
+            Orientation="Horizontal"
+            Spacing="12">
+            <TextBox
+                Text="{Binding TopicSearchText}"
+                MinWidth="300"
+                Watermark="Search topics..."
+                Padding="12,8"
+                CornerRadius="6"/>
+
+            <Button
+                ToolTip.Tip="Group topics by category"
+                Padding="10,8"
+                CornerRadius="6">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <controls:SymbolIcon
+                        Symbol="Pin"
+                        FontSize="16"/>
+                    <TextBlock Text="Group"/>
+                </StackPanel>
+
+                <Button.Flyout>
+                    <Flyout Placement="Bottom">
+                        <StackPanel
+                            Spacing="12"
+                            Margin="12">
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="Group By"/>
+                            <CheckBox
+                                Content="Severity"
+                                IsChecked="{Binding IsTopicsGroupedBySeverity}"/>
+                            <CheckBox
+                                Content="Record Type"
+                                IsChecked="{Binding IsTopicsGroupedByRecordType}"/>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
+
+        <!-- Topics Tree -->
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto">
+            <TreeDataGrid
+                x:Name="TopicsTree"
+                Source="{Binding TopicsTreeSource}">
+                <Interaction.Behaviors>
+                    <treeDataGrid:ScrollToSelection/>
+                    <treeDataGrid:ExpandAllChildren
+                        x:TypeArguments="system:Object"/>
+                    <treeDataGrid:AutoExpandSingleChildren
+                        x:TypeArguments="system:Object"/>
+                </Interaction.Behaviors>
+            </TreeDataGrid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
