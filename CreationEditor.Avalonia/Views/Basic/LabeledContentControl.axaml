@@ -27,7 +27,7 @@
     <Style Selector="controls|LabeledContentControl">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid RowDefinitions="Auto,2,*">
+                <Grid RowDefinitions="Auto,4,*">
                     <StackPanel Grid.Row="0"
                                 Spacing="5"
                                 Orientation="Horizontal"
