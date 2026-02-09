@@ -3,19 +3,24 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.State;
 using Noggog;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using Reloaded.Memory.Extensions;
 namespace CreationEditor.Avalonia.Services.Record.Prefix;
 
 public sealed record RecordPrefixMemento(
     string Prefix);
 
-public class RecordPrefixService(
+public partial class RecordPrefixService(
     IEditorEnvironment editorEnvironment,
     IStateRepositoryFactory<RecordPrefixMemento, RecordPrefixMemento, string> stateRepositoryFactory)
-    : IRecordPrefixService, ILifecycleTask {
+    : ReactiveObject, IRecordPrefixService, ILifecycleTask {
     private readonly IStateRepository<RecordPrefixMemento, RecordPrefixMemento, string> _stateRepository = stateRepositoryFactory.Create("RecordPrefix");
 
-    public string Prefix { get; set; } = string.Empty;
+    [Reactive] public partial string Prefix { get; set; } = string.Empty;
+
+    public IObservable<string> PrefixChanged => this.WhenAnyValue(x => x.Prefix)
+        .PublishRefCount();
 
     public void PreStartup() {
         // No work needed

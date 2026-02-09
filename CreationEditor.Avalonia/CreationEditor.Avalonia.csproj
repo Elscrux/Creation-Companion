@@ -144,6 +144,9 @@
         <Compile Update="Resources\Command\AddElementCustom.cs">
           <DependentUpon>ListCommand.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Record\Prefix\RecordPrefixService.cs">
+          <DependentUpon>IRecordPrefixService.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
