@@ -187,7 +187,10 @@ public sealed partial class EnchantmentsVM : ViewModel {
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedEnchantmentItems)
-            .CombineLatest(ModPickerVM.SelectedMods, (def, mods) => (Definitions: def, SelectedMods: mods))
+            .CombineLatest(
+                ModPickerVM.SelectedMods,
+                RecordPrefixVM.RecordPrefixService.PrefixChanged.ThrottleMedium(),
+                (def, mods, _) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
             .Subscribe(x => UpdateEnchantmentsShowcase(x.Definitions, x.SelectedMods))
