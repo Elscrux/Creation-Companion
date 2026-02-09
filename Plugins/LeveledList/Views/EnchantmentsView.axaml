@@ -76,9 +76,10 @@
               RowDefinitions="Auto,10,*">
             <StackPanel
                 Grid.Row="0"
+                Margin="10, 0, 0 0"
+                Spacing="10"
                 Orientation="Horizontal">
                 <basic:LabeledContentControl
-                    Margin="10, 0"
                     Header="Generation Preview"
                     HeaderToolTip="To generate enchantments, add enchantment levels to tiers, and assign items to tiers.">
                     <StackPanel Orientation="Horizontal"
@@ -95,6 +96,48 @@
                 </basic:LabeledContentControl>
 
                 <record:RecordPrefixPicker DataContext="{Binding RecordPrefixVM}"/>
+
+                <basic:LabeledContentControl
+                    Header="EditorID Regex Replacement"
+                    HeaderToolTip="Replace parts of the generated enchantment EditorIDs with a regex.">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <TextBox
+                            Text="{Binding EditorIDRegexPattern}"
+                            Watermark="Search Regex"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            MinWidth="120"/>
+
+                        <TextBox
+                            Text="{Binding EditorIDRegexReplacement}"
+                            Watermark="Replace Regex"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            MinWidth="120"/>
+                    </StackPanel>
+                </basic:LabeledContentControl>
+
+                <basic:LabeledContentControl
+                    Header="Name Replacement"
+                    HeaderToolTip="Replace parts of the generated enchantment name with a regex.">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <TextBox
+                            Text="{Binding NameRegexPattern}"
+                            Watermark="Search Regex"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            MinWidth="120"/>
+
+                        <TextBox
+                            Text="{Binding NameRegexReplacement}"
+                            Watermark="Replace Regex"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            MinWidth="120"/>
+                    </StackPanel>
+                </basic:LabeledContentControl>
             </StackPanel>
 
             <Grid Grid.Row="2">

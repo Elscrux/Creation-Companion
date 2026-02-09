@@ -99,8 +99,11 @@ public partial record ListDefinition(
         FeatureNode featureNode,
         EnchantmentProvider enchantmentProvider,
         IRecordPrefixService recordPrefixService,
-        Func<ListDefinitionIdentifier, List<LeveledList>> listsProvider) {
+        Func<ListDefinitionIdentifier, List<LeveledList>> listsProvider,
+        Func<string, string> editorIdSelector) {
         var editorID = recordPrefixService.Prefix + GetFullName(featureNode.Features);
+        editorID = editorIdSelector(editorID);
+
         var leveledList = new LeveledList(featureNode.Features, editorID, [], Chance, UseAll, CalculateForEach, CalculateFromAllLevels, SpecialLoot);
 
         if (Tiers is not null) {

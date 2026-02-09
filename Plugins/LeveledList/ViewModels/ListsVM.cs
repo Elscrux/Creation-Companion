@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
@@ -51,6 +52,8 @@ public sealed partial class ListsVM : ValidatableViewModel {
     [Reactive] public partial string? LeveledListFolderPath { get; set; }
     [Reactive] public partial IReadOnlyList<ExtendedListDefinition>? SelectedLists { get; set; } = null;
     [Reactive] public partial string? LeveledListFilter { get; set; }
+    [Reactive] public partial string EditorIDRegexPattern { get; set; } = string.Empty;
+    [Reactive] public partial string EditorIDRegexReplacement { get; set; } = string.Empty;
 
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
     public MultiModPickerVM ModPickerVM { get; }
@@ -197,7 +200,8 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .CombineLatest(
                 ModPickerVM.SelectedMods,
                 RecordPrefixVM.RecordPrefixService.PrefixChanged.ThrottleMedium(),
-                (def, mods, _) => (Definitions: def, SelectedMods: mods))
+                this.WhenAnyValue(x => x.EditorIDRegexPattern, x => x.EditorIDRegexReplacement).ThrottleMedium(),
+                (def, mods, _, _) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
             .Subscribe(x => UpdateListsShowcase(x.Definitions, x.SelectedMods))
@@ -217,7 +221,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
         var generatedLists = new List<Model.List.LeveledList>();
         foreach (var listTypeDefinition in SelectedLists.Select(x => x.TypeDefinition).Distinct()) {
             var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
-            var leveledLists = _generator.Generate(listTypeDefinition, selectedMods);
+            var leveledLists = _generator.Generate(listTypeDefinition, selectedMods, EditorIdSelector);
             generatedLists.AddRange(leveledLists
                 .Where(x => SelectedLists.Any(list => list.Matches(x, tierAliases))));
         }
@@ -248,7 +252,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             var generatedLists = new List<LeveledListTreeNode>();
             foreach (var listTypeDefinition in selectedLists.Select(x => x.TypeDefinition).Distinct()) {
                 var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
-                var leveledLists = _generator.Generate(listTypeDefinition, mods);
+                var leveledLists = _generator.Generate(listTypeDefinition, mods, EditorIdSelector);
                 generatedLists.AddRange(leveledLists
                     .Where(x => selectedLists.Any(list => list.Matches(x, tierAliases)))
                     .Select(l => new LeveledListTreeNode(
@@ -331,4 +335,6 @@ public sealed partial class ListsVM : ValidatableViewModel {
             contextFlyout.ShowAt(control, true);
         }
     }
+
+    private string EditorIdSelector(string x) => Regex.Replace(x, EditorIDRegexPattern, EditorIDRegexReplacement);
 }

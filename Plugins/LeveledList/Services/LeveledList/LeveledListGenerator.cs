@@ -16,7 +16,10 @@ public class LeveledListGenerator(
     IRecordPrefixService recordPrefixService,
     ITierController tierController,
     IFeatureProvider featureProvider) {
-    public IEnumerable<Model.List.LeveledList> Generate(ListTypeDefinition listTypeDefinition, IReadOnlyCollection<IModGetter> modsToLookAt) {
+    public IEnumerable<Model.List.LeveledList> Generate(
+        ListTypeDefinition listTypeDefinition,
+        IReadOnlyCollection<IModGetter> modsToLookAt,
+        Func<string, string> editorIdSelector) {
         var enchantmentProvider = new EnchantmentProvider(editorEnvironment);
         var records = leveledListRecordTypeProvider.GetRecords(modsToLookAt, listTypeDefinition.Type).ToArray();
         var tierAliases = tierController.GetTierAliases(listTypeDefinition.Type);
@@ -44,7 +47,8 @@ public class LeveledListGenerator(
                     featureNode,
                     enchantmentProvider,
                     recordPrefixService,
-                    identifier => createdListsPerDefinition[identifier]);
+                    identifier => createdListsPerDefinition[identifier],
+                    editorIdSelector);
 
                 createdLists.Add(leveledItem);
 

@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
@@ -44,6 +45,10 @@ public sealed partial class EnchantmentsVM : ViewModel {
     [Reactive] public partial string? DefinitionsFolderPath { get; set; }
     [Reactive] public partial IReadOnlyList<ExtendedEnchantmentItem>? SelectedEnchantmentItems { get; set; } = null;
     [Reactive] public partial string? EnchantedItemsFilter { get; set; }
+    [Reactive] public partial string EditorIDRegexPattern { get; set; } = string.Empty;
+    [Reactive] public partial string EditorIDRegexReplacement { get; set; } = string.Empty;
+    [Reactive] public partial string NameRegexPattern { get; set; } = string.Empty;
+    [Reactive] public partial string NameRegexReplacement { get; set; } = string.Empty;
 
     public FlatTreeDataGridSource<EnchantedItem> EnchantmentsSource { get; }
     public MultiModPickerVM ModPickerVM { get; }
@@ -190,7 +195,8 @@ public sealed partial class EnchantmentsVM : ViewModel {
             .CombineLatest(
                 ModPickerVM.SelectedMods,
                 RecordPrefixVM.RecordPrefixService.PrefixChanged.ThrottleMedium(),
-                (def, mods, _) => (Definitions: def, SelectedMods: mods))
+                this.WhenAnyValue(x => x.EditorIDRegexPattern, x => x.EditorIDRegexReplacement, x => x.NameRegexPattern, x => x.NameRegexReplacement).ThrottleMedium(),
+                (def, mods, _, _) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
             .Subscribe(x => UpdateEnchantmentsShowcase(x.Definitions, x.SelectedMods))
@@ -217,7 +223,9 @@ public sealed partial class EnchantmentsVM : ViewModel {
                 var enchantedItems = _generator.Generate(
                     enchantmentsDefinition.EnchantmentsDefinition.Type,
                     enchantmentsDefinition.EnchantmentItem,
-                    mods);
+                    mods,
+                    EditorIdSelector,
+                    NameSelector);
                 generatedLists.AddRange(enchantedItems);
             }
 
@@ -260,4 +268,7 @@ public sealed partial class EnchantmentsVM : ViewModel {
             }
         }
     }
+
+    private string EditorIdSelector(string x) => Regex.Replace(x, EditorIDRegexPattern, EditorIDRegexReplacement);
+    private string NameSelector(string x) => Regex.Replace(x, NameRegexPattern, NameRegexReplacement);
 }

@@ -19,7 +19,12 @@ public class EnchantmentsGenerator(
     IFeatureProvider featureProvider,
     IRecordPrefixService recordPrefixService,
     EnchantmentProvider enchantmentProvider) {
-    public IEnumerable<EnchantedItem> Generate(ListRecordType type, EnchantmentItem enchantment, IReadOnlyCollection<IModGetter> modsToLookAt) {
+    public IEnumerable<EnchantedItem> Generate(
+        ListRecordType type,
+        EnchantmentItem enchantment,
+        IReadOnlyCollection<IModGetter> modsToLookAt,
+        Func<string, string> editorIdSelector,
+        Func<string, string> nameSelector) {
         foreach (var record in leveledListRecordTypeProvider.GetRecords(modsToLookAt, type)) {
             if (record.Record is not (IEnchantableGetter enchantable and IKeywordedGetter { Keywords: {} keywords })) continue;
 
@@ -89,11 +94,16 @@ public class EnchantmentsGenerator(
                     editorId = recordPrefixService.Prefix + "Ench" + cleanedEnchantableEditorId + enchantment.Suffix + enchantmentLevel.ToString("D2");
                 }
 
+                editorId = editorIdSelector(editorId);
+
                 editorEnvironment.LinkCache.TryResolve<IEnchantableGetter>(editorId, out var existingEnchanted);
+
+                var name = enchantmentTierData.GetFullName(enchantable);
+                name = nameSelector(name);
 
                 yield return new EnchantedItem(
                     editorId,
-                    enchantmentTierData.GetFullName(enchantable),
+                    name,
                     enchantable,
                     objectEffect,
                     existingEnchanted,
