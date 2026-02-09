@@ -17,8 +17,9 @@
         </ContentControl.Resources>
         <ContentControl.DataTemplates>
             <DataTemplate DataType="vm:MultiModPickerVM">
-                <Button Content="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}}"
+                <Button Content="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}, FallbackValue='None'}"
                         MaxWidth="200"
+                        MinHeight="32"
                         ToolTip.Tip="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}}">
                     <Button.Flyout>
                         <Flyout>
