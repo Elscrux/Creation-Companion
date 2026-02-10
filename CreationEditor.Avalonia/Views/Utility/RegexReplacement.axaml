@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:utility="clr-namespace:CreationEditor.Avalonia.ViewModels.Utility"
+             mc:Ignorable="d"
+             d:DesignWidth="400"
+             d:DesignHeight="150"
+             x:Class="CreationEditor.Avalonia.Views.Utility.RegexReplacement"
+             x:DataType="utility:RegexReplacementVM">
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10">
+            <TextBox
+                Text="{Binding Pattern}"
+                Watermark="Search Pattern"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                MinWidth="120"/>
+
+            <TextBox
+                Text="{Binding Replacement}"
+                Watermark="Replacement"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                MinWidth="120"/>
+        </StackPanel>
+</UserControl>

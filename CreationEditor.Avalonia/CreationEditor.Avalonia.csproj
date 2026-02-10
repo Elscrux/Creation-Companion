@@ -147,26 +147,6 @@
         <Compile Update="Services\Record\Prefix\RecordPrefixService.cs">
           <DependentUpon>IRecordPrefixService.cs</DependentUpon>
         </Compile>
-        <Compile Update="Views\Basic\Card.axaml.cs">
-          <DependentUpon>Card.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\Basic\ExpanderCard.axaml.cs">
-          <DependentUpon>ExpanderCard.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\Basic\StepByStepTutorial.axaml.cs">
-          <DependentUpon>Tutorial.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\Basic\Header.axaml.cs">
-          <DependentUpon>Header.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\Basic\SectionHeader.axaml.cs">
-          <DependentUpon>Section.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
 </Project>
