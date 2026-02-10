@@ -1,8 +1,7 @@
 ﻿<Styles
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Style
-        Selector="Border.Card">
+    <Style Selector="Border.Card">
         <Setter
             Property="Background"
             Value="{DynamicResource CardBackgroundFillColorDefault}"/>
@@ -14,9 +13,24 @@
             Value="1"/>
         <Setter
             Property="CornerRadius"
-            Value="12"/>
+            Value="8"/>
         <Setter
             Property="Padding"
-            Value="20"/>
+            Value="16"/>
+    </Style>
+
+    <Style Selector="Border.CardNested">
+        <Setter
+            Property="Background"
+            Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+        <Setter
+            Property="BorderBrush"
+            Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+        <Setter
+            Property="BorderThickness"
+            Value="1"/>
+        <Setter
+            Property="CornerRadius"
+            Value="4"/>
     </Style>
 </Styles>
