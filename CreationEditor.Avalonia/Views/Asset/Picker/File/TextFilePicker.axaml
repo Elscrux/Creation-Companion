@@ -3,15 +3,15 @@
         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File">
     <Design.PreviewWith>
-        <StackPanel Height="100" Width="1000">
-            <file:TextFilePicker FilePath="some/file/path/which/is/very.interesting"/>
-        </StackPanel>
+        <file:TextFilePicker
+            Margin="5"
+            FilePath="some/file/path/which/is/very.interesting"/>
     </Design.PreviewWith>
 
     <Style Selector="file|TextFilePicker">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid ColumnDefinitions="Auto,Auto,Auto"
+                <Grid ColumnDefinitions="Auto,Auto,*"
                       MinWidth="100"
                       MaxHeight="27">
                     <Border Grid.Column="0"
@@ -30,20 +30,33 @@
                             <TextBox
                                 IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                 IsEnabled="{TemplateBinding AllowTextEdit}"
+                                Padding="4"
+                                BorderThickness="0"
                                 Text="{TemplateBinding FilePath}"
                                 Watermark="{TemplateBinding Watermark}"
                                 TextBlock.TextTrimming="{x:Static TextTrimming.CharacterEllipsis}"
-                                ToolTip.Tip="{TemplateBinding FilePath}"/>
+                                ToolTip.Tip="{TemplateBinding FilePath}">
+                                <TextBox.Styles>
+                                    <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </Style>
+
+                                    <Style Selector="TextBox /template/ Border">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </TextBox.Styles>
+                            </TextBox>
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="1"
-                            BorderBrush="{DynamicResource ButtonBorderBrush}"
-                            BorderThickness="0.5"/>
+                    <Rectangle Grid.Column="1"
+                               Width="0.5"
+                               Fill="{DynamicResource ButtonBorderBrush}"/>
 
                     <Button Grid.Column="2"
                             Command="{TemplateBinding Pick}"
                             BorderThickness="0,1,1,1"
+                            BorderBrush="{DynamicResource ButtonBorderBrush}"
                             CornerRadius="0,4,4,0"
                             VerticalAlignment="Center">
                         <controls:SymbolIcon
