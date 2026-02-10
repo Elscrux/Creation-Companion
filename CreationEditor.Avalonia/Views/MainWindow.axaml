@@ -35,7 +35,7 @@
                                   InputGesture="Ctrl+Alt+D"
                                   Command="{Binding #DataSourceSelectionPopup.Show}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Library"/>
+                                <controls:SymbolIcon Symbol="Folder"/>
                             </MenuItem.Icon>
                         </MenuItem>
 

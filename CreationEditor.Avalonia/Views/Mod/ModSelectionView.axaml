@@ -33,7 +33,7 @@
                         Click="OpenDataSourceSelectionView"
                         VerticalAlignment="Stretch">
                     <controls:SymbolIcon
-                        Symbol="Library"
+                        Symbol="Folder"
                         ToolTip.Tip="Data Sources"/>
                 </Button>
 
