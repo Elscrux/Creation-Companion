@@ -1,9 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
@@ -12,8 +9,6 @@ using Avalonia.Threading;
 using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.Prefix;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.State;
@@ -21,69 +16,51 @@ using DynamicData;
 using DynamicData.Binding;
 using LeveledList.Model;
 using LeveledList.Model.Enchantments;
-using LeveledList.Resources;
 using LeveledList.Services.Enchantments;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Serilog;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 namespace LeveledList.ViewModels;
 
-public sealed partial class EnchantmentsVM : ViewModel {
+public sealed partial class EnchantmentsVM : ValidatableViewModel {
     private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly IEditorEnvironment _editorEnvironment;
     private readonly EnchantmentsGenerator _generator;
     private readonly EnchantmentsImplementer _implementer;
 
-    private readonly ObservableCollectionExtended<EnchantedItem> _enchantedItems = new();
+    public GenerationConfigurationVM GenerationConfig { get; }
+
+    private readonly ObservableCollectionExtended<EnchantedItem> _enchantedItems = [];
     public ReadOnlyObservableCollection<EnchantedItem> EnchantedItems { get; }
     public IObservableCollection<ExtendedEnchantmentItem> EnchantmentsDefinitions { get; } = new ObservableCollectionExtended<ExtendedEnchantmentItem>();
 
-    [Reactive] public partial string? DefinitionsFolderPath { get; set; }
-    [Reactive] public partial IReadOnlyList<ExtendedEnchantmentItem>? SelectedEnchantmentItems { get; set; } = null;
-    [Reactive] public partial string? EnchantedItemsFilter { get; set; }
-    [Reactive] public partial string EditorIDRegexPattern { get; set; } = string.Empty;
-    [Reactive] public partial string EditorIDRegexReplacement { get; set; } = string.Empty;
-    [Reactive] public partial string NameRegexPattern { get; set; } = string.Empty;
-    [Reactive] public partial string NameRegexReplacement { get; set; } = string.Empty;
+    [Reactive] public partial IReadOnlyList<ExtendedEnchantmentItem>? SelectedDefinitions { get; set; }
 
     public FlatTreeDataGridSource<EnchantedItem> EnchantmentsSource { get; }
-    public MultiModPickerVM ModPickerVM { get; }
-    public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateEnchantments { get; }
-    public ReactiveCommand<Unit, Unit> ReloadLists { get; }
-
-    private readonly Subject<bool> _isBusy = new();
-    public IObservable<bool> IsBusy => _isBusy;
+    public ReactiveCommand<Unit, Unit> ReloadDefinitions { get; }
 
     public EnchantmentsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
-        MultiModPickerVM modPickerVM,
-        RecordPrefixVM recordPrefixVM,
         ILogger logger,
-        IFileSystem fileSystem,
-        IEditorEnvironment editorEnvironment,
         ISearchFilter searchFilter,
         EnchantmentsGenerator generator,
+        GenerationConfigurationVM generationConfig,
         EnchantmentsImplementer implementer) {
-        ModPickerVM = modPickerVM;
-        RecordPrefixVM = recordPrefixVM;
         _logger = logger;
-        _fileSystem = fileSystem;
-        _editorEnvironment = editorEnvironment;
         _generator = generator;
         _implementer = implementer;
+
+        GenerationConfig = generationConfig;
+        GenerationConfig.ShowNameReplacement = true;
 
         var stateRepository = stateRepositoryFactory.Create("Enchantments");
         var enchantmentsMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
         Guid? enchantmentsMementoGuid = enchantmentsMemento.Value is null ? null : enchantmentsMemento.Key;
 
-        DefinitionsFolderPath = enchantmentsMemento.Value?.EnchantmentsFolderPath;
+        GenerationConfig.DefinitionsFolderPath = enchantmentsMemento.Value?.EnchantmentsFolderPath;
 
-        var filter = this.WhenAnyValue(x => x.EnchantedItemsFilter)
+        var filter = GenerationConfig.WhenAnyValue(x => x.FilterText)
             .NotNull()
             .Select<string, Func<EnchantedItem, bool>>(filter =>
                 node => searchFilter.Filter(node.EditorID, filter))
@@ -97,16 +74,16 @@ public sealed partial class EnchantmentsVM : ViewModel {
             .ToObservableCollection(this);
 
         GenerateEnchantments = ReactiveCommand.CreateRunInBackground(GenerateEnchantedItems);
-        ReloadLists = ReactiveCommand.Create(() => {
-            if (DefinitionsFolderPath is null) return;
+        ReloadDefinitions = ReactiveCommand.Create(() => {
+            if (GenerationConfig.DefinitionsFolderPath is null) return;
 
-            EnchantmentsDefinitions.LoadOptimized(GetDefinitions(DefinitionsFolderPath));
+            LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
         });
 
         EnchantmentsSource = new FlatTreeDataGridSource<EnchantedItem>(EnchantedItems) {
             Columns = {
                 new TemplateColumn<EnchantedItem>(
-                    "Existing",
+                    "Exists",
                     new FuncDataTemplate<EnchantedItem>((x, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,
                         Text = x?.ExistingEnchanted is not null ? "✅" : string.Empty
@@ -179,10 +156,10 @@ public sealed partial class EnchantmentsVM : ViewModel {
             }
         };
 
-        this.WhenAnyValue(x => x.DefinitionsFolderPath)
+        GenerationConfig.WhenAnyValue(x => x.DefinitionsFolderPath)
             .NotNull()
             .Subscribe(path => {
-                EnchantmentsDefinitions.LoadOptimized(GetDefinitions(path));
+                LoadDefinitions(path);
                 stateRepository.Update(
                     memento => memento is null
                         ? new LeveledListMemento(string.Empty, path)
@@ -191,84 +168,71 @@ public sealed partial class EnchantmentsVM : ViewModel {
             })
             .DisposeWith(this);
 
-        this.WhenAnyValue(x => x.SelectedEnchantmentItems)
+        this.WhenAnyValue(x => x.SelectedDefinitions)
             .CombineLatest(
-                ModPickerVM.SelectedMods,
-                RecordPrefixVM.RecordPrefixService.PrefixChanged.ThrottleMedium(),
-                this.WhenAnyValue(x => x.EditorIDRegexPattern, x => x.EditorIDRegexReplacement, x => x.NameRegexPattern, x => x.NameRegexReplacement).ThrottleMedium(),
-                (def, mods, _, _) => (Definitions: def, SelectedMods: mods))
+                GenerationConfig.ModPicker.SelectedMods,
+                GenerationConfig.RecordPrefixContent.RecordPrefixService.PrefixChanged.ThrottleMedium(),
+                GenerationConfig.EditorIdReplacement.WhenAnyValue(x => x.Pattern, x => x.Replacement).ThrottleMedium(),
+                GenerationConfig.NameReplacement.WhenAnyValue(x => x.Pattern, x => x.Replacement).ThrottleMedium(),
+                (def, mods, _, _, _) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
             .Subscribe(x => UpdateEnchantmentsShowcase(x.Definitions, x.SelectedMods))
             .DisposeWith(this);
     }
 
-    private void GenerateEnchantedItems() {
-        if (SelectedEnchantmentItems is null) return;
+    private void LoadDefinitions(string directoryPath) {
+        EnchantmentsDefinitions.LoadOptimized(GetDefinitions(directoryPath));
+    }
 
-        _implementer.ImplementEnchantments(_editorEnvironment.ActiveMod, _enchantedItems);
+    private void GenerateEnchantedItems() {
+        if (SelectedDefinitions is null) return;
+
+        _implementer.ImplementEnchantments(GenerationConfig.EditorEnvironment.ActiveMod, _enchantedItems);
     }
 
     private void UpdateEnchantmentsShowcase(IReadOnlyList<ExtendedEnchantmentItem>? selectedLists, IReadOnlyCollection<OrderedModItem> selectedMods) {
-        var mods = _editorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
+        var mods = GenerationConfig.EditorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
         if (mods.Length == 0 || selectedLists is null) {
             Dispatcher.UIThread.Post(() => _enchantedItems.Clear());
             return;
         }
 
         try {
-            _isBusy.OnNext(true);
+            GenerationConfig.SetBusy(true);
             var generatedLists = new List<EnchantedItem>();
             foreach (var enchantmentsDefinition in selectedLists.Distinct()) {
                 var enchantedItems = _generator.Generate(
                     enchantmentsDefinition.EnchantmentsDefinition.Type,
                     enchantmentsDefinition.EnchantmentItem,
                     mods,
-                    EditorIdSelector,
-                    NameSelector);
+                    GenerationConfig.EditorIdReplacement.Replace,
+                    GenerationConfig.NameReplacement is {} rep ? rep.Replace : s => s);
                 generatedLists.AddRange(enchantedItems);
             }
 
             Dispatcher.UIThread.Post(() => {
                 _enchantedItems.LoadOptimized(generatedLists);
-                _isBusy.OnNext(false);
+                GenerationConfig.SetBusy(false);
             });
         } catch (Exception e) {
             Dispatcher.UIThread.Post(() => {
                 _enchantedItems.Clear();
-                _isBusy.OnNext(false);
+                GenerationConfig.SetBusy(false);
             });
             _logger.Here().Error(e,
-                "Failed to generate leveled lists for {ListDefinition}",
+                "Failed to generate enchantments for {ListDefinition}",
                 string.Join(',', selectedLists.Select(x => x.FileName)));
         }
     }
 
     private IEnumerable<ExtendedEnchantmentItem> GetDefinitions(string directoryPath) {
-        if (!_fileSystem.Directory.Exists(directoryPath)) yield break;
-
-        var deserializer = new DeserializerBuilder()
-            .WithTypeConverter(new FormKeyYamlTypeConverter())
-            .WithNamingConvention(HyphenatedNamingConvention.Instance)
-            .Build();
-
-        foreach (var file in _fileSystem.Directory.EnumerateFiles(directoryPath, "*.yaml", SearchOption.AllDirectories)) {
-            using var fileStream = _fileSystem.File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var fileName = _fileSystem.Path.GetFileNameWithoutExtension(file);
-
-            EnchantmentsDefinition enchantmentsDefinition;
-            try {
-                enchantmentsDefinition = deserializer.Deserialize<EnchantmentsDefinition>(new StreamReader(fileStream));
-            } catch (Exception) {
-                continue;
-            }
-
-            foreach (var enchantment in enchantmentsDefinition.Enchantments.Values) {
-                yield return new ExtendedEnchantmentItem(file, fileName, enchantment, enchantmentsDefinition);
-            }
-        }
+        return GenerationConfig.GetDefinitionsFromYaml<ExtendedEnchantmentItem>(
+            directoryPath,
+            (deserializer, reader, file, fileName) => {
+                var enchantmentsDefinition = deserializer.Deserialize<EnchantmentsDefinition>(reader);
+                return enchantmentsDefinition.Enchantments.Values.Select(enchantment =>
+                    new ExtendedEnchantmentItem(file, fileName, enchantment, enchantmentsDefinition));
+            });
     }
-
-    private string EditorIdSelector(string x) => Regex.Replace(x, EditorIDRegexPattern, EditorIDRegexReplacement);
-    private string NameSelector(string x) => Regex.Replace(x, NameRegexPattern, NameRegexReplacement);
 }

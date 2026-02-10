@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Disposables;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using LeveledList.Model.List;
@@ -14,6 +13,13 @@ public partial class ListsView : ReactiveUserControl<ListsVM> {
         InitializeComponent();
 
         this.WhenActivated(disposables => {
+            ListsDataGrid.SelectedItems.Clear();
+            if (ViewModel?.SelectedDefinitions is not null) {
+                foreach (var definition in ViewModel.SelectedDefinitions) {
+                    ListsDataGrid.SelectedItems.Add(definition);
+                }
+            }
+
             this.WhenAnyValue(x => x.ListsDataGrid.SelectedItem)
                 .Subscribe(_ => {
                     if (ViewModel is null) return;
@@ -22,14 +28,13 @@ public partial class ListsView : ReactiveUserControl<ListsVM> {
                         .OfType<ExtendedListDefinition>()
                         .ToArray();
 
-                    ViewModel.SelectedLists = selectedDefinitions;
+                    // Only update if the selected definitions have changed to avoid unnecessary updates
+                    if (ViewModel.SelectedDefinitions is not null && selectedDefinitions.SequenceEqual(ViewModel.SelectedDefinitions)) return;
+
+                    ViewModel.SelectedDefinitions = selectedDefinitions;
                 })
                 .DisposeWith(disposables);
         });
-    }
-
-    private void Control_OnContextRequested(object? sender, ContextRequestedEventArgs e) {
-        ViewModel?.ContextMenu(sender, e);
     }
 
     private void OpenFile(object? sender, RoutedEventArgs e) {

@@ -13,6 +13,13 @@ public partial class EnchantmentsView : ReactiveUserControl<EnchantmentsVM> {
         InitializeComponent();
 
         this.WhenActivated(disposables => {
+            ListsDataGrid.SelectedItems.Clear();
+            if (ViewModel?.SelectedDefinitions is not null) {
+                foreach (var definition in ViewModel.SelectedDefinitions) {
+                    ListsDataGrid.SelectedItems.Add(definition);
+                }
+            }
+
             this.WhenAnyValue(x => x.ListsDataGrid.SelectedItem)
                 .Subscribe(_ => {
                     if (ViewModel is null) return;
@@ -21,7 +28,10 @@ public partial class EnchantmentsView : ReactiveUserControl<EnchantmentsVM> {
                         .OfType<ExtendedEnchantmentItem>()
                         .ToArray();
 
-                    ViewModel.SelectedEnchantmentItems = selectedDefinitions;
+                    // Only update if the selected definitions have changed to avoid unnecessary updates
+                    if (ViewModel.SelectedDefinitions is not null && selectedDefinitions.SequenceEqual(ViewModel.SelectedDefinitions)) return;
+
+                    ViewModel.SelectedDefinitions = selectedDefinitions;
                 })
                 .DisposeWith(disposables);
         });

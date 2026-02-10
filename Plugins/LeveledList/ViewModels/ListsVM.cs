@@ -1,9 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
@@ -14,8 +11,6 @@ using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.ViewModels.Record.Prefix;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.State;
@@ -24,7 +19,6 @@ using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model;
 using LeveledList.Model.List;
-using LeveledList.Resources;
 using LeveledList.Services;
 using LeveledList.Services.LeveledList;
 using Mutagen.Bethesda.Skyrim;
@@ -32,66 +26,50 @@ using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Serilog;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 namespace LeveledList.ViewModels;
 
 public sealed partial class ListsVM : ValidatableViewModel {
     private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly IEditorEnvironment _editorEnvironment;
     private readonly ITierController _tierController;
     private readonly LeveledListGenerator _generator;
     private readonly LeveledListImplementer _implementer;
     private readonly IRecordPrefixService _recordPrefixService;
 
-    private readonly ObservableCollectionExtended<LeveledListTreeNode> _leveledLists = new();
+    public GenerationConfigurationVM GenerationConfig { get; }
+
+    private readonly ObservableCollectionExtended<LeveledListTreeNode> _leveledLists = [];
     public ReadOnlyObservableCollection<LeveledListTreeNode> LeveledLists { get; }
     public IObservableCollection<ExtendedListDefinition> ListTypeDefinitions { get; } = new ObservableCollectionExtended<ExtendedListDefinition>();
 
-    [Reactive] public partial string? LeveledListFolderPath { get; set; }
-    [Reactive] public partial IReadOnlyList<ExtendedListDefinition>? SelectedLists { get; set; } = null;
-    [Reactive] public partial string? LeveledListFilter { get; set; }
-    [Reactive] public partial string EditorIDRegexPattern { get; set; } = string.Empty;
-    [Reactive] public partial string EditorIDRegexReplacement { get; set; } = string.Empty;
+    [Reactive] public partial IReadOnlyList<ExtendedListDefinition>? SelectedDefinitions { get; set; }
 
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
-    public MultiModPickerVM ModPickerVM { get; }
-    public RecordPrefixVM RecordPrefixVM { get; }
     public ReactiveCommand<Unit, Unit> GenerateSelectedLists { get; }
-    public ReactiveCommand<Unit, Unit> ReloadLists { get; }
-
-    private readonly Subject<bool> _isBusy = new();
-    public IObservable<bool> IsBusy => _isBusy;
+    public ReactiveCommand<Unit, Unit> ReloadDefinitions { get; }
 
     public ListsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
-        MultiModPickerVM modPickerVM,
-        RecordPrefixVM recordPrefixVM,
         ILogger logger,
-        IFileSystem fileSystem,
-        IEditorEnvironment editorEnvironment,
         ISearchFilter searchFilter,
         ITierController tierController,
         LeveledListGenerator generator,
         LeveledListImplementer implementer,
+        GenerationConfigurationVM generationConfig,
         IRecordPrefixService recordPrefixService) {
-        ModPickerVM = modPickerVM;
-        RecordPrefixVM = recordPrefixVM;
         _logger = logger;
-        _fileSystem = fileSystem;
-        _editorEnvironment = editorEnvironment;
         _tierController = tierController;
         _generator = generator;
         _implementer = implementer;
         _recordPrefixService = recordPrefixService;
 
+        GenerationConfig = generationConfig;
+
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
         var leveledListMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
         Guid? leveledListMementoGuid = leveledListMemento.Value is null ? null : leveledListMemento.Key;
-        LeveledListFolderPath = leveledListMemento.Value?.LeveledListFolderPath;
+        GenerationConfig.DefinitionsFolderPath = leveledListMemento.Value?.LeveledListFolderPath;
 
-        var filter = this.WhenAnyValue(x => x.LeveledListFilter)
+        var filter = GenerationConfig.WhenAnyValue(x => x.FilterText)
             .NotNull()
             .Select<string, Func<LeveledListTreeNode, bool>>(filter =>
                 node => searchFilter.Filter(node.LeveledList?.EditorID ?? string.Empty, filter))
@@ -105,16 +83,16 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .ToObservableCollection(this);
 
         GenerateSelectedLists = ReactiveCommand.CreateRunInBackground(GenerateLeveledLists);
-        ReloadLists = ReactiveCommand.Create(() => {
-            if (LeveledListFolderPath is null) return;
+        ReloadDefinitions = ReactiveCommand.Create(() => {
+            if (GenerationConfig.DefinitionsFolderPath is null) return;
 
-            ListTypeDefinitions.LoadOptimized(GetDefinitions(LeveledListFolderPath));
+            LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
         });
 
         LeveledListSource = new HierarchicalTreeDataGridSource<LeveledListTreeNode>(LeveledLists) {
             Columns = {
                 new TemplateColumn<LeveledListTreeNode>(
-                    "Existing",
+                    "Exists",
                     new FuncDataTemplate<LeveledListTreeNode>((x, _) => new TextBlock {
                         VerticalAlignment = VerticalAlignment.Center,
                         Text = x?.ExistingLeveledItem is not null ? "✅" : string.Empty
@@ -184,10 +162,10 @@ public sealed partial class ListsVM : ValidatableViewModel {
             }
         };
 
-        this.WhenAnyValue(x => x.LeveledListFolderPath)
+        GenerationConfig.WhenAnyValue(x => x.DefinitionsFolderPath)
             .NotNull()
             .Subscribe(path => {
-                ListTypeDefinitions.LoadOptimized(GetDefinitions(path));
+                LoadDefinitions(path);
                 stateRepository.Update(
                     memento => memento is null
                         ? new LeveledListMemento(path, string.Empty)
@@ -196,11 +174,11 @@ public sealed partial class ListsVM : ValidatableViewModel {
             })
             .DisposeWith(this);
 
-        this.WhenAnyValue(x => x.SelectedLists)
+        this.WhenAnyValue(x => x.SelectedDefinitions)
             .CombineLatest(
-                ModPickerVM.SelectedMods,
-                RecordPrefixVM.RecordPrefixService.PrefixChanged.ThrottleMedium(),
-                this.WhenAnyValue(x => x.EditorIDRegexPattern, x => x.EditorIDRegexReplacement).ThrottleMedium(),
+                GenerationConfig.ModPicker.SelectedMods,
+                GenerationConfig.RecordPrefixContent.RecordPrefixService.PrefixChanged.ThrottleMedium(),
+                GenerationConfig.EditorIdReplacement.WhenAnyValue(x => x.Pattern, x => x.Replacement).ThrottleMedium(),
                 (def, mods, _, _) => (Definitions: def, SelectedMods: mods))
             .ThrottleShort()
             .ObserveOnTaskpool()
@@ -208,56 +186,60 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .DisposeWith(this);
     }
 
-    private void GenerateLeveledLists() {
-        if (SelectedLists is null) return;
+    private void LoadDefinitions(string directoryPath) {
+        ListTypeDefinitions.LoadOptimized(GetDefinitions(directoryPath));
+    }
 
-        var selectedModsItems = ModPickerVM.GetSelectedMods();
+    private void GenerateLeveledLists() {
+        if (SelectedDefinitions is null) return;
+
+        var selectedModsItems = GenerationConfig.ModPicker.GetSelectedMods();
         if (selectedModsItems.Count == 0) return;
 
-        var selectedMods = _editorEnvironment.ResolveMods(selectedModsItems.Select(x => x.ModKey)).ToArray();
+        var selectedMods = GenerationConfig.EditorEnvironment.ResolveMods(selectedModsItems.Select(x => x.ModKey)).ToArray();
         if (selectedMods.Length == 0) return;
 
         // Generate leveled list intermediate format based on type definition
         var generatedLists = new List<Model.List.LeveledList>();
-        foreach (var listTypeDefinition in SelectedLists.Select(x => x.TypeDefinition).Distinct()) {
+        foreach (var listTypeDefinition in SelectedDefinitions.Select(x => x.TypeDefinition).Distinct()) {
             var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
-            var leveledLists = _generator.Generate(listTypeDefinition, selectedMods, EditorIdSelector);
+            var leveledLists = _generator.Generate(listTypeDefinition, selectedMods, GenerationConfig.EditorIdReplacement.Replace);
             generatedLists.AddRange(leveledLists
-                .Where(x => SelectedLists.Any(list => list.Matches(x, tierAliases))));
+                .Where(x => SelectedDefinitions.Any(list => list.Matches(x, tierAliases))));
         }
 
-        _implementer.ImplementLeveledLists(_editorEnvironment.ActiveMod, generatedLists);
+        _implementer.ImplementLeveledLists(GenerationConfig.EditorEnvironment.ActiveMod, generatedLists);
     }
 
     private IEnumerable<LeveledListTreeNode>? SelectNodes(Model.List.LeveledList? list) {
         return list?.Entries
             .Select(entry => new LeveledListTreeNode(
                 null,
-                entry.Item.EditorID is not null && _editorEnvironment.LinkCache.TryResolve<IItemGetter>(entry.Item.EditorID, out var existingLeveledItem)
+                entry.Item.EditorID is not null && GenerationConfig.EditorEnvironment.LinkCache.TryResolve<IItemGetter>(entry.Item.EditorID, out var existingLeveledItem)
                     ? existingLeveledItem
                     : null,
                 entry));
     }
 
     private void UpdateListsShowcase(IReadOnlyList<ExtendedListDefinition>? selectedLists, IReadOnlyCollection<OrderedModItem> selectedMods) {
-        var mods = _editorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
+        var mods = GenerationConfig.EditorEnvironment.ResolveMods(selectedMods.Select(x => x.ModKey)).ToArray();
         if (mods.Length == 0 || selectedLists is null) {
             Dispatcher.UIThread.Post(() => _leveledLists.Clear());
             return;
         }
 
         try {
-            _isBusy.OnNext(true);
+            GenerationConfig.SetBusy(true);
             // Generate leveled list intermediate format based on type definition
             var generatedLists = new List<LeveledListTreeNode>();
             foreach (var listTypeDefinition in selectedLists.Select(x => x.TypeDefinition).Distinct()) {
                 var tierAliases = _tierController.GetTierAliases(listTypeDefinition.Type);
-                var leveledLists = _generator.Generate(listTypeDefinition, mods, EditorIdSelector);
+                var leveledLists = _generator.Generate(listTypeDefinition, mods, GenerationConfig.EditorIdReplacement.Replace);
                 generatedLists.AddRange(leveledLists
                     .Where(x => selectedLists.Any(list => list.Matches(x, tierAliases)))
                     .Select(l => new LeveledListTreeNode(
                         l,
-                        _editorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(l.EditorID, out var existingLeveledItem)
+                        GenerationConfig.EditorEnvironment.LinkCache.TryResolve<ILeveledItemGetter>(l.EditorID, out var existingLeveledItem)
                             ? existingLeveledItem
                             : null,
                         null)));
@@ -265,12 +247,12 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
             Dispatcher.UIThread.Post(() => {
                 _leveledLists.LoadOptimized(generatedLists);
-                _isBusy.OnNext(false);
+                GenerationConfig.SetBusy(false);
             });
         } catch (Exception e) {
             Dispatcher.UIThread.Post(() => {
                 _leveledLists.Clear();
-                _isBusy.OnNext(false);
+                GenerationConfig.SetBusy(false);
             });
             _logger.Here().Error(e,
                 "Failed to generate leveled lists for {ListDefinition}",
@@ -279,28 +261,13 @@ public sealed partial class ListsVM : ValidatableViewModel {
     }
 
     private IEnumerable<ExtendedListDefinition> GetDefinitions(string directoryPath) {
-        if (!_fileSystem.Directory.Exists(directoryPath)) yield break;
-
-        var deserializer = new DeserializerBuilder()
-            .WithTypeConverter(new FormKeyYamlTypeConverter())
-            .WithNamingConvention(HyphenatedNamingConvention.Instance)
-            .Build();
-
-        foreach (var file in _fileSystem.Directory.EnumerateFiles(directoryPath, "*.yaml", SearchOption.AllDirectories)) {
-            using var fileStream = _fileSystem.File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var fileName = _fileSystem.Path.GetFileNameWithoutExtension(file);
-
-            ListTypeDefinition listTypeDefinition;
-            try {
-                listTypeDefinition = deserializer.Deserialize<ListTypeDefinition>(new StreamReader(fileStream));
-            } catch (Exception) {
-                continue;
-            }
-
-            foreach (var (listName, list) in listTypeDefinition.Lists) {
-                yield return new ExtendedListDefinition(file, fileName, listTypeDefinition, listName, list, _recordPrefixService);
-            }
-        }
+        return GenerationConfig.GetDefinitionsFromYaml<ExtendedListDefinition>(
+            directoryPath,
+            (deserializer, reader, file, fileName) => {
+                var listTypeDefinition = deserializer.Deserialize<ListTypeDefinition>(reader);
+                return listTypeDefinition.Lists.Select(kvp =>
+                    new ExtendedListDefinition(file, fileName, listTypeDefinition, kvp.Key, kvp.Value, _recordPrefixService));
+            });
     }
 
     public void ContextMenu(object? sender, ContextRequestedEventArgs e) {
@@ -326,7 +293,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                                 _tierController.RemoveRecordTier(record);
                             }
 
-                            UpdateListsShowcase(SelectedLists, ModPickerVM.GetSelectedMods());
+                            UpdateListsShowcase(SelectedDefinitions, GenerationConfig.ModPicker.GetSelectedMods());
                         })
                     },
                 },
@@ -335,6 +302,4 @@ public sealed partial class ListsVM : ValidatableViewModel {
             contextFlyout.ShowAt(control, true);
         }
     }
-
-    private string EditorIdSelector(string x) => Regex.Replace(x, EditorIDRegexPattern, EditorIDRegexReplacement);
 }

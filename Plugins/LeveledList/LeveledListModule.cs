@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
+using CreationEditor.Avalonia.ViewModels.Utility;
 using CreationEditor.Services.Plugin;
 using LeveledList.Services;
 using LeveledList.Services.Enchantments;
@@ -22,7 +23,14 @@ public class LeveledListModule : ExtensionModule {
             .AsSelf()
             .SingleInstance();
 
+
+        builder.RegisterType<GenerationConfigurationVM>()
+            .AsSelf();
+
         builder.RegisterType<LeveledListVM>()
+            .AsSelf();
+
+        builder.RegisterType<RegexReplacementVM>()
             .AsSelf();
 
         builder.RegisterType<ListsVM>()

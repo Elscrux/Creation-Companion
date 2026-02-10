@@ -2,21 +2,61 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
              xmlns:views="clr-namespace:LeveledList.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="LeveledList.Views.LeveledListView"
              x:DataType="viewModels:LeveledListVM">
     <TabControl>
-        <TabItem Header="Lists">
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <controls:SymbolIcon
+                        Symbol="List"
+                        FontSize="16"/>
+
+                    <TextBlock Text="Lists"
+                               FontSize="14"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </TabItem.Header>
+
             <views:ListsView DataContext="{Binding ListsVM}"/>
         </TabItem>
 
-        <TabItem Header="Enchantments">
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <controls:SymbolIcon
+                        Symbol="Star"
+                        FontSize="16"/>
+
+                    <TextBlock Text="Enchantments"
+                               FontSize="14"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </TabItem.Header>
+
             <views:EnchantmentsView DataContext="{Binding EnchantmentsVM}"/>
         </TabItem>
 
-        <TabItem Header="Tiers">
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <controls:SymbolIcon
+                        Symbol="Tag"
+                        FontSize="16"/>
+
+                    <TextBlock Text="Tiers"
+                               FontSize="14"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </TabItem.Header>
+
             <views:TiersView DataContext="{Binding TiersVM}"/>
         </TabItem>
     </TabControl>

@@ -1,0 +1,71 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:mod="clr-namespace:CreationEditor.Avalonia.Views.Mod;assembly=CreationEditor.Avalonia"
+             xmlns:record="clr-namespace:CreationEditor.Avalonia.Views.Record;assembly=CreationEditor.Avalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:utility="clr-namespace:CreationEditor.Avalonia.Views.Utility;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:LeveledList.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="600"
+             x:Class="LeveledList.Views.WorkflowConfiguration"
+             x:DataType="viewModels:GenerationConfigurationVM">
+    <StackPanel Spacing="12">
+        <!-- Required Configuration Section -->
+        <basic:Card
+            Header="Mod Selection"
+            Description="Required • Choose which mods to generate content for"
+            Icon="Save">
+            <mod:ModPickerButton DataContext="{Binding ModPicker}"/>
+        </basic:Card>
+
+        <!-- Optional Configuration Section -->
+        <basic:Card
+            Header="EditorID Customization"
+            Description="Optional • Add prefixes to generated EditorIDs"
+            Icon="Tag">
+            <!-- Record Prefix -->
+            <record:RecordPrefixPicker DataContext="{Binding RecordPrefixContent}"/>
+        </basic:Card>
+
+        <!-- Advanced Alterations Section -->
+        <basic:ExpanderCard
+            Header="Advanced Regex Alterations"
+            Description="Optional • Apply regex patterns to modify EditorIDs"
+            Icon="Edit">
+            <StackPanel Spacing="12">
+                <!-- EditorID Alterations -->
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <controls:SymbolIcon Symbol="Code"
+                                             FontSize="16"/>
+                        <TextBlock Text="EditorID Patterns"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+
+                    <utility:RegexReplacement DataContext="{Binding EditorIdReplacement}"/>
+                </StackPanel>
+
+                <!-- Name Alterations -->
+                <StackPanel Spacing="12"
+                            IsVisible="{Binding ShowNameReplacement}">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <controls:SymbolIcon Symbol="Rename"
+                                             FontSize="16"/>
+                        <TextBlock Text="Name Patterns"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+
+                    <utility:RegexReplacement DataContext="{Binding NameReplacement}"/>
+                </StackPanel>
+            </StackPanel>
+        </basic:ExpanderCard>
+    </StackPanel>
+</UserControl>
