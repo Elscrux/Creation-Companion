@@ -10,7 +10,7 @@ public sealed partial class TextDiff : ReactiveObject {
 
         IsDifferent = this.WhenAnyValue(x => x.New)
             .Select(newText => newText != Old)
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 

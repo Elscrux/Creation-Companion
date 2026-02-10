@@ -30,7 +30,7 @@ public sealed class RecordSelectionVM : ViewModel {
                 RecordProvider.IsBusy,
                 (filtering, busy) => filtering || busy)
             .ObserveOnGui()
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 }

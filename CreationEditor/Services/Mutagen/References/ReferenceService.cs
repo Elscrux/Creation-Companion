@@ -184,7 +184,7 @@ public sealed class ReferenceService : IReferenceService {
             .CombineLatest(_nifTextureReferenceController.IsLoading,
                 _scriptAssetReferenceController.IsLoading,
                 (a, b, c) => a || b || c)
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         IsLoadingRecordReferences = _recordReferenceController.IsLoading
@@ -192,11 +192,11 @@ public sealed class ReferenceService : IReferenceService {
                 _nifSoundReferenceController.IsLoading,
                 _nifAddonNodeReferenceController.IsLoading,
                 (a, b, c, d) => a || b || c || d)
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         IsLoading = IsLoadingAssetReferences.CombineLatest(IsLoadingRecordReferences, (a, b) => a || b)
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 

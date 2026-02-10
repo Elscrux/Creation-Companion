@@ -174,7 +174,7 @@ public sealed partial class AnalyzerVM : ViewModel {
 
         ActiveTopicCount = activeTopicsChanged
             .Select(x => x.Count(item => item.IsActive))
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         activeTopicsChanged

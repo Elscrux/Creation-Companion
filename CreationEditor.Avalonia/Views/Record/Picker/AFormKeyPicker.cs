@@ -328,7 +328,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         AnyTypeSelected = selectedTypesChanged
             .Select(x => x.Any(typeItem => typeItem.IsSelected))
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         SelectableMods = this.WhenAnyValue(x => x.LinkCache)
@@ -342,7 +342,7 @@ public class AFormKeyPicker : ActivatableTemplatedControl {
 
         AnyModSelected = selectedModsChanged
             .Select(x => x.Any(modItem => modItem.IsSelected))
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         var scopedRecordsCollection = this.WhenAnyValue(x => x.ScopedRecords)

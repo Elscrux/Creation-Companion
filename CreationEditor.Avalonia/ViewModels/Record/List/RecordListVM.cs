@@ -50,7 +50,7 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
                 RecordProvider.IsBusy,
                 (filtering, busy) => filtering || busy)
             .ObserveOnGui()
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         PrimaryCommand = ReactiveCommand.Create<SelectedListContext>(context => {

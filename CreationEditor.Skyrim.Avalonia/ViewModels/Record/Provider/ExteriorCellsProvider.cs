@@ -38,7 +38,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
             .Select(_ => new Func<IReferencedRecord, bool>(
                 record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettings.Filter(record.Record)))
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged

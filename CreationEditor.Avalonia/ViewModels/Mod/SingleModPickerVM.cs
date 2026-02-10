@@ -65,7 +65,7 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
 
         HasModSelected = SelectedModChanged
             .Select(mod => mod is not null && !mod.ModKey.IsNull)
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 

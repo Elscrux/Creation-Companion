@@ -47,10 +47,10 @@ public sealed partial class SingleDataSourcePickerVM : ViewModel, IDataSourcePic
 
         HasDataSourceSelected = this.WhenAnyValue(x => x.SelectedDataSource)
             .Select(dataSource => dataSource is not null)
-            .Publish()
+            .Replay(1)
             .RefCount();
         SelectedDataSourceChanged = this.WhenAnyValue(x => x.SelectedDataSource)
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 

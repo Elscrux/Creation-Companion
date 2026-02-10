@@ -58,7 +58,7 @@ public sealed partial class ModScopeProviderVM : ViewModel, IModScopeProviderVM 
 
         ScopeChanged = _selectedMods.Connect()
             .Unit()
-            .Publish()
+            .Replay(1)
             .RefCount();
     }
 

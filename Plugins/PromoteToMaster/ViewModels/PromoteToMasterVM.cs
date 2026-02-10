@@ -126,7 +126,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
         NoAssetTarget = assetTargetCountChanges
             .Select(count => count == 0)
-            .Publish()
+            .Replay(1)
             .RefCount();
 
         // Make sure there is only at max one target data source
