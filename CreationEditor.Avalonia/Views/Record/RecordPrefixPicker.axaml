@@ -3,11 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:prefix="clr-namespace:CreationEditor.Avalonia.ViewModels.Record.Prefix"
-             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Record.RecordPrefixPicker"
              x:DataType="prefix:RecordPrefixVM">
-    <basic:LabeledContentControl Header="EditorID Prefix">
-        <TextBox Text="{Binding RecordPrefixService.Prefix, Mode=TwoWay}"/>
-    </basic:LabeledContentControl>
+    <TextBox Text="{Binding RecordPrefixService.Prefix, Mode=TwoWay}"
+             Watermark="Enter a prefix for your records"/>
 </UserControl>
