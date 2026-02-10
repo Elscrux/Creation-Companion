@@ -44,10 +44,6 @@
       <Compile Update="Resources\DataTemplates\GetEventDataTemplate.cs">
         <DependentUpon>CustomConditionDataTemplate.cs</DependentUpon>
       </Compile>
-      <Compile Update="Views\Record\Picker\EventDataPicker.axaml.cs">
-        <DependentUpon>EventMemberPicker.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
       <Compile Update="Services\Record\Editor\ConditionCopyController.cs">
         <DependentUpon>IConditionCopyPasteController.cs</DependentUpon>
       </Compile>

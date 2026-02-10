@@ -35,7 +35,6 @@ using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Previe
 using CreationEditor.Skyrim.Services.Mod;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
-using SkyrimModGetterVM = CreationEditor.Avalonia.ViewModels.Mod.SkyrimModGetterVM;
 namespace CreationEditor.Skyrim.Avalonia.Modules;
 
 public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGetter> {
