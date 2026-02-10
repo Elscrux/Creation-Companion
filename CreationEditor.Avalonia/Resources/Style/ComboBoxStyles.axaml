@@ -117,18 +117,18 @@
                                 IsVisible="False"
                                 HorizontalAlignment="Right"/>
 
-                        <controls:FontIcon Name="DropDownGlyph"
-                                           Foreground="{DynamicResource ComboBoxDropDownGlyphForeground}"
-                                           MinHeight="0"
-                                           Grid.Row="1"
-                                           Grid.Column="1"
-                                           IsHitTestVisible="False"
-                                           Margin="0 0 14 0"
-                                           FontFamily="{DynamicResource SymbolThemeFontFamily}"
-                                           FontSize="12"
-                                           Glyph="&#xE70D;"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"/>
+                        <controls:SymbolIcon
+                            Name="DropDownGlyph"
+                            Foreground="{DynamicResource ComboBoxDropDownGlyphForeground}"
+                            MinHeight="0"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            IsHitTestVisible="False"
+                            Margin="0 0 14 0"
+                            FontSize="12"
+                            Symbol="ChevronDown"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"/>
 
                         <Popup Name="PART_Popup"
                                WindowManagerAddShadowHint="False"

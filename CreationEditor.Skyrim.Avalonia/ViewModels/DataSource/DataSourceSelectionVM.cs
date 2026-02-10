@@ -83,7 +83,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
                         if (item is null) return null;
 
                         return new FontIcon {
-                            Glyph = item.DataSource.IsReadOnly ? "\uE72E" : "\uE785",
+                            Glyph = item.DataSource.IsReadOnly ? "🔒" : "🔓",
                             Foreground = item.DataSource.IsReadOnly ? Brushes.Orange : Brushes.ForestGreen,
                         };
                     })),
