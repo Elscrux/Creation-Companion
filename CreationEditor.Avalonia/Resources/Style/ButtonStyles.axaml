@@ -57,4 +57,16 @@
             <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}"/>
         </Style>
     </Style>
+
+    <Style Selector="Button.Primary">
+        <Setter Property="Padding" Value="24,12"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style Selector="Button.Secondary">
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
 </Styles>
