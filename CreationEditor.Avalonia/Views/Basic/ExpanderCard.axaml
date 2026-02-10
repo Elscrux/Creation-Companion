@@ -1,0 +1,77 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic">
+    <Design.PreviewWith>
+        <basic:ExpanderCard
+            MinWidth="250"
+            Margin="10"
+            Header="Name"
+            Description="Description"
+            Icon="Contact">
+            <TextBox Watermark="Enter your name"/>
+        </basic:ExpanderCard>
+    </Design.PreviewWith>
+
+    <Style Selector="basic|ExpanderCard">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{DynamicResource CardBackgroundFillColorDefault}"
+                        BorderBrush="{DynamicResource CardStrokeColorDefault}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Expander IsExpanded="False"
+                              HorizontalAlignment="Stretch">
+                        <Expander.Styles>
+                            <Style Selector="Expander /template/ ToggleButton#ExpanderHeader">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="Expander /template/ ToggleButton#ExpanderContent">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                        </Expander.Styles>
+
+                        <Expander.Header>
+                            <StackPanel Margin="8"
+                                        MinWidth="100"
+                                        Orientation="Horizontal"
+                                        Spacing="12">
+                                <!-- Icon -->
+                                <Grid>
+                                    <controls:SymbolIcon
+                                        IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNull}}"
+                                        Symbol="{TemplateBinding Icon}"
+                                        FontSize="20"
+                                        Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
+
+                                    <ContentPresenter
+                                        IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                        Content="{TemplateBinding IconControl}"
+                                        FontSize="20"
+                                        Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
+                                </Grid>
+
+                                <!-- Text -->
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock Text="{TemplateBinding Description}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Expander.Header>
+
+                        <ContentPresenter
+                            x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            VerticalAlignment="Stretch"/>
+                    </Expander>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

@@ -1,0 +1,51 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic">
+    <Design.PreviewWith>
+        <basic:Header
+            MinWidth="250"
+            Margin="10"
+            Header="Name"
+            Description="Description"
+            Icon="Contact">
+        </basic:Header>
+    </Design.PreviewWith>
+
+    <Style Selector="basic|Header">
+        <!-- Set Defaults -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="12">
+                        <!-- Icon -->
+                        <Grid>
+                            <controls:SymbolIcon
+                                IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNull}}"
+                                Symbol="{TemplateBinding Icon}"
+                                FontSize="24"
+                                Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
+
+                            <ContentPresenter
+                                IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                Content="{TemplateBinding IconControl}"
+                                FontSize="24"
+                                Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
+                        </Grid>
+
+                        <!-- Text -->
+                        <TextBlock Text="{TemplateBinding Header}"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{TemplateBinding Description}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               FontSize="12"/>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

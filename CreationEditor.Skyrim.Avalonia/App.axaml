@@ -86,5 +86,10 @@
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Asset/Picker/Folder/TextFolderPicker.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/MultiButton.axaml"/>
         <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/LabeledContentControl.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/Header.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/SectionHeader.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/Card.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/ExpanderCard.axaml"/>
+        <StyleInclude Source="avares://CreationEditor.Avalonia/Views/Basic/StepByStepTutorial.axaml"/>
     </Application.Styles>
 </Application>
