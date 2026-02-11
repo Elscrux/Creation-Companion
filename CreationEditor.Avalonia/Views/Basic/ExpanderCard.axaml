@@ -21,7 +21,9 @@
                         BorderBrush="{DynamicResource CardStrokeColorDefault}"
                         BorderThickness="1"
                         CornerRadius="8">
-                    <Expander IsExpanded="False"
+                    <Expander IsExpanded="{TemplateBinding IsExpanded}"
+                              ExpandDirection="{TemplateBinding ExpandDirection}"
+                              ContentTransition="{TemplateBinding ContentTransition}"
                               HorizontalAlignment="Stretch">
                         <Expander.Styles>
                             <Style Selector="Expander /template/ ToggleButton#ExpanderHeader">
