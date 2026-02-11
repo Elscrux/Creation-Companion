@@ -12,30 +12,45 @@
     xmlns:topics="clr-namespace:Mutagen.Bethesda.Analyzers.SDK.Topics;assembly=Mutagen.Bethesda.Analyzers.SDK"
     xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
     xmlns:views="clr-namespace:AnalyzerPlugin.Views"
+    xmlns:collections="clr-namespace:Avalonia.Collections;assembly=Avalonia.Base"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     mc:Ignorable="d"
     d:DesignWidth="1400"
     d:DesignHeight="800"
     x:Class="AnalyzerPlugin.Views.AnalyzerView"
     x:DataType="viewModels:AnalyzerVM">
-
     <Grid
-        ColumnDefinitions="1*,2*"
         RowDefinitions="*"
         Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition
+                Width="350"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition
+                Width="2*"
+                MinWidth="500"/>
+        </Grid.ColumnDefinitions>
+
         <!-- Left Sidebar with right margin for spacing -->
         <Border
             Grid.Column="0"
-            Classes="Card"
-            Margin="0,0,24,0">
+            Classes="Card">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="10">
                     <!-- Configuration Header -->
-                    <basic:LabeledContentControl Header="Analysis Configuration"/>
+                    <basic:Header
+                        Header="Analyzer Configuration"
+                        Description="Select which mods and topics to include in the analysis"
+                        Icon="Checkmark"/>
+
+                    <!-- Divider -->
+                    <Separator/>
 
                     <!-- Mods Selection Card -->
-                    <basic:LabeledContentControl
-                        Header="Mods to Analyze"
-                        HeaderToolTip="Select which mods to analyze">
+                    <basic:Card
+                        Header="Mod Selection"
+                        Description="Select which mods to analyze"
+                        Icon="Save">
                         <StackPanel
                             Spacing="8">
                             <mod:ModPickerButton
@@ -56,17 +71,13 @@
                                     Text="{Binding ModPickerVM.SelectedMods^.Count, StringFormat='{}{0} mod(s) selected'}"/>
                             </Grid>
                         </StackPanel>
-                    </basic:LabeledContentControl>
-
-                    <!-- Divider -->
-                    <Separator
-                        Height="1"
-                        Margin="0,8"/>
+                    </basic:Card>
 
                     <!-- Severity Filter Card -->
-                    <basic:LabeledContentControl
+                    <basic:Card
                         Header="Minimum Severity"
-                        HeaderToolTip="Display issues at or above this severity level">
+                        Description="Display issues at or above this severity level"
+                        Icon="Alert">
                         <ComboBox
                             ItemsSource="{x:Static viewModels:AnalyzerVM.AllSeverities}"
                             SelectedItem="{Binding MinimumSeverity}"
@@ -92,17 +103,13 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                    </basic:LabeledContentControl>
-
-                    <!-- Divider -->
-                    <Separator
-                        Height="1"
-                        Margin="0,8"/>
+                    </basic:Card>
 
                     <!-- Topics Selection Card -->
-                    <basic:LabeledContentControl
-                        Header="Analysis Topics"
-                        HeaderToolTip="{Binding ActiveTopicCount^, StringFormat='{}Select topics to analyze ({0} active)'}">
+                    <basic:Card
+                        Header="Topic Selection"
+                        Description="Select topics to analyze"
+                        Icon="List">
                         <StackPanel Spacing="8">
                             <Button
                                 Padding="12,10"
@@ -140,7 +147,7 @@
                                     Text="{Binding ActiveTopicCount^, StringFormat='{}{0} topic(s) selected'}"/>
                             </Grid>
                         </StackPanel>
-                    </basic:LabeledContentControl>
+                    </basic:Card>
 
                     <!-- Divider -->
                     <Separator
@@ -149,8 +156,7 @@
 
                     <!-- Primary Action Button -->
                     <Button
-                        Classes="Accent"
-                        FontWeight="SemiBold"
+                        Classes="Primary Accent"
                         Command="{Binding Analyze}">
                         <Button.IsEnabled>
                             <MultiBinding
@@ -189,137 +195,106 @@
         </Border>
 
         <!-- Right Panel: Results -->
-        <Grid
-            Grid.Column="1"
-            RowDefinitions="Auto,16,*">
-
-            <!-- Results Header -->
-            <basic:LabeledContentControl
-                Grid.Row="0"
-                Header="Analysis Results">
-                <TextBlock 
-                    Text="{Binding Results.Count, StringFormat='{}{0} issues found'}"
-                    Foreground="{DynamicResource TextFillColorTertiary}"/>
-            </basic:LabeledContentControl>
-
-            <!-- Results Content -->
+        <Border
+            Grid.Column="2"
+            Classes="Card">
             <Grid
-                Grid.Row="2"
-                RowDefinitions="Auto,12,*">
+                RowDefinitions="Auto,8,*">
 
-                <!-- Results Toolbar -->
-                <StackPanel
+                <!-- Results Header -->
+                <basic:Header
                     Grid.Row="0"
-                    Orientation="Horizontal"
-                    Spacing="12"
-                    IsVisible="{Binding Results.Count}">
-                    <!-- Search Box -->
-                    <TextBox
-                        MinWidth="280"
-                        Text="{Binding ResultsSearchText}"
-                        Watermark="Search results..."
-                        Padding="12,8"
-                        CornerRadius="6"/>
+                    Header="Analysis Results"
+                    Description="{Binding Results.Count, StringFormat='{}{0} issues found'}"
+                    Icon="List"/>
 
-                    <!-- Group By Button -->
-                    <Button
-                        ToolTip.Tip="Group results by different categories"
-                        Padding="10,8"
-                        CornerRadius="6">
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="8">
-                            <controls:SymbolIcon
-                                Symbol="Pin"
-                                FontSize="16"/>
-                            <TextBlock
-                                Text="Group"/>
-                        </StackPanel>
-
-                        <Button.Flyout>
-                            <Flyout Placement="Bottom">
-                                <StackPanel
-                                    Spacing="12"
-                                    Margin="12">
-                                    <TextBlock
-                                        FontWeight="SemiBold"
-                                        Text="Group Results By"/>
-                                    <CheckBox
-                                        Content="Record Type"
-                                        IsChecked="{Binding IsResultsGroupedByRecordType}"/>
-                                    <CheckBox
-                                        Content="Record"
-                                        IsChecked="{Binding IsResultsGroupedByRecord}"/>
-                                    <CheckBox
-                                        Content="Severity"
-                                        IsChecked="{Binding IsResultsGroupedBySeverity}"/>
-                                    <CheckBox
-                                        Content="Topic"
-                                        IsChecked="{Binding IsResultsGroupedByTopic}"/>
-                                </StackPanel>
-                            </Flyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
-
-                <!-- Empty State -->
-                <StackPanel
+                <!-- Results Content -->
+                <Grid
                     Grid.Row="2"
-                    IsVisible="{Binding !Results.Count}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="16">
-                    <controls:SymbolIcon
-                        Symbol="List"
-                        FontSize="64"
-                        Foreground="{DynamicResource TextFillColorDisabled}"/>
+                    RowDefinitions="Auto,12,*">
+
+                    <!-- Results Toolbar -->
                     <StackPanel
-                        Spacing="8"
-                        HorizontalAlignment="Center">
-                        <TextBlock
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                            Text="No Analysis Results"
-                            TextAlignment="Center"
-                            Foreground="{DynamicResource TextFillColorPrimary}"/>
-                        <TextBlock
-                            FontSize="13"
-                            Foreground="{DynamicResource TextFillColorSecondary}"
-                            TextAlignment="Center"
-                            Text="Run an analysis to see results here"/>
+                        Grid.Row="0"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        IsVisible="{Binding Results.Count}">
+                        <!-- Search Box -->
+                        <TextBox
+                            MinWidth="280"
+                            Text="{Binding ResultsSearchText}"
+                            Watermark="Search results..."
+                            Padding="12,8"
+                            CornerRadius="6"/>
 
-                        <!-- Step-by-step guidance -->
-                        <StackPanel
-                            Spacing="6"
-                            Margin="0,16,0,0">
-                            <TextBlock
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource TextFillColorSecondary}"
-                                Text="Quick Start:"/>
-                            <TextBlock
-                                FontSize="11"
-                                Foreground="{DynamicResource TextFillColorTertiary}"
-                                Text="1. Select mods on the left sidebar"/>
-                            <TextBlock
-                                FontSize="11"
-                                Foreground="{DynamicResource TextFillColorTertiary}"
-                                Text="2. Choose analysis topics via &quot;Browse Topics&quot;"/>
-                            <TextBlock
-                                FontSize="11"
-                                Foreground="{DynamicResource TextFillColorTertiary}"
-                                Text="3. Click &quot;Start Analysis&quot; to begin"/>
-                        </StackPanel>
+                        <!-- Group By Button -->
+                        <Button
+                            ToolTip.Tip="Group results by different categories"
+                            Padding="10,8"
+                            CornerRadius="6">
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <controls:SymbolIcon
+                                    Symbol="Pin"
+                                    FontSize="16"/>
+                                <TextBlock
+                                    Text="Group"/>
+                            </StackPanel>
+
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <StackPanel
+                                        Spacing="12"
+                                        Margin="12">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="Group Results By"/>
+                                        <CheckBox
+                                            Content="Record Type"
+                                            IsChecked="{Binding IsResultsGroupedByRecordType}"/>
+                                        <CheckBox
+                                            Content="Record"
+                                            IsChecked="{Binding IsResultsGroupedByRecord}"/>
+                                        <CheckBox
+                                            Content="Severity"
+                                            IsChecked="{Binding IsResultsGroupedBySeverity}"/>
+                                        <CheckBox
+                                            Content="Topic"
+                                            IsChecked="{Binding IsResultsGroupedByTopic}"/>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
                     </StackPanel>
-                </StackPanel>
 
-                <!-- Results Tree -->
-                <TreeDataGrid
-                    Grid.Row="2"
-                    x:Name="ResultsTree"
-                    IsVisible="{Binding Results.Count}"
-                    Source="{Binding ResultsTreeSource}"/>
+                    <!-- Empty State -->
+                    <basic:StepByStepTutorial
+                        Grid.Row="2"
+                        IsVisible="{Binding !Results.Count}"
+                        Header="No Analysis Results"
+                        Description="Run an analysis to see results here"
+                        Icon="List">
+                        <basic:StepByStepTutorial.Steps>
+                            <collections:AvaloniaList x:TypeArguments="system:String">
+                                <system:String>1. Select mods on the left sidebar</system:String>
+                                <system:String>2. Choose analysis topics via "Browse Topics"</system:String>
+                                <system:String>3. Click "Start Analysis" to begin</system:String>
+                            </collections:AvaloniaList>
+                        </basic:StepByStepTutorial.Steps>
+                    </basic:StepByStepTutorial>
+
+                    <!-- Results Tree -->
+                    <Border
+                        Grid.Row="2"
+                        Classes="CardNested">
+                        <TreeDataGrid
+                            x:Name="ResultsTree"
+                            IsVisible="{Binding Results.Count}"
+                            Source="{Binding ResultsTreeSource}"/>
+                    </Border>
+                </Grid>
             </Grid>
-        </Grid>
+        </Border>
     </Grid>
 </UserControl>
