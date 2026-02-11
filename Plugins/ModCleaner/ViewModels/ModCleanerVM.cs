@@ -148,18 +148,15 @@ public sealed partial class ModCleanerVM : ViewModel {
                 foreach (var modItem in DependenciesModPickerVM.Mods) {
                     modItem.IsSelected = true;
                 }
-
-                foreach (var featureFlag in FeatureFlags.ToArray()) {
-                    featureFlag.IsSelected = featureFlag.FeatureFlag.ModKey == cleanMod.ModKey;
-                }
             })
             .DisposeWith(this);
 
-        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(BuildRefGraph,
-            CleaningModPickerVM.HasModSelected
-                .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x)));
+        var requirementsMet = CleaningModPickerVM.HasModSelected
+            .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x));
 
-        BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(BuildRetained);
+        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(BuildRefGraph, requirementsMet);
+
+        BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(BuildRetained, requirementsMet);
 
         CleanMod = ReactiveCommand.CreateRunInBackground(Clean,
             this.WhenAnyValue(x => x.CleanAssets)

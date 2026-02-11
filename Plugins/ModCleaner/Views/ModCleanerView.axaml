@@ -19,8 +19,8 @@
              x:Class="ModCleaner.Views.ModCleanerView"
              x:Name="Control"
              x:DataType="viewModels:ModCleanerVM">
-    <Grid>
-        <ScrollViewer IsEnabled="{Binding !IsBusy}">
+    <Grid RowDefinitions="Auto,*">
+        <ScrollViewer Grid.Row="1" IsEnabled="{Binding !IsBusy}">
             <ScrollViewer.Resources>
                 <converter:ReturnParameterIfTrueConverter
                     x:Key="IfTrueConverter"
@@ -34,7 +34,7 @@
                                                  ConverterParameter=0}"/>
             </ScrollViewer.Effect>
 
-            <StackPanel Spacing="10" Margin="5">
+            <StackPanel Spacing="16" Margin="12">
                 <StackPanel.Resources>
                     <converter1:LinkIdentifierEnricher
                         x:Key="LinkIdentifierEnricher"
@@ -52,7 +52,7 @@
                         x:Key="LinkDataTemplate"
                         DataType="models:ILinkIdentifier">
                         <StackPanel Orientation="Horizontal" Spacing="5">
-                            <Button Content="?">
+                            <Button Content="?" FontSize="12" Padding="6,4">
                                 <Button.Flyout>
                                     <Flyout>
                                         <ListBox
@@ -62,7 +62,7 @@
                                 </Button.Flyout>
                             </Button>
 
-                            <Button Content="Exclude"
+                            <Button Content="Exclude" FontSize="12" Padding="6,4"
                                     Command="{Binding #Control.ViewModel.ExcludeRecord}"
                                     CommandParameter="{Binding}"/>
 
@@ -79,6 +79,7 @@
                                     Spacing="5">
                             <Button
                                 Content="Search"
+                                FontSize="12" Padding="6,4"
                                 Command="{Binding #Control.ViewModel.SearchForRecords}">
                                 <Button.CommandParameter>
                                     <MultiBinding>
@@ -88,7 +89,7 @@
                                 </Button.CommandParameter>
                             </Button>
 
-                            <Button Content="?">
+                            <Button Content="?" FontSize="12" Padding="6,4">
                                 <Button.Flyout>
                                     <Flyout>
                                         <ListBox
@@ -105,396 +106,562 @@
                     </DataTemplate>
                 </StackPanel.Resources>
 
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <StackPanel Spacing="10">
-                        <basic:LabeledContentControl Header="Select Data Source to Clean">
+                <!-- Step 1: Configuration -->
+                <basic:ExpanderCard
+                    IsExpanded="True"
+                    Header="Step 1: Configuration"
+                    Description="Select what data source and mod to clean"
+                    Icon="Settings">
+                    <StackPanel Spacing="12">
+                        <!-- Data Source Selection -->
+                        <basic:Card
+                            Header="Data Source to Clean"
+                            Description="Choose which data source to use for cleaning"
+                            Icon="Folder">
                             <StackPanel Orientation="Horizontal">
-                                <CheckBox IsChecked="{Binding CleanAssets}"/>
-                                <StackPanel IsEnabled="{Binding CleanAssets}">
+                                <CheckBox IsChecked="{Binding CleanAssets}" VerticalAlignment="Center"/>
+                                <StackPanel IsEnabled="{Binding CleanAssets}" Spacing="8" HorizontalAlignment="Stretch">
                                     <dataSource:DataSourcePicker
                                         DataContext="{Binding CleaningDataSourcePicker}"/>
                                 </StackPanel>
                             </StackPanel>
-                        </basic:LabeledContentControl>
+                        </basic:Card>
 
-                        <basic:LabeledContentControl Header="Select Mod to Clean">
+                        <!-- Mod Selection -->
+                        <basic:Card
+                            Header="Mod to Clean"
+                            Description="Choose which mod to clean"
+                            Icon="Save">
                             <mod:ModPicker
                                 DataContext="{Binding CleaningModPickerVM}"
-                                MaxHeight="500"/>
-                        </basic:LabeledContentControl>
+                                MaxHeight="400"/>
+                        </basic:Card>
 
-                        <basic:LabeledContentControl
-                            Header="Select Dependent Mods"
-                            HeaderToolTip="Select dependent mods that should be considered in the cleaning process - usually that should be all mods listed here."
-                            IsVisible="{Binding !!DependenciesModPickerVM.Mods.Count}">
+                        <!-- Dependencies -->
+                        <basic:Card
+                            IsVisible="{Binding !!DependenciesModPickerVM.Mods.Count}"
+                            Header="Dependent Mods"
+                            Description="Select dependent mods that should be considered in the cleaning process - usually that should be all mods listed here."
+                            Icon="Link">
                             <mod:ModPicker
                                 DataContext="{Binding DependenciesModPickerVM}"
-                                MaxHeight="500"/>
-                        </basic:LabeledContentControl>
+                                MaxHeight="300"/>
+                        </basic:Card>
 
-                        <Separator/>
-
-                        <StackPanel>
-                            <avaloniaProgressRing:ProgressRing
-                                ToolTip.Tip="Loading References"
-                                HorizontalAlignment="Left"
-                                IsVisible="{Binding ReferenceService.IsLoading^}"
-                                Foreground="{DynamicResource SystemAccentColor}"
-                                Width="20" Height="20"/>
-
-                            <Button
-                                Content="Build Reference Graph"
-                                Command="{Binding BuildReferenceGraph}"
-                                IsVisible="{Binding !ReferenceService.IsLoading^}"/>
-                        </StackPanel>
-
-                        <StackPanel IsVisible="{Binding !!ReferenceGraph}">
-                            <TextBlock
-                                Text="{Binding ReferenceGraph.VertexCount, StringFormat='{}Built reference graph with {0} nodes'}"/>
-                            <Button Content="Build Retained Records"
-                                    Command="{Binding BuildRetainedLinks}"/>
-                        </StackPanel>
+                        <basic:Card
+                            Header="Feature Flags"
+                            Description="Required • Select which features to retain"
+                            Icon="Flag">
+                            <DataGrid
+                                x:Name="FeatureFlagsDataGrid"
+                                Background="{DynamicResource SystemControlTransparentBrush}"
+                                ItemsSource="{Binding FeatureFlags}"
+                                CanUserSortColumns="True"
+                                CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                AutoGenerateColumns="False"
+                                Classes="Small Mutable"
+                                IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Enabled" Width="60">
+                                        <DataTemplate DataType="featureFlag:FeatureFlagItem">
+                                            <CheckBox
+                                                HorizontalAlignment="Center"
+                                                IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn
+                                        Header="Name"
+                                        Binding="{Binding FeatureFlag.Name}"
+                                        IsReadOnly="True"
+                                        x:DataType="featureFlag:FeatureFlagItem"
+                                        Width="*"/>
+                                    <DataGridTextColumn
+                                        Header="Mod"
+                                        Binding="{Binding FeatureFlag.ModKey.FileName}"
+                                        IsReadOnly="True"
+                                        x:DataType="featureFlag:FeatureFlagItem"
+                                        Width="200"/>
+                                    <DataGridTemplateColumn Header="Actions" Width="100">
+                                        <DataTemplate DataType="featureFlag:FeatureFlagItem">
+                                            <Button Content="Edit"
+                                                    FontSize="12"
+                                                    Padding="8,4"
+                                                    Command="{Binding #Control.ViewModel.EditFeatureFlag}"
+                                                    CommandParameter="{Binding FeatureFlag}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </basic:Card>
                     </StackPanel>
+                </basic:ExpanderCard>
 
-                    <basic:LabeledContentControl
-                        Header="Temporarily Excluded Records from Graph - Build Retained Records again to update"
-                        IsVisible="{Binding !!ExcludedLinks.Count}">
-                        <ListBox
-                            ItemsSource="{Binding ExcludedLinks}"
-                            MaxHeight="500">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="models:ILinkIdentifier">
-                                    <StackPanel Orientation="Horizontal" Spacing="5">
-                                        <Button Content="Retain"
-                                                Command="{Binding #Control.ViewModel.RetainRecord}"
-                                                CommandParameter="{Binding}"/>
+                <!-- Step 2: Build Graph -->
+                <basic:ExpanderCard
+                    IsExpanded="True"
+                    Header="Step 2: Build Reference Graph"
+                    Description="Analyze dependencies between records and between assets to understand what can be removed">
+                    <basic:ExpanderCard.IconControl>
+                        <controls:SymbolIcon Symbol="Globe"/>
+                    </basic:ExpanderCard.IconControl>
 
-                                        <TextBlock
-                                            Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
-                                            VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </basic:LabeledContentControl>
+                    <StackPanel Spacing="12">
+                        <avaloniaProgressRing:ProgressRing
+                            ToolTip.Tip="Building reference graph..."
+                            HorizontalAlignment="Left"
+                            IsVisible="{Binding ReferenceService.IsLoading^}"
+                            Foreground="{DynamicResource SystemAccentColor}"
+                            Width="24" Height="24"/>
 
-                    <basic:LabeledContentControl
-                        Header="Feature Flags"
-                        HeaderToolTip="Retain certain features in the cleaning process, always select at least one.">
-                        <DataGrid
-                            x:Name="FeatureFlagsDataGrid"
-                            Background="{DynamicResource SystemControlTransparentBrush}"
-                            ItemsSource="{Binding FeatureFlags}"
-                            CanUserSortColumns="True"
-                            CanUserReorderColumns="True" CanUserResizeColumns="True"
-                            AutoGenerateColumns="False"
-                            Classes="Small Mutable"
-                            IsReadOnly="True">
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Enabled">
-                                    <DataTemplate DataType="featureFlag:FeatureFlagItem">
-                                        <CheckBox
-                                            HorizontalAlignment="Center"
-                                            IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn
-                                    Header="Name"
-                                    Binding="{Binding FeatureFlag.Name}"
-                                    IsReadOnly="True"
-                                    x:DataType="featureFlag:FeatureFlagItem"/>
-                                <DataGridTextColumn
-                                    Header="Mod"
-                                    Binding="{Binding FeatureFlag.ModKey.FileName}"
-                                    IsReadOnly="True"
-                                    x:DataType="featureFlag:FeatureFlagItem"/>
-                                <DataGridTemplateColumn>
-                                    <DataTemplate DataType="featureFlag:FeatureFlagItem">
-                                        <Button Content="Edit"
-                                                Command="{Binding #Control.ViewModel.EditFeatureFlag}"
-                                                CommandParameter="{Binding FeatureFlag}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </basic:LabeledContentControl>
-                </StackPanel>
+                        <TextBlock
+                            Text="{Binding ReferenceGraph.VertexCount, StringFormat='✓ Built graph with {0} nodes'}"
+                            Foreground="{DynamicResource SystemAccentColor}"
+                            IsVisible="{Binding !!ReferenceGraph}"/>
 
-                <StackPanel IsVisible="{Binding !!RetainedRecords}"
-                            Spacing="5">
+                        <Button
+                            Content="Build Reference Graph"
+                            Command="{Binding BuildReferenceGraph}"
+                            IsVisible="{Binding !ReferenceService.IsLoading^}"/>
 
-                    <StackPanel Orientation="Horizontal" Spacing="20">
-                        <basic:LabeledContentControl
-                            MinWidth="200"
-                            Header="2"
-                            Foreground="IndianRed"
-                            HeaderToolTip="There are records which are probably not meant to be retained, but they are still referenced by retained records. Break the link chains between retained and not to be retained records. Search the paths between them and exclude certain records which are probably misconfigured / need to be changed for this release and create a plugin which fixes this and merge it into the plugin for the cleaning process temporarily. Regard the excluded records as to do list of things to look into to break the links.">
-                            <basic:LabeledContentControl.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Warnings"
-                                               Classes="h1"/>
-                                </DataTemplate>
-                            </basic:LabeledContentControl.HeaderTemplate>
-                            
-                            <basic:LabeledContentControl.IsVisible>
-                                <MultiBinding Converter="{x:Static BoolConverters.Or}">
-                                    <Binding Path="!!InvalidQuests.Count"/>
-                                    <Binding Path="!!InvalidExteriorCells.Count"/>
-                                    <Binding Path="!!InteriorCells.Count"/>
-                                </MultiBinding>
-                            </basic:LabeledContentControl.IsVisible>
+                        <Button Content="Build Retained Records"
+                                Command="{Binding BuildRetainedLinks}"
+                                IsVisible="{Binding !!ReferenceGraph}"/>
+                    </StackPanel>
+                </basic:ExpanderCard>
 
-                            <StackPanel>
-                                <Expander Header="{Binding InvalidQuests.Count, StringFormat='{} {0} Invalid Quests'}"
-                                          IsVisible="{Binding !!InvalidQuests.Count}">
-                                    <DataGrid
-                                        Background="{DynamicResource SystemControlTransparentBrush}"
-                                        ItemsSource="{Binding InvalidQuests}"
-                                        CanUserSortColumns="True"
-                                        CanUserReorderColumns="True" CanUserResizeColumns="True"
-                                        AutoGenerateColumns="False"
-                                        IsReadOnly="True">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="FormKey"
-                                                                Binding="{Binding FormKey}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:IQuestGetter"/>
-                                            <DataGridTextColumn Header="EditorID"
-                                                                Binding="{Binding EditorID}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:IQuestGetter"/>
-                                            <DataGridTextColumn Header="Name"
-                                                                Binding="{Binding Name.String}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.NamedRequiredComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:IQuestGetter"/>
-                                            <DataGridTemplateColumn Header="Path">
-                                                <DataTemplate DataType="skyrim:IQuestGetter">
-                                                    <Button Content="Linked from">
-                                                        <Button.Flyout>
-                                                            <Flyout>
-                                                                <ListBox
-                                                                    ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
-                                                                    ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
-                                                            </Flyout>
-                                                        </Button.Flyout>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Expander>
+                <!-- Step 3: Refine Retained Records -->
+                <!-- IsVisible="{Binding !!RetainedRecords}" -->
+                <basic:ExpanderCard
+                    IsExpanded="True"
+                    Header="Step 3: Refine Retained Records"
+                    Description="Investigate problematic records, analyze dependencies, and exclude records that shouldn't be retained. After excluding records, rebuild retained records to refine your selection."
+                    Icon="Find">
+                    <StackPanel Spacing="12">
+                        <!-- Workflow Instructions -->
+                        <basic:Card
+                            HorizontalAlignment="Left"
+                            Header="Refinement Workflow"
+                            Description="Steps to refine the list of retained records">
+                            <basic:Card.IconControl>
+                                <controls:FontIcon Glyph="🔍"></controls:FontIcon>
+                            </basic:Card.IconControl>
 
-                                <Expander
-                                    Header="{Binding InvalidExteriorCells.Count, StringFormat='{} {0} Exterior Cells'}"
-                                    IsVisible="{Binding !!InvalidExteriorCells.Count}">
-                                    <DataGrid
-                                        Background="{DynamicResource SystemControlTransparentBrush}"
-                                        ItemsSource="{Binding InvalidExteriorCells}"
-                                        CanUserSortColumns="True"
-                                        CanUserReorderColumns="True" CanUserResizeColumns="True"
-                                        AutoGenerateColumns="False"
-                                        IsReadOnly="True">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="FormKey"
-                                                                Binding="{Binding Cell.FormKey}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="viewModels:ExteriorCell"/>
-                                            <DataGridTextColumn Header="EditorID"
-                                                                Binding="{Binding Cell.EditorID}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="viewModels:ExteriorCell"/>
-                                            <DataGridTextColumn Header="Grid"
-                                                                Binding="{Binding Cell.Grid.Point}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="viewModels:ExteriorCell"/>
-                                            <DataGridTextColumn Header="Worldspace"
-                                                                Binding="{Binding Worldspace.EditorID}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="viewModels:ExteriorCell"/>
-                                            <DataGridTemplateColumn>
-                                                <DataTemplate DataType="viewModels:ExteriorCell">
-                                                    <Button Content="Linked from" DataContext="{Binding Cell}">
-                                                        <Button.Flyout>
-                                                            <Flyout>
-                                                                <ListBox
-                                                                    ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
-                                                                    ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
-                                                            </Flyout>
-                                                        </Button.Flyout>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Expander>
+                            <TextBlock
+                                Foreground="{DynamicResource TextFillColorSecondary}"
+                                TextWrapping="Wrap">
+                                1. Review warnings below to find potentially problematic records
+                                <LineBreak/>
+                                2. Use "Show Links" or path analysis to understand why they're retained
+                                <LineBreak/>
+                                3. Exclude records that shouldn't be retained (they'll appear in the exclusion list)
+                                <LineBreak/>
+                                4. Remove or adjust these records in a separate mod that you can temporarily merge into the full mod before cleaning
+                                <LineBreak/>
+                                5. Rebuild retained records to apply exclusions and refine the list
+                            </TextBlock>
+                        </basic:Card>
 
-                                <Expander Header="{Binding InteriorCells.Count, StringFormat='{} {0} Interior Cells'}"
-                                          IsVisible="{Binding !!InteriorCells.Count}">
-                                    <DataGrid
-                                        Background="{DynamicResource SystemControlTransparentBrush}"
-                                        ItemsSource="{Binding InteriorCells}"
-                                        CanUserSortColumns="True"
-                                        CanUserReorderColumns="True" CanUserResizeColumns="True"
-                                        AutoGenerateColumns="False"
-                                        IsReadOnly="True">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="FormKey"
-                                                                Binding="{Binding FormKey}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:ICellGetter"/>
-                                            <DataGridTextColumn Header="EditorID"
-                                                                Binding="{Binding EditorID}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:ICellGetter"/>
-                                            <DataGridTemplateColumn>
-                                                <DataTemplate DataType="skyrim:ICellGetter">
-                                                    <Button Content="Linked from">
-                                                        <Button.Flyout>
-                                                            <Flyout>
-                                                                <ListBox
-                                                                    ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
-                                                                    ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
-                                                            </Flyout>
-                                                        </Button.Flyout>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Expander>
+                        <!-- Warnings Section -->
+                        <basic:Card
+                            Header="Potentially Problematic Records"
+                            Description="Records that are retained but might not belong in this release - investigate these first">
+                            <basic:Card.IconControl>
+                                <StackPanel>
+                                    <controls:FontIcon Glyph="✅">
+                                        <controls:FontIcon.IsVisible>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="!InvalidQuests.Count"/>
+                                                <Binding Path="!InvalidExteriorCells.Count"/>
+                                                <Binding Path="!InteriorCells.Count"/>
+                                                <Binding Path="!InvalidVoiceTypes.Count"/>
+                                            </MultiBinding>
+                                        </controls:FontIcon.IsVisible>
+                                    </controls:FontIcon>
+                                    <controls:FontIcon Glyph="⚠">
+                                        <controls:FontIcon.IsVisible>
+                                            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                                                <Binding Path="!!InvalidQuests.Count"/>
+                                                <Binding Path="!!InvalidExteriorCells.Count"/>
+                                                <Binding Path="!!InteriorCells.Count"/>
+                                                <Binding Path="!!InvalidVoiceTypes.Count"/>
+                                            </MultiBinding>
+                                        </controls:FontIcon.IsVisible>
+                                    </controls:FontIcon>
+                                </StackPanel>
+                            </basic:Card.IconControl>
 
-                                <Expander Header="{Binding InvalidVoiceTypes.Count, StringFormat='{} {0} Voice Types'}"
-                                          IsVisible="{Binding !!InvalidVoiceTypes.Count}">
-                                    <DataGrid
-                                        Background="{DynamicResource SystemControlTransparentBrush}"
-                                        ItemsSource="{Binding InvalidVoiceTypes}"
-                                        CanUserSortColumns="True"
-                                        CanUserReorderColumns="True" CanUserResizeColumns="True"
-                                        AutoGenerateColumns="False"
-                                        IsReadOnly="True">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="FormKey"
-                                                                Binding="{Binding FormKey}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:IVoiceTypeGetter"/>
-                                            <DataGridTextColumn Header="EditorID"
-                                                                Binding="{Binding EditorID}"
-                                                                CanUserSort="True"
-                                                                CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
-                                                                IsReadOnly="True"
-                                                                x:DataType="skyrim:IVoiceTypeGetter"/>
-                                            <DataGridTemplateColumn>
-                                                <DataTemplate DataType="skyrim:IVoiceTypeGetter">
-                                                    <Button Content="Linked from">
-                                                        <Button.Flyout>
-                                                            <Flyout>
-                                                                <ListBox
-                                                                    ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
-                                                                    ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
-                                                            </Flyout>
-                                                        </Button.Flyout>
-                                                    </Button>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Expander>
+                            <StackPanel Spacing="8">
+                                <TextBlock
+                                    Text="No problematic records found!"
+                                    Foreground="{DynamicResource TextFillColorSecondary}">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="!InvalidQuests.Count"/>
+                                            <Binding Path="!InvalidExteriorCells.Count"/>
+                                            <Binding Path="!InteriorCells.Count"/>
+                                            <Binding Path="!InvalidVoiceTypes.Count"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+
+                                <Border Classes="CardNested"
+                                        IsVisible="{Binding !!InvalidQuests.Count, FallbackValue=False}">
+                                    <Expander
+                                        Header="{Binding InvalidQuests.Count, StringFormat='{}{0} Invalid Quests'}">
+                                        <DataGrid
+                                            Background="{DynamicResource SystemControlTransparentBrush}"
+                                            ItemsSource="{Binding InvalidQuests}"
+                                            CanUserSortColumns="True"
+                                            CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                            AutoGenerateColumns="False"
+                                            IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="FormKey"
+                                                                    Binding="{Binding FormKey}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:IQuestGetter"/>
+                                                <DataGridTextColumn Header="EditorID"
+                                                                    Binding="{Binding EditorID}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:IQuestGetter"/>
+                                                <DataGridTextColumn Header="Name"
+                                                                    Binding="{Binding Name.String}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.NamedRequiredComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:IQuestGetter"/>
+                                                <DataGridTemplateColumn Header="Actions">
+                                                    <DataTemplate DataType="skyrim:IQuestGetter">
+                                                        <Button Content="Show Links" Padding="8,4" FontSize="12">
+                                                            <Button.Flyout>
+                                                                <Flyout>
+                                                                    <ListBox
+                                                                        ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
+                                                                        ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
+                                                                </Flyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </Border>
+
+                                <Border Classes="CardNested"
+                                        IsVisible="{Binding !!InvalidExteriorCells.Count, FallbackValue=False}">
+                                    <Expander
+                                        Header="{Binding InvalidExteriorCells.Count, StringFormat='{}{0} Invalid Exterior Cells'}">
+                                        <DataGrid
+                                            Background="{DynamicResource SystemControlTransparentBrush}"
+                                            ItemsSource="{Binding InvalidExteriorCells}"
+                                            CanUserSortColumns="True"
+                                            CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                            AutoGenerateColumns="False"
+                                            IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="FormKey"
+                                                                    Binding="{Binding Cell.FormKey}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="viewModels:ExteriorCell"/>
+                                                <DataGridTextColumn Header="EditorID"
+                                                                    Binding="{Binding Cell.EditorID}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="viewModels:ExteriorCell"/>
+                                                <DataGridTextColumn Header="Grid"
+                                                                    Binding="{Binding Cell.Grid.Point}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="viewModels:ExteriorCell"/>
+                                                <DataGridTextColumn Header="Worldspace"
+                                                                    Binding="{Binding Worldspace.EditorID}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="viewModels:ExteriorCell"/>
+                                                <DataGridTemplateColumn Header="Actions">
+                                                    <DataTemplate DataType="viewModels:ExteriorCell">
+                                                        <Button Content="Show Links" Padding="8,4" FontSize="12"
+                                                                DataContext="{Binding Cell}">
+                                                            <Button.Flyout>
+                                                                <Flyout>
+                                                                    <ListBox
+                                                                        ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
+                                                                        ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
+                                                                </Flyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </Border>
+
+                                <Border Classes="CardNested"
+                                        IsVisible="{Binding !!InteriorCells.Count, FallbackValue=False}">
+                                    <Expander
+                                        Header="{Binding InteriorCells.Count, StringFormat='{}{0} Invalid Interior Cells'}">
+                                        <DataGrid
+                                            Background="{DynamicResource SystemControlTransparentBrush}"
+                                            ItemsSource="{Binding InteriorCells}"
+                                            CanUserSortColumns="True"
+                                            CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                            AutoGenerateColumns="False"
+                                            IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="FormKey"
+                                                                    Binding="{Binding FormKey}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:ICellGetter"/>
+                                                <DataGridTextColumn Header="EditorID"
+                                                                    Binding="{Binding EditorID}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:ICellGetter"/>
+                                                <DataGridTemplateColumn Header="Actions">
+                                                    <DataTemplate DataType="skyrim:ICellGetter">
+                                                        <Button Content="Show Links" Padding="8,4" FontSize="12">
+                                                            <Button.Flyout>
+                                                                <Flyout>
+                                                                    <ListBox
+                                                                        ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
+                                                                        ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
+                                                                </Flyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </Border>
+
+                                <Border Classes="CardNested"
+                                        IsVisible="{Binding !!InvalidVoiceTypes.Count, FallbackValue=False}">
+                                    <Expander
+                                        Header="{Binding InvalidVoiceTypes.Count, StringFormat='{}{0} Invalid Voice Types'}">
+                                        <DataGrid
+                                            Background="{DynamicResource SystemControlTransparentBrush}"
+                                            ItemsSource="{Binding InvalidVoiceTypes}"
+                                            CanUserSortColumns="True"
+                                            CanUserReorderColumns="True" CanUserResizeColumns="True"
+                                            AutoGenerateColumns="False"
+                                            IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="FormKey"
+                                                                    Binding="{Binding FormKey}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.FormKeyComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:IVoiceTypeGetter"/>
+                                                <DataGridTextColumn Header="EditorID"
+                                                                    Binding="{Binding EditorID}"
+                                                                    CanUserSort="True"
+                                                                    CustomSortComparer="{x:Static comparer:RecordComparers.EditorIDComparer}"
+                                                                    IsReadOnly="True"
+                                                                    x:DataType="skyrim:IVoiceTypeGetter"/>
+                                                <DataGridTemplateColumn Header="Actions">
+                                                    <DataTemplate DataType="skyrim:IVoiceTypeGetter">
+                                                        <Button Content="Show Links" Padding="8,4" FontSize="12">
+                                                            <Button.Flyout>
+                                                                <Flyout>
+                                                                    <ListBox
+                                                                        ItemsSource="{Binding Converter={StaticResource DependencyGetIncomingEdgesConverter}}"
+                                                                        ItemTemplate="{StaticResource LinkSearchDataTemplate}"/>
+                                                                </Flyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </Border>
                             </StackPanel>
-                        </basic:LabeledContentControl>
+                        </basic:Card>
 
-                        <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <HeaderedContentControl Header="Source">
-                            <controls:FAComboBox
-                                x:Name="Source"
-                                IsEditable="True"
-                                IsTextSearchEnabled="True"
-                                ItemsSource="{Binding RetainedRecords}"
-                                SelectedItem="{Binding SourceLink}">
-                                <controls:FAComboBox.DisplayMemberBinding>
-                                    <MultiBinding StringFormat="{}{0} ({1})">
-                                        <Binding Path="EditorID"/>
-                                        <Binding Path="FormKey"/>
-                                    </MultiBinding>
-                                </controls:FAComboBox.DisplayMemberBinding>
-                            </controls:FAComboBox>
-                        </HeaderedContentControl>
+                        <!-- Path Analysis Tool -->
+                        <basic:Card
+                            Header="Dependency Path Analysis"
+                            Description="Find the path between two records to understand why they're linked">
+                            <basic:Card.IconControl>
+                                <controls:FontIcon Glyph="🔗"></controls:FontIcon>
+                            </basic:Card.IconControl>
 
-                        <Button Content="?"
-                                VerticalAlignment="Bottom">
-                            <Button.Flyout>
-                                <Flyout>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto" ColumnSpacing="12">
+                                <!-- Source Selection -->
+                                <basic:LabeledContentControl
+                                    Header="Source Record"
+                                    Grid.Column="0"
+                                    Grid.Row="0">
+                                    <StackPanel Spacing="8" Orientation="Horizontal">
+                                        <controls:FAComboBox
+                                            x:Name="Source"
+                                            IsEditable="True"
+                                            IsTextSearchEnabled="True"
+                                            ItemsSource="{Binding RetainedRecords}"
+                                            SelectedItem="{Binding SourceLink}">
+                                            <controls:FAComboBox.DisplayMemberBinding>
+                                                <MultiBinding StringFormat="{}{0} ({1})">
+                                                    <Binding Path="EditorID"/>
+                                                    <Binding Path="FormKey"/>
+                                                </MultiBinding>
+                                            </controls:FAComboBox.DisplayMemberBinding>
+                                        </controls:FAComboBox>
+
+                                        <Button Content="?"
+                                                ToolTip.Tip="Show incoming references"
+                                                VerticalAlignment="Top">
+                                            <Button.Flyout>
+                                                <Flyout>
+                                                    <ListBox
+                                                        ItemsSource="{Binding #Source.SelectedItem, Converter={StaticResource ReferenceGetIncomingEdgesConverter}}"
+                                                        ItemTemplate="{StaticResource LinkDataTemplate}"/>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </StackPanel>
+                                </basic:LabeledContentControl>
+
+                                <!-- Target Selection -->
+                                <basic:LabeledContentControl
+                                    Header="Target Record"
+                                    Grid.Column="1"
+                                    Grid.Row="0">
+                                    <StackPanel Spacing="8" Orientation="Horizontal">
+                                        <controls:FAComboBox
+                                            x:Name="Target"
+                                            IsEditable="True"
+                                            IsTextSearchEnabled="True"
+                                            ItemsSource="{Binding RetainedRecords}"
+                                            SelectedItem="{Binding TargetLink}">
+                                            <controls:FAComboBox.DisplayMemberBinding>
+                                                <MultiBinding StringFormat="{}{0} ({1})">
+                                                    <Binding Path="EditorID"/>
+                                                    <Binding Path="FormKey"/>
+                                                </MultiBinding>
+                                            </controls:FAComboBox.DisplayMemberBinding>
+                                        </controls:FAComboBox>
+
+                                        <Button Content="?"
+                                                ToolTip.Tip="Show incoming references"
+                                                VerticalAlignment="Top">
+                                            <Button.Flyout>
+                                                <Flyout>
+                                                    <ListBox
+                                                        ItemsSource="{Binding #Target.SelectedItem, Converter={StaticResource ReferenceGetIncomingEdgesConverter}}"
+                                                        ItemTemplate="{StaticResource LinkDataTemplate}"/>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </StackPanel>
+                                </basic:LabeledContentControl>
+
+                                <Separator Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"/>
+
+                                <!-- Find Path Button -->
+                                <Button Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2"
+                                        Content="Find Dependency Path"
+                                        Command="{Binding SearchForSelectedPath}"
+                                        Padding="12,8"/>
+
+                                <!-- Results -->
+                                <StackPanel Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2" Spacing="8"
+                                            Margin="0,8,0,0">
+                                    <TextBlock Text="Path Result:" FontWeight="SemiBold"
+                                               IsVisible="{Binding !!Path.Count}"/>
+
                                     <ListBox
-                                        ItemsSource="{Binding #Source.SelectedItem, Converter={StaticResource ReferenceGetIncomingEdgesConverter}}"
-                                        ItemTemplate="{StaticResource LinkDataTemplate}"/>
-                                </Flyout>
-                            </Button.Flyout>
-                        </Button>
+                                        ItemsSource="{Binding Path}"
+                                        ItemTemplate="{StaticResource LinkDataTemplate}"
+                                        MaxHeight="200"
+                                        IsVisible="{Binding !!Path.Count}"/>
 
-                        <HeaderedContentControl Header="Target">
-                            <controls:FAComboBox
-                                x:Name="Target"
-                                IsEditable="True"
-                                IsTextSearchEnabled="True"
-                                ItemsSource="{Binding RetainedRecords}"
-                                SelectedItem="{Binding TargetLink}">
-                                <controls:FAComboBox.DisplayMemberBinding>
-                                    <MultiBinding StringFormat="{}{0} {1}">
-                                        <Binding Path="EditorID"/>
-                                        <Binding Path="FormKey"/>
-                                    </MultiBinding>
-                                </controls:FAComboBox.DisplayMemberBinding>
-                            </controls:FAComboBox>
-                        </HeaderedContentControl>
+                                    <Border Classes="CardNested"
+                                            HorizontalAlignment="Left"
+                                            Padding="8"
+                                            IsVisible="{Binding !Path.Count}">
+                                        <TextBlock
+                                            Text="💡 Select source and target records, then click 'Find Dependency Path' to see how they're connected"
+                                            TextWrapping="Wrap"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </basic:Card>
 
-                        <Button Content="?"
-                                VerticalAlignment="Bottom">
-                            <Button.Flyout>
-                                <Flyout>
-                                    <ListBox
-                                        ItemsSource="{Binding #Target.SelectedItem, Converter={StaticResource ReferenceGetIncomingEdgesConverter}}"
-                                        ItemTemplate="{StaticResource LinkDataTemplate}"/>
-                                </Flyout>
-                            </Button.Flyout>
-                        </Button>
+                        <!-- Excluded Records Section -->
+                        <basic:Card
+                            IsVisible="{Binding !!ExcludedLinks.Count}"
+                            Header="🚫 Excluded Records"
+                            Description="Records you've excluded from the analysis - rebuild retained records to apply these exclusions">
+                            <StackPanel Spacing="8">
+                                <TextBlock
+                                    Text="After excluding records, go back to Step 2 and click 'Build Retained Records' to refine the list."
+                                    TextWrapping="Wrap"
+                                    Opacity="0.8"
+                                    FontStyle="Italic"/>
+                                <ListBox
+                                    ItemsSource="{Binding ExcludedLinks}"
+                                    MaxHeight="250">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate DataType="models:ILinkIdentifier">
+                                            <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                                                    CornerRadius="4"
+                                                    Padding="12,8"
+                                                    Margin="0,4">
+                                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                                    <Button Content="Retain"
+                                                            FontSize="12"
+                                                            Padding="8,4"
+                                                            Command="{Binding #Control.ViewModel.RetainRecord}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip.Tip="Remove from exclusion list"/>
+
+                                                    <TextBlock
+                                                        Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
+                                                        VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </basic:Card>
                     </StackPanel>
-                            <Button Content="Find Path"
-                                    Command="{Binding SearchForSelectedPath}"/>
+                </basic:ExpanderCard>
 
-                            <ListBox
-                                ItemsSource="{Binding Path}"
-                                ItemTemplate="{StaticResource LinkDataTemplate}"/>
+                <!-- Step 4: Execute Cleaning -->
+                <!-- IsVisible="{Binding !!RetainedRecords}" -->
+                <basic:ExpanderCard
+                    IsExpanded="True"
+                    Header="Step 4: Execute Cleaning"
+                    Description="Perform the actual cleaning operation on the selected mod"
+                    Icon="Delete">
+                    <StackPanel Spacing="12">
+                        <Button Content="🧹 Clean Mod"
+                                Command="{Binding CleanMod}"
+                                Classes="Primary"
+                                FontWeight="Normal"/>
 
+                        <Border Background="{DynamicResource WarningFillColorBrush}"
+                                CornerRadius="4"
+                                Padding="12,8">
                             <TextBlock
-                                Text="No Path Found"
-                                Foreground="IndianRed"
-                                IsVisible="{Binding !Path.Count}"/>
-                        </StackPanel>
+                                Text="⚠ Important: Re-save the cleaned mod in the Creation Kit after cleaning"
+                                Foreground="{DynamicResource WarningTextFillColorPrimaryBrush}"/>
+                        </Border>
                     </StackPanel>
-
-                    <Button Content="Clean Mod"
-                            Command="{Binding CleanMod}"/>
-
-                    <TextBlock
-                        Text="Make sure to re-save the cleaned mod in the Creation Kit!"
-                        Foreground="IndianRed"/>
-                </StackPanel>
+                </basic:ExpanderCard>
             </StackPanel>
         </ScrollViewer>
 
         <avaloniaProgressRing:ProgressRing
+            Grid.Row="0" Grid.RowSpan="2"
             IsActive="{Binding IsBusy}"
             HorizontalAlignment="Center" VerticalAlignment="Center"
             Width="100" Height="100"/>
