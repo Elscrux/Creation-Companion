@@ -15,11 +15,10 @@
         <ContentControl.Resources>
             <converter:ModItemListToStringConverter x:Key="ModItemListToStringConverter"/>
         </ContentControl.Resources>
+
         <ContentControl.DataTemplates>
             <DataTemplate DataType="vm:MultiModPickerVM">
-                <Button Content="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}, FallbackValue='None'}"
-                        MaxWidth="200"
-                        MinHeight="32"
+                <Button MinHeight="32"
                         ToolTip.Tip="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}}">
                     <Button.Flyout>
                         <Flyout>
@@ -57,6 +56,16 @@
                             </Grid>
                         </Flyout>
                     </Button.Flyout>
+
+                    <Grid ColumnDefinitions="*,8,Auto">
+                        <TextBlock
+                            Grid.Column="0"
+                            Text="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}, FallbackValue='None'}"/>
+
+                        <controls:SymbolIcon
+                            Grid.Column="2"
+                            Symbol="ChevronDown"/>
+                    </Grid>
                 </Button>
             </DataTemplate>
 
