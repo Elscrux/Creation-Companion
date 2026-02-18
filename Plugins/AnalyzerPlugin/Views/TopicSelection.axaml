@@ -31,10 +31,10 @@
                 <StackPanel
                     Orientation="Horizontal"
                     Spacing="8">
+                    <TextBlock Text="Group"/>
                     <controls:SymbolIcon
                         Symbol="Pin"
                         FontSize="16"/>
-                    <TextBlock Text="Group"/>
                 </StackPanel>
 
                 <Button.Flyout>
