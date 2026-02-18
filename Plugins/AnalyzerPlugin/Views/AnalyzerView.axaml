@@ -81,7 +81,7 @@
                         <ComboBox
                             ItemsSource="{x:Static viewModels:AnalyzerVM.AllSeverities}"
                             SelectedItem="{Binding MinimumSeverity}"
-                            Padding="12,10"
+                            Padding="12,8"
                             CornerRadius="8">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate
@@ -112,7 +112,7 @@
                         Icon="List">
                         <StackPanel Spacing="8">
                             <Button
-                                Padding="12,10"
+                                Padding="12,8"
                                 CornerRadius="8"
                                 Background="{DynamicResource ButtonBackground}"
                                 BorderBrush="{DynamicResource ButtonBorderBrush}"
@@ -230,7 +230,7 @@
                         <!-- Group By Button -->
                         <Button
                             ToolTip.Tip="Group results by different categories"
-                            Padding="10,8"
+                            Padding="12,8"
                             CornerRadius="6">
                             <StackPanel
                                 Orientation="Horizontal"

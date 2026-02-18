@@ -26,7 +26,7 @@
 
             <Button
                 ToolTip.Tip="Group topics by category"
-                Padding="10,8"
+                Padding="12,8"
                 CornerRadius="6">
                 <StackPanel
                     Orientation="Horizontal"
