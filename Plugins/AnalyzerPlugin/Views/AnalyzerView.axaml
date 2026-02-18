@@ -18,7 +18,8 @@
     d:DesignWidth="1400"
     d:DesignHeight="800"
     x:Class="AnalyzerPlugin.Views.AnalyzerView"
-    x:DataType="viewModels:AnalyzerVM">
+    x:DataType="viewModels:AnalyzerVM"
+    x:Name="Control">
     <Grid
         RowDefinitions="*"
         Margin="16">
@@ -264,6 +265,26 @@
                                     </StackPanel>
                                 </Flyout>
                             </Button.Flyout>
+                        </Button>
+
+                        <!-- Export Topics Button -->
+                        <Button
+                            Command="{Binding #Control.SetupFilePickerFunction}"
+                            IsEnabled="{Binding !!FilteredResults.Count}"
+                            Padding="12,8"
+                            CornerRadius="6"
+                            Background="{DynamicResource ButtonBackground}"
+                            BorderBrush="{DynamicResource ButtonBorderBrush}"
+                            BorderThickness="1">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock
+                                    Text="Export as CSV"
+                                    VerticalAlignment="Center"/>
+                                <controls:SymbolIcon
+                                    Grid.Column="1"
+                                    Symbol="Download"
+                                    Margin="8,0,0,0"/>
+                            </Grid>
                         </Button>
                     </StackPanel>
 

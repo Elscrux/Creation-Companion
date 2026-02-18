@@ -1,8 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
+using AnalyzerPlugin.Services;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -58,6 +61,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         });
 
     private readonly IEditorEnvironment _editorEnvironment;
+    private readonly IFileSystem _fileSystem;
 
     public IObservableCollection<TopicItem> Topics { get; }
     public ReadOnlyObservableCollection<TopicItem> FilteredTopics { get; }
@@ -98,6 +102,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         IReadOnlyList<IAnalyzer> analyzers,
         MultiModPickerVM multiModPickerVM) {
         _editorEnvironment = editorEnvironment;
+        _fileSystem = fileSystem;
         ModPickerVM = multiModPickerVM;
         var topicEnricher = new TopicEnricher(editorEnvironment);
         analyzers = analyzers.DistinctBy(x => x.Id).ToList();
@@ -413,6 +418,54 @@ public sealed partial class AnalyzerVM : ViewModel {
             ModPickerVM.SelectedMods.Any());
     }
 
+    public async Task ExportCsv(string filePath) {
+        var csvLines = new StringBuilder();
+        csvLines.AppendLine("Topic ID,Title,Severity,Record,Record Type,Information URI,Message,Meta Data");
+
+        foreach (var result in FilteredResults.OrderBy(r => r.Topic.TopicDefinition.Id.ToString())) {
+            var id = result.Topic.TopicDefinition.Id.ToString();
+            var title = EscapeCsvField(result.Topic.TopicDefinition.Title);
+            var severity = result.Topic.TopicDefinition.Severity;
+            var record = EscapeCsvField(result.Record?.ToString() ?? string.Empty);
+            var recordType = EscapeCsvField(GetRecordTypeName(result.Record?.Type) ?? string.Empty);
+            var infoUri = EscapeCsvField(result.Topic.TopicDefinition.InformationUri?.AbsoluteUri ?? "");
+            var message = EscapeCsvField(result.Topic.FormattedTopic.FormattedMessage);
+            var metaData = EscapeCsvField(string.Join(" ", result.Topic.MetaData.Select(x => $"{x.Name}={Stringifier(x.Value)}")));
+
+            csvLines.AppendLine($"{id},{title},{severity},{record},{recordType},{infoUri},{message},{metaData}");
+        }
+
+        await _fileSystem.File.WriteAllTextAsync(filePath, csvLines.ToString());
+
+        // Open the file location
+        Process.Start(new ProcessStartInfo {
+            FileName = "explorer.exe",
+            Arguments = $"/select,\"{filePath}\"",
+            UseShellExecute = true,
+        });
+
+        string Stringifier(object? value) => value switch {
+            IDictionary dictionary => '[' + string.Join(",",
+                dictionary.Keys
+                    .Cast<object>()
+                    .Select(key => $"{Stringifier(key)}={Stringifier(dictionary[key])}")) + ']',
+            IEnumerable enumerable => $"[{string.Join(", ", enumerable.Cast<object>().Select(Stringifier))}]",
+            _ => value?.ToString() ?? string.Empty
+        };
+
+        static string EscapeCsvField(string field) {
+            if (string.IsNullOrEmpty(field)) {
+                return "\"\"";
+            }
+
+            if (field.Contains(',') || field.Contains('"') || field.Contains('\n')) {
+                return $"\"{field.Replace("\"", "\"\"")}\"";
+            }
+
+            return field;
+        }
+    }
+
     private bool? GetAllActive(GroupInstance group) {
         var activeCount = group.Items
             .Count(x => x switch {
@@ -491,10 +544,12 @@ public sealed partial class AnalyzerVM : ViewModel {
 
     private Control GetRecordTypeControl(Type? type) {
         return new TextBlock {
-            Text = type?.Name[1..^6] ?? "All",
+            Text = GetRecordTypeName(type) ?? "All",
             VerticalAlignment = VerticalAlignment.Center,
         };
     }
+
+    private static string? GetRecordTypeName(Type? type) => type?.Name[1..^6];
 
     private Control GetSeverityControl(Severity severity) {
         return new TextBlock {
