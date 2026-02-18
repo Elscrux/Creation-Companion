@@ -99,6 +99,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         MultiModPickerVM multiModPickerVM) {
         _editorEnvironment = editorEnvironment;
         ModPickerVM = multiModPickerVM;
+        var topicEnricher = new TopicEnricher(editorEnvironment);
         analyzers = analyzers.DistinctBy(x => x.Id).ToList();
 
         var analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
@@ -381,6 +382,14 @@ public sealed partial class AnalyzerVM : ViewModel {
                     .Build();
 
                 var resultsObservable = analyzer.Analyze()
+                    .Select(x => {
+                        // TODO remove when fixed in analyzers
+                        return new AnalyzerResult {
+                            Topic = topicEnricher.Enrich(x.Topic),
+                            Record = x.Record,
+                            ModKey = x.ModKey,
+                        };
+                    })
                     .ToObservable()
                     .Publish()
                     .RefCount();
