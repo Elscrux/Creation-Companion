@@ -28,6 +28,7 @@ using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Services.Plugin;
+using CreationEditor.Services.Serialization.Json;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 using FluentAvalonia.UI.Windowing;
@@ -106,6 +107,9 @@ public sealed class MainModule : Module {
         builder.RegisterType<PluginsFolderAssemblyProvider>()
             .As<IPluginAssemblyProvider>()
             .SingleInstance();
+
+        builder.RegisterType<JsonSerializerSettingsProvider>()
+            .As<IJsonSerializerSettingsProvider>();
 
         builder.RegisterType<MutagenTypeProvider>()
             .As<IMutagenTypeProvider>()

@@ -1,26 +1,16 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
-using Mutagen.Bethesda.Json;
+using CreationEditor.Services.Serialization.Json;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using ReactiveUI;
 namespace CreationEditor.Services.Json;
 
 public sealed class NewtonsoftJsonSuspensionDriver(
+    IJsonSerializerSettingsProvider jsonSerializerSettingsProvider,
     IFileSystem fileSystem,
-    IContractResolver contractResolver,
     string stateFilePath)
     : ISuspensionDriver {
-
-    private readonly JsonSerializerSettings _settings = new() {
-        TypeNameHandling = TypeNameHandling.All,
-        ContractResolver = contractResolver,
-        Converters = {
-            JsonConvertersMixIn.FormKey,
-            JsonConvertersMixIn.ModKey,
-        },
-    };
 
     public IObservable<Unit> InvalidateState() {
         if (fileSystem.File.Exists(stateFilePath)) fileSystem.File.Delete(stateFilePath);
@@ -32,14 +22,14 @@ public sealed class NewtonsoftJsonSuspensionDriver(
         if (!fileSystem.File.Exists(stateFilePath)) return Observable.Throw<object>(new FileNotFoundException(stateFilePath));
 
         var lines = fileSystem.File.ReadAllText(stateFilePath);
-        var state = JsonConvert.DeserializeObject<object>(lines, _settings)
+        var state = JsonConvert.DeserializeObject<object>(lines, jsonSerializerSettingsProvider.SerializerSettings)
          ?? throw new InvalidDataException($"{stateFilePath} is not in valid format");
         return Observable.Return(state);
 
     }
 
     public IObservable<Unit> SaveState(object state) {
-        var lines = JsonConvert.SerializeObject(state, _settings);
+        var lines = JsonConvert.SerializeObject(state, jsonSerializerSettingsProvider.SerializerSettings);
         fileSystem.File.WriteAllText(stateFilePath, lines);
         return Observable.Return(Unit.Default);
     }

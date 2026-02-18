@@ -1,13 +1,12 @@
 ﻿using System.IO.Abstractions;
-using Mutagen.Bethesda.Json;
+using CreationEditor.Services.Serialization.Json;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Services.State;
 
 public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
-    IContractResolver contractResolver,
+    IJsonSerializerSettingsProvider jsonSerializerSettingsProvider,
     IStateIdentifier<TIdentifier> stateIdentifier,
     ILogger logger,
     IFileSystem fileSystem,
@@ -21,17 +20,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     private const string Wildcard = "*";
     private const string RootPath = "States";
 
-    private readonly JsonSerializerSettings _serializerSettings = new() {
-        Formatting = Formatting.Indented,
-        TypeNameHandling = TypeNameHandling.Auto,
-        ContractResolver = contractResolver,
-        Converters = {
-            JsonConvertersMixIn.FormKey,
-            JsonConvertersMixIn.ModKey,
-        },
-    };
-
-    private readonly string _directoryPath =  fileSystem.Path.Combine([
+    private readonly string _directoryPath = fileSystem.Path.Combine([
         AppDomain.CurrentDomain.BaseDirectory,
         RootPath,
         ..stateIds
@@ -74,7 +63,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
     public IEnumerable<TStateOut> LoadAll() {
         return EnumerateStateFiles()
             .Select(filePath => fileSystem.File.ReadAllText(filePath))
-            .Select(json => JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings))
+            .Select(json => JsonConvert.DeserializeObject<TStateOut>(json, jsonSerializerSettingsProvider.SerializerSettings))
             .WhereNotNull();
     }
 
@@ -85,7 +74,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
                 var fileName = fileSystem.Path.GetRelativePath(stateDirectory, filePath);
                 var identifier = GetIdentifier(fileName);
                 var json = fileSystem.File.ReadAllText(filePath);
-                var state = JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings);
+                var state = JsonConvert.DeserializeObject<TStateOut>(json, jsonSerializerSettingsProvider.SerializerSettings);
                 if (state is null) return null;
 
                 return new KeyValuePair<TIdentifier, TState>(identifier, state);
@@ -99,7 +88,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
         if (!fileInfo.Exists) return null;
 
         var json = fileSystem.File.ReadAllText(fileInfo.FullName);
-        return JsonConvert.DeserializeObject<TStateOut>(json, _serializerSettings);
+        return JsonConvert.DeserializeObject<TStateOut>(json, jsonSerializerSettingsProvider.SerializerSettings);
     }
 
     public bool Save(TState state, TIdentifier id) {
@@ -113,7 +102,7 @@ public sealed class JsonStateRepository<TStateOut, TState, TIdentifier>(
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
         logger.Here().Verbose("Exporting {State} with Id {Id} to {Path}", stateIds.Last(), id, filePath);
-        var content = JsonConvert.SerializeObject(stateT, _serializerSettings);
+        var content = JsonConvert.SerializeObject(stateT, jsonSerializerSettingsProvider.SerializerSettings);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
