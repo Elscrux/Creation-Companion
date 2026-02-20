@@ -36,6 +36,7 @@ using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
+using Serilog;
 namespace AnalyzerPlugin.ViewModels;
 
 public sealed record AnalyzerMemento {
@@ -60,6 +61,7 @@ public sealed partial class AnalyzerVM : ViewModel {
             _ => Brushes.ForestGreen,
         });
 
+    private readonly ILogger _logger;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IFileSystem _fileSystem;
 
@@ -96,11 +98,13 @@ public sealed partial class AnalyzerVM : ViewModel {
     public MultiModPickerVM ModPickerVM { get; }
 
     public AnalyzerVM(
+        ILogger logger,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
         IStateRepositoryFactory<AnalyzerMemento, AnalyzerMemento, Guid> stateRepositoryFactory,
         IReadOnlyList<IAnalyzer> analyzers,
         MultiModPickerVM multiModPickerVM) {
+        _logger = logger;
         _editorEnvironment = editorEnvironment;
         _fileSystem = fileSystem;
         ModPickerVM = multiModPickerVM;
@@ -209,7 +213,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                  || result.Topic.FormattedTopic.FormattedMessage.Contains(searchText, StringComparison.OrdinalIgnoreCase))))
             .ToObservableCollection(this);
 
-        ResultsRecordTypeGroup = new Group<AnalyzerResult>(result => result.Record?.Type.Name[1..^6], IsResultsGroupedByRecordType);
+        ResultsRecordTypeGroup = new Group<AnalyzerResult>(result => GetRecordTypeName(result.Record?.Type), IsResultsGroupedByRecordType);
         ResultsRecordGroup = new Group<AnalyzerResult>(result => result.Record, IsResultsGroupedByRecord);
         ResultsSeverityGroup = new Group<AnalyzerResult>(result => result.Topic.Severity, IsResultsGroupedBySeverity);
         ResultsTopicGroup = new Group<AnalyzerResult>(result => result.Topic.TopicDefinition, IsResultsGroupedByTopic);
@@ -549,7 +553,17 @@ public sealed partial class AnalyzerVM : ViewModel {
         };
     }
 
-    private static string? GetRecordTypeName(Type? type) => type?.Name[1..^6];
+    private string? GetRecordTypeName(Type? type) {
+        var typeName = type?.Name;
+        if (typeName is null) return null;
+
+        if (typeName.Length > 6) {
+            return typeName[1..^6];
+        }
+
+        _logger.Here().Warning("Analyzer topic has a record type with an unexpected name: {TypeName}", typeName);
+        return null;
+    }
 
     private Control GetSeverityControl(Severity severity) {
         return new TextBlock {
