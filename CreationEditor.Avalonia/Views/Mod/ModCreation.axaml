@@ -20,6 +20,7 @@
         <TextBox Text="{Binding NewModName}"
                  Watermark="{Binding ModNameWatermark}"
                  VerticalAlignment="Center"
+                 KeyUp="TextBox_OnKeyUp"
                  MinWidth="200"
                  Padding="5"/>
 
