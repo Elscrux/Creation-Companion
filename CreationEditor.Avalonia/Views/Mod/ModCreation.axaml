@@ -5,7 +5,6 @@
              xmlns:mod="clr-namespace:CreationEditor.Avalonia.ViewModels.Mod"
              xmlns:plugins="clr-namespace:Mutagen.Bethesda.Plugins;assembly=Mutagen.Bethesda.Kernel"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="100"
              x:Class="CreationEditor.Avalonia.Views.Mod.ModCreation"
              x:DataType="mod:ModCreationVM"
@@ -40,15 +39,13 @@
 
         <Button
             Click="AddButton_Click"
+            Content="Create"
+            Classes="Accent"
             Height="32"
-            Width="32"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             IsEnabled="{Binding !HasErrors}"
-            IsVisible="{Binding #Creation.ShowAddButton}"
-            Padding="7">
-            <controls:SymbolIcon Symbol="Add"/>
-        </Button>
+            IsVisible="{Binding #Creation.ShowAddButton}"/>
 
         <Popup x:Name="Popup"
                WindowManagerAddShadowHint="False"
