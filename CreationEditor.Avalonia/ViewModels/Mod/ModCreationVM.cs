@@ -9,9 +9,11 @@ using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
+using Serilog;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
 public sealed partial class ModCreationVM : ValidatableViewModel {
+    public ILogger Logger { get; }
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDataSourceService _dataSourceService;
     private readonly IFileSystem _fileSystem;
@@ -31,7 +33,9 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
     public ModCreationVM(
         IEditorEnvironment editorEnvironment,
         IDataSourceService dataSourceService,
+        ILogger logger,
         IFileSystem fileSystem) {
+        Logger = logger;
         _editorEnvironment = editorEnvironment;
         _dataSourceService = dataSourceService;
         _fileSystem = fileSystem;
