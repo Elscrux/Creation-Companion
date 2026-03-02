@@ -230,8 +230,8 @@
                 </basic:ExpanderCard>
 
                 <!-- Step 3: Refine Retained Records -->
-                <!-- IsVisible="{Binding !!RetainedRecords}" -->
                 <basic:ExpanderCard
+                    IsVisible="{Binding !!RetainedRecords}"
                     IsExpanded="True"
                     Header="Step 3: Refine Retained Records"
                     Description="Investigate problematic records, analyze dependencies, and exclude records that shouldn't be retained. After excluding records, rebuild retained records to refine your selection."
@@ -636,8 +636,8 @@
                 </basic:ExpanderCard>
 
                 <!-- Step 4: Execute Cleaning -->
-                <!-- IsVisible="{Binding !!RetainedRecords}" -->
                 <basic:ExpanderCard
+                    IsVisible="{Binding !!RetainedRecords}"
                     IsExpanded="True"
                     Header="Step 4: Execute Cleaning"
                     Description="Perform the actual cleaning operation on the selected mod"
