@@ -255,7 +255,7 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         var invalidQuests = GetInvalidQuests(retainedLinks, mod);
 
-        var voiceTypesWithoutSounds = GetVoiceTypesWithoutSounds(mod);
+        var voiceTypesWithoutSounds = GetVoiceTypesWithoutSounds(retainedLinks, mod);
 
         // Retain dialog without voiced lines?
 
@@ -333,7 +333,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         return invalidQuests;
     }
 
-    private HashSet<IVoiceTypeGetter> GetVoiceTypesWithoutSounds(ISkyrimModGetter mod) {
+    private HashSet<IVoiceTypeGetter> GetVoiceTypesWithoutSounds(HashSet<ILinkIdentifier> retainedLinks, ISkyrimModGetter mod) {
         if (SelectedDataSource is null) return [];
 
         var path = SelectedDataSource.FileSystem.Path;
@@ -352,6 +352,7 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         return mod.EnumerateMajorRecords<IVoiceTypeGetter>()
             .Where(voiceType => !voiceTypesWithSounds.Contains(voiceType))
+            .Where(voiceType => retainedLinks.Contains(new FormLinkIdentifier(voiceType.ToFormLinkInformation())))
             .ToHashSet();
     }
 
