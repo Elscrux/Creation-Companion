@@ -304,5 +304,8 @@
         <Compile Update="Services\Mutagen\References\Cache\Serialization\ReferenceCacheSerializationConfigLink.cs">
           <DependentUpon>IReferenceCacheSerializationConfigLink.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Asset\IModelService.cs">
+          <DependentUpon>NifService.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>
