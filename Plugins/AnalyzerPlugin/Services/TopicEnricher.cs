@@ -29,8 +29,8 @@ public class TopicEnricher(ILinkCacheProvider linkCacheProvider) {
             case IFormLinkGetter:
             case IEnumerable<IFormLinkGetter>:
                 return true;
-            case IEnumerable<object> enumerable:
-                return enumerable.Any(IsEnrichTarget);
+            case IEnumerable enumerable:
+                return enumerable.Cast<object>().Any(IsEnrichTarget);
             default:
                 return false;
         }
@@ -54,32 +54,40 @@ public class TopicEnricher(ILinkCacheProvider linkCacheProvider) {
         _ => item
     };
 
-    private object EnrichItem(object item) => item switch {
-        IFormLinkGetter link => LinkResolver(link),
-        IDictionary dictionary => dictionary.Keys.Cast<object>()
-            .ToDictionary(key => key switch {
-                    IFormLinkGetter keyLink => LinkResolver(keyLink),
-                    _ => EnrichItem(key)
-                },
-                key => {
-                    var value = dictionary[key];
-                    return value switch {
-                        IFormLinkGetter valueLink => LinkResolver(valueLink),
-                        null => null,
-                        _ => EnrichItem(value)
-                    };
-                }),
-        IEnumerable<IFormLinkGetter> enumerable => enumerable
-            .Select(LinkResolver)
-            .ToArray(),
-        IEnumerable<object> enumerable => enumerable
-            .Select(x => x switch {
-                IFormLinkGetter link => LinkResolver(link),
-                _ => EnrichItem(x)
-            })
-            .ToArray(),
-        _ => item
-    };
+    private object EnrichItem(object item) {
+        switch (item) {
+            case IFormLinkGetter link:
+                return LinkResolver(link);
+            case IDictionary dictionary:
+                return dictionary.Keys.Cast<object>()
+                    .ToDictionary(key => key switch {
+                            IFormLinkGetter keyLink => LinkResolver(keyLink),
+                            _ => EnrichItem(key)
+                        },
+                        key => {
+                            var value = dictionary[key];
+                            return value switch {
+                                IFormLinkGetter valueLink => LinkResolver(valueLink),
+                                null => null,
+                                _ => EnrichItem(value)
+                            };
+                        });
+            case IEnumerable<IFormLinkGetter> enumerable:
+                return enumerable.Select(LinkResolver).ToArray();
+            case IEnumerable enumerable:
+                var array = enumerable as object[] ?? enumerable.Cast<object>().ToArray();
+                return array.Any(IsEnrichTarget)
+                    ? array
+                        .Select(x => x switch {
+                            IFormLinkGetter link => LinkResolver(link),
+                            _ => EnrichItem(x)
+                        })
+                        .ToArray()
+                    : item;
+            default:
+                return item;
+        }
+    }
 
     private object LinkResolver(IFormLinkGetter link) {
         if (linkCacheProvider.LinkCache.TryResolveIdentifier(link.FormKey, link.Type, out var editorId)) {
