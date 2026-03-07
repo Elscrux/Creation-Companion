@@ -86,7 +86,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         ModInfoProvider = modInfoProvider;
         SelectedModDetails = modGetterVM;
         ModCreationVM = modCreationVM;
-        PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease);
+        PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease) ?? "Could not retrieve plugins file path";
         MissingPluginsFile = !fileSystem.File.Exists(PluginsFilePath);
         ModSearchText = string.Empty;
 
