@@ -5,6 +5,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="ReactiveUI.SourceGenerators">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Update="Services\LeveledList\FeatureProvider.cs">
         <DependentUpon>IFeatureProvider.cs</DependentUpon>
       </Compile>

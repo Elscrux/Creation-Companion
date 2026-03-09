@@ -1,7 +1,7 @@
 ﻿using AnalyzerPlugin.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace AnalyzerPlugin.Views;
 

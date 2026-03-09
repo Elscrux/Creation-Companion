@@ -16,6 +16,6 @@ public interface IModSelectionVM : ISaveDialogVM {
     IObservable<bool> AnyModsLoaded { get; }
     IObservable<bool> AnyModsActive { get; }
     ReactiveCommand<Unit, Unit> ToggleActive { get; }
-    IBinding LoadOrderItemIsEnabled { get; }
+    BindingBase LoadOrderItemIsEnabled { get; }
     Func<IReactiveSelectable, bool> CanSelect { get; }
 }

@@ -89,7 +89,7 @@
                                 Grid.Row="1"
                                 Opacity="0"/>
 
-                        <TextBlock x:Name="PlaceholderTextBlock"
+                        <TextBlock x:Name="WatermarkBlock"
                                    Grid.Row="1"
                                    Grid.Column="0"
                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"

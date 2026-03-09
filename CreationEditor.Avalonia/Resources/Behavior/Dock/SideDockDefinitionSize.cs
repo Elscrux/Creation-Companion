@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.ViewModels.Docking;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Behavior;
 
@@ -26,7 +27,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
         this.WhenAnyValue(x => x.SideDock,
                 x => x.AssociatedObject)
             .Subscribe(_ => SideDockChanged())
-            .DisposeWith(_disposables);
+            .DisposeWithComposite(_disposables);
     }
 
     protected override void OnDetaching() {
@@ -46,7 +47,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
                     SideDock.ActiveTab.Size = size.Value;
                 }
             })
-            .DisposeWith(_disposables);
+            .DisposeWithComposite(_disposables);
 
         SideDock.WhenAnyValue(
                 x => x.InEditMode,
@@ -63,7 +64,7 @@ public sealed class SideDockDefinitionSize : Behavior<DefinitionBase>, IDisposab
                 var minSize = ReturnIf(SideDock, ActiveTabMinSize, NoActiveTabSize);
                 AssociatedObject.SetValue(GetMinSizeProperty(), minSize);
             })
-            .DisposeWith(_disposables);
+            .DisposeWithComposite(_disposables);
     }
 
     private static double ReturnIf(SideDockVM? vm, double tabActive, double noTabActive) {

@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;

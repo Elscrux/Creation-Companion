@@ -10,7 +10,7 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "Weight",
-                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Weight), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Weight)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.WeightComparer,
                 Width = new DataGridLength(85),
@@ -20,7 +20,7 @@ public sealed class WeightValueExtraColumns : ExtraColumns<IWeightValueGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "Value",
-                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Value), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IWeightValueGetter.Value)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.ValueComparer,
                 Width = new DataGridLength(75),

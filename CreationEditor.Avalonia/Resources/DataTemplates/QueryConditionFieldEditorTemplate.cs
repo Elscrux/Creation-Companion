@@ -150,8 +150,8 @@ public sealed class QueryConditionFieldEditorTemplate : AvaloniaObject, IDataTem
                 [!NumericUpDown.ValueProperty] = binding,
             };
         } else if (valueQuery.TypeClass == typeof(Color)) {
-            control = new ColorPickerButton {
-                [!ColorPickerButton.ColorProperty] = new Binding(valueQuery.Name) {
+            control = new ColorPicker {
+                [!ColorView.ColorProperty] = new Binding(valueQuery.Name) {
                     Converter = new ExtendedFuncValueConverter<Color, global::Avalonia.Media.Color?, object?>(
                         (color, _) => global::Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B),
                         (color, _) => color.HasValue

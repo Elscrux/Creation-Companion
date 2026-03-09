@@ -1,9 +1,9 @@
-﻿using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.TextMate;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;

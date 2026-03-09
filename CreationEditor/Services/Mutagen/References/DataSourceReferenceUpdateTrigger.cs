@@ -48,29 +48,29 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
                     var watcher = dataSourceWatcherProvider.GetWatcher(dataSource);
                     watcher.CreatedFile
                         .Subscribe(referenceController.RegisterCreation)
-                        .DisposeWith(_dataSourceUpdatedDisposables);
+                        .DisposeWithComposite(_dataSourceUpdatedDisposables);
 
                     watcher.DeletedFile
                         .Subscribe(referenceController.RegisterDeletion)
-                        .DisposeWith(_dataSourceUpdatedDisposables);
+                        .DisposeWithComposite(_dataSourceUpdatedDisposables);
 
                     watcher.RenamedFile
                         .Subscribe(x => {
                             referenceController.RegisterDeletion(x.Old);
                             referenceController.RegisterCreation(x.New);
                         })
-                        .DisposeWith(_dataSourceUpdatedDisposables);
+                        .DisposeWithComposite(_dataSourceUpdatedDisposables);
 
                     watcher.ChangedFile
                         .Subscribe(link => {
                             var registerUpdate = referenceController.RegisterUpdate(link);
                             registerUpdate(link);
                         })
-                        .DisposeWith(_dataSourceUpdatedDisposables);
+                        .DisposeWithComposite(_dataSourceUpdatedDisposables);
 
                 }
             })
-            .DisposeWith(disposables);
+            .DisposeWithComposite(disposables);
     }
 
     public void Dispose() => _tokenSource.Dispose();

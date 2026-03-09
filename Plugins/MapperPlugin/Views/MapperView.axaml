@@ -185,7 +185,8 @@
                         <controls:CommandBarButton.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox x:Name="MapName" Watermark="Enter a name"/>
+                                    <TextBox x:Name="MapName"
+                                             Watermark="Enter a name"/>
                                     <Button Content="Save"
                                             Command="{Binding SaveMap}"
                                             CommandParameter="{Binding #MapName.Text}"/>
@@ -345,7 +346,7 @@
 
                     <DataGridTemplateColumn Header="Color">
                         <DataTemplate x:DataType="viewModels:MarkingMapping">
-                            <controls:ColorPickerButton Color="{Binding Color}"/>
+                            <ColorPicker Color="{Binding Color}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn>
 

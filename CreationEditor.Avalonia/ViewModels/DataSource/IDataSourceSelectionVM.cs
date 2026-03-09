@@ -12,7 +12,7 @@ namespace CreationEditor.Avalonia.ViewModels.DataSource;
 public interface IDataSourceSelectionVM : ISaveDialogVM {
     ObservableCollectionExtended<DataSourceItem> DataSources { get; }
     Func<IReactiveSelectable, bool> CanSelect { get; }
-    IBinding DataSourceIsEnabled { get; }
+    BindingBase DataSourceIsEnabled { get; }
     string? AddedDataSourcePath { get; set; }
     ReactiveCommand<IList, Unit> RemoveDataSource { get; }
     ReactiveCommand<Unit, Unit> RefreshDataSources { get; }

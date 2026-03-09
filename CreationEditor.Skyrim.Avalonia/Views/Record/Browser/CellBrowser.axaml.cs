@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Browser;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Browser;

@@ -10,7 +10,7 @@ public sealed class NamedRequiredExtraColumns : ExtraColumns<INamedRequiredGette
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "Name",
-                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(INamedRequiredGetter.Name), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(INamedRequiredGetter.Name)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.NamedRequiredComparer,
                 Width = new DataGridLength(100),

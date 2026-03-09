@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Mod;
 namespace CreationEditor.Avalonia.Views.Mod;

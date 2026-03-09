@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using FluentAvalonia.UI.Controls;
 using MapperPlugin.ViewModels;

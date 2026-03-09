@@ -5,6 +5,7 @@ using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
@@ -28,7 +29,7 @@ public sealed class RecordEditorController : IRecordEditorController, IDisposabl
 
         _dockingManagerService.Closed
             .Subscribe(OnClosed)
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
     }
 
     public bool AnyEditorsOpen() => _openRecordEditors.Count > 0;

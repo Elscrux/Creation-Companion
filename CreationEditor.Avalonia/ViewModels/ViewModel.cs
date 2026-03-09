@@ -15,7 +15,7 @@ public abstract class ViewModel : ReactiveObject, IActivatableViewModel, IDispos
         this.WhenActivated(disposable => {
             Disposable
                 .Create(() => ActivatedDisposable.Clear())
-                .DisposeWith(disposable);
+                .DisposeWithComposite(disposable);
 
             WhenActivated();
         });

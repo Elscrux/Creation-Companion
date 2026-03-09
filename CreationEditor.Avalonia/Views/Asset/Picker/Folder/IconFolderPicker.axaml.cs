@@ -37,7 +37,11 @@ public class IconFolderPicker : AFolderPicker {
     private void Drop(object? sender, DragEventArgs e) {
         RemoveAdorner(sender);
 
-        FolderPath = e.Data.Get("Folder") as string;
+        // Get drag data
+        var file = e.DataTransfer.TryGetFile();
+        if (file is null) return;
+
+        FolderPath = file.Path.AbsolutePath;
     }
 
     private static void DragEnter(object? sender, DragEventArgs e) {

@@ -33,13 +33,13 @@ public static class ObservableExtension {
             return wrapped(obs.Do(_ => isWorking.OnNext(true)))
                 .Do(_ => isWorking.OnNext(false));
         }
-        public IObservable<T> ObserveOnGui() => obs.ObserveOn(RxApp.MainThreadScheduler);
-        public IObservable<T> ObserveOnTaskpool() => obs.ObserveOn(RxApp.TaskpoolScheduler);
-        public IObservable<T> ThrottleShort() => obs.Throttle(TimeSpan.FromMilliseconds(100), RxApp.MainThreadScheduler);
-        public IObservable<T> ThrottleMedium() => obs.Throttle(TimeSpan.FromMilliseconds(300), RxApp.MainThreadScheduler);
-        public IObservable<T> ThrottleLong() => obs.Throttle(TimeSpan.FromMilliseconds(700), RxApp.MainThreadScheduler);
+        public IObservable<T> ObserveOnGui() => obs.ObserveOn(RxSchedulers.MainThreadScheduler);
+        public IObservable<T> ObserveOnTaskpool() => obs.ObserveOn(RxSchedulers.TaskpoolScheduler);
+        public IObservable<T> ThrottleShort() => obs.Throttle(TimeSpan.FromMilliseconds(100), RxSchedulers.MainThreadScheduler);
+        public IObservable<T> ThrottleMedium() => obs.Throttle(TimeSpan.FromMilliseconds(300), RxSchedulers.MainThreadScheduler);
+        public IObservable<T> ThrottleLong() => obs.Throttle(TimeSpan.FromMilliseconds(700), RxSchedulers.MainThreadScheduler);
         public IObservable<T> ThrottleVeryLong() =>
-            obs.Throttle(TimeSpan.FromMilliseconds(1200), RxApp.MainThreadScheduler);
+            obs.Throttle(TimeSpan.FromMilliseconds(1200), RxSchedulers.MainThreadScheduler);
         public IObservable<T> UpdateWhenCollectionChanges(INotifyCollectionChanged collection) {
             return obs.CombineLatest(collection.WhenCollectionChanges(), (t, _) => t);
         }

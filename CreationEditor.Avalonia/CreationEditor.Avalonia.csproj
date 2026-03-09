@@ -10,10 +10,8 @@
         <PackageReference Include="Avalonia.AvaloniaEdit" />
         <PackageReference Include="Avalonia.Controls.DataGrid" />
         <PackageReference Include="Avalonia.Controls.PanAndZoom" />
-        <PackageReference Include="Avalonia.Controls.TreeDataGrid" />
         <PackageReference Include="Avalonia.HtmlRenderer" />
         <PackageReference Include="Avalonia.Desktop" />
-        <PackageReference Include="Avalonia.ReactiveUI" />
         <PackageReference Include="Avalonia.Themes.Fluent" />
         <PackageReference Include="AvaloniaEdit.TextMate" />
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
@@ -23,10 +21,16 @@
         <PackageReference Include="MessageBox.Avalonia" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
-        <PackageReference Include="ReactiveUI.SourceGenerators" />
+        <PackageReference Include="ReactiveUI.Avalonia" />
+        <PackageReference Include="ReactiveUI.Avalonia.Autofac" />
+        <PackageReference Include="ReactiveUI.SourceGenerators">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="ReactiveUI.Validation" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
+        <PackageReference Include="TreeDataGrid" />
         <PackageReference Include="Xaml.Behaviors.Avalonia" />
     </ItemGroup>
 

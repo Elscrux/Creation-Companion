@@ -10,18 +10,18 @@ public sealed class ObservableExceptionHandler(ILogger logger) : IObserver<Excep
 
         logger.Here().Error("Error occured: {Message}", value.ToString());
 
-        // RxApp.MainThreadScheduler.Schedule(() => { throw value; });
+        // RxSchedulers.MainThreadScheduler.Schedule(() => { throw value; });
     }
 
     public void OnError(Exception error) {
         if (Debugger.IsAttached) Debugger.Break();
 
-        RxApp.MainThreadScheduler.Schedule(() => throw error);
+        RxSchedulers.MainThreadScheduler.Schedule(() => throw error);
     }
 
     public void OnCompleted() {
         if (Debugger.IsAttached) Debugger.Break();
 
-        RxApp.MainThreadScheduler.Schedule(() => throw new NotImplementedException());
+        RxSchedulers.MainThreadScheduler.Schedule(() => throw new NotImplementedException());
     }
 }

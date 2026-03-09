@@ -21,6 +21,24 @@ public static class TypeExtension {
                     return string.Equals(p.Name[(lastIndexOf + 1)..], name, StringComparison.Ordinal);
                 });
         }
+
+        /// <summary>
+        /// Custom get field method that supports fields that explicitly implement an interface and thus have
+        /// a name like "Interface.Field" not just "Field" which causes the default GetField method to fail.
+        /// </summary>
+        /// <param name="name">Name of the field</param>
+        /// <returns>Field if found, otherwise null</returns>
+        public FieldInfo? GetFieldCustom(string name) {
+            return type
+                .GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .FirstOrDefault(p => {
+                    var lastIndexOf = p.Name.AsSpan().LastIndexOf('.');
+                    if (lastIndexOf == -1) return p.Name == name;
+
+                    return string.Equals(p.Name[(lastIndexOf + 1)..], name, StringComparison.Ordinal);
+                });
+        }
+
         /// <summary>
         /// Returns it the calling type inherits from any of the types in the parameter enumerable.
         /// Any 1 : N

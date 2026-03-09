@@ -36,7 +36,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
     public Func<object, bool> CanRemoveDataSource { get; }
     public Func<IReactiveSelectable, bool> CanSelect => selectable => selectable is DataSourceItem { DataSource.IsReadOnly: false };
 
-    public IBinding DataSourceIsEnabled => new Binding($"!{nameof(DataSourceItem.DataSource)}.{nameof(DataSourceItem.DataSource.IsReadOnly)}");
+    public BindingBase DataSourceIsEnabled => new Binding($"!{nameof(DataSourceItem.DataSource)}.{nameof(DataSourceItem.DataSource.IsReadOnly)}");
 
     [Reactive] public partial string? AddedDataSourcePath { get; set; }
     public ReactiveCommand<IList, Unit> RemoveDataSource { get; }
@@ -71,7 +71,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
                             if (item is null) return null;
 
                             return new CheckBox {
-                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(DataSourceItem.IsSelected), BindingMode.TwoWay),
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(DataSourceItem.IsSelected)) { Mode = BindingMode.TwoWay },
                                 VerticalAlignment = VerticalAlignment.Center,
                                 IsEnabled = !item.DataSource.IsReadOnly
                             };

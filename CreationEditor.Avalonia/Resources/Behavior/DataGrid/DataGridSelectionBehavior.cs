@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -13,6 +14,7 @@ using Avalonia.Styling;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
+using Noggog;
 using ReactiveUI;
 using Action = System.Action;
 namespace CreationEditor.Avalonia.Behavior;
@@ -24,8 +26,8 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     public static readonly StyledProperty<Func<IReactiveSelectable, bool>> SelectionGuardProperty
         = AvaloniaProperty.Register<DataGrid, Func<IReactiveSelectable, bool>>(nameof(SelectionGuard), _ => true);
 
-    public static readonly StyledProperty<IBinding?> ItemIsEnabledProperty
-        = AvaloniaProperty.Register<DataGrid, IBinding?>(nameof(ItemIsEnabled));
+    public static readonly StyledProperty<BindingBase?> ItemIsEnabledProperty
+        = AvaloniaProperty.Register<DataGrid, BindingBase?>(nameof(ItemIsEnabled));
 
     public static readonly StyledProperty<bool> MultiSelectProperty
         = AvaloniaProperty.Register<DataGridSelectionBehavior, bool>(nameof(MultiSelect), true);
@@ -54,7 +56,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         set => SetValue(SelectionGuardProperty, value);
     }
 
-    public IBinding? ItemIsEnabled {
+    public BindingBase? ItemIsEnabled {
         get => GetValue(ItemIsEnabledProperty);
         set => SetValue(ItemIsEnabledProperty, value);
     }
@@ -120,7 +122,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
                     .ToObservableChangeSet()
                     .AutoRefresh(selectable => selectable.IsSelected)
                     .Subscribe(OnSelectionToggled)
-                    .DisposeWith(_visualsAttachedDisposable);
+                    .DisposeWithComposite(_visualsAttachedDisposable);
             }
         }
     }

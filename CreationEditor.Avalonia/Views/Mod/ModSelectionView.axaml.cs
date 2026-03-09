@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.Views.Dialog;
 using MsBox.Avalonia;

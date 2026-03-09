@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Faction;
 using Mutagen.Bethesda.Skyrim;

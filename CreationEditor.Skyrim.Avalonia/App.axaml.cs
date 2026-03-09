@@ -6,22 +6,18 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Avalonia.Services.Docking;
-using CreationEditor.Avalonia.Services.Exceptions;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Modules;
-using HotAvalonia;
 using Mutagen.Bethesda.Autofac;
 using Noggog;
-using ReactiveUI;
 using Serilog;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public class App : Application {
     public override void Initialize() {
-        this.EnableHotReload();
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -42,9 +38,6 @@ public class App : Application {
             builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
 
             var container = builder.Build();
-
-            // Init ReactiveUI
-            RxApp.DefaultExceptionHandler = new ObservableExceptionHandler(container.Resolve<ILogger>());
 
             // Do startup
             var lifecycleStartup = container.Resolve<ILifecycleStartup>();

@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.ViewModels.Reference;
 namespace CreationEditor.Avalonia.Views.Reference;

@@ -26,18 +26,14 @@ public sealed class DockDragBehavior : Behavior<Control> {
     private static async Task Drag(object? sender, object? identifier, PointerEventArgs e) {
         if (sender is not Control { DataContext: IDockedItem dockedItem }) return;
 
-        var dataObject = new DataObject();
-        dataObject.Set(nameof(DockDragData), new DockDragData { Item = dockedItem });
+        var dataTransfer = IDataTransfer.Create(new DockDragData { Item = dockedItem });
 
         SetDragging(true);
-        var result = await DragDrop.DoDragDrop(e, dataObject, DragDropEffects.Move);
+        var result = await DragDrop.DoDragDropAsync(e, dataTransfer, DragDropEffects.Move);
         SetDragging(false);
 
-        if (result == DragDropEffects.None) {
-            var data = dataObject.Get(nameof(DockDragData));
-            if (data is DockDragData dragData) {
-                dragData.Preview?.HidePreview();
-            }
+        if (result == DragDropEffects.None && dataTransfer.TryGet<DockDragData>(out var data)) { 
+            data.Preview?.HidePreview();
         }
 
         void SetDragging(bool state) {

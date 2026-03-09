@@ -13,7 +13,7 @@ public class ActivatableTemplatedControl : TemplatedControl, IActivatableView, I
         _activationDisposable = this.WhenActivated(disposables => {
             Disposable
                 .Create(() => ActivatedDisposable.Clear())
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
 
             WhenActivated();
         });

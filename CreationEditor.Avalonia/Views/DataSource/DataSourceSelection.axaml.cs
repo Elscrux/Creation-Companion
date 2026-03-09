@@ -2,7 +2,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Input;
-using Avalonia.ReactiveUI;
+using Avalonia.Xaml.Interactions.DragAndDrop;
+using CreationEditor.Avalonia.Behavior;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Models.DataSource;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Services.DataSource;
@@ -23,7 +25,7 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
     private void TreeDataGrid_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
         e.Inner.DragEffects = DragDropEffects.Move;
 
-        if (e.TargetRow.Model is not DataSourceItem
+        if (e.TargetRow?.Model is not DataSourceItem
          || e.Position is not (TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before)) {
             e.Inner.DragEffects = DragDropEffects.None;
         }
@@ -35,8 +37,14 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
         // Never allow the tree to drop things, changes are handled by file system watchers
         e.Inner.DragEffects = DragDropEffects.None;
 
-        if (e.TargetRow.Model is not DataSourceItem item) return;
-        if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
+        if (e.TargetRow?.Model is not DataSourceItem item) return;
+
+        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
+        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
+        if (dataTransferItem is null) return;
+
+        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
+        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
 
         var indexOf = ViewModel.DataSources.IndexOf(item);
 

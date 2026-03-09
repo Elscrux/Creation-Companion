@@ -9,7 +9,7 @@ public sealed class TypeExtraColumns : IUntypedExtraColumns {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "Type",
-                Binding = new Binding(nameof(IReferencedRecord.RecordTypeName), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.RecordTypeName)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.TypeComparer,
             },

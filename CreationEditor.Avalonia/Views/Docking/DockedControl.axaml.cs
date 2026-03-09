@@ -6,7 +6,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;

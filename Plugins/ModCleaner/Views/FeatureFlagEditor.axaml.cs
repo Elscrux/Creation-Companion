@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using ModCleaner.ViewModels;
 namespace ModCleaner.Views;
 

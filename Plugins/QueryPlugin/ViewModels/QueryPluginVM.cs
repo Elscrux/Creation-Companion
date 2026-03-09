@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;

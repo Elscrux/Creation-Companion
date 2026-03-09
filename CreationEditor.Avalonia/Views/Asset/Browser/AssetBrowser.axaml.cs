@@ -8,7 +8,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using CreationEditor.Avalonia.Attached.DragDrop;
@@ -108,53 +108,88 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     private void AssetTree_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
         TrySetDragData(e);
 
-        e.Inner.DragEffects = DragDropEffects.Move;
+        e.Inner.DragEffects = CanDrop(e)
+            ? DragDropEffects.Move
+            : DragDropEffects.None;
+    }
 
-        if (e.TargetRow.Model is DataSourceDirectoryLink directoryLink
-         && e.Position is not (TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before)) {
-            if (e.Inner.Data.Get(DragInfo.DataFormat) is DragInfo dragInfo) {
-                var assets = dragInfo.Indexes
-                    .Select(indexPath => {
-                        var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
-                        var row = dragInfo.Source.Rows[rowIndex];
-                        return row.Model;
-                    })
-                    .OfType<DataSourceDirectoryLink>();
+    private static bool CanDrop(TreeDataGridRowDragEventArgs e) {
+        if (e.TargetRow?.Model is not DataSourceDirectoryLink directoryLink) return false;
+        if (e.Position is TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before) return false;
 
-                if (assets.Any(asset => asset == directoryLink || asset.ParentDirectory == directoryLink)) {
-                    e.Inner.DragEffects = DragDropEffects.None;
-                }
-            }
-        } else {
-            e.Inner.DragEffects = DragDropEffects.None;
-        }
+        // Can't drop on files or in empty space
+        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
+        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
+        if (dataTransferItem is null) return false;
+
+        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return false;
+        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return false;
+
+        var dragLinks = dragInfo.Indexes
+            .Select(indexPath => {
+                var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
+                var row = dragInfo.Source.Rows[rowIndex];
+                return row.Model;
+            })
+            .OfType<IDataSourceLink>();
+
+        if (!dragLinks.Any(dragLink => (dragLink) switch {
+            DataSourceDirectoryLink dragDirectoryLink =>
+                // Can't drop a directory into
+                // Itself
+                dragDirectoryLink.Equals(directoryLink)
+                // Another directory it contains
+             || dragDirectoryLink.Contains(directoryLink)
+                // Its parent directory
+             || directoryLink.Equals(dragDirectoryLink.ParentDirectory),
+            DataSourceFileLink dragFileLink =>
+                // Can't drop a file into the same directory it's already in
+                directoryLink.Equals(dragFileLink.ParentDirectory),
+            _ => false
+        })) return true;
+
+        return false;
     }
 
     private void TrySetDragData(TreeDataGridRowDragEventArgs e) {
+        if (ViewModel is null) return;
+        if (e.TargetRow?.DataContext is not IDataSourceLink dataSourceLink) return;
+
+        var assetLink = ViewModel.GetAssetLink(dataSourceLink);
+        if (assetLink is null) return;
+
+        if (e.Inner.DataTransfer.Items.Any(i => i.Formats.Contains(ContextDropBehaviorBase.ContextDataTransferFormat))) return;
+
         // Set drag data on first drag over - needed to integrate into the editor wide drag and drop system
-        var dragEventArgs = e.Inner;
-        if (e.TargetRow.DataContext is IDataSourceLink dataSourceLink
-         && dragEventArgs.Data is DataObject dataObject
-         && !dragEventArgs.Data.Contains(ContextDropBehaviorBase.DataFormat)
-         && ViewModel is not null) {
-            var assetLink = ViewModel.GetAssetLink(dataSourceLink);
-            if (assetLink is not null) {
-                dataObject.Set(ContextDropBehaviorBase.DataFormat,
-                    new DragContext {
-                        Data = {
-                            { AssetLinkDragDrop.Data, new AssetDataSourceLink(dataSourceLink, assetLink) }
-                        }
-                    });
-            }
-        }
+        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
+        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
+        if (dataTransferItem is null) return;
+
+        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
+        if (dataObject.Contains(ContextDropBehaviorBase.ContextDataTransferFormat.Identifier)) return;
+
+        dataObject.Set(ContextDropBehaviorBase.ContextDataTransferFormat.Identifier,
+            new DragContext {
+                Data = {
+                    { AssetLinkDragDrop.Data, new AssetDataSourceLink(dataSourceLink, assetLink) }
+                }
+            });
     }
 
     private void AssetTree_OnRowDrop(object? sender, TreeDataGridRowDragEventArgs e) {
-        // Never allow the tree to drop things, changes are handled by file system watchers
+        // Never update the tree manually, changes are handled by file system watchers
         e.Inner.DragEffects = DragDropEffects.None;
 
-        if (e.TargetRow.Model is not DataSourceDirectoryLink directoryLink) return;
-        if (e.Inner.Data.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
+        if (!CanDrop(e)) return;
+
+        if (e.TargetRow?.Model is not DataSourceDirectoryLink directoryLink) return;
+
+        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
+        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
+        if (dataTransferItem is null) return;
+
+        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
+        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
 
         ViewModel?.Drop(directoryLink, dragInfo);
     }

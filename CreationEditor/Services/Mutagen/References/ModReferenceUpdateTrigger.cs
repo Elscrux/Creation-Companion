@@ -38,7 +38,7 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
                         editorEnvironment.LinkCache.ListedOrder.Count,
                         e.Message));
             })
-            .DisposeWith(disposables);
+            .DisposeWithComposite(disposables);
     }
 
     public void Dispose() => _tokenSource.Dispose();

@@ -1,7 +1,7 @@
-﻿using System.Reactive.Disposables;
-using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Query;
 using CreationEditor.Services.Query.From;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Query;
 
@@ -17,7 +17,7 @@ public partial class QueryView : ReactiveUserControl<QueryVM> {
 
                     ViewModel.QueryRunner.QueryFrom.SelectedItem = queryFromItem;
                 })
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
         });
     }
 

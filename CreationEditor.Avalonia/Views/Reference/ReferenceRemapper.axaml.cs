@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Platform.Storage;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Attached.DragDrop;
@@ -86,7 +86,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                                 dialog.ShowAsync();
                             }
                         })
-                        .DisposeWith(disposables);
+                        .DisposeWithComposite(disposables);
                 });
         });
     }

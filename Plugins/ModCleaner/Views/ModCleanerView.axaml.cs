@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Attached;
 using ModCleaner.ViewModels;
 namespace ModCleaner.Views;

@@ -9,7 +9,7 @@ public class PlacedExtraColumns : ExtraColumns<IPlacedGetter> {
     public override IEnumerable<ExtraColumn> CreateColumns() {
         yield return new ExtraColumn(new DataGridTextColumn {
                 Header = "Base",
-                Binding = new Binding(nameof(ReferencedPlacedRecord.Base) + '.' + nameof(ReferencedPlacedRecord.Base.EditorID), BindingMode.OneWay),
+                Binding = new Binding(nameof(ReferencedPlacedRecord.Base) + '.' + nameof(ReferencedPlacedRecord.Base.EditorID)),
                 CanUserSort = true,
                 CustomSortComparer = SkyrimRecordComparers.BaseComparer,
                 Width = new DataGridLength(200),

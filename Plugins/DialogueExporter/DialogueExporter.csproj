@@ -4,6 +4,13 @@
       <ProjectReference Include="..\..\CreationEditor.Skyrim.Avalonia\CreationEditor.Skyrim.Avalonia.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="ReactiveUI.SourceGenerators">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
     <Target Name="CopyPlugin" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins"/>
     </Target>

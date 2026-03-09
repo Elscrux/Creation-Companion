@@ -1,11 +1,11 @@
-﻿using System.Reactive.Disposables;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
+using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views.Record;
 
@@ -16,19 +16,19 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
         this.WhenActivated(disposables => {
             this.WhenAnyValue(list => list.ViewModel!.SelectedRecord)
                 .Subscribe(ScrollToItem)
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
 
             this.WhenAnyValue(list => list.ViewModel!.Records)
                 .Subscribe(records => RecordGrid.SelectedItem = records?.OfType<IReferencedRecord>().FirstOrDefault())
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
 
             this.WhenAnyValue(list => list.ViewModel!.Columns)
                 .SyncTo(RecordGrid.Columns)
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
 
             RecordGrid.Columns.ObserveCollectionChanges()
                 .Subscribe(_ => Sort())
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
         });
     }
 

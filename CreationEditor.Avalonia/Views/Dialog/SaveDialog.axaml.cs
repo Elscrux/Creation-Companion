@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Dialog;
 namespace CreationEditor.Avalonia.Views.Dialog;
 

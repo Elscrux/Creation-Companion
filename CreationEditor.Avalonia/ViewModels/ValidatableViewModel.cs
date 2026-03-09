@@ -16,7 +16,7 @@ public abstract class ValidatableViewModel : ReactiveValidationObject, IActivata
         this.WhenActivated(disposable => {
             Disposable
                 .Create(() => ActivatedDisposable.Clear())
-                .DisposeWith(disposable);
+                .DisposeWithComposite(disposable);
 
             WhenActivated();
         });

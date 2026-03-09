@@ -12,7 +12,7 @@ public abstract class ActivatableUserControl : UserControl, IActivatableView, ID
         _activationDisposable = this.WhenActivated(disposables => {
             Disposable
                 .Create(() => ActivatedDisposable.Clear())
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
 
             WhenActivated();
         });

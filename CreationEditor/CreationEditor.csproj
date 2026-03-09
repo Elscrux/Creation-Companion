@@ -12,7 +12,10 @@
         <PackageReference Include="QuickGraph" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
-        <PackageReference Include="ReactiveUI.SourceGenerators" />
+        <PackageReference Include="ReactiveUI.SourceGenerators">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Serilog" />
         <PackageReference Include="System.IO.Hashing" />
         <PackageReference Include="System.Linq.Async" />
@@ -307,5 +310,11 @@
         <Compile Update="Services\Asset\IModelService.cs">
           <DependentUpon>NifService.cs</DependentUpon>
         </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Avalonia.Base">
+        <HintPath>..\CreationEditor.Skyrim.Avalonia\bin\Debug\net10.0\Avalonia.Base.dll</HintPath>
+      </Reference>
     </ItemGroup>
 </Project>

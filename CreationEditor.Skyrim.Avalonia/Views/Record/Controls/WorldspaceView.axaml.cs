@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using WorldspaceViewVM = CreationEditor.Skyrim.Avalonia.ViewModels.Record.Controls.WorldspaceViewVM;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Controls;
 

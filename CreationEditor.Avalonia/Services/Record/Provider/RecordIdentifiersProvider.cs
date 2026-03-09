@@ -49,7 +49,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
                             var formKey = identifier.FormKey;
                             _recordTypes.Add(identifier.Type);
                             if (x.LinkCache.TryResolve(formKey, identifier.Type, out var record)) {
-                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
 
                                 updater.AddOrUpdate(referencedRecord);
                             } else {

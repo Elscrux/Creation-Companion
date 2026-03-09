@@ -71,17 +71,17 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
     }
 
     private string GetNewWatermark(IReadOnlyList<ModKey> loadOrder) {
-        // Assign new watermark if the name is already taken
-        var watermark = WatermarkBase;
-        if (NameIsFree(watermark, loadOrder)) return watermark;
+        // Assign new placeholder text if the name is already taken
+        var Watermark = WatermarkBase;
+        if (NameIsFree(Watermark, loadOrder)) return Watermark;
 
         var counter = 2;
-        while (!NameIsFree(watermark, loadOrder)) {
-            watermark = WatermarkName(counter);
+        while (!NameIsFree(Watermark, loadOrder)) {
+            Watermark = WatermarkName(counter);
             counter++;
         }
 
-        return watermark;
+        return Watermark;
     }
 
     private bool NameIsFree(string? modName, IEnumerable<ModKey> loadOrder) {

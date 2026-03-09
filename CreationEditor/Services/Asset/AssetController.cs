@@ -130,7 +130,7 @@ public sealed class AssetController(
 
         if (directoryPath is not null) {
             try {
-                var newPath = origin.FileSystem.Path.Combine(directoryPath, origin.Name);
+                var newPath = origin.FileSystem.Path.Combine(directoryPath, newName);
                 switch (origin) {
                     case DataSourceFileLink fileLink: {
                         var destinationFileLink = new DataSourceFileLink(fileLink.DataSource, newPath);
@@ -328,10 +328,10 @@ public sealed class AssetController(
     }
 
     public void Redo() {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }
 
     public void Undo() {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }
 }

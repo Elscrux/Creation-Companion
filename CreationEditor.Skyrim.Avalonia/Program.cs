@@ -1,8 +1,13 @@
 ﻿using System.IO.Abstractions;
+using Autofac;
 using Avalonia;
-using Avalonia.ReactiveUI;
+using CreationEditor.Avalonia.Modules;
+using CreationEditor.Avalonia.Services.Exceptions;
 using CreationEditor.Services.Plugin;
+using HotAvalonia;
 using Noggog;
+using ReactiveUI.Avalonia.Splat;
+using ILogger = Serilog.ILogger;
 namespace CreationEditor.Skyrim.Avalonia;
 
 internal static class Program {
@@ -52,8 +57,19 @@ internal static class Program {
     // Avalonia configuration, don't remove; also used by visual designer.
     private static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
+            .UseHotReload()
             .UsePlatformDetect()
             .WithDeveloperTools()
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUIWithAutofac(builder => {
+                    // Register dependencies in the container
+                },
+                withReactiveUIBuilder: rxBuilder => {
+                    var builder = new ContainerBuilder();
+                    builder.RegisterInstance(new FileSystem()).As<IFileSystem>().SingleInstance();
+                    builder.RegisterModule<LoggingModule>();
+                    var container = builder.Build();
+                    var logger = container.Resolve<ILogger>();
+                    rxBuilder.WithExceptionHandler(new ObservableExceptionHandler(logger));
+                });
 }

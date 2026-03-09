@@ -167,7 +167,7 @@
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Color">
                                 <DataTemplate DataType="viewModels:PresetVM">
-                                    <controls:ColorPickerButton
+                                    <ColorPicker
                                         Color="{Binding Color}"
                                         IsAlphaEnabled="False"/>
                                 </DataTemplate>

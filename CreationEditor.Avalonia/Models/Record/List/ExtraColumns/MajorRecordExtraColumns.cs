@@ -12,7 +12,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "EditorID",
-                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.EditorID), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.EditorID)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.EditorIDComparer,
                 Width = new DataGridLength(200),
@@ -22,7 +22,7 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
         yield return new ExtraColumn(
             new DataGridTextColumn {
                 Header = "FormKey",
-                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.FormKey), BindingMode.OneWay),
+                Binding = new Binding(nameof(IReferencedRecord.Record) + '.' + nameof(IReferencedRecord.Record.FormKey)),
                 CanUserSort = true,
                 CustomSortComparer = ReferencedRecordComparers.FormKeyComparer,
                 Width = new DataGridLength(100),
@@ -33,7 +33,8 @@ public class MajorRecordExtraColumns : ExtraColumns<IMajorRecordGetter> {
             new DataGridTemplateColumn {
                 Header = "References",
                 CellTemplate = IUntypedExtraColumns.GetTextCellTemplate(r =>
-                    r.ReferenceCount
+                    // todo remove cast when Avalonia upgraded to v12
+                    (BindingBase) r.ReferenceCount
                         .Select(x => x.ToString())
                         .ToBinding()),
                 CanUserSort = true,

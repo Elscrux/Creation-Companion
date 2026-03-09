@@ -9,6 +9,7 @@
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
+        <HotAvaloniaMode>Aggressive</HotAvaloniaMode>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,10 +17,15 @@
         <PackageReference Include="DocumentFormat.OpenXml" />
         <PackageReference Include="Mutagen.Bethesda.Autofac" />
         <PackageReference Include="ReactiveUI" />
-        <PackageReference Include="ReactiveUI.SourceGenerators" />
+        <PackageReference Include="ReactiveUI.SourceGenerators">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="Avalonia.Markup.Xaml.Loader" />
-        <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" />
-        <PackageReference Include="HotAvalonia.Extensions" />
+        <PackageReference Include="HotAvalonia"
+                          Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))"
+                          PrivateAssets="All"
+                          Publish="True"/>
     </ItemGroup>
 
     <ItemGroup>

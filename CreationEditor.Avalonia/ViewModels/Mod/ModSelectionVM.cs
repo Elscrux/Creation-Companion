@@ -63,7 +63,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     private readonly Subject<Unit> _refreshListings = new();
 
     public ReactiveCommand<Unit, Unit> ToggleActive { get; }
-    public IBinding LoadOrderItemIsEnabled { get; } = new Binding(nameof(LoadOrderModItem.MastersValid));
+    public BindingBase LoadOrderItemIsEnabled { get; } = new Binding(nameof(LoadOrderModItem.MastersValid));
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
 
     public ModSelectionVM(

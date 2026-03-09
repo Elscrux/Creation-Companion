@@ -41,7 +41,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                         foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
                             if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
 
-                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -66,7 +66,7 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                     if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) return;
 
                     // Create new entry
-                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWithComposite(_referencesDisposable);
                     listRecord = outListRecord;
                 }
 

@@ -91,7 +91,9 @@
                         <controls:CommandBarButton.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox x:Name="MapName" Watermark="Enter a name"/>
+                                    <TextBox
+                                        x:Name="MapName"
+                                        Watermark="Enter a name"/>
                                 </StackPanel>
                             </Flyout>
                         </controls:CommandBarButton.Flyout>

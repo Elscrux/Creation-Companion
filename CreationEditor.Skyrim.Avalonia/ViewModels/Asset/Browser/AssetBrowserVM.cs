@@ -61,27 +61,29 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public IAssetIconService AssetIconService { get; }
 
     [Reactive] public partial IDataSource DataSource { get; set; }
-    [Reactive] public partial string SearchText { get; set; }
-    [Reactive] public partial bool ShowEmptyDirectories { get; set; }
-    [Reactive] public partial bool ShowIgnoredDirectories { get; set; }
-    [Reactive] public partial bool ShowReferencedFiles { get; set; }
-    [Reactive] public partial bool ShowOrphanedFiles { get; set; }
-    [Reactive] public partial bool ShowOtherFiles { get; set; }
-    [Reactive] public partial bool ShowTextures { get; set; }
-    [Reactive] public partial bool ShowModels { get; set; }
-    [Reactive] public partial bool ShowScriptSources { get; set; }
-    [Reactive] public partial bool ShowScripts { get; set; }
-    [Reactive] public partial bool ShowSounds { get; set; }
-    [Reactive] public partial bool ShowMusic { get; set; }
-    [Reactive] public partial bool ShowBehaviors { get; set; }
-    [Reactive] public partial bool ShowBodyTextures { get; set; }
-    [Reactive] public partial bool ShowDeformedModels { get; set; }
-    [Reactive] public partial bool ShowInterfaces { get; set; }
-    [Reactive] public partial bool ShowSeq { get; set; }
-    [Reactive] public partial bool ShowTranslations { get; set; }
+    [Reactive] public partial string SearchText { get; set; } = string.Empty;
+    [Reactive] public partial bool ShowEmptyDirectories { get; set; } = false;
+    [Reactive] public partial bool ShowIgnoredDirectories { get; set; } = false;
 
-    [Reactive] public partial bool IsBusyLoadingAssets { get; set; }
-    [Reactive] public partial bool IsBusyLoadingReferences { get; set; }
+    [Reactive] public partial bool ShowReferencedFiles { get; set; } = true;
+    [Reactive] public partial bool ShowOrphanedFiles { get; set; } = true;
+    [Reactive] public partial bool ShowOtherFiles { get; set; } = true;
+
+    [Reactive] public partial bool ShowTextures { get; set; } = true;
+    [Reactive] public partial bool ShowModels { get; set; } = true;
+    [Reactive] public partial bool ShowScriptSources { get; set; } = true;
+    [Reactive] public partial bool ShowScripts { get; set; } = true;
+    [Reactive] public partial bool ShowSounds { get; set; } = true;
+    [Reactive] public partial bool ShowMusic { get; set; } = true;
+    [Reactive] public partial bool ShowBehaviors { get; set; } = true;
+    [Reactive] public partial bool ShowBodyTextures { get; set; } = true;
+    [Reactive] public partial bool ShowDeformedModels { get; set; } = true;
+    [Reactive] public partial bool ShowInterfaces { get; set; } = true;
+    [Reactive] public partial bool ShowSeq { get; set; } = true;
+    [Reactive] public partial bool ShowTranslations { get; set; } = true;
+
+    [Reactive] public partial bool IsBusyLoadingAssets { get; set; } = true;
+    [Reactive] public partial bool IsBusyLoadingReferences { get; set; } = true;
 
     public ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
 
@@ -112,7 +114,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter) {
         DataSourceService = dataSourceService;
-        SearchText = "";
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _menuItemProvider = menuItemProvider;
         _referenceService = referenceService;
@@ -123,27 +124,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _mainWindow = mainWindow;
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _searchFilter = searchFilter;
-
-        ShowReferencedFiles = true;
-        ShowOrphanedFiles = true;
-        ShowOtherFiles = true;
-
-        ShowTextures = true;
-        ShowModels = true;
-        ShowScriptSources = true;
-        ShowScripts = true;
-        ShowSounds = true;
-        ShowMusic = true;
-        ShowBehaviors = true;
-        ShowBodyTextures = true;
-        ShowDeformedModels = true;
-        ShowInterfaces = true;
-        ShowSeq = true;
-        ShowTranslations = true;
-
-        SearchText = string.Empty;
-        IsBusyLoadingAssets = true;
-        IsBusyLoadingReferences = true;
 
         DataSource = DataSourceService.ListedOrder.OfType<FileSystemDataSource>().First();
         DataSourceSelections = DataSourceService.DataSourcesChanged
@@ -456,13 +436,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private async Task RenameAsset(IDataSourceLink asset) {
-        if (asset is not DataSourceFileLink fileLink) return;
-
-        var nameWithoutExtension = fileLink.NameWithoutExtension;
+        var nameWithoutExtension = asset.NameWithoutExtension;
         var textBox = new TextBox { Text = nameWithoutExtension };
         var content = new StackPanel { Children = { textBox } };
 
-        var referenceBrowserVM = GetReferenceBrowserVM(fileLink);
+        var referenceBrowserVM = GetReferenceBrowserVM(asset);
         if (referenceBrowserVM is not null) {
             var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
             content.Children.Add(new TextBlock {
@@ -471,11 +449,18 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             content.Children.Add(referenceBrowser);
         }
 
-        var renameDialog = CreateAssetDialog($"Rename {fileLink.Name}", content);
+        var renameDialog = CreateAssetDialog($"Rename {asset.Name}", content);
         if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
             if (string.Equals(nameWithoutExtension, textBox.Text, DataRelativePath.PathComparison)) return;
 
-            _assetController.Rename(fileLink, textBox.Text + fileLink.Extension);
+            switch (asset) {
+                case DataSourceDirectoryLink directoryLink:
+                    _assetController.Rename(directoryLink, textBox.Text);
+                    break;
+                case DataSourceFileLink fileLink:
+                    _assetController.Rename(fileLink, textBox.Text + fileLink.Extension);
+                    break;
+            }
         }
     }
 

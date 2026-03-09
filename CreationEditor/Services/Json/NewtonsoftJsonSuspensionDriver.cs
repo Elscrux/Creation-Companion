@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using CreationEditor.Services.Serialization.Json;
 using Newtonsoft.Json;
 using ReactiveUI;
@@ -18,17 +20,19 @@ public sealed class NewtonsoftJsonSuspensionDriver(
         return Observable.Return(Unit.Default);
     }
 
-    public IObservable<object> LoadState() {
-        if (!fileSystem.File.Exists(stateFilePath)) return Observable.Throw<object>(new FileNotFoundException(stateFilePath));
+    public IObservable<object?> LoadState() => LoadState(JsonTypeInfo.CreateJsonTypeInfo<object>(new JsonSerializerOptions()));
+    public IObservable<T?> LoadState<T>(JsonTypeInfo<T> typeInfo) {
+        if (!fileSystem.File.Exists(stateFilePath)) return Observable.Throw<T>(new FileNotFoundException(stateFilePath));
 
         var lines = fileSystem.File.ReadAllText(stateFilePath);
-        var state = JsonConvert.DeserializeObject<object>(lines, jsonSerializerSettingsProvider.SerializerSettings)
+        var state = JsonConvert.DeserializeObject<T>(lines, jsonSerializerSettingsProvider.SerializerSettings)
          ?? throw new InvalidDataException($"{stateFilePath} is not in valid format");
-        return Observable.Return(state);
+        return Observable.Return<T>(state);
 
     }
 
-    public IObservable<Unit> SaveState(object state) {
+    public IObservable<Unit> SaveState<T>(T state) => SaveState(state, JsonTypeInfo.CreateJsonTypeInfo<T>(new JsonSerializerOptions()));
+    public IObservable<Unit> SaveState<T>(T state, JsonTypeInfo<T> typeInfo) {
         var lines = JsonConvert.SerializeObject(state, jsonSerializerSettingsProvider.SerializerSettings);
         fileSystem.File.WriteAllText(stateFilePath, lines);
         return Observable.Return(Unit.Default);

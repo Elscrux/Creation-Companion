@@ -54,7 +54,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
                     RecordCache.Clear();
                     RecordCache.Edit(updater => {
                         foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
-                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWith(_referencesDisposable);
+                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
 
                             updater.AddOrUpdate(referencedRecord);
                         }
@@ -85,7 +85,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
                     if (worldspace.FormKey != WorldspaceFormKey) return;
 
                     // Create new entry
-                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWithComposite(_referencesDisposable);
                     listRecord = outListRecord;
 
                     // Force update

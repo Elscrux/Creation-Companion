@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Disposables;
 using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using LeveledList.Model.Enchantments;
 using LeveledList.ViewModels;
+using Noggog;
 using ReactiveUI;
 
 namespace LeveledList.Views;
@@ -33,7 +34,7 @@ public partial class EnchantmentsView : ReactiveUserControl<EnchantmentsVM> {
 
                     ViewModel.SelectedDefinitions = selectedDefinitions;
                 })
-                .DisposeWith(disposables);
+                .DisposeWithComposite(disposables);
         });
     }
 

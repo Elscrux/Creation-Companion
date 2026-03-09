@@ -18,7 +18,7 @@ public interface IUntypedExtraColumns {
         });
     }
 
-    static FuncDataTemplate<IReferencedRecord> GetTextCellTemplate(Func<IReferencedRecord, IBinding> bindingSelector) {
+    static FuncDataTemplate<IReferencedRecord> GetTextCellTemplate(Func<IReferencedRecord, BindingBase> bindingSelector) {
         return new FuncDataTemplate<IReferencedRecord>((record, _) => new TextBlock {
             Name = "CellTextBlock",
             [!TextBlock.TextProperty] = bindingSelector(record)

@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Logging;
 namespace CreationEditor.Avalonia.Views.Logging;
 

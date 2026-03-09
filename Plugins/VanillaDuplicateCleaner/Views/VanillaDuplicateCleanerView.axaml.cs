@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using VanillaDuplicateCleaner.ViewModels;
 namespace VanillaDuplicateCleaner.Views;
 

@@ -1,4 +1,4 @@
-﻿using Avalonia.ReactiveUI;
+﻿using ReactiveUI.Avalonia;
 using QueryPlugin.ViewModels;
 namespace QueryPlugin.Views;
 

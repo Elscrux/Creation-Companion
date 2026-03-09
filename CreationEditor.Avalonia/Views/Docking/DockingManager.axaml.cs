@@ -1,4 +1,4 @@
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;
 

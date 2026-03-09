@@ -42,13 +42,14 @@ public class IconFilePicker : AFilePicker {
         var imageAllPatterns = FilePickerFileTypes.ImageAll.Patterns?.Select(x => x.TrimStart('*')).ToArray();
         if (imageAllPatterns is null) return;
 
-        var filePath = e.Data
-            .GetFiles()?
-            .FirstOrDefault(file => imageAllPatterns.Contains(Path.GetExtension(file.Name)));
-
-        if (filePath is null) return;
-
-        FilePath = filePath.Path.AbsolutePath;
+        // e.DataTransfer.
+        // var filePath = e.Data
+        //     .GetFiles()?
+        //     .FirstOrDefault(file => imageAllPatterns.Contains(Path.GetExtension(file.Name)));
+        //
+        // if (filePath is null) return;
+        //
+        // FilePath = filePath.Path.AbsolutePath;
     }
 
     private static void DragEnter(object? sender, DragEventArgs e) {

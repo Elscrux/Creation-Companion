@@ -83,7 +83,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
                     QuestContext = quest;
                 }
             })
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
     }
 
     public bool Match(object? data) => data is ConditionData;
@@ -308,7 +308,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
                 [Grid.ColumnProperty] = pickerColumn,
                 [!Visual.IsVisibleProperty] = usesPackageData.ToBinding(),
                 [!PackageDataPicker.PackageProperty] = this[!ContextProperty],
-                [!PackageDataPicker.PackageDataIndexProperty] = new Binding(nameof(IndexDataContext.PackageDataIndex), BindingMode.TwoWay),
+                [!PackageDataPicker.PackageDataIndexProperty] = new Binding(nameof(IndexDataContext.PackageDataIndex)) { Mode = BindingMode.TwoWay },
                 [PackageDataPicker.ScopedTypesProperty] = scopedTypes,
                 [!PackageDataPicker.LinkCacheProperty] = this[!LinkCacheProperty],
                 [ToolTip.TipProperty] = parameter,
@@ -336,7 +336,7 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
                 [Grid.ColumnProperty] = pickerColumn,
                 [!Visual.IsVisibleProperty] = usesAliases.ToBinding(),
                 [!QuestAliasPicker.QuestProperty] = this[!QuestContextProperty],
-                [!QuestAliasPicker.AliasIndexProperty] = new Binding(nameof(IndexDataContext.AliasIndex), BindingMode.TwoWay),
+                [!QuestAliasPicker.AliasIndexProperty] = new Binding(nameof(IndexDataContext.AliasIndex)) { Mode = BindingMode.TwoWay },
                 [QuestAliasPicker.ScopedAliasTypesProperty] = type.AsEnumerable(),
                 [ToolTip.TipProperty] = parameter,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -359,12 +359,12 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
             this.WhenAnyValue(x => x.UseAliases)
                 .WhereTrue()
                 .Subscribe(_ => UsePackageData = false)
-                .DisposeWith(_disposable);
+                .DisposeWithComposite(_disposable);
 
             this.WhenAnyValue(x => x.UsePackageData)
                 .WhereTrue()
                 .Subscribe(_ => UseAliases = false)
-                .DisposeWith(_disposable);
+                .DisposeWithComposite(_disposable);
         }
 
         public void Dispose() => _disposable.Dispose();
@@ -413,17 +413,17 @@ public sealed partial class ConditionDataTemplate : AvaloniaObject, IDataTemplat
 
             substituteUsedChanged
                 .Subscribe(use => data.TrySetProperty(useProperty, use))
-                .DisposeWith(_disposable);
+                .DisposeWithComposite(_disposable);
 
             substituteUsedChanged
                 .WhereTrue()
                 .CombineLatest(this.WhenAnyValue(indexExpression), (_, index) => index)
                 .Subscribe(setExpression)
-                .DisposeWith(_disposable);
+                .DisposeWithComposite(_disposable);
 
             this.WhenAnyValue(indexExpression)
                 .Subscribe(setExpression)
-                .DisposeWith(_disposable);
+                .DisposeWithComposite(_disposable);
         }
 
         public void Dispose() => _disposable.Dispose();

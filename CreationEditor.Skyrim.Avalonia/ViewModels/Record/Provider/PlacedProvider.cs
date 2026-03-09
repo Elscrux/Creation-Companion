@@ -54,7 +54,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
                             foreach (var record in cell.GetAllPlaced(linkCacheProvider.LinkCache)) {
                                 if (!refFormKeys.Add(record.FormKey)) continue;
 
-                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWith(_referencesDisposable);
+                                referenceService.GetReferencedRecord(record, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
                                 var referencedPlacedRecord = new ReferencedPlacedRecord(referencedRecord, linkCacheProvider.LinkCache);
 
                                 updater.AddOrUpdate(referencedPlacedRecord);
@@ -78,7 +78,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
                     referencedPlaced.Record = placed;
                 } else {
                     // Create new entry
-                    referenceService.GetReferencedRecord(placed, out var outReferencedPlaced).DisposeWith(_referencesDisposable);
+                    referenceService.GetReferencedRecord(placed, out var outReferencedPlaced).DisposeWithComposite(_referencesDisposable);
                     referencedPlaced = outReferencedPlaced;
                 }
 

@@ -1,5 +1,5 @@
 ﻿using Avalonia.Data.Converters;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using PromoteToMaster.ViewModels;
 namespace PromoteToMaster.Views;
 

@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
@@ -83,7 +84,7 @@ public sealed partial class EditableCondition : ReactiveObject {
         this.WhenAnyValue(x => x.Function)
             .DistinctUntilChanged()
             .Subscribe(function => Data = function.ToCondition())
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
 
         // Set the reference to the player when RunOnType is player
         this.WhenAnyValue(x => x.RunOnType)
@@ -93,7 +94,7 @@ public sealed partial class EditableCondition : ReactiveObject {
                     ReferenceLink.SetTo(Mutagen.Bethesda.FormKeys.SkyrimSE.Skyrim.PlayerRef.FormKey);
                 }
             })
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
     }
 
     public EditableCondition(IConditionGetter parent) : this() {

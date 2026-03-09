@@ -52,7 +52,7 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                         break;
                 }
             })
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
 
         questContext
             .Subscribe(quest => {
@@ -127,8 +127,8 @@ public class GetEventDataTemplate : CustomConditionDataTemplate<GetEventDataCond
                                 break;
                         }
                     })
-                    .DisposeWith(_disposable);
+                    .DisposeWithComposite(_disposable);
             })
-            .DisposeWith(_disposable);
+            .DisposeWithComposite(_disposable);
     }
 }
