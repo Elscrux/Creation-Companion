@@ -124,8 +124,7 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         builder.RegisterType<CacheLocationProvider>()
-            .As<ICacheLocationProvider>()
-            .SingleInstance();
+            .As<ICacheLocationProvider>();
 
         builder.RegisterGeneric(typeof(JsonStateRepository<,,>))
             .As(typeof(IStateRepository<,,>))
