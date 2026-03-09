@@ -10,7 +10,6 @@ using Serilog;
 namespace CreationEditor.Services.Asset;
 
 public sealed class AssetController(
-    IDeleteDirectoryProvider deleteDirectoryProvider,
     IAssetTypeService assetTypeService,
     IDataSourceService dataSourceService,
     IReferenceService referenceService,
@@ -34,7 +33,7 @@ public sealed class AssetController(
 
     public void Delete(IDataSourceLink link, CancellationToken token = default) {
         try {
-            var deletePath = link.FileSystem.Path.Combine(deleteDirectoryProvider.DeleteDirectory, link.DataRelativePath.Path);
+            var deletePath = link.FileSystem.Path.Combine(link.DataSource.DeleteDirectoryLink.FullPath, link.DataRelativePath.Path);
 
             switch (link) {
                 case DataSourceDirectoryLink directoryLink:

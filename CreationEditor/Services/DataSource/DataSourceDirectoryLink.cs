@@ -26,8 +26,12 @@ public sealed class DataSourceDirectoryLink(IDataSource dataSource, DataRelative
     public bool Contains(IDataSourceLink link) {
         if (!link.DataSource.Equals(DataSource)) return false;
 
+        return Contains(link.DataRelativePath);
+    }
+
+    public bool Contains(DataRelativePath dataRelativePath) {
         return DataRelativePath.Path.IsNullOrEmpty()
-         || link.DataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar,
+         || dataRelativePath.Path.StartsWith(DataRelativePath.Path + FileSystem.Path.DirectorySeparatorChar,
                 DataRelativePath.PathComparison);
     }
 
@@ -45,7 +49,11 @@ public sealed class DataSourceDirectoryLink(IDataSource dataSource, DataRelative
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            yield return new DataSourceFileLink(DataSource, new DataRelativePath(relativePath));
+            var fileDataRelativePath = new DataRelativePath(relativePath);
+
+            if (DataSource.DeleteDirectoryLink.Contains(relativePath)) continue;
+
+            yield return new DataSourceFileLink(DataSource, fileDataRelativePath);
         }
     }
 
@@ -63,7 +71,11 @@ public sealed class DataSourceDirectoryLink(IDataSource dataSource, DataRelative
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
-            yield return new DataSourceDirectoryLink(DataSource, new DataRelativePath(relativePath));
+            var directoryDataRelativePath = new DataRelativePath(relativePath);
+
+            if (DataSource.DeleteDirectoryLink.Contains(relativePath)) continue;
+
+            yield return new DataSourceDirectoryLink(DataSource, directoryDataRelativePath);
         }
     }
 

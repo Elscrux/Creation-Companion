@@ -9,6 +9,7 @@ public sealed class FileSystemDataSource : IDataSource {
     public string Name { get; }
     public string Path { get; }
     public bool IsReadOnly { get; }
+    public DataSourceDirectoryLink DeleteDirectoryLink { get; }
     public IFileSystem FileSystem { get; }
 
     public FileSystemDataSource(IFileSystem fileSystem, string fullPath, bool isReadOnly = false) {
@@ -16,6 +17,7 @@ public sealed class FileSystemDataSource : IDataSource {
         Name = FileSystem.Path.GetFileName(fullPath);
         Path = fullPath;
         IsReadOnly = isReadOnly;
+        DeleteDirectoryLink = new DataSourceDirectoryLink(this, "_DELETE_");
     }
 
     public DataSourceMemento CreateMemento() {
@@ -39,6 +41,7 @@ public sealed class FileSystemDataSource : IDataSource {
         var fullPath = GetFullPath(path.Path);
         return FileSystem.Directory.Exists(fullPath);
     }
+
     public IEnumerable<DataRelativePath> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var fullPath = GetFullPath(path.Path);
         var files = FileSystem.Directory
@@ -46,9 +49,14 @@ public sealed class FileSystemDataSource : IDataSource {
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(Path, file);
-            yield return new DataRelativePath(relativePath);
+            var fileDataRelativePath = new DataRelativePath(relativePath);
+
+            if (DeleteDirectoryLink.Contains(relativePath)) continue;
+
+            yield return fileDataRelativePath;
         }
     }
+
     public IEnumerable<DataRelativePath> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var fullPath = GetFullPath(path.Path);
         var directories = FileSystem.Directory
@@ -56,7 +64,11 @@ public sealed class FileSystemDataSource : IDataSource {
 
         foreach (var directory in directories) {
             var relativePath = FileSystem.Path.GetRelativePath(Path, directory);
-            yield return new DataRelativePath(relativePath);
+            var directoryDataRelativePath = new DataRelativePath(relativePath);
+
+            if (DeleteDirectoryLink.Contains(relativePath)) continue;
+
+            yield return directoryDataRelativePath;
         }
     }
 

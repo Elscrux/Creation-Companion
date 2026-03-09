@@ -16,6 +16,7 @@ public sealed class ArchiveDataSource : IDataSource {
     public string Name { get; }
     public string Path { get; }
     public bool IsReadOnly => true;
+    public DataSourceDirectoryLink DeleteDirectoryLink => null!;
     public IFileSystem FileSystem { get; }
 
     public ArchiveDataSource(IFileSystem fileSystem, string fullPath, IArchiveReader archiveReader, DataSourceFileLink archiveFileLink) {

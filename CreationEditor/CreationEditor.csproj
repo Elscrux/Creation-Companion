@@ -6,6 +6,7 @@
         <PackageReference Include="Mutagen.Bethesda.Analyzers" />
         <PackageReference Include="Mutagen.Bethesda.Core" />
         <PackageReference Include="Mutagen.Bethesda.Json" />
+        <PackageReference Include="NAudio" />
         <PackageReference Include="niflysharp" />
         <PackageReference Include="Nifly" />
         <PackageReference Include="Noggog.Autofac" />
@@ -19,6 +20,7 @@
         <PackageReference Include="Serilog" />
         <PackageReference Include="System.IO.Hashing" />
         <PackageReference Include="System.Linq.Async" />
+        <PackageReference Include="TransformersSharp" />
         <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
@@ -100,9 +102,6 @@
         </Compile>
         <Compile Update="Services\Asset\AssetController.cs">
           <DependentUpon>IAssetController.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Services\Asset\DeleteDirectoryProvider.cs">
-          <DependentUpon>IDeleteDirectoryProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Mutagen\Mod\Save\DeletedNewRecordRemoveStep.cs">
           <DependentUpon>ISaveStep.cs</DependentUpon>

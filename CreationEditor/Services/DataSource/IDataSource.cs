@@ -11,6 +11,8 @@ public interface IDataSource : IMementoProvider<DataSourceMemento> {
     string Path { get; }
     bool IsReadOnly { get; }
 
+    DataSourceDirectoryLink DeleteDirectoryLink { get; }
+
     IFileSystem FileSystem { get; }
 
     string GetFullPath(DataRelativePath path);

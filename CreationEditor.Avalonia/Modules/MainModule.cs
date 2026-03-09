@@ -119,10 +119,6 @@ public sealed class MainModule : Module {
             .As<IModSaveLocationProvider>()
             .SingleInstance();
 
-        builder.RegisterType<DeleteDirectoryProvider>()
-            .As<IDeleteDirectoryProvider>()
-            .SingleInstance();
-
         builder.RegisterType<IgnoredDirectoriesProvider>()
             .As<IIgnoredDirectoriesProvider>()
             .SingleInstance();

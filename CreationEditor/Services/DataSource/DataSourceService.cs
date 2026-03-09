@@ -169,6 +169,7 @@ public sealed class DataSourceService : IDataSourceService {
             var files = dataSource.EnumerateFiles(directoryPath, searchPattern, includeSubDirectories);
 
             foreach (var dataRelativePath in files) {
+                if (dataSource.DeleteDirectoryLink.Contains(dataRelativePath)) continue;
                 if (!referencedFiles.Add(dataRelativePath)) continue;
 
                 yield return new DataSourceFileLink(dataSource, dataRelativePath);
