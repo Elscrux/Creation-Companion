@@ -15,12 +15,12 @@ public sealed class RecordReferenceQuery : IReferenceQuery<IModGetter, RecordRef
         foreach (var record in source.EnumerateMajorRecords()) {
             cache.FormKeys.Add(record.FormKey);
 
-            foreach (var formLink in record.EnumerateFormLinks().Where(formLink => !formLink.IsNull)) {
+            foreach (var formLink in record.EnumerateFormLinks(false).Where(formLink => !formLink.IsNull)) {
                 var references = cache.Cache.GetOrAdd(formLink.FormKey);
                 references.Add(FormLinkInformation.Factory(record));
             }
         }
     }
 
-    public static IEnumerable<IFormLinkIdentifier> ParseRecord(IMajorRecordGetter record) => record.EnumerateFormLinks();
+    public static IEnumerable<IFormLinkIdentifier> ParseRecord(IMajorRecordGetter record) => record.EnumerateFormLinks(false);
 }
