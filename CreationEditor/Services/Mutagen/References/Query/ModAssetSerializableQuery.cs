@@ -16,9 +16,6 @@ public sealed class ModAssetSerializableQuery
 
     public string Name => "Mod Asset Links";
 
-    public bool SkipResolvedAssets { get; set; } = true; // todo change back to false by default when inferred assets bug is fixed
-    private const AssetLinkQuery NotResolvedQueryFlags = AssetLinkQuery.Listed | AssetLinkQuery.Inferred;
-
     public ModAssetSerializableQuery(
         ILogger logger,
         ILinkCacheProvider linkCacheProvider) {
@@ -38,39 +35,20 @@ public sealed class ModAssetSerializableQuery
     public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
 
     public void FillCache(IModGetter source, AssetReferenceCache<IFormLinkIdentifier> cache) {
-        if (SkipResolvedAssets) {
-            foreach (var record in source.EnumerateMajorRecords()) {
-                try {
-                    var recordLink = record.ToLinkFromRuntimeType();
-                    foreach (var link in record.EnumerateAssetLinks(NotResolvedQueryFlags).Where(l => !l.IsNull)) {
-                        cache.Add(link, recordLink);
-                    }
-                } catch (Exception e) {
-                    _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
-                }
+        foreach (var record in source.EnumerateMajorRecords()) {
+            try {
+                var recordLink = record.ToLinkFromRuntimeType();
+                foreach (var assetLinkGetter in record.EnumerateAllAssetLinks(_assetLinkCache).Where(l => !l.IsNull)) {
+                    cache.Add(assetLinkGetter, recordLink);
 
-            }
-        } else {
-            foreach (var record in source.EnumerateMajorRecords()) {
-                try {
-                    var recordLink = record.ToLinkFromRuntimeType();
-                    foreach (var assetLinkGetter in record.EnumerateAllAssetLinks(_assetLinkCache).Where(l => !l.IsNull)) {
-                        cache.Add(assetLinkGetter, recordLink);
-
-                    }
-                } catch (Exception e) {
-                    _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
                 }
+            } catch (Exception e) {
+                _logger.Here().Error(e, "Error parsing asset references of {Record}", record);
             }
         }
     }
 
     public IEnumerable<IAssetLinkGetter> ParseRecord(IMajorRecordGetter record) {
-        if (SkipResolvedAssets) {
-            return record.EnumerateAssetLinks(NotResolvedQueryFlags, _assetLinkCache)
-                .Where(l => !l.IsNull);
-        }
-
         return record.EnumerateAllAssetLinks(_assetLinkCache)
             .Where(l => !l.IsNull);
     }
