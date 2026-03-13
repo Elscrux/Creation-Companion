@@ -46,7 +46,11 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
         async Task<TCache> TryParseCache() {
             if (serialization.Validate(source, query)) {
                 // Cache is valid, deserialize it
-                return await ParseCache();
+                try {
+                    return await ParseCache();
+                } catch (Exception e) {
+                    logger.Here().Warning(e, "Failed to parse {QueryName} cache for {Source}, doing a full parse instead {Exception}", query.Name, sourceName, e);
+                }
             }
 
             // Cache is invalid, parse source and serialize them
