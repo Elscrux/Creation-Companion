@@ -25,7 +25,7 @@ public class NifService(ILogger logger) : IModelService {
             logger.Here().Warning(e,
                 "Failed to parse nif file {Path}: {Exception} for asset references",
                 fileLink,
-                e.Message);
+                e);
         }
 
         return false;

@@ -195,10 +195,10 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
                         drawingGroup.Opacity = 0.5;
                         RegionsImage = new DrawingImage(drawingGroup);
                     } catch (Exception e) {
-                        logger.Here().Error(e, "Failed to create region map: {Exception}", e.Message);
+                        logger.Here().Error(e, "Failed to create region map: {Exception}", e);
                     }
                 } catch (Exception e) {
-                    logger.Here().Error(e, "Failed to create region map: {Exception}", e.Message);
+                    logger.Here().Error(e, "Failed to create region map: {Exception}", e);
                 }
             })
             .Do(_ => BusyTasks--)
@@ -276,7 +276,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
                 try {
                     ImageSource = new Bitmap(path);
                 } catch (Exception e) {
-                    logger.Here().Error(e, "Failed to load image: {Exception}", e.Message);
+                    logger.Here().Error(e, "Failed to load image: {Exception}", e);
                 }
             })
             .DisposeWith(this);

@@ -42,7 +42,7 @@ public sealed class DataSourceReferenceUpdateTrigger<TCache, TLink, TSubscriber>
                         "Failed to load {Name} References for {Count} Data Sources {Exception}",
                         referenceController.Name,
                         dataSources.Count,
-                        e.Message));
+                        e));
 
                 foreach (var dataSource in dataSources.OfType<FileSystemDataSource>()) {
                     var watcher = dataSourceWatcherProvider.GetWatcher(dataSource);

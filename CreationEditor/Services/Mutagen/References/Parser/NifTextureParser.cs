@@ -69,7 +69,7 @@ public sealed class NifTextureParser(
                     "Failed to parse asset path {AssetString} referenced in {Path}: {Exception}",
                     assetString,
                     filePath,
-                    e.Message);
+                    e);
                 return;
             }
 

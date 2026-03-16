@@ -46,7 +46,7 @@ public sealed class AssetController(
                     break;
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", link, e.Message);
+            logger.Here().Error(e, "Couldn't delete {Path}: {Exception}", link, e);
         }
     }
 
@@ -83,7 +83,7 @@ public sealed class AssetController(
                 }
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e);
         }
     }
 
@@ -120,7 +120,7 @@ public sealed class AssetController(
                 }
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Error(e, "Couldn't move {Path} to {Destination}: {Exception}", origin, destination, e);
         }
     }
 
@@ -149,7 +149,7 @@ public sealed class AssetController(
                     }
                 }
             } catch (Exception e) {
-                logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", origin, newName, e.Message);
+                logger.Here().Error(e, "Couldn't rename {Path} to {NewName}: {Exception}", origin, newName, e);
             }
         } else {
             logger.Here().Warning("Couldn't find path to base directory of {Path}", origin);
@@ -223,7 +223,7 @@ public sealed class AssetController(
 
             origin.FileSystem.File.Copy(origin.FullPath, destination.FullPath);
         } catch (Exception e) {
-            logger.Here().Warning(e, "Couldn't copy {Origin} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't copy {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
         }
 
@@ -240,7 +240,7 @@ public sealed class AssetController(
 
             origin.FileSystem.Directory.DeepCopy(origin.FullPath, destination.FullPath);
         } catch (Exception e) {
-            logger.Here().Warning(e, "Couldn't copy {Origin} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't copy {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
         }
 
@@ -257,7 +257,7 @@ public sealed class AssetController(
 
             origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
         } catch (Exception e) {
-            logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
         }
 
@@ -297,7 +297,7 @@ public sealed class AssetController(
                 origin.FileSystem.Directory.Move(origin.FullPath, destination.FullPath);
             }
         } catch (Exception e) {
-            logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e.Message);
+            logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
         }
 

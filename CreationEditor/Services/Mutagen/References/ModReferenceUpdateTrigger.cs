@@ -36,7 +36,7 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
                         "Failed to load {Name} References for {Count} Mods {Exception}",
                         referenceController.Name,
                         editorEnvironment.LinkCache.ListedOrder.Count,
-                        e.Message));
+                        e));
             })
             .DisposeWithComposite(disposables);
     }

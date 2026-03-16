@@ -46,7 +46,7 @@ public sealed class DictionaryReferenceCacheSerialization<TSource, TCache, TLink
 
             return referenceCacheSerializationConfig.IsCacheUpToDate(reader, source);
         } catch (Exception e) {
-            logger.Here().Warning(e, "Failed to validate cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning(e, "Failed to validate cache file {File}: {Exception}", cacheFile, e);
             return false;
         }
     }
@@ -87,7 +87,7 @@ public sealed class DictionaryReferenceCacheSerialization<TSource, TCache, TLink
                 cache.Cache.TryAdd(link, references);
             }
         } catch (Exception e) {
-            logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
+            logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e);
         }
 
         return cache;

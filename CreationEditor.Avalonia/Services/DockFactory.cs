@@ -42,7 +42,7 @@ public sealed class DockFactory(
                     throw new InvalidOperationException($"Failed to open dock {dockElement}");
                 }
             })
-            .FireAndForget(e => logger.Here().Warning(e, "Couldn't open dock {DockElement}: {Message}", dockElement, e.Message));
+            .FireAndForget(e => logger.Here().Warning(e, "Couldn't open dock {DockElement}: {Message}", dockElement, e));
     }
 
     public Task Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {

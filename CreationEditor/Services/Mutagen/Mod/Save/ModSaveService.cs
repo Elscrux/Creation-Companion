@@ -41,7 +41,7 @@ public sealed class ModSaveService(
                 "Failed to save mod {ModName} at {FilePath}, try backup location instead: {Exception}",
                 mod.ModKey.FileName,
                 filePath,
-                e.Message);
+                e);
             try {
                 // Save at backup location if failed once
                 filePath = modSaveLocationProvider.GetBackupSaveLocation(mod);
@@ -99,7 +99,7 @@ public sealed class ModSaveService(
                 "Failed to create backup of mod {ModName} at {FilePath}: {Exception}",
                 mod.ModKey.FileName,
                 filePath,
-                e.Message);
+                e);
         }
 
         LimitBackups(limit, mod);
