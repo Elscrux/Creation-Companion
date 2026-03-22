@@ -15,7 +15,7 @@ internal static class Program {
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static async Task Main(string[] args) {
+    public static int Main(string[] args) {
         AppDomain.CurrentDomain.UnhandledException += LogCrashes;
 
         switch (args) {
@@ -31,11 +31,11 @@ internal static class Program {
 
                 // If found run the entry point and exit
                 if (entryPoint is not null) {
-                    await entryPoint.Run(args);
+                    entryPoint.Run(args).GetAwaiter().GetResult();
 
                     Console.WriteLine("Done, press enter to exit");
                     Console.ReadLine();
-                    return;
+                    return 0;
                 }
 
                 // Otherwise, if no entry point was found, log and continue to start the GUI
@@ -43,7 +43,7 @@ internal static class Program {
                 break;
         }
 
-        BuildAvaloniaApp()
+        return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
 
