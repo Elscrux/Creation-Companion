@@ -33,7 +33,7 @@ public sealed class AssetController(
 
     public void Delete(IDataSourceLink link, CancellationToken token = default) {
         try {
-            var deletePath = link.FileSystem.Path.Combine(link.DataSource.DeleteDirectoryLink.FullPath, link.DataRelativePath.Path);
+            var deletePath = link.FileSystem.Path.Combine(link.DataSource.DeleteDirectoryLink.DataRelativePath.Path, link.DataRelativePath.Path);
 
             switch (link) {
                 case DataSourceDirectoryLink directoryLink:
@@ -169,7 +169,7 @@ public sealed class AssetController(
         // Remap references in records
         RemapRecordReferences(oldFileLink, newFileLink);
 
-        // Remap references in NIFs
+        // Remap references in nifs
         RemapAssetReferences(oldFileLink, newFileLink);
     }
 
