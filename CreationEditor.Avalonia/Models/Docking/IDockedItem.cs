@@ -13,14 +13,14 @@ public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
 
     new DockContainerVM DockParent { get; set; }
 
-    [Reactive] bool IsSelected { get; set; }
+    bool IsSelected { get; set; }
 
-    [Reactive] string? Header { get; set; }
-    [Reactive] IconSource? IconSource { get; set; }
+    string? Header { get; set; }
+    IconSource? IconSource { get; set; }
 
     double? Size { get; set; }
 
-    [Reactive] bool CanClose { get; set; }
+    bool CanClose { get; set; }
     ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
 
     DisposableCounterLock RemovalLock { get; }
