@@ -17,6 +17,7 @@ namespace CreationEditor.Avalonia.ViewModels.Reference;
 public sealed partial class ReferenceRemapperVM : ViewModel {
     public IDataSourceService DataSourceService { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
+    public IReadOnlyList<IRecordRemappingPreprocessor> RecordRemappingPreprocessors { get; }
     public object? Context { get; }
 
     public DataSourceFileLink? DataSourceLink { get; }
@@ -37,12 +38,14 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public ReferenceRemapperVM(
         IDataSourceService dataSourceService,
         ILinkCacheProvider linkCacheProvider,
+        IReadOnlyList<IRecordRemappingPreprocessor> recordRemappingPreprocessors,
         IAssetController assetController,
         IAssetTypeService assetTypeService,
         IRecordController recordController,
         object? context = null) {
         DataSourceService = dataSourceService;
         LinkCacheProvider = linkCacheProvider;
+        RecordRemappingPreprocessors = recordRemappingPreprocessors;
         Context = context;
 
         DataSourceLink = ParseAssetContext(context);

@@ -13,6 +13,7 @@ using CreationEditor.Avalonia.ViewModels.Scripting;
 using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Mutagen.Mod;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.Type;
 using CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Skyrim.Avalonia.Services.Asset;
@@ -33,6 +34,7 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
 using CreationEditor.Skyrim.Services.Mod;
+using CreationEditor.Skyrim.Services.Record;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Modules;
@@ -82,6 +84,10 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
 
         builder.RegisterType<RegionMapCreator>()
             .AsSelf();
+
+        builder.RegisterType<LightRecordRemappingPreprocessor>()
+            .As<IRecordRemappingPreprocessor>()
+            .SingleInstance();
 
         // View Model
         builder.RegisterType<InteriorCellsVM>()
