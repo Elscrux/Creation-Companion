@@ -20,7 +20,6 @@
         <PackageReference Include="Serilog" />
         <PackageReference Include="System.IO.Hashing" />
         <PackageReference Include="System.Linq.Async" />
-        <PackageReference Include="TransformersSharp" />
         <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
