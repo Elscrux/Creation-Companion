@@ -1,6 +1,4 @@
 ﻿using System.Reactive.Linq;
-using Avalonia;
-using Avalonia.Data;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
