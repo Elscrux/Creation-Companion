@@ -4,6 +4,6 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Settings.View;
 
-public sealed class ViewSetting : ReactiveObject, ISettingModel {
-    [JsonProperty, Reactive] public ViewMode ViewMode { get; set; }
+public sealed partial class ViewSetting : ReactiveObject, ISettingModel {
+    [JsonProperty, Reactive] public partial ViewMode ViewMode { get; set; }
 }
