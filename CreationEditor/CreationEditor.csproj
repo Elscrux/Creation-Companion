@@ -20,6 +20,11 @@
         <PackageReference Include="Serilog" />
         <PackageReference Include="System.IO.Hashing" />
         <PackageReference Include="System.Linq.Async" />
+        <PackageReference Include="ThrowsAnalyzer">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="TransformersSharp" />
         <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 

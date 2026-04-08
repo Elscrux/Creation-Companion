@@ -151,6 +151,12 @@
         <Compile Update="Services\Record\Prefix\RecordPrefixService.cs">
           <DependentUpon>IRecordPrefixService.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Actions\GenericContextActionsProvider.cs">
+          <DependentUpon>IGenericContextActionsProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="ViewModels\Reference\ReferenceBrowserVMFactory.cs">
+          <DependentUpon>IReferenceBrowserVMFactory.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
