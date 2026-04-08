@@ -6,6 +6,9 @@ using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References;
 
 public interface IReferenceService {
+    bool IsLoadingCurrently { get; }
+    bool IsLoadingAssetReferencesCurrently { get; }
+    bool IsLoadingRecordReferencesCurrently { get; }
     IObservable<bool> IsLoading { get; }
     IObservable<bool> IsLoadingAssetReferences { get; }
     IObservable<bool> IsLoadingRecordReferences { get; }

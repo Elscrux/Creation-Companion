@@ -15,10 +15,12 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using ReactiveUI;
 using ScriptFileParser = CreationEditor.Services.Mutagen.References.Parser.ScriptFileParser;
 namespace CreationEditor.Services.Mutagen.References;
 
-public sealed class ReferenceService : IReferenceService {
+public sealed class ReferenceService : ReactiveObject, IReferenceService {
+    private readonly DisposableBucket  _disposableBucket = new();
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IMutagenCommonAspectsProvider _mutagenCommonAspectsProvider;
 
@@ -40,6 +42,9 @@ public sealed class ReferenceService : IReferenceService {
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset> _recordAssetReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<IAssetLinkGetter, DataRelativePath, IReferencedAsset> _assetReferenceSubscriptionManager;
 
+    public bool IsLoadingCurrently { get; private set; }
+    public bool IsLoadingAssetReferencesCurrently { get; private set; }
+    public bool IsLoadingRecordReferencesCurrently { get; private set; }
     public IObservable<bool> IsLoading { get; }
     public IObservable<bool> IsLoadingAssetReferences { get; }
     public IObservable<bool> IsLoadingRecordReferences { get; }
@@ -198,6 +203,18 @@ public sealed class ReferenceService : IReferenceService {
         IsLoading = IsLoadingAssetReferences.CombineLatest(IsLoadingRecordReferences, (a, b) => a || b)
             .Replay(1)
             .RefCount();
+
+        IsLoading
+            .ToProperty(this, x => x.IsLoadingCurrently)
+            .DisposeWith(_disposableBucket);
+
+        IsLoadingAssetReferences
+            .ToProperty(this, x => x.IsLoadingAssetReferencesCurrently)
+            .DisposeWith(_disposableBucket);
+
+        IsLoadingRecordReferences
+            .ToProperty(this, x => x.IsLoadingRecordReferencesCurrently)
+            .DisposeWith(_disposableBucket);
     }
 
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
