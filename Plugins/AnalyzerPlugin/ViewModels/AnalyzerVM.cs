@@ -20,9 +20,11 @@ using CreationEditor;
 using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.GroupCollection;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.State;
 using DynamicData;
 using DynamicData.Binding;
@@ -46,7 +48,7 @@ public sealed record AnalyzerMemento {
 
 public sealed partial class TopicItem : ReactiveObject {
     public required TopicDefinition TopicDefinition { get; init; }
-    public Type? RecordType { get; init; }
+    public required string RecordTypeName { get; init; }
     [Reactive] public partial bool IsActive { get; set; } = true;
 }
 
@@ -64,6 +66,8 @@ public sealed partial class AnalyzerVM : ViewModel {
     private readonly ILogger _logger;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IFileSystem _fileSystem;
+    private readonly IReferenceService _referenceService;
+    private readonly IContextMenuProvider _contextMenuProvider;
 
     public IObservableCollection<TopicItem> Topics { get; }
     public ReadOnlyObservableCollection<TopicItem> FilteredTopics { get; }
@@ -101,12 +105,16 @@ public sealed partial class AnalyzerVM : ViewModel {
         ILogger logger,
         IEditorEnvironment editorEnvironment,
         IFileSystem fileSystem,
+        IReferenceService referenceService,
+        IContextMenuProvider contextMenuProvider,
         IStateRepositoryFactory<AnalyzerMemento, AnalyzerMemento, Guid> stateRepositoryFactory,
         IReadOnlyList<IAnalyzer> analyzers,
         MultiModPickerVM multiModPickerVM) {
         _logger = logger;
         _editorEnvironment = editorEnvironment;
         _fileSystem = fileSystem;
+        _referenceService = referenceService;
+        _contextMenuProvider = contextMenuProvider;
         ModPickerVM = multiModPickerVM;
         var topicEnricher = new TopicEnricher(editorEnvironment);
         analyzers = analyzers.DistinctBy(x => x.Id).ToList();
@@ -136,7 +144,7 @@ public sealed partial class AnalyzerVM : ViewModel {
 
                 return analyzer.Topics.Select(t => new TopicItem {
                     TopicDefinition = t,
-                    RecordType = type,
+                    RecordTypeName = GetRecordTypeName(type),
                     IsActive = analyzersState is null || !analyzersState.InactiveTopicIds.Contains(t.Id.ToString()),
                 });
             })
@@ -153,7 +161,7 @@ public sealed partial class AnalyzerVM : ViewModel {
             .ToObservableCollection(this);
 
         TopicsSeverityGroup = new Group<TopicItem>(t => t.TopicDefinition.Severity, IsTopicsGroupedBySeverity);
-        TopicsRecordTypeGroup = new Group<TopicItem>(t => t.RecordType, IsTopicsGroupedByRecordType);
+        TopicsRecordTypeGroup = new Group<TopicItem>(t => t.RecordTypeName, IsTopicsGroupedByRecordType);
 
         this.WhenAnyValue(x => x.IsTopicsGroupedBySeverity)
             .Subscribe(x => TopicsSeverityGroup.IsGrouped = TopicSearchText.IsNullOrEmpty() && x)
@@ -273,7 +281,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                                             CommandParameter = groupInstance,
                                         },
                                         groupInstance.Class switch {
-                                            Type recordType => GetRecordTypeControl(recordType),
+                                            Type recordType => GetRecordTypeControl(GetRecordTypeName(recordType)),
                                             Severity severity => GetSeverityControl(severity),
                                             null => new TextBlock {
                                                 Text = "All",
@@ -309,7 +317,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                     "Type",
                     new FuncDataTemplate<object>((item, _) => {
                         return item switch {
-                            TopicItem result => GetRecordTypeControl(result.RecordType),
+                            TopicItem result => GetRecordTypeControl(result.RecordTypeName),
                             _ => null,
                         };
                     })),
@@ -326,7 +334,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                                 TopicDefinition topicDefinition => GetTopicControl(topicDefinition),
                                 IFormLinkIdentifier formLinkIdentifier => GetRecordControl(formLinkIdentifier),
                                 Severity severity => GetSeverityControl(severity),
-                                Type recordType => GetRecordTypeControl(recordType),
+                                Type recordType => GetRecordTypeControl(GetRecordTypeName(recordType)),
                                 _ => new TextBlock {
                                     Text = groupInstance.Class?.ToString(),
                                     VerticalAlignment = VerticalAlignment.Center,
@@ -422,6 +430,15 @@ public sealed partial class AnalyzerVM : ViewModel {
             ModPickerVM.SelectedMods.Any());
     }
 
+    [ReactiveCommand]
+    public void OpenTopicDefinition(TopicItem topicItem) {
+        Process.Start(new ProcessStartInfo {
+            FileName = topicItem.TopicDefinition.InformationUri?.AbsoluteUri,
+            UseShellExecute = true,
+            Verb = "open",
+        });
+    }
+
     public async Task ExportCsv(string filePath) {
         var csvLines = new StringBuilder();
         csvLines.AppendLine("Topic ID,Title,Severity,Record,Record Type,Information URI,Message,Meta Data");
@@ -431,7 +448,7 @@ public sealed partial class AnalyzerVM : ViewModel {
             var title = EscapeCsvField(result.Topic.TopicDefinition.Title);
             var severity = result.Topic.TopicDefinition.Severity;
             var record = EscapeCsvField(result.Record?.ToString() ?? string.Empty);
-            var recordType = EscapeCsvField(GetRecordTypeName(result.Record?.Type) ?? string.Empty);
+            var recordType = EscapeCsvField(GetRecordTypeName(result.Record?.Type));
             var infoUri = EscapeCsvField(result.Topic.TopicDefinition.InformationUri?.AbsoluteUri ?? "");
             var message = EscapeCsvField(result.Topic.FormattedTopic.FormattedMessage);
             var metaData = EscapeCsvField(string.Join(" ", result.Topic.MetaData.Select(x => $"{x.Name}={Stringifier(x.Value)}")));
@@ -486,11 +503,7 @@ public sealed partial class AnalyzerVM : ViewModel {
     private void SetTopics(GroupInstance group) {
         var allActive = GetAllActive(group);
 
-        if (allActive is false) {
-            SetTopics(group, true);
-        } else {
-            SetTopics(group, false);
-        }
+        SetTopics(group, allActive is false);
     }
 
     private void SetTopics(GroupInstance group, bool newState) {
@@ -546,23 +559,24 @@ public sealed partial class AnalyzerVM : ViewModel {
         };
     }
 
-    private Control GetRecordTypeControl(Type? type) {
+    private Control GetRecordTypeControl(string typeName) {
         return new TextBlock {
-            Text = GetRecordTypeName(type) ?? "All",
+            Text = typeName,
             VerticalAlignment = VerticalAlignment.Center,
         };
     }
 
-    private string? GetRecordTypeName(Type? type) {
+    private string GetRecordTypeName(Type? type) {
         var typeName = type?.Name;
-        if (typeName is null) return null;
+        if (typeName is not null) {
+            if (typeName.Length > 6) {
+                return typeName[1..^6];
+            }
 
-        if (typeName.Length > 6) {
-            return typeName[1..^6];
+            _logger.Here().Warning("Analyzer topic has a record type with an unexpected name: {TypeName}", typeName);
         }
 
-        _logger.Here().Warning("Analyzer topic has a record type with an unexpected name: {TypeName}", typeName);
-        return null;
+        return "None";
     }
 
     private Control GetSeverityControl(Severity severity) {
@@ -579,5 +593,14 @@ public sealed partial class AnalyzerVM : ViewModel {
             Text = formattedTopic.FormattedMessage,
             VerticalAlignment = VerticalAlignment.Center,
         };
+    }
+
+    public IEnumerable<Control> GetContextMenuItems(AnalyzerResult result) {
+        if (result.Record is null) return [];
+        if (!_editorEnvironment.LinkCache.TryResolve(result.Record, out var record)) return [];
+
+        using var disposable = _referenceService.GetReferencedRecord(record, out var referencedRecord);
+        var menuItems = _contextMenuProvider.GetMenuItems(new SelectedListContext([new RecordContext(result.ModKey, referencedRecord)], []));
+        return menuItems.OfType<Control>();
     }
 }

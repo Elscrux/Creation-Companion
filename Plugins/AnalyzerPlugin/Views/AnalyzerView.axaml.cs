@@ -1,8 +1,8 @@
 ﻿using AnalyzerPlugin.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using ReactiveUI.Avalonia;
-
 namespace AnalyzerPlugin.Views;
 
 public partial class AnalyzerView : ReactiveUserControl<AnalyzerVM> {
@@ -33,5 +33,15 @@ public partial class AnalyzerView : ReactiveUserControl<AnalyzerVM> {
         if (string.IsNullOrEmpty(path)) return;
 
         ViewModel?.ExportCsv(path);
+    }
+
+    private void ResultsTree_OnContextRequested(object? sender, ContextRequestedEventArgs e) {
+        if (e.Source is not Control { DataContext: AnalyzerResult result } control) return;
+
+        var contextFlyout = new MenuFlyout {
+            ItemsSource = ViewModel?.GetContextMenuItems(result),
+        };
+
+        contextFlyout.ShowAt(control, true);
     }
 }

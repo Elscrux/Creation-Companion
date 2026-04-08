@@ -129,7 +129,7 @@
                                 </Grid>
 
                                 <Button.Flyout>
-                                    <Flyout FlyoutPresenterClasses="Flyout750x300">
+                                    <Flyout FlyoutPresenterClasses="Flyout750x1000">
                                         <views:TopicSelection/>
                                     </Flyout>
                                 </Button.Flyout>
@@ -310,6 +310,7 @@
                         Classes="CardNested">
                         <TreeDataGrid
                             x:Name="ResultsTree"
+                            ContextRequested="ResultsTree_OnContextRequested"
                             IsVisible="{Binding Results.Count}"
                             Source="{Binding ResultsTreeSource}"/>
                     </Border>
