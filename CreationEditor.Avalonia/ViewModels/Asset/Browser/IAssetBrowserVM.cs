@@ -2,6 +2,7 @@
 using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
@@ -34,12 +35,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     ReactiveCommand<Unit, Unit> Undo { get; }
     ReactiveCommand<Unit, Unit> Redo { get; }
 
-    ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Open { get; }
-    ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Delete { get; }
-    ReactiveCommand<IDataSourceLink, Unit> Rename { get; }
-    ReactiveCommand<DataSourceFileLink, Unit> OpenReferences { get; }
     ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
-    ReactiveCommand<DataSourceDirectoryLink, Unit> AddFolder { get; }
 
     bool IsBusyLoadingAssets { get; set; }
     bool IsBusyLoadingReferences { get; set; }
@@ -48,6 +44,8 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     IDataSource DataSource { get; set; }
     ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
 
+    IAssetContextActionsProvider AssetContextActionsProvider { get; }
+    IGenericContextActionsProvider GenericContextActionsProvider { get; }
     IAssetTypeService AssetTypeService { get; }
     IAssetIconService AssetIconService { get; }
 

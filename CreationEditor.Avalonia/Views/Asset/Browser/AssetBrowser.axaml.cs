@@ -8,7 +8,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using ReactiveUI.Avalonia;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using CreationEditor.Avalonia.Attached.DragDrop;
@@ -18,6 +17,7 @@ using CreationEditor.Services.DataSource;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Asset.Browser;
 
 public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
@@ -215,18 +215,20 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             // Open references
             case Key.R when (e.KeyModifiers & KeyModifiers.Control) != 0:
                 if (dataGridRow.Model is DataSourceFileLink item) {
-                    await ViewModel.OpenReferences.Execute(item);
+                    ViewModel.GenericContextActionsProvider.OpenReferences(item);
                 }
                 break;
             // Rename
             case Key.F2:
                 if (dataGridRow.Model is IDataSourceLink dataSourceLink) {
-                    await ViewModel.Rename.Execute(dataSourceLink);
+                    await ViewModel.AssetContextActionsProvider.RenameAsset(dataSourceLink);
                 }
                 break;
             // Delete
             case Key.Delete:
-                await ViewModel.Delete.Execute(selectedItems.OfType<IDataSourceLink?>().ToList());
+                await ViewModel.AssetContextActionsProvider.DeleteAssets(selectedItems
+                    .OfType<IDataSourceLink>()
+                    .ToList());
                 break;
         }
     }
@@ -243,7 +245,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
         if (dataGridRow.Model is DataSourceFileLink fileLink) {
             // Open file
-            await ViewModel.Open.Execute([fileLink]);
+            ViewModel.AssetContextActionsProvider.OpenAssets(fileLink);
         } else {
             // Expand or collapse directory
             var expanderCell = visual.FindAncestorOfType<TreeDataGridExpanderCell>();

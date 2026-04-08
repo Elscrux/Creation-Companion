@@ -21,7 +21,7 @@ public sealed class PromotionContextActionProvider : IContextActionsProvider {
 
         var promoteCommand = ReactiveCommand.Create<SelectedListContext>(context => {
             var referenceWindow = new PromotionWindow {
-                DataContext = promoteToMasterVMFactory(context.SelectedRecords),
+                DataContext = promoteToMasterVMFactory(context.SelectedRecords.Select(x => x.ReferencedRecord).ToArray()),
             };
 
             referenceWindow.Show(mainWindow);
@@ -35,7 +35,7 @@ public sealed class PromotionContextActionProvider : IContextActionsProvider {
 
                     return context.SelectedRecords
                         .Any(record => {
-                            var modKey = record.FormKey.ModKey;
+                            var modKey = record.ReferencedRecord.FormKey.ModKey;
                             return linkCacheProvider
                                 .LinkCache.GetMod(modKey)
                                 .MasterReferences.Any(master => !SkyrimDefinitions.SkyrimModKeys.Contains(master.Master));

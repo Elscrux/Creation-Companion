@@ -6,6 +6,11 @@ namespace CreationEditor;
 
 public static class LinkCacheExtension {
     extension(ILinkCache linkCache) {
+        public ModKey? GetWinningOverrideModKey(IMajorRecordGetter record) {
+            return linkCache.TryResolveSimpleContext(record, out var context)
+                ? context.ModKey
+                : default;
+        }
         public IModGetter GetMod(ModKey modKey) {
             return linkCache.ListedOrder.First(mod => mod.ModKey == modKey);
         }

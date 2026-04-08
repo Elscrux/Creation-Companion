@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Builder;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
@@ -36,6 +37,7 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
 
     protected abstract IReg<ICellBrowserFactory> CellBrowserFactory { get; }
     protected abstract IReg<IApplicationIconProvider> ApplicationIconProvider { get; }
+    protected abstract IReg<IAssetContextActionsProvider> AssetContextActionsProvider { get; }
 
     protected abstract IReg<IArchiveService> ArchiveService { get; }
     protected abstract IReg<IAssetBrowserVM> AssetBrowserVM { get; }
@@ -78,6 +80,10 @@ public abstract class GameSpecificModule<TMod, TModGetter> : Module
         // Provider
         Register(builder, ApplicationIconProvider)
             .As<IApplicationIconProvider>()
+            .SingleInstance();
+
+        Register(builder, AssetContextActionsProvider)
+            .As<IAssetContextActionsProvider>()
             .SingleInstance();
 
         Register(builder, MutagenCommonTypeProvider)

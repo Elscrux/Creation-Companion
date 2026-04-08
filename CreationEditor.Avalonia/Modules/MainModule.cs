@@ -2,6 +2,7 @@
 using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
@@ -176,6 +177,14 @@ public sealed class MainModule : Module {
             .As<ILifecycleTask>()
             .SingleInstance();
 
+        builder.RegisterType<GenericContextActionsProvider>()
+            .As<IGenericContextActionsProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<TaskDialogProvider>()
+            .As<ITaskDialogProvider>()
+            .SingleInstance();
+
         // Factory
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
@@ -183,6 +192,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<BSEViewportFactory>()
             .As<IViewportFactory>()
+            .SingleInstance();
+
+        builder.RegisterType<ReferenceBrowserVMFactory>()
+            .As<IReferenceBrowserVMFactory>()
             .SingleInstance();
 
         // Pipeline

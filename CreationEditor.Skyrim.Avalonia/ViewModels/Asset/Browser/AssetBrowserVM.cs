@@ -6,33 +6,25 @@ using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Constants;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
-using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
-using CreationEditor.Avalonia.ViewModels.Reference;
-using CreationEditor.Avalonia.Views;
-using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
-using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
-using CreationEditor.Services.Mutagen.FormLink;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
@@ -41,11 +33,7 @@ using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
-    private readonly Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> _referenceBrowserVMFactory;
-    private readonly IMenuItemProvider _menuItemProvider;
-    private readonly IAssetController _assetController;
-    private readonly ILinkCacheProvider _linkCacheProvider;
-    private readonly MainWindow _mainWindow;
+    private readonly IContextMenuProvider _contextMenuProvider;
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
     private DataSourceDirectoryLink _rootDirectory = null!;
@@ -57,6 +45,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public IDataSourceService DataSourceService { get; }
     public ReadOnlyObservableCollection<IDataSource> DataSourceSelections { get; }
+    public IAssetContextActionsProvider AssetContextActionsProvider { get; }
+    public IGenericContextActionsProvider GenericContextActionsProvider { get; }
     public IAssetTypeService AssetTypeService { get; }
     public IAssetIconService AssetIconService { get; }
 
@@ -90,40 +80,30 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     public ReactiveCommand<Unit, Unit> Undo { get; }
     public ReactiveCommand<Unit, Unit> Redo { get; }
 
-    public ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Open { get; }
-    public ReactiveCommand<IReadOnlyList<IDataSourceLink?>, Unit> Delete { get; }
-    public ReactiveCommand<IDataSourceLink, Unit> Rename { get; }
-    public ReactiveCommand<IDataSourceLink, Unit> CopyPath { get; }
-    public ReactiveCommand<DataSourceFileLink, Unit> OpenReferences { get; }
-    public ReactiveCommand<DataSourceDirectoryLink, Unit> AddFolder { get; }
-
     public HierarchicalTreeDataGridSource<IDataSourceLink> AssetTreeSource { get; }
 
     public AssetBrowserVM(
-        Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserVMFactory,
+        IContextMenuProvider contextMenuProvider,
         IDataSourceWatcherProvider dataSourceWatcherProvider,
         IDataSourceService dataSourceService,
-        IMenuItemProvider menuItemProvider,
         IReferenceService referenceService,
         IAssetController assetController,
         IAssetTypeService assetTypeService,
         IAssetIconService assetIconService,
-        ILinkCacheProvider linkCacheProvider,
         IModelService modelService,
-        MainWindow mainWindow,
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
-        ISearchFilter searchFilter) {
+        ISearchFilter searchFilter,
+        IAssetContextActionsProvider assetContextActionsProvider,
+        IGenericContextActionsProvider genericContextActionsProvider) {
         DataSourceService = dataSourceService;
-        _referenceBrowserVMFactory = referenceBrowserVMFactory;
-        _menuItemProvider = menuItemProvider;
+        _contextMenuProvider = contextMenuProvider;
         _referenceService = referenceService;
-        _assetController = assetController;
         AssetTypeService = assetTypeService;
         AssetIconService = assetIconService;
-        _linkCacheProvider = linkCacheProvider;
-        _mainWindow = mainWindow;
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _searchFilter = searchFilter;
+        AssetContextActionsProvider = assetContextActionsProvider;
+        GenericContextActionsProvider = genericContextActionsProvider;
 
         DataSource = DataSourceService.ListedOrder.OfType<FileSystemDataSource>().First();
         DataSourceSelections = DataSourceService.DataSourcesChanged
@@ -213,7 +193,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         if (assetLink is null) return null;
 
                         var referenceCount = _referenceService.GetReferenceCount(assetLink);
-                        return new TextBlock { Text = referenceCount.ToString(), VerticalAlignment = VerticalAlignment.Center};
+                        return new TextBlock { Text = referenceCount.ToString(), VerticalAlignment = VerticalAlignment.Center };
                     }),
                     null,
                     new GridLength(),
@@ -337,54 +317,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             })
             .DisposeWith(this);
 
-        Undo = ReactiveCommand.Create(() => _assetController.Undo());
-        Redo = ReactiveCommand.Create(() => _assetController.Redo());
-
-        Open = ReactiveCommand.Create<IReadOnlyList<IDataSourceLink?>>(OpenAssets);
-
-        Delete = ReactiveCommand.CreateFromTask<IReadOnlyList<IDataSourceLink?>>(async assets => {
-            var deleteAssets = assets.WhereNotNull().ToArray();
-            Control? content = null;
-
-            var referenceBrowserVM = GetReferenceBrowserVM(deleteAssets);
-            if (referenceBrowserVM is not null) {
-                var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
-                content = new StackPanel {
-                    Children = {
-                        new TextBlock { Text = "Do you really want to proceed? There are still references to these assets." },
-                        referenceBrowser,
-                    },
-                };
-            }
-
-            var deleteDialog = assets.Count == 1
-                ? CreateAssetDialog(deleteAssets, $"Delete {deleteAssets[0].Name}", content)
-                : CreateAssetDialog(deleteAssets, $"Delete {assets.Count}", content);
-
-            if (await deleteDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-                foreach (var asset in deleteAssets) {
-                    _assetController.Delete(asset);
-                }
-            }
-        });
-
-        Rename = ReactiveCommand.CreateFromTask<IDataSourceLink>(RenameAsset);
-
-        CopyPath = ReactiveCommand.Create<IDataSourceLink>(CopyAssetPath);
-
-        OpenReferences = ReactiveCommand.Create<DataSourceFileLink>(OpenAssetReferences,
-            this.WhenAnyValue(x => x.AssetTreeSource.RowSelection!.SelectedItem)
-                .Select(link => {
-                    if (link is null) return false;
-
-                    var assetLink = AssetTypeService.GetAssetLink(link.DataRelativePath);
-                    if (assetLink is null) return false;
-
-                    return _referenceService.GetReferenceCount(assetLink) > 0;
-                })
-        );
-
-        AddFolder = ReactiveCommand.CreateFromTask<DataSourceDirectoryLink>(AddAssetFolder);
+        Undo = ReactiveCommand.Create(assetController.Undo);
+        Redo = ReactiveCommand.Create(assetController.Redo);
     }
 
     private IEnumerable<string> GetMissingLinks(DataSourceFileLink fileLink, IAssetLinkGetter assetLink) {
@@ -410,96 +344,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Where(dir => ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(dir.DataRelativePath));
     }
 
-    private async Task AddAssetFolder(DataSourceDirectoryLink dir) {
-        var textBox = new TextBox { Text = string.Empty, Watermark = "New folder" };
-        var relativePath = dir.DataRelativePath.Path;
-        var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
-
-        if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-            var newFolder = dir.FileSystem.Path.Combine(dir.FullPath, textBox.Text);
-            dir.FileSystem.Directory.CreateDirectory(newFolder);
-        }
-    }
-
-    private void OpenAssetReferences(DataSourceFileLink asset) {
-        var referenceBrowserVM = GetReferenceBrowserVM(asset);
-        var relativePath = asset.DataRelativePath.Path;
-
-        var referenceWindow = new ReferenceWindow(relativePath, referenceBrowserVM);
-        referenceWindow.Show(_mainWindow);
-    }
-
-    private void CopyAssetPath(IDataSourceLink asset) {
-        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
-
-        clipboard?.SetTextAsync(asset.DataRelativePath.Path);
-    }
-
-    private async Task RenameAsset(IDataSourceLink asset) {
-        var nameWithoutExtension = asset.NameWithoutExtension;
-        var textBox = new TextBox { Text = nameWithoutExtension };
-        var content = new StackPanel { Children = { textBox } };
-
-        var referenceBrowserVM = GetReferenceBrowserVM(asset);
-        if (referenceBrowserVM is not null) {
-            var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
-            content.Children.Add(new TextBlock {
-                Text = "Do you really want to proceed? These references will be modified to point to the new path.",
-            });
-            content.Children.Add(referenceBrowser);
-        }
-
-        var renameDialog = CreateAssetDialog($"Rename {asset.Name}", content);
-        if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-            if (string.Equals(nameWithoutExtension, textBox.Text, DataRelativePath.PathComparison)) return;
-
-            switch (asset) {
-                case DataSourceDirectoryLink directoryLink:
-                    _assetController.Rename(directoryLink, textBox.Text);
-                    break;
-                case DataSourceFileLink fileLink:
-                    _assetController.Rename(fileLink, textBox.Text + fileLink.Extension);
-                    break;
-            }
-        }
-    }
-
-    private ReferenceBrowserVM? GetReferenceBrowserVM(params IReadOnlyList<IDataSourceLink> assets) {
-        var recordReferences = new HashSet<IFormLinkIdentifier>(FormLinkIdentifierEqualityComparer.Instance);
-        var assetReferences = new HashSet<DataRelativePath>();
-
-        // Gather all references to all assets
-        foreach (var asset in assets) {
-            if (!asset.Exists()) continue;
-
-            if (asset is DataSourceDirectoryLink directoryLink) {
-                foreach (var fileLink in directoryLink.EnumerateFileLinks(true)) {
-                    AddReferences(fileLink);
-                }
-            } else {
-                AddReferences(asset);
-            }
-
-            void AddReferences(IDataSourceLink fileLink) {
-                var assetLink = AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
-                if (assetLink is null) return;
-
-                assetReferences.AddRange(_referenceService.GetAssetReferences(assetLink));
-                recordReferences.AddRange(_referenceService.GetRecordReferences(assetLink));
-            }
-        }
-
-        var references = assetReferences
-            .Select(path => new AssetReferenceVM(path, _linkCacheProvider, AssetTypeService, _referenceService))
-            .Cast<IReferenceVM>()
-            .Combine(recordReferences.Select(x => new RecordReferenceVM(x, _linkCacheProvider, _referenceService)))
-            .ToArray();
-
-        if (references.Length == 0) return null;
-
-        return _referenceBrowserVMFactory(assets.Count == 1 ? assets[0] : assets, references);
-    }
-
     public async Task Drop(DataSourceDirectoryLink dstDirectory, DragInfo dragInfo) {
         var draggedAssets = dragInfo.Indexes
             .Select(indexPath => {
@@ -510,160 +354,26 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .OfType<IDataSourceLink>()
             .ToArray();
 
-        var firstDraggedAsset = draggedAssets.FirstOrDefault();
-        if (firstDraggedAsset is null) return;
-
-        var srcDirectory = firstDraggedAsset.ParentDirectory;
-        if (srcDirectory is null) return;
-
-        var relativeSrcDirectory = srcDirectory.DataRelativePath.Path;
-        var relativeDstDirectory = dstDirectory.DataRelativePath.Path;
-
-        // No need to move if the source and destination are the same
-        if (string.Equals(relativeSrcDirectory, relativeDstDirectory, DataRelativePath.PathComparison)) return;
-
-        var content = new StackPanel {
-            Children = {
-                draggedAssets.Length > 1
-                    ? new TextBlock {
-                        Inlines = [
-                            new Run("Move "),
-                            new Run(draggedAssets.Length.ToString()) {
-                                Foreground = StandardBrushes.HighlightBrush,
-                            },
-                            new Run(" Items from "),
-                            new Run(relativeSrcDirectory) {
-                                Foreground = StandardBrushes.HighlightBrush,
-                            },
-                            new Run(" to "),
-                            new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.HighlightBrush,
-                            },
-                        ],
-                        FontSize = 14,
-                        TextWrapping = TextWrapping.Wrap,
-                    }
-                    : new TextBlock {
-                        Inlines = [
-                            new Run("Move "),
-                            new Run(firstDraggedAsset.Name) {
-                                Foreground = StandardBrushes.HighlightBrush,
-                            },
-                            new Run(" to "),
-                            new Run(relativeDstDirectory) {
-                                Foreground = StandardBrushes.HighlightBrush,
-                            },
-                        ],
-                        FontSize = 14,
-                        TextWrapping = TextWrapping.Wrap,
-                    },
-            },
-        };
-
-        var referenceBrowserVM = GetReferenceBrowserVM(draggedAssets);
-        if (referenceBrowserVM is not null) {
-            var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
-            content.Children.Add(new TextBlock {
-                Text = "Do you really want to proceed? These references will be modified to point to the new path.",
-            });
-            content.Children.Add(referenceBrowser);
-        }
-
-        // Show a confirmation dialog
-        var moveDialog = CreateAssetDialog(draggedAssets, "Confirm", content);
-        if (await moveDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
-            // Move all assets and remap their references
-            foreach (var asset in draggedAssets) _assetController.Move(asset, dstDirectory);
-        }
+        await AssetContextActionsProvider.MoveAssets(dstDirectory, draggedAssets);
     }
 
     public IEnumerable<Control> GetContextMenuItems(IDataSourceLink asset) {
-        var selectedItems = AssetTreeSource.RowSelection!.SelectedItems.ToArray();
-        if (!selectedItems.Contains(asset)) {
-            // We got an outdated selected items list - just use the current asset
-            selectedItems = [asset];
-        }
-
-        List<Control> items = [
-            _menuItemProvider.File(Open, selectedItems),
-            _menuItemProvider.Rename(Rename, asset),
-            _menuItemProvider.Delete(Delete, selectedItems),
-            new Separator(),
-            new MenuItem {
-                Icon = new SymbolIcon { Symbol = Symbol.Copy },
-                Header = "Copy Path",
-                Command = CopyPath,
-                CommandParameter = asset,
-            },
-        ];
+        List<Control> items = [];
 
         var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
+        IReferencedAsset? referencedAsset;
         if (assetLink is not null) {
-            var assetReferences = _referenceService.GetAssetReferences(assetLink);
-            var recordReferences = _referenceService.GetRecordReferences(assetLink);
-            if (assetReferences.Any() || recordReferences.Any()) {
-                var dataSourceLink = new DataSourceFileLink(asset.DataSource, asset.DataRelativePath);
-                items.Add(_menuItemProvider.References(OpenReferences, dataSourceLink));
-            }
+            using var _ = _referenceService.GetReferencedAsset(assetLink, out referencedAsset);
+        } else {
+            referencedAsset = null;
         }
 
-        if (asset is DataSourceDirectoryLink) {
-            items.Add(new Separator());
-            items.Add(new MenuItem {
-                Icon = new SymbolIcon { Symbol = Symbol.NewFolder },
-                Header = "Add Folder",
-                Command = AddFolder,
-                CommandParameter = asset,
-            });
+        var menuItems = _contextMenuProvider.GetMenuItems(new SelectedListContext([], [new AssetContext(asset, referencedAsset)]));
+        foreach (var control in menuItems.OfType<Control>()) {
+            items.Add(control);
         }
 
         return items;
-    }
-
-    private TaskDialog CreateAssetDialog(string header, Control? content = null) {
-        var assetDialog = new TaskDialog {
-            Header = header,
-            Content = content,
-            XamlRoot = _mainWindow,
-            Buttons = {
-                TaskDialogButton.OKButton,
-                TaskDialogButton.CancelButton,
-            },
-            KeyBindings = {
-                new KeyBinding {
-                    Gesture = new KeyGesture(Key.Enter),
-                    Command = TaskDialogButton.OKButton.Command,
-                },
-                new KeyBinding {
-                    Gesture = new KeyGesture(Key.Escape),
-                    Command = TaskDialogButton.CancelButton.Command,
-                },
-            },
-        };
-
-        content?.KeyBindings.AddRange(assetDialog.KeyBindings);
-
-        if (IsBusyLoadingReferences) {
-            assetDialog.IconSource = new SymbolIconSource { Symbol = Symbol.ReportHacked };
-            assetDialog.SubHeader += "Warning: This change might break something - Not all references have been loaded yet.";
-        }
-
-        return assetDialog;
-    }
-
-    private TaskDialog CreateAssetDialog(IEnumerable<IDataSourceLink> footerAssets, string header, Control? content = null) {
-        var dialog = CreateAssetDialog(header, content);
-
-        var fileLinks = footerAssets.ToArray();
-        if (fileLinks.Length > 1) {
-            dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
-            dialog.Footer = new ItemsControl {
-                ItemsSource = fileLinks,
-                ItemTemplate = new FuncDataTemplate<IDataSourceLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
-            };
-        }
-
-        return dialog;
     }
 
     private void MoveToPath(DataRelativePath path) {
@@ -697,12 +407,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         AssetTreeSource.RowSelection!.Clear();
         AssetTreeSource.RowSelection.Select(pathIndices);
-    }
-
-    public void OpenAssets(IReadOnlyList<IDataSourceLink?> assets) {
-        foreach (var asset in assets.WhereNotNull()) {
-            _assetController.Open(asset);
-        }
     }
 
     public IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink) {
@@ -857,9 +561,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         switch (link) {
             case DataSourceFileLink fileLink:
                 if (!FilterLink(fileLink)) return;
+
                 break;
             case DataSourceDirectoryLink directoryLink:
                 if (!SearchAndFilterDirectory(directoryLink)) return;
+
                 break;
         }
 
@@ -950,6 +656,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             if (value is not TreeDataGridItemsSourceView view) continue;
 
             if (row.Model is not DataSourceDirectoryLink directoryLink) continue;
+
             var dataSourceLinks = GetFilteredFileSystemChildren(directoryLink).ToArray();
             var oldLinks = view.Inner.OfType<IDataSourceLink>().Except(dataSourceLinks).ToHashSet();
             var newLinks = dataSourceLinks.Except(view.Inner.OfType<IDataSourceLink>()).ToArray();

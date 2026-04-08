@@ -6,19 +6,16 @@ using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Services.Actions;
-using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.Views;
-using CreationEditor.Avalonia.Views.Reference;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
-using CreationEditor.Services.Mutagen.Record;
-using CreationEditor.Services.Mutagen.References;
-using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed partial class ReferenceBrowserVM : ViewModel {
+    private readonly ILinkCacheProvider _linkCacheProvider;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IContextMenuProvider _contextMenuProvider;
 
     public object? Context { get; }
@@ -27,26 +24,18 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
     [Reactive] public partial bool ShowTree { get; set; }
     [Reactive] public partial ITreeDataGridSource<IReferenceVM> ReferenceSource { get; set; }
 
-    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> EditRecord { get; }
-    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DuplicateRecord { get; }
-    public ReactiveCommand<IEnumerable<IMajorRecordGetter>, Unit> DeleteRecord { get; }
-    public ReactiveCommand<IEnumerable<IReferencedRecord>, Unit> OpenReferences { get; }
-
     public ReactiveCommand<Unit, Unit> ToggleTree { get; }
     public ReactiveCommand<Unit, Unit> RemapReferences { get; }
 
     public ReferenceBrowserVM(
-        Func<object?, IReadOnlyList<IReferenceVM>, ReferenceBrowserVM> referenceBrowserFactory,
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
         ILinkCacheProvider linkCacheProvider,
+        IDataSourceService dataSourceService,
         IContextMenuProvider contextMenuProvider,
-        IMenuItemProvider menuItemProvider,
-        IRecordController recordController,
-        IReferenceService referenceService,
-        IRecordEditorController recordEditorController,
-        MainWindow mainWindow,
         object? context = null,
         params IReadOnlyList<IReferenceVM> references) {
+        _linkCacheProvider = linkCacheProvider;
+        _dataSourceService = dataSourceService;
         _contextMenuProvider = contextMenuProvider;
         Context = context;
 
@@ -121,42 +110,6 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         };
         if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> flatRowSelection) flatRowSelection.SingleSelect = false;
 
-        EditRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
-            foreach (var record in records) {
-                var newOverride = recordController.GetOrAddOverride(record);
-                recordEditorController.OpenEditor(newOverride);
-            }
-        });
-
-        DuplicateRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
-            foreach (var record in records) {
-                recordController.DuplicateRecord(record);
-            }
-        });
-
-        DeleteRecord = ReactiveCommand.Create<IEnumerable<IMajorRecordGetter>>(records => {
-            foreach (var record in records) {
-                recordController.DeleteRecord(record);
-            }
-        });
-
-        OpenReferences = ReactiveCommand.Create<IEnumerable<IReferencedRecord>>(referencedRecords => {
-            var records = referencedRecords.ToArray();
-
-            var recordReferences = records
-                .SelectMany(record => record.RecordReferences)
-                .Select(identifier => new RecordReferenceVM(identifier, linkCacheProvider, referenceService))
-                .Cast<IReferenceVM>()
-                .ToArray();
-
-            var referenceBrowserVM = referenceBrowserFactory(referencedRecords, recordReferences);
-            var referenceWindow = new ReferenceWindow(records.Select(record => record.Record)) {
-                Content = new ReferenceBrowser(referenceBrowserVM),
-            };
-
-            referenceWindow.Show(mainWindow);
-        });
-
         ToggleTree = ReactiveCommand.Create(() => {
             ShowTree = !ShowTree;
             ReferenceSource = ShowTree ? treeReferenceSource : flatReferenceSource;
@@ -194,7 +147,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
         _contextMenuProvider.ExecutePrimary(recordListContext);
     }
 
-    private static SelectedListContext? GetRecordListContext(Control control) {
+    private SelectedListContext? GetRecordListContext(Control control) {
         var treeDataGrid = control.FindAncestorOfType<TreeDataGrid>();
         if (treeDataGrid?.RowSelection is null) return null;
 
@@ -208,8 +161,20 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
 
         if (selectedRecordReferences.Count == 0 && selectedAssetReferences.Count == 0) return null;
 
-        var recordReferences = selectedRecordReferences.Select(x => x.ReferencedRecord).ToArray();
-        var assetReferences = selectedAssetReferences.Select(x => x.ReferencedAsset).ToArray();
+        var recordReferences = selectedRecordReferences
+            .Select(x => {
+                var modKey = _linkCacheProvider.LinkCache.GetWinningOverrideModKey(x.ReferencedRecord.Record);
+                return new RecordContext(modKey, x.ReferencedRecord);
+            })
+            .WhereNotNull()
+            .ToArray();
+        var assetReferences = selectedAssetReferences
+            .Select(x => x.ReferencedAsset)
+            .Select(x => _dataSourceService.TryGetFileLink(x.AssetLink.DataRelativePath, out var link)
+                ? new AssetContext(link, x)
+                : null)
+            .WhereNotNull()
+            .ToArray();
         return new SelectedListContext(recordReferences, assetReferences);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Modules;
+using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Browser;
@@ -51,6 +52,7 @@ public sealed class SkyrimModule : GameSpecificModule<ISkyrimMod, ISkyrimModGett
 
     protected override IReg<ICellBrowserFactory> CellBrowserFactory => Register<SkyrimCellBrowserFactory>();
     protected override IReg<IApplicationIconProvider> ApplicationIconProvider => Register<SkyrimApplicationIconProvider>();
+    protected override IReg<IAssetContextActionsProvider> AssetContextActionsProvider => Register<SkyrimAssetContextActionsProvider>();
 
     protected override IReg<IArchiveService> ArchiveService => Register<ArchiveService>();
     protected override IReg<IAssetBrowserVM> AssetBrowserVM => Register<AssetBrowserVM>();

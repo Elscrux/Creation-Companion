@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Record.Provider;
+using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using DynamicData.Binding;
@@ -13,6 +14,7 @@ using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.List;
 
 public sealed partial class RecordListVM : ViewModel, IRecordListVM {
+    private readonly ILinkCacheProvider _linkCacheProvider;
     public IEnumerable? Records { get; }
 
     public IRecordProvider RecordProvider { get; }
@@ -28,8 +30,10 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
 
     public RecordListVM(
         IRecordProvider recordProvider,
+        ILinkCacheProvider linkCacheProvider,
         IContextMenuProvider contextMenuProvider,
         IObservable<Func<IReferencedRecord, bool>>? customFilter = null) {
+        _linkCacheProvider = linkCacheProvider;
         RecordProvider = recordProvider.DisposeWith(this);
         ContextMenuProvider = contextMenuProvider;
 
@@ -59,7 +63,17 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
     }
 
     public SelectedListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {
-        return new SelectedListContext(referencedRecords, [], RecordProvider.RecordTypes.ToList(), _settings);
+        return new SelectedListContext(
+            referencedRecords
+                .Select(x => {
+                    var modKey = _linkCacheProvider.LinkCache.GetWinningOverrideModKey(x.Record);
+                    return new RecordContext(modKey, x);
+                })
+                .WhereNotNull()
+                .ToArray(),
+                [],
+            RecordProvider.RecordTypes.ToList(),
+            Settings: _settings);
     }
 
     public IRecordListVM AddSetting<T>(T t) {

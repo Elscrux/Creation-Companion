@@ -1,24 +1,32 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References;
+using Mutagen.Bethesda.Plugins;
+using Noggog;
 namespace CreationEditor.Avalonia.Services.Actions;
 
+public record RecordContext(ModKey? Origin, IReferencedRecord ReferencedRecord);
+public record AssetContext(IDataSourceLink DataSourceLink, IReferencedAsset? ReferencedAsset);
+
 public sealed record SelectedListContext(
-    IReadOnlyList<IReferencedRecord> SelectedRecords,
-    IReadOnlyList<IReferencedAsset> SelectedAssets,
+    IReadOnlyList<RecordContext> SelectedRecords,
+    IReadOnlyList<AssetContext> SelectedAssets,
     IEnumerable<Type> ListTypes,
     IDictionary<Type, object>? Settings = null) {
 
     public int Count => SelectedRecords.Count + SelectedAssets.Count;
 
     public SelectedListContext(
-        IReadOnlyList<IReferencedRecord> selectedRecords,
-        IReadOnlyList<IReferencedAsset> selectedAssets,
+        IReadOnlyList<RecordContext> selectedRecords,
+        IReadOnlyList<AssetContext> selectedAssets,
         IDictionary<Type, object>? settings = null)
         : this(
             selectedRecords,
             selectedAssets,
-            selectedRecords.Select(r => r.Record.Type)
-                .Concat(selectedAssets.Select(a => a.AssetLink.Type.GetType()))
+            selectedRecords.Select(r => r.ReferencedRecord.Record.Type)
+                .Concat(selectedAssets
+                    .Select(a => a.ReferencedAsset?.AssetLink.Type.GetType())
+                    .WhereNotNull())
                 .Distinct(),
             settings) {}
 

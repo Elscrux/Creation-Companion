@@ -22,14 +22,14 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
 
         _addToTierCommand = ReactiveCommand.Create<(SelectedListContext Context, TierIdentifier Tier)>(x => {
             foreach (var record in x.Context.SelectedRecords) {
-                _tierController.SetRecordTier(record.Record, x.Tier);
+                _tierController.SetRecordTier(record.ReferencedRecord.Record, x.Tier);
             }
         });
 
         _actions = [
             new ContextAction(
                 context => context.SelectedAssets.Count == 0
-                 && context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
+                 && context.SelectedRecords.All(record => record.ReferencedRecord.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
                 ContextActionGroup.Misc,
                 null,
@@ -40,7 +40,7 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
                 }),
             new ContextAction(
                 context => context.SelectedAssets.Count == 0 
-                 && context.SelectedRecords.All(record => record.Record is IItemGetter) && GetMenuItems(context).Any(),
+                 && context.SelectedRecords.All(record => record.ReferencedRecord.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
                 ContextActionGroup.Misc,
                 null,
@@ -49,7 +49,7 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
                     Icon = new SymbolIcon { Symbol = Symbol.Remove },
                     Command = ReactiveCommand.Create(() => {
                         foreach (var record in context.SelectedRecords) {
-                            _tierController.RemoveRecordTier(record.Record);
+                            _tierController.RemoveRecordTier(record.ReferencedRecord.Record);
                         }
                     })
                 }),
@@ -59,8 +59,9 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
     private IEnumerable<MenuItem> GetMenuItems(SelectedListContext context) {
         if (context.SelectedRecords.Count == 0) return [];
 
-        var listRecordType = _leveledListRecordTypeProvider.GetListRecordType(context.SelectedRecords[0].Record);
-        if (listRecordType is null || context.SelectedRecords.Any(r => _leveledListRecordTypeProvider.GetListRecordType(r.Record) != listRecordType)) return [];
+        var listRecordType = _leveledListRecordTypeProvider.GetListRecordType(context.SelectedRecords[0].ReferencedRecord.Record);
+        if (listRecordType is null) return [];
+        if (context.SelectedRecords.Any(r => _leveledListRecordTypeProvider.GetListRecordType(r.ReferencedRecord.Record) != listRecordType)) return [];
 
         var tiers = _tierController.GetTiers(listRecordType.Value);
         var tierGroup = new TierGroup(string.Empty, tiers.Keys, ListDefinition.TierGroupSeparator);

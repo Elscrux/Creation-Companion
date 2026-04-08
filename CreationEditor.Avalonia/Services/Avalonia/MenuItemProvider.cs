@@ -12,7 +12,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return menuItem;
     }
 
-    public MenuItem Save(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Save(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -20,7 +20,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Save",
             },
             parameter,
-            new KeyGesture(Key.S, KeyModifiers.Control));
+            hasKeyGesture ? new KeyGesture(Key.S, KeyModifiers.Control) : null);
     }
 
     public MenuItem View(ICommand command, object? parameter = null, string? customHeader = null) {
@@ -43,7 +43,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem Rename(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Rename(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -51,7 +51,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Rename",
             },
             parameter,
-            new KeyGesture(Key.F2));
+            hasKeyGesture ? new KeyGesture(Key.F2) : null);
     }
 
     public MenuItem New(ICommand command, object? parameter = null, string? customHeader = null) {
@@ -74,7 +74,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
-    public MenuItem Duplicate(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Duplicate(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -82,10 +82,10 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Duplicate",
             },
             parameter,
-            new KeyGesture(Key.D, KeyModifiers.Control));
+            hasKeyGesture ? new KeyGesture(Key.D, KeyModifiers.Control) : null);
     }
 
-    public MenuItem Delete(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Delete(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -93,10 +93,10 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Delete",
             },
             parameter,
-            new KeyGesture(Key.Delete));
+            hasKeyGesture ? new KeyGesture(Key.Delete) : null);
     }
 
-    public MenuItem References(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem References(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -104,10 +104,10 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Open References",
             },
             parameter,
-            new KeyGesture(Key.R, KeyModifiers.Control));
+            hasKeyGesture ? new KeyGesture(Key.R, KeyModifiers.Control) : null);
     }
 
-    public MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -115,10 +115,10 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Copy",
             },
             parameter,
-            new KeyGesture(Key.C, KeyModifiers.Control));
+            hasKeyGesture ? new KeyGesture(Key.C, KeyModifiers.Control) : null);
     }
 
-    public MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null) {
+    public MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
                 Command = command,
@@ -126,7 +126,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
                 Header = customHeader ?? "Paste",
             },
             parameter,
-            new KeyGesture(Key.V, KeyModifiers.Control));
+            hasKeyGesture ? new KeyGesture(Key.V, KeyModifiers.Control) : null);
     }
 
     public MenuItem Custom(ICommand command, string customHeader, object? parameter = null, object? icon = null, KeyGesture? keyGesture = null) {

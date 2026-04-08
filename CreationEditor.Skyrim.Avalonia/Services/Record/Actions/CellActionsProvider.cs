@@ -15,7 +15,7 @@ public sealed class CellActionsProvider : IContextActionsProvider {
         IDockFactory dockFactory) {
 
         var viewCommand = ReactiveCommand.CreateFromTask<SelectedListContext>(async context => {
-            if (context.SelectedRecords[0].Record is not ICellGetter cell) return;
+            if (context.SelectedRecords[0].ReferencedRecord.Record is not ICellGetter cell) return;
 
             var cellLoadStrategy = context.GetSetting<ICellLoadStrategy>();
 
@@ -29,7 +29,7 @@ public sealed class CellActionsProvider : IContextActionsProvider {
         });
 
         _actions = [
-            new ContextAction(context => context is { SelectedRecords: [{ Record: ICellGetter }], SelectedAssets.Count: 0 },
+            new ContextAction(context => context is { SelectedRecords: [{ ReferencedRecord.Record: ICellGetter }], SelectedAssets.Count: 0 },
                 100,
                 ContextActionGroup.Viewing,
                 viewCommand,
