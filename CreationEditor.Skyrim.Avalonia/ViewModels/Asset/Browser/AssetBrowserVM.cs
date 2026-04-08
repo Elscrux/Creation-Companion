@@ -242,6 +242,18 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     }
                                 );
                             }
+
+                            var misalignedPaths = modelService.GetMisalignedPaths(fileLink).ToList();
+                            if (misalignedPaths.Count > 0) {
+                                // For models, we show the misaligned paths in a tooltip
+                                stackPanel.Children.Add(
+                                    new FontIcon {
+                                        Glyph = "⚠️",
+                                        VerticalAlignment = VerticalAlignment.Center,
+                                        [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths),
+                                    }
+                                );
+                            }
                         }
 
                         return stackPanel;

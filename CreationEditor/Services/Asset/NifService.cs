@@ -1,9 +1,16 @@
-﻿using CreationEditor.Services.DataSource;
+﻿using System.IO.Abstractions;
+using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Mutagen.References.Parser;
+using Mutagen.Bethesda.Assets;
+using Mutagen.Bethesda.Plugins.Exceptions;
 using nifly;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
-public class NifService(ILogger logger) : IModelService {
+public class NifService(
+    ILogger logger,
+    IFileSystem fileSystem,
+    NifTextureParser nifTextureParser) : IModelService {
     public bool HasCollision(DataSourceFileLink fileLink) {
         if (!fileLink.Exists()) return false;
 
@@ -29,5 +36,23 @@ public class NifService(ILogger logger) : IModelService {
         }
 
         return false;
+    }
+
+    public IEnumerable<string> GetMisalignedPaths(DataSourceFileLink fileLink) {
+        if (!fileLink.Exists()) yield break;
+
+        foreach (var textureString in nifTextureParser.ParseFileTextureStrings(fileLink.FullPath, fileSystem)) {
+            string? misalignedPath = null;
+
+            try {
+                _ = new DataRelativePath(textureString);
+            } catch (AssetPathMisalignedException e) {
+                misalignedPath = e.Path;
+            }
+
+            if (misalignedPath is not null) {
+                yield return misalignedPath;
+            }
+        }
     }
 }

@@ -15,8 +15,8 @@ public sealed class NifTextureParser(
     public string Name => "Nif Textures";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<IAssetLinkGetter> ParseFile(string filePath, IFileSystem fileSystem) {
-        var results = new HashSet<IAssetLinkGetter>();
+    public IEnumerable<string> ParseFileTextureStrings(string filePath, IFileSystem fileSystem) {
+        var results = new HashSet<string>();
         if (!fileSystem.File.Exists(filePath)) return results;
 
         using var nif = new NifFile();
@@ -61,22 +61,28 @@ public sealed class NifTextureParser(
             var assetString = asset.get();
             if (string.IsNullOrEmpty(assetString)) return;
 
+            results.Add(assetString);
+        }
+    }
+
+    public IEnumerable<IAssetLinkGetter> ParseFile(string filePath, IFileSystem fileSystem) {
+        foreach (var fileTextureString in ParseFileTextureStrings(filePath, fileSystem)) {
             DataRelativePath dataRelativePath;
             try {
-                dataRelativePath = new DataRelativePath(assetString);
+                dataRelativePath = new DataRelativePath(fileTextureString);
             } catch (AssetPathMisalignedException e) {
                 logger.Here().Warning(e,
                     "Failed to parse asset path {AssetString} referenced in {Path}: {Exception}",
-                    assetString,
+                    fileTextureString,
                     filePath,
                     e);
-                return;
+                continue;
             }
 
             var assetLink = assetTypeService.GetAssetLink(dataRelativePath);
-            if (assetLink is null) return;
+            if (assetLink is null) continue;
 
-            results.Add(assetLink);
+            yield return assetLink;
         }
     }
 }

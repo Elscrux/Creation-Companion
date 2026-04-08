@@ -3,4 +3,5 @@ namespace CreationEditor.Services.Asset;
 
 public interface IModelService {
     bool HasCollision(DataSourceFileLink fileLink);
+    IEnumerable<string> GetMisalignedPaths(DataSourceFileLink fileLink);
 }
