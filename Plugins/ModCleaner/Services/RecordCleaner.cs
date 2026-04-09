@@ -171,19 +171,6 @@ public sealed class RecordCleaner(
                 }
             }
         }
-
-        foreach (var location in mod.EnumerateMajorRecords<ILocationGetter>()) {
-            var locationLink = new FormLinkIdentifier(location.ToFormLinkInformation());
-            if (location.Keywords is not null) {
-                foreach (var keyword in location.Keywords) {
-                    graph.AddEdge(new Edge<ILinkIdentifier>(locationLink, new FormLinkIdentifier(keyword)));
-                }
-            }
-            if (!location.ParentLocation.IsNull) graph.AddEdge(new Edge<ILinkIdentifier>(locationLink, new FormLinkIdentifier(location.ParentLocation)));
-            if (!location.Music.IsNull) graph.AddEdge(new Edge<ILinkIdentifier>(locationLink, new FormLinkIdentifier(location.Music)));
-            if (!location.UnreportedCrimeFaction.IsNull) graph.AddEdge(new Edge<ILinkIdentifier>(locationLink, new FormLinkIdentifier(location.UnreportedCrimeFaction)));
-            if (!location.WorldLocationMarkerRef.IsNull) graph.AddEdge(new Edge<ILinkIdentifier>(locationLink, new FormLinkIdentifier(location.WorldLocationMarkerRef)));
-        }
     }
 
     public static HashSet<FormLinkInformation> GetRecordsToClean(
