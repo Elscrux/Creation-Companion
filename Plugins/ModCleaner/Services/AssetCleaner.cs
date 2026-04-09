@@ -7,6 +7,8 @@ using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Assets;
 using Noggog;
 using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
@@ -20,7 +22,7 @@ public sealed class AssetCleaner(
     IReferenceService referenceService,
     IDataSourceService dataSourceService) {
 
-    public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
+    public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
         foreach (var fileLink in dataSourceService.EnumerateFileLinksInAllDataSources(new DataRelativePath(string.Empty), true)) {
             var assetLink = assetTypeService.GetAssetLink(fileLink.DataRelativePath);
             if (assetLink is null) continue;
@@ -29,7 +31,9 @@ public sealed class AssetCleaner(
             graph.AddVertex(assetLinkIdentifier);
 
             foreach (var recordReference in referenceService.GetRecordReferences(assetLink)) {
-                if (mod.ModKey == recordReference.FormKey.ModKey || dependencies.Contains(recordReference.FormKey.ModKey)) {
+                if (mod.ModKey == recordReference.FormKey.ModKey
+                 || masters.Contains(recordReference.FormKey.ModKey)
+                 || dependencies.Contains(recordReference.FormKey.ModKey)) {
                     graph.AddEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(recordReference), assetLinkIdentifier));
                 }
             }

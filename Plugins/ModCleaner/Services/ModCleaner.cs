@@ -1,15 +1,15 @@
-﻿using CreationEditor;
-using CreationEditor.Services.DataSource;
+﻿using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Environment;
+using CreationEditor.Skyrim;
 using ModCleaner.Models;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
-using Serilog;
 using ILinkIdentifier = ModCleaner.Models.ILinkIdentifier;
 namespace ModCleaner.Services;
 
 public sealed class ModCleaner(
-    ILogger logger,
+    IEditorEnvironment editorEnvironment,
     AssetCleaner assetCleaner,
     RecordCleaner recordCleaner) {
 
@@ -27,9 +27,10 @@ public sealed class ModCleaner(
 
     public Graph<ILinkIdentifier, Edge<ILinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var graph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
+        var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
 
-        recordCleaner.BuildGraph(graph, mod, dependencies);
-        assetCleaner.BuildGraph(graph, mod, dependencies);
+        recordCleaner.BuildGraph(graph, mod, dependencies, masters);
+        assetCleaner.BuildGraph(graph, mod, dependencies, masters);
 
         return graph;
     }

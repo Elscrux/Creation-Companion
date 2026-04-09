@@ -24,8 +24,7 @@ public sealed class RecordCleaner(
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
 
-    public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
-        var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
+    public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
         var processedRecords = new HashSet<FormKey>();
         foreach (var record in mod.EnumerateMajorRecords()) {
             // Record specific pre-processing
