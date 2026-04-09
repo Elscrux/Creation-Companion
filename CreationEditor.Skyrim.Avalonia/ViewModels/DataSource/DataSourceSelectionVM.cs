@@ -8,6 +8,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using CreationEditor.Avalonia.Models.DataSource;
@@ -102,7 +103,9 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
                         if (item is null) return null;
 
                         return new CheckBox {
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(DataSourceItem.IsActive), BindingMode.TwoWay),
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(DataSourceItem.IsActive)) { Mode = BindingMode.TwoWay },
+                            [!InputElement.IsEnabledProperty] =
+                                new Binding("!" + nameof(DataSourceItem.DataSource) + "." + nameof(DataSourceItem.DataSource.IsReadOnly)) { Mode = BindingMode.TwoWay },
                             VerticalAlignment = VerticalAlignment.Center,
                         };
                     })),
