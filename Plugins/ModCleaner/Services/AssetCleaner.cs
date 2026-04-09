@@ -46,11 +46,12 @@ public sealed class AssetCleaner(
         }
     }
 
-    public IReadOnlyList<IAssetLinkGetter> GetAssetsToClean(HashSet<ILinkIdentifier> retained, IDataSource dataSource) {
+    public IReadOnlyList<IAssetLinkGetter> GetAssetsToClean(HashSet<ILinkIdentifier> retained, IDataSource dataSource, ISkyrimModGetter mod) {
         return dataSource.EnumerateFiles(new DataRelativePath(string.Empty), includeSubDirectories: true)
             .Select(assetTypeService.GetAssetLink)
             .WhereNotNull()
             .Except(retained.OfType<AssetLinkIdentifier>().Select(x => x.AssetLink))
+            .Concat(mod.EnumerateInferredAssetLinks<SkyrimTranslationAssetType>())
             .ToArray();
     }
 

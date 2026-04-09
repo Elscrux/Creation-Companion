@@ -17,10 +17,7 @@ public sealed class ModCleaner(
         var recordsToClean = RecordCleaner.GetRecordsToClean(retained, mod);
 
         if (dataSource is not null) {
-            var assetsToClean = assetCleaner.GetAssetsToClean(retained, dataSource);
-
-            var m = string.Join("\n", assetsToClean.Select(x => x.DataRelativePath.Path));
-            logger.Here().Verbose("Cleaning assets: {Assets}", m);
+            var assetsToClean = assetCleaner.GetAssetsToClean(retained, dataSource, mod);
 
             assetCleaner.CleanDataSource(dataSource, assetsToClean);
         }
