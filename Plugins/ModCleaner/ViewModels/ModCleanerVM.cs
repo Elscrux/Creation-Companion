@@ -404,9 +404,6 @@ public sealed partial class ModCleanerVM : ViewModel {
         Dispatcher.UIThread.Post(() => IsBusy = true);
 
         var (retainedLinks, dependencyGraph) = _modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
-        if (retainedLinks.Contains(new FormLinkIdentifier(new FormLinkInformation(FormKey.Factory("0D49FD:BSHeartland.esm"), typeof(IStoryManagerQuestNodeGetter))))) {
-            Console.WriteLine();
-        }
         _retainedLinks = retainedLinks;
 
         var retainedRecords = retainedLinks.OfType<FormLinkIdentifier>()
