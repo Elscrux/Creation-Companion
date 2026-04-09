@@ -1,6 +1,5 @@
 ﻿using System.Reactive;
 using Avalonia.Controls;
-using Avalonia.Input.Platform;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
@@ -68,11 +67,12 @@ public sealed class QueryPluginVM : ViewModel {
             }
         });
 
-        CopyColumnText = ReactiveCommand.Create<QueryColumnVM>(vm => {
+        CopyColumnText = ReactiveCommand.CreateFromTask<QueryColumnVM>(async vm => {
             var clipboard = TopLevel.GetTopLevel(window)?.Clipboard;
-
-            var text = string.Join(Environment.NewLine, vm.QueriedFields);
-            clipboard?.SetTextAsync(text);
+            if (clipboard is not null) {
+                var text = string.Join(Environment.NewLine, vm.QueriedFields);
+                await clipboard.SetTextAsync(text);
+            }
         });
 
         RestoreColumns = ReactiveCommand.Create(() => {

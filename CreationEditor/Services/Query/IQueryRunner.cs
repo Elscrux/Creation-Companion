@@ -29,5 +29,5 @@ public interface IQueryRunner : IMementoProvider<QueryRunnerMemento>, IMementoRe
     bool EnableOrderBy { get; set; }
     bool EnableSelect { get; set; }
 
-    IEnumerable<object?> RunQuery();
+    IEnumerable<QueryResult> RunQuery();
 }

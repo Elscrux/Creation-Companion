@@ -41,6 +41,7 @@ public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<Ma
                     .Where(_ => QueryVM.QueryRunner.QueryFrom.SelectedItem is not null)
                     .Select(_ => QueryVM.QueryRunner
                         .RunQuery()
+                        .Select(x => x.QueriedField)
                         .OfType<IFormLinkIdentifier>()
                         .CountGreaterThan(MaxAutomaticUpdateSize))
                     .ObserveOnGui()
@@ -69,7 +70,9 @@ public sealed partial class MarkingMapping : ReactiveObject, IMementoProvider<Ma
     }
 
     public IEnumerable<IFormLinkIdentifier> CurrentRecords => UseQuery
-        ? QueryVM.QueryRunner.RunQuery().OfType<IFormLinkIdentifier>()
+        ? QueryVM.QueryRunner.RunQuery()
+            .Select(x => x.QueriedField)
+            .OfType<IFormLinkIdentifier>()
         : [Record];
 
     public MarkingMappingMemento CreateMemento() {

@@ -5,6 +5,7 @@
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:viewModels="clr-namespace:QueryPlugin.ViewModels"
              xmlns:query="clr-namespace:CreationEditor.Avalonia.Views.Query;assembly=CreationEditor.Avalonia"
+             xmlns:query1="clr-namespace:CreationEditor.Services.Query;assembly=CreationEditor"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="QueryPlugin.Views.QueryColumn"
              x:DataType="viewModels:QueryColumnVM">
@@ -41,6 +42,13 @@
         </Border>
 
         <ListBox Grid.Row="1"
-                 ItemsSource="{Binding QueriedFields}"/>
+                 ItemsSource="{Binding QueriedFields}"
+                 ContextRequested="Control_OnContextRequested">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="query1:QueryResult">
+                    <TextBlock Text="{Binding QueriedField}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </UserControl>

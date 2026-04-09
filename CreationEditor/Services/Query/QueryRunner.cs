@@ -129,7 +129,7 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
         return builder.ToString();
     }
 
-    public IEnumerable<object?> RunQuery() {
+    public IEnumerable<QueryResult> RunQuery() {
         // From
         var records = QueryFrom.GetRecords();
 
@@ -145,8 +145,28 @@ public sealed class QueryRunner : IQueryRunner, IDisposable {
 
         // Select
         return EnableSelect
-            ? records.Select(record => FieldSelector.GetValue(record))
-            : records;
+            ? records.Select(record => new QueryResult(record, FieldSelector.GetValue(record)))
+            : records.Select(record => new QueryResult(record, record));
+    }
+
+    public IEnumerable<QueryResult> RunQueryKeepRecord() {
+        // From
+        var records = QueryFrom.GetRecords();
+
+        // Where
+        if (EnableConditions && QueryConditions.Any()) {
+            records = records.Where(record => QueryConditions.EvaluateConditions(record));
+        }
+
+        // Order By
+        if (EnableOrderBy) {
+            records = records.OrderBy(record => OrderBySelector.GetValue(record));
+        }
+
+        // Select
+        return EnableSelect
+            ? records.Select(record => new QueryResult(record, FieldSelector.GetValue(record)))
+            : records.Select(record => new QueryResult(record, (object?)null));
     }
 
     public QueryRunnerMemento CreateMemento() {
