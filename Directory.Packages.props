@@ -56,6 +56,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="System.Linq.Async" Version="7.0.0" />
+    <PackageVersion Include="ThrowsAnalyzer" Version="1.0.0-beta.2" />
     <PackageVersion Include="TreeDataGrid" Version="11.3.12.1" />
     <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.9.5" />
     <PackageVersion Include="xunit" Version="2.9.3" />
