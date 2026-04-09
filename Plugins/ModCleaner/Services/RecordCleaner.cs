@@ -229,10 +229,17 @@ public sealed class RecordCleaner(
 
                 if (!retained.Add(current)) continue;
                 if (excluded.Contains(current)) continue;
-                if (!graph.IncomingEdges.TryGetValue(current, out var currentEdges)) continue;
 
-                queue.Enqueue(currentEdges.Select(x => x.Target)
-                    .Where(t => formLink.Type.InheritsFromAny(SelfRetainedRecordTypes)));
+                // Ensure all referenced links are retained for self-retained records as well
+                if (graph.OutgoingEdges.TryGetValue(current, out var links)) {
+                    retainOutgoingEdges(links);
+                }
+
+                if (!graph.IncomingEdges.TryGetValue(current, out var incomingEdges)) continue;
+
+                queue.Enqueue(incomingEdges.Select(x => x.Target)
+                    .OfType<FormLinkIdentifier>()
+                    .Where(link => link.FormLink.Type.InheritsFromAny(SelfRetainedRecordTypes)));
             }
         }
     }
