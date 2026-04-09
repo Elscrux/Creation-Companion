@@ -132,21 +132,6 @@ public sealed class RecordCleaner(
                     // Navmesh to navmesh links will connect all cells in the worldspace which we don't want - re-finalize navmesh after cleaning!
                     if (current.Type == typeof(INavigationMeshGetter) && currentReference.Type == typeof(INavigationMeshGetter)) continue;
 
-                    // Skip cells referencing everything their placed objects are referencing but we don't retain all of them
-                    // TODO remove when the references don't count nested references anymore, needs Mutagen update
-                    if (currentReference.Type == typeof(ICellGetter)) {
-                        if (current.Type == typeof(INavigationMeshGetter)) continue;
-
-                        if (current.Type != typeof(IEncounterZoneGetter)
-                         && current.Type != typeof(IImageSpaceGetter)
-                         && current.Type != typeof(IMusicTypeGetter)
-                         && current.Type != typeof(IWaterGetter)
-                         && current.Type != typeof(ILightingTemplateGetter)
-                         && current.Type != typeof(IRegionGetter)) {
-                            continue;
-                        }
-                    }
-
                     var currentReferenceLink = new FormLinkIdentifier(currentReference);
                     queue.Enqueue(currentReference);
 
