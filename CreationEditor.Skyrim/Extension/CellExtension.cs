@@ -53,7 +53,7 @@ public static class CellExtension {
         /// <param name="linkCache">Link cache</param>
         /// <returns>Door linking to an interior cell placed in the worldspace</returns>
         public IEnumerable<IPlacedObjectGetter> GetDoorsToWorldspace(ILinkCache linkCache) {
-            if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) throw new ArgumentException("Cell must be an interior cell", nameof(cell));
+            if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) throw new ArgumentException("Cell must be an interior cell");
 
             return GetDoorsToWorldspaceImp(cell, linkCache);
         }

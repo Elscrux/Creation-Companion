@@ -30,7 +30,7 @@ public static class NotifyCollectionChangedEventArgsExtension {
                     new NotifyCollectionChangedEventArgs(
                         NotifyCollectionChangedAction.Remove,
                         currentItems),
-                _ => throw new ArgumentOutOfRangeException(nameof(e)),
+                _ => throw new ArgumentOutOfRangeException(nameof(e.Action)),
             };
 
             yield return e.Action switch {
@@ -38,7 +38,7 @@ public static class NotifyCollectionChangedEventArgsExtension {
                     new NotifyCollectionChangedEventArgs(
                         NotifyCollectionChangedAction.Add,
                         newItems?.OfType<TSource>().Select(selector).Where(x => x is not null).ToList()),
-                _ => throw new ArgumentOutOfRangeException(nameof(e)),
+                _ => throw new ArgumentOutOfRangeException(nameof(e.Action)),
             };
         }
     }
