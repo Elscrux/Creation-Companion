@@ -422,6 +422,7 @@ public sealed class RecordCleaner(
                         retainOutgoingEdges([
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)),
+                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)),
                             new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)),
