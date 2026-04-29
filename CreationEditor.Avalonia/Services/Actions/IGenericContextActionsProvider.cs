@@ -6,7 +6,7 @@ namespace CreationEditor.Avalonia.Services.Actions;
 public interface IGenericContextActionsProvider {
     IMajorRecord CreateNewRecord(Type recordType);
     IMajorRecord EditRecord(IMajorRecordGetter record);
-    void OpenReferences(IReferencedRecord referencedRecord);
-    void OpenReferences(IReferencedAsset referencedAsset);
-    void OpenReferences(IDataSourceLink dataSourceLink);
+    void OpenReferences(IReferencedRecord referencedRecord, bool remap = false);
+    void OpenReferences(IReferencedAsset referencedAsset, bool remap = false);
+    void OpenReferences(IDataSourceLink dataSourceLink, bool remap = false);
 }

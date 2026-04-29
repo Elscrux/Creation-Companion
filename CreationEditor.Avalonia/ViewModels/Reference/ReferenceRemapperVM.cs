@@ -31,7 +31,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     public IList<Type>? ScopedTypes { get; }
 
     [Reactive] public partial bool IsRemapping { get; set; }
-    public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
+    public ReplaySubject<Unit> ShowReferenceRemapDialog { get; } = new(1);
 
     public ReferenceRemapperVM(
         IDataSourceService dataSourceService,

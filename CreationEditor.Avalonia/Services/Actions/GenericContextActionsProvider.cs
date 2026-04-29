@@ -9,6 +9,7 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Actions;
@@ -84,6 +85,13 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                         ? $"Delete All ({context.SelectedRecords.Count})"
                         : "Delete"),
                 () => menuItemProvider.Delete(DeleteCommand).HotKey
+            ),
+            new ContextAction(context => (context.SelectedRecords.Count == 1 && context.SelectedRecords[0].ReferencedRecord.GetReferenceCount() > 0)
+                 || (context.SelectedAssets is [{ ReferencedAsset: {} referencedAsset }] && referencedAsset.GetReferenceCount() > 0),
+                20,
+                ContextActionGroup.Modification,
+                RemapReferencesCommand,
+                context => menuItemProvider.Custom(RemapReferencesCommand, "Remap References", context, Symbol.Rename)
             ),
             new ContextAction(context => (context.SelectedRecords.Count == 1 && context.SelectedRecords[0].ReferencedRecord.GetReferenceCount() > 0)
                  || (context.SelectedAssets is [{ ReferencedAsset: {} referencedAsset }] && referencedAsset.GetReferenceCount() > 0),
@@ -176,6 +184,18 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         }
     }
 
+    [ReactiveCommand]
+    private void RemapReferences(SelectedListContext context) {
+        if (context.SelectedRecords.Count > 0) {
+            var referencedRecord = context.SelectedRecords[0].ReferencedRecord;
+            OpenReferences(referencedRecord, true);
+        } else if (context.SelectedAssets.Count > 0) {
+            if (context.SelectedAssets[0].ReferencedAsset is not {} referencedAsset) return;
+
+            OpenReferences(referencedAsset, true);
+        }
+    }
+
     public IMajorRecord CreateNewRecord(Type recordType) {
         var newRecord = _recordController.CreateRecord(recordType);
         _recordEditorController.OpenEditor(newRecord);
@@ -188,28 +208,38 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         return newOverride;
     }
 
-    public void OpenReferences(IReferencedRecord referencedRecord) {
-        var referenceWindow = new ReferenceWindow(
-            referencedRecord.Record,
-            _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedRecord));
+    public void OpenReferences(IReferencedRecord referencedRecord, bool remap = false) {
+        var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedRecord);
+        var referenceWindow = new ReferenceWindow(referencedRecord.Record, referenceBrowserVM);
 
         referenceWindow.Show(_mainWindow);
+        if (remap) {
+            referenceBrowserVM?.ReferenceRemapperVM?.Remap();
+        }
     }
 
-    public void OpenReferences(IReferencedAsset referencedAsset) {
-        var referenceWindow = new ReferenceWindow(
-            referencedAsset.AssetLink.DataRelativePath.Path,
-            _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedAsset));
+    public void OpenReferences(IReferencedAsset referencedAsset, bool remap = false) {
+        var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedAsset);
+        var referenceWindow = new ReferenceWindow(referencedAsset.AssetLink.DataRelativePath.Path, referenceBrowserVM);
+
 
         referenceWindow.Show(_mainWindow);
+        if (remap) {
+            referenceBrowserVM?.ReferenceRemapperVM?.Remap();
+        }
     }
 
-    public void OpenReferences(IDataSourceLink dataSourceLink) {
+    public void OpenReferences(IDataSourceLink dataSourceLink, bool remap = false) {
+        var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(dataSourceLink);
         var referenceWindow = new ReferenceWindow(
             dataSourceLink.DataRelativePath.Path,
-            _referenceBrowserVMFactory.GetReferenceBrowserVM(dataSourceLink));
+            referenceBrowserVM);
 
         referenceWindow.Show(_mainWindow);
+        if (remap) {
+            referenceBrowserVM?.ReferenceRemapperVM?.Remap();
+        }
+
     }
 
     private static bool HasOneRecordType(SelectedListContext context) {

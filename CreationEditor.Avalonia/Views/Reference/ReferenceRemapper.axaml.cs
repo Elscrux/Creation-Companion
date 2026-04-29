@@ -26,16 +26,18 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
             this.WhenAnyValue(x => x.ViewModel)
                 .Subscribe(vm => {
                     vm?.ShowReferenceRemapDialog
-                        .Subscribe(_ => {
-                            if (vm is { DataSourceLink: {} dataSourceLink, AssetType: {} assetType }) {
-                                RemapAssets(vm, assetType, dataSourceLink);
-                            } else if (vm.ReferencedRecordContext is {} referencedRecord) {
-                                RemapRecords(vm, referencedRecord);
-                            }
-                        })
+                        .Subscribe(_ => Remap(vm))
                         .DisposeWithComposite(disposables);
                 });
         });
+    }
+
+    private void Remap(ReferenceRemapperVM vm) {
+        if (vm is { DataSourceLink: {} dataSourceLink, AssetType: {} assetType }) {
+            RemapAssets(vm, assetType, dataSourceLink);
+        } else if (vm.ReferencedRecordContext is {} referencedRecord) {
+            RemapRecords(vm, referencedRecord);
+        }
     }
 
     private void RemapAssets(ReferenceRemapperVM vm, IAssetType assetType, DataSourceFileLink dataSourceLink) {
