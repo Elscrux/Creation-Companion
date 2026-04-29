@@ -150,7 +150,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                 ContextActionGroup.Copy,
                 CopyFormIdCommand,
                 context => menuItemProvider.Copy(
-                    CopyFormKeyCommand,
+                    CopyFormIdCommand,
                     context,
                     "Copy FormID " + GetFormId(context),
                     false)
