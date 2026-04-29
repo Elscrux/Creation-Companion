@@ -7,16 +7,17 @@ using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Services.Query.Select;
 
-public sealed class QueryFieldSelectorCollection : ReactiveObject, IQueryFieldSelectorCollection, IDisposable {
+public sealed partial class QueryFieldSelectorCollection : ReactiveObject, IQueryFieldSelectorCollection, IDisposable {
     private readonly DisposableBucket _disposables = new();
     private readonly ObservableCollectionExtended<IQueryFieldSelector> _selectors = [];
     public IObservableCollection<IQueryFieldSelector> Selectors => _selectors;
 
     private readonly Subject<Unit> _selectionChanged = new();
     public IObservable<Unit> SelectionChanged => _selectionChanged;
-    public ReactiveCommand<Unit, Unit> AddNextSelector { get; }
+    public IObservable<bool> CanAddNextSelector { get; }
     public Func<IQueryField, bool>? SelectorFilter { get; set; }
 
     public QueryFieldSelectorCollection() {
@@ -25,24 +26,18 @@ public sealed class QueryFieldSelectorCollection : ReactiveObject, IQueryFieldSe
             .Unit()
             .Merge(_selectors.WhenCollectionChanges());
 
-        AddNextSelector = ReactiveCommand.Create(
-            canExecute: selectionChanges.Select(_ => {
-                if (_selectors.Count == 0) return false;
+        CanAddNextSelector = selectionChanges.Select(_ => {
+            if (_selectors.Count == 0) return false;
 
-                var selectedField = _selectors[^1].SelectedField;
-                if (selectedField is null) return false;
+            var selectedField = _selectors[^1].SelectedField;
+            if (selectedField is null) return false;
 
-                return selectedField.Type != typeof(string)
-                 && selectedField.Type != typeof(bool)
-                 && !selectedField.Type.InheritsFrom(typeof(IFormLinkGetter))
-                 && !selectedField.Type.InheritsFromOpenGeneric(typeof(INumberBase<>))
-                 && !selectedField.Type.InheritsFrom(typeof(Enum));
-            }),
-            execute: () => {
-                if (_selectors.Count == 0) return;
-
-                AddSelector(_selectors[^1].SelectedField?.Type ?? typeof(object));
-            });
+            return selectedField.Type != typeof(string)
+             && selectedField.Type != typeof(bool)
+             && !selectedField.Type.InheritsFrom(typeof(IFormLinkGetter))
+             && !selectedField.Type.InheritsFromOpenGeneric(typeof(INumberBase<>))
+             && !selectedField.Type.InheritsFrom(typeof(Enum));
+        });
 
         selectionChanges
             .Subscribe(_ => {
@@ -50,6 +45,13 @@ public sealed class QueryFieldSelectorCollection : ReactiveObject, IQueryFieldSe
                 _selectionChanged.OnNext(Unit.Default);
             })
             .DisposeWith(_disposables);
+    }
+
+    [ReactiveCommand(CanExecute = nameof(CanAddNextSelector))]
+    private void AddNextSelector() {
+        if (_selectors.Count == 0) return;
+
+        AddSelector(_selectors[^1].SelectedField?.Type ?? typeof(object));
     }
 
     public void AddSelector(Type type) {

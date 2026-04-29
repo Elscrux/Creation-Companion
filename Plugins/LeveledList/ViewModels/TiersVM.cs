@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Threading;
 using CreationEditor;
@@ -19,6 +18,10 @@ using ReactiveUI.SourceGenerators;
 namespace LeveledList.ViewModels;
 
 public sealed partial class TiersVM : ValidatableViewModel {
+    private readonly ILinkCacheProvider _linkCacheProvider;
+    private readonly IRecordListVMBuilder _recordListVMBuilder;
+    private readonly ITierController _tierController;
+    private IExtraColumnsBuilder _extraColumnsBuilder;
     public IObservableCollection<TierItem> Tiers { get; } = new ObservableCollectionExtended<TierItem>();
     public IObservableCollection<TierAliasItem> TierAliases { get; } = new ObservableCollectionExtended<TierAliasItem>();
 
@@ -28,17 +31,15 @@ public sealed partial class TiersVM : ValidatableViewModel {
     [Reactive] public partial TierItem? SelectedTier { get; set; }
     [Reactive] public partial IRecordListVM? RecordListVM { get; set; }
 
-    public ReactiveCommand<Unit, Unit> SaveTiers { get; }
-    public ReactiveCommand<string, Unit> AddTier { get; }
-    public ReactiveCommand<IList, Unit> RemoveTier { get; }
-    public ReactiveCommand<Unit, Unit> AddTierAlias { get; }
-    public ReactiveCommand<IList, Unit> RemoveTierAlias { get; }
-
     public TiersVM(
         ILinkCacheProvider linkCacheProvider,
         IRecordListVMBuilder recordListVMBuilder,
         IExtraColumnsBuilder extraColumnsBuilder,
         ITierController tierController) {
+        _linkCacheProvider = linkCacheProvider;
+        _recordListVMBuilder = recordListVMBuilder;
+        _extraColumnsBuilder = extraColumnsBuilder;
+        _tierController = tierController;
         Task.Run(() => RecordListVM = GetRecordListVM());
 
         this.WhenAnyValue(x => x.SelectedTierType)
@@ -72,69 +73,76 @@ public sealed partial class TiersVM : ValidatableViewModel {
                 Dispatcher.UIThread.Post(() => RecordListVM = vm);
             })
             .DisposeWith(this);
+    }
 
-        SaveTiers = ReactiveCommand.Create(() => {
-            var tierIdentifiers = Tiers
-                .Where(x => !string.IsNullOrEmpty(x.Identifier))
-                .ToDictionary(x => x.Identifier, x => new TierData(x.GetEnchantmentLevels()));
+    [ReactiveCommand]
+    private void AddTier(string tierName) {
+        var tier = new TierItem {
+            Identifier = tierName
+        };
+        if (Tiers.Contains(tier)) return;
 
-            var tierAliases = TierAliases
-                .Where(x => !string.IsNullOrEmpty(x.Original?.Identifier) && !string.IsNullOrEmpty(x.Alias?.Identifier))
-                .ToDictionary(x => x.Alias!.Identifier, x => x.Original!.Identifier);
+        Tiers.Add(tier);
+    }
 
-            tierController.SetTiers(SelectedTierType, tierIdentifiers, tierAliases);
+    [ReactiveCommand]
+    private void RemoveTier(IList tiers) {
+        Tiers.RemoveMany(tiers.OfType<TierItem>());
+    }
 
-            RecordListVM = GetRecordListVM();
-        });
+    [ReactiveCommand]
+    private void AddTierAlias() {
+        var tierAlias = new TierAliasItem();
+        if (TierAliases.Contains(tierAlias)) return;
 
-        AddTier = ReactiveCommand.Create<string>(tierName => {
-            var tier = new TierItem { Identifier = tierName };
-            if (Tiers.Contains(tier)) return;
+        TierAliases.Add(tierAlias);
+    }
 
-            Tiers.Add(tier);
-        });
+    [ReactiveCommand]
+    private void RemoveTierAlias(IList tiers) {
+        TierAliases.RemoveMany(tiers.OfType<TierAliasItem>());
+    }
 
-        RemoveTier = ReactiveCommand.Create<IList>(tiers => {
-            Tiers.RemoveMany(tiers.OfType<TierItem>());
-        });
+    [ReactiveCommand]
+    private void SaveTiers() {
+        var tierIdentifiers = Tiers
+            .Where(x => !string.IsNullOrEmpty(x.Identifier))
+            .ToDictionary(x => x.Identifier, x => new TierData(x.GetEnchantmentLevels()));
 
-        AddTierAlias = ReactiveCommand.Create(() => {
-            var tierAlias = new TierAliasItem();
-            if (TierAliases.Contains(tierAlias)) return;
+        var tierAliases = TierAliases
+            .Where(x => !string.IsNullOrEmpty(x.Original?.Identifier) && !string.IsNullOrEmpty(x.Alias?.Identifier))
+            .ToDictionary(x => x.Alias!.Identifier, x => x.Original!.Identifier);
 
-            TierAliases.Add(tierAlias);
-        });
+        _tierController.SetTiers(SelectedTierType, tierIdentifiers, tierAliases);
 
-        RemoveTierAlias = ReactiveCommand.Create<IList>(tiers => {
-            TierAliases.RemoveMany(tiers.OfType<TierAliasItem>());
-        });
+        RecordListVM = GetRecordListVM();
+    }
 
-        IRecordListVM GetRecordListVM() {
-            var tiers = tierController
-                .GetTiers(SelectedTierType)
-                .Select(x => x.Key)
-                .ToHashSet();
+    private IRecordListVM GetRecordListVM() {
+        var tiers = _tierController
+            .GetTiers(SelectedTierType)
+            .Select(x => x.Key)
+            .ToHashSet();
 
-            var records = tierController.GetAllRecordTiers()
-                .Where(x => tiers.Contains(x.Value.TierIdentifier))
-                .Where(x => linkCacheProvider.LinkCache.TryResolve(x.Key, out _));
+        var records = _tierController.GetAllRecordTiers()
+            .Where(x => tiers.Contains(x.Value.TierIdentifier))
+            .Where(x => _linkCacheProvider.LinkCache.TryResolve(x.Key, out _));
 
-            if (SelectedTier is not null) {
-                records = records
-                    .Where(x => x.Value.TierIdentifier == SelectedTier.Identifier);
-            }
-
-            var formLinkInformation = records
-                .Select(x => x.Key);
-
-            foreach (var recordType in SelectedTierType.GetRecordTypes()) {
-                extraColumnsBuilder = extraColumnsBuilder.AddRecordType(recordType);
-            }
-
-            return Dispatcher.UIThread.Invoke(() => recordListVMBuilder
-                .WithExtraColumns(extraColumnsBuilder)
-                .BuildWithSource(formLinkInformation)
-                .DisposeWith(this));
+        if (SelectedTier is not null) {
+            records = records
+                .Where(x => x.Value.TierIdentifier == SelectedTier.Identifier);
         }
+
+        var formLinkInformation = records
+            .Select(x => x.Key);
+
+        foreach (var recordType in SelectedTierType.GetRecordTypes()) {
+            _extraColumnsBuilder = _extraColumnsBuilder.AddRecordType(recordType);
+        }
+
+        return Dispatcher.UIThread.Invoke(() => _recordListVMBuilder
+            .WithExtraColumns(_extraColumnsBuilder)
+            .BuildWithSource(formLinkInformation)
+            .DisposeWith(this));
     }
 }

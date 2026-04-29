@@ -21,7 +21,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Top"
                 Content="+ Add Column"
-                Command="{Binding AddColumn}"/>
+                Command="{Binding AddColumnCommand}"/>
 
             <controls:InfoBar
                 Grid.Row="0"
@@ -30,7 +30,7 @@
                 IsOpen="{Binding QueryCount}">
                 <controls:InfoBar.ActionButton>
                     <Button Content="Restore"
-                            Command="{Binding RestoreColumns}"/>
+                            Command="{Binding RestoreColumnsCommand}"/>
                 </controls:InfoBar.ActionButton>
             </controls:InfoBar>
         </Grid>

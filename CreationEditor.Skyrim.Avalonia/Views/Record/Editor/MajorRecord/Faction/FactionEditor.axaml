@@ -9,9 +9,9 @@
              d:DesignHeight="900" d:DesignWidth="900"
              x:Name="Editor">
     <UserControl.KeyBindings>
-        <KeyBinding Gesture="Ctrl+Z" Command="{Binding Core.Undo}"/>
-        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding Core.Redo}"/>
-        <KeyBinding Gesture="Ctrl+Y" Command="{Binding Core.Redo}"/>
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding Core.UndoCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding Core.RedoCommand}"/>
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding Core.RedoCommand}"/>
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="40,65,*">
@@ -22,7 +22,7 @@
                     Label="Save"
                     IsCompact="False"
                     IsVisible="True"
-                    Command="{Binding Core.Save}"/>
+                    Command="{Binding Core.SaveCommand}"/>
             </controls:CommandBar.PrimaryCommands>
         </controls:CommandBar>
 

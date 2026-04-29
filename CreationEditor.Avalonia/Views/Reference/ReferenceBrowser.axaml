@@ -12,7 +12,7 @@
         <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
                     Spacing="5">
-            <Button Command="{Binding ToggleTree}"
+            <Button Command="{Binding ToggleTreeCommand}"
                     ToolTip.Tip="Toggle Tree View">
                 <StackPanel>
                     <controls:SymbolIcon
@@ -24,7 +24,7 @@
                 </StackPanel>
             </Button>
 
-            <Button Command="{Binding RemapReferences}"
+            <Button Command="{Binding ReferenceRemapperVM.RemapCommand}"
                     IsVisible="{Binding ReferenceRemapperVM.ContextCanBeRemapped, FallbackValue=False}"
                     ToolTip.Tip="Remap References">
                 <controls:SymbolIcon

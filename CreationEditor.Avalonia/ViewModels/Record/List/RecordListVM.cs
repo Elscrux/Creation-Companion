@@ -56,10 +56,11 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
             .ObserveOnGui()
             .Replay(1)
             .RefCount();
+    }
 
-        PrimaryCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            ContextMenuProvider.ExecutePrimary(context);
-        });
+    [ReactiveCommand]
+    private void Primary(SelectedListContext context) {
+        ContextMenuProvider.ExecutePrimary(context);
     }
 
     public SelectedListContext GetRecordListContext(IReadOnlyList<IReferencedRecord> referencedRecords) {

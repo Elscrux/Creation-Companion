@@ -8,5 +8,5 @@ public interface ISettingsVM : IDisposableDropoff {
     IEnumerable<ISetting> RootSettings { get; }
     ISetting? SelectedSetting { get; set; }
 
-    ReactiveCommand<Unit, Unit> Save { get; }
+    ReactiveCommand<Unit, Unit> SaveCommand { get; }
 }

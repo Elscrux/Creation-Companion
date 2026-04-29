@@ -10,13 +10,14 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins.Records;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Actions;
 
 public sealed partial class GenericContextActionsProvider : IContextActionsProvider, IGenericContextActionsProvider {
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IRecordController _recordController;
+    private readonly IAssetController _assetController;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IRecordEditorController _recordEditorController;
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
     private readonly MainWindow _mainWindow;
@@ -33,106 +34,64 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         MainWindow mainWindow) {
         _editorEnvironment = editorEnvironment;
         _recordController = recordController;
+        _assetController = assetController;
+        _dataSourceService = dataSourceService;
         _recordEditorController = recordEditorController;
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _mainWindow = mainWindow;
-
-        var newCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            var recordType = AllSelectedRecordsHaveSameType(context)
-                ? context.SelectedRecords[0].ReferencedRecord.Record.Registration.GetterType
-                : context.ListTypes.First();
-
-            CreateNewRecord(recordType);
-        });
-
-        var editCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
-                EditRecord(record);
-            }
-        });
-
-        var duplicateCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
-                _recordController.DuplicateRecord(record);
-            }
-        });
-
-        var deleteCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
-                _recordController.DeleteRecord(record);
-            }
-
-            foreach (var referencedAsset in context.SelectedAssets) {
-                var fileLink = dataSourceService.GetFileLink(referencedAsset.DataSourceLink.DataRelativePath);
-                if (fileLink is null) continue;
-
-                assetController.Delete(fileLink);
-            }
-        });
-
-        var openReferencesCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            if (context.SelectedRecords.Count > 0) {
-                var referencedRecord = context.SelectedRecords[0].ReferencedRecord;
-                OpenReferences(referencedRecord);
-            } else if (context.SelectedAssets.Count > 0) {
-                if (context.SelectedAssets[0].ReferencedAsset is not {} referencedAsset) return;
-
-                OpenReferences(referencedAsset);
-            }
-        });
 
         _actions = [
             new ContextAction(HasOneRecordType,
                 100,
                 ContextActionGroup.Modification,
-                newCommand,
-                context => menuItemProvider.New(newCommand, context),
-                () => menuItemProvider.New(newCommand).HotKey
+                NewCommand,
+                context => menuItemProvider.New(NewCommand, context),
+                () => menuItemProvider.New(NewCommand).HotKey
             ),
             new ContextAction(context => context.SelectedAssets.Count == 0 && context.SelectedRecords.Count > 0,
                 50,
                 ContextActionGroup.Modification,
-                editCommand,
+                EditCommand,
                 context => menuItemProvider.Edit(
-                    editCommand,
+                    EditCommand,
                     context,
                     context.Count > 1
                         ? $"Edit All ({context.Count}"
                         : "Edit"),
-                () => menuItemProvider.Edit(editCommand).HotKey,
+                () => menuItemProvider.Edit(EditCommand).HotKey,
                 true
             ),
             new ContextAction(context => context.SelectedRecords.Count > 0 && context.SelectedAssets.Count == 0,
                 40,
                 ContextActionGroup.Modification,
-                duplicateCommand,
+                DuplicateCommand,
                 context => menuItemProvider.Duplicate(
-                    duplicateCommand,
+                    DuplicateCommand,
                     context,
                     context.SelectedRecords.Count > 1
                         ? $"Duplicate All ({context.SelectedRecords.Count})"
                         : "Duplicate"),
-                () => menuItemProvider.Duplicate(duplicateCommand).HotKey
+                () => menuItemProvider.Duplicate(DuplicateCommand).HotKey
             ),
             new ContextAction(context => context.SelectedAssets.Count > 0 && context.SelectedRecords.Count > 0,
                 30,
                 ContextActionGroup.Modification,
-                deleteCommand,
+                DeleteCommand,
                 context => menuItemProvider.Delete(
-                    deleteCommand,
+                    DeleteCommand,
                     context,
                     context.Count > 1
                         ? $"Delete All ({context.SelectedRecords.Count})"
                         : "Delete"),
-                () => menuItemProvider.Delete(deleteCommand).HotKey
+                () => menuItemProvider.Delete(DeleteCommand).HotKey
             ),
             new ContextAction(context => (context.SelectedRecords.Count == 1 && context.SelectedRecords[0].ReferencedRecord.GetReferenceCount() > 0)
                  || (context.SelectedAssets is [{ ReferencedAsset: {} referencedAsset }] && referencedAsset.GetReferenceCount() > 0),
                 50,
                 ContextActionGroup.Inspection,
-                openReferencesCommand,
-                context => menuItemProvider.References(openReferencesCommand, context),
-                () => menuItemProvider.References(openReferencesCommand).HotKey
+                OpenReferencesCommand,
+                context => menuItemProvider.References(OpenReferencesCommand, context),
+                () => menuItemProvider.References(OpenReferencesCommand).HotKey
             ),
             // TODO remap references context action
             new ContextAction(context => context.SelectedRecords.Count == 1 && context.SelectedAssets.Count == 0,
@@ -168,6 +127,53 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                     false)
             ),
         ];
+    }
+
+    [ReactiveCommand]
+    private void New(SelectedListContext context) {
+        var recordType = AllSelectedRecordsHaveSameType(context) ? context.SelectedRecords[0].ReferencedRecord.Record.Registration.GetterType : context.ListTypes.First();
+
+        CreateNewRecord(recordType);
+    }
+
+    [ReactiveCommand]
+    private void Edit(SelectedListContext context) {
+        foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
+            EditRecord(record);
+        }
+    }
+
+    [ReactiveCommand]
+    private void Duplicate(SelectedListContext context) {
+        foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
+            _recordController.DuplicateRecord(record);
+        }
+    }
+
+    [ReactiveCommand]
+    private void Delete(SelectedListContext context) {
+        foreach (var record in context.SelectedRecords.Select(x => x.ReferencedRecord.Record)) {
+            _recordController.DeleteRecord(record);
+        }
+
+        foreach (var referencedAsset in context.SelectedAssets) {
+            var fileLink = _dataSourceService.GetFileLink(referencedAsset.DataSourceLink.DataRelativePath);
+            if (fileLink is null) continue;
+
+            _assetController.Delete(fileLink);
+        }
+    }
+
+    [ReactiveCommand]
+    private void OpenReferences(SelectedListContext context) {
+        if (context.SelectedRecords.Count > 0) {
+            var referencedRecord = context.SelectedRecords[0].ReferencedRecord;
+            OpenReferences(referencedRecord);
+        } else if (context.SelectedAssets.Count > 0) {
+            if (context.SelectedAssets[0].ReferencedAsset is not {} referencedAsset) return;
+
+            OpenReferences(referencedAsset);
+        }
     }
 
     public IMajorRecord CreateNewRecord(Type recordType) {

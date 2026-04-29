@@ -1,5 +1,4 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using Mutagen.Bethesda.Plugins;
@@ -16,8 +15,6 @@ public sealed partial class CellBrowserVM : ViewModel, ICellBrowserVM {
     [Reactive] public partial int SelectedTab { get; set; }
     [Reactive] public partial bool ShowPlaced { get; set; }
 
-    public ReactiveCommand<Unit, Unit> TogglePlaced { get; }
-
     public CellBrowserVM(
         InteriorCellsVM interiorCellsVM,
         ExteriorCellsVM exteriorCellsVM,
@@ -25,8 +22,6 @@ public sealed partial class CellBrowserVM : ViewModel, ICellBrowserVM {
         InteriorCellsVM = interiorCellsVM.DisposeWith(this);
         ExteriorCellsVM = exteriorCellsVM.DisposeWith(this);
         PlacedListVM = placedListVM.DisposeWith(this);
-
-        TogglePlaced = ReactiveCommand.Create(() => { ShowPlaced = !ShowPlaced; });
 
         this.WhenAnyValue(x => x.PlacedListVM.PlacedProvider.CellFormKey)
             .Where(x => x != FormKey.Null)
@@ -43,4 +38,7 @@ public sealed partial class CellBrowserVM : ViewModel, ICellBrowserVM {
             .Subscribe(cell => PlacedListVM.PlacedProvider.CellFormKey = cell?.Record.FormKey ?? FormKey.Null)
             .DisposeWith(this);
     }
+
+    [ReactiveCommand]
+    private void ToggleShowPlaced() => ShowPlaced = !ShowPlaced;
 }

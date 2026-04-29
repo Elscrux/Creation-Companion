@@ -54,14 +54,14 @@
                             </MenuItem.Icon>
 
                             <MenuItem Header="_Game Folder"
-                                      Command="{Binding OpenGameFolder}">
+                                      Command="{Binding OpenGameFolderCommand}">
                                 <MenuItem.Icon>
                                     <controls:SymbolIcon Symbol="Message"/>
                                 </MenuItem.Icon>
                             </MenuItem>
 
                             <MenuItem Header="_Data Folder"
-                                      Command="{Binding OpenDataFolder}">
+                                      Command="{Binding OpenDataFolderCommand}">
                                 <MenuItem.Icon>
                                     <controls:SymbolIcon Symbol="Message"/>
                                 </MenuItem.Icon>
@@ -71,7 +71,7 @@
                         <MenuItem Header="Settings"
                                   HotKey="Ctrl+Alt+S"
                                   InputGesture="Ctrl+Alt+S"
-                                  Command="{Binding OpenSettings}">
+                                  Command="{Binding OpenSettingsCommand}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Settings"/>
                             </MenuItem.Icon>
@@ -80,7 +80,7 @@
                         <MenuItem Header="Save"
                                   HotKey="Ctrl+S"
                                   InputGesture="Ctrl+S"
-                                  Command="{Binding Save}">
+                                  Command="{Binding SaveCommand}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Save"/>
                             </MenuItem.Icon>
@@ -91,7 +91,7 @@
                         <MenuItem Header="Log"
                                   HotKey="Ctrl+Alt+L"
                                   InputGesture="Ctrl+Alt+L"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.Log}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Message"/>
@@ -101,7 +101,7 @@
                         <MenuItem Header="Record Browser"
                                   HotKey="Ctrl+Alt+R"
                                   InputGesture="Ctrl+Alt+R"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="BulletList"/>
@@ -111,7 +111,7 @@
                         <MenuItem Header="_Cell Browser"
                                   HotKey="Ctrl+Alt+C"
                                   InputGesture="Ctrl+Alt+C"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.CellBrowser}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Image"/>
@@ -121,7 +121,7 @@
                         <MenuItem Header="_Asset Browser"
                                   HotKey="Ctrl+Alt+A"
                                   InputGesture="Ctrl+Alt+A"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.AssetBrowser}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Folder"/>
@@ -129,7 +129,7 @@
                         </MenuItem>
 
                         <MenuItem Header="_Script Editor"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.ScriptEditor}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Code"/>
@@ -137,7 +137,7 @@
                         </MenuItem>
 
                         <MenuItem Header="_Viewport"
-                                  Command="{Binding OpenDockElement}"
+                                  Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.Viewport}">
                             <MenuItem.Icon>
                                 <controls:SymbolIcon Symbol="Pictures"/>
@@ -155,7 +155,7 @@
                                 <Setter Property="Icon"
                                         Value="{Binding Converter={x:Static plugin:IMenuPluginDefinition.ToIcon}}"/>
                                 <Setter Property="Command"
-                                        Value="{Binding #Window.ViewModel.OpenPlugin}"/>
+                                        Value="{Binding #Window.ViewModel.OpenPluginCommand}"/>
                                 <Setter Property="CommandParameter"
                                         Value="{Binding}"/>
                             </Style>

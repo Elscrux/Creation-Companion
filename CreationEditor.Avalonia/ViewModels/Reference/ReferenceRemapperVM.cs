@@ -10,11 +10,12 @@ using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
 public sealed partial class ReferenceRemapperVM : ViewModel {
+    private readonly IAssetController _assetController;
+    private readonly IRecordController _recordController;
     public IDataSourceService DataSourceService { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
     public IReadOnlyList<IRecordRemappingPreprocessor> RecordRemappingPreprocessors { get; }
@@ -32,9 +33,6 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
     [Reactive] public partial bool IsRemapping { get; set; }
     public Subject<Unit> ShowReferenceRemapDialog { get; } = new();
 
-    public ReactiveCommand<FormKey, Unit> RemapRecordReferences { get; }
-    public ReactiveCommand<DataSourceFileLink, Unit> RemapAssetReferences { get; }
-
     public ReferenceRemapperVM(
         IDataSourceService dataSourceService,
         ILinkCacheProvider linkCacheProvider,
@@ -43,6 +41,8 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
         IAssetTypeService assetTypeService,
         IRecordController recordController,
         object? context = null) {
+        _assetController = assetController;
+        _recordController = recordController;
         DataSourceService = dataSourceService;
         LinkCacheProvider = linkCacheProvider;
         RecordRemappingPreprocessors = recordRemappingPreprocessors;
@@ -64,26 +64,28 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
             ContextType = referencedRecord.Record.Registration.GetterType;
             ScopedTypes = ContextType.AsEnumerable().ToArray();
         }
+    }
 
-        RemapRecordReferences = ReactiveCommand.Create<FormKey>(formKey => {
-            if (ContextType is null || ReferencedRecordContext is null) return;
-            if (!linkCacheProvider.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
+    [ReactiveCommand]
+    private void RemapAssetReferences(DataSourceFileLink dataSourceLink) {
+        if (DataSourceLink is null || AssetType is null) return;
 
-            IsRemapping = true;
-            Task.Run(() => {
-                recordController.RemapReferences(ReferencedRecordContext, record);
-                Dispatcher.UIThread.Post(() => IsRemapping = false);
-            });
+        IsRemapping = true;
+        Task.Run(() => {
+            _assetController.RemapFileReferences(DataSourceLink, dataSourceLink);
+            Dispatcher.UIThread.Post(() => IsRemapping = false);
         });
+    }
 
-        RemapAssetReferences = ReactiveCommand.Create<DataSourceFileLink>(dataSourceLink => {
-            if (DataSourceLink is null || AssetType is null) return;
+    [ReactiveCommand]
+    private void RemapRecordReferences(FormKey formKey) {
+        if (ContextType is null || ReferencedRecordContext is null) return;
+        if (!LinkCacheProvider.LinkCache.TryResolve(formKey, ContextType, out var record)) return;
 
-            IsRemapping = true;
-            Task.Run(() => {
-                assetController.RemapFileReferences(DataSourceLink, dataSourceLink);
-                Dispatcher.UIThread.Post(() => IsRemapping = false);
-            });
+        IsRemapping = true;
+        Task.Run(() => {
+            _recordController.RemapReferences(ReferencedRecordContext, record);
+            Dispatcher.UIThread.Post(() => IsRemapping = false);
         });
     }
 
@@ -102,6 +104,7 @@ public sealed partial class ReferenceRemapperVM : ViewModel {
         };
     }
 
+    [ReactiveCommand]
     public void Remap() {
         if (ContextCanBeRemapped) {
             ShowReferenceRemapDialog.OnNext(Unit.Default);

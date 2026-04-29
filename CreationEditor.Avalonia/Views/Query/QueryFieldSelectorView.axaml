@@ -31,14 +31,13 @@
                         IsTextSearchEnabled="True"
                         ItemsSource="{Binding RecordType, Converter={StaticResource Extractor}}"
                         SelectedItem="{Binding SelectedField}"
-                        DisplayMemberBinding="{Binding Name, DataType=select:IQueryField}">
-                    </controls:FAComboBox>
+                        DisplayMemberBinding="{Binding Name, DataType=select:IQueryField}"/>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Button IsVisible="{Binding AddNextSelector.CanExecute^}"
-                Command="{Binding AddNextSelector}"
+        <Button IsVisible="{Binding AddNextSelectorCommand.CanExecute^}"
+                Command="{Binding AddNextSelectorCommand}"
                 VerticalAlignment="Stretch">
             <controls:SymbolIcon Symbol="Add"/>
         </Button>

@@ -123,7 +123,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         var assetBrowser = await _dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
         if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
 
-        await assetBrowserVM.MoveTo.Execute(dataRelativePath);
+        await assetBrowserVM.MoveToPathCommand.Execute(dataRelativePath);
     }
 
     [ReactiveCommand]

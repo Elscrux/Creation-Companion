@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO.Abstractions;
-using System.Reactive;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
@@ -20,11 +19,16 @@ using CreationEditor.Services.Plugin;
 using DynamicData.Binding;
 using FluentAvalonia.UI.Windowing;
 using Noggog;
-using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels;
 
-public sealed class MainVM : ViewModel {
+public sealed partial class MainVM : ViewModel {
+    private readonly Func<ISettingsVM> _settingsVMFactory;
     private readonly IEditorEnvironment _editorEnvironment;
+    private readonly IDockFactory _dockFactory;
+    private readonly MainWindow _mainWindow;
+    private readonly IModSaveService _modSaveService;
+    private readonly IFileSystem _fileSystem;
     private const string BaseWindowTitle = "Creation Companion";
 
     public INotificationVM NotificationVM { get; }
@@ -63,16 +67,6 @@ public sealed class MainVM : ViewModel {
         "Create Record in New Window",
     };
 
-    public ReactiveCommand<IMenuPluginDefinition, Unit> OpenPlugin { get; }
-    public ReactiveCommand<Unit, Unit> OpenSettings { get; }
-
-    public ReactiveCommand<Unit, Unit> OpenGameFolder { get; }
-    public ReactiveCommand<Unit, Unit> OpenDataFolder { get; }
-
-    public ReactiveCommand<Unit, Unit> Save { get; }
-
-    public ReactiveCommand<DockElement, Unit> OpenDockElement { get; }
-
     public MainVM(
         Func<ISettingsVM> settingsVMFactory,
         INotificationVM notificationVM,
@@ -87,14 +81,19 @@ public sealed class MainVM : ViewModel {
         IModSaveService modSaveService,
         IApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
+        _settingsVMFactory = settingsVMFactory;
         _editorEnvironment = editorEnvironment;
+        _dockFactory = dockFactory;
+        _mainWindow = mainWindow;
+        _modSaveService = modSaveService;
+        _fileSystem = fileSystem;
         NotificationVM = notificationVM;
         BusyService = busyService;
         ModSelectionVM = modSelectionVM;
         DataSourceSelectionVM = dataSourceSelectionVM;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
-        mainWindow.SplashScreen = splashScreen;
+        _mainWindow.SplashScreen = splashScreen;
 
         PluginService?.PluginsRegistered
             .Subscribe(newPlugins => {
@@ -102,53 +101,62 @@ public sealed class MainVM : ViewModel {
             })
             .DisposeWith(this);
 
-        OpenPlugin = ReactiveCommand.Create<IMenuPluginDefinition>(plugin => {
-            DockingManagerService.AddControl(
-                plugin.GetControl(),
-                new DockConfig {
-                    DockInfo = new DockInfo { Header = plugin.Name },
-                    DockMode = plugin.DockMode,
-                    Dock = plugin.Dock,
-                });
-        });
-
-        OpenGameFolder = ReactiveCommand.Create(() => {
-            var gameFolder = fileSystem.Directory.GetParent(_editorEnvironment.GameEnvironment.DataFolderPath);
-            if (gameFolder is not null) {
-                Process.Start(new ProcessStartInfo {
-                    FileName = gameFolder.FullName,
-                    UseShellExecute = true,
-                    Verb = "open",
-                });
-            }
-        });
-
-        OpenDataFolder = ReactiveCommand.Create(() => {
-            Process.Start(new ProcessStartInfo {
-                FileName = _editorEnvironment.GameEnvironment.DataFolderPath,
-                UseShellExecute = true,
-                Verb = "open",
-            });
-        });
-
-        OpenSettings = ReactiveCommand.Create(() => {
-            var settingsVM = settingsVMFactory();
-            var settingsWindow = new SettingsWindow(settingsVM);
-            settingsWindow.ShowDialog(mainWindow);
-        });
-
-        Save = ReactiveCommand.CreateRunInBackground(() => {
-            Parallel.ForEach(_editorEnvironment.MutableMods, modSaveService.SaveMod);
-        });
-
-        OpenDockElement = ReactiveCommand.CreateFromTask<DockElement>(element => dockFactory.Open(element));
-
         WindowTitleObs = _editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
     }
 
+    [ReactiveCommand]
+    private void OpenPlugin(IMenuPluginDefinition plugin) {
+        DockingManagerService.AddControl(plugin.GetControl(),
+            new DockConfig {
+                DockInfo = new DockInfo {
+                    Header = plugin.Name
+                },
+                DockMode = plugin.DockMode,
+                Dock = plugin.Dock,
+            });
+    }
+
+    [ReactiveCommand]
+    private void OpenGameFolder() {
+        var gameFolder = _fileSystem.Directory.GetParent(_editorEnvironment.GameEnvironment.DataFolderPath);
+        if (gameFolder is not null) {
+            Process.Start(new ProcessStartInfo {
+                FileName = gameFolder.FullName,
+                UseShellExecute = true,
+                Verb = "open",
+            });
+        }
+    }
+
+    [ReactiveCommand]
+    private void OpenDataFolder() {
+        Process.Start(new ProcessStartInfo {
+            FileName = _editorEnvironment.GameEnvironment.DataFolderPath,
+            UseShellExecute = true,
+            Verb = "open",
+        });
+    }
+
+    [ReactiveCommand]
+    private void OpenSettings() {
+        var settingsVM = _settingsVMFactory();
+        var settingsWindow = new SettingsWindow(settingsVM);
+        settingsWindow.ShowDialog(_mainWindow);
+    }
+
+    [ReactiveCommand]
+    private void Save() {
+        Parallel.ForEach(_editorEnvironment.MutableMods, _modSaveService.SaveMod);
+    }
+
+    [ReactiveCommand]
+    private Task OpenDockElement(DockElement element) {
+        return _dockFactory.Open(element);
+    }
+
     public bool IsEnvironmentUninitialized() {
-        return _editorEnvironment.ActiveMod.ModKey.IsNull;    
+        return _editorEnvironment.ActiveMod.ModKey.IsNull;
     }
 }

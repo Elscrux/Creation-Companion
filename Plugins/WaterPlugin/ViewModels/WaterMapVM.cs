@@ -36,9 +36,10 @@ public sealed partial class WaterMapVM : ViewModel {
 
     public ObservableCollectionExtended<PresetVM> Presets { get; } = [];
 
-    public ReactiveCommand<Unit, Unit> Generate { get; }
+    public ReactiveCommand<Unit, Unit> GenerateWaterMapCommand { get; }
     [Reactive] public partial float ReflectivityAmount { get; set; }
     [Reactive] public partial float ReflectionMagnitude { get; set; }
+    public IObservable<bool> CanGenerate { get; set; }
 
     public WaterMapVM(
         WaterGradientGenerator generator,
@@ -76,8 +77,8 @@ public sealed partial class WaterMapVM : ViewModel {
              && presets.DistinctBy(x => x.Color).Count() == presets.Count
              && presets.DistinctBy(x => x.WaterType).Count() == presets.Count);
 
-        var canGenerate = worldspaceValid.CombineLatest(imagesValid, presetsValid, (x, y, z) => x && y && z);
-        Generate = ReactiveCommand.CreateRunInBackground(GenerateWaterMap, canGenerate);
+        CanGenerate = worldspaceValid.CombineLatest(imagesValid, presetsValid, (x, y, z) => x && y && z);
+        GenerateWaterMapCommand = ReactiveCommand.CreateRunInBackground(GenerateWaterMap, CanGenerate);
     }
 
     private void GenerateWaterMap() {

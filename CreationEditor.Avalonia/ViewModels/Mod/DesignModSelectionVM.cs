@@ -26,7 +26,7 @@ public class DesignModSelectionVM : IModSelectionVM {
     public IObservable<bool> AnyModsActive { get; } = Observable.Return(true);
     public IObservable<bool>? CanSave => null;
     public IObservable<string>? SaveButtonContent => null;
-    public ReactiveCommand<Unit, Unit> ToggleActive { get; } = ReactiveCommand.Create(() => {});
+    public ReactiveCommand<Unit, Unit> ToggleActiveCommand { get; } = ReactiveCommand.Create(() => {});
     public BindingBase LoadOrderItemIsEnabled { get; } = new Binding();
     public Func<IReactiveSelectable, bool> CanSelect { get; } = _ => true;
     public Task<bool> Save() => Task.FromResult(true);

@@ -17,7 +17,7 @@
     <basic:PageHost HasFinalButton="True">
         <basic:PageHost.Pages>
             <!-- First Page -->
-            <basic:PageData OnNext="{Binding SettingsConfirmed}">
+            <basic:PageData OnNext="{Binding LoadPromotionChangesCommand}">
                 <basic:PageData.DataTemplate>
                     <DataTemplate DataType="viewModels:PromoteToMasterVM">
                         <StackPanel Spacing="15">
@@ -121,7 +121,7 @@
             </basic:PageData>
 
             <!-- Second Page -->
-            <basic:PageData OnNext="{Binding Run}"
+            <basic:PageData OnNext="{Binding PromoteCommand}"
                             NextButtonText="Confirm">
                 <basic:PageData.DataTemplate>
                     <DataTemplate DataType="viewModels:PromoteToMasterVM">

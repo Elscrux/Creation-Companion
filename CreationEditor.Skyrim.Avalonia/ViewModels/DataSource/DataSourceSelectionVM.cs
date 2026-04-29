@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.IO.Abstractions;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia.Controls;
@@ -40,9 +39,6 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
     public BindingBase DataSourceIsEnabled => new Binding($"!{nameof(DataSourceItem.DataSource)}.{nameof(DataSourceItem.DataSource.IsReadOnly)}");
 
     [Reactive] public partial string? AddedDataSourcePath { get; set; }
-    public ReactiveCommand<IList, Unit> RemoveDataSource { get; }
-    public ReactiveCommand<Unit, Unit> RefreshDataSources { get; }
-    public ReactiveCommand<Unit, Unit> ApplyDataSourcesChanges { get; }
 
     private readonly Subject<bool> _anyLocalChanges = new();
     public IObservable<bool> AnyLocalChanges => _anyLocalChanges;
@@ -59,10 +55,6 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
 
         CanRemoveDataSource = o => o is DataSourceItem { DataSource: { IsReadOnly: false } dataSource }
          && !DataRelativePath.PathComparer.Equals(dataSource.Path, dataDirectoryProvider.Path);
-
-        RefreshDataSources = ReactiveCommand.Create<Unit>(_ => ResetDataSources(_dataSourceService.ListedOrder));
-
-        ApplyDataSourcesChanges = ReactiveCommand.CreateFromTask<Unit>(_ => Save());
 
         _dataSourceTreeSource = new HierarchicalTreeDataGridSource<DataSourceItem>(DataSources) {
             Columns = {
@@ -174,23 +166,6 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
 
         CanSave = anyDataSourceSelected.CombineLatest(anyDataSourceActive, (anySelected, anyActive) => anySelected && anyActive);
 
-        RemoveDataSource = ReactiveCommand.Create<IList>(dataSources => {
-            var removeDataSources = dataSources
-                .Cast<DataSourceItem>()
-                .ToList();
-
-            DataSources.RemoveRange(removeDataSources);
-
-            var archiveDataSources = _dataSourceService
-                .GetNestedArchiveDataSources(removeDataSources.Select(x => x.DataSource))
-                .Order(_dataSourceService.DataSourceComparer);
-            foreach (var archiveDataSource in archiveDataSources) {
-                DataSources.RemoveWhere(x => x.DataSource.Equals(archiveDataSource));
-            }
-
-            _anyLocalChanges.OnNext(true);
-        });
-
         this.WhenAnyValue(x => x.AddedDataSourcePath)
             .NotNull()
             .Subscribe(dataSourcePath => {
@@ -207,6 +182,32 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
                 _anyLocalChanges.OnNext(true);
             })
             .DisposeWith(this);
+    }
+
+    [ReactiveCommand]
+    private Task ApplyDataSourcesChanges() {
+        return Save();
+    }
+
+    [ReactiveCommand]
+    private void RefreshDataSources() {
+        ResetDataSources(_dataSourceService.ListedOrder);
+    }
+
+    [ReactiveCommand]
+    private void RemoveDataSource(IList dataSources) {
+        var removeDataSources = dataSources.Cast<DataSourceItem>()
+            .ToList();
+
+        DataSources.RemoveRange(removeDataSources);
+
+        var archiveDataSources = _dataSourceService.GetNestedArchiveDataSources(removeDataSources.Select(x => x.DataSource))
+            .Order(_dataSourceService.DataSourceComparer);
+        foreach (var archiveDataSource in archiveDataSources) {
+            DataSources.RemoveWhere(x => x.DataSource.Equals(archiveDataSource));
+        }
+
+        _anyLocalChanges.OnNext(true);
     }
 
     public Task<bool> Save() {

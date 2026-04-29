@@ -16,10 +16,11 @@ using CreationEditor.Avalonia.Models.Selectables;
 using DynamicData;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using Action = System.Action;
 namespace CreationEditor.Avalonia.Behavior;
 
-public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable {
+public sealed partial class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable {
     public static readonly StyledProperty<bool?> AllCheckedProperty
         = AvaloniaProperty.Register<DataGrid, bool?>(nameof(AllChecked), false);
 
@@ -222,13 +223,13 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
             new MenuItem {
                 [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
                 Header = "Invert",
-                Command = ReactiveCommand.Create(InvertAll),
+                Command = InvertAllCommand,
             });
         menuFlyout.Items.Insert(0,
             new MenuItem {
                 [!Visual.IsVisibleProperty] = this.GetObservable(MultiSelectProperty).ToBinding(),
                 Header = "Select All",
-                Command = ReactiveCommand.Create(() => SelectDynamic()),
+                Command = SelectDynamicCommand,
             });
 
         ContextFlyoutEnabled = true;
@@ -251,7 +252,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
     private void AddKeyBindings() {
         AssociatedObject?.KeyBindings.Insert(0,
             new KeyBinding {
-                Command = ReactiveCommand.Create(ToggleSelection),
+                Command = ToggleSelectionCommand,
                 Gesture = new KeyGesture(ToggleSelectionKeyBinding),
             });
 
@@ -342,6 +343,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         });
     }
 
+    [ReactiveCommand]
     private void SelectDynamic(bool newState = true) {
         if (AssociatedObject?.SelectedItems is null) return;
 
@@ -354,6 +356,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         }
     }
 
+    [ReactiveCommand]
     private void ToggleSelection() {
         if (AssociatedObject?.SelectedItems is null) return;
 
@@ -373,6 +376,7 @@ public sealed class DataGridSelectionBehavior : Behavior<DataGrid>, IDisposable 
         UpdateAllChecked();
     }
 
+    [ReactiveCommand]
     private void InvertAll() {
         if (AssociatedObject?.ItemsSource is null) return;
 

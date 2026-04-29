@@ -15,15 +15,15 @@
     <UserControl.KeyBindings>
         <KeyBinding
             Gesture="Ctrl+Z"
-            Command="{Binding Undo}"/>
+            Command="{Binding UndoCommand}"/>
 
         <KeyBinding
             Gesture="Ctrl+Y"
-            Command="{Binding Redo}"/>
+            Command="{Binding RedoCommand}"/>
 
         <KeyBinding
             Gesture="Ctrl+Shift+Z"
-            Command="{Binding Redo}"/>
+            Command="{Binding RedoCommand}"/>
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="Auto,*">

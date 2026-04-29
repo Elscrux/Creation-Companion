@@ -12,5 +12,5 @@ public interface ICellBrowserVM : IDisposableDropoff {
     int SelectedTab { get; set; }
 
     bool ShowPlaced { get; set; }
-    ReactiveCommand<Unit, Unit> TogglePlaced { get; }
+    ReactiveCommand<Unit, Unit> ToggleShowPlacedCommand { get; }
 }

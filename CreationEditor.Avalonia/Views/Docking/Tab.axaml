@@ -22,7 +22,7 @@
 
             <!-- Close -->
             <Button Classes="DockClose"
-                    Command="{Binding #Control.DockedItem.Close}"
+                    Command="{Binding #Control.DockedItem.CloseCommand}"
                     IsVisible="{Binding #Control.DockedItem.CanClose}">
                 <controls:SymbolIcon Symbol="Dismiss"
                                      ToolTip.Tip="Close"/>

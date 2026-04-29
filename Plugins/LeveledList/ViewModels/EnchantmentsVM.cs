@@ -37,8 +37,7 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
     [Reactive] public partial IReadOnlyList<ExtendedEnchantmentItem>? SelectedDefinitions { get; set; }
 
     public FlatTreeDataGridSource<EnchantedItem> EnchantmentsSource { get; }
-    public ReactiveCommand<Unit, Unit> GenerateEnchantments { get; }
-    public ReactiveCommand<Unit, Unit> ReloadDefinitions { get; }
+    public ReactiveCommand<Unit, Unit> GenerateEnchantmentsCommand { get; }
 
     public EnchantmentsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
@@ -73,12 +72,7 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
             .Filter(filter)
             .ToObservableCollection(this);
 
-        GenerateEnchantments = ReactiveCommand.CreateRunInBackground(GenerateEnchantedItems);
-        ReloadDefinitions = ReactiveCommand.Create(() => {
-            if (GenerationConfig.DefinitionsFolderPath is null) return;
-
-            LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
-        });
+        GenerateEnchantmentsCommand = ReactiveCommand.CreateRunInBackground(GenerateEnchantments);
 
         EnchantmentsSource = new FlatTreeDataGridSource<EnchantedItem>(EnchantedItems) {
             Columns = {
@@ -185,10 +179,17 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
         EnchantmentsDefinitions.LoadOptimized(GetDefinitions(directoryPath));
     }
 
-    private void GenerateEnchantedItems() {
+    private void GenerateEnchantments() {
         if (SelectedDefinitions is null) return;
 
         _implementer.ImplementEnchantments(GenerationConfig.EditorEnvironment.ActiveMod, _enchantedItems);
+    }
+
+    [ReactiveCommand]
+    private void ReloadDefinitions() {
+        if (GenerationConfig.DefinitionsFolderPath is null) return;
+
+        LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
     }
 
     private void UpdateEnchantmentsShowcase(IReadOnlyList<ExtendedEnchantmentItem>? selectedLists, IReadOnlyCollection<OrderedModItem> selectedMods) {

@@ -2,13 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Input;
-using Avalonia.Xaml.Interactions.DragAndDrop;
-using CreationEditor.Avalonia.Behavior;
-using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Models.DataSource;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Services.DataSource;
 using Noggog;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.DataSource;
 
 public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelectionVM> {
@@ -82,7 +80,7 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
 
                 if (itemsToRemove.Count == 0) return;
 
-                await ViewModel.RemoveDataSource.Execute(itemsToRemove);
+                await ViewModel.RemoveDataSourceCommand.Execute(itemsToRemove);
 
                 break;
             case Key.Space: {

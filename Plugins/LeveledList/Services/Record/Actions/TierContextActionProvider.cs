@@ -1,30 +1,23 @@
-﻿using System.Reactive;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Actions;
 using FluentAvalonia.UI.Controls;
 using LeveledList.Model.List;
 using LeveledList.Model.Tier;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace LeveledList.Services.Record.Actions;
 
-public sealed class TierContextActionProvider : IContextActionsProvider {
+public sealed partial class TierContextActionProvider : IContextActionsProvider {
     private readonly ILeveledListRecordTypeProvider _leveledListRecordTypeProvider;
     private readonly ITierController _tierController;
     private readonly IList<ContextAction> _actions;
-    private readonly ReactiveCommand<(SelectedListContext Context, TierIdentifier Tier), Unit> _addToTierCommand;
 
     public TierContextActionProvider(
         ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
         ITierController tierController) {
         _leveledListRecordTypeProvider = leveledListRecordTypeProvider;
         _tierController = tierController;
-
-        _addToTierCommand = ReactiveCommand.Create<(SelectedListContext Context, TierIdentifier Tier)>(x => {
-            foreach (var record in x.Context.SelectedRecords) {
-                _tierController.SetRecordTier(record.ReferencedRecord.Record, x.Tier);
-            }
-        });
 
         _actions = [
             new ContextAction(
@@ -39,7 +32,7 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
                     ItemsSource = GetMenuItems(context),
                 }),
             new ContextAction(
-                context => context.SelectedAssets.Count == 0 
+                context => context.SelectedAssets.Count == 0
                  && context.SelectedRecords.All(record => record.ReferencedRecord.Record is IItemGetter) && GetMenuItems(context).Any(),
                 0,
                 ContextActionGroup.Misc,
@@ -54,6 +47,13 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
                     })
                 }),
         ];
+    }
+
+    [ReactiveCommand]
+    private void AddToTier((SelectedListContext Context, TierIdentifier Tier) x) {
+        foreach (var record in x.Context.SelectedRecords) {
+            _tierController.SetRecordTier(record.ReferencedRecord.Record, x.Tier);
+        }
     }
 
     private IEnumerable<MenuItem> GetMenuItems(SelectedListContext context) {
@@ -78,7 +78,7 @@ public sealed class TierContextActionProvider : IContextActionsProvider {
             foreach (var item in group.GetItems()) {
                 yield return new MenuItem {
                     Header = item,
-                    Command = _addToTierCommand,
+                    Command = AddToTierCommand,
                     CommandParameter = (Context: context, Tier: JoinPrefix(item)),
                 };
             }

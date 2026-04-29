@@ -58,12 +58,12 @@
                       Classes="NoCellSelection Small">
 
                 <DataGrid.KeyBindings>
-                    <KeyBinding Gesture="A" Command="{Binding ToggleActive}"/>
+                    <KeyBinding Gesture="A" Command="{Binding ToggleActiveCommand}"/>
                 </DataGrid.KeyBindings>
 
                 <DataGrid.ContextFlyout>
                     <MenuFlyout>
-                        <MenuItem Header="Toggle Active" Command="{Binding ToggleActive}"/>
+                        <MenuItem Header="Toggle Active" Command="{Binding ToggleActiveCommand}"/>
                     </MenuFlyout>
                 </DataGrid.ContextFlyout>
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -38,8 +37,6 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
 
     public ReadOnlyObservableCollection<ModItem> Mods { get; }
 
-    public ReactiveCommand<Unit, Unit> SearchCommand { get; }
-
     [Reactive] public partial string? SearchText { get; set; }
     [Reactive] public partial string? ReplaceText { get; set; }
     [Reactive] public partial bool Replace { get; set; }
@@ -66,8 +63,6 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
         TypeGroup = new Group<TextReference>(references => references.TextSearcher, true);
         RecordGroup = new Group<TextReference>(references => references.Record, true);
         GroupCollection = new GroupCollection<TextReference>(new ReadOnlyObservableCollection<TextReference>(References), TypeGroup, RecordGroup).DisposeWith(ActivatedDisposable);
-
-        SearchCommand = ReactiveCommand.CreateFromTask(Search);
 
         TreeStructureSource = new HierarchicalTreeDataGridSource<object>(GroupCollection.Items) {
             Columns = {
@@ -210,6 +205,7 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
         };
     }
 
+    [ReactiveCommand]
     private async Task Search() {
         if (SearchText is null) return;
 

@@ -32,9 +32,9 @@ public record RecordUpdate<TMajorRecord>(TMajorRecord Record, RecordUpdateReason
     where TMajorRecord : class, IMajorRecordGetter;
 
 public interface IRecordEditorCore : IDisposableDropoff {
-    ReactiveCommand<Unit, Unit> Save { get; }
-    ReactiveCommand<Unit, Unit> Undo { get; }
-    ReactiveCommand<Unit, Unit> Redo { get; }
+    ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    ReactiveCommand<Unit, Unit> UndoCommand { get; }
+    ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
     ILinkCacheProvider LinkCacheProvider { get; }
 }
@@ -66,6 +66,8 @@ public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMaj
     where TMajorRecord : class, IMajorRecordInternal, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
     private readonly EditableRecordConverter<TEditableRecord, TMajorRecord, TMajorRecordGetter> _convertEditableRecord;
+    private readonly IRecordController _recordController;
+    private readonly IRecordEditorController _recordEditorController;
     public RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRecordGetter> RecordEditorHistory { get; }
     public RecordEditorValidator<TEditableRecord, TMajorRecord, TMajorRecordGetter> RecordEditorValidator { get; }
     public ILinkCacheProvider LinkCacheProvider { get; }
@@ -76,10 +78,9 @@ public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMaj
     private readonly Subject<RecordUpdate<TMajorRecordGetter>> _recordChanged = new();
     public IObservable<RecordUpdate<TMajorRecordGetter>> RecordChanged => _recordChanged;
 
-    public ReactiveCommand<Unit, Unit> Save { get; }
-    public ReactiveCommand<Unit, Unit> Undo { get; }
-    public ReactiveCommand<Unit, Unit> Redo { get; }
-    public ReactiveCommand<IDatedItem<TMajorRecord>, Unit> ApplyRecordHistory { get; }
+    public ReactiveCommand<Unit, Unit> UndoCommand => RecordEditorHistory.UndoCommand;
+    public ReactiveCommand<Unit, Unit> RedoCommand => RecordEditorHistory.RedoCommand;
+    public ReactiveCommand<IDatedItem<TMajorRecordGetter>, Unit> ApplyRecordHistory => RecordEditorHistory.SetToStateCommand;
 
     public RecordEditorCore(
         TMajorRecord record,
@@ -89,6 +90,8 @@ public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMaj
         IRecordEditorController recordEditorController,
         ILinkCacheProvider linkCacheProvider) {
         _convertEditableRecord = convertEditableRecord;
+        _recordController = recordController;
+        _recordEditorController = recordEditorController;
 
         Record = record;
         EditableRecord = convertEditableRecord.ConvertToEditable(Record);
@@ -100,14 +103,6 @@ public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMaj
                 EditableRecord = convertEditableRecord.ConvertToEditable(r);
                 UpdateRecord(RecordUpdateReason.History);
             });
-
-        Save = ReactiveCommand.Create(() => {
-            recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));
-            recordEditorController.CloseEditor(EditableRecord);
-        });
-        Undo = ReactiveCommand.Create(RecordEditorHistory.Undo);
-        Redo = ReactiveCommand.Create(RecordEditorHistory.Redo);
-        ApplyRecordHistory = ReactiveCommand.Create<IDatedItem<TMajorRecord>>(RecordEditorHistory.SetToState);
 
         this.WhenAnyValue(x => x.EditableRecord)
             .Subscribe(editableRecord => {
@@ -125,6 +120,12 @@ public sealed partial class RecordEditorCore<TEditableRecord, TMajorRecord, TMaj
                 UpdateRecord( RecordUpdateReason.External);
             })
             .DisposeWith(this);
+    }
+
+    [ReactiveCommand]
+    private void Save() {
+        _recordController.RegisterUpdate(Record, () => EditableRecord.CopyTo(Record));
+        _recordEditorController.CloseEditor(EditableRecord);
     }
 
     private void UpdateRecord(RecordUpdateReason reason) {

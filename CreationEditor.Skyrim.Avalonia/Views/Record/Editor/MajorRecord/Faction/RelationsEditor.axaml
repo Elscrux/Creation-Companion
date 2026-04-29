@@ -28,8 +28,8 @@
                   dragDrop:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRelationIndex}"
                   Classes="NoCellSelection Medium Mutable"
-                  attached:ListShortcuts.Add="{Binding AddRelation}"
-                  attached:ListShortcuts.Remove="{Binding RemoveRelation}">
+                  attached:ListShortcuts.Add="{Binding AddRelationCommand}"
+                  attached:ListShortcuts.Remove="{Binding RemoveRelationCommand}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>

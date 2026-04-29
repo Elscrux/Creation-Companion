@@ -81,7 +81,7 @@
                     <StackPanel Orientation="Horizontal"
                                 Spacing="5">
                         <Button Content="Run"
-                                Command="{Binding Run}"
+                                Command="{Binding RunCommand}"
                                 CommandParameter="{Binding ModPickerVM.SelectedMod}"/>
                         <TextBlock IsVisible="{Binding ReferenceService.IsLoadingRecordReferences^}"
                                    VerticalAlignment="Center"

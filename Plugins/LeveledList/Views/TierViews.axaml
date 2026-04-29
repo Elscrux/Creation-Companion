@@ -49,7 +49,7 @@
                             SelectedItem="{Binding SelectedTierType}"/>
 
                         <Button Grid.Column="2"
-                                Command="{Binding SaveTiers}"
+                                Command="{Binding SaveTiersCommand}"
                                 Content="Save"
                                 Classes="Accent"/>
                     </Grid>
@@ -78,8 +78,8 @@
                                 ItemsSource="{Binding Tiers}"
                                 dragDrop:DragDropExtended.AllowDrag="True"
                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                attached:ListShortcuts.Add="{Binding AddTier}"
-                                attached:ListShortcuts.Remove="{Binding RemoveTier}">
+                                attached:ListShortcuts.Add="{Binding AddTierCommand}"
+                                attached:ListShortcuts.Remove="{Binding RemoveTierCommand}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn
                                         Header="Name"
@@ -113,8 +113,8 @@
                                 ItemsSource="{Binding TierAliases}"
                                 dragDrop:DragDropExtended.AllowDrag="True"
                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                attached:ListShortcuts.Add="{Binding AddTierAlias}"
-                                attached:ListShortcuts.Remove="{Binding RemoveTierAlias}">
+                                attached:ListShortcuts.Add="{Binding AddTierAliasCommand}"
+                                attached:ListShortcuts.Remove="{Binding RemoveTierAliasCommand}">
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Header="Alias">
                                         <DataTemplate DataType="tier:TierAliasItem">

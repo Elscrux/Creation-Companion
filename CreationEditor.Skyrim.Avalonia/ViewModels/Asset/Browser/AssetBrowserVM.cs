@@ -71,14 +71,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [Reactive] public partial bool ShowInterfaces { get; set; } = true;
     [Reactive] public partial bool ShowSeq { get; set; } = true;
     [Reactive] public partial bool ShowTranslations { get; set; } = true;
+    public ReactiveCommand<Unit, Unit> UndoCommand { get; }
+    public ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
     [Reactive] public partial bool IsBusyLoadingAssets { get; set; } = true;
     [Reactive] public partial bool IsBusyLoadingReferences { get; set; } = true;
-
-    public ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
-
-    public ReactiveCommand<Unit, Unit> Undo { get; }
-    public ReactiveCommand<Unit, Unit> Redo { get; }
 
     public HierarchicalTreeDataGridSource<IDataSourceLink> AssetTreeSource { get; }
 
@@ -290,8 +287,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Subscribe(Tree_UpdateAll)
             .DisposeWith(this);
 
-        MoveTo = ReactiveCommand.Create<DataRelativePath>(MoveToPath);
-
         this.WhenAnyValue(x => x.DataSource)
             .Subscribe(dataSource => {
                 var watcher = dataSourceWatcherProvider.GetWatcher(dataSource);
@@ -329,8 +324,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             })
             .DisposeWith(this);
 
-        Undo = ReactiveCommand.Create(assetController.Undo);
-        Redo = ReactiveCommand.Create(assetController.Redo);
+        UndoCommand = ReactiveCommand.Create(assetController.Undo);
+        RedoCommand = ReactiveCommand.Create(assetController.Redo);
     }
 
     private IEnumerable<string> GetMissingLinks(DataSourceFileLink fileLink, IAssetLinkGetter assetLink) {
@@ -388,6 +383,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return items;
     }
 
+    [ReactiveCommand]
     private void MoveToPath(DataRelativePath path) {
         var pathIndices = new IndexPath();
         IDataSourceLink? currentNode;

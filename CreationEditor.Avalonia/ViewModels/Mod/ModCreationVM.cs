@@ -1,12 +1,10 @@
 ﻿using System.IO.Abstractions;
-using System.Reactive;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
 using Serilog;
@@ -27,8 +25,7 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
 
     public string ModNameOrBackup => NewModName ?? ModNameWatermark;
     public ModKey? NewModKey => new ModKey(ModNameOrBackup, NewModType);
-
-    public ReactiveCommand<Unit, IMod> CreateModCommand { get; }
+    public IObservable<bool> IsValid => this.IsValid();
 
     public ModCreationVM(
         IEditorEnvironment editorEnvironment,
@@ -43,18 +40,9 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
         NewModType = ModType.Plugin;
 
         ModNameWatermark = GetNewWatermark(_editorEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
-        editorEnvironment.LoadOrderChanged
+        _editorEnvironment.LoadOrderChanged
             .Subscribe(loadOrder => ModNameWatermark = GetNewWatermark(loadOrder))
             .DisposeWith(this);
-
-        CreateModCommand = ReactiveCommand.Create(() => {
-                var modKey = string.IsNullOrWhiteSpace(NewModName)
-                    ? new ModKey(ModNameWatermark, NewModType)
-                    : new ModKey(NewModName, NewModType);
-                NewModName = null;
-                return editorEnvironment.AddNewMutableMod(modKey);
-            },
-            this.IsValid());
 
         this.ValidationRule(
             x => x.NewModName,
@@ -70,18 +58,25 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
             });
     }
 
+    [ReactiveCommand(CanExecute = nameof(IsValid))]
+    private IMod CreateMod() {
+        var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNameWatermark, NewModType) : new ModKey(NewModName, NewModType);
+        NewModName = null;
+        return _editorEnvironment.AddNewMutableMod(modKey);
+    }
+
     private string GetNewWatermark(IReadOnlyList<ModKey> loadOrder) {
         // Assign new placeholder text if the name is already taken
-        var Watermark = WatermarkBase;
-        if (NameIsFree(Watermark, loadOrder)) return Watermark;
+        var watermark = WatermarkBase;
+        if (NameIsFree(watermark, loadOrder)) return watermark;
 
         var counter = 2;
-        while (!NameIsFree(Watermark, loadOrder)) {
-            Watermark = WatermarkName(counter);
+        while (!NameIsFree(watermark, loadOrder)) {
+            watermark = WatermarkName(counter);
             counter++;
         }
 
-        return Watermark;
+        return watermark;
     }
 
     private bool NameIsFree(string? modName, IEnumerable<ModKey> loadOrder) {

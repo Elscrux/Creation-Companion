@@ -47,6 +47,7 @@ public sealed record FormLinkWithEditorID(FormLinkIdentifier Link, string? Edito
 }
 
 public sealed partial class ModCleanerVM : ViewModel {
+    private readonly MainWindow _mainWindow;
     private readonly ILogger _logger;
     private readonly Services.ModCleaner _modCleaner;
     private readonly IEssentialRecordProvider _essentialRecordProvider;
@@ -78,19 +79,16 @@ public sealed partial class ModCleanerVM : ViewModel {
 
     [Reactive] public partial bool IsBusy { get; set; }
 
-    public ReactiveCommand<Unit, Unit> BuildReferenceGraph { get; }
-    public ReactiveCommand<Unit, Unit> BuildRetainedLinks { get; }
-    public ReactiveCommand<Unit, Unit> CleanMod { get; }
-    public ReactiveCommand<FormLinkIdentifier, Unit> ExcludeRecord { get; }
-    public ReactiveCommand<FormLinkIdentifier, Unit> RetainRecord { get; }
-    public ReactiveCommand<Unit, Unit> SearchForSelectedPath { get; }
-    public ReactiveCommand<IList, Unit> SearchForRecords { get; }
-    public ReactiveCommand<FeatureFlag, Unit> EditFeatureFlag { get; }
-    public ReactiveCommand<Unit, Unit> AddFeatureFlag { get; }
-    public ReactiveCommand<object?, Unit> DeleteFeatureFlags { get; }
+    public ReactiveCommand<Unit, Unit> BuildReferenceGraphCommand { get; }
+    public ReactiveCommand<Unit, Unit> BuildRetainedLinksCommand { get; }
+    public ReactiveCommand<Unit, Unit> CleanCommand { get; }
+    public ReactiveCommand<Unit, Unit> SearchForSelectedPathCommand { get; }
+    public ReactiveCommand<IList, Unit> SearchForRecordsCommand { get; }
     public Func<FeatureFlag, FeatureFlagEditorVM> FeatureFlagEditorVMFactory { get; }
 
     public IDataSource? SelectedDataSource => CleanAssets ? CleaningDataSourcePicker.SelectedDataSource : null;
+    public IObservable<bool> RequirementsMet { get; }
+    public IObservable<bool> CanClean { get; }
 
     public ModCleanerVM(
         Func<FeatureFlag, FeatureFlagEditorVM> featureFlagEditorVMFactory,
@@ -104,7 +102,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         SingleModPickerVM cleaningModPickerVM,
         MultiModPickerVM dependenciesModPickerVM,
         IFeatureFlagService featureFlagService) {
-        var mainWindow1 = mainWindow;
+        _mainWindow = mainWindow;
         _logger = logger;
         _modCleaner = modCleaner;
         _essentialRecordProvider = essentialRecordProvider;
@@ -151,100 +149,108 @@ public sealed partial class ModCleanerVM : ViewModel {
             })
             .DisposeWith(this);
 
-        var requirementsMet = CleaningModPickerVM.HasModSelected
+        RequirementsMet = CleaningModPickerVM.HasModSelected
             .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x));
 
-        BuildReferenceGraph = ReactiveCommand.CreateRunInBackground(BuildRefGraph, requirementsMet);
+        CanClean = this.WhenAnyValue(x => x.CleanAssets)
+            .CombineLatest(
+                CleaningDataSourcePicker.HasDataSourceSelected,
+                (cleanAssets, dataSourceSelected) => !cleanAssets || dataSourceSelected);
 
-        BuildRetainedLinks = ReactiveCommand.CreateRunInBackground(BuildRetained, requirementsMet);
+        BuildReferenceGraphCommand = ReactiveCommand.CreateRunInBackground(BuildReferenceGraph, RequirementsMet);
+        BuildRetainedLinksCommand = ReactiveCommand.CreateRunInBackground(BuildRetainedLinks, RequirementsMet);
+        CleanCommand = ReactiveCommand.CreateRunInBackground(Clean, CanClean);
+        SearchForSelectedPathCommand = ReactiveCommand.CreateRunInBackground(SearchForSelectedPath);
+        SearchForRecordsCommand = ReactiveCommand.CreateRunInBackground<IList>(SearchForRecords);
+    }
 
-        CleanMod = ReactiveCommand.CreateRunInBackground(Clean,
-            this.WhenAnyValue(x => x.CleanAssets)
-                .CombineLatest(
-                    CleaningDataSourcePicker.HasDataSourceSelected,
-                    (cleanAssets, dataSourceSelected) => !cleanAssets || dataSourceSelected));
+    private void SearchForRecords(IList parameter) {
+        if (parameter is not [FormLinkIdentifier source, IMajorRecordGetter targetRecord]) return;
 
-        ExcludeRecord = ReactiveCommand.CreateRunInBackground<FormLinkIdentifier>(link => {
-            if (!ExcludedLinks.Contains(link)) {
-                ExcludedLinks.Add(link);
-            }
-        });
-        RetainRecord = ReactiveCommand.CreateRunInBackground<FormLinkIdentifier>(link => ExcludedLinks.Remove(link));
+        if (!EditorEnvironment.LinkCache.TryResolveIdentifier(source.FormLink, out var editorId)) return;
 
-        SearchForSelectedPath = ReactiveCommand.CreateRunInBackground(SearchForPath);
+        var target = new FormLinkIdentifier(targetRecord.ToStandardizedIdentifier());
 
-        SearchForRecords = ReactiveCommand.CreateRunInBackground<IList>(parameter => {
-            if (parameter is not [FormLinkIdentifier source, IMajorRecordGetter targetRecord]) return;
-
-            if (!EditorEnvironment.LinkCache.TryResolveIdentifier(source.FormLink, out var editorId)) return;
-
-            var target = new FormLinkIdentifier(targetRecord.ToStandardizedIdentifier());
-
-            Dispatcher.UIThread.Post(() => {
-                SourceLink = new FormLinkWithEditorID(source, editorId);
-                TargetLink = new FormLinkWithEditorID(target, targetRecord.EditorID);
-            });
-
-            FindShortestPath(source, target);
+        Dispatcher.UIThread.Post(() => {
+            SourceLink = new FormLinkWithEditorID(source, editorId);
+            TargetLink = new FormLinkWithEditorID(target, targetRecord.EditorID);
         });
 
-        EditFeatureFlag = ReactiveCommand.CreateFromTask<FeatureFlag>(async featureFlag => {
-            var flagEditorVM = FeatureFlagEditorVMFactory(featureFlag);
-            var assetDialog = new TaskDialog {
-                Title = $"Feature Flag {featureFlag.Name}",
-                Content = new FeatureFlagEditor(flagEditorVM) {
-                    Width = 1200
+        FindShortestPath(source, target);
+    }
+
+    [ReactiveCommand]
+    private async Task EditFeatureFlag(FeatureFlag featureFlag) {
+        var flagEditorVM = FeatureFlagEditorVMFactory(featureFlag);
+        var assetDialog = new TaskDialog {
+            Title = $"Feature Flag {featureFlag.Name}",
+            Content = new FeatureFlagEditor(flagEditorVM) {
+                Width = 1200
+            },
+            XamlRoot = _mainWindow,
+            Buttons = {
+                new TaskDialogButton {
+                    Text = "Save",
+                    DialogResult = TaskDialogStandardResult.OK,
                 },
-                XamlRoot = mainWindow1,
-                Buttons = {
-                    new TaskDialogButton {
-                        Text = "Save",
-                        DialogResult = TaskDialogStandardResult.OK,
-                    },
-                    TaskDialogButton.CancelButton,
-                },
-                Classes = { "No" },
-                Styles = {
-                    new Style(x => x.OfType<TaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
-                        Setters = {
-                            new Setter(Layoutable.MaxWidthProperty, 1500.0),
-                        },
+                TaskDialogButton.CancelButton,
+            },
+            Classes = {
+                "No"
+            },
+            Styles = {
+                new Style(x => x.OfType<TaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
+                    Setters = {
+                        new Setter(Layoutable.MaxWidthProperty, 1500.0),
                     },
                 },
-                MinWidth = 1200,
-                KeyBindings = {
-                    new KeyBinding {
-                        Gesture = new KeyGesture(Key.Enter),
-                        Command = TaskDialogButton.OKButton.Command,
-                    },
-                    new KeyBinding {
-                        Gesture = new KeyGesture(Key.Escape),
-                        Command = TaskDialogButton.CancelButton.Command,
-                    },
+            },
+            MinWidth = 1200,
+            KeyBindings = {
+                new KeyBinding {
+                    Gesture = new KeyGesture(Key.Enter),
+                    Command = TaskDialogButton.OKButton.Command,
                 },
-            };
+                new KeyBinding {
+                    Gesture = new KeyGesture(Key.Escape),
+                    Command = TaskDialogButton.CancelButton.Command,
+                },
+            },
+        };
 
-            if (await assetDialog.ShowAsync() is TaskDialogStandardResult.OK) {
-                FeatureFlagService.RemoveFeatureFlag(featureFlag);
-                FeatureFlagService.AddFeatureFlag(flagEditorVM.GetFeatureFlag());
-            }
-        });
+        if (await assetDialog.ShowAsync() is TaskDialogStandardResult.OK) {
+            FeatureFlagService.RemoveFeatureFlag(featureFlag);
+            FeatureFlagService.AddFeatureFlag(flagEditorVM.GetFeatureFlag());
+        }
+    }
 
-        AddFeatureFlag = ReactiveCommand.Create(() => {
-            FeatureFlagService.AddFeatureFlag(new FeatureFlag(
-                "NewFeatureFlag",
-                CleaningModPickerVM.SelectedMod?.ModKey ?? ModKey.Null,
-                [],
-                []));
-        });
+    [ReactiveCommand]
+    private void AddFeatureFlag() {
+        FeatureFlagService.AddFeatureFlag(new FeatureFlag("NewFeatureFlag",
+            CleaningModPickerVM.SelectedMod?.ModKey ?? ModKey.Null,
+            [],
+            []));
+    }
 
-        DeleteFeatureFlags = ReactiveCommand.Create<object?>(o => {
-            if (o is not IList removeList) return;
+    [ReactiveCommand]
+    private void DeleteFeatureFlags(object? o) {
+        if (o is not IList removeList) return;
 
-            foreach (var featureFlag in removeList.OfType<FeatureFlagItem>()) {
-                FeatureFlagService.RemoveFeatureFlag(featureFlag.FeatureFlag);
-            }
-        });
+        foreach (var featureFlag in removeList.OfType<FeatureFlagItem>()) {
+            FeatureFlagService.RemoveFeatureFlag(featureFlag.FeatureFlag);
+        }
+    }
+
+    [ReactiveCommand]
+    private void RetainRecord(FormLinkIdentifier link) {
+        ExcludedLinks.Remove(link);
+    }
+
+    [ReactiveCommand]
+    private void ExcludeRecord(FormLinkIdentifier link) {
+        if (!ExcludedLinks.Contains(link)) {
+            ExcludedLinks.Add(link);
+        }
     }
 
     private void UpdateInvalidRecords(HashSet<ILinkIdentifier> retainedLinks) {
@@ -267,7 +273,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         });
     }
 
-    private void SearchForPath() {
+    private void SearchForSelectedPath() {
         if (SourceLink is null || TargetLink is null) return;
 
         FindShortestPath(SourceLink.Link, TargetLink.Link);
@@ -387,7 +393,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         return true;
     }
 
-    private void BuildRefGraph() {
+    private void BuildReferenceGraph() {
         if (!GetModAndDependencies(out var mod, out var dependencies)) return;
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
@@ -396,7 +402,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         Dispatcher.UIThread.Post(() => IsBusy = false);
     }
 
-    public void BuildRetained() {
+    public void BuildRetainedLinks() {
         if (CleaningModPickerVM.SelectedMod is null) return;
         if (ReferenceGraph is null) return;
         if (!GetModAndDependencies(out var mod, out var dependencies)) return;

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models;
@@ -9,10 +8,10 @@ using CreationEditor.Avalonia.Services;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Settings;
 using DynamicData.Binding;
-using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
-public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed partial class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
     public static readonly IEnumerable<DockElement> StartupDockTypes = Enum.GetValues<DockElement>();
     public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>();
     public static readonly IEnumerable<Dock> DockTypes = Enum.GetValues<Dock>();
@@ -25,9 +24,6 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
 
     public IObservableCollection<StartupDock> Docks { get; }
 
-    public ReactiveCommand<Unit, Unit> AddStartupDock { get; }
-    public ReactiveCommand<IList, Unit> RemoveStartupDock { get; }
-
     public StartupDocksSetting Settings { get; }
     public ISettingModel Model => Settings;
 
@@ -38,14 +34,18 @@ public sealed class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask 
 
         Settings = settingImporter.Import(this) ?? StartupDocksSetting.Default;
         Docks = new ObservableCollectionExtended<StartupDock>(Settings.Docks);
+    }
 
-        AddStartupDock = ReactiveCommand.Create(() => Docks.Add(new StartupDock()));
+    [ReactiveCommand]
+    private void RemoveStartupDock(IList removeDocks) {
+        foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
+            Docks.Remove(removeDock);
+        }
+    }
 
-        RemoveStartupDock = ReactiveCommand.Create<IList>(removeDocks => {
-            foreach (var removeDock in removeDocks.OfType<StartupDock>().ToList()) {
-                Docks.Remove(removeDock);
-            }
-        });
+    [ReactiveCommand]
+    private void AddStartupDock() {
+        Docks.Add(new StartupDock());
     }
 
     private void Start(StartupDock startupDock) {

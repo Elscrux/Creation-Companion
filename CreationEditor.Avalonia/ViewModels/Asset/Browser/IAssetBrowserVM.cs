@@ -32,10 +32,10 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool ShowSeq { get; set; }
     bool ShowTranslations { get; set; }
 
-    ReactiveCommand<Unit, Unit> Undo { get; }
-    ReactiveCommand<Unit, Unit> Redo { get; }
+    ReactiveCommand<Unit, Unit> UndoCommand { get; }
+    ReactiveCommand<Unit, Unit> RedoCommand { get; }
 
-    ReactiveCommand<DataRelativePath, Unit> MoveTo { get; }
+    ReactiveCommand<DataRelativePath, Unit> MoveToPathCommand { get; }
 
     bool IsBusyLoadingAssets { get; set; }
     bool IsBusyLoadingReferences { get; set; }

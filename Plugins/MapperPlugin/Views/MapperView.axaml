@@ -188,7 +188,7 @@
                                     <TextBox x:Name="MapName"
                                              Watermark="Enter a name"/>
                                     <Button Content="Save"
-                                            Command="{Binding SaveMap}"
+                                            Command="{Binding SaveMapCommand}"
                                             CommandParameter="{Binding #MapName.Text}"/>
                                 </StackPanel>
                             </Flyout>
@@ -208,12 +208,12 @@
                                                 <Button
                                                     HorizontalAlignment="Stretch"
                                                     Content="{Binding Name}"
-                                                    Command="{Binding #View.ViewModel.LoadMap}"
+                                                    Command="{Binding #View.ViewModel.LoadMapCommand}"
                                                     CommandParameter="{Binding}"/>
 
                                                 <Button HorizontalAlignment="Right"
                                                         VerticalAlignment="Stretch"
-                                                        Command="{Binding #View.ViewModel.DeleteMap}"
+                                                        Command="{Binding #View.ViewModel.DeleteMapCommand}"
                                                         CommandParameter="{Binding}">
                                                     <controls:SymbolIcon
                                                         Symbol="Delete"
@@ -281,8 +281,8 @@
                 CanUserResizeColumns="True"
                 AutoGenerateColumns="False"
                 Classes="NoCellSelection Medium Mutable"
-                attached:ListShortcuts.Add="{Binding AddMapping}"
-                attached:ListShortcuts.Remove="{Binding RemoveMapping}">
+                attached:ListShortcuts.Add="{Binding AddMappingCommand}"
+                attached:ListShortcuts.Remove="{Binding RemoveMappingCommand}">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Enabled">
                         <DataTemplate x:DataType="viewModels:MarkingMapping">

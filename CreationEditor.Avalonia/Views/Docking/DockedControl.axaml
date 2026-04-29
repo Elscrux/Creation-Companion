@@ -38,7 +38,7 @@
                     <!-- Close -->
                     <Button
                         Classes="DockClose"
-                        Command="{Binding Close}"
+                        Command="{Binding CloseCommand}"
                         IsVisible="{Binding CanClose}">
                         <controls:SymbolIcon Symbol="Dismiss"
                                              ToolTip.Tip="Close"/>

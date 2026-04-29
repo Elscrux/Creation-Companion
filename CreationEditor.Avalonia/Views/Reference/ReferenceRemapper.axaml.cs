@@ -2,7 +2,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using ReactiveUI.Avalonia;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using Avalonia.Xaml.Interactivity;
 using CreationEditor.Avalonia.Attached.DragDrop;
@@ -16,6 +15,7 @@ using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Reference;
 
 public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM> {
@@ -64,7 +64,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                 new TaskDialogButton {
                     Text = "Remap",
                     DialogResult = "OK",
-                    Command = vm.RemapAssetReferences,
+                    Command = vm.RemapAssetReferencesCommand,
                     [!TaskDialogButton.CommandParameterProperty] = filePicker
                         .GetObservable(AFilePicker.FilePathProperty)
                         .NotNull()
@@ -111,7 +111,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                             }
                         }
 
-                        await vm.RemapRecordReferences.Execute(formKeyPicker.FormKey);
+                        await vm.RemapRecordReferencesCommand.Execute(formKeyPicker.FormKey);
                     }),
                 },
                 TaskDialogButton.CancelButton,

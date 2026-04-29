@@ -43,13 +43,14 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
     [Reactive] public partial bool ForceDelete { get; set; }
 
-    public ReactiveCommand<Unit, Unit> SettingsConfirmed { get; }
-    public ReactiveCommand<Unit, Unit> Run { get; }
+    public ReactiveCommand<Unit, Unit> LoadPromotionChangesCommand { get; }
+    public ReactiveCommand<Unit, Unit> PromoteCommand { get; }
 
     public AssetPromotionMode AssetPromotionMode { get; set; } = AssetPromotionMode.ForceMove;
     public IObservable<bool> NoAssetTarget { get; }
     public IObservableCollection<IDataSource> AssetOrigins { get; } = new ObservableCollectionExtended<IDataSource>();
     public IObservableCollection<IDataSource> AssetTargets { get; } = new ObservableCollectionExtended<IDataSource>();
+    public IObservable<bool> AllModsSelected { get; set; }
 
     public PromoteToMasterVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
@@ -88,39 +89,12 @@ public sealed partial class PromoteToMasterVM : ViewModel {
             })
             .DisposeWith(this);
 
-        var allModsSelected = InjectToMod.HasModSelected.CombineLatest(
+        AllModsSelected = InjectToMod.HasModSelected.CombineLatest(
             InjectedRecordCreationMod.HasModSelected,
             EditMod.HasModSelected,
             (a, b, c) => a && b && c);
-        SettingsConfirmed = ReactiveCommand.CreateRunInBackground(() => {
-                if (InjectToMod.SelectedMod is null) return;
-
-                // Only run this once
-                IReadOnlyList<RecordPromotionChange> recordPromotionChanges;
-                if (RecordPromotionChanges.Count == 0) {
-                    var injectionTarget = _editorEnvironment.GetMod(InjectToMod.SelectedMod.ModKey);
-                    recordPromotionChanges = GetAffectedRecords(RecordsToPromote, injectionTarget).ToList();
-                    Dispatcher.UIThread.Post(() => RecordPromotionChanges.LoadOptimized(recordPromotionChanges));
-                } else {
-                    recordPromotionChanges = RecordPromotionChanges.ToList();
-                }
-
-                var promotedRecords = recordPromotionChanges
-                    .Where(x => x.ChangeType == RecordPromotionChangeType.Deleted)
-                    .Select(x => x.Record)
-                    .ToArray();
-                var assetPromotionChanges = GetAffectedAssets(promotedRecords).ToList();
-                Dispatcher.UIThread.Post(() => AssetPromotionChanges.LoadOptimized(assetPromotionChanges));
-            },
-            allModsSelected
-        );
-
-        Run = ReactiveCommand.CreateRunInBackground(() => {
-                Save(RemovePrefix is null
-                    ? record => record.EditorID
-                    : record => CalculateEditorID(record.EditorID, RemovePrefix, AddPrefix));
-            },
-            allModsSelected);
+        LoadPromotionChangesCommand = ReactiveCommand.CreateRunInBackground(LoadPromotionChanges, AllModsSelected);
+        PromoteCommand = ReactiveCommand.CreateRunInBackground(Promote, AllModsSelected);
 
         var assetTargetCountChanges = this.WhenAnyValue(x => x.AssetTargets.Count);
 
@@ -137,6 +111,32 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                 AssetTargets.RemoveRange(1, AssetTargets.Count - 1);
             })
             .DisposeWith(this);
+    }
+
+    private void LoadPromotionChanges() {
+        if (InjectToMod.SelectedMod is null) return;
+
+        // Only run this once
+        IReadOnlyList<RecordPromotionChange> recordPromotionChanges;
+        if (RecordPromotionChanges.Count == 0) {
+            var injectionTarget = _editorEnvironment.GetMod(InjectToMod.SelectedMod.ModKey);
+            recordPromotionChanges = GetAffectedRecords(RecordsToPromote, injectionTarget).ToList();
+            Dispatcher.UIThread.Post(() => RecordPromotionChanges.LoadOptimized(recordPromotionChanges));
+        } else {
+            recordPromotionChanges = RecordPromotionChanges.ToList();
+        }
+
+        var promotedRecords = recordPromotionChanges.Where(x => x.ChangeType == RecordPromotionChangeType.Deleted)
+            .Select(x => x.Record)
+            .ToArray();
+        var assetPromotionChanges = GetAffectedAssets(promotedRecords).ToList();
+        Dispatcher.UIThread.Post(() => AssetPromotionChanges.LoadOptimized(assetPromotionChanges));
+    }
+
+    private void Promote() {
+        Save(RemovePrefix is null
+            ? record => record.EditorID
+            : record => CalculateEditorID(record.EditorID, RemovePrefix, AddPrefix));
     }
 
     private static bool FilterDataSources(IDataSource dataSource) {

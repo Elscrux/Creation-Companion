@@ -13,8 +13,8 @@
     <DataGrid ItemsSource="{Binding Docks}"
               Background="{DynamicResource SystemControlTransparentBrush}"
               GridLinesVisibility="Horizontal"
-              attached:ListShortcuts.Add="{Binding AddStartupDock}"
-              attached:ListShortcuts.Remove="{Binding RemoveStartupDock}"
+              attached:ListShortcuts.Add="{Binding AddStartupDockCommand}"
+              attached:ListShortcuts.Remove="{Binding RemoveStartupDockCommand}"
               Classes="NoCellSelection Medium Mutable">
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Dock Type">

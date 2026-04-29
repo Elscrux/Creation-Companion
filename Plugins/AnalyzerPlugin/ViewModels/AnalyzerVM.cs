@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Abstractions;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using AnalyzerPlugin.Services;
@@ -68,6 +67,8 @@ public sealed partial class AnalyzerVM : ViewModel {
     private readonly IFileSystem _fileSystem;
     private readonly IReferenceService _referenceService;
     private readonly IContextMenuProvider _contextMenuProvider;
+    private readonly IReadOnlyList<IAnalyzer> _analyzers;
+    private readonly TopicEnricher _topicEnricher;
 
     public IObservableCollection<TopicItem> Topics { get; }
     public ReadOnlyObservableCollection<TopicItem> FilteredTopics { get; }
@@ -97,9 +98,8 @@ public sealed partial class AnalyzerVM : ViewModel {
     [Reactive] public partial string ResultsSearchText { get; set; } = string.Empty;
     public IObservable<int> ActiveTopicCount { get; }
 
-    public ReactiveCommand<Unit, Unit> Analyze { get; }
-
     public MultiModPickerVM ModPickerVM { get; }
+    public IObservable<bool> AnyModsSelected { get; }
 
     public AnalyzerVM(
         ILogger logger,
@@ -116,8 +116,8 @@ public sealed partial class AnalyzerVM : ViewModel {
         _referenceService = referenceService;
         _contextMenuProvider = contextMenuProvider;
         ModPickerVM = multiModPickerVM;
-        var topicEnricher = new TopicEnricher(editorEnvironment);
-        analyzers = analyzers.DistinctBy(x => x.Id).ToList();
+        _topicEnricher = new TopicEnricher(editorEnvironment);
+        _analyzers = analyzers.DistinctBy(x => x.Id).ToList();
 
         var analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
         var (guid, analyzersState) = analyzersStateRepo.LoadAllWithIdentifier().FirstOrDefault();
@@ -184,6 +184,8 @@ public sealed partial class AnalyzerVM : ViewModel {
                 }
             });
 
+        AnyModsSelected = ModPickerVM.SelectedMods.Any();
+        
         var activeTopicsChanged = Topics
             .ToObservableChangeSet<IObservableCollection<TopicItem>, TopicItem>()
             .AutoRefresh(x => x.IsActive)
@@ -261,7 +263,6 @@ public sealed partial class AnalyzerVM : ViewModel {
 
         GroupedResults = new GroupCollection<AnalyzerResult>(FilteredResults, ResultsRecordTypeGroup, ResultsRecordGroup, ResultsSeverityGroup, ResultsTopicGroup);
 
-        var setTopics = ReactiveCommand.Create<GroupInstance>(SetTopics);
         TopicsTreeSource = new HierarchicalTreeDataGridSource<object>(GroupedTopics.Items) {
             Columns = {
                 new HierarchicalExpanderColumn<object>(
@@ -277,7 +278,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                                                 .WhenCollectionChanges()
                                                 .Select(_ => GetAllActive(groupInstance))
                                                 .ToBinding(),
-                                            Command = setTopics,
+                                            Command = SetTopicsCommand,
                                             CommandParameter = groupInstance,
                                         },
                                         groupInstance.Class switch {
@@ -374,60 +375,59 @@ public sealed partial class AnalyzerVM : ViewModel {
                     })),
             }
         };
+    }
 
-        Analyze = ReactiveCommand.CreateFromTask(() => Task.Run(async () => {
-                var selectedMods = ModPickerVM.GetSelectedMods();
-                var notSelectedMods = _editorEnvironment.LinkCache.ListedOrder
-                    .Select(mod => mod.ModKey)
-                    .Except(selectedMods.Select(mod => mod.ModKey));
+    [ReactiveCommand(CanExecute = nameof(AnyModsSelected))]
+    private Task Analyze() {
+        return Task.Run(async () => {
+            var selectedMods = ModPickerVM.GetSelectedMods();
+            var notSelectedMods = _editorEnvironment.LinkCache.ListedOrder.Select(mod => mod.ModKey)
+                .Except(selectedMods.Select(mod => mod.ModKey));
 
-                var selectedTopicIds = Topics
-                    .Where(t => t.IsActive)
-                    .Select(t => t.TopicDefinition.Id)
-                    .ToHashSet();
+            var selectedTopicIds = Topics.Where(t => t.IsActive)
+                .Select(t => t.TopicDefinition.Id)
+                .ToHashSet();
 
-                var selectedAnalyzers = analyzers
-                    .Where(a => a.Topics.Any(t => selectedTopicIds.Contains(t.Id)))
-                    .ToList();
+            var selectedAnalyzers = _analyzers.Where(a => a.Topics.Any(t => selectedTopicIds.Contains(t.Id)))
+                .ToList();
 
-                var analyzer = AnalyzerRunnerBuilder.Create(GameRelease.SkyrimSE)
-                    .WithLinkCache(_editorEnvironment.LinkCache)
-                    .WithAnalyzers(selectedAnalyzers)
-                    .WithBlacklistedMods(notSelectedMods)
-                    .WithMinimumSeverity(MinimumSeverity)
-                    .WithFileSystem(fileSystem)
-                    .Build();
+            var analyzer = AnalyzerRunnerBuilder.Create(GameRelease.SkyrimSE)
+                .WithLinkCache(_editorEnvironment.LinkCache)
+                .WithAnalyzers(selectedAnalyzers)
+                .WithBlacklistedMods(notSelectedMods)
+                .WithMinimumSeverity(MinimumSeverity)
+                .WithFileSystem(_fileSystem)
+                .Build();
 
-                var resultsObservable = analyzer.Analyze()
-                    .Select(x => {
-                        // TODO remove when fixed in analyzers
-                        return new AnalyzerResult {
-                            Topic = topicEnricher.Enrich(x.Topic),
-                            Record = x.Record,
-                            ModKey = x.ModKey,
-                        };
-                    })
-                    .ToObservable()
-                    .Publish()
-                    .RefCount();
+            var resultsObservable = analyzer.Analyze()
+                .Select(x => {
+                    // TODO remove when fixed in analyzers
+                    return new AnalyzerResult {
+                        Topic = _topicEnricher.Enrich(x.Topic),
+                        Record = x.Record,
+                        ModKey = x.ModKey,
+                    };
+                })
+                .ToObservable()
+                .Publish()
+                .RefCount();
 
-                var disposableBucket = new DisposableBucket();
+            var disposableBucket = new DisposableBucket();
+            ProvideCaches x = new ProvideCaches(_editorEnvironment.LinkCache, []);
 
-                Dispatcher.UIThread.Post(void () => {
-                    Results.Clear();
+            Dispatcher.UIThread.Post(void () => {
+                Results.Clear();
 
-                    // Add results in batches to avoid UI freezing
-                    resultsObservable
-                        .Where(result => selectedTopicIds.Contains(result.Topic.TopicDefinition.Id))
-                        .Subscribe(result => Results.Add(result))
-                        // ReSharper disable once AccessToDisposedClosure - dispose called after await
-                        .DisposeWith(disposableBucket);
-                });
+                // Add results in batches to avoid UI freezing
+                resultsObservable.Where(result => selectedTopicIds.Contains(result.Topic.TopicDefinition.Id))
+                    .Subscribe(result => Results.Add(result))
+                    // ReSharper disable once AccessToDisposedClosure - dispose called after await
+                    .DisposeWith(disposableBucket);
+            });
 
-                await resultsObservable;
-                disposableBucket.Dispose();
-            }),
-            ModPickerVM.SelectedMods.Any());
+            await resultsObservable;
+            disposableBucket.Dispose();
+        });
     }
 
     [ReactiveCommand]
@@ -500,6 +500,7 @@ public sealed partial class AnalyzerVM : ViewModel {
         return null;
     }
 
+    [ReactiveCommand]
     private void SetTopics(GroupInstance group) {
         var allActive = GetAllActive(group);
 

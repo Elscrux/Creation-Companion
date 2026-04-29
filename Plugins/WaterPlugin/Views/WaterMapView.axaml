@@ -189,7 +189,7 @@
         <Button Grid.Row="1"
                 DockPanel.Dock="Bottom"
                 Content="Generate"
-                Command="{Binding Generate}"
+                Command="{Binding GenerateWaterMapCommand}"
                 HorizontalAlignment="Stretch"/>
     </Grid>
 </UserControl>

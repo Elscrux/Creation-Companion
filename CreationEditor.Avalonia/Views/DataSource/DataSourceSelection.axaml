@@ -33,7 +33,7 @@
             </Button>
 
             <Button
-                Command="{Binding RefreshDataSources}"
+                Command="{Binding RefreshDataSourcesCommand}"
                 IsEnabled="{Binding AnyLocalChanges^}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
@@ -53,10 +53,9 @@
                 RowDragOver="TreeDataGrid_OnRowDragOver"
                 RowDrop="TreeDataGrid_OnRowDrop"
                 attached:ListShortcuts.CanRemove="{Binding CanRemoveDataSource}"
-                attached:ListShortcuts.Remove="{Binding RemoveDataSource}"
+                attached:ListShortcuts.Remove="{Binding RemoveDataSourceCommand}"
                 Height="{Binding $parent.Bounds.Height}"
-                Source="{Binding DataSourceTreeSource}">
-            </TreeDataGrid>
+                Source="{Binding DataSourceTreeSource}"/>
         </ScrollViewer>
     </Grid>
 </UserControl>

@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Reactive;
 using Avalonia.Platform.Storage;
 using CreationEditor.Avalonia.Models.Settings.Save;
 using CreationEditor.Avalonia.Views;
@@ -7,14 +6,15 @@ using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Settings;
 using Mutagen.Bethesda.Environments.DI;
-using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Save;
 
-public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed partial class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
+    private readonly MainWindow _mainWindow;
 
     public string Name => "Save";
     public Type? Parent => null;
@@ -23,8 +23,6 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
     public string FullCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrFullCustomSaveLocation)
         ? Settings.DataRelativeOrFullCustomSaveLocation
         : _fileSystem.Path.Combine(_dataDirectoryProvider.Path, Settings.DataRelativeOrFullCustomSaveLocation);
-
-    public ReactiveCommand<Unit, Unit> SelectCustomDirectory { get; }
 
     public SaveLocation[] SaveLocations { get; } = Enum.GetValues<SaveLocation>();
 
@@ -44,37 +42,34 @@ public sealed class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
         _modSaveLocationProvider = modSaveLocationProvider;
+        _mainWindow = mainWindow;
         Settings = settingsImporter.Import(this) ?? new SaveSettings();
+    }
 
-        SelectCustomDirectory = ReactiveCommand.CreateFromTask(async () => {
-            var startLocation = await mainWindow.StorageProvider
-                .TryGetFolderFromPathAsync(_modSaveLocationProvider.GetSaveLocation())
-                .ConfigureAwait(true);
+    [ReactiveCommand]
+    private async Task SelectCustomDirectory() {
+        var startLocation = await _mainWindow.StorageProvider.TryGetFolderFromPathAsync(_modSaveLocationProvider.GetSaveLocation())
+            .ConfigureAwait(true);
 
-            var folderPickerOpenOptions = new FolderPickerOpenOptions {
-                Title = "Mod Save Location",
-                SuggestedStartLocation = startLocation,
-            };
+        var folderPickerOpenOptions = new FolderPickerOpenOptions {
+            Title = "Mod Save Location",
+            SuggestedStartLocation = startLocation,
+        };
 
-            var pickedDirectories = await mainWindow.StorageProvider
-                .OpenFolderPickerAsync(folderPickerOpenOptions)
-                .ConfigureAwait(true);
+        var pickedDirectories = await _mainWindow.StorageProvider.OpenFolderPickerAsync(folderPickerOpenOptions)
+            .ConfigureAwait(true);
 
-            var directory = pickedDirectories.Count > 0 ? pickedDirectories[0] : null;
-            if (directory is null) return;
+        var directory = pickedDirectories.Count > 0 ? pickedDirectories[0] : null;
+        if (directory is null) return;
 
-            var localPath = directory.Path.LocalPath;
-            if (localPath == _dataDirectoryProvider.Path) {
-                Settings.SaveLocation = SaveLocation.DataFolder;
-            } else {
-                Settings.DataRelativeOrFullCustomSaveLocation
-                    = localPath.StartsWith(_dataDirectoryProvider.Path)
-                        ? $"./{_fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, localPath)}"
-                        : localPath;
-            }
+        var localPath = directory.Path.LocalPath;
+        if (localPath == _dataDirectoryProvider.Path) {
+            Settings.SaveLocation = SaveLocation.DataFolder;
+        } else {
+            Settings.DataRelativeOrFullCustomSaveLocation = localPath.StartsWith(_dataDirectoryProvider.Path) ? $"./{_fileSystem.Path.GetRelativePath(_dataDirectoryProvider.Path, localPath)}" : localPath;
+        }
 
-            Apply();
-        });
+        Apply();
     }
 
     public void PreStartup() {}

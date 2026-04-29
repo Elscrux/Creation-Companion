@@ -38,7 +38,7 @@
                            Margin="0,0,5,0"/>
 
             <Button Content="Search"
-                    Command="{Binding SelectGridCell}"/>
+                    Command="{Binding SelectGridCellCommand}"/>
         </StackPanel>
 
         <CheckBox Grid.Row="4"

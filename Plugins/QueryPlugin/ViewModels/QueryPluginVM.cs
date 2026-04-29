@@ -1,15 +1,14 @@
-﻿using System.Reactive;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
 using CreationEditor.Services.State;
 using QueryPlugin.Views;
-using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace QueryPlugin.ViewModels;
 
-public sealed class QueryPluginVM : ViewModel {
+public sealed partial class QueryPluginVM : ViewModel {
     /// <summary>
     /// Used to pad the right side of the grid so that the splitter can be dragged at the most right column.
     /// </summary>
@@ -17,18 +16,14 @@ public sealed class QueryPluginVM : ViewModel {
 
     private readonly Func<QueryColumnVM> _queryColumnVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
+    private readonly MainWindow _window;
 
     public Grid ColumnsGrid { get; } = new() {
         ColumnDefinitions = [new ColumnDefinition()],
     };
 
-    public ReactiveCommand<Unit, Unit> AddColumn { get; }
-    public ReactiveCommand<QueryColumnVM, Unit> SaveColumn { get; }
-    public ReactiveCommand<QueryColumnVM, Unit> DuplicateColumn { get; }
-    public ReactiveCommand<QueryColumnVM, Unit> DeleteColumn { get; }
-    public ReactiveCommand<QueryColumnVM, Unit> CopyColumnText { get; }
-    public ReactiveCommand<Unit, Unit> RestoreColumns { get; }
     public int QueryCount { get; }
+    public IStateRepository<QueryRunnerMemento, QueryRunnerMemento, Guid> StateRepository { get; }
 
     public QueryPluginVM(
         Func<QueryColumnVM> queryColumnVMFactory,
@@ -37,50 +32,57 @@ public sealed class QueryPluginVM : ViewModel {
         MainWindow window) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
+        _window = window;
         ColumnsGrid.Children.Add(_paddingRight);
 
-        var stateRepository = stateRepositoryFactory.Create("Query");
+        StateRepository = stateRepositoryFactory.Create("Query");
 
-        QueryCount = stateRepository.Count();
+        QueryCount = StateRepository.Count();
+    }
 
-        AddColumn = ReactiveCommand.Create(() => {
-            InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
-        });
+    [ReactiveCommand]
+    private void AddColumn() {
+        InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
+    }
 
-        SaveColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
-            var memento = vm.QueryVM.QueryRunner.CreateMemento();
-            stateRepository.Save(memento, memento.Id);
-        });
+    [ReactiveCommand]
+    private void SaveColumn(QueryColumnVM vm) {
+        var memento = vm.QueryVM.QueryRunner.CreateMemento();
+        StateRepository.Save(memento, memento.Id);
+    }
 
-        DuplicateColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
-            if (!GetColumnIndex(vm, out var columnIndex)) return;
+    [ReactiveCommand]
+    private void DuplicateColumn(QueryColumnVM vm) {
+        if (!GetColumnIndex(vm, out var columnIndex)) return;
 
-            var insertedColumn = InsertColumn(columnIndex + 2);
-            if (insertedColumn.ViewModel is null) return;
+        var insertedColumn = InsertColumn(columnIndex + 2);
+        if (insertedColumn.ViewModel is null) return;
 
-            insertedColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(vm.QueryVM.QueryRunner.CreateMemento());
-        });
+        insertedColumn.ViewModel.QueryVM.QueryRunner.RestoreMemento(vm.QueryVM.QueryRunner.CreateMemento());
+    }
 
-        DeleteColumn = ReactiveCommand.Create<QueryColumnVM>(vm => {
-            if (GetColumnIndex(vm, out var columnIndex)) {
-                RemoveColumn(columnIndex);
-            }
-        });
+    [ReactiveCommand]
+    private void DeleteColumn(QueryColumnVM vm) {
+        if (GetColumnIndex(vm, out var columnIndex)) {
+            RemoveColumn(columnIndex);
+        }
+    }
 
-        CopyColumnText = ReactiveCommand.CreateFromTask<QueryColumnVM>(async vm => {
-            var clipboard = TopLevel.GetTopLevel(window)?.Clipboard;
-            if (clipboard is not null) {
-                var text = string.Join(Environment.NewLine, vm.QueriedFields);
-                await clipboard.SetTextAsync(text);
-            }
-        });
+    [ReactiveCommand]
+    private async Task CopyColumnText(QueryColumnVM vm) {
+        var clipboard = TopLevel.GetTopLevel(_window)?.Clipboard;
+        if (clipboard is not null) {
+            var text = string.Join(Environment.NewLine, vm.QueriedFields);
+            await clipboard.SetTextAsync(text);
+        }
+    }
 
-        RestoreColumns = ReactiveCommand.Create(() => {
-            foreach (var queryMemento in stateRepository.LoadAll()) {
-                var queryColumn = InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
-                queryColumn.ViewModel?.QueryVM.QueryRunner.RestoreMemento(queryMemento);
-            }
-        });
+    [ReactiveCommand]
+    private void RestoreColumns() {
+        foreach (var queryMemento in StateRepository.LoadAll()) {
+            var queryColumn = InsertColumn(ColumnsGrid.ColumnDefinitions.Count - 1);
+            queryColumn.ViewModel?.QueryVM.QueryRunner.RestoreMemento(queryMemento);
+        }
     }
 
     private QueryColumn InsertColumn(int column) {
@@ -151,10 +153,10 @@ public sealed class QueryPluginVM : ViewModel {
 
     private MenuItem[] GetColumnMenuItems(QueryColumnVM queryColumnVM) {
         return [
-            _menuItemProvider.Save(SaveColumn, queryColumnVM),
-            _menuItemProvider.Duplicate(DuplicateColumn, queryColumnVM),
-            _menuItemProvider.Delete(DeleteColumn, queryColumnVM),
-            _menuItemProvider.Copy(CopyColumnText, queryColumnVM).Name("Copy Entries Text"),
+            _menuItemProvider.Save(SaveColumnCommand, queryColumnVM),
+            _menuItemProvider.Duplicate(DuplicateColumnCommand, queryColumnVM),
+            _menuItemProvider.Delete(DeleteColumnCommand, queryColumnVM),
+            _menuItemProvider.Copy(CopyColumnTextCommand, queryColumnVM).Name("Copy Entries Text"),
         ];
     }
 }

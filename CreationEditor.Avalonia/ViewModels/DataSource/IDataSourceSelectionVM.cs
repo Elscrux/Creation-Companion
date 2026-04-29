@@ -14,9 +14,9 @@ public interface IDataSourceSelectionVM : ISaveDialogVM {
     Func<IReactiveSelectable, bool> CanSelect { get; }
     BindingBase DataSourceIsEnabled { get; }
     string? AddedDataSourcePath { get; set; }
-    ReactiveCommand<IList, Unit> RemoveDataSource { get; }
-    ReactiveCommand<Unit, Unit> RefreshDataSources { get; }
-    ReactiveCommand<Unit, Unit> ApplyDataSourcesChanges { get; }
+    ReactiveCommand<IList, Unit> RemoveDataSourceCommand { get; }
+    ReactiveCommand<Unit, Unit> RefreshDataSourcesCommand { get; }
+    ReactiveCommand<Unit, Unit> ApplyDataSourcesChangesCommand { get; }
     IObservable<bool> AnyLocalChanges { get; }
     ITreeDataGridSource DataSourceTreeSource { get; }
     Func<object, bool> CanRemoveDataSource { get; }

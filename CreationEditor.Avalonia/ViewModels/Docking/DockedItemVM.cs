@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using CreationEditor.Avalonia.Models.Docking;
 using FluentAvalonia.UI.Controls;
-using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
@@ -25,7 +24,8 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
     [Reactive] public partial bool IsSelected { get; set; }
 
     [Reactive] public partial bool CanClose { get; set; }
-    public ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
+    private IObservable<bool> CanCloseObservable => this.WhenAnyValue(x => x.CanClose);
+    public ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand { get; }
 
     public DisposableCounterLock RemovalLock { get; }
 
@@ -42,19 +42,18 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
         CanClose = info.CanClose;
 
         RemovalLock = new DisposableCounterLock(CheckRemoved);
+        
+        CloseCommand = ReactiveCommand.Create(Close, CanCloseObservable);
 
         Control.DetachedFromLogicalTree += CheckRemoved;
+    }
 
-        Close = ReactiveCommand.Create(
-            canExecute: this.WhenAnyValue(x => x.CanClose),
-            execute: () => {
-                var oneTimeSubscription = Closed.Take(1);
+    private IObservable<IDockedItem> Close() {
+        var oneTimeSubscription = Closed.Take(1);
 
-                DockParent.Remove(this);
+        DockParent.Remove(this);
 
-                return oneTimeSubscription;
-            })
-            .DisposeWith(this);
+        return oneTimeSubscription;
     }
 
     private void CheckRemoved(object? o, LogicalTreeAttachmentEventArgs logicalTreeAttachmentEventArgs) => CheckRemoved();

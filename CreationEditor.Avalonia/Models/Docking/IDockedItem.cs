@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.Docking;
 
 public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
@@ -21,7 +20,7 @@ public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
     double? Size { get; set; }
 
     bool CanClose { get; set; }
-    ReactiveCommand<Unit, IObservable<IDockedItem>> Close { get; }
+    ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand { get; }
 
     DisposableCounterLock RemovalLock { get; }
 

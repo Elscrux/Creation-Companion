@@ -10,7 +10,7 @@ public interface IQueryFieldSelectorCollection : IReactiveObject, IMementoProvid
     IObservableCollection<IQueryFieldSelector> Selectors { get; }
     IObservable<Unit> SelectionChanged { get; }
 
-    ReactiveCommand<Unit, Unit> AddNextSelector { get; }
+    ReactiveCommand<Unit, Unit> AddNextSelectorCommand { get; }
 
     void SetRootType(Type type);
 

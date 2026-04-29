@@ -1,6 +1,6 @@
-﻿using ReactiveUI.Avalonia;
-using CreationEditor.Avalonia.Attached;
+﻿using CreationEditor.Avalonia.Attached;
 using ModCleaner.ViewModels;
+using ReactiveUI.Avalonia;
 namespace ModCleaner.Views;
 
 public partial class ModCleanerView : ReactiveUserControl<ModCleanerVM> {
@@ -10,7 +10,7 @@ public partial class ModCleanerView : ReactiveUserControl<ModCleanerVM> {
 
     public ModCleanerView(ModCleanerVM vm) : this() {
         DataContext = vm;
-        FeatureFlagsDataGrid[ListShortcuts.AddProperty] = vm.AddFeatureFlag;
-        FeatureFlagsDataGrid[ListShortcuts.RemoveProperty] = vm.DeleteFeatureFlags;
+        FeatureFlagsDataGrid[ListShortcuts.AddProperty] = vm.AddFeatureFlagCommand;
+        FeatureFlagsDataGrid[ListShortcuts.RemoveProperty] = vm.DeleteFeatureFlagsCommand;
     }
 }

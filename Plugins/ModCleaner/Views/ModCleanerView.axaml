@@ -63,7 +63,7 @@
                             </Button>
 
                             <Button Content="Exclude" FontSize="12" Padding="6,4"
-                                    Command="{Binding #Control.ViewModel.ExcludeRecord}"
+                                    Command="{Binding #Control.ViewModel.ExcludeRecordCommand}"
                                     CommandParameter="{Binding}"/>
 
                             <TextBlock
@@ -80,7 +80,7 @@
                             <Button
                                 Content="Search"
                                 FontSize="12" Padding="6,4"
-                                Command="{Binding #Control.ViewModel.SearchForRecords}">
+                                Command="{Binding #Control.ViewModel.SearchForRecordsCommand}">
                                 <Button.CommandParameter>
                                     <MultiBinding>
                                         <Binding/>
@@ -186,7 +186,7 @@
                                             <Button Content="Edit"
                                                     FontSize="12"
                                                     Padding="8,4"
-                                                    Command="{Binding #Control.ViewModel.EditFeatureFlag}"
+                                                    Command="{Binding #Control.ViewModel.EditFeatureFlagCommand}"
                                                     CommandParameter="{Binding FeatureFlag}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn>
@@ -220,11 +220,11 @@
 
                         <Button
                             Content="Build Reference Graph"
-                            Command="{Binding BuildReferenceGraph}"
+                            Command="{Binding BuildReferenceGraphCommand}"
                             IsVisible="{Binding !ReferenceService.IsLoading^}"/>
 
                         <Button Content="Build Retained Records"
-                                Command="{Binding BuildRetainedLinks}"
+                                Command="{Binding BuildRetainedLinksCommand}"
                                 IsVisible="{Binding !!ReferenceGraph}"/>
                     </StackPanel>
                 </basic:ExpanderCard>
@@ -243,7 +243,7 @@
                             Header="Refinement Workflow"
                             Description="Steps to refine the list of retained records">
                             <basic:Card.IconControl>
-                                <controls:FontIcon Glyph="🔍"></controls:FontIcon>
+                                <controls:FontIcon Glyph="🔍"/>
                             </basic:Card.IconControl>
 
                             <TextBlock
@@ -490,7 +490,7 @@
                             Header="Dependency Path Analysis"
                             Description="Find the path between two records to understand why they're linked">
                             <basic:Card.IconControl>
-                                <controls:FontIcon Glyph="🔗"></controls:FontIcon>
+                                <controls:FontIcon Glyph="🔗"/>
                             </basic:Card.IconControl>
 
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto" ColumnSpacing="12">
@@ -567,7 +567,7 @@
                                 <!-- Find Path Button -->
                                 <Button Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2"
                                         Content="Find Dependency Path"
-                                        Command="{Binding SearchForSelectedPath}"
+                                        Command="{Binding SearchForSelectedPathCommand}"
                                         Padding="12,8"/>
 
                                 <!-- Results -->
@@ -618,7 +618,7 @@
                                                     <Button Content="Retain"
                                                             FontSize="12"
                                                             Padding="8,4"
-                                                            Command="{Binding #Control.ViewModel.RetainRecord}"
+                                                            Command="{Binding #Control.ViewModel.RetainRecordCommand}"
                                                             CommandParameter="{Binding}"
                                                             ToolTip.Tip="Remove from exclusion list"/>
 
@@ -644,7 +644,7 @@
                     Icon="Delete">
                     <StackPanel Spacing="12">
                         <Button Content="🧹 Clean Mod"
-                                Command="{Binding CleanMod}"
+                                Command="{Binding CleanCommand}"
                                 Classes="Primary"
                                 FontWeight="Normal"/>
 

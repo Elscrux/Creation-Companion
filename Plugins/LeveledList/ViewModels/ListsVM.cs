@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -45,8 +44,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
     [Reactive] public partial IReadOnlyList<ExtendedListDefinition>? SelectedDefinitions { get; set; }
 
     public HierarchicalTreeDataGridSource<LeveledListTreeNode> LeveledListSource { get; }
-    public ReactiveCommand<Unit, Unit> GenerateSelectedLists { get; }
-    public ReactiveCommand<Unit, Unit> ReloadDefinitions { get; }
+    public ReactiveCommand<Unit, Unit> GenerateSelectedListsCommand { get; }
 
     public ListsVM(
         IStateRepositoryFactory<LeveledListMemento, LeveledListMemento, Guid> stateRepositoryFactory,
@@ -83,13 +81,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
             .Filter(filter)
             .ToObservableCollection(this);
 
-        GenerateSelectedLists = ReactiveCommand.CreateRunInBackground(GenerateLeveledLists);
-        ReloadDefinitions = ReactiveCommand.Create(() => {
-            if (GenerationConfig.DefinitionsFolderPath is null) return;
-
-            LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
-        });
-
+        GenerateSelectedListsCommand = ReactiveCommand.CreateRunInBackground(GenerateSelectedLists);
         LeveledListSource = new HierarchicalTreeDataGridSource<LeveledListTreeNode>(LeveledLists) {
             Columns = {
                 new TemplateColumn<LeveledListTreeNode>(
@@ -191,7 +183,14 @@ public sealed partial class ListsVM : ValidatableViewModel {
         ListTypeDefinitions.LoadOptimized(GetDefinitions(directoryPath));
     }
 
-    private void GenerateLeveledLists() {
+    [ReactiveCommand]
+    private void ReloadDefinitions() {
+        if (GenerationConfig.DefinitionsFolderPath is null) return;
+
+        LoadDefinitions(GenerationConfig.DefinitionsFolderPath);
+    }
+
+    private void GenerateSelectedLists() {
         if (SelectedDefinitions is null) return;
 
         var selectedModsItems = GenerationConfig.ModPicker.GetSelectedMods();

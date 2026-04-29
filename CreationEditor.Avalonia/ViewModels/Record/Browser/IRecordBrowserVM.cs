@@ -10,9 +10,9 @@ namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 public interface IRecordBrowserVM : IDisposableDropoff {
     IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 
-    ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
-    ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
-    ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
+    ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroupCommand { get; }
+    ReactiveCommand<RecordTypeListing, Unit> SelectRecordTypeCommand { get; }
+    ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilterCommand { get; }
 
     IRecordListVM? RecordListVM { get; set; }
     IRecordBrowserSettings RecordBrowserSettings { get; }

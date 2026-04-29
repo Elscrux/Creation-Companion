@@ -31,7 +31,7 @@
                     Spacing="2"
                     Background="{DynamicResource ButtonBackground}">
             <Button Classes="Transparent"
-                    Command="{Binding Clear}"
+                    Command="{Binding ClearCommand}"
                     Width="20" Height="20"
                     Padding="2"
                     ToolTip.Tip="Clear Log">
@@ -39,7 +39,7 @@
             </Button>
 
             <Button Classes="Transparent"
-                    Command="{Binding ToggleAutoScroll}"
+                    Command="{Binding ToggleAutoScrollCommand}"
                     Width="20" Height="20"
                     Padding="2"
                     ToolTip.Tip="Toggle Auto Scroll">
@@ -64,7 +64,7 @@
                                     <CheckBox Classes="LogLevelColor"
                                               IsChecked="{Binding Converter={StaticResource LevelVisibilityConverter}}"
                                               Content="{Binding Converter={x:Static converter:EnumConverters.ToString}}"
-                                              Command="{Binding #Log.ViewModel.ToggleEvent}"
+                                              Command="{Binding #Log.ViewModel.ToggleEventCommand}"
                                               CommandParameter="{Binding}">
                                         <CheckBox.Styles>
                                             <Style

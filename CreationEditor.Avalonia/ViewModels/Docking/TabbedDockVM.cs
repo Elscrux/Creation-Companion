@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reactive;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using DynamicData.Binding;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Docking;
 
@@ -14,22 +12,20 @@ public abstract partial class TabbedDockVM : DockContainerVM {
     public override int ChildrenCount => Tabs.Count;
 
     [Reactive] public partial IDockedItem? ActiveTab { get; set; }
-    public ReactiveCommand<IDockedItem, Unit> Activate { get; }
 
     public abstract DockMode DockMode { get; }
 
     protected TabbedDockVM(DockContainerVM dockParent) {
         DockParent = dockParent;
+    }
 
-        Activate = ReactiveCommand.Create<IDockedItem>(tab => {
-            if (tab is null) return;
-
-            if (tab.Equals(ActiveTab)) {
-                Unfocus();
-            } else {
-                Focus(tab);
-            }
-        });
+    [ReactiveCommand]
+    private void Activate(IDockedItem tab) {
+        if (tab.Equals(ActiveTab)) {
+            Unfocus();
+        } else {
+            Focus(tab);
+        }
     }
 
     public override bool TryGetDock(Control control, [MaybeNullWhen(false)] out IDockedItem outDock) {

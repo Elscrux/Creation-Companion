@@ -15,7 +15,7 @@
              x:DataType="viewModels:DialogueExporterVM">
     <TabControl>
         <TabItem Header="Voice Line Export">
-            <Grid IsEnabled="{Binding !ExportVoiceSheets.IsExecuting^}">
+            <Grid IsEnabled="{Binding !ExportVoiceSheetsCommand.IsExecuting^}">
                 <StackPanel Spacing="10">
                     <TextBlock
                         Text="Voice line export specifically crafted to be easy for voice actors to record line by line with enough context to easily understand the context and how to deliver the line. All lines tied to a voice type coming from the selected mod will be included."
@@ -42,7 +42,7 @@
                     <StackPanel>
                         <Button Content="Export"
                                 IsVisible="{Binding !ReferenceService.IsLoadingRecordReferences^}"
-                                Command="{Binding ExportVoiceSheets}"/>
+                                Command="{Binding ExportVoiceSheetsCommand}"/>
 
                         <avaloniaProgressRing:ProgressRing
                             IsActive="{Binding ReferenceService.IsLoadingRecordReferences^}"
@@ -52,14 +52,14 @@
                 </StackPanel>
 
                 <avaloniaProgressRing:ProgressRing
-                    IsActive="{Binding ExportVoiceSheets.IsExecuting^}"
+                    IsActive="{Binding ExportVoiceSheetsCommand.IsExecuting^}"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Width="200" Height="200"/>
             </Grid>
         </TabItem>
 
         <TabItem Header="VA Synth Export">
-            <Grid IsEnabled="{Binding !ExportVaSynth.IsExecuting^}">
+            <Grid IsEnabled="{Binding !ExportVaSynthCommand.IsExecuting^}">
                 <StackPanel Spacing="10">
                     <TextBlock
                         Text="Export for the tool xVASynth, which can generate placeholder voice lines using AI voice synthesis. Load the resulting export into "
@@ -102,14 +102,13 @@
                             SelectedItem="{Binding Vocoder}"
                             SelectedIndex="0"
                             IsEditable="True"
-                            IsTextSearchEnabled="True">
-                        </controls:FAComboBox>
+                            IsTextSearchEnabled="True"/>
                     </basic:LabeledContentControl>
 
                     <StackPanel>
                         <Button Content="Export"
                                 IsVisible="{Binding !ReferenceService.IsLoadingRecordReferences^}"
-                                Command="{Binding ExportVaSynth}"/>
+                                Command="{Binding ExportVaSynthCommand}"/>
 
                         <avaloniaProgressRing:ProgressRing
                             IsActive="{Binding ReferenceService.IsLoadingRecordReferences^}"
@@ -119,7 +118,7 @@
                 </StackPanel>
 
                 <avaloniaProgressRing:ProgressRing
-                    IsActive="{Binding ExportVaSynth.IsExecuting^}"
+                    IsActive="{Binding ExportVaSynthCommand.IsExecuting^}"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Width="200" Height="200"/>
             </Grid>

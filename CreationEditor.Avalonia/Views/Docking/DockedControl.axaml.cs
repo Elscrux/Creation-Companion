@@ -6,12 +6,12 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
-using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 [DebuggerDisplay("Header = {Header}")]
@@ -51,7 +51,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         set => DockedItem.CanClose = value;
     }
 
-    public ReactiveCommand<Unit, IObservable<IDockedItem>> Close => DockedItem.Close;
+    public ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand => DockedItem.CloseCommand;
 
     public DisposableCounterLock RemovalLock => DockedItem.RemovalLock;
 

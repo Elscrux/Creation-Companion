@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -30,6 +29,7 @@ namespace MapperPlugin.ViewModels;
 public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento>, IMementoReceiver<MapperMemento> {
     private readonly Func<QueryVM> _queryVMFactory;
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
+    private readonly IStateRepository<MapperMemento, MapperMemento, NamedGuid> _stateRepository;
 
     public HeatmapCreator HeatmapCreator { get; }
     public IReferenceService ReferenceService { get; }
@@ -62,11 +62,6 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
 
     public IObservableCollection<MarkingMapping> Mappings { get; }
 
-    public ReactiveCommand<Unit, Unit> AddMapping { get; }
-    public ReactiveCommand<IList, Unit> RemoveMapping { get; }
-    public ReactiveCommand<string, Unit> SaveMap { get; }
-    public ReactiveCommand<NamedGuid, Unit> LoadMap { get; }
-    public ReactiveCommand<NamedGuid, Unit> DeleteMap { get; }
     public IObservableCollection<NamedGuid> SavedMaps { get; } = new ObservableCollectionExtended<NamedGuid>();
 
     public MapperVM(
@@ -85,13 +80,13 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         ReferenceService = referenceService;
         HeightmapCreator = new HeightmapCreator();
         LinkCacheProvider = linkCacheProvider;
-        var stateRepository = stateRepositoryFactory.Create("Heatmap");
+        _stateRepository = stateRepositoryFactory.Create("Heatmap");
         TopCell = 64;
         BottomCell = -64;
         LeftCell = -64;
         RightCell = 64;
         MarkingSize = 10;
-        SavedMaps.AddRange(stateRepository.LoadAllIdentifiers());
+        SavedMaps.AddRange(_stateRepository.LoadAllIdentifiers());
 
         var registrationsByGetterType = mutagenTypeProvider
             .GetRegistrations(gameReleaseContext.Release)
@@ -103,36 +98,6 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .ToList();
 
         Mappings = new ObservableCollectionExtended<MarkingMapping> { CreateMapping() };
-
-        AddMapping = ReactiveCommand.Create(() => Mappings.Add(CreateMapping()));
-        RemoveMapping = ReactiveCommand.Create<IList>(removeMappings => {
-            foreach (var removeMapping in removeMappings.OfType<MarkingMapping>().ToList()) {
-                Mappings.Remove(removeMapping);
-            }
-        });
-
-        SaveMap = ReactiveCommand.Create<string>(name => {
-            var memento = CreateMemento();
-            var newGuid = Guid.NewGuid();
-            stateRepository.Save(memento, new NamedGuid(newGuid, name));
-            foreach (var id in SavedMaps.Where(x => x.Name == name).ToList()) {
-                SavedMaps.Remove(id);
-                stateRepository.Delete(id);
-            }
-            SavedMaps.Add(new NamedGuid(newGuid, name));
-        });
-
-        LoadMap = ReactiveCommand.Create<NamedGuid>(id => {
-            var memento = stateRepository.Load(id);
-            if (memento is not null) {
-                RestoreMemento(memento);
-            }
-        });
-
-        DeleteMap = ReactiveCommand.Create<NamedGuid>(id => {
-            stateRepository.Delete(id);
-            SavedMaps.RemoveWhere(x => x.Id == id.Id);
-        });
 
         // Logical update
         var logicalMappingUpdates = Mappings
@@ -280,6 +245,44 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
                 }
             })
             .DisposeWith(this);
+    }
+
+    [ReactiveCommand]
+    private void AddMapping() {
+        Mappings.Add(CreateMapping());
+    }
+
+    [ReactiveCommand]
+    private void RemoveMapping(IList removeMappings) {
+        foreach (var removeMapping in removeMappings.OfType<MarkingMapping>().ToList()) {
+            Mappings.Remove(removeMapping);
+        }
+    }
+
+    [ReactiveCommand]
+    private void SaveMap(string name) {
+        var memento = CreateMemento();
+        var newGuid = Guid.NewGuid();
+        _stateRepository.Save(memento, new NamedGuid(newGuid, name));
+        foreach (var id in SavedMaps.Where(x => x.Name == name).ToList()) {
+            SavedMaps.Remove(id);
+            _stateRepository.Delete(id);
+        }
+        SavedMaps.Add(new NamedGuid(newGuid, name));
+    }
+
+    [ReactiveCommand]
+    private void LoadMap(NamedGuid id) {
+        var memento = _stateRepository.Load(id);
+        if (memento is not null) {
+            RestoreMemento(memento);
+        }
+    }
+
+    [ReactiveCommand]
+    private void DeleteMap(NamedGuid id) {
+        _stateRepository.Delete(id);
+        SavedMaps.RemoveWhere(x => x.Id == id.Id);
     }
 
     private MarkingMapping CreateMapping() {

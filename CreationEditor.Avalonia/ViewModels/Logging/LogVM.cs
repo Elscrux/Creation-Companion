@@ -20,10 +20,6 @@ public sealed partial class LogVM : ViewModel, ILogVM {
 
     public IObservableCollection<LogEventLevel> VisibilityLevels { get; } = new ObservableCollectionExtended<LogEventLevel>(LogLevels);
 
-    public ReactiveCommand<Unit, Unit> Clear { get; }
-    public ReactiveCommand<LogEventLevel, Unit> ToggleEvent { get; }
-    public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
-
     [Reactive] public partial bool AutoScroll { get; set; }
 
     private readonly SourceCache<ILogItem, Guid> _logAddedCache = new(item => item.Id);
@@ -44,30 +40,34 @@ public sealed partial class LogVM : ViewModel, ILogVM {
             })
             .DisposeWith(this);
 
-        Clear = ReactiveCommand.Create<Unit>(_ => _logAddedCache.Clear());
-
-        ToggleEvent = ReactiveCommand.Create<LogEventLevel>(level => {
-            LevelsVisibility.UpdateOrAdd(
-                level,
-                visibility => {
-                    if (visibility) {
-                        VisibilityLevels.Remove(level);
-                    } else {
-                        VisibilityLevels.Add(level);
-                    }
-                    return !visibility;
-                });
-        });
-
-        ToggleAutoScroll = ReactiveCommand.Create(() => {
-            AutoScroll = !AutoScroll;
-        });
-
         LogItems = _logAddedCache
             .Connect()
             .Filter(this.WhenAnyValue(x => x.VisibilityLevels.Count)
                 .Select(_ => new Func<ILogItem, bool>(item => VisibilityLevels.Contains(item.Level))))
             .SortBy(item => item.Time)
             .ToObservableCollection(this);
+    }
+
+    [ReactiveCommand]
+    private void ToggleAutoScroll() {
+        AutoScroll = !AutoScroll;
+    }
+
+    [ReactiveCommand]
+    private void ToggleEvent(LogEventLevel level) {
+        LevelsVisibility.UpdateOrAdd(level,
+            visibility => {
+                if (visibility) {
+                    VisibilityLevels.Remove(level);
+                } else {
+                    VisibilityLevels.Add(level);
+                }
+                return !visibility;
+            });
+    }
+
+    [ReactiveCommand]
+    private void Clear(Unit _) {
+        _logAddedCache.Clear();
     }
 }

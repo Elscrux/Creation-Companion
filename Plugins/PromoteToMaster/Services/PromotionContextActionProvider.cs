@@ -8,24 +8,20 @@ using CreationEditor.Skyrim.Definitions;
 using FluentAvalonia.UI.Controls;
 using PromoteToMaster.ViewModels;
 using PromoteToMaster.Views;
-using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace PromoteToMaster.Services;
 
-public sealed class PromotionContextActionProvider : IContextActionsProvider {
+public sealed partial class PromotionContextActionProvider : IContextActionsProvider {
+    private readonly Func<IReadOnlyList<IReferencedRecord>, PromoteToMasterVM> _promoteToMasterVMFactory;
+    private readonly MainWindow _mainWindow;
     private readonly IList<ContextAction> _actions;
     public PromotionContextActionProvider(
         ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
         Func<IReadOnlyList<IReferencedRecord>, PromoteToMasterVM> promoteToMasterVMFactory,
         MainWindow mainWindow) {
-
-        var promoteCommand = ReactiveCommand.Create<SelectedListContext>(context => {
-            var referenceWindow = new PromotionWindow {
-                DataContext = promoteToMasterVMFactory(context.SelectedRecords.Select(x => x.ReferencedRecord).ToArray()),
-            };
-
-            referenceWindow.Show(mainWindow);
-        });
+        _promoteToMasterVMFactory = promoteToMasterVMFactory;
+        _mainWindow = mainWindow;
 
         _actions = [
             new ContextAction(
@@ -43,14 +39,23 @@ public sealed class PromotionContextActionProvider : IContextActionsProvider {
                 },
                 0,
                 ContextActionGroup.Modification,
-                promoteCommand,
+                PromoteCommand,
                 context => menuItemProvider.Custom(
-                    promoteCommand,
+                    PromoteCommand,
                     "Promote to Master",
                     context,
                     Symbol.Up),
                 IsPrimary: true),
         ];
+    }
+
+    [ReactiveCommand]
+    private void Promote(SelectedListContext context) {
+        var referenceWindow = new PromotionWindow {
+            DataContext = _promoteToMasterVMFactory(context.SelectedRecords.Select(x => x.ReferencedRecord).ToArray()),
+        };
+
+        referenceWindow.Show(_mainWindow);
     }
 
     public IEnumerable<ContextAction> GetActions() => _actions;

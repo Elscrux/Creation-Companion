@@ -1,5 +1,4 @@
-﻿using System.Reactive;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Selection;
 using Avalonia.Controls.Templates;
@@ -9,7 +8,6 @@ using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Noggog;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Reference;
 
@@ -24,8 +22,8 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
     [Reactive] public partial bool ShowTree { get; set; }
     [Reactive] public partial ITreeDataGridSource<IReferenceVM> ReferenceSource { get; set; }
 
-    public ReactiveCommand<Unit, Unit> ToggleTree { get; }
-    public ReactiveCommand<Unit, Unit> RemapReferences { get; }
+    public HierarchicalTreeDataGridSource<IReferenceVM> TreeReferenceSource { get; }
+    public ITreeDataGridSource<IReferenceVM> FlatReferenceSource { get; }
 
     public ReferenceBrowserVM(
         Func<object?, ReferenceRemapperVM> referenceRemapperVMFactory,
@@ -88,7 +86,7 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
             }
         );
 
-        var treeReferenceSource = new HierarchicalTreeDataGridSource<IReferenceVM>(references) {
+        TreeReferenceSource = new HierarchicalTreeDataGridSource<IReferenceVM>(references) {
             Columns = {
                 new HierarchicalExpanderColumn<IReferenceVM>(
                     nameColumn,
@@ -99,23 +97,22 @@ public sealed partial class ReferenceBrowserVM : ViewModel {
                 typeColumn,
             },
         };
-        if (treeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> treeRowSelection) treeRowSelection.SingleSelect = false;
+        if (TreeReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> treeRowSelection) treeRowSelection.SingleSelect = false;
 
-        var flatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReferenceVM>(references) {
+        FlatReferenceSource = ReferenceSource = new FlatTreeDataGridSource<IReferenceVM>(references) {
             Columns = {
                 nameColumn,
                 identifierColumn,
                 typeColumn,
             },
         };
-        if (flatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> flatRowSelection) flatRowSelection.SingleSelect = false;
+        if (FlatReferenceSource.Selection is TreeDataGridRowSelectionModel<IReferenceVM> flatRowSelection) flatRowSelection.SingleSelect = false;
+    }
 
-        ToggleTree = ReactiveCommand.Create(() => {
-            ShowTree = !ShowTree;
-            ReferenceSource = ShowTree ? treeReferenceSource : flatReferenceSource;
-        });
-
-        RemapReferences = ReactiveCommand.Create(() => ReferenceRemapperVM?.Remap());
+    [ReactiveCommand]
+    private void ToggleTree() {
+        ShowTree = !ShowTree;
+        ReferenceSource = ShowTree ? TreeReferenceSource : FlatReferenceSource;
     }
 
     public void ContextMenu(ContextRequestedEventArgs e) {

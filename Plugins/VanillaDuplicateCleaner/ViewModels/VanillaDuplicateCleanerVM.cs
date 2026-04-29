@@ -30,7 +30,7 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
 
     [Reactive] public partial bool IsBusy { get; set; }
 
-    public ReactiveCommand<OrderedModItem, Unit> Run { get; }
+    public ReactiveCommand<OrderedModItem, Unit> RunCommand { get; }
 
     public VanillaDuplicateCleanerVM(
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
@@ -52,11 +52,13 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
                 }
             });
 
-        Run = ReactiveCommand.CreateRunInBackground<OrderedModItem>(mod => {
-            Dispatcher.UIThread.Post(() => IsBusy = true);
-            Save(mod.ModKey);
-            Dispatcher.UIThread.Post(() => IsBusy = false);
-        });
+        RunCommand = ReactiveCommand.CreateRunInBackground<OrderedModItem>(Run);
+    }
+
+    private void Run(OrderedModItem mod) {
+        Dispatcher.UIThread.Post(() => IsBusy = true);
+        Save(mod.ModKey);
+        Dispatcher.UIThread.Post(() => IsBusy = false);
     }
 
     private List<RecordDiff> Process(ModKey modKey) {

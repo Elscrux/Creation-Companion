@@ -62,9 +62,9 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
     private readonly Subject<Unit> _refreshListings = new();
 
-    public ReactiveCommand<Unit, Unit> ToggleActive { get; }
     public BindingBase LoadOrderItemIsEnabled { get; } = new Binding(nameof(LoadOrderModItem.MastersValid));
     public Func<IReactiveSelectable, bool> CanSelect { get; } = selectable => selectable is LoadOrderModItem { MastersValid: true };
+    public IObservable<bool> SelectedModValid { get; set; }
 
     public ModSelectionVM(
         MainWindow mainWindow,
@@ -184,19 +184,10 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             })
             .DisposeWith(this);
 
-        var selectedModValid = this
+        SelectedModValid = this
             .WhenAnyValue(x => x.SelectedMod)
             .NotNull()
             .Select(CanSelect);
-
-        ToggleActive = ReactiveCommand.Create(
-            canExecute: selectedModValid,
-            execute: () => {
-                if (SelectedMod is null) return;
-
-                SelectedMod.IsActive = !SelectedMod.IsActive;
-            })
-            .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()
@@ -212,6 +203,11 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             AnyModsLoaded,
             AnyModsActive,
             (newModValid, anyLoaded, anyActive) => anyLoaded && (newModValid || anyActive));
+    }
+
+    [ReactiveCommand(CanExecute = nameof(SelectedModValid))]
+    private void ToggleActive() {
+        SelectedMod?.IsActive = !SelectedMod.IsActive;
     }
 
     private IEnumerable<DataSourceFileLink> GetModsFromDataSources() {

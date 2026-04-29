@@ -60,7 +60,7 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Spacing="4">
-                        <Button Command="{Binding ReloadDefinitions}"
+                        <Button Command="{Binding ReloadDefinitionsCommand}"
                                 HorizontalAlignment="Left"
                                 IsVisible="{Binding GenerationConfig.DefinitionsFolderPath, Converter={x:Static ObjectConverters.IsNotNull}}">
                             <StackPanel Orientation="Horizontal"
@@ -139,8 +139,7 @@
                         Classes="CardNested">
                     <Grid>
                         <TreeDataGrid
-                            Source="{Binding EnchantmentsSource}">
-                        </TreeDataGrid>
+                            Source="{Binding EnchantmentsSource}"/>
 
                         <avaloniaProgressRing:ProgressRing
                             IsActive="{Binding GenerationConfig.IsBusy^}"
@@ -190,7 +189,7 @@
                     <Button Grid.Column="1"
                             Classes="Secondary Accent"
                             IsEnabled="{Binding EnchantedItems.Count}"
-                            Command="{Binding GenerateEnchantments}">
+                            Command="{Binding GenerateEnchantmentsCommand}">
                         <StackPanel Orientation="Horizontal"
                                     Spacing="8">
                             <controls:SymbolIcon Symbol="Play"

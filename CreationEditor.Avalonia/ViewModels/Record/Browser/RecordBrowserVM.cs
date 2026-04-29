@@ -1,5 +1,4 @@
-﻿using System.Reactive;
-using CreationEditor.Avalonia.Models.Record.Browser;
+﻿using CreationEditor.Avalonia.Models.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.Browser;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
@@ -7,7 +6,6 @@ using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Filter;
 using DynamicData.Binding;
 using Noggog;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Record.Browser;
 
@@ -20,10 +18,6 @@ public sealed partial class RecordBrowserVM : ViewModel, IRecordBrowserVM {
 
     public IObservableCollection<RecordTypeGroup> RecordTypeGroups { get; }
 
-    public ReactiveCommand<RecordTypeGroup, Unit> SelectRecordTypeGroup { get; }
-    public ReactiveCommand<RecordTypeListing, Unit> SelectRecordType { get; }
-    public ReactiveCommand<RecordFilterListing, Unit> SelectRecordFilter { get; }
-
     private Type? _recordListType;
 
     public RecordBrowserVM(
@@ -35,33 +29,34 @@ public sealed partial class RecordBrowserVM : ViewModel, IRecordBrowserVM {
         _recordListVMBuilder = recordListVMBuilder;
         RecordBrowserSettings = recordBrowserSettingsVM;
         RecordTypeGroups = new ObservableCollectionExtended<RecordTypeGroup>(recordBrowserGroupProvider.GetRecordGroups());
+    }
 
-        SelectRecordTypeGroup = ReactiveCommand.Create<RecordTypeGroup>(group => {
-            if (group is null) return;
+    [ReactiveCommand]
+    private void SelectRecordFilter(RecordFilterListing recordFilterListing) {
+        var parent = recordFilterListing.Parent;
+        while (parent is RecordFilterListing { Parent: {} grandparent }) {
+            parent = grandparent;
+        }
 
-            group.Activate();
-        });
+        if (parent is RecordTypeListing recordTypeListing) {
+            if (recordTypeListing.Registration.GetterType != _recordListType) SetRecordList(recordTypeListing.Registration.GetterType);
+            RecordBrowserSettings.CustomFilter = recordFilterListing.Filter;
+        }
+    }
 
-        SelectRecordType = ReactiveCommand.Create<RecordTypeListing>(recordTypeListing => {
-            var recordType = recordTypeListing.Registration.GetterType;
-            RecordBrowserSettings.CustomFilter = null;
+    [ReactiveCommand]
+    private void SelectRecordType(RecordTypeListing recordTypeListing) {
+        var recordType = recordTypeListing.Registration.GetterType;
+        RecordBrowserSettings.CustomFilter = null;
 
-            if (_recordListType == recordType) return;
+        if (_recordListType == recordType) return;
 
-            SetRecordList(recordType);
-        });
+        SetRecordList(recordType);
+    }
 
-        SelectRecordFilter = ReactiveCommand.Create<RecordFilterListing>(recordFilterListing => {
-            var parent = recordFilterListing.Parent;
-            while (parent is RecordFilterListing { Parent: {} grandparent }) {
-                parent = grandparent;
-            }
-
-            if (parent is RecordTypeListing recordTypeListing) {
-                if (recordTypeListing.Registration.GetterType != _recordListType) SetRecordList(recordTypeListing.Registration.GetterType);
-                RecordBrowserSettings.CustomFilter = recordFilterListing.Filter;
-            }
-        });
+    [ReactiveCommand]
+    private void SelectRecordTypeGroup(RecordTypeGroup group) {
+        group.Activate();
     }
 
     private void SetRecordList(Type recordType) {

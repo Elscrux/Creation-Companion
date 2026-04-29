@@ -4,6 +4,7 @@ using CreationEditor.Avalonia.Models.Mod.Editor;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Record.Editor;
 
 public interface IDatedItem<out T> {
@@ -13,7 +14,7 @@ public interface IDatedItem<out T> {
 
 public record DatedItem<T>(T Item, DateTime Date) : IDatedItem<T>;
 
-public sealed class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRecordGetter>
+public sealed partial class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRecordGetter>
     where TEditableRecord : class, IEditableRecord<TMajorRecord>, TMajorRecord
     where TMajorRecord : class, IMajorRecordInternal, TMajorRecordGetter
     where TMajorRecordGetter : class, IMajorRecordGetter {
@@ -43,6 +44,7 @@ public sealed class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRec
         OnStatesUpdated();
     }
 
+    [ReactiveCommand]
     public void SetToState(IDatedItem<TMajorRecordGetter> datedItem) {
         var indexOf = RecordStates.IndexOf(datedItem);
         if (indexOf == -1) return;
@@ -52,6 +54,7 @@ public sealed class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRec
         OnStatesUpdated();
     }
 
+    [ReactiveCommand]
     public void Undo() {
         // Skip if there is only the initial state
         if (_recordStates.Count == 1) return;
@@ -64,6 +67,7 @@ public sealed class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRec
         OnStatesUpdated();
     }
 
+    [ReactiveCommand]
     public void Redo() {
         if (_redoStates.Count == 0) return;
 

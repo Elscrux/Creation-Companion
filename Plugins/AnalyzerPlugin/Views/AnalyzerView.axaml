@@ -158,7 +158,7 @@
                     <!-- Primary Action Button -->
                     <Button
                         Classes="Primary Accent"
-                        Command="{Binding Analyze}">
+                        Command="{Binding AnalyzeCommand}">
                         <Button.IsEnabled>
                             <MultiBinding
                                 Converter="{x:Static BoolConverters.And}">
@@ -180,7 +180,7 @@
                                 Margin="0,0,8,0"/>
                             <avaloniaProgressRing:ProgressRing
                                 Grid.Column="1"
-                                IsVisible="{Binding Analyze.IsExecuting^}"
+                                IsVisible="{Binding AnalyzeCommand.IsExecuting^}"
                                 Width="18"
                                 Height="18"/>
                         </Grid>

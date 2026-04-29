@@ -55,7 +55,7 @@
                 Classes="DockClose"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Command="{Binding TogglePlaced}"
+                Command="{Binding ToggleShowPlacedCommand}"
                 IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
             <Grid>
                 <controls:SymbolIcon Symbol="ChevronDown"

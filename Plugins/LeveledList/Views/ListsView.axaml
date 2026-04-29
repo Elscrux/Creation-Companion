@@ -58,7 +58,7 @@
                     <StackPanel Grid.Row="2"
                                 Orientation="Horizontal"
                                 Spacing="4">
-                        <Button Command="{Binding ReloadDefinitions}"
+                        <Button Command="{Binding ReloadDefinitionsCommand}"
                                 HorizontalAlignment="Left"
                                 IsVisible="{Binding GenerationConfig.DefinitionsFolderPath, Converter={x:Static ObjectConverters.IsNotNull}}">
                             <StackPanel Orientation="Horizontal"
@@ -136,8 +136,7 @@
                         Classes="CardNested">
                     <Grid>
                         <TreeDataGrid
-                            Source="{Binding LeveledListSource}">
-                        </TreeDataGrid>
+                            Source="{Binding LeveledListSource}"/>
 
                         <avaloniaProgressRing:ProgressRing
                             IsActive="{Binding GenerationConfig.IsBusy^}"
@@ -187,7 +186,7 @@
                     <Button Grid.Column="1"
                             Classes="Secondary Accent"
                             IsEnabled="{Binding LeveledLists.Count}"
-                            Command="{Binding GenerateSelectedLists}">
+                            Command="{Binding GenerateSelectedListsCommand}">
                         <StackPanel Orientation="Horizontal"
                                     Spacing="8">
                             <controls:SymbolIcon Symbol="Play"

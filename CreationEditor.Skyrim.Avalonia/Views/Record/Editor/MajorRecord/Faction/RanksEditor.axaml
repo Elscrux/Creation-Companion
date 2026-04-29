@@ -23,8 +23,8 @@
                   dragDrop:DragDropExtended.AllowDrop="True"
                   SelectedIndex="{Binding SelectedRankIndex}"
                   Classes="NoCellSelection Medium Mutable"
-                  attached:ListShortcuts.Add="{Binding AddRank}"
-                  attached:ListShortcuts.Remove="{Binding RemoveRank}">
+                  attached:ListShortcuts.Add="{Binding AddRankCommand}"
+                  attached:ListShortcuts.Remove="{Binding RemoveRankCommand}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>

@@ -42,7 +42,7 @@
                                     </DataTriggerBehavior.Value>
 
                                     <InvokeCommandAction
-                                        Command="{Binding #Browser.ViewModel.SelectRecordTypeGroup}"
+                                        Command="{Binding #Browser.ViewModel.SelectRecordTypeGroupCommand}"
                                         CommandParameter="{Binding}"/>
                                 </DataTriggerBehavior>
                             </Interaction.Behaviors>
@@ -63,7 +63,7 @@
                                     </DataTriggerBehavior.Value>
 
                                     <InvokeCommandAction
-                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordType}"
+                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordTypeCommand}"
                                         CommandParameter="{Binding}"/>
                                 </DataTriggerBehavior>
                             </Interaction.Behaviors>
@@ -84,7 +84,7 @@
                                     </DataTriggerBehavior.Value>
 
                                     <InvokeCommandAction
-                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordFilter}"
+                                        Command="{ReflectionBinding #Browser.ViewModel.SelectRecordFilterCommand}"
                                         CommandParameter="{Binding}"/>
                                 </DataTriggerBehavior>
                             </Interaction.Behaviors>

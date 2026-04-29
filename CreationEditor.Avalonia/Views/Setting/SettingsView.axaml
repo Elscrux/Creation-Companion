@@ -38,6 +38,6 @@
                 Classes="Accent"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Content="Save"
-                Command="{Binding Save}"/>
+                Command="{Binding SaveCommand}"/>
     </Grid>
 </UserControl>

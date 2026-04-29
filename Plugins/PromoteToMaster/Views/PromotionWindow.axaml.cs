@@ -21,7 +21,7 @@ public partial class PromotionWindow : ActivatableAppWindow {
                     ? $"Promote {vm.RecordsToPromote.Count} Records"
                     : $"Promote {vm.RecordsToPromote[0].Record.EditorID ?? vm.RecordsToPromote[0].Record.FormKey.ToString()}";
 
-                vm.Run.Subscribe(_ => {
+                vm.PromoteCommand.Subscribe(_ => {
                     Close();
                 });
             })
