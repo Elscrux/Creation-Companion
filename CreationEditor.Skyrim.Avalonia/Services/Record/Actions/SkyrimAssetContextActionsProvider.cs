@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
@@ -20,7 +21,6 @@ using CreationEditor.Services.Mutagen.References;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Skyrim;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Key = Avalonia.Input.Key;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
@@ -28,6 +28,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider, IAssetContextActionsProvider {
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
     private readonly MainWindow _mainWindow;
+    private readonly IDockFactory _dockFactory;
     private readonly ITaskDialogProvider _taskDialogProvider;
     private readonly IAssetController _assetController;
     private readonly IReferenceService _referenceService;
@@ -44,18 +45,10 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         IMenuItemProvider menuItemProvider) {
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _mainWindow = mainWindow;
+        _dockFactory = dockFactory;
         _taskDialogProvider = taskDialogProvider;
         _assetController = assetController;
         _referenceService = referenceService;
-
-        var goToAsset = ReactiveCommand.CreateFromTask<SelectedListContext>(async context => {
-            if (context.SelectedRecords[0].ReferencedRecord.Record is not IModeledGetter { Model.File.DataRelativePath: var dataRelativePath }) return;
-
-            var assetBrowser = await dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
-            if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
-
-            await assetBrowserVM.MoveTo.Execute(dataRelativePath);
-        });
 
         _actions = [
             new ContextAction(
@@ -64,12 +57,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                  && !string.IsNullOrWhiteSpace(rawFilePath.Path),
                 50,
                 ContextActionGroup.Linking,
-                goToAsset,
+                GoToAssetCommand,
                 context => {
                     var dataRelativePath = (context.SelectedRecords[0].ReferencedRecord.Record as IModeledGetter)!.Model!.File.DataRelativePath;
 
                     return menuItemProvider.Custom(
-                        goToAsset,
+                        GoToAssetCommand,
                         $"Go to {fileSystem.Path.GetFileName(dataRelativePath.Path)}",
                         context,
                         Symbol.Go);
@@ -81,6 +74,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                 ContextActionGroup.Viewing,
                 OpenAssetsCommand,
                 context => menuItemProvider.File(OpenAssetsCommand, context)),
+            new ContextAction(
+                context => context.SelectedAssets is [{ DataSourceLink: var asset }] && asset.Exists(),
+                40,
+                ContextActionGroup.Viewing,
+                OpenInFileExplorerCommand,
+                context => menuItemProvider.OpenFolder(OpenInFileExplorerCommand, context, "Open in File Explorer")),
             new ContextAction(
                 context => context.SelectedAssets is [{ DataSourceLink: var asset }] && asset.Exists(),
                 60,
@@ -115,6 +114,27 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     "Copy Path",
                     false)),
         ];
+    }
+
+    [ReactiveCommand]
+    private async Task GoToAsset(SelectedListContext context) {
+        if (context.SelectedRecords[0].ReferencedRecord.Record is not IModeledGetter { Model.File.DataRelativePath: var dataRelativePath }) return;
+
+        var assetBrowser = await _dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
+        if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
+
+        await assetBrowserVM.MoveTo.Execute(dataRelativePath);
+    }
+
+    [ReactiveCommand]
+    private async Task OpenInFileExplorer(SelectedListContext context) {
+        if (context.SelectedAssets is  not [{ DataSourceLink: var asset }]) return;
+
+        Process.Start(new ProcessStartInfo {
+            FileName = "explorer.exe",
+            Arguments = $"/select,\"{asset.FullPath}\"",
+            UseShellExecute = true,
+        });
     }
 
     [ReactiveCommand]

@@ -12,6 +12,7 @@ public interface IMenuItemProvider {
     MenuItem Duplicate(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true);
     MenuItem Delete(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true);
     MenuItem File(ICommand command, object? parameter = null, string? customHeader = null);
+    MenuItem OpenFolder(ICommand command, object? parameter = null, string? customHeader = null);
     MenuItem References(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true);
     MenuItem Copy(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true);
     MenuItem Paste(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true);

@@ -43,6 +43,16 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             parameter);
     }
 
+    public MenuItem OpenFolder(ICommand command, object? parameter = null, string? customHeader = null) {
+        return Init(
+            new MenuItem {
+                Command = command,
+                Icon = new SymbolIcon { Symbol = Symbol.OpenFolder },
+                Header = customHeader ?? "Open Folder",
+            },
+            parameter);
+    }
+
     public MenuItem Rename(ICommand command, object? parameter = null, string? customHeader = null, bool hasKeyGesture = true) {
         return Init(
             new MenuItem {
