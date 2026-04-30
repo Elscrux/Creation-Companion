@@ -1,12 +1,10 @@
 ﻿using System.Diagnostics;
-using System.Reactive.Disposables;
 using Avalonia.Interactivity;
-using ReactiveUI.Avalonia;
 using LeveledList.Model.Enchantments;
 using LeveledList.ViewModels;
 using Noggog;
 using ReactiveUI;
-
+using ReactiveUI.Avalonia;
 namespace LeveledList.Views;
 
 public partial class EnchantmentsView : ReactiveUserControl<EnchantmentsVM> {
@@ -22,20 +20,21 @@ public partial class EnchantmentsView : ReactiveUserControl<EnchantmentsVM> {
             }
 
             this.WhenAnyValue(x => x.ListsDataGrid.SelectedItem)
-                .Subscribe(_ => {
-                    if (ViewModel is null) return;
-
-                    var selectedDefinitions = ListsDataGrid.SelectedItems
-                        .OfType<ExtendedEnchantmentItem>()
-                        .ToArray();
-
-                    // Only update if the selected definitions have changed to avoid unnecessary updates
-                    if (ViewModel.SelectedDefinitions is not null && selectedDefinitions.SequenceEqual(ViewModel.SelectedDefinitions)) return;
-
-                    ViewModel.SelectedDefinitions = selectedDefinitions;
-                })
+                .Subscribe(SyncSelectedDefinitions)
                 .DisposeWithComposite(disposables);
         });
+    }
+
+    private void SyncSelectedDefinitions() {
+        if (ViewModel is null) return;
+
+        var selectedDefinitions = ListsDataGrid.SelectedItems.OfType<ExtendedEnchantmentItem>()
+            .ToArray();
+
+        // Only update if the selected definitions have changed to avoid unnecessary updates
+        if (ViewModel.SelectedDefinitions is not null && selectedDefinitions.SequenceEqual(ViewModel.SelectedDefinitions)) return;
+
+        ViewModel.SelectedDefinitions = selectedDefinitions;
     }
 
     private void OpenFile(object? sender, RoutedEventArgs e) {

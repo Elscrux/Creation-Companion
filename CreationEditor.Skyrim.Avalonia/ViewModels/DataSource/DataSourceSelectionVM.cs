@@ -27,6 +27,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.DataSource;
 
 public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelectionVM {
     private readonly IDataSourceService _dataSourceService;
+    private readonly IFileSystem _fileSystem;
 
     public ObservableCollectionExtended<DataSourceItem> DataSources { get; } = [];
     private IDataSource? ActiveDataSource => DataSources.FirstOrDefault(d => d.IsActive)?.DataSource;
@@ -52,6 +53,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
         IDataDirectoryProvider dataDirectoryProvider,
         IDataSourceService dataSourceService) {
         _dataSourceService = dataSourceService;
+        _fileSystem = fileSystem;
 
         CanRemoveDataSource = o => o is DataSourceItem { DataSource: { IsReadOnly: false } dataSource }
          && !DataRelativePath.PathComparer.Equals(dataSource.Path, dataDirectoryProvider.Path);
@@ -119,21 +121,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
             .ToObservableChangeSet()
             .AutoRefresh(x => x.IsSelected)
             .ToCollection()
-            .Subscribe(updatedItems => {
-                // Forward selection state to children
-                foreach (var item in updatedItems) {
-                    foreach (var child in item.Children) {
-                        child.IsSelected = item.IsSelected;
-                    }
-
-                    // Deactivate item if it is not selected anymore
-                    if (item is { IsActive: true, IsSelected: false }) {
-                        item.IsActive = false;
-                    }
-                }
-
-                _anyLocalChanges.OnNext(true);
-            })
+            .Subscribe(UpdateSelectionState)
             .DisposeWith(this);
 
         var dataSourceActivated = DataSources
@@ -141,22 +129,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
             .AutoRefresh(x => x.IsActive);
 
         dataSourceActivated
-            .Subscribe(changes => {
-                var active = changes.FirstOrDefault(item => item is
-                    { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current;
-                if (active is null) return;
-
-                active.IsSelected = true;
-
-                // Set all other data sources to inactive
-                foreach (var item in DataSources) {
-                    if (item == active) continue;
-
-                    item.IsActive = false;
-                }
-
-                _anyLocalChanges.OnNext(true);
-            })
+            .Subscribe(UpdateActiveDataSource)
             .DisposeWith(this);
 
         var anyDataSourceActive = dataSourceActivated
@@ -168,20 +141,55 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
 
         this.WhenAnyValue(x => x.AddedDataSourcePath)
             .NotNull()
-            .Subscribe(dataSourcePath => {
-                AddedDataSourcePath = null;
-
-                if (DataSources.Any(ds => ds.DataSource.Path.Equals(dataSourcePath, DataRelativePath.PathComparison))) return;
-
-                var dataSource = new FileSystemDataSource(fileSystem, dataSourcePath);
-                var archiveDataSources = _dataSourceService.GetNestedArchiveDataSources([dataSource]);
-                DataSources.Add(new DataSourceItem(dataSource, archiveDataSources) { IsSelected = true });
-
-                SortDataSources();
-
-                _anyLocalChanges.OnNext(true);
-            })
+            .Subscribe(AddNewDataSource)
             .DisposeWith(this);
+    }
+
+    private void UpdateSelectionState(IReadOnlyCollection<DataSourceItem> updatedItems) {
+        // Forward selection state to children
+        foreach (var item in updatedItems) {
+            foreach (var child in item.Children) {
+                child.IsSelected = item.IsSelected;
+            }
+
+            // Deactivate item if it is not selected anymore
+            if (item is { IsActive: true, IsSelected: false }) {
+                item.IsActive = false;
+            }
+        }
+
+        _anyLocalChanges.OnNext(true);
+    }
+
+    private void UpdateActiveDataSource(IChangeSet<DataSourceItem> changes) {
+        var active = changes.FirstOrDefault(item => item is
+            { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current;
+        if (active is null) return;
+
+        active.IsSelected = true;
+
+        // Set all other data sources to inactive
+        foreach (var item in DataSources) {
+            if (item == active) continue;
+
+            item.IsActive = false;
+        }
+
+        _anyLocalChanges.OnNext(true);
+    }
+
+    private void AddNewDataSource(string dataSourcePath) {
+        AddedDataSourcePath = null;
+
+        if (DataSources.Any(ds => ds.DataSource.Path.Equals(dataSourcePath, DataRelativePath.PathComparison))) return;
+
+        var dataSource = new FileSystemDataSource(_fileSystem, dataSourcePath);
+        var archiveDataSources = _dataSourceService.GetNestedArchiveDataSources([dataSource]);
+        DataSources.Add(new DataSourceItem(dataSource, archiveDataSources) { IsSelected = true });
+
+        SortDataSources();
+
+        _anyLocalChanges.OnNext(true);
     }
 
     [ReactiveCommand]

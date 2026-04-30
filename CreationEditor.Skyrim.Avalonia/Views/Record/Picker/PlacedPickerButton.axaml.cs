@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using Avalonia;
-using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.Resources.Converter;
 using Mutagen.Bethesda.Plugins;

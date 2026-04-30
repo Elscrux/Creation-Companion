@@ -34,6 +34,8 @@ public sealed partial class ListsVM : ValidatableViewModel {
     private readonly LeveledListGenerator _generator;
     private readonly LeveledListImplementer _implementer;
     private readonly IRecordPrefixService _recordPrefixService;
+    private readonly IStateRepository<LeveledListMemento, LeveledListMemento, Guid> _stateRepository;
+    private Guid? _leveledListMementoGuid;
 
     public GenerationConfigurationVM GenerationConfig { get; }
 
@@ -64,8 +66,9 @@ public sealed partial class ListsVM : ValidatableViewModel {
         GenerationConfig = generationConfig;
 
         var stateRepository = stateRepositoryFactory.Create("LeveledList");
+        _stateRepository = stateRepository;
         var leveledListMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
-        Guid? leveledListMementoGuid = leveledListMemento.Value is null ? null : leveledListMemento.Key;
+        _leveledListMementoGuid = leveledListMemento.Value is null ? null : leveledListMemento.Key;
         GenerationConfig.DefinitionsFolderPath = leveledListMemento.Value?.LeveledListFolderPath;
 
         var filter = GenerationConfig.WhenAnyValue(x => x.FilterText)
@@ -157,14 +160,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
 
         GenerationConfig.WhenAnyValue(x => x.DefinitionsFolderPath)
             .NotNull()
-            .Subscribe(path => {
-                LoadDefinitions(path);
-                stateRepository.Update(
-                    memento => memento is null
-                        ? new LeveledListMemento(path, string.Empty)
-                        : memento with { LeveledListFolderPath = path },
-                    leveledListMementoGuid ??= Guid.NewGuid());
-            })
+            .Subscribe(UpdateDefinitionsFolder)
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedDefinitions)
@@ -268,6 +264,15 @@ public sealed partial class ListsVM : ValidatableViewModel {
                 return listTypeDefinition.Lists.Select(kvp =>
                     new ExtendedListDefinition(file, fileName, listTypeDefinition, kvp.Key, kvp.Value, _recordPrefixService));
             });
+    }
+
+    private void UpdateDefinitionsFolder(string path) {
+        LoadDefinitions(path);
+        _stateRepository.Update(
+            memento => memento is null
+                ? new LeveledListMemento(path, string.Empty)
+                : memento with { LeveledListFolderPath = path },
+            _leveledListMementoGuid ??= Guid.NewGuid());
     }
 
     public void ContextMenu(object? sender, ContextRequestedEventArgs e) {

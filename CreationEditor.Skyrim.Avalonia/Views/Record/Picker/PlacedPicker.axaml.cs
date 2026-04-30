@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Avalonia;
-using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Record.Picker;
 using CreationEditor.Skyrim.Avalonia.Resources.Constants;

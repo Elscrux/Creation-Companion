@@ -82,11 +82,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
         dataSourceService
             .DataSourcesChanged
-            .Subscribe(dataSources => {
-                dataSources = dataSources.Where(FilterDataSources).ToList();
-                AssetOrigins.LoadOptimized(dataSources.Except(AssetTargets));
-                AssetTargets.LoadOptimized(dataSources.Intersect(AssetTargets));
-            })
+            .Subscribe(UpdateDataSources)
             .DisposeWith(this);
 
         AllModsSelected = InjectToMod.HasModSelected.CombineLatest(
@@ -106,10 +102,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         // Make sure there is only at max one target data source
         assetTargetCountChanges
             .Where(count => count > 1)
-            .Subscribe(_ => {
-                AssetOrigins.AddRange(AssetTargets.Skip(1).ToArray());
-                AssetTargets.RemoveRange(1, AssetTargets.Count - 1);
-            })
+            .Subscribe(LimitTargetDataSources)
             .DisposeWith(this);
     }
 
@@ -284,7 +277,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                 case AssetPromotionMode.Move:
                     var allAssetRefsIncluded = ReferenceService
                         .GetAssetReferences(assetLink)
-                        .All(path => allReferencedDataRelativePaths.Contains(path));
+                        .All(allReferencedDataRelativePaths.Contains);
 
                     var allRecordRefsIncluded = ReferenceService
                         .GetRecordReferences(assetLink)
@@ -303,6 +296,17 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                     break;
             }
         }
+    }
+
+    private void UpdateDataSources(IEnumerable<IDataSource> dataSources) {
+        dataSources = dataSources.Where(FilterDataSources).ToList();
+        AssetOrigins.LoadOptimized(dataSources.Except(AssetTargets));
+        AssetTargets.LoadOptimized(dataSources.Intersect(AssetTargets));
+    }
+
+    private void LimitTargetDataSources() {
+        AssetOrigins.AddRange(AssetTargets.Skip(1).ToArray());
+        AssetTargets.RemoveRange(1, AssetTargets.Count - 1);
     }
 }
 

@@ -8,11 +8,13 @@ using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
+    private readonly IReferenceService _referenceService;
     private readonly CompositeDisposable _referencesDisposable = new();
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
@@ -26,28 +28,14 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
         IRecordController recordController,
         IReferenceService referenceService,
         IRecordBrowserSettings recordBrowserSettings) {
+        _referenceService = referenceService;
         RecordBrowserSettings = recordBrowserSettings;
 
         Filter = IRecordProvider<IReferencedRecord>.DefaultFilter(RecordBrowserSettings);
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .ObserveOnTaskpool()
-            .WrapInProgressMarker(
-                x => x.Do(linkCache => {
-                    _referencesDisposable.Clear();
-
-                    RecordCache.Clear();
-                    RecordCache.Edit(updater => {
-                        foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
-                            if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
-
-                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
-
-                            updater.AddOrUpdate(referencedRecord);
-                        }
-                    });
-                }),
-                out var isBusy)
+            .WrapInProgressMarker(x => x.Do(UpdateRecordCache), out var isBusy)
             .Subscribe()
             .DisposeWith(this);
 
@@ -82,6 +70,21 @@ public sealed class InteriorCellsProvider : ViewModel, IRecordProvider<IReferenc
                 RecordCache.RemoveKey(cell.FormKey);
             })
             .DisposeWith(this);
+    }
+
+    private void UpdateRecordCache(ILinkCache linkCache) {
+        _referencesDisposable.Clear();
+
+        RecordCache.Clear();
+        RecordCache.Edit(updater => {
+            foreach (var cell in linkCache.PriorityOrder.WinningOverrides<ICellGetter>()) {
+                if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0) continue;
+
+                _referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
+
+                updater.AddOrUpdate(referencedRecord);
+            }
+        });
     }
 
     protected override void Dispose(bool disposing) {

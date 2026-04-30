@@ -30,6 +30,7 @@ using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Analyzers;
+using Mutagen.Bethesda.Analyzers.Drivers;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
@@ -69,6 +70,9 @@ public sealed partial class AnalyzerVM : ViewModel {
     private readonly IContextMenuProvider _contextMenuProvider;
     private readonly IReadOnlyList<IAnalyzer> _analyzers;
     private readonly TopicEnricher _topicEnricher;
+    private readonly IStateRepository<AnalyzerMemento, AnalyzerMemento, Guid> _analyzersStateRepo;
+    private Guid? _analyzersStateGuid;
+    private List<string> _inactiveTopicIds;
 
     public IObservableCollection<TopicItem> Topics { get; }
     public ReadOnlyObservableCollection<TopicItem> FilteredTopics { get; }
@@ -119,22 +123,16 @@ public sealed partial class AnalyzerVM : ViewModel {
         _topicEnricher = new TopicEnricher(editorEnvironment);
         _analyzers = analyzers.DistinctBy(x => x.Id).ToList();
 
-        var analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
-        var (guid, analyzersState) = analyzersStateRepo.LoadAllWithIdentifier().FirstOrDefault();
-        Guid? analyzersStateGuid = analyzersState is null ? null : guid;
+        _analyzersStateRepo = stateRepositoryFactory.Create("Analyzers");
+        var (guid, analyzersState) = _analyzersStateRepo.LoadAllWithIdentifier().FirstOrDefault();
+        _analyzersStateGuid = analyzersState is null ? null : guid;
+        _inactiveTopicIds = analyzersState?.InactiveTopicIds.ToList() ?? [];
         MinimumSeverity = analyzersState?.MinimumSeverity ?? Severity.None;
 
         this.WhenAnyValue(x => x.MinimumSeverity)
             .Skip(1)
             .ThrottleLong()
-            .Subscribe(severity => {
-                analyzersStateRepo.Update(
-                    _ => new AnalyzerMemento {
-                        MinimumSeverity = severity,
-                        InactiveTopicIds = analyzersState?.InactiveTopicIds ?? [],
-                    },
-                    analyzersStateGuid ??= Guid.NewGuid());
-            })
+            .Subscribe(UpdateMinimumSeverity)
             .DisposeWith(this);
 
         var topics = analyzers
@@ -173,19 +171,11 @@ public sealed partial class AnalyzerVM : ViewModel {
 
         this.WhenAnyValue(x => x.TopicSearchText)
             .CombineLatest(FilteredTopics.WhenCollectionChanges(), (searchText, _) => searchText)
-            .Subscribe(searchText => {
-                // This is done to work around issues with using a filtered collection in grouped collections
-                if (searchText.IsNullOrEmpty()) {
-                    TopicsSeverityGroup.IsGrouped = IsTopicsGroupedBySeverity;
-                    TopicsRecordTypeGroup.IsGrouped = IsTopicsGroupedByRecordType;
-                } else {
-                    TopicsSeverityGroup.IsGrouped = false;
-                    TopicsRecordTypeGroup.IsGrouped = false;
-                }
-            });
+            .Subscribe(SearchTopics)
+            .DisposeWith(this);
 
         AnyModsSelected = ModPickerVM.SelectedMods.Any();
-        
+
         var activeTopicsChanged = Topics
             .ToObservableChangeSet<IObservableCollection<TopicItem>, TopicItem>()
             .AutoRefresh(x => x.IsActive)
@@ -199,18 +189,7 @@ public sealed partial class AnalyzerVM : ViewModel {
 
         activeTopicsChanged
             .Skip(1)
-            .Subscribe(t => {
-                analyzersStateRepo.Update(
-                    _ => new AnalyzerMemento {
-                        MinimumSeverity = MinimumSeverity,
-                        InactiveTopicIds = t
-                            .Where(x => !x.IsActive)
-                            .Select(x => x.TopicDefinition.Id.ToString())
-                            .Distinct()
-                            .ToList(),
-                    },
-                    analyzersStateGuid ??= Guid.NewGuid());
-            })
+            .Subscribe(SaveTopics)
             .DisposeWith(this);
 
         GroupedTopics = new GroupCollection<TopicItem>(FilteredTopics, TopicsSeverityGroup, TopicsRecordTypeGroup);
@@ -246,20 +225,7 @@ public sealed partial class AnalyzerVM : ViewModel {
 
         this.WhenAnyValue(x => x.ResultsSearchText)
             .CombineLatest(FilteredResults.WhenCollectionChanges(), (searchText, _) => searchText)
-            .Subscribe(searchText => {
-                // This is done to work around issues with using a filtered collection in grouped collections
-                if (searchText.IsNullOrEmpty()) {
-                    ResultsRecordTypeGroup.IsGrouped = IsResultsGroupedByRecordType;
-                    ResultsRecordGroup.IsGrouped = IsResultsGroupedByRecord;
-                    ResultsSeverityGroup.IsGrouped = IsResultsGroupedBySeverity;
-                    ResultsTopicGroup.IsGrouped = IsResultsGroupedByTopic;
-                } else {
-                    ResultsRecordTypeGroup.IsGrouped = false;
-                    ResultsRecordGroup.IsGrouped = false;
-                    ResultsSeverityGroup.IsGrouped = false;
-                    ResultsTopicGroup.IsGrouped = false;
-                }
-            });
+            .Subscribe(UpdateResultsGrouping);
 
         GroupedResults = new GroupCollection<AnalyzerResult>(FilteredResults, ResultsRecordTypeGroup, ResultsRecordGroup, ResultsSeverityGroup, ResultsTopicGroup);
 
@@ -603,5 +569,55 @@ public sealed partial class AnalyzerVM : ViewModel {
         using var disposable = _referenceService.GetReferencedRecord(record, out var referencedRecord);
         var menuItems = _contextMenuProvider.GetMenuItems(new SelectedListContext([new RecordContext(result.ModKey, referencedRecord)], []));
         return menuItems.OfType<Control>();
+    }
+
+    private void SearchTopics(string searchText) {
+        // This is done to work around issues with using a filtered collection in grouped collections
+        if (searchText.IsNullOrEmpty()) {
+            TopicsSeverityGroup.IsGrouped = IsTopicsGroupedBySeverity;
+            TopicsRecordTypeGroup.IsGrouped = IsTopicsGroupedByRecordType;
+        } else {
+            TopicsSeverityGroup.IsGrouped = false;
+            TopicsRecordTypeGroup.IsGrouped = false;
+        }
+    }
+
+    private void SaveTopics(IEnumerable<TopicItem> topics) {
+        _inactiveTopicIds = topics
+            .Where(x => !x.IsActive)
+            .Select(x => x.TopicDefinition.Id.ToString())
+            .Distinct()
+            .ToList();
+
+        _analyzersStateRepo.Update(
+            _ => new AnalyzerMemento {
+                MinimumSeverity = MinimumSeverity,
+                InactiveTopicIds = _inactiveTopicIds,
+            },
+            _analyzersStateGuid ??= Guid.NewGuid());
+    }
+
+    private void UpdateMinimumSeverity(Severity severity) {
+        _analyzersStateRepo.Update(
+            _ => new AnalyzerMemento {
+                MinimumSeverity = severity,
+                InactiveTopicIds = _inactiveTopicIds,
+            },
+            _analyzersStateGuid ??= Guid.NewGuid());
+    }
+
+    private void UpdateResultsGrouping(string searchText) {
+        // This is done to work around issues with using a filtered collection in grouped collections
+        if (searchText.IsNullOrEmpty()) {
+            ResultsRecordTypeGroup.IsGrouped = IsResultsGroupedByRecordType;
+            ResultsRecordGroup.IsGrouped = IsResultsGroupedByRecord;
+            ResultsSeverityGroup.IsGrouped = IsResultsGroupedBySeverity;
+            ResultsTopicGroup.IsGrouped = IsResultsGroupedByTopic;
+        } else {
+            ResultsRecordTypeGroup.IsGrouped = false;
+            ResultsRecordGroup.IsGrouped = false;
+            ResultsSeverityGroup.IsGrouped = false;
+            ResultsTopicGroup.IsGrouped = false;
+        }
     }
 }

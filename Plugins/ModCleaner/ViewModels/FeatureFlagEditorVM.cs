@@ -77,18 +77,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         );
 
         this.WhenAnyValue(x => x.ModPickerVM.SelectedMod)
-            .Subscribe(selectedMod => {
-                if (selectedMod is { ModKey: var modKey }) {
-                    var newMod = LinkCacheProvider.LinkCache.ResolveMod(modKey);
-                    UnusedQuests.ReplaceWith(GetUnusedRecords(EssentialQuests, newMod));
-                    UnusedLoadScreens.ReplaceWith(GetUnusedRecords(EssentialLoadScreens, newMod));
-                    UnusedIdleAnimations.ReplaceWith(GetUnusedRecords(EssentialIdleAnimations, newMod));
-                } else {
-                    UnusedQuests.ReplaceWith([]);
-                    UnusedLoadScreens.ReplaceWith([]);
-                    UnusedIdleAnimations.ReplaceWith([]);
-                }
-            })
+            .Subscribe(UpdateUnusedRecords)
             .DisposeWith(this);
 
         ObservableCollectionExtended<T> GetEssentialRecords<T>()
@@ -96,16 +85,29 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
             featureFlag.EssentialRecords
                 .Select(link => LinkCacheProvider.LinkCache.TryResolve<T>(link.FormKey, out var r) ? r : null)
                 .WhereNotNull());
+    }
 
-        IObservableCollection<T> GetUnusedRecords<T>(IObservableCollection<T> essentialRecords, IModGetter? currentMod)
-            where T : class, IMajorRecordGetter {
-            if (currentMod is null) return new ObservableCollectionExtended<T>();
-
-            return new ObservableCollectionExtended<T>(currentMod.EnumerateMajorRecords<T>()
-                .Where(q => !essentialRecords.Contains(q))
-                .OrderBy(q => q.EditorID)
-            );
+    private void UpdateUnusedRecords(IModKeyed? selectedMod) {
+        if (selectedMod is { ModKey: var modKey }) {
+            var newMod = LinkCacheProvider.LinkCache.ResolveMod(modKey);
+            UnusedQuests.ReplaceWith(GetUnusedRecords(EssentialQuests, newMod));
+            UnusedLoadScreens.ReplaceWith(GetUnusedRecords(EssentialLoadScreens, newMod));
+            UnusedIdleAnimations.ReplaceWith(GetUnusedRecords(EssentialIdleAnimations, newMod));
+        } else {
+            UnusedQuests.ReplaceWith([]);
+            UnusedLoadScreens.ReplaceWith([]);
+            UnusedIdleAnimations.ReplaceWith([]);
         }
+    }
+
+    private IObservableCollection<T> GetUnusedRecords<T>(IObservableCollection<T> essentialRecords, IModGetter? currentMod)
+        where T : class, IMajorRecordGetter {
+        if (currentMod is null) return new ObservableCollectionExtended<T>();
+
+        return new ObservableCollectionExtended<T>(currentMod.EnumerateMajorRecords<T>()
+            .Where(q => !essentialRecords.Contains(q))
+            .OrderBy(q => q.EditorID)
+        );
     }
 
     public FeatureFlag GetFeatureFlag() {

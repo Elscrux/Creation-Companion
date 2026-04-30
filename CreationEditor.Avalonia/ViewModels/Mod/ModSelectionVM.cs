@@ -132,11 +132,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             .ToObservableCollection(this);
 
         _editorEnvironment.ActiveModChanged
-            .Subscribe(activeMod => {
-                foreach (var mod in _mods) {
-                    mod.IsActive = mod.ModKey == activeMod;
-                }
-            })
+            .Subscribe(UpdateActiveModState)
             .DisposeWith(this);
 
         var connectedMods = _mods.ToObservableChangeSet();
@@ -169,19 +165,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             .CombineLatest(
                 _mods.ObserveCollectionChanges().Select(_ => _mods),
                 (changedMods, allMods) => (ChangedMods: changedMods, AllMods: allMods))
-            .Subscribe(x => {
-                var activeMod = x.ChangedMods.FirstOrDefault(mod => mod is { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current
-                    ?? x.ChangedMods.Select(mod => mod is { Type: ChangeType.Range, Reason: ListChangeReason.AddRange }
-                     && mod.Range.FirstOrDefault(i => i.IsActive) is {} m ? m : null)
-                        .FirstOrDefault(m => m is not null);
-                if (activeMod is null) return;
-
-                foreach (var item in x.AllMods) {
-                    if (activeMod.ModKey != item.ModKey) {
-                        item.IsActive = false;
-                    }
-                }
-            })
+            .Subscribe(x => SyncActiveModSelection(x.ChangedMods, x.AllMods))
             .DisposeWith(this);
 
         SelectedModValid = this
@@ -191,12 +175,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
 
         this.WhenAnyValue(x => x.SelectedMod)
             .NotNull()
-            .Subscribe(selectedMod => {
-                var mod = _mods.FirstOrDefault(mod => mod.ModKey == selectedMod.ModKey);
-                if (mod is null) return;
-
-                SelectedModDetails.SetTo(mod.ModInfo);
-            })
+            .Subscribe(UpdateSelectedModDetails)
             .DisposeWith(this);
 
         CanSave = ModCreationVM.IsValid().CombineLatest(
@@ -208,6 +187,33 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     [ReactiveCommand(CanExecute = nameof(SelectedModValid))]
     private void ToggleActive() {
         SelectedMod?.IsActive = !SelectedMod.IsActive;
+    }
+
+    private void UpdateActiveModState(ModKey activeMod) {
+        foreach (var mod in _mods) {
+            mod.IsActive = mod.ModKey == activeMod;
+        }
+    }
+
+    private void UpdateSelectedModDetails(LoadOrderModItem selectedMod) {
+        var mod = _mods.FirstOrDefault(mod => mod.ModKey == selectedMod.ModKey);
+        if (mod is null) return;
+
+        SelectedModDetails.SetTo(mod.ModInfo);
+    }
+
+    private void SyncActiveModSelection(IChangeSet<LoadOrderModItem> changedMods, ReadOnlyObservableCollection<LoadOrderModItem> allMods) {
+        var activeMod = changedMods.FirstOrDefault(mod => mod is { Type: ChangeType.Item, Reason: ListChangeReason.Refresh, Item.Current.IsActive: true })?.Item.Current
+         ?? changedMods.Select(mod => mod is { Type: ChangeType.Range, Reason: ListChangeReason.AddRange }
+                 && mod.Range.FirstOrDefault(i => i.IsActive) is {} m ? m : null)
+                .FirstOrDefault(m => m is not null);
+        if (activeMod is null) return;
+
+        foreach (var item in allMods) {
+            if (activeMod.ModKey != item.ModKey) {
+                item.IsActive = false;
+            }
+        }
     }
 
     private IEnumerable<DataSourceFileLink> GetModsFromDataSources() {

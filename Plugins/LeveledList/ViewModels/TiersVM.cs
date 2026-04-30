@@ -45,34 +45,38 @@ public sealed partial class TiersVM : ValidatableViewModel {
         this.WhenAnyValue(x => x.SelectedTierType)
             .Select(tierController.GetTierDefinitions)
             .ObserveOnGui()
-            .Subscribe(tierDefinitions => {
-                var tierItems = tierDefinitions?.Tiers
-                    .Select(tier => new TierItem {
-                        Identifier = tier.Key,
-                        EnchantmentLevels = string.Join(", ", tier.Value.Levels),
-                    })
-                    .ToArray();
-
-                var tierAliases = tierDefinitions?.TierAliases?
-                    .Select(alias => new TierAliasItem {
-                        Alias = tierItems?.FirstOrDefault(x => x.Identifier == alias.Key),
-                        Original = tierItems?.FirstOrDefault(x => x.Identifier == alias.Value),
-                    })
-                    .ToArray();
-
-                SelectedTier = tierItems?.FirstOrDefault();
-                Tiers.LoadOptimized(tierItems ?? []);
-                TierAliases.LoadOptimized(tierAliases ?? []);
-            })
+            .Subscribe(UpdateTierDefinitions)
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedTier)
             .ObserveOnTaskpool()
-            .Subscribe(_ => {
-                var vm = GetRecordListVM();
-                Dispatcher.UIThread.Post(() => RecordListVM = vm);
-            })
+            .Subscribe(RefreshRecordList)
             .DisposeWith(this);
+    }
+
+    private void UpdateTierDefinitions(TierDefinitions? tierDefinitions) {
+        var tierItems = tierDefinitions?.Tiers
+            .Select(tier => new TierItem {
+                Identifier = tier.Key,
+                EnchantmentLevels = string.Join(", ", tier.Value.Levels),
+            })
+            .ToArray();
+
+        var tierAliases = tierDefinitions?.TierAliases?
+            .Select(alias => new TierAliasItem {
+                Alias = tierItems?.FirstOrDefault(x => x.Identifier == alias.Key),
+                Original = tierItems?.FirstOrDefault(x => x.Identifier == alias.Value),
+            })
+            .ToArray();
+
+        SelectedTier = tierItems?.FirstOrDefault();
+        Tiers.LoadOptimized(tierItems ?? []);
+        TierAliases.LoadOptimized(tierAliases ?? []);
+    }
+
+    private void RefreshRecordList() {
+        var vm = GetRecordListVM();
+        Dispatcher.UIThread.Post(() => RecordListVM = vm);
     }
 
     [ReactiveCommand]

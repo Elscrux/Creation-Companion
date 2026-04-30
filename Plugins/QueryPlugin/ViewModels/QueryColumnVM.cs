@@ -20,6 +20,8 @@ public sealed partial class QueryColumnVM : ViewModel {
     public IReferenceService ReferenceService { get; }
     public IContextMenuProvider ContextMenuProvider { get; }
 
+    private CancellationTokenSource? _lastCancellationTokenSource;
+
     public QueryColumnVM(
         QueryVM queryVM,
         ILinkCacheProvider linkCacheProvider,
@@ -30,24 +32,25 @@ public sealed partial class QueryColumnVM : ViewModel {
         ReferenceService = referenceService;
         ContextMenuProvider = contextMenuProvider;
 
-        CancellationTokenSource? lastCancellationTokenSource = null;
         QueryVM.QueryRunner.SettingsChanged
             .ThrottleMedium()
-            .Subscribe(_ => {
-                lastCancellationTokenSource?.Cancel();
-                var cancellationTokenSource = lastCancellationTokenSource = new CancellationTokenSource().DisposeWith(this);
-                var cancellationToken = cancellationTokenSource.Token;
-                Task.Run(
-                    () => {
-                        QueriedFields.Clear();
-                        foreach (var obj in QueryVM.QueryRunner.RunQuery()) {
-                            if (cancellationToken.IsCancellationRequested) return;
-
-                            QueriedFields.Add(obj);
-                        }
-                    },
-                    cancellationToken);
-            })
+            .Subscribe(_ => ExecuteQuery())
             .DisposeWith(this);
+    }
+
+    private void ExecuteQuery() {
+        _lastCancellationTokenSource?.Cancel();
+        var cancellationTokenSource = _lastCancellationTokenSource = new CancellationTokenSource().DisposeWith(this);
+        var cancellationToken = cancellationTokenSource.Token;
+        Task.Run(
+            () => {
+                QueriedFields.Clear();
+                foreach (var obj in QueryVM.QueryRunner.RunQuery()) {
+                    if (cancellationToken.IsCancellationRequested) return;
+
+                    QueriedFields.Add(obj);
+                }
+            },
+            cancellationToken);
     }
 }

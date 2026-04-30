@@ -96,9 +96,7 @@ public sealed partial class MainVM : ViewModel {
         _mainWindow.SplashScreen = splashScreen;
 
         PluginService?.PluginsRegistered
-            .Subscribe(newPlugins => {
-                MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>());
-            })
+            .Subscribe(newPlugins => MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>()))
             .DisposeWith(this);
 
         WindowTitleObs = _editorEnvironment.ActiveModChanged

@@ -39,13 +39,7 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
             .ToObservableCollection(this);
 
         this.WhenAnyValue(x => x.Filter)
-            .Subscribe(filter => {
-                if (filter is null) {
-                    SelectedMod ??= Mods.FirstOrDefault();
-                } else if (SelectedMod is null || !filter(SelectedMod)) {
-                    SelectedMod = Mods.FirstOrDefault(filter);
-                }
-            })
+            .Subscribe(UpdateSelectedModFromFilter)
             .DisposeWith(this);
 
         // When the own mod creator creates a new mod, select it
@@ -54,11 +48,7 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
             .DisposeWith(this);
 
         Mods.WhenCollectionChanges()
-            .Subscribe(_ => {
-                if (SelectedMod is null || (Filter is not null && !Filter(SelectedMod))) {
-                    SelectedMod = Mods.FirstOrDefault(mod => mod.ModKey.FileName.String.Equals(SelectionText, StringComparison.OrdinalIgnoreCase));
-                }
-            })
+            .Subscribe(RestoreSelectionFromText)
             .DisposeWith(this);
 
         SelectedModChanged = this.WhenAnyValue(x => x.SelectedMod);
@@ -75,5 +65,19 @@ public sealed partial class SingleModPickerVM : ViewModel, IModPickerVM {
 
         SelectedMod = item;
         return true;
+    }
+
+    private void UpdateSelectedModFromFilter(Func<OrderedModItem, bool>? filter) {
+        if (filter is null) {
+            SelectedMod ??= Mods.FirstOrDefault();
+        } else if (SelectedMod is null || !filter(SelectedMod)) {
+            SelectedMod = Mods.FirstOrDefault(filter);
+        }
+    }
+
+    private void RestoreSelectionFromText() {
+        if (SelectedMod is null || (Filter is not null && !Filter(SelectedMod))) {
+            SelectedMod = Mods.FirstOrDefault(mod => mod.ModKey.FileName.String.Equals(SelectionText, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

@@ -30,6 +30,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
     private readonly Func<QueryVM> _queryVMFactory;
     private readonly IList<QueryFromItem> _placeableQueryFromItems;
     private readonly IStateRepository<MapperMemento, MapperMemento, NamedGuid> _stateRepository;
+    private readonly ILogger _logger;
 
     public HeatmapCreator HeatmapCreator { get; }
     public IReferenceService ReferenceService { get; }
@@ -75,6 +76,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         IMutagenTypeProvider mutagenTypeProvider,
         ILinkCacheProvider linkCacheProvider) {
         _queryVMFactory = queryVMFactory;
+        _logger = logger;
         HeatmapCreator = heatmapCreator;
         VertexColorMapCreator = new VertexColorMapCreator();
         ReferenceService = referenceService;
@@ -232,18 +234,7 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.ImageFilePath)
-            .Subscribe(path => {
-                if (path is null) {
-                    ImageSource = null;
-                    return;
-                }
-
-                try {
-                    ImageSource = new Bitmap(path);
-                } catch (Exception e) {
-                    logger.Here().Error(e, "Failed to load image: {Exception}", e);
-                }
-            })
+            .Subscribe(LoadImage)
             .DisposeWith(this);
     }
 
@@ -321,5 +312,18 @@ public sealed partial class MapperVM : ViewModel, IMementoProvider<MapperMemento
         TopCell = memento.TopCell;
         BottomCell = memento.BottomCell;
         MarkingSize = memento.MarkingSize;
+    }
+
+    private void LoadImage(string? path) {
+        if (path is null) {
+            ImageSource = null;
+            return;
+        }
+
+        try {
+            ImageSource = new Bitmap(path);
+        } catch (Exception e) {
+            _logger.Here().Error(e, "Failed to load image: {Exception}", e);
+        }
     }
 }

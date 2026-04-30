@@ -27,6 +27,8 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
     private readonly ILogger _logger;
     private readonly EnchantmentsGenerator _generator;
     private readonly EnchantmentsImplementer _implementer;
+    private readonly IStateRepository<LeveledListMemento, LeveledListMemento, Guid> _stateRepository;
+    private Guid? _enchantmentsMementoGuid;
 
     public GenerationConfigurationVM GenerationConfig { get; }
 
@@ -54,8 +56,9 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
         GenerationConfig.ShowNameReplacement = true;
 
         var stateRepository = stateRepositoryFactory.Create("Enchantments");
+        _stateRepository = stateRepository;
         var enchantmentsMemento = stateRepository.LoadAllWithIdentifier().FirstOrDefault();
-        Guid? enchantmentsMementoGuid = enchantmentsMemento.Value is null ? null : enchantmentsMemento.Key;
+        _enchantmentsMementoGuid = enchantmentsMemento.Value is null ? null : enchantmentsMemento.Key;
 
         GenerationConfig.DefinitionsFolderPath = enchantmentsMemento.Value?.EnchantmentsFolderPath;
 
@@ -152,14 +155,7 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
 
         GenerationConfig.WhenAnyValue(x => x.DefinitionsFolderPath)
             .NotNull()
-            .Subscribe(path => {
-                LoadDefinitions(path);
-                stateRepository.Update(
-                    memento => memento is null
-                        ? new LeveledListMemento(string.Empty, path)
-                        : memento with { EnchantmentsFolderPath = path },
-                    enchantmentsMementoGuid ??= Guid.NewGuid());
-            })
+            .Subscribe(UpdateDefinitionsFolder)
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.SelectedDefinitions)
@@ -235,5 +231,14 @@ public sealed partial class EnchantmentsVM : ValidatableViewModel {
                 return enchantmentsDefinition.Enchantments.Values.Select(enchantment =>
                     new ExtendedEnchantmentItem(file, fileName, enchantment, enchantmentsDefinition));
             });
+    }
+
+    private void UpdateDefinitionsFolder(string path) {
+        LoadDefinitions(path);
+        _stateRepository.Update(
+            memento => memento is null
+                ? new LeveledListMemento(string.Empty, path)
+                : memento with { EnchantmentsFolderPath = path },
+            _enchantmentsMementoGuid ??= Guid.NewGuid());
     }
 }

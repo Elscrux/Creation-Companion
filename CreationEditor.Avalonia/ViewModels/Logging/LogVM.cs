@@ -1,5 +1,4 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Logging;
 using DynamicData;
 using DynamicData.Binding;
@@ -28,16 +27,11 @@ public sealed partial class LogVM : ViewModel, ILogVM {
         AutoScroll = true;
 
         observableLogSink.LogAdded
-            .Subscribe(log => _logAddedCache.AddOrUpdate(log))
+            .Subscribe(AddLogItem)
             .DisposeWith(this);
 
         _logAddedCache.CountChanged
-            .Subscribe(_ => {
-                while (_logAddedCache.Count > MaxLogCount) {
-                    var logItem = _logAddedCache.Items.MinBy(x => x.Time);
-                    if (logItem is not null) _logAddedCache.Remove(logItem.Id);
-                }
-            })
+            .Subscribe(TrimLogItems)
             .DisposeWith(this);
 
         LogItems = _logAddedCache
@@ -67,7 +61,18 @@ public sealed partial class LogVM : ViewModel, ILogVM {
     }
 
     [ReactiveCommand]
-    private void Clear(Unit _) {
+    private void Clear() {
         _logAddedCache.Clear();
+    }
+
+    private void AddLogItem(ILogItem log) {
+        _logAddedCache.AddOrUpdate(log);
+    }
+
+    private void TrimLogItems() {
+        while (_logAddedCache.Count > MaxLogCount) {
+            var logItem = _logAddedCache.Items.MinBy(x => x.Time);
+            if (logItem is not null) _logAddedCache.Remove(logItem.Id);
+        }
     }
 }

@@ -8,6 +8,8 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Cache;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReactiveUI;
@@ -16,6 +18,8 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 
 public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<IReferencedRecord<ICellGetter>> {
     private readonly CompositeDisposable _referencesDisposable = new();
+    private readonly ILinkCacheProvider _linkCacheProvider;
+    private readonly IReferenceService _referenceService;
 
     public IRecordBrowserSettings RecordBrowserSettings { get; }
     public IEnumerable<Type> RecordTypes { get; } = [typeof(ICellGetter)];
@@ -32,34 +36,25 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
         IReferenceService referenceService,
         IRecordController recordController,
         IRecordBrowserSettings recordBrowserSettings) {
+        _linkCacheProvider = linkCacheProvider;
+        _referenceService = referenceService;
         RecordBrowserSettings = recordBrowserSettings;
         ShowWildernessCells = true;
         Filter = RecordBrowserSettings.SettingsChanged
             .Merge(this.WhenAnyValue(x => x.ShowWildernessCells).Unit())
-            .Select(_ => new Func<IReferencedRecord, bool>(
-                record => (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettings.Filter(record.Record)))
+            .Select(_ => new Func<IReferencedRecord, bool>(record =>
+                (ShowWildernessCells || !record.Record.EditorID.IsNullOrEmpty()) && RecordBrowserSettings.Filter(record.Record)))
             .Replay(1)
             .RefCount();
 
         RecordBrowserSettings.ModScopeProvider.LinkCacheChanged
             .CombineLatest(
                 this.WhenAnyValue(x => x.WorldspaceFormKey),
-                (linkCache, worldspaceFormKey) => (LinkCache: linkCache, WorldspaceFormKey: worldspaceFormKey))
+                (linkCache, worldspaceFormKey) => (linkCache, worldspaceFormKey))
             .ThrottleMedium()
             .ObserveOnTaskpool()
             .WrapInProgressMarker(
-                x => x.Do(y => {
-                    _referencesDisposable.Clear();
-
-                    RecordCache.Clear();
-                    RecordCache.Edit(updater => {
-                        foreach (var cell in y.LinkCache.EnumerateAllCells(y.WorldspaceFormKey)) {
-                            referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
-
-                            updater.AddOrUpdate(referencedRecord);
-                        }
-                    });
-                }),
+                x => x.Do(s => UpdateRecordCache(s.linkCache, s.worldspaceFormKey)),
                 out var isBusy)
             .Subscribe()
             .DisposeWith(this);
@@ -68,39 +63,57 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
 
         recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
-            .Subscribe(x => {
-                if (x.Record is not ICellGetter cell) return;
-
-                if (RecordCache.TryGetValue(cell.FormKey, out var listRecord)) {
-                    // Modify value
-                    listRecord.Record = cell;
-
-                    // Force update
-                    RecordCache.AddOrUpdate(listRecord);
-                } else {
-                    // Check if cell exists in current scope
-                    if ((cell.Flags & Cell.Flag.IsInteriorCell) != 0) return;
-                    if (!linkCacheProvider.LinkCache.TryResolveSimpleContext<ICellGetter>(cell.FormKey, out var cellContext)) return;
-                    if (cellContext.Parent?.Record is not IWorldspaceGetter worldspace) return;
-                    if (worldspace.FormKey != WorldspaceFormKey) return;
-
-                    // Create new entry
-                    referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWithComposite(_referencesDisposable);
-                    listRecord = outListRecord;
-
-                    // Force update
-                    RecordCache.AddOrUpdate(listRecord);
-                }
-            })
+            .Subscribe(x => UpdateRecord(x.Record, x.Mod))
             .DisposeWith(this);
 
         recordController.WinningRecordDeleted
-            .Subscribe(x => {
-                if (x.Record is not ICellGetter cell) return;
-
-                RecordCache.RemoveKey(cell.FormKey);
-            })
+            .Subscribe(x => RemoveRecord(x.Record, x.Mod))
             .DisposeWith(this);
+    }
+
+    private void UpdateRecordCache(ILinkCache linkCache, FormKey worldspaceFormKey) {
+        _referencesDisposable.Clear();
+
+        RecordCache.Clear();
+        RecordCache.Edit(updater => {
+            foreach (var cell in linkCache.EnumerateAllCells(worldspaceFormKey)) {
+                _referenceService.GetReferencedRecord(cell, out var referencedRecord).DisposeWithComposite(_referencesDisposable);
+
+                updater.AddOrUpdate(referencedRecord);
+            }
+        });
+    }
+
+    private void UpdateRecord(IMajorRecord record, IMod mod) {
+        if (record is not ICellGetter cell) return;
+
+        if (RecordCache.TryGetValue(cell.FormKey, out var listRecord)) {
+            // Modify value
+            listRecord.Record = cell;
+
+            // Force update
+            RecordCache.AddOrUpdate(listRecord);
+            return;
+        }
+
+        // Check if cell exists in current scope
+        if ((cell.Flags & Cell.Flag.IsInteriorCell) != 0) return;
+        if (!_linkCacheProvider.LinkCache.TryResolveSimpleContext<ICellGetter>(cell.FormKey, out var cellContext)) return;
+        if (cellContext.Parent?.Record is not IWorldspaceGetter worldspace) return;
+        if (worldspace.FormKey != WorldspaceFormKey) return;
+
+        // Create new entry
+        _referenceService.GetReferencedRecord(cell, out var outListRecord).DisposeWithComposite(_referencesDisposable);
+        listRecord = outListRecord;
+
+        // Force update
+        RecordCache.AddOrUpdate(listRecord);
+    }
+
+    private void RemoveRecord(IMajorRecord record, IMod mod) {
+        if (record is not ICellGetter cell) return;
+
+        RecordCache.RemoveKey(cell.FormKey);
     }
 
     protected override void Dispose(bool disposing) {

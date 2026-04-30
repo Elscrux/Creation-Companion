@@ -44,13 +44,8 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
         ModPickerVM.Filter = mod => !SkyrimDefinitions.SkyrimModKeys.Contains(mod.ModKey);
 
         ModPickerVM.WhenAnyValue(x => x.SelectedMod)
-            .Subscribe(mod => {
-                if (mod is null || mod.ModKey.IsNull) {
-                    Records.Clear();
-                } else {
-                    Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff { RecordDiff = diff }));
-                }
-            });
+            .Subscribe(UpdateSelectedMod)
+            .DisposeWith(this);
 
         RunCommand = ReactiveCommand.CreateRunInBackground<OrderedModItem>(Run);
     }
@@ -143,6 +138,14 @@ public sealed partial class VanillaDuplicateCleanerVM : ViewModel {
         cleanedBaseMod.RemapLinks(remapData);
         foreach (var cleanedOtherMod in cleanedOtherMods) {
             cleanedOtherMod.RemapLinks(remapData);
+        }
+    }
+
+    private void UpdateSelectedMod(OrderedModItem? mod) {
+        if (mod is null || mod.ModKey.IsNull) {
+            Records.Clear();
+        } else {
+            Records.ReplaceWith(Process(mod.ModKey).Select(diff => new SelectableRecordDiff { RecordDiff = diff }));
         }
     }
 }

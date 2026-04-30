@@ -9,6 +9,7 @@ using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CreationEditor;
+using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
@@ -124,29 +125,12 @@ public sealed partial class ModCleanerVM : ViewModel {
             .ToObservableChangeSet()
             .AutoRefresh(x => x.IsSelected)
             .ToCollection()
-            .Subscribe(flags => {
-                foreach (var flag in flags) {
-                    featureFlagService.SetFeatureEnabled(flag.FeatureFlag, flag.IsSelected);
-                }
-            })
+            .Subscribe(OnFeatureFlagsChanged)
             .DisposeWith(this);
 
         DependenciesModPickerVM.Filter = _ => false;
         CleaningModPickerVM.SelectedModChanged
-            .Subscribe(cleanMod => {
-                if (cleanMod is null) {
-                    DependenciesModPickerVM.Filter = _ => false;
-                    return;
-                }
-
-                DependenciesModPickerVM.Filter = dependency => EditorEnvironment.Environment.ResolveMod(dependency.ModKey)?
-                    .ModHeader.MasterReferences.Any(m => cleanMod.ModKey == m.Master) is true;
-
-                // Set all dependencies to selected by default
-                foreach (var modItem in DependenciesModPickerVM.Mods) {
-                    modItem.IsSelected = true;
-                }
-            })
+            .Subscribe(OnCleaningModSelected)
             .DisposeWith(this);
 
         RequirementsMet = CleaningModPickerVM.HasModSelected
@@ -455,5 +439,26 @@ public sealed partial class ModCleanerVM : ViewModel {
         Dispatcher.UIThread.Post(() => IsBusy = true);
         _modCleaner.Clean(mod, _retainedLinks, SelectedDataSource);
         Dispatcher.UIThread.Post(() => IsBusy = false);
+    }
+
+    private void OnFeatureFlagsChanged(IReadOnlyCollection<FeatureFlagItem> flags) {
+        foreach (var flag in flags) {
+            FeatureFlagService.SetFeatureEnabled(flag.FeatureFlag, flag.IsSelected);
+        }
+    }
+
+    private void OnCleaningModSelected(OrderedModItem? cleanMod) {
+        if (cleanMod is null) {
+            DependenciesModPickerVM.Filter = _ => false;
+            return;
+        }
+
+        DependenciesModPickerVM.Filter = dependency => EditorEnvironment.Environment.ResolveMod(dependency.ModKey)?
+            .ModHeader.MasterReferences.Any(m => cleanMod.ModKey == m.Master) is true;
+
+        // Set all dependencies to selected by default
+        foreach (var modItem in DependenciesModPickerVM.Mods) {
+            modItem.IsSelected = true;
+        }
     }
 }

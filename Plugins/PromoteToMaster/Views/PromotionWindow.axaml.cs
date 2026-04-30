@@ -16,15 +16,17 @@ public partial class PromotionWindow : ActivatableAppWindow {
         this.WhenAnyValue(x => x.DataContext)
             .NotNull()
             .OfType<PromoteToMasterVM>()
-            .Subscribe(vm => {
-                Title = vm.RecordsToPromote.Count > 1
-                    ? $"Promote {vm.RecordsToPromote.Count} Records"
-                    : $"Promote {vm.RecordsToPromote[0].Record.EditorID ?? vm.RecordsToPromote[0].Record.FormKey.ToString()}";
+            .Subscribe(UpdateTitleFromRecords)
+            .DisposeWith(ActivatedDisposable);
+    }
 
-                vm.PromoteCommand.Subscribe(_ => {
-                    Close();
-                });
-            })
+    private void UpdateTitleFromRecords(PromoteToMasterVM vm) {
+        Title = vm.RecordsToPromote.Count > 1
+            ? $"Promote {vm.RecordsToPromote.Count} Records"
+            : $"Promote {vm.RecordsToPromote[0].Record.EditorID ?? vm.RecordsToPromote[0].Record.FormKey.ToString()}";
+
+        vm.PromoteCommand
+            .Subscribe(_ => Close())
             .DisposeWith(ActivatedDisposable);
     }
 }
