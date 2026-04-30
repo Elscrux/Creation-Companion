@@ -630,6 +630,10 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
+
+                                <Button Content="Build Retained Records"
+                                        Command="{Binding BuildRetainedLinksCommand}"
+                                        IsVisible="{Binding !!ReferenceGraph}"/>
                             </StackPanel>
                         </basic:Card>
                     </StackPanel>
