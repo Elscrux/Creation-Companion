@@ -125,11 +125,11 @@ public sealed class AssetController(
     }
 
     public void Rename(IDataSourceLink origin, string newName, CancellationToken token = default) {
-        var directoryPath = origin.ParentDirectory?.FullPath;
+        var directoryDataRelativePath = origin.ParentDirectory?.DataRelativePath.Path;
 
-        if (directoryPath is not null) {
+        if (directoryDataRelativePath is not null) {
             try {
-                var newPath = origin.FileSystem.Path.Combine(directoryPath, newName);
+                var newPath = origin.FileSystem.Path.Combine(directoryDataRelativePath, newName);
                 switch (origin) {
                     case DataSourceFileLink fileLink: {
                         var destinationFileLink = new DataSourceFileLink(fileLink.DataSource, newPath);
