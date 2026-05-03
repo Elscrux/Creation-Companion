@@ -207,9 +207,9 @@ public sealed class AssetController(
             if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
 
             var recordOverride = recordController.GetOrAddOverride(record);
-            recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
+            recordController.RegisterUpdate(recordOverride, () => recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
                 { assetLink, shortenedDataRelativePath },
-            });
+            }));
         }
     }
 
