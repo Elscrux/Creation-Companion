@@ -101,7 +101,6 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                 context => menuItemProvider.References(OpenReferencesCommand, context),
                 () => menuItemProvider.References(OpenReferencesCommand).HotKey
             ),
-            // TODO remap references context action
             new ContextAction(context => context.SelectedRecords.Count == 1 && context.SelectedAssets.Count == 0,
                 53,
                 ContextActionGroup.Copy,

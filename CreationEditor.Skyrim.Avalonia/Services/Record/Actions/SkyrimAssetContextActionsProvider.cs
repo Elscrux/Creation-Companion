@@ -1,22 +1,31 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
+using System.Text.RegularExpressions;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
+using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Reference;
 using CreationEditor.Avalonia.Views;
+using CreationEditor.Avalonia.Views.Basic;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
@@ -27,10 +36,14 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider, IAssetContextActionsProvider {
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
+    private readonly IAssetTypeProvider _assetTypeProvider;
     private readonly MainWindow _mainWindow;
     private readonly IDockFactory _dockFactory;
+    private readonly IModelModificationService _modelModificationService;
     private readonly ITaskDialogProvider _taskDialogProvider;
+    private readonly IRecordPrefixService _recordPrefixService;
     private readonly IAssetController _assetController;
+    private readonly IRecordController _recordController;
     private readonly IReferenceService _referenceService;
     private readonly IList<ContextAction> _actions;
 
@@ -39,15 +52,23 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         IFileSystem fileSystem,
         MainWindow mainWindow,
         IDockFactory dockFactory,
+        IModelModificationService modelModificationService,
+        IAssetTypeProvider assetTypeProvider,
         ITaskDialogProvider taskDialogProvider,
+        IRecordPrefixService recordPrefixService,
         IAssetController assetController,
+        IRecordController recordController,
         IReferenceService referenceService,
         IMenuItemProvider menuItemProvider) {
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
+        _assetTypeProvider = assetTypeProvider;
         _mainWindow = mainWindow;
         _dockFactory = dockFactory;
+        _modelModificationService = modelModificationService;
         _taskDialogProvider = taskDialogProvider;
+        _recordPrefixService = recordPrefixService;
         _assetController = assetController;
+        _recordController = recordController;
         _referenceService = referenceService;
 
         _actions = [
@@ -104,6 +125,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     Symbol.NewFolder,
                     new KeyGesture(Key.N, KeyModifiers.Control | KeyModifiers.Shift))),
             new ContextAction(
+                context => context.SelectedAssets.Count > 0,
+                10,
+                ContextActionGroup.Modification,
+                RemapTexturesCommand,
+                context => menuItemProvider.Custom(RemapTexturesCommand, "Remap Textures", context, Symbol.Rename)),
+            new ContextAction(
                 context => context is { SelectedAssets.Count: > 0, SelectedRecords.Count: 0 },
                 50,
                 ContextActionGroup.Copy,
@@ -128,7 +155,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
     [ReactiveCommand]
     private async Task OpenInFileExplorer(SelectedListContext context) {
-        if (context.SelectedAssets is  not [{ DataSourceLink: var asset }]) return;
+        if (context.SelectedAssets is not [{ DataSourceLink: var asset }]) return;
 
         Process.Start(new ProcessStartInfo {
             FileName = "explorer.exe",
@@ -286,6 +313,124 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     }
 
     [ReactiveCommand]
+    private async Task RemapTextures(SelectedListContext context) {
+        var assets = context.SelectedAssets
+            .Where(assetContext => assetContext.DataSourceLink is DataSourceDirectoryLink
+             || assetContext.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeProvider.Model)
+            .SelectMany(assetContext => assetContext.DataSourceLink.EnumerateAllFileLinks())
+            .ToArray();
+
+        if (assets.Length == 0) return;
+
+        var textures = assets.SelectMany(a => _referenceService.GetAssetLinks(a))
+            .Where(x => x.AssetTypeInstance == _assetTypeProvider.Texture)
+            .Select(x => x.DataRelativePath.Path)
+            .Distinct()
+            .ToArray();
+
+        var firstTexture = textures.FirstOrDefault();
+        var enableRegex = new CheckBox { Content = "Enable Regex", IsChecked = false };
+        var fromTextBox = new TextBox { Text = firstTexture };
+        var toTextBox = new TextBox { Text = firstTexture };
+        var replacementCount = new TextBlock { Foreground = StandardBrushes.HighlightBrush };
+        var replacement = new Card {
+            Header = "Replace Textures",
+            Description = "Replace parts of the texture paths. You can use regular expressions for more complex replacements.",
+            Icon = Symbol.Rename,
+            Content = new StackPanel {
+                Spacing = 5,
+                Children = {
+                    enableRegex,
+                    fromTextBox,
+                    toTextBox,
+                }
+            }
+        };
+        var regexErrorText = new TextBlock {
+            Foreground = Brushes.IndianRed,
+            IsVisible = false,
+            TextWrapping = TextWrapping.Wrap,
+        };
+        var texturesListBox = new ItemsRepeater { ItemsSource = textures, [Grid.ColumnProperty] = 0 };
+        var texturesAfterListBox = new ItemsRepeater { ItemsSource = textures, [Grid.ColumnProperty] = 1 };
+
+        var previewObservable = Observable
+            .CombineLatest(
+                fromTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
+                toTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
+                enableRegex.GetObservable(ToggleButton.IsCheckedProperty).Select(x => x is true),
+                (fromValue, toValue, isRegex) => new { FromValue = fromValue, ToValue = toValue, IsRegex = isRegex })
+            .Publish()
+            .RefCount();
+
+        using var previewSubscription = previewObservable.Subscribe(values => {
+            if (values.IsRegex) {
+                try {
+                    texturesAfterListBox.ItemsSource = textures.Select(path => Regex.Replace(path, values.FromValue, values.ToValue)).ToArray();
+                    regexErrorText.IsVisible = false;
+                    regexErrorText.Text = string.Empty;
+                } catch (ArgumentException ex) {
+                    texturesAfterListBox.ItemsSource = textures;
+                    regexErrorText.Text = ex.Message;
+                    regexErrorText.IsVisible = true;
+                }
+            } else {
+                texturesAfterListBox.ItemsSource = textures.Select(path => path.Replace(values.FromValue, values.ToValue, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+                regexErrorText.IsVisible = false;
+                regexErrorText.Text = string.Empty;
+            }
+
+            if (texturesAfterListBox.ItemsSource is IEnumerable itemsSource) {
+                var count = itemsSource
+                    .OfType<string>()
+                    .Index()
+                    .Count(x => x.Item != textures.ElementAt(x.Index));
+
+                replacementCount.Text = $"{count} textures will be replaced";
+            } else {
+                replacementCount.Text = string.Empty;
+            }
+        });
+
+        var content = new DockPanel {
+            Children = {
+                new StackPanel {
+                    [DockPanel.DockProperty] = Dock.Top,
+                    Children = {
+                        replacement,
+                        regexErrorText,
+                        replacementCount,
+                    }
+                },
+                new ScrollViewer {
+                    Height = 440,
+                    Content = new Grid {
+                        ColumnDefinitions = new ColumnDefinitions("*,*"),
+                        Children = { texturesListBox, texturesAfterListBox }
+                    }
+                }
+            }
+        };
+
+        var target = assets is [{ Name: var name }] ? name : $"{assets.Length} assets";
+        var remapDialog = CreateAssetDialog($"Remap textures in {target}", content);
+        if (await remapDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+            foreach (var fileLink in assets) {
+                _modelModificationService.RemapLinks(
+                    fileLink,
+                    path => {
+                        if (enableRegex.IsChecked is true) {
+                            return Regex.Replace(path, fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty);
+                        }
+
+                        return path.Replace(fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                    });
+            }
+        }
+    }
+
+    [ReactiveCommand]
     private async Task AddFolder(SelectedListContext context) {
         if (context.SelectedAssets is not [{ DataSourceLink: DataSourceDirectoryLink dir }]) return;
 
@@ -337,6 +482,14 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             header,
             content,
             assetDialog => {
+                assetDialog.Classes.Add("AssetDialog");
+                assetDialog.Styles.Add(new Style(x => x.OfType<TaskDialog>().Class("AssetDialog").Template().OfType<Border>().Name("ContentRoot")) {
+                        Setters = {
+                            new Setter(Layoutable.MinWidthProperty, 1000.0),
+                        },
+                    }
+                );
+
                 if (!_referenceService.IsLoadingCurrently) return;
 
                 assetDialog.IconSource = new SymbolIconSource { Symbol = Symbol.ReportHacked };
