@@ -22,6 +22,14 @@ public partial class RecordPrefixService(
     public IObservable<string> PrefixChanged => this.WhenAnyValue(x => x.Prefix)
         .PublishRefCount();
 
+    public string ApplyPrefix(string editorId) {
+        if (editorId.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)) {
+            return editorId;
+        }
+
+        return Prefix + editorId;
+    }
+
     public void PreStartup() {
         // No work needed
     }
