@@ -15,11 +15,13 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     private readonly ILogger _logger;
     private readonly IMutagenTypeProvider _mutagenTypeProvider;
     private readonly IEditorEnvironment<TMod, TModGetter> _editorEnvironment;
+    private readonly Lock _editableModsLock = new();
+    private readonly Dictionary<ModKey, Lock> _editableModGates = new();
 
     private IObservable<IMajorRecordGetter> OnlyActiveMod(IObservable<RecordModPair> observable) {
         return observable
             .Where(x => x.Mod.ModKey == _editorEnvironment.ActiveMod.ModKey)
-            .Select(x => x.Item1);
+            .Select(x => x.Record);
     }
 
     private IObservable<RecordModPair> OnlyWinningRecord(IObservable<RecordModPair> observable) {
@@ -69,12 +71,34 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         throw new ArgumentException("Mod is not of the correct type", nameof(mod));
     }
 
+    private Lock GetEditableModGate(ModKey modKey) {
+        lock (_editableModsLock) {
+            if (_editableModGates.TryGetValue(modKey, out var gate)) return gate;
+
+            gate = new Lock();
+            _editableModGates.Add(modKey, gate);
+            return gate;
+        }
+    }
+
+    private void LockWithMod(ModKey modKey, Action action) {
+        lock (GetEditableModGate(modKey)) {
+            action();
+        }
+    }
+
+    private TResult LockWithMod<TResult>(ModKey modKey, Func<TResult> action) {
+        lock (GetEditableModGate(modKey)) {
+            return action();
+        }
+    }
+
     #region CreateRecord
     public IMajorRecord CreateRecord(System.Type type) => CreateRecord(type, _editorEnvironment.ActiveMod);
     public IMajorRecord CreateRecord(System.Type type, IMod mod) => CreateRecord(type, CastOrThrow<TMod>(mod));
     public IMajorRecord CreateRecord(System.Type type, TMod mod) {
         var group = mod.GetTopLevelGroup(type);
-        var record = group.AddNew(mod.GetNextFormKey());
+        var record = LockWithMod(mod.ModKey, () => group.AddNew(mod.GetNextFormKey()));
 
         _logger.Here().Verbose(
             "Creating new record {Record} of type {Type} in {Mod}",
@@ -97,7 +121,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var group = mod.GetTopLevelGroup<TMajorRecord>();
-        var record = group.AddNew(mod.GetNextFormKey());
+        var record = LockWithMod(mod.ModKey, () => group.AddNew(mod.GetNextFormKey()));
 
         _logger.Here().Verbose("Creating new record {Record} of type {Type} in {Mod}", record, typeof(TMajorRecord), mod.ModKey);
 
@@ -111,7 +135,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         if (record.FormKey.ModKey != mod.ModKey) throw new ArgumentException("Record is not from the same mod", nameof(record));
 
         var group = mod.GetTopLevelGroup(record.Registration.GetterType);
-        group.AddUntyped(record);
+        LockWithMod(mod.ModKey, () => group.AddUntyped(record));
         
         _logger.Here().Verbose("Adding new record {Record} in {Mod}", record, mod.ModKey);
 
@@ -126,7 +150,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public IMajorRecord DuplicateRecord(IMajorRecordGetter record) => DuplicateRecord(record, _editorEnvironment.ActiveMod);
     public IMajorRecord DuplicateRecord(IMajorRecordGetter record, TMod mod) {
         var resolveContext = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, record.Registration.GetterType);
-        var duplicate = resolveContext.DuplicateIntoAsNewRecord(mod);
+        var duplicate = LockWithMod(mod.ModKey, () => resolveContext.DuplicateIntoAsNewRecord(mod));
 
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}", duplicate, record, mod.ModKey);
 
@@ -151,7 +175,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var resolveContext = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
-        var duplicate = resolveContext.DuplicateIntoAsNewRecord(mod);
+        var duplicate = LockWithMod(mod.ModKey, () => resolveContext.DuplicateIntoAsNewRecord(mod));
 
         _logger.Here().Verbose("Creating new record {Duplicate} by duplicating {Record} in {Mod}", duplicate, record, mod.ModKey);
 
@@ -182,7 +206,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter {
-        var newOverride = GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, mod);
+        var newOverride = LockWithMod(mod.ModKey, () => GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record, mod));
         newOverride.IsDeleted = true;
 
         _logger.Here().Verbose("Deleting record {Record} from {Mod}", record, mod);
@@ -197,7 +221,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public IMajorRecord GetOrAddOverride(IFormLinkIdentifier record, TMod mod) {
         var context = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, _mutagenTypeProvider.GetRecordGetterType(record.Type));
 
-        var newOverride = context.GetOrAddAsOverride(mod);
+        var newOverride = LockWithMod(mod.ModKey, () => context.GetOrAddAsOverride(mod));
         if (context.ModKey != mod.ModKey) {
             _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
 
@@ -211,7 +235,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
     public IMajorRecord GetOrAddOverride(IMajorRecordGetter record, TMod mod) {
         var context = _editorEnvironment.LinkCache.ResolveContext(record.FormKey, record.Registration.GetterType);
 
-        var newOverride = context.GetOrAddAsOverride(mod);
+        var newOverride = LockWithMod(mod.ModKey, () => context.GetOrAddAsOverride(mod));
         if (context.ModKey != mod.ModKey) {
             _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
 
@@ -238,7 +262,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         where TMajorRecordGetter : class, IMajorRecordGetter {
         var context = _editorEnvironment.LinkCache.ResolveContext<TMajorRecord, TMajorRecordGetter>(record.FormKey);
 
-        var newOverride = context.GetOrAddAsOverride(mod);
+        var newOverride = LockWithMod(mod.ModKey, () => context.GetOrAddAsOverride(mod));
         if (context.ModKey != mod.ModKey) {
             _logger.Here().Verbose("Creating overwrite of record {Record} in {Mod}", record, mod.ModKey);
 
