@@ -13,6 +13,8 @@ public interface IDataSourceLink : IComparable<IDataSourceLink>, IEquatable<IDat
 
     DataSourceDirectoryLink? ParentDirectory { get; }
 
+    IEnumerable<DataSourceFileLink> EnumerateAllFileLinks();
+
     bool Exists();
 
     int CompareToDirectoriesFirst(IDataSourceLink? other);

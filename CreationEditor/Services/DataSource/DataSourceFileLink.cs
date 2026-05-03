@@ -23,6 +23,10 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
         }
     }
 
+    public IEnumerable<DataSourceFileLink> EnumerateAllFileLinks() {
+        yield return this;
+    }
+
     public bool Exists() => FileSystem.File.Exists(FullPath);
 
     public Stream? ReadFileStream() {

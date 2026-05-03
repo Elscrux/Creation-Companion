@@ -35,6 +35,8 @@ public sealed class DataSourceDirectoryLink(IDataSource dataSource, DataRelative
                 DataRelativePath.PathComparison);
     }
 
+    public IEnumerable<DataSourceFileLink> EnumerateAllFileLinks() => EnumerateFileLinks(true);
+
     public IEnumerable<DataSourceFileLink> EnumerateFileLinks(bool includeSubDirectories) {
         return EnumerateFileLinks("*", includeSubDirectories);
     }
