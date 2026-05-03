@@ -368,23 +368,24 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         await AssetContextActionsProvider.MoveAssets(dstDirectory, draggedAssets);
     }
 
-    public IEnumerable<Control> GetContextMenuItems(IDataSourceLink asset) {
-        List<Control> items = [];
+    public IEnumerable<Control> GetContextMenuItems(IEnumerable<IDataSourceLink> assets) {
+        var assetContexts = assets
+            .Select(dataSourceLink => {
+                var assetLink = AssetTypeService.GetAssetLink(dataSourceLink.DataRelativePath);
+                IReferencedAsset? referencedAsset;
+                if (assetLink is not null) {
+                    using var _ = _referenceService.GetReferencedAsset(assetLink, out referencedAsset);
+                } else {
+                    referencedAsset = null;
+                }
 
-        var assetLink = AssetTypeService.GetAssetLink(asset.DataRelativePath);
-        IReferencedAsset? referencedAsset;
-        if (assetLink is not null) {
-            using var _ = _referenceService.GetReferencedAsset(assetLink, out referencedAsset);
-        } else {
-            referencedAsset = null;
-        }
+                return new AssetContext(dataSourceLink, referencedAsset);
+            })
+            .ToArray();
 
-        var menuItems = _contextMenuProvider.GetMenuItems(new SelectedListContext([], [new AssetContext(asset, referencedAsset)]));
-        foreach (var control in menuItems.OfType<Control>()) {
-            items.Add(control);
-        }
-
-        return items;
+        var context = new SelectedListContext([], assetContexts);
+        var menuItems = _contextMenuProvider.GetMenuItems(context);
+        return menuItems.OfType<Control>();
     }
 
     [ReactiveCommand]

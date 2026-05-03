@@ -88,10 +88,10 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void ContextRequestHandler(object? sender, ContextRequestedEventArgs e) {
-        if (e.Source is not Control { DataContext: IDataSourceLink link } control) return;
+        if (sender is not TreeDataGrid { RowSelection.SelectedItems: var selectedItems } || e.Source is not Control control) return;
 
         var contextFlyout = new MenuFlyout {
-            ItemsSource = ViewModel?.GetContextMenuItems(link),
+            ItemsSource = ViewModel?.GetContextMenuItems(selectedItems.OfType<IDataSourceLink>()),
         };
 
         contextFlyout.ShowAt(control, true);

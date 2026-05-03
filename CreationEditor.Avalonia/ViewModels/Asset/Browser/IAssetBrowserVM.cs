@@ -51,5 +51,5 @@ public interface IAssetBrowserVM : IDisposableDropoff {
 
     IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink);
     Task Drop(DataSourceDirectoryLink dstDirectory, DragInfo dragInfo);
-    IEnumerable<Control> GetContextMenuItems(IDataSourceLink asset);
+    IEnumerable<Control> GetContextMenuItems(IEnumerable<IDataSourceLink> assets);
 }
