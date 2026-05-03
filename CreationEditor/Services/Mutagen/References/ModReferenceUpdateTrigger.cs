@@ -1,5 +1,7 @@
 ﻿using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References.Cache;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -9,12 +11,14 @@ namespace CreationEditor.Services.Mutagen.References;
 
 public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
     ILogger logger,
+    IRecordController recordController,
     IEditorEnvironment editorEnvironment)
     : IDisposable, IReferenceUpdateTrigger<IModGetter, RecordModPair, TCache, TLink, IFormLinkIdentifier, TSubscriber>
     where TCache : IReferenceCache<TCache, TLink, IFormLinkIdentifier>
     where TLink : notnull
     where TSubscriber : IReferenced {
     private CancellationTokenSource _tokenSource = new();
+    private readonly CompositeDisposable _loadOrderChangedDisposables = new();
     public IFormLinkIdentifier ToReference(RecordModPair element) => element.Record;
     public IModGetter GetSourceFor(RecordModPair element) => element.Mod;
     public void SetupSubscriptions(
@@ -24,6 +28,8 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
             .ObserveOnTaskpool()
             .Subscribe(_ => {
                 _tokenSource.Cancel();
+
+                _loadOrderChangedDisposables.Clear();
 
                 Task.Run(async () => {
                         _tokenSource = new CancellationTokenSource();
@@ -37,6 +43,10 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
                         referenceController.Name,
                         editorEnvironment.LinkCache.ListedOrder.Count,
                         e));
+
+                recordController.RecordChangedDiff
+                    .Subscribe(referenceController.RegisterUpdate)
+                    .DisposeWith(_loadOrderChangedDisposables);
             })
             .DisposeWithComposite(disposables);
     }
