@@ -184,8 +184,13 @@ public sealed class AssetController(
             if (dataSourceService.TryGetFileLink(reference, out var referenceFileLink)) {
                 modelModificationService.RemapLinks(
                     referenceFileLink,
-                    p => !p.IsNullOrWhitespace() && oldFileLink.DataRelativePath.Path.EndsWith(p, DataRelativePath.PathComparison),
-                    newFileLink.DataRelativePath.Path);
+                    path => {
+                        if (!path.IsNullOrWhitespace() && oldFileLink.DataRelativePath.Path.EndsWith(path, DataRelativePath.PathComparison)) {
+                            return newFileLink.DataRelativePath.Path;
+                        }
+
+                        return path;
+                    });
             } else {
                 logger.Here().Warning("Couldn't find file link {Reference} of {Path}", reference, oldFileLink.FullPath);
             }
