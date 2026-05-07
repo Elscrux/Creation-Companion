@@ -125,7 +125,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     Symbol.NewFolder,
                     new KeyGesture(Key.N, KeyModifiers.Control | KeyModifiers.Shift))),
             new ContextAction(
-                context => context.SelectedAssets.Count > 0,
+                context => context.HasAnyAssetOfType(_assetTypeProvider.Model),
                 10,
                 ContextActionGroup.Modification,
                 RemapTexturesCommand,
@@ -140,6 +140,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     context,
                     "Copy Path",
                     false)),
+            new ContextAction(
+                context => context.HasAnyAssetOfType(_assetTypeProvider.Model),
+                10,
+                ContextActionGroup.Misc,
+                CreateStaticRecordCommand,
+                context => menuItemProvider.Custom(CreateStaticRecordCommand, "Create Static Record for Mesh", context, Symbol.Home)),
         ];
     }
 
@@ -459,6 +465,19 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
         if (clipboard is not null) {
             await clipboard.SetTextAsync(dataSourceLink.DataRelativePath.Path);
+        }
+    }
+
+    [ReactiveCommand]
+    private async Task CreateStaticRecord(SelectedListContext context) {
+        foreach (var asset in context.SelectedAssets.Where(c => c.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeProvider.Model)) {
+            var staticRecord = _recordController.CreateRecord<Static, IStaticGetter>();
+            _recordController.RegisterUpdate(staticRecord,
+                () => {
+                    staticRecord.Model ??= new Model();
+                    staticRecord.Model.File = asset.DataSourceLink.DataRelativePath;
+                    staticRecord.EditorID = _recordPrefixService.ApplyPrefix(asset.DataSourceLink.NameWithoutExtension);
+                });
         }
     }
 

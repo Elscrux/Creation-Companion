@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References;
+using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Actions;
@@ -31,6 +32,12 @@ public sealed record SelectedListContext(
             settings) {}
 
     private IDictionary<Type, object>? Settings { get; } = Settings;
+
+    public bool HasAnyAssetOfType(IAssetType assetType) {
+        return SelectedAssets.Any(assetContext => assetContext.DataSourceLink
+            .EnumerateAllFileLinks()
+            .Any(fileLink => assetType.FileExtensions.Contains(fileLink.Extension, StringComparer.OrdinalIgnoreCase)));
+    }
 
     public T GetSetting<T>() {
         return (T) Settings![typeof(T)];
