@@ -404,11 +404,6 @@ public sealed partial class ModCleanerVM : ViewModel {
             .OrderBy(r => r.EditorID)
             .ToList();
 
-        var formKey = FormKey.Factory("0D49FD:BSHeartland.esm");
-        if (retainedRecords.Any(x => x.FormKey == formKey)) {
-            Console.WriteLine();
-        }
-
         var referenceGraphOnlyRetained = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
         foreach (var link in retainedLinks) {
             if (ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
