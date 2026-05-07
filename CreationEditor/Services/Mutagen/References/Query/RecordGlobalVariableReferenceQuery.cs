@@ -15,7 +15,6 @@ public sealed partial class RecordGlobalVariableReferenceQuery(IMutagenCommonAsp
      public string Name => "Mod Global Variable Links";
 
     public string GetSourceName(IModGetter source) => source.ModKey.FileName;
-    public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
 
     public void FillCache(IModGetter source, DictionaryReferenceCache<string, IFormLinkIdentifier> cache) {
         foreach (var book in source.EnumerateMajorRecords(commonAspectsProvider.BookType)) {
@@ -82,6 +81,8 @@ public sealed partial class RecordGlobalVariableReferenceQuery(IMutagenCommonAsp
             }
         }
     }
+
+    public void FillCache(IFormLinkIdentifier reference, DictionaryReferenceCache<string, IFormLinkIdentifier> cache) {}
 
     public IEnumerable<string> ParseRecord(IMajorRecordGetter record) {
         var globalNames = ParseTranslatedString(commonAspectsProvider.GetBookText(record));

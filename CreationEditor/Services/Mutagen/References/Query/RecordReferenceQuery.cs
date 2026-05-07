@@ -9,8 +9,6 @@ public sealed class RecordReferenceQuery : IReferenceQuery<IModGetter, RecordRef
 
     public string GetSourceName(IModGetter source) => source.ModKey.FileName;
 
-    public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
-
     public void FillCache(IModGetter source, RecordReferenceCache cache) {
         foreach (var record in source.EnumerateMajorRecords()) {
             cache.FormKeys.Add(record.FormKey);
@@ -21,6 +19,7 @@ public sealed class RecordReferenceQuery : IReferenceQuery<IModGetter, RecordRef
             }
         }
     }
+    public void FillCache(IFormLinkIdentifier source, RecordReferenceCache cache) {}
 
     public static IEnumerable<IFormLinkIdentifier> ParseRecord(IMajorRecordGetter record) => record.EnumerateFormLinks(false);
 }

@@ -15,7 +15,6 @@ public sealed class ArchiveQuery<TCache, TLink>(
     where TLink : notnull {
     public string Name => fileParser.Name + " (Archive)";
     public string GetSourceName(ArchiveDataSource source) => source.Name;
-    public ArchiveDataSource? ReferenceToSource(DataRelativePath reference) => null;
     public void FillCache(ArchiveDataSource source, TCache cache) {
         var archiveReader = archiveService.GetReader(source.GetRootLink());
 
@@ -43,4 +42,6 @@ public sealed class ArchiveQuery<TCache, TLink>(
             }
         }
     }
+
+    public void FillCache(DataRelativePath reference, TCache cache) {}
 }

@@ -32,8 +32,6 @@ public sealed class ModAssetSerializableQuery
 
     public string GetSourceName(IModGetter source) => source.ModKey.FileName;
 
-    public IModGetter? ReferenceToSource(IFormLinkIdentifier reference) => null;
-
     public void FillCache(IModGetter source, AssetReferenceCache<IFormLinkIdentifier> cache) {
         foreach (var record in source.EnumerateMajorRecords()) {
             try {
@@ -47,6 +45,8 @@ public sealed class ModAssetSerializableQuery
             }
         }
     }
+
+    public void FillCache(IFormLinkIdentifier reference, AssetReferenceCache<IFormLinkIdentifier> cache) {}
 
     public IEnumerable<IAssetLinkGetter> ParseRecord(IMajorRecordGetter record) {
         return record.EnumerateAllAssetLinks(_assetLinkCache)

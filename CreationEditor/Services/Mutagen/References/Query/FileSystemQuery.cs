@@ -16,8 +16,8 @@ public sealed class FileSystemQuery<TCache, TLink>(
 
     public string GetSourceName(FileSystemDataSource source) => source.Path;
 
-    public FileSystemDataSource? ReferenceToSource(DataRelativePath reference) {
-        return dataSourceService.TryGetDataSource(reference.Path, out var dataSource) ? dataSource as FileSystemDataSource : null;
+    public DataSourceFileLink? ReferenceToSource(DataRelativePath reference) {
+        return dataSourceService.TryGetFileLink(reference.Path, out var fileLink) ? fileLink : null;
     }
 
     public void FillCache(FileSystemDataSource source, TCache cache) {
@@ -34,6 +34,17 @@ public sealed class FileSystemQuery<TCache, TLink>(
                     cache.Add(result, file.DataRelativePath);
                 }
             }
+        }
+    }
+
+    public void FillCache(DataRelativePath reference, TCache cache) {
+        if (!dataSourceService.TryGetFileLink(reference.Path, out var fileLink)) return;
+
+        var assetType = assetTypeService.GetAssetType(fileLink.FullPath);
+        if (fileParser.AssetType != assetType) return;
+
+        foreach (var result in fileParser.ParseFile(fileLink.FullPath, fileLink.FileSystem)) {
+            cache.Add(result, fileLink.DataRelativePath);
         }
     }
 }

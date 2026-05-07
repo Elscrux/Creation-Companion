@@ -1,4 +1,4 @@
-﻿ using CreationEditor.Services.Cache.Validation;
+﻿using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.Mutagen.References.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Query;
 using Serilog;
@@ -111,7 +111,7 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
 
             // Otherwise, parse invalidated elements and merge with deserialized cache
             logger.Here().Debug(
-                "Partly invalidated {QueryName} cache content for {Source}, parsing invalidated elements and using {ValidatedContentCount} validated elements",
+                "Partly invalidated {QueryName} cache content for {Source}, parsing  {ValidatedContentCount} invalidated elements",
                 query.Name,
                 sourceName,
                 validationResult.InvalidatedContent.Count);
@@ -122,10 +122,7 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
             var newParsedCache = TCache.CreateNew();
             var parseTask = Task.Run(() => {
                 foreach (var invalidatedContent in validationResult.InvalidatedContent) {
-                    var newSource = query.ReferenceToSource(invalidatedContent);
-                    if (newSource is not null) {
-                        query.FillCache(newSource, newParsedCache);
-                    }
+                    query.FillCache(invalidatedContent, newParsedCache);
                 }
             });
 
