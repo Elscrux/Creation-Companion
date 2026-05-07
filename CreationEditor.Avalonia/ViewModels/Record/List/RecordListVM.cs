@@ -20,7 +20,6 @@ public sealed partial class RecordListVM : ViewModel, IRecordListVM {
     public IRecordProvider RecordProvider { get; }
     [Reactive] public partial IReferencedRecord? SelectedRecord { get; set; }
     public IContextMenuProvider ContextMenuProvider { get; }
-    public ReactiveCommand<SelectedListContext, Unit> PrimaryCommand { get; }
 
     public IObservableCollection<DataGridColumn> Columns { get; } = new ObservableCollectionExtended<DataGridColumn>();
 
