@@ -28,8 +28,7 @@ public partial class ReferenceWindow : AppWindow {
     public ReferenceWindow(
         IMajorRecordIdentifierGetter record,
         ReferenceBrowserVM? referenceBrowserVM = null) : this() {
-        var editorId = record.EditorID;
-        Title = $"References of {record.FormKey}" + (editorId is null ? string.Empty : $" - {editorId}");
+        Title = $"References of {GetIdentifier(record)}";
 
         ReferenceBrowserVM = referenceBrowserVM;
     }
@@ -37,15 +36,17 @@ public partial class ReferenceWindow : AppWindow {
     public ReferenceWindow(
         IEnumerable<IMajorRecordIdentifierGetter> records,
         ReferenceBrowserVM? referenceBrowserVM = null) : this() {
-        var recordsIdentifiers = string.Join(
-            ", ",
-            records.Select(record => {
-                var editorId = record.EditorID;
-                return $"{record.FormKey}" + (editorId is null ? string.Empty : $" - {editorId}");
-            }));
+        var recordsIdentifiers = string.Join(", ", records.Select(GetIdentifier));
 
         Title = $"References of {recordsIdentifiers}";
 
         ReferenceBrowserVM = referenceBrowserVM;
+    }
+
+    private static string GetIdentifier(IMajorRecordIdentifierGetter record) {
+        var editorId = record.EditorID;
+        return editorId is null
+            ? record.FormKey.ToString()
+            : $"{editorId} ({record.FormKey})";
     }
 }
