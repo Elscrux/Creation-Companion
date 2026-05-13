@@ -18,7 +18,11 @@ public static class FeatureFlagExtensions {
                 if (!group.Key.TryResolve(linkCache, out var worldspace)) continue;
 
                 var regions = group.SelectMany(y => y.Regions).ToHashSet();
-                foreach (var cell in worldspace.EnumerateCells().Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any())) {
+                var cells = regions.Count == 0
+                    ? worldspace.EnumerateCells()
+                    : worldspace.EnumerateCells().Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any());
+
+                foreach (var cell in cells) {
                     retainedCells.GetOrAdd(worldspace.FormKey).Add(cell);
                 }
             }
