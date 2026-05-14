@@ -55,12 +55,12 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         INotificationService notificationService,
         IMutagenCommonAspectsProvider mutagenCommonAspectsProvider,
         // Update Triggers
-        ModReferenceUpdateTrigger<DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IReferencedRecord> stringModReferenceUpdateTrigger,
-        ModReferenceUpdateTrigger<RecordReferenceCache, IFormLinkIdentifier, IReferencedRecord> modReferenceUpdateTrigger,
-        ModReferenceUpdateTrigger<AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IReferencedAsset> modAssetReferenceUpdateTrigger,
-        DataSourceReferenceUpdateTrigger<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, IReferencedAsset> dataSourceReferenceUpdateTrigger,
-        DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<uint>, uint, IReferencedRecord> addonNodeReferenceUpdateTrigger,
-        DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<string>, string, IReferencedRecord> soundRecordReferenceUpdateTrigger,
+        Func<ModReferenceUpdateTrigger<DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IReferencedRecord>> stringModReferenceUpdateTrigger,
+        Func<ModReferenceUpdateTrigger<RecordReferenceCache, IFormLinkIdentifier, IReferencedRecord>> modReferenceUpdateTrigger,
+        Func<ModReferenceUpdateTrigger<AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IReferencedAsset>> modAssetReferenceUpdateTrigger,
+        Func<DataSourceReferenceUpdateTrigger<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, IReferencedAsset>> dataSourceReferenceUpdateTrigger,
+        Func<DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<uint>, uint, IReferencedRecord>> addonNodeReferenceUpdateTrigger,
+        Func<DataSourceReferenceUpdateTrigger<AssetDictionaryReferenceCache<string>, string, IReferencedRecord>> editorIdStringRecordReferenceUpdateTrigger,
         // Cache Controllers
         RecordReferenceCacheController recordReferenceCacheController,
         AssetReferenceCacheController<IModGetter, IFormLinkIdentifier> recordAssetReferenceCacheController,
@@ -123,7 +123,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         _recordReferenceController =
             new ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord>(
                 notificationService,
-                modReferenceUpdateTrigger,
+                modReferenceUpdateTrigger(),
                 recordReferenceCacheController,
                 recordReferenceQueryConfig,
                 _recordReferenceSubscriptionManager);
@@ -131,7 +131,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         _recordGlobalVariableReferenceController =
             new ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord>(
                 notificationService,
-                stringModReferenceUpdateTrigger,
+                stringModReferenceUpdateTrigger(),
                 stringModDictionaryReferenceCacheController,
                 recordGlobalVariableReferenceQueryConfig,
                 _recordGlobalVariableReferenceSubscriptionManager);
@@ -140,7 +140,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             new ReferenceController<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier,
                 IReferencedAsset>(
                 notificationService,
-                modAssetReferenceUpdateTrigger,
+                modAssetReferenceUpdateTrigger(),
                 recordAssetReferenceCacheController,
                 recordAssetReferenceQueryConfig,
                 _recordAssetReferenceSubscriptionManager);
@@ -148,7 +148,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         _nifAddonNodeReferenceController =
             new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<uint>, uint, DataRelativePath, IReferencedRecord>(
                 notificationService,
-                addonNodeReferenceUpdateTrigger,
+                addonNodeReferenceUpdateTrigger(),
                 intAssetDictionaryReferenceCacheController,
                 nifAddonNodeReferenceQueryConfig,
                 _nifAddonNodeReferenceSubscriptionManager);
@@ -157,7 +157,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             new ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
                 IReferencedAsset>(
                 notificationService,
-                dataSourceReferenceUpdateTrigger,
+                dataSourceReferenceUpdateTrigger(),
                 assetAssetReferenceCacheController,
                 nifTextureReferenceQueryConfig,
                 _assetReferenceSubscriptionManager);
@@ -165,7 +165,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         _nifSoundReferenceController =
             new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
                 notificationService,
-                soundRecordReferenceUpdateTrigger,
+                editorIdStringRecordReferenceUpdateTrigger(),
                 stringAssetDictionaryReferenceCacheController,
                 nifSoundReferenceQueryConfig,
                 _assetRecordReferenceSubscriptionManager);
