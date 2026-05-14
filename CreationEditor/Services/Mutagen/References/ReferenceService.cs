@@ -20,7 +20,7 @@ using ScriptFileParser = CreationEditor.Services.Mutagen.References.Parser.Scrip
 namespace CreationEditor.Services.Mutagen.References;
 
 public sealed class ReferenceService : ReactiveObject, IReferenceService {
-    private readonly DisposableBucket  _disposableBucket = new();
+    private readonly DisposableBucket _disposableBucket = new();
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IMutagenCommonAspectsProvider _mutagenCommonAspectsProvider;
 
@@ -91,40 +91,34 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
                 record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
                 (record, change) => record.RecordReferences.Apply(change, FormLinkIdentifierEqualityComparer.Instance),
                 (record, newData) => record.RecordReferences.AddRange(newData),
-                record => record.Record.EditorID ?? string.Empty);
+                record => record.Record.EditorID);
 
         _assetRecordReferenceSubscriptionManager = new ReferenceSubscriptionManager<string, DataRelativePath, IReferencedRecord>(
             record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
             (record, change) => record.AssetReferences.Apply(change),
             (record, newData) => record.AssetReferences.AddRange(newData),
-            record => record.Record.EditorID ?? string.Empty);
+            record => record.Record.EditorID);
 
         _nifAddonNodeReferenceSubscriptionManager = new ReferenceSubscriptionManager<uint, DataRelativePath, IReferencedRecord>(
             record => editorEnvironment.LinkCache.ResolveMod(record.Record.FormKey.ModKey) is null,
             (record, change) => record.AssetReferences.Apply(change),
             (record, newData) => record.AssetReferences.AddRange(newData),
-            record => mutagenCommonAspectsProvider.GetAddonNodeIndex(record.Record) ?? 0);
+            record => mutagenCommonAspectsProvider.GetAddonNodeIndex(record.Record) ?? 0,
+            record => mutagenCommonAspectsProvider.GetAddonNodeIndex(record.Record) is not null);
 
         _recordAssetReferenceSubscriptionManager = new ReferenceSubscriptionManager<IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset>(
             asset => !dataSourceService.FileExists(asset.AssetLink.DataRelativePath),
             (asset, change) => asset.RecordReferences.Apply(change),
             (record, newData) => record.RecordReferences.AddRange(newData),
             asset => asset.AssetLink,
-            AssetLinkEqualityComparer.Instance);
+            comparer: AssetLinkEqualityComparer.Instance);
 
         _assetReferenceSubscriptionManager = new ReferenceSubscriptionManager<IAssetLinkGetter, DataRelativePath, IReferencedAsset>(
             asset => !dataSourceService.FileExists(asset.AssetLink.DataRelativePath),
             (asset, change) => asset.AssetReferences.Apply(change),
             (record, newData) => record.AssetReferences.AddRange(newData),
             asset => asset.AssetLink,
-            AssetLinkEqualityComparer.Instance);
-
-        _assetReferenceSubscriptionManager = new ReferenceSubscriptionManager<IAssetLinkGetter, DataRelativePath, IReferencedAsset>(
-            asset => !dataSourceService.FileExists(asset.AssetLink.DataRelativePath),
-            (asset, change) => asset.AssetReferences.Apply(change),
-            (record, newData) => record.AssetReferences.AddRange(newData),
-            asset => asset.AssetLink,
-            AssetLinkEqualityComparer.Instance);
+            comparer: AssetLinkEqualityComparer.Instance);
 
         _recordReferenceController =
             new ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord>(
@@ -226,7 +220,8 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         var recordDisposable = _recordAssetReferenceSubscriptionManager.Register(referencedAsset);
         var assetDisposable = _assetReferenceSubscriptionManager.Register(referencedAsset);
 
-        return new CompositeDisposable(recordDisposable, assetDisposable);
+        var disposables = new[] { recordDisposable, assetDisposable }.NotNull().ToArray();
+        return new CompositeDisposable(disposables);
     }
 
     public IDisposable GetReferencedRecord<TMajorRecordGetter>(
@@ -251,7 +246,9 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         var assetRecordDisposable = _assetRecordReferenceSubscriptionManager.Register(outReferencedRecord);
         var recordDisposable = _recordReferenceSubscriptionManager.Register(outReferencedRecord);
         var globalVariableDisposable = _recordGlobalVariableReferenceSubscriptionManager.Register(outReferencedRecord);
-        return new CompositeDisposable(nifAddonNodeDisposable, assetRecordDisposable, recordDisposable, globalVariableDisposable);
+
+        var disposables = new[] { nifAddonNodeDisposable, assetRecordDisposable, recordDisposable, globalVariableDisposable }.NotNull().ToArray();
+        return new CompositeDisposable(disposables);
     }
 
     public IEnumerable<IFormLinkIdentifier> GetRecordReferences(IFormLinkIdentifier formLink) {

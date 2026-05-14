@@ -7,7 +7,8 @@ public sealed class ReferenceSubscriptionManager<TLink, TReference, TSubscriber>
     Predicate<TSubscriber> isOutdated,
     Action<TSubscriber, Change<TReference>> changeAction,
     Action<TSubscriber, IReadOnlyList<TReference>> addAllAction,
-    Func<TSubscriber, TLink> identifierSelector,
+    Func<TSubscriber, TLink?> identifierSelector,
+    Predicate<TSubscriber>? hasIdentifier = null,
     IEqualityComparer<TLink>? comparer = null)
     where TLink : notnull
     where TReference : notnull {
@@ -15,12 +16,19 @@ public sealed class ReferenceSubscriptionManager<TLink, TReference, TSubscriber>
     private readonly Lock _lockObject = new();
     private readonly ConcurrentDictionary<TLink, ConcurrentDictionary<ReferenceSubscription, byte>> _identifierSubscriptions = new(comparer);
 
-    public IDisposable Register(TSubscriber subscriber) {
-        var identifier = identifierSelector(subscriber);
+    public IDisposable? Register(TSubscriber subscriber) {
+        if (hasIdentifier is not null && !hasIdentifier(subscriber)) return null;
+
+        var identifierNullable = identifierSelector(subscriber);
+        if (identifierNullable is null) return null;
+
+        var identifier = identifierNullable!;
+
         var subscriptions = _identifierSubscriptions.GetOrAdd(identifier);
 
         var newSubscription = new ReferenceSubscription(this, identifier, subscriber);
 
+        // Use a dictionary because there is no concurrent hash set, set the value to byte.MaxValue since it is not used
         subscriptions.TryAdd(newSubscription, byte.MaxValue);
 
         return newSubscription;
