@@ -46,6 +46,6 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
         var extension = element.Extension;
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
-        return fileParser.ParseFile(element.FullPath, element.FileSystem);
+        return fileParser.ParseFile(element.FullPath, element);
     }
 }

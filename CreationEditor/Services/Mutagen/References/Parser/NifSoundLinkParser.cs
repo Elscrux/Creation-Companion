@@ -1,5 +1,5 @@
-﻿using System.IO.Abstractions;
-using CreationEditor.Services.Asset;
+﻿using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using nifly;
 namespace CreationEditor.Services.Mutagen.References.Parser;
@@ -8,13 +8,13 @@ public sealed class NifSoundLinkParser(IAssetTypeService assetTypeService) : IFi
     public string Name => "Nif Sounds";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<string> ParseFile(string filePath, IFileSystem fileSystem) {
+    public IEnumerable<string> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
         var results = new HashSet<string>();
 
-        if (!fileSystem.File.Exists(filePath)) return results;
+        if (!fileLink.DataSource.FileSystem.File.Exists(actualFilePath)) return results;
 
         using var nif = new NifFile();
-        nif.Load(filePath);
+        nif.Load(actualFilePath);
 
         if (!nif.IsValid()) return results;
 

@@ -1,5 +1,5 @@
-﻿using System.IO.Abstractions;
-using CreationEditor.Services.Asset;
+﻿using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Exceptions;
@@ -15,9 +15,9 @@ public sealed class NifTextureParser(
     public string Name => "Nif Textures";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<string> ParseFileTextureStrings(string filePath, IFileSystem fileSystem) {
+    public IEnumerable<string> ParseFileTextureStrings(string filePath, DataSourceFileLink fileLink) {
         var results = new HashSet<string>();
-        if (!fileSystem.File.Exists(filePath)) return results;
+        if (!fileLink.DataSource.FileSystem.File.Exists(filePath)) return results;
 
         using var nif = new NifFile();
         nif.Load(filePath);
@@ -65,8 +65,8 @@ public sealed class NifTextureParser(
         }
     }
 
-    public IEnumerable<IAssetLinkGetter> ParseFile(string filePath, IFileSystem fileSystem) {
-        foreach (var fileTextureString in ParseFileTextureStrings(filePath, fileSystem)) {
+    public IEnumerable<IAssetLinkGetter> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
+        foreach (var fileTextureString in ParseFileTextureStrings(actualFilePath, fileLink)) {
             DataRelativePath dataRelativePath;
             try {
                 dataRelativePath = new DataRelativePath(fileTextureString);
@@ -74,7 +74,7 @@ public sealed class NifTextureParser(
                 logger.Here().Warning(e,
                     "Failed to parse asset path {AssetString} referenced in {Path}: {Exception}",
                     fileTextureString,
-                    filePath,
+                    actualFilePath,
                     e);
                 continue;
             }

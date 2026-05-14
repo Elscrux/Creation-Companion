@@ -41,7 +41,7 @@ public class NifService(
     public IEnumerable<string> GetMisalignedPaths(DataSourceFileLink fileLink) {
         if (!fileLink.Exists()) yield break;
 
-        foreach (var textureString in nifTextureParser.ParseFileTextureStrings(fileLink.FullPath, fileSystem)) {
+        foreach (var textureString in nifTextureParser.ParseFileTextureStrings(fileLink.FullPath, fileLink)) {
             string? misalignedPath = null;
 
             try {

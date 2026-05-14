@@ -34,7 +34,7 @@ public sealed class ArchiveQuery<TCache, TLink>(
                 archiveStream.Close();
 
                 //Parse the temp file as nif and delete it afterward
-                foreach (var result in fileParser.ParseFile(tempPath, fileSystem)) {
+                foreach (var result in fileParser.ParseFile(tempPath, new DataSourceFileLink(source, new DataRelativePath(archiveFile.Path)))) {
                     cache.Add(result, archiveFile.Path);
                 }
             } finally {

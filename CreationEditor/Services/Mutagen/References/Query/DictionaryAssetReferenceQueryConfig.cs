@@ -49,6 +49,6 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
         var extension = element.Extension;
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
-        return fileParser.ParseFile(element.FullPath, element.FileSystem);
+        return fileParser.ParseFile(element.FullPath, element);
     }
 }

@@ -1,5 +1,5 @@
-﻿using System.IO.Abstractions;
-using CreationEditor.Services.Asset;
+﻿using CreationEditor.Services.Asset;
+using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using nifly;
 using Serilog;
@@ -11,15 +11,15 @@ public sealed class NifAddonNodeLinkParser(
     public string Name => "Nif Addon Nodes";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<uint> ParseFile(string filePath, IFileSystem fileSystem) {
+    public IEnumerable<uint> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
         var results = new HashSet<uint>();
-        if (!fileSystem.File.Exists(filePath)) return results;
+        if (!fileLink.FileSystem.File.Exists(actualFilePath)) return results;
 
         try {
-            using var fileStream = fileSystem.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            
+            using var fileStream = fileLink.FileSystem.File.Open(actualFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
             using var nif = new NifFile();
-            nif.Load(filePath);
+            nif.Load(actualFilePath);
 
             if (!nif.IsValid()) return results;
 
@@ -32,7 +32,7 @@ public sealed class NifAddonNodeLinkParser(
                 results.Add((uint) bsValueNode.value);
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Failed to parse nif file {FilePath} for addon nodes", filePath);
+            logger.Here().Error(e, "Failed to parse nif file {FilePath} for addon nodes", actualFilePath);
         }
 
         return results;
