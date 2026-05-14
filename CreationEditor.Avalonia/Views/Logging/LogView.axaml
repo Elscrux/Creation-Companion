@@ -52,6 +52,25 @@
             </Button>
 
             <Button Classes="Transparent"
+                    Width="20" Height="20"
+                    Padding="2"
+                    ToolTip.Tip="Search">
+                <Button.Flyout>
+                    <Flyout>
+                        <TextBox Text="{Binding SearchText}"/>
+                    </Flyout>
+                </Button.Flyout>
+
+                <StackPanel>
+                    <controls:SymbolIcon Symbol="Find"
+                                         IsVisible="{Binding !SearchText.Length}"/>
+                    <controls:SymbolIcon Symbol="Find"
+                                         Foreground="{DynamicResource SystemAccentColor}"
+                                         IsVisible="{Binding !!SearchText.Length}"/>
+                </StackPanel>
+            </Button>
+
+            <Button Classes="Transparent"
                     Padding="2"
                     HorizontalAlignment="Center"
                     Width="20" Height="20"

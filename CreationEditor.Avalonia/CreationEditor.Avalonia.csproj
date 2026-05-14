@@ -157,6 +157,9 @@
         <Compile Update="ViewModels\Reference\ReferenceBrowserVMFactory.cs">
           <DependentUpon>IReferenceBrowserVMFactory.cs</DependentUpon>
         </Compile>
+        <Compile Update="ViewModels\Logging\LogVM.cs">
+          <DependentUpon>ILogVM.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

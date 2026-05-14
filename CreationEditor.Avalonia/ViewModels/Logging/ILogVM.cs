@@ -15,4 +15,5 @@ public interface ILogVM : IDisposableDropoff {
     ReactiveCommand<Unit, Unit> ToggleAutoScrollCommand { get; }
 
     bool AutoScroll { get; set; }
+    string SearchText { get; set; }
 }

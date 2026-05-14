@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models.Logging;
+using CreationEditor.Services.Filter;
 using DynamicData;
 using DynamicData.Binding;
 using Noggog;
@@ -20,10 +21,13 @@ public sealed partial class LogVM : ViewModel, ILogVM {
     public IObservableCollection<LogEventLevel> VisibilityLevels { get; } = new ObservableCollectionExtended<LogEventLevel>(LogLevels);
 
     [Reactive] public partial bool AutoScroll { get; set; }
+    [Reactive] public partial string SearchText { get; set; }
 
     private readonly SourceCache<ILogItem, Guid> _logAddedCache = new(item => item.Id);
 
-    public LogVM(IObservableLogSink observableLogSink) {
+    public LogVM(
+        ISearchFilter searchFilter,
+        IObservableLogSink observableLogSink) {
         AutoScroll = true;
 
         observableLogSink.LogAdded
@@ -38,6 +42,8 @@ public sealed partial class LogVM : ViewModel, ILogVM {
             .Connect()
             .Filter(this.WhenAnyValue(x => x.VisibilityLevels.Count)
                 .Select(_ => new Func<ILogItem, bool>(item => VisibilityLevels.Contains(item.Level))))
+            .Filter(this.WhenAnyValue(x => x.SearchText)
+                .Select(searchText => new Func<ILogItem, bool>(item => searchFilter.Filter(item.Text, searchText))))
             .SortBy(item => item.Time)
             .ToObservableCollection(this);
     }
