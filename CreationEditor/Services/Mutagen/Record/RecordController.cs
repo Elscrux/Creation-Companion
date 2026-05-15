@@ -136,11 +136,11 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
         var group = mod.GetTopLevelGroup(record.Registration.GetterType);
         LockWithMod(mod.ModKey, () => group.AddUntyped(record));
-        
+
         _logger.Here().Verbose("Adding new record {Record} in {Mod}", record, mod.ModKey);
 
         _recordCreated.OnNext((record, mod));
-        
+
         return record;
     }
     #endregion
@@ -199,7 +199,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
+        where TMajorRecordGetter : class, IMajorRecordGetter =>
+        DeleteRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
     public void DeleteRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
         where TMajorRecordGetter : class, IMajorRecordGetter => DeleteRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
@@ -350,6 +351,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
             MarkForDeletion(record, editMod, () => references, forceDelete);
         }
 
+        _logger.Here().Information("Injected {RecordCount} records into {NewRecordMod}", uniqueRecords.Length, injectionTarget.ModKey);
+
         return newRecords;
     }
     #endregion
@@ -414,12 +417,15 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         TMod mod) {
         var remap = new Dictionary<FormKey, FormKey> { { record.FormKey, replacingRecord.FormKey } };
 
-        foreach (var reference in references.ToArray()) {
+        var referencesArray = references.ToArray();
+        foreach (var reference in referencesArray) {
             if (!_editorEnvironment.LinkCache.TryResolve(reference, out var referenceRecord)) continue;
 
             var overrideRecord = GetOrAddOverride(referenceRecord, mod);
             RegisterUpdate(overrideRecord, mod, () => overrideRecord.RemapLinks(remap));
         }
+
+        _logger.Here().Information("Remapped {ReferenceCount} references from {Record} to {ReplacingRecord}", referencesArray.Length, record, replacingRecord);
     }
     #endregion
 
