@@ -9,6 +9,7 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 using ReactiveUI.SourceGenerators;
@@ -287,7 +288,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     private string? GetFormId(SelectedListContext context) {
         if (context.SelectedRecords is not [{ ReferencedRecord.Record: var record, Origin: {} modKey }, ..]) return null;
 
-        var modIndex = _editorEnvironment.GameEnvironment.LoadOrder.IndexOf(modKey);
+        var modIndex = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder.IndexOf(modKey);
         var formId = modIndex.ToString("D2") + record.FormKey.IDString();
         return formId;
     }
