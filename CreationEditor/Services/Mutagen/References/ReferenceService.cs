@@ -330,6 +330,67 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             .Concat(_scriptAssetReferenceController.GetLinks(fileFileLink));
     }
 
+    public IEnumerable<IAssetLinkGetter> GetAssetLinks(IMajorRecordGetter record, IModGetter? mod = null) {
+        mod ??= _editorEnvironment.LinkCache.GetMod(record.FormKey.ModKey);
+        return _recordAssetReferenceController.GetLinks((record, mod));
+    }
+
+    public IEnumerable<IFormLinkIdentifier> GetRecordLinks(DataSourceFileLink fileFileLink) {
+        IEnumerable<IMajorRecordGetter> recordLinks = [];
+
+        var soundEditorIDs = _nifSoundReferenceController
+            .GetLinks(fileFileLink)
+            .ToHashSet();
+        if (soundEditorIDs.Count > 0) {
+            var soundRecords = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(_mutagenCommonAspectsProvider.SoundDescriptorRecordType)
+                .Select(sound => {
+                    if (sound.EditorID is null) return null;
+
+                    if (soundEditorIDs.Contains(sound.EditorID)) {
+                        return sound;
+                    }
+
+                    return null;
+                })
+                .NotNull();
+
+            recordLinks = recordLinks.Concat(soundRecords);
+        }
+
+        var addonNodeIndices = _nifAddonNodeReferenceController
+            .GetLinks(fileFileLink)
+            .ToHashSet();
+        if (addonNodeIndices.Count > 0) {
+            var addonNodes = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(_mutagenCommonAspectsProvider.AddonNodeRecordType)
+                .Select(addonNode => {
+                    var nodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(addonNode);
+                    if (nodeIndex is null) return null;
+
+                    if (addonNodeIndices.Contains(nodeIndex.Value)) {
+                        return addonNode;
+                    }
+
+                    return null;
+                })
+                .NotNull();
+
+            recordLinks = recordLinks.Concat(addonNodes);
+        }
+
+        return recordLinks;
+    }
+
+    public IEnumerable<IFormLinkIdentifier> GetRecordLinks(IMajorRecordGetter record, IModGetter? mod = null) {
+        mod ??= _editorEnvironment.LinkCache.GetMod(record.FormKey.ModKey);
+
+        var referencedGlobals = _recordGlobalVariableReferenceController.GetLinks((record, mod))
+            .Select(editorId => _editorEnvironment.LinkCache.TryResolve(editorId, _mutagenCommonAspectsProvider.GlobalVariableType, out var global) ? global : null)
+            .NotNull();
+
+        return _recordReferenceController.GetLinks((record, mod))
+            .Concat(referencedGlobals);
+    }
+
     public int GetReferenceCount(IAssetLink assetLink) {
         return GetRecordReferences(assetLink).Count() + GetAssetReferences(assetLink).Count();
     }
