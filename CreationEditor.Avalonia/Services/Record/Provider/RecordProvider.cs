@@ -46,6 +46,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
 
         recordController.WinningRecordChanged
             .Merge(recordController.RecordCreated)
+            .ObserveOnGui()
             .Subscribe(x => UpdateRecord(x.Record, x.Mod))
             .DisposeWith(this);
 
