@@ -484,6 +484,9 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private bool FilterLink(DataSourceFileLink fileLink) {
+        if (fileLink.DataSource.DeleteDirectoryLink.Contains(fileLink.DataRelativePath)) return false;
+        if (_ignoredDirectoriesProvider.IsIgnored(fileLink.DataRelativePath)) return false;
+
         var assetLink = AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
         if (assetLink is not null) {
             switch (assetLink.Type) {
