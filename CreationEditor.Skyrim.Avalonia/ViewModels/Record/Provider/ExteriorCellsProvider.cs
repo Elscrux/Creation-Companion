@@ -84,7 +84,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
         });
     }
 
-    private void UpdateRecord(IMajorRecord record, IMod mod) {
+    private void UpdateRecord(IMajorRecordGetter record, IModGetter mod) {
         if (record is not ICellGetter cell) return;
 
         if (RecordCache.TryGetValue(cell.FormKey, out var listRecord)) {
@@ -110,7 +110,7 @@ public sealed partial class ExteriorCellsProvider : ViewModel, IRecordProvider<I
         RecordCache.AddOrUpdate(listRecord);
     }
 
-    private void RemoveRecord(IMajorRecord record, IMod mod) {
+    private void RemoveRecord(IMajorRecordGetter record, IModGetter mod) {
         if (record is not ICellGetter cell) return;
 
         RecordCache.RemoveKey(cell.FormKey);

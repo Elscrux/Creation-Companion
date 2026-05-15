@@ -83,7 +83,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
         }
     }
 
-    private void UpdatePlacedRecord(IMajorRecord record, IMod mod) {
+    private void UpdatePlacedRecord(IMajorRecordGetter record, IModGetter mod) {
         if (record is not IPlacedGetter placed) return;
 
         if (RecordCache.TryGetValue(placed.FormKey, out var referencedPlaced)) {
@@ -99,7 +99,7 @@ public sealed partial class PlacedProvider : ViewModel, IRecordProvider<Referenc
         RecordCache.AddOrUpdate(referencedPlaced);
     }
 
-    private void RemovePlacedRecord(IMajorRecord record, IMod mod) {
+    private void RemovePlacedRecord(IMajorRecordGetter record, IModGetter mod) {
         if (record is not IPlacedGetter placed) return;
 
         RecordCache.RemoveKey(placed.FormKey);

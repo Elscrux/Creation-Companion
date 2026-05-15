@@ -68,7 +68,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         });
     }
 
-    private void UpdateRecord(IMajorRecord record, IMod mod) {
+    private void UpdateRecord(IMajorRecordGetter record, IModGetter mod) {
         if (record is not TMajorRecordGetter r) return;
 
         if (RecordCache.TryGetValue(r.FormKey, out var listRecord)) {
@@ -84,7 +84,7 @@ public sealed class RecordProvider<TMajorRecord, TMajorRecordGetter> : ViewModel
         RecordCache.AddOrUpdate(listRecord);
     }
 
-    private void RemoveRecord(IMajorRecord record, IMod mod) {
+    private void RemoveRecord(IMajorRecordGetter record, IModGetter mod) {
         RecordCache.RemoveKey(record.FormKey);
     }
 

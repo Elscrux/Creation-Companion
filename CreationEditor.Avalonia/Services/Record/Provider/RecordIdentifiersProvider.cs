@@ -82,7 +82,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
         });
     }
 
-    private void UpdateRecord(IMajorRecord record, IMod _mod) {
+    private void UpdateRecord(IMajorRecordGetter record, IModGetter _mod) {
         // Don't add if record not in the original identifiers list
         if (!RecordCache.TryGetValue(record.FormKey, out var listRecord)) return;
 
@@ -93,7 +93,7 @@ public sealed partial class RecordIdentifiersProvider : ViewModel, IRecordProvid
         RecordCache.AddOrUpdate(listRecord);
     }
 
-    private void RemoveRecord(IMajorRecord record, IMod _mod) {
+    private void RemoveRecord(IMajorRecordGetter record, IModGetter _mod) {
         RecordCache.RemoveKey(record.FormKey);
     }
 
