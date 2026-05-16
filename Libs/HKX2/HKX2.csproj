@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <Compile Remove="Autogen\Xml\**" />
+      <EmbeddedResource Remove="Autogen\Xml\**" />
+      <None Remove="Autogen\Xml\**" />
+    </ItemGroup>
+
+</Project>

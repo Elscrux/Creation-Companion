@@ -28,6 +28,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Libs\HKX2\HKX2.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Update="Notification\ChainedNotifier.cs">
             <DependentUpon>ANotifier.cs</DependentUpon>
         </Compile>
@@ -319,4 +323,5 @@
         <HintPath>..\CreationEditor.Skyrim.Avalonia\bin\Debug\net10.0\Avalonia.Base.dll</HintPath>
       </Reference>
     </ItemGroup>
+
 </Project>
