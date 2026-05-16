@@ -69,6 +69,13 @@ public interface IMutagenTypeProvider {
     string GetTypeName(IFormLinkIdentifier formLinkIdentifier);
 
     /// <summary>
+    /// Returns the type name of a form link
+    /// </summary>
+    /// <param name="type">Type to retrieve the type name for</param>
+    /// <returns>Type name of a form link</returns>
+    string GetTypeName(System.Type type);
+
+    /// <summary>
     /// Returns all record class types of a game release 
     /// </summary>
     /// <param name="gameRelease">Game release to get types for</param>

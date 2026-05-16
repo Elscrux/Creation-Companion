@@ -70,8 +70,12 @@ public sealed class MutagenTypeProvider : IMutagenTypeProvider {
     }
 
     public string GetTypeName(IFormLinkIdentifier formLinkIdentifier) {
+        return GetTypeName(formLinkIdentifier.Type);
+    }
+
+    public string GetTypeName(System.Type type) {
         // Selecting the type name from the name
-        var name = formLinkIdentifier.Type.Name.AsSpan();
+        var name = type.Name.AsSpan();
 
         // Cutting starting interface prefix if it exists
         if (name.StartsWith(InterfacePrefix)) {
