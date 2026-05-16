@@ -9,6 +9,7 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Mutagen.Type;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
@@ -32,6 +33,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         IDataSourceService dataSourceService,
         IRecordEditorController recordEditorController,
         IMenuItemProvider menuItemProvider,
+        IMutagenTypeProvider mutagenTypeProvider,
         IReferenceBrowserVMFactory referenceBrowserVMFactory,
         MainWindow mainWindow) {
         _editorEnvironment = editorEnvironment;
@@ -47,7 +49,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                 100,
                 ContextActionGroup.Modification,
                 NewCommand,
-                context => menuItemProvider.New(NewCommand, context),
+                context => menuItemProvider.New(NewCommand, context, $"New {mutagenTypeProvider.GetTypeName(context.ListTypes.First())}"),
                 () => menuItemProvider.New(NewCommand).HotKey
             ),
             new ContextAction(context => context.SelectedAssets.Count == 0 && context.SelectedRecords.Count > 0,
