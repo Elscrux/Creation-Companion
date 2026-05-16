@@ -102,6 +102,18 @@ public sealed class ReferenceModule : Module {
         builder.RegisterType<NifTextureParser>()
             .AsSelf();
 
+        builder.RegisterType<NifBehaviorParser>()
+            .AsSelf();
+
+        builder.RegisterType<BehaviorSoundLinkParser>()
+            .AsSelf();
+
+        builder.RegisterType<BehaviorAnimObjectLinkParser>()
+            .AsSelf();
+
+        builder.RegisterType<BehaviorAnimationLinkParser>()
+            .AsSelf();
+
         builder.RegisterType<ScriptFileParser>()
             .AsSelf();
 

@@ -6,6 +6,7 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Types;
 
 public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider {
     public Type AddonNodeRecordType { get; } = typeof(IAddonNodeGetter);
+    public Type AnimObjectRecordType { get; } = typeof(IAnimatedObjectGetter);
     public Type SoundDescriptorRecordType { get; } = typeof(ISoundDescriptorGetter);
     public Type SoundMarkerRecordType { get; } = typeof(ISoundMarkerGetter);
     public Type BookType { get; } = typeof(IBookGetter);

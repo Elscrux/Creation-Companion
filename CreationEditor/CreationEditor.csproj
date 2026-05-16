@@ -316,6 +316,21 @@
         <Compile Update="Services\Asset\NifService.cs">
           <DependentUpon>IModelService.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Mutagen\References\Query\ModAssetSerializableQuery.cs">
+          <DependentUpon>IReferenceQuery.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\BehaviorSoundLinkParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\BehaviorAnimObjectLinkParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\BehaviorAnimationLinkParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Mutagen\References\Parser\NifBehaviorParser.cs">
+          <DependentUpon>IFileParser.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

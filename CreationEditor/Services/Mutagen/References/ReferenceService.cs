@@ -25,15 +25,30 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
     private readonly IMutagenCommonAspectsProvider _mutagenCommonAspectsProvider;
 
     // Asset reference controllers
-    private readonly ReferenceController<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset> _recordAssetReferenceController;
-    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _nifTextureReferenceController;
-    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset> _scriptAssetReferenceController;
+    private readonly ReferenceController<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier, IReferencedAsset>
+        _recordAssetReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset>
+        _nifTextureReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset>
+        _nifBehaviorReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset>
+        _scriptAssetReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath, IReferencedAsset>
+        _behaviorAnimationReferenceController;
 
     // Record reference controllers
-    private readonly ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceController;
-    private readonly ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceController;
-    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord> _nifSoundReferenceController;
-    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<uint>, uint, DataRelativePath, IReferencedRecord> _nifAddonNodeReferenceController;
+    private readonly ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord>
+        _recordReferenceController;
+    private readonly ReferenceController<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier, IReferencedRecord>
+        _recordGlobalVariableReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>
+        _nifSoundReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<uint>, uint, DataRelativePath, IReferencedRecord>
+        _nifAddonNodeReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>
+        _behaviorSoundReferenceController;
+    private readonly ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>
+        _behaviorAnimObjectReferenceController;
 
     private readonly ReferenceSubscriptionManager<IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord> _recordReferenceSubscriptionManager;
     private readonly ReferenceSubscriptionManager<string, IFormLinkIdentifier, IReferencedRecord> _recordGlobalVariableReferenceSubscriptionManager;
@@ -74,7 +89,11 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
         RecordAssetReferenceQueryConfig recordAssetReferenceQueryConfig,
         DictionaryAssetReferenceQueryConfig<NifAddonNodeLinkParser, AssetDictionaryReferenceCache<uint>, uint> nifAddonNodeReferenceQueryConfig,
         DictionaryAssetReferenceQueryConfig<NifSoundLinkParser, AssetDictionaryReferenceCache<string>, string> nifSoundReferenceQueryConfig,
+        DictionaryAssetReferenceQueryConfig<BehaviorSoundLinkParser, AssetDictionaryReferenceCache<string>, string> behaviorSoundReferenceQueryConfig,
+        DictionaryAssetReferenceQueryConfig<BehaviorAnimObjectLinkParser, AssetDictionaryReferenceCache<string>, string> behaviorAnimObjectReferenceQueryConfig,
         AssetReferenceCacheQueryConfig<NifTextureParser> nifTextureReferenceQueryConfig,
+        AssetReferenceCacheQueryConfig<NifBehaviorParser> nifBehaviorParserReferenceQueryConfig,
+        AssetReferenceCacheQueryConfig<BehaviorAnimationLinkParser> behaviorAnimationReferenceQueryConfig,
         AssetReferenceCacheQueryConfig<ScriptFileParser> scriptAssetReferenceQueryConfig) {
         _editorEnvironment = editorEnvironment;
         _mutagenCommonAspectsProvider = mutagenCommonAspectsProvider;
@@ -119,6 +138,8 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             (record, newData) => record.AssetReferences.AddRange(newData),
             asset => asset.AssetLink,
             comparer: AssetLinkEqualityComparer.Instance);
+
+        // TODO add direct asset references from scripts, see https://ck.uesp.net/wiki/PlayTerrainEffect_-_ObjectReference
 
         _recordReferenceController =
             new ReferenceController<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier, IReferencedRecord>(
@@ -170,27 +191,65 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
                 nifSoundReferenceQueryConfig,
                 _assetRecordReferenceSubscriptionManager);
 
+        _nifBehaviorReferenceController =
+            new ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
+                IReferencedAsset>(
+                notificationService,
+                dataSourceReferenceUpdateTrigger(),
+                assetAssetReferenceCacheController,
+                nifBehaviorParserReferenceQueryConfig,
+                _assetReferenceSubscriptionManager);
+
+        _behaviorSoundReferenceController =
+            new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
+                notificationService,
+                editorIdStringRecordReferenceUpdateTrigger(),
+                stringAssetDictionaryReferenceCacheController,
+                behaviorSoundReferenceQueryConfig,
+                _assetRecordReferenceSubscriptionManager);
+
+        _behaviorAnimObjectReferenceController =
+            new ReferenceController<IDataSource, DataSourceFileLink, AssetDictionaryReferenceCache<string>, string, DataRelativePath, IReferencedRecord>(
+                notificationService,
+                editorIdStringRecordReferenceUpdateTrigger(),
+                stringAssetDictionaryReferenceCacheController,
+                behaviorAnimObjectReferenceQueryConfig,
+                _assetRecordReferenceSubscriptionManager);
+
+        _behaviorAnimationReferenceController =
+            new ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
+                IReferencedAsset>(
+                notificationService,
+                dataSourceReferenceUpdateTrigger(),
+                assetAssetReferenceCacheController,
+                behaviorAnimationReferenceQueryConfig,
+                _assetReferenceSubscriptionManager);
+
         _scriptAssetReferenceController =
             new ReferenceController<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath,
                 IReferencedAsset>(
                 notificationService,
-                dataSourceReferenceUpdateTrigger,
+                dataSourceReferenceUpdateTrigger(),
                 assetAssetReferenceCacheController,
                 scriptAssetReferenceQueryConfig,
                 _assetReferenceSubscriptionManager);
 
         IsLoadingAssetReferences = _recordAssetReferenceController.IsLoading
             .CombineLatest(_nifTextureReferenceController.IsLoading,
+                _nifBehaviorReferenceController.IsLoading,
                 _scriptAssetReferenceController.IsLoading,
-                (a, b, c) => a || b || c)
+                _behaviorAnimationReferenceController.IsLoading,
+                (a, b, c, e, f) => a || b || c || e || f)
             .Replay(1)
             .RefCount();
 
         IsLoadingRecordReferences = _recordReferenceController.IsLoading
             .CombineLatest(_recordGlobalVariableReferenceController.IsLoading,
                 _nifSoundReferenceController.IsLoading,
+                _behaviorSoundReferenceController.IsLoading,
+                _behaviorAnimObjectReferenceController.IsLoading,
                 _nifAddonNodeReferenceController.IsLoading,
-                (a, b, c, d) => a || b || c || d)
+                (a, b, c, d, e, f) => a || b || c || d || e || f)
             .Replay(1)
             .RefCount();
 
@@ -214,8 +273,15 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
     public IDisposable GetReferencedAsset(IAssetLinkGetter asset, out IReferencedAsset referencedAsset) {
         var recordAssetReferences = _recordAssetReferenceController.GetReferences(asset);
         var nifTextureReferences = _nifTextureReferenceController.GetReferences(asset);
+        var nifBehaviorReferences = _nifBehaviorReferenceController.GetReferences(asset);
         var scriptReferences = _scriptAssetReferenceController.GetReferences(asset);
-        referencedAsset = new ReferencedAsset(asset, recordAssetReferences, nifTextureReferences.Concat(scriptReferences));
+        var behaviorReferences = _behaviorAnimationReferenceController.GetReferences(asset);
+        referencedAsset = new ReferencedAsset(asset,
+            recordAssetReferences,
+            nifTextureReferences
+                .Concat(scriptReferences)
+                .Concat(nifBehaviorReferences)
+                .Concat(behaviorReferences));
 
         var recordDisposable = _recordAssetReferenceSubscriptionManager.Register(referencedAsset);
         var assetDisposable = _assetReferenceSubscriptionManager.Register(referencedAsset);
@@ -234,7 +300,15 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             recordReferences = recordReferences.Concat(_recordGlobalVariableReferenceController.GetReferences(editorId));
         }
 
-        var assetReferences = editorId is not null ? _nifSoundReferenceController.GetReferences(editorId) : [];
+        IEnumerable<DataRelativePath> assetReferences;
+        if (editorId is not null) {
+            assetReferences = _nifSoundReferenceController.GetReferences(editorId)
+                .Concat(_behaviorSoundReferenceController.GetReferences(editorId))
+                .Concat(_behaviorAnimObjectReferenceController.GetReferences(editorId));
+        } else {
+            assetReferences = [];
+        }
+
         var addonNodeIndex = _mutagenCommonAspectsProvider.GetAddonNodeIndex(record);
         if (addonNodeIndex is not null) {
             assetReferences = assetReferences.Concat(_nifAddonNodeReferenceController.GetReferences(addonNodeIndex.Value));
@@ -279,12 +353,19 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
          && _editorEnvironment.LinkCache.TryResolve(formLink, out var soundDescriptor)
          && soundDescriptor is { EditorID: {} soundDescriptorEditorId }) {
             // Record is a sound
-            return _nifSoundReferenceController.GetReferences(soundDescriptorEditorId);
+            return _nifSoundReferenceController.GetReferences(soundDescriptorEditorId)
+                .Concat(_behaviorAnimObjectReferenceController.GetReferences(soundDescriptorEditorId));
         } else if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.SoundMarkerRecordType)
          && _editorEnvironment.LinkCache.TryResolve(formLink, out var soundMarker)
          && soundMarker is { EditorID: {} soundMarkerEditorId }) {
             // Record is a sound
-            return _nifSoundReferenceController.GetReferences(soundMarkerEditorId);
+            return _nifSoundReferenceController.GetReferences(soundMarkerEditorId)
+                .Concat(_behaviorAnimObjectReferenceController.GetReferences(soundMarkerEditorId));
+        } else if (formLink.Type.InheritsFrom(_mutagenCommonAspectsProvider.AnimObjectRecordType)
+         && _editorEnvironment.LinkCache.TryResolve(formLink, out var animObject)
+         && animObject is { EditorID: {} animObjectEditorId }) {
+            // Record is an anim object
+            return _behaviorSoundReferenceController.GetReferences(animObjectEditorId);
         }
 
         return [];
@@ -292,9 +373,14 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
 
     public IEnumerable<DataRelativePath> GetAssetReferences(IAssetLinkGetter assetLink) {
         var nifTextureReferences = _nifTextureReferenceController.GetReferences(assetLink);
+        var nifBehaviorReferences = _nifBehaviorReferenceController.GetReferences(assetLink);
         var scriptReferences = _scriptAssetReferenceController.GetReferences(assetLink);
+        var behaviorReferences = _behaviorAnimationReferenceController.GetReferences(assetLink);
 
-        return nifTextureReferences.Concat(scriptReferences);
+        return nifTextureReferences
+            .Concat(scriptReferences)
+            .Concat(nifBehaviorReferences)
+            .Concat(behaviorReferences);
     }
 
     public IEnumerable<string> GetMissingRecordLinks(DataSourceFileLink fileFileLink) {
@@ -314,7 +400,9 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
             }
         }
 
-        var soundEditorIds = _nifSoundReferenceController.GetLinks(fileFileLink).ToArray();
+        var soundEditorIds = _nifSoundReferenceController.GetLinks(fileFileLink)
+            .Concat(_behaviorSoundReferenceController.GetLinks(fileFileLink))
+            .ToArray();
         if (soundEditorIds.Length > 0) {
             foreach (var soundEditorId in soundEditorIds) {
                 if (_editorEnvironment.LinkCache.TryResolve(soundEditorId, _mutagenCommonAspectsProvider.SoundDescriptorRecordType, out _)) continue;
@@ -323,10 +411,21 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
                 yield return "Sound: " + soundEditorId;
             }
         }
+
+        var animObjectEditorIds = _behaviorAnimObjectReferenceController.GetLinks(fileFileLink).ToArray();
+        if (animObjectEditorIds.Length > 0) {
+            foreach (var animObjectEditorId in animObjectEditorIds) {
+                if (_editorEnvironment.LinkCache.TryResolve(animObjectEditorId, _mutagenCommonAspectsProvider.AnimObjectRecordType, out _)) continue;
+
+                yield return "Anim Object: " + animObjectEditorId;
+            }
+        }
     }
 
     public IEnumerable<IAssetLinkGetter> GetAssetLinks(DataSourceFileLink fileFileLink) {
         return _nifTextureReferenceController.GetLinks(fileFileLink)
+            .Concat(_nifBehaviorReferenceController.GetLinks(fileFileLink))
+            .Concat(_behaviorAnimationReferenceController.GetLinks(fileFileLink))
             .Concat(_scriptAssetReferenceController.GetLinks(fileFileLink));
     }
 
@@ -340,6 +439,7 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
 
         var soundEditorIDs = _nifSoundReferenceController
             .GetLinks(fileFileLink)
+            .Concat(_behaviorSoundReferenceController.GetLinks(fileFileLink))
             .ToHashSet();
         if (soundEditorIDs.Count > 0) {
             var soundRecords = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(_mutagenCommonAspectsProvider.SoundDescriptorRecordType)
@@ -355,6 +455,25 @@ public sealed class ReferenceService : ReactiveObject, IReferenceService {
                 .NotNull();
 
             recordLinks = recordLinks.Concat(soundRecords);
+        }
+
+        var animObjectEditorIds = _behaviorAnimObjectReferenceController
+            .GetLinks(fileFileLink)
+            .ToHashSet();
+        if (animObjectEditorIds.Count > 0) {
+            var animObjectRecords = _editorEnvironment.LinkCache.PriorityOrder.WinningOverrides(_mutagenCommonAspectsProvider.AnimObjectRecordType)
+                .Select(animObject => {
+                    if (animObject.EditorID is null) return null;
+
+                    if (animObjectEditorIds.Contains(animObject.EditorID)) {
+                        return animObject;
+                    }
+
+                    return null;
+                })
+                .NotNull();
+
+            recordLinks = recordLinks.Concat(animObjectRecords);
         }
 
         var addonNodeIndices = _nifAddonNodeReferenceController
