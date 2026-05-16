@@ -26,6 +26,7 @@ public sealed partial class PromoteToMasterVM : ViewModel {
 
     private readonly IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> _editorEnvironment;
     private readonly IAssetController _assetController;
+    private readonly IAssetTypeService _assetTypeService;
 
     public IReadOnlyList<IReferencedRecord> RecordsToPromote { get; }
 
@@ -58,12 +59,14 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         IReferenceService referenceService,
         IRecordController recordController,
         IAssetController assetController,
+        IAssetTypeService assetTypeService,
         SingleModPickerVM injectToMod,
         SingleModPickerVM injectedRecordCreationMod,
         SingleModPickerVM editMod,
         IReadOnlyList<IReferencedRecord> recordsToPromote) {
         _editorEnvironment = editorEnvironment;
         _assetController = assetController;
+        _assetTypeService = assetTypeService;
         RecordsToPromote = recordsToPromote;
         ReferenceService = referenceService;
         RecordController = recordController;
@@ -110,19 +113,13 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         if (InjectToMod.SelectedMod is null) return;
 
         // Only run this once
-        IReadOnlyList<RecordPromotionChange> recordPromotionChanges;
-        if (RecordPromotionChanges.Count == 0) {
-            var injectionTarget = _editorEnvironment.GetMod(InjectToMod.SelectedMod.ModKey);
-            recordPromotionChanges = GetAffectedRecords(RecordsToPromote, injectionTarget).ToList();
-            Dispatcher.UIThread.Post(() => RecordPromotionChanges.LoadOptimized(recordPromotionChanges));
-        } else {
-            recordPromotionChanges = RecordPromotionChanges.ToList();
-        }
+        if (RecordPromotionChanges.Count != 0) return;
 
-        var promotedRecords = recordPromotionChanges.Where(x => x.ChangeType == RecordPromotionChangeType.Deleted)
-            .Select(x => x.Record)
-            .ToArray();
-        var assetPromotionChanges = GetAffectedAssets(promotedRecords).ToList();
+        var injectionTarget = _editorEnvironment.GetMod(InjectToMod.SelectedMod.ModKey);
+        var promotedLinks = GetPromotedLinks(RecordsToPromote, injectionTarget).ToList();
+        var recordPromotionChanges = promotedLinks.OfType<RecordPromotionChange>().ToArray();
+        var assetPromotionChanges = promotedLinks.OfType<AssetPromotionChange>().ToArray();
+        Dispatcher.UIThread.Post(() => RecordPromotionChanges.LoadOptimized(recordPromotionChanges));
         Dispatcher.UIThread.Post(() => AssetPromotionChanges.LoadOptimized(assetPromotionChanges));
     }
 
@@ -207,25 +204,50 @@ public sealed partial class PromoteToMasterVM : ViewModel {
         }
     }
 
-    public IEnumerable<RecordPromotionChange> GetAffectedRecords(
+    public IEnumerable<IPromotionChange> GetPromotedLinks(
         IReadOnlyCollection<IReferencedRecord> recordsToBePromoted,
         ISkyrimModGetter injectionTarget) {
         var allMastersAndInjection = injectionTarget.GetTransitiveMasters(_editorEnvironment.GameEnvironment, true).ToArray();
 
         // Gather all linked records that are not already in the target mod
         var includedRecords = new HashSet<IMajorRecordGetter>(recordsToBePromoted.Select(x => x.Record));
-        var recordsToCheck = new Queue<IMajorRecordGetter>();
-        recordsToCheck.Enqueue(recordsToBePromoted.Select(x => x.Record));
-        while (recordsToCheck.Count > 0) {
-            var record = recordsToCheck.Dequeue();
+        var includedAssets = new HashSet<DataSourceFileLink>();
+        var linksToCheck = new Queue<object>(recordsToBePromoted.Select(x => x.Record));
+        while (linksToCheck.Count > 0) {
+            switch (linksToCheck.Dequeue()) {
+                case IMajorRecordGetter record:
+                    IncludeAssetLinks(ReferenceService.GetAssetLinks(record, injectionTarget));
+                    IncludeRecordLinks(ReferenceService.GetRecordLinks(record, injectionTarget));
+                    break;
+                case DataSourceFileLink fileLink:
+                    IncludeAssetLinks(ReferenceService.GetAssetLinks(fileLink));
+                    IncludeRecordLinks(ReferenceService.GetRecordLinks(fileLink));
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
 
-            // Enqueue all linked records to check them as well
-            foreach (var link in record.EnumerateFormLinks()) {
-                if (allMastersAndInjection.Contains(link.FormKey.ModKey)) continue;
-                if (!_editorEnvironment.LinkCache.TryResolve(link, out var linkedRecord)) continue;
+            void IncludeRecordLinks(IEnumerable<IFormLinkIdentifier> recordLinks) {
+                foreach (var link in recordLinks) {
+                    if (allMastersAndInjection.Contains(link.FormKey.ModKey)) continue;
+                    if (!_editorEnvironment.LinkCache.TryResolve(link, out var linkedRecord)) continue;
 
-                if (includedRecords.Add(linkedRecord)) {
-                    recordsToCheck.Enqueue(linkedRecord);
+                    if (includedRecords.Add(linkedRecord)) {
+                        linksToCheck.Enqueue(linkedRecord);
+                    }
+                }
+            }
+
+            void IncludeAssetLinks(IEnumerable<IAssetLinkGetter> assetLinks) {
+                foreach (var link in assetLinks) {
+                    var dataSource = AssetOrigins.FirstOrDefault(dataSource => dataSource.FileExists(link.DataRelativePath));
+                    if (dataSource is null) continue;
+
+                    var dataSourceLink = new DataSourceFileLink(dataSource, link.DataRelativePath);
+
+                    if (includedAssets.Add(dataSourceLink)) {
+                        linksToCheck.Enqueue(dataSourceLink);
+                    }
                 }
             }
         }
@@ -248,30 +270,27 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                 yield return new RecordPromotionChange(context.Record, RecordPromotionChangeType.Modified);
             }
         }
-    }
 
-    public IEnumerable<AssetPromotionChange> GetAffectedAssets(IReadOnlyCollection<IMajorRecordGetter> records) {
+        // Asset will be copied or moved, depending on the asset promotion mode
         if (AssetPromotionMode == AssetPromotionMode.Nothing) yield break;
         if (AssetTargets.Count != 1) yield break;
 
-        var recordIdentifiers = records.Select(r => r.ToFormLinkInformation()).ToArray();
-        var allReferencedAssets = records
-            .SelectMany(r => r.EnumerateAssetLinks(AssetLinkQuery.Listed | AssetLinkQuery.Inferred))
+        var recordIdentifiers = includedRecords.Select(r => r.ToFormLinkInformation()).ToArray();
+        var allReferencedAssets = includedRecords
+            .SelectMany(r => ReferenceService.GetAssetLinks(r))
             .ToArray();
 
         var allReferencedDataRelativePaths = allReferencedAssets
             .Select(assetLink => assetLink.DataRelativePath)
             .ToHashSet();
 
-        foreach (var assetLink in allReferencedAssets) {
-            var dataSource = AssetOrigins.FirstOrDefault(dataSource => dataSource.FileExists(assetLink.DataRelativePath));
-            if (dataSource is null) continue;
-
-            var dataSourceLink = new DataSourceFileLink(dataSource, assetLink.DataRelativePath);
-
+        foreach (var fileLink in includedAssets) {
+            var assetLink = _assetTypeService.GetAssetLink(fileLink.DataRelativePath);
+            if (assetLink is null) continue;
+            
             switch (AssetPromotionMode) {
                 case AssetPromotionMode.Copy:
-                    yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Copied);
+                    yield return new AssetPromotionChange(fileLink, AssetPromotionChangeType.Copied);
 
                     break;
                 case AssetPromotionMode.Move:
@@ -284,14 +303,14 @@ public sealed partial class PromoteToMasterVM : ViewModel {
                         .All(recordIdentifiers.Contains);
 
                     if (allAssetRefsIncluded && allRecordRefsIncluded) {
-                        yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Moved);
+                        yield return new AssetPromotionChange(fileLink, AssetPromotionChangeType.Moved);
                     } else {
-                        yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Copied);
+                        yield return new AssetPromotionChange(fileLink, AssetPromotionChangeType.Copied);
                     }
 
                     break;
                 case AssetPromotionMode.ForceMove:
-                    yield return new AssetPromotionChange(dataSourceLink, AssetPromotionChangeType.Moved);
+                    yield return new AssetPromotionChange(fileLink, AssetPromotionChangeType.Moved);
 
                     break;
             }
@@ -310,8 +329,9 @@ public sealed partial class PromoteToMasterVM : ViewModel {
     }
 }
 
-public sealed record RecordPromotionChange(IMajorRecordGetter Record, RecordPromotionChangeType ChangeType);
-public sealed record AssetPromotionChange(DataSourceFileLink FileLink, AssetPromotionChangeType ChangeType);
+public interface IPromotionChange;
+public sealed record RecordPromotionChange(IMajorRecordGetter Record, RecordPromotionChangeType ChangeType) : IPromotionChange;
+public sealed record AssetPromotionChange(DataSourceFileLink FileLink, AssetPromotionChangeType ChangeType) : IPromotionChange;
 
 public enum RecordPromotionChangeType {
     Modified,
