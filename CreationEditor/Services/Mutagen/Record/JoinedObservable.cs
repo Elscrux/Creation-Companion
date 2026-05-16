@@ -10,6 +10,7 @@ namespace CreationEditor.Services.Mutagen.Record;
 public sealed class JoinedObservable<T> {
     public Subject<UpdateAction<T>> Subject { get; }
 
+    private readonly Lock _lock = new();
     private readonly List<Func<T, Action<T>>> _actions = [];
 
     public JoinedObservable(Subject<UpdateAction<T>> subject) {
@@ -35,8 +36,14 @@ public sealed class JoinedObservable<T> {
     /// and returns an action that should be called when the update is performed.</param>
     /// <returns>Disposable to unregister the update function</returns>
     public IDisposable Subscribe(Func<T, Action<T>> function) {
-        _actions.Add(function);
+        lock (_lock) {
+            _actions.Add(function);
+        }
 
-        return Disposable.Create(() => _actions.Remove(function));
+        return Disposable.Create(() => {
+            lock (_lock) {
+                _actions.Remove(function);
+            }
+        });
     }
 }
