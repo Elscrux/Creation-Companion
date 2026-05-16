@@ -62,6 +62,7 @@ public sealed partial class MainVM : ViewModel {
         "Open Record",
         "Open Record in New Tab",
         "Open Record in New Window",
+        "Go to Folder in Asset Browser",
         "Create Record",
         "Create Record in New Tab",
         "Create Record in New Window",
