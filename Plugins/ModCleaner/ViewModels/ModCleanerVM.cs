@@ -166,24 +166,24 @@ public sealed partial class ModCleanerVM : ViewModel {
     [ReactiveCommand]
     private async Task EditFeatureFlag(FeatureFlag featureFlag) {
         var flagEditorVM = FeatureFlagEditorVMFactory(featureFlag);
-        var assetDialog = new TaskDialog {
+        var assetDialog = new FATaskDialog {
             Title = $"Feature Flag {featureFlag.Name}",
             Content = new FeatureFlagEditor(flagEditorVM) {
                 Width = 1200
             },
             XamlRoot = _mainWindow,
             Buttons = {
-                new TaskDialogButton {
+                new FATaskDialogButton {
                     Text = "Save",
-                    DialogResult = TaskDialogStandardResult.OK,
+                    DialogResult = FATaskDialogStandardResult.OK,
                 },
-                TaskDialogButton.CancelButton,
+                FATaskDialogButton.CancelButton,
             },
             Classes = {
                 "No"
             },
             Styles = {
-                new Style(x => x.OfType<TaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
+                new Style(x => x.OfType<FATaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
                     Setters = {
                         new Setter(Layoutable.MaxWidthProperty, 1500.0),
                     },
@@ -193,16 +193,16 @@ public sealed partial class ModCleanerVM : ViewModel {
             KeyBindings = {
                 new KeyBinding {
                     Gesture = new KeyGesture(Key.Enter),
-                    Command = TaskDialogButton.OKButton.Command,
+                    Command = FATaskDialogButton.OKButton.Command,
                 },
                 new KeyBinding {
                     Gesture = new KeyGesture(Key.Escape),
-                    Command = TaskDialogButton.CancelButton.Command,
+                    Command = FATaskDialogButton.CancelButton.Command,
                 },
             },
         };
 
-        if (await assetDialog.ShowAsync() is TaskDialogStandardResult.OK) {
+        if (await assetDialog.ShowAsync() is FATaskDialogStandardResult.OK) {
             FeatureFlagService.RemoveFeatureFlag(featureFlag);
             FeatureFlagService.AddFeatureFlag(flagEditorVM.GetFeatureFlag());
         }

@@ -80,7 +80,7 @@
                                                Text="{Binding #View.ViewModel.BottomCell}"
                                                HorizontalAlignment="Center"/>
 
-                                    <controls:RangeSlider
+                                    <controls:FARangeSlider
                                         ToolTip.Tip="Select the range of cells in the worldspace that the maps are covering in the horizontal direction."
                                         Grid.Column="1"
                                         Grid.Row="0"
@@ -101,7 +101,7 @@
                                             <RotateTransform Angle="-90"/>
                                         </LayoutTransformControl.LayoutTransform>
 
-                                        <controls:RangeSlider
+                                        <controls:FARangeSlider
                                             ToolTip.Tip="Select the range of cells in the worldspace that the maps are covering in the vertical direction."
                                             ShowValueToolTip="True"
                                             ToolTipStringFormat="N0"

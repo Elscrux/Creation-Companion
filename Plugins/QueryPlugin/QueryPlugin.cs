@@ -24,5 +24,5 @@ public sealed class QueryPlugin(
 
     public Control GetControl() => new QueryPluginView(queryPluginVMFactory());
 
-    public object GetIcon() => new SymbolIcon { Symbol = Symbol.List };
+    public object GetIcon() => new FASymbolIcon { Symbol = FASymbol.List };
 }

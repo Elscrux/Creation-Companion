@@ -80,7 +80,7 @@ public sealed partial class MainVM : ViewModel {
         MainWindow mainWindow,
         IPluginService? pluginService,
         IModSaveService modSaveService,
-        IApplicationSplashScreen splashScreen,
+        IFAApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
         _settingsVMFactory = settingsVMFactory;
         _editorEnvironment = editorEnvironment;

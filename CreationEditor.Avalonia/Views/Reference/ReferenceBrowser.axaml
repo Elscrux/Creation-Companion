@@ -15,10 +15,10 @@
             <Button Command="{Binding ToggleTreeCommand}"
                     ToolTip.Tip="Toggle Tree View">
                 <StackPanel>
-                    <controls:SymbolIcon
+                    <controls:FASymbolIcon
                         Symbol="List"
                         IsVisible="{Binding ShowTree}"/>
-                    <controls:SymbolIcon
+                    <controls:FASymbolIcon
                         Symbol="Bookmarks"
                         IsVisible="{Binding !ShowTree}"/>
                 </StackPanel>
@@ -27,7 +27,7 @@
             <Button Command="{Binding ReferenceRemapperVM.RemapCommand}"
                     IsVisible="{Binding ReferenceRemapperVM.ContextCanBeRemapped, FallbackValue=False}"
                     ToolTip.Tip="Remap References">
-                <controls:SymbolIcon
+                <controls:FASymbolIcon
                     Symbol="Edit"/>
             </Button>
         </StackPanel>

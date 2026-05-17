@@ -20,7 +20,7 @@
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Stretch"
                         DragDrop.AllowDrop="True">
-                    <controls:SymbolIcon
+                    <controls:FASymbolIcon
                         Symbol="Upload"
                         FontSize="{TemplateBinding FontSize}"
                         IsVisible="{TemplateBinding ShowIcon}"/>

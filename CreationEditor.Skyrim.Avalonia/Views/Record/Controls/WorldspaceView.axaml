@@ -73,33 +73,33 @@
 
         <Grid Grid.Column="2"
               RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
-            <controls:CommandBar
+            <controls:FACommandBar
                 Grid.Row="0"
                 DefaultLabelPosition="Right">
-                <controls:CommandBar.PrimaryCommands>
-                    <controls:CommandBarButton
+                <controls:FACommandBar.PrimaryCommands>
+                    <controls:FACommandBarButton
                         IconSource="Share"
                         Label="Export"
                         IsCompact="False"/>
 
-                    <controls:CommandBarSeparator/>
+                    <controls:FACommandBarSeparator/>
 
-                    <controls:CommandBarButton
+                    <controls:FACommandBarButton
                         IconSource="Save"
                         Label="Save"
                         IsCompact="False">
-                        <controls:CommandBarButton.Flyout>
+                        <controls:FACommandBarButton.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox
                                         x:Name="MapName"
-                                        Watermark="Enter a name"/>
+                                        PlaceholderText="Enter a name"/>
                                 </StackPanel>
                             </Flyout>
-                        </controls:CommandBarButton.Flyout>
-                    </controls:CommandBarButton>
-                </controls:CommandBar.PrimaryCommands>
-            </controls:CommandBar>
+                        </controls:FACommandBarButton.Flyout>
+                    </controls:FACommandBarButton>
+                </controls:FACommandBar.PrimaryCommands>
+            </controls:FACommandBar>
         </Grid>
     </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using AnalyzerPlugin.ViewModels;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using ReactiveUI.Avalonia;

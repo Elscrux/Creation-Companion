@@ -208,7 +208,7 @@ public sealed partial class DataGridSelectionBehavior : Behavior<DataGrid>, IDis
     }
 
     private void RemoveSelectionColumn() {
-        AssociatedObject?.Columns?.RemoveAt(0);
+        AssociatedObject?.Columns.RemoveAt(0);
         ColumnEnabled = false;
     }
 

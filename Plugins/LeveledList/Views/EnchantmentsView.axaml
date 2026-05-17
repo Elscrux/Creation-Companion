@@ -65,7 +65,7 @@
                                 IsVisible="{Binding GenerationConfig.DefinitionsFolderPath, Converter={x:Static ObjectConverters.IsNotNull}}">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="8">
-                                <controls:SymbolIcon Symbol="Refresh"
+                                <controls:FASymbolIcon Symbol="Refresh"
                                                      FontSize="14"/>
                                 <TextBlock Text="Reload"/>
                             </StackPanel>
@@ -73,7 +73,7 @@
 
                         <folder:TextFolderPicker
                             x:Name="FolderPicker"
-                            Watermark="Select Definition Folder..."
+                            PlaceholderText="Select Definition Folder..."
                             HorizontalAlignment="Stretch"
                             MinHeight="36"
                             FolderPath="{Binding GenerationConfig.DefinitionsFolderPath, Mode=TwoWay}"/>
@@ -131,7 +131,7 @@
 
                 <!-- Filter -->
                 <TextBox Grid.Row="2"
-                         Watermark="Filter preview by EditorID..."
+                         PlaceholderText="Filter preview by EditorID..."
                          Text="{Binding GenerationConfig.FilterText}"/>
 
                 <!-- Preview Tree -->
@@ -174,7 +174,7 @@
                                 Orientation="Horizontal"
                                 Spacing="8"
                                 VerticalAlignment="Center">
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             Symbol="Document"
                             FontSize="16"
                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
@@ -192,7 +192,7 @@
                             Command="{Binding GenerateEnchantmentsCommand}">
                         <StackPanel Orientation="Horizontal"
                                     Spacing="8">
-                            <controls:SymbolIcon Symbol="Play"
+                            <controls:FASymbolIcon Symbol="Play"
                                                  FontSize="16"
                                                  Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
                             <TextBlock Text="Generate All"

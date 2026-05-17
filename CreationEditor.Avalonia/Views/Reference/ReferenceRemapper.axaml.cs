@@ -58,23 +58,23 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
             }
         }));
 
-        var dialog = new TaskDialog {
+        var dialog = new FATaskDialog {
             Header = "Remap References for " + dataSourceLink.Name,
             Content = filePicker,
             XamlRoot = this,
             Buttons = {
-                new TaskDialogButton {
+                new FATaskDialogButton {
                     Text = "Remap",
                     DialogResult = "OK",
                     Command = vm.RemapAssetReferencesCommand,
-                    [!TaskDialogButton.CommandParameterProperty] = filePicker
+                    [!FATaskDialogButton.CommandParameterProperty] = filePicker
                         .GetObservable(AFilePicker.FilePathProperty)
                         .NotNull()
                         .Select(path => vm.DataSourceService.GetFileLink(path))
                         .NotNull()
                         .ToBinding(),
                 },
-                TaskDialogButton.CancelButton,
+                FATaskDialogButton.CancelButton,
             },
         };
 
@@ -97,12 +97,12 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
             }
         }
 
-        var dialog = new TaskDialog {
+        var dialog = new FATaskDialog {
             Header = "Remap References for " + (referencedRecord.Record.GetHumanReadableName() ?? "Unknown"),
             Content = stackPanel,
             XamlRoot = this,
             Buttons = {
-                new TaskDialogButton {
+                new FATaskDialogButton {
                     Text = "Remap",
                     DialogResult = "OK",
                     Command = ReactiveCommand.CreateFromTask(async () => {
@@ -116,7 +116,7 @@ public partial class ReferenceRemapper : ReactiveUserControl<ReferenceRemapperVM
                         await vm.RemapRecordReferencesCommand.Execute(formKeyPicker.FormKey);
                     }),
                 },
-                TaskDialogButton.CancelButton,
+                FATaskDialogButton.CancelButton,
             },
         };
 

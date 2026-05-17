@@ -18,7 +18,7 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
     public DockContainerVM DockParent { get; set; } = null!;
 
     [Reactive] public partial string? Header { get; set; }
-    [Reactive] public partial IconSource? IconSource { get; set; }
+    [Reactive] public partial FAIconSource? IconSource { get; set; }
     public double? Size { get; set; }
 
     [Reactive] public partial bool IsSelected { get; set; }

@@ -21,7 +21,7 @@
                     Background="{DynamicResource ButtonBackground}">
             <Button Classes="Stretch"
                     ToolTip.Tip="Search Filters">
-                <controls:SymbolIcon Symbol="Filter"/>
+                <controls:FASymbolIcon Symbol="Filter"/>
 
                 <Button.Flyout>
                     <Flyout>
@@ -34,7 +34,7 @@
 
             <Button Classes="Stretch"
                     ToolTip.Tip="Scope Filters">
-                <controls:SymbolIcon Symbol="SettingsFilled"/>
+                <controls:FASymbolIcon Symbol="SettingsFilled"/>
 
                 <Button.Flyout>
                     <Flyout>
@@ -77,7 +77,7 @@
                 <TextBox x:Name="SearchBox"
                          Text="{Binding SearchText}"
                          MinWidth="200"
-                         Watermark="Search..."
+                         PlaceholderText="Search..."
                          ToolTip.Tip="Text to search for">
                     <TextBox.KeyBindings>
                         <KeyBinding Gesture="Enter"
@@ -90,7 +90,7 @@
                         MinHeight="32"
                         Command="{Binding SearchCommand}">
                     <StackPanel>
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             Symbol="Find"
                             FontSize="20"
                             IsVisible="{Binding !IsBusy}"
@@ -110,7 +110,7 @@
 
                 <TextBox MinWidth="{Binding #SearchBox.Bounds.Width}"
                          Text="{Binding ReplaceText}"
-                         Watermark="Replace..."
+                         PlaceholderText="Replace..."
                          IsEnabled="{Binding Replace}"
                          ToolTip.Tip="Text to replace the search text with"/>
             </StackPanel>
@@ -123,10 +123,10 @@
             <Button Classes="Stretch"
                     ToolTip.Tip="Group By">
                 <StackPanel>
-                    <controls:SymbolIcon
+                    <controls:FASymbolIcon
                         Symbol="Pin"
                         IsVisible="{Binding !TypeGroup.IsGrouped}"/>
-                    <controls:SymbolIcon
+                    <controls:FASymbolIcon
                         Symbol="MapPinFilled"
                         IsVisible="{Binding TypeGroup.IsGrouped}"/>
                 </StackPanel>

@@ -40,7 +40,7 @@
                         Classes="DockClose"
                         Command="{Binding CloseCommand}"
                         IsVisible="{Binding CanClose}">
-                        <controls:SymbolIcon Symbol="Dismiss"
+                        <controls:FASymbolIcon Symbol="Dismiss"
                                              ToolTip.Tip="Close"/>
                     </Button>
                 </StackPanel>

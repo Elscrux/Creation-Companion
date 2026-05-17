@@ -51,8 +51,8 @@ public sealed class ListShortcuts : AvaloniaObject {
     private const string AddHeader = "Add";
     private const string RemoveHeader = "Remove";
 
-    private const Symbol AddSymbol = Symbol.Add;
-    private const Symbol RemoveSymbol = Symbol.Remove;
+    private const FASymbol AddSymbol = FASymbol.Add;
+    private const FASymbol RemoveSymbol = FASymbol.Remove;
 
     static ListShortcuts() {
         AddProperty.Changed.Subscribe(args => {
@@ -132,7 +132,7 @@ public sealed class ListShortcuts : AvaloniaObject {
                         AncestorType = typeof(TRowType),
                     },
                 },
-                Content = new SymbolIcon { Symbol = Symbol.Delete },
+                Content = new FASymbolIcon { Symbol = FASymbol.Delete },
                 Foreground = Brushes.Red,
                 Padding = new Thickness(0),
                 Classes = { "Transparent" },
@@ -186,7 +186,7 @@ public sealed class ListShortcuts : AvaloniaObject {
         object? parameter,
         KeyGesture gesture,
         string header,
-        Symbol menuIcon) {
+        FASymbol menuIcon) {
         if (args.Sender is not Control control) return;
 
         var newCommand = args.NewValue.GetValueOrDefault();
@@ -219,7 +219,7 @@ public sealed class ListShortcuts : AvaloniaObject {
 
             if (newCommand is not null) {
                 var menuItem = new MenuItem {
-                    Icon = new SymbolIcon { Symbol = menuIcon },
+                    Icon = new FASymbolIcon { Symbol = menuIcon },
                     Header = header,
                     Command = newCommand,
                 };

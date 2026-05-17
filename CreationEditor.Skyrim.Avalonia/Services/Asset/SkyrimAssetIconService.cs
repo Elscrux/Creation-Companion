@@ -18,9 +18,9 @@ public sealed class SkyrimAssetIconService : IAssetIconService {
         _fileExtensionIconsFactories = Enum
             .GetValues<ModType>()
             .ToDictionary<ModType, string, Func<FAIconElement>>(modType => modType.ToFileExtension(),
-                modType => () => GetIcon(Symbol.Save, modType.ToString()));
+                modType => () => GetIcon(FASymbol.Save, modType.ToString()));
 
-        _fileExtensionIconsFactories.Add(archiveService.GetExtension(), () => GetIcon(Symbol.Library));
+        _fileExtensionIconsFactories.Add(archiveService.GetExtension(), () => GetIcon(FASymbol.Library));
 
         foreach (var assetType in assetTypeProvider.AllAssetTypes) {
             foreach (var extension in assetType.FileExtensions) {
@@ -30,15 +30,15 @@ public sealed class SkyrimAssetIconService : IAssetIconService {
     }
 
     public static FAIconElement GetGlyphIcon(string glyph, string? tooltip = null) {
-        return new FontIcon {
+        return new FAFontIcon {
             Glyph = glyph,
             VerticalAlignment = VerticalAlignment.Center,
             [ToolTip.TipProperty] = tooltip,
         };
     }
 
-    public FAIconElement GetIcon(Symbol symbol, string? tooltip = null) {
-        return new SymbolIcon {
+    public FAIconElement GetIcon(FASymbol symbol, string? tooltip = null) {
+        return new FASymbolIcon {
             Symbol = symbol,
             VerticalAlignment = VerticalAlignment.Center,
             [ToolTip.TipProperty] = tooltip,
@@ -48,7 +48,7 @@ public sealed class SkyrimAssetIconService : IAssetIconService {
     public FAIconElement GetIcon(string extension, string? tooltip = null) {
         return _fileExtensionIconsFactories.TryGetValue(extension, out var factory)
             ? factory()
-            : GetIcon(Symbol.Document, tooltip);
+            : GetIcon(FASymbol.Document, tooltip);
     }
 
     public FAIconElement GetIcon(IAssetType? assetType) {
@@ -56,17 +56,17 @@ public sealed class SkyrimAssetIconService : IAssetIconService {
         return assetType switch {
             SkyrimBehaviorAssetType => GetGlyphIcon("", tooltip),
             SkyrimBodyTextureAssetType => GetGlyphIcon("", tooltip),
-            SkyrimDeformedModelAssetType => GetIcon(Symbol.HomeFilled, tooltip),
-            SkyrimInterfaceAssetType => GetIcon(Symbol.Keyboard, tooltip),
-            SkyrimModelAssetType => GetIcon(Symbol.Home, tooltip),
+            SkyrimDeformedModelAssetType => GetIcon(FASymbol.HomeFilled, tooltip),
+            SkyrimInterfaceAssetType => GetIcon(FASymbol.Keyboard, tooltip),
+            SkyrimModelAssetType => GetIcon(FASymbol.Home, tooltip),
             SkyrimMusicAssetType => GetGlyphIcon("🎜", tooltip),
-            SkyrimScriptCompiledAssetType => GetIcon(Symbol.Next, tooltip),
-            SkyrimScriptSourceAssetType => GetIcon(Symbol.CodeHTML, tooltip),
+            SkyrimScriptCompiledAssetType => GetIcon(FASymbol.Next, tooltip),
+            SkyrimScriptSourceAssetType => GetIcon(FASymbol.Code, tooltip),
             SkyrimSeqAssetType => GetGlyphIcon("▶", tooltip),
-            SkyrimSoundAssetType => GetIcon(Symbol.Volume, tooltip),
-            SkyrimTextureAssetType => GetIcon(Symbol.Image, tooltip),
+            SkyrimSoundAssetType => GetIcon(FASymbol.Volume, tooltip),
+            SkyrimTextureAssetType => GetIcon(FASymbol.Image, tooltip),
             SkyrimTranslationAssetType => GetGlyphIcon("ℒ", tooltip),
-            _ => GetIcon(Symbol.Document)
+            _ => GetIcon(FASymbol.Document)
         };
     }
 

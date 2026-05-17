@@ -17,5 +17,5 @@ public sealed class MapperPlugin(
     public Control GetControl() => new MapperView(mapperVM());
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new FontIcon { Glyph = "🗺️️" };
+    public object GetIcon() => new FAFontIcon { Glyph = "🗺️️" };
 }

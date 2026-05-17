@@ -3,7 +3,7 @@ namespace CreationEditor.Avalonia.Models.Docking;
 
 public sealed class DockInfo {
     public string Header { get; init; } = string.Empty;
-    public IconSource? IconSource { get; init; } = null;
+    public FAIconSource? IconSource { get; init; } = null;
 
     public double? Size { get; init; }
 

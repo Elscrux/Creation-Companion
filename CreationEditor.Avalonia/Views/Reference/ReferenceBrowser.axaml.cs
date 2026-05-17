@@ -1,10 +1,9 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using ReactiveUI.Avalonia;
 using Avalonia.VisualTree;
 using CreationEditor.Avalonia.ViewModels.Reference;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Reference;
 
 public partial class ReferenceBrowser : ReactiveUserControl<ReferenceBrowserVM> {

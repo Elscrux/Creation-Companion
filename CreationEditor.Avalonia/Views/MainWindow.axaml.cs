@@ -6,7 +6,7 @@ using FluentAvalonia.UI.Windowing;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views;
 
-public partial class MainWindow : AppWindow, IViewFor<MainVM> {
+public partial class MainWindow : FAAppWindow, IViewFor<MainVM> {
     public static readonly StyledProperty<MainVM?> ViewModelProperty
         = AvaloniaProperty.Register<MainWindow, MainVM?>(nameof(ViewModel));
 
@@ -24,7 +24,6 @@ public partial class MainWindow : AppWindow, IViewFor<MainVM> {
         InitializeComponent();
 
         TitleBar.ExtendsContentIntoTitleBar = true;
-        TitleBar.TitleBarHitTestType = TitleBarHitTestType.Complex;
 
         var anyDialogVisible = ModSelectionPopup.GetObservable(IsVisibleProperty)
             .CombineLatest(DataSourceSelectionPopup.GetObservable(IsVisibleProperty), (a, b) => a || b);

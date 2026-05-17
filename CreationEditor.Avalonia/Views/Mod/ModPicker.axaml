@@ -17,7 +17,7 @@
                     <TextBox
                         Grid.Row="0"
                         Margin="5"
-                        Watermark="Search..."
+                        PlaceholderText="Search..."
                         Text="{Binding ModSearchText}"/>
 
                     <DataGrid
@@ -59,7 +59,7 @@
                     <Button IsVisible="{Binding CanCreateNewMod}"
                             VerticalAlignment="Stretch"
                             Margin="5, 0">
-                        <controls:SymbolIcon Symbol="Add"/>
+                        <controls:FASymbolIcon Symbol="Add"/>
 
                         <Button.Flyout>
                             <Flyout>

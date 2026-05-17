@@ -9,6 +9,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -86,7 +87,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                         GoToAssetCommand,
                         $"Go to {fileSystem.Path.GetFileName(dataRelativePath.Path)}",
                         context,
-                        Symbol.Go);
+                        FASymbol.Go);
                 }
             ),
             new ContextAction(
@@ -122,14 +123,14 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     AddFolderCommand,
                     "Add Folder",
                     context,
-                    Symbol.NewFolder,
+                    FASymbol.NewFolder,
                     new KeyGesture(Key.N, KeyModifiers.Control | KeyModifiers.Shift))),
             new ContextAction(
                 context => context.HasAnyAssetOfType(_assetTypeProvider.Model),
                 10,
                 ContextActionGroup.Modification,
                 RemapTexturesCommand,
-                context => menuItemProvider.Custom(RemapTexturesCommand, "Remap Textures", context, Symbol.Rename)),
+                context => menuItemProvider.Custom(RemapTexturesCommand, "Remap Textures", context, FASymbol.Rename)),
             new ContextAction(
                 context => context is { SelectedAssets.Count: > 0, SelectedRecords.Count: 0 },
                 50,
@@ -145,7 +146,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                 10,
                 ContextActionGroup.Misc,
                 CreateStaticRecordCommand,
-                context => menuItemProvider.Custom(CreateStaticRecordCommand, "Create Static Record for Mesh", context, Symbol.Home)),
+                context => menuItemProvider.Custom(CreateStaticRecordCommand, "Create Static Record for Mesh", context, FASymbol.Home)),
         ];
     }
 
@@ -203,7 +204,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         }
 
         var renameDialog = CreateAssetDialog($"Rename {asset.Name}", content);
-        if (await renameDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+        if (await renameDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             if (string.Equals(nameWithoutExtension, textBox.Text, DataRelativePath.PathComparison)) return;
 
             switch (asset) {
@@ -279,7 +280,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
         // Show a confirmation dialog
         var moveDialog = CreateAssetDialog(movingAssets, "Confirm", content);
-        if (await moveDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+        if (await moveDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             // Move all assets and remap their references
             foreach (var asset in movingAssets) _assetController.Move(asset, dstDirectory);
         }
@@ -311,7 +312,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             ? CreateAssetDialog(deleteAssets, $"Delete {deleteAssets[0].Name}", content)
             : CreateAssetDialog(deleteAssets, $"Delete {deleteAssets.Count}", content);
 
-        if (await deleteDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+        if (await deleteDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             foreach (var asset in deleteAssets) {
                 _assetController.Delete(asset);
             }
@@ -342,7 +343,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         var replacement = new Card {
             Header = "Replace Textures",
             Description = "Replace parts of the texture paths. You can use regular expressions for more complex replacements.",
-            Icon = Symbol.Rename,
+            Icon = FASymbol.Rename,
             Content = new StackPanel {
                 Spacing = 5,
                 Children = {
@@ -357,8 +358,8 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             IsVisible = false,
             TextWrapping = TextWrapping.Wrap,
         };
-        var texturesListBox = new ItemsRepeater { ItemsSource = textures, [Grid.ColumnProperty] = 0 };
-        var texturesAfterListBox = new ItemsRepeater { ItemsSource = textures, [Grid.ColumnProperty] = 1 };
+        var texturesListBox = new ItemsControl { ItemsSource = textures, [Grid.ColumnProperty] = 0 };
+        var texturesAfterListBox = new ItemsControl { ItemsSource = textures, [Grid.ColumnProperty] = 1 };
 
         var previewObservable = Observable
             .CombineLatest(
@@ -421,7 +422,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
         var target = assets is [{ Name: var name }] ? name : $"{assets.Length} assets";
         var remapDialog = CreateAssetDialog($"Remap textures in {target}", content);
-        if (await remapDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+        if (await remapDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             foreach (var fileLink in assets) {
                 _modelModificationService.RemapLinks(
                     fileLink,
@@ -444,11 +445,11 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     }
 
     public async Task AddFolder(DataSourceDirectoryLink dir) {
-        var textBox = new TextBox { Text = string.Empty, Watermark = "New folder" };
+        var textBox = new TextBox { Text = string.Empty, PlaceholderText = "New folder" };
         var relativePath = dir.DataRelativePath.Path;
         var folderDialog = CreateAssetDialog($"Add new Folder at {relativePath}", textBox);
 
-        if (await folderDialog.ShowAsync(true) is TaskDialogStandardResult.OK) {
+        if (await folderDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             var newFolder = dir.FileSystem.Path.Combine(dir.FullPath, textBox.Text);
             dir.FileSystem.Directory.CreateDirectory(newFolder);
         }
@@ -481,12 +482,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         }
     }
 
-    private TaskDialog CreateAssetDialog(IEnumerable<IDataSourceLink> footerAssets, string header, Control? content = null) {
+    private FATaskDialog CreateAssetDialog(IEnumerable<IDataSourceLink> footerAssets, string header, Control? content = null) {
         var dialog = CreateAssetDialog(header, content);
 
         var fileLinks = footerAssets.ToArray();
         if (fileLinks.Length > 1) {
-            dialog.FooterVisibility = TaskDialogFooterVisibility.Auto;
+            dialog.FooterVisibility = FATaskDialogFooterVisibility.Auto;
             dialog.Footer = new ItemsControl {
                 ItemsSource = fileLinks,
                 ItemTemplate = new FuncDataTemplate<IDataSourceLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
@@ -496,13 +497,13 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         return dialog;
     }
 
-    private TaskDialog CreateAssetDialog(string header, Control? content = null) {
+    private FATaskDialog CreateAssetDialog(string header, Control? content = null) {
         return _taskDialogProvider.CreateTaskDialog(
             header,
             content,
             assetDialog => {
                 assetDialog.Classes.Add("AssetDialog");
-                assetDialog.Styles.Add(new Style(x => x.OfType<TaskDialog>().Class("AssetDialog").Template().OfType<Border>().Name("ContentRoot")) {
+                assetDialog.Styles.Add(new Style(x => x.OfType<FATaskDialog>().Class("AssetDialog").Template().OfType<Border>().Name("ContentRoot")) {
                         Setters = {
                             new Setter(Layoutable.MinWidthProperty, 1000.0),
                         },
@@ -511,7 +512,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
                 if (!_referenceService.IsLoadingCurrently) return;
 
-                assetDialog.IconSource = new SymbolIconSource { Symbol = Symbol.ReportHacked };
+                assetDialog.IconSource = new FASymbolIconSource { Symbol = FASymbol.ReportHacked };
                 assetDialog.SubHeader += "Warning: This change might break something - Not all references have been loaded yet.";
             });
     }

@@ -16,7 +16,7 @@ public interface IAssetIconService {
     /// <param name="symbol">Symbol to display</param>
     /// <param name="tooltip">Optional tooltip to display when hovering over the icon</param>
     /// <returns>A control that displays the icon for the symbol</returns>
-    FAIconElement GetIcon(Symbol symbol, string? tooltip = null);
+    FAIconElement GetIcon(FASymbol symbol, string? tooltip = null);
 
     /// <summary>
     /// Creates a control that displays the icon for the given symbol.

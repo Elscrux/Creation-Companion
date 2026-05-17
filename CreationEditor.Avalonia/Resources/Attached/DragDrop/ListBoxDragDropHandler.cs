@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
-using FluentAvalonia.Core;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class ListBoxDragDropHandler : CollectionDragDropHandler<ListBox, ListBoxItem> {
@@ -13,7 +12,7 @@ public sealed class ListBoxDragDropHandler : CollectionDragDropHandler<ListBox, 
         return control.SelectedItems ?? throw new InvalidOperationException(
             "ListBox does not have SelectedItems set. Ensure you are using a SelectionMode that supports selection.");
     }
-    protected override int IndexOfElement(ListBox control, ListBoxItem element) => control.ItemsSource.IndexOf(element.DataContext);
+    protected override int IndexOfElement(ListBox control, ListBoxItem element) => control.Items.IndexOf(element.DataContext);
     protected override IEnumerable<ListBoxItem> GetElements(ListBox control) {
         return control
             .GetLogicalChildren()
@@ -23,7 +22,7 @@ public sealed class ListBoxDragDropHandler : CollectionDragDropHandler<ListBox, 
         return control
             .GetLogicalChildren()
             .OfType<ListBoxItem>()
-            .FirstOrDefault(i => control.ItemsSource.IndexOf(i.DataContext) == index);
+            .FirstOrDefault(i => control.Items.IndexOf(i.DataContext) == index);
     }
     protected override ListBoxItem? GetElement(ListBox control, object? item) {
         return control

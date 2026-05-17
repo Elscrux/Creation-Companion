@@ -54,14 +54,14 @@
             <Button x:Name="BackButton"
                     Click="Back">
                 <Button.Content>
-                    <controls:SymbolIcon Symbol="Back"/>
+                    <controls:FASymbolIcon Symbol="Back"/>
                 </Button.Content>
             </Button>
 
             <Button x:Name="NextButton"
                     Click="Next">
                 <Button.Content>
-                    <controls:SymbolIcon Symbol="Forward"/>
+                    <controls:FASymbolIcon Symbol="Forward"/>
                 </Button.Content>
             </Button>
         </StackPanel>

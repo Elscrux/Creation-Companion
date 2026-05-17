@@ -4,7 +4,7 @@ using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Avalonia.Views.Reference;
 
-public partial class ReferenceWindow : AppWindow {
+public partial class ReferenceWindow : FAAppWindow {
     public static readonly StyledProperty<ReferenceBrowserVM?> RecordReferenceBrowserVMProperty
         = AvaloniaProperty.Register<ReferenceWindow, ReferenceBrowserVM?>(nameof(ReferenceBrowserVM));
 

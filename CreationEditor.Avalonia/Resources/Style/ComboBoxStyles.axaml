@@ -89,7 +89,7 @@
                                 Grid.Row="1"
                                 Opacity="0"/>
 
-                        <TextBlock x:Name="WatermarkBlock"
+                        <TextBlock x:Name="PlaceholderTextBlock"
                                    Grid.Row="1"
                                    Grid.Column="0"
                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -117,7 +117,7 @@
                                 IsVisible="False"
                                 HorizontalAlignment="Right"/>
 
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             Name="DropDownGlyph"
                             Foreground="{DynamicResource ComboBoxDropDownGlyphForeground}"
                             MinHeight="0"

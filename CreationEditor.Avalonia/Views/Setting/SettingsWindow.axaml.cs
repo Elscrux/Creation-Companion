@@ -2,7 +2,7 @@
 using FluentAvalonia.UI.Windowing;
 namespace CreationEditor.Avalonia.Views.Setting;
 
-public partial class SettingsWindow : AppWindow {
+public partial class SettingsWindow : FAAppWindow {
     public SettingsWindow() {
         InitializeComponent();
     }

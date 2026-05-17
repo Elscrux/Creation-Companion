@@ -26,7 +26,7 @@
                                 <TextBox
                                     Grid.Row="0"
                                     Margin="5"
-                                    Watermark="Search..."
+                                    PlaceholderText="Search..."
                                     Text="{Binding ModSearchText}"/>
 
                                 <DataGrid
@@ -62,7 +62,7 @@
                             Grid.Column="0"
                             Text="{Binding SelectedMods^, Converter={StaticResource ModItemListToStringConverter}, FallbackValue='None'}"/>
 
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             Grid.Column="2"
                             Symbol="ChevronDown"/>
                     </Grid>
@@ -81,7 +81,7 @@
                     <Button IsVisible="{Binding CanCreateNewMod}"
                             VerticalAlignment="Stretch"
                             Margin="5, 0">
-                        <controls:SymbolIcon Symbol="Add"/>
+                        <controls:FASymbolIcon Symbol="Add"/>
 
                         <Button.Flyout>
                             <Flyout>

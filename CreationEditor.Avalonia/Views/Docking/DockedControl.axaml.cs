@@ -36,7 +36,7 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         set => DockedItem.Header = value;
     }
 
-    public IconSource? IconSource {
+    public FAIconSource? IconSource {
         get => DockedItem.IconSource;
         set => DockedItem.IconSource = value;
     }

@@ -5,7 +5,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Views.Startup;
 
-public sealed partial class StartupSplashScreen : ReactiveObject, IApplicationSplashScreen {
+public sealed partial class StartupSplashScreen : ReactiveObject, IFAApplicationSplashScreen {
     public string AppName => "Creation Companion";
     [Reactive] public partial IImage AppIcon { get; set; }
     public object SplashScreenContent { get; }

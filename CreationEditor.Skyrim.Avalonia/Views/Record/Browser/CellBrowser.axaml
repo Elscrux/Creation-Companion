@@ -58,9 +58,9 @@
                 Command="{Binding ToggleShowPlacedCommand}"
                 IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
             <Grid>
-                <controls:SymbolIcon Symbol="ChevronDown"
+                <controls:FASymbolIcon Symbol="ChevronDown"
                                      IsVisible="{Binding ShowPlaced}"/>
-                <controls:SymbolIcon Symbol="ChevronUp"
+                <controls:FASymbolIcon Symbol="ChevronUp"
                                      IsVisible="{Binding !ShowPlaced}"/>
             </Grid>
         </Button>

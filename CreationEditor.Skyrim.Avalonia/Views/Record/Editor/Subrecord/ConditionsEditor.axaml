@@ -51,7 +51,7 @@
                           Command="{Binding #Editor.Copy}"
                           CommandParameter="{Binding #ConditionsGrid.SelectedItems}">
                     <MenuItem.Icon>
-                        <controls:SymbolIcon Symbol="Copy"/>
+                        <controls:FASymbolIcon Symbol="Copy"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Copy All"
@@ -59,7 +59,7 @@
                           Command="{Binding #Editor.CopyAll}"
                           CommandParameter="{Binding #ConditionsGrid.ItemsSource}">
                     <MenuItem.Icon>
-                        <controls:SymbolIcon Symbol="CopyFilled"/>
+                        <controls:FASymbolIcon Symbol="CopyFilled"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Paste"
@@ -67,7 +67,7 @@
                           Command="{Binding #Editor.Paste}"
                           CommandParameter="{Binding #ConditionsGrid.SelectedIndex}">
                     <MenuItem.Icon>
-                        <controls:SymbolIcon Symbol="Paste"/>
+                        <controls:FASymbolIcon Symbol="Paste"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuFlyout>

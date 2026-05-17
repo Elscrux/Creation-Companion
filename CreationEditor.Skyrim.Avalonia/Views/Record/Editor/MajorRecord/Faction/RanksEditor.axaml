@@ -34,7 +34,7 @@
 
                     <DataTemplate x:DataType="skyrim:Rank">
                         <TextBox Text="{Binding Title.Male.String}"
-                                 Watermark="Male"/>
+                                 PlaceholderText="Male"/>
                     </DataTemplate>
                 </DataGridTemplateColumn>
 
@@ -46,7 +46,7 @@
 
                     <DataTemplate x:DataType="skyrim:Rank">
                         <TextBox Text="{Binding Title.Female.String}"
-                                 Watermark="Female"/>
+                                 PlaceholderText="Female"/>
                     </DataTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>

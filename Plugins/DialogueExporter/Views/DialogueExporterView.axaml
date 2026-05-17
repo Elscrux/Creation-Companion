@@ -22,7 +22,7 @@
                         TextWrapping="Wrap"/>
 
                     <folder:TextFolderPicker
-                        Watermark="Select Output Folder"
+                        PlaceholderText="Select Output Folder"
                         ToolTip.Tip="Folder to output the exported voice line files per voice type."
                         MinWidth="250"
                         HorizontalAlignment="Left"
@@ -66,7 +66,7 @@
                         TextWrapping="Wrap"/>
 
                     <file:TextFilePicker
-                        Watermark="Set Output File Path"
+                        PlaceholderText="Set Output File Path"
                         ToolTip.Tip="CSV file to output the xVASynth export to."
                         MinWidth="250"
                         HorizontalAlignment="Left"
@@ -76,7 +76,7 @@
                         Margin="5"/>
 
                     <file:TextFilePicker
-                        Watermark="Select VoiceType Mapping File"
+                        PlaceholderText="Select VoiceType Mapping File"
                         ToolTip.Tip="CSV file mapping voice types to xVASynth voice models. Should have format 'VoiceType,xVASynth model'."
                         MinWidth="250"
                         HorizontalAlignment="Left"

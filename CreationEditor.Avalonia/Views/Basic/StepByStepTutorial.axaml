@@ -30,7 +30,7 @@
                     Spacing="16">
                     <!-- Icon -->
                     <Grid>
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNull}}"
                             Symbol="{TemplateBinding Icon}"
                             FontSize="64"

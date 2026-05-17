@@ -1,12 +1,12 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Record.List;
 using CreationEditor.Services.Mutagen.References;
 using DynamicData.Binding;
 using Noggog;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Record;
 
 public partial class RecordList : ReactiveUserControl<IRecordListVM> {
@@ -19,7 +19,7 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
                 .DisposeWithComposite(disposables);
 
             this.WhenAnyValue(list => list.ViewModel!.Records)
-                .Subscribe(records => RecordGrid.SelectedItem = records?.OfType<IReferencedRecord>().FirstOrDefault())
+                .Subscribe(records => RecordGrid.SelectedItem = records?.OfType<IReferencedRecord>().FirstOrDefault() ?? RecordGrid.SelectedItem)
                 .DisposeWithComposite(disposables);
 
             this.WhenAnyValue(list => list.ViewModel!.Columns)

@@ -9,7 +9,6 @@
         <PackageReference Include="Avalonia" />
         <PackageReference Include="Avalonia.AvaloniaEdit" />
         <PackageReference Include="Avalonia.Controls.DataGrid" />
-        <PackageReference Include="Avalonia.Controls.PanAndZoom" />
         <PackageReference Include="Avalonia.HtmlRenderer" />
         <PackageReference Include="Avalonia.Desktop" />
         <PackageReference Include="Avalonia.Themes.Fluent" />
@@ -19,6 +18,7 @@
         <PackageReference Include="FluentAvaloniaUI" />
         <PackageReference Include="HtmlAgilityPack" />
         <PackageReference Include="MessageBox.Avalonia" />
+        <PackageReference Include="PanAndZoom" />
         <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
         <PackageReference Include="ReactiveUI" />
         <PackageReference Include="ReactiveUI.Avalonia" />

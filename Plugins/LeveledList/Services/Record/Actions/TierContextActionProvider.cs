@@ -28,7 +28,7 @@ public sealed partial class TierContextActionProvider : IContextActionsProvider 
                 null,
                 context => new MenuItem {
                     Header = "Add to Tier",
-                    Icon = new SymbolIcon { Symbol = Symbol.Add },
+                    Icon = new FASymbolIcon { Symbol = FASymbol.Add },
                     ItemsSource = GetMenuItems(context),
                 }),
             new ContextAction(
@@ -39,7 +39,7 @@ public sealed partial class TierContextActionProvider : IContextActionsProvider 
                 null,
                 context => new MenuItem {
                     Header = "Remove from Tier",
-                    Icon = new SymbolIcon { Symbol = Symbol.Remove },
+                    Icon = new FASymbolIcon { Symbol = FASymbol.Remove },
                     Command = ReactiveCommand.Create(() => {
                         foreach (var record in context.SelectedRecords) {
                             _tierController.RemoveRecordTier(record.ReferencedRecord.Record);

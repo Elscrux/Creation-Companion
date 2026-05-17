@@ -13,7 +13,7 @@
             <Button Grid.Column="0"
                     MinWidth="32" MinHeight="32"
                     Margin="0,0,5,0">
-                <controls:SymbolIcon Symbol="SettingsFilled"/>
+                <controls:FASymbolIcon Symbol="SettingsFilled"/>
 
                 <Button.Flyout>
                     <Flyout>
@@ -29,7 +29,7 @@
 
             <TextBox Grid.Column="1"
                      Text="{Binding #View.Settings.SearchTerm}"
-                     Watermark="Search..."/>
+                     PlaceholderText="Search..."/>
         </Grid>
 
         <CheckBox Grid.Row="1"

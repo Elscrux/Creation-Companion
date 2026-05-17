@@ -8,8 +8,7 @@
             Margin="10"
             Header="Name"
             Description="Description"
-            Icon="Contact">
-        </basic:SectionHeader>
+            Icon="Contact"/>
     </Design.PreviewWith>
 
     <Style Selector="basic|SectionHeader">
@@ -20,7 +19,7 @@
                             Spacing="12">
                     <!-- Icon -->
                     <Grid>
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNull}}"
                             Symbol="{TemplateBinding Icon}"
                             FontSize="20"

@@ -15,19 +15,19 @@
              x:Name="Editor">
     <Grid ColumnDefinitions="Auto,*"
           RowDefinitions="40,*">
-        <controls:CommandBar Grid.Row="0"
+        <controls:FACommandBar Grid.Row="0"
                              Grid.Column="0"
                              Grid.ColumnSpan="2"
                              DefaultLabelPosition="Right">
-            <controls:CommandBar.PrimaryCommands>
-                <controls:CommandBarButton
+            <controls:FACommandBar.PrimaryCommands>
+                <controls:FACommandBarButton
                     IconSource="Save"
                     Label="Save"
                     IsCompact="False"
                     IsVisible="True"
                     Command="{Binding Core.SaveCommand}"/>
-            </controls:CommandBar.PrimaryCommands>
-        </controls:CommandBar>
+            </controls:FACommandBar.PrimaryCommands>
+        </controls:FACommandBar>
 
         <StackPanel Grid.Column="0" Grid.Row="1">
             <HeaderedContentControl Margin="5"
@@ -142,7 +142,7 @@
                   VerticalAlignment="Top">
                 <StackPanel Spacing="10">
                     <Button Click="Switch_OnClick">
-                        <controls:SymbolIcon Symbol="Switch"/>
+                        <controls:FASymbolIcon Symbol="Switch"/>
                     </Button>
 
                     <ComboBox ItemsSource="{x:Static constants:EnumConstants.Languages}"

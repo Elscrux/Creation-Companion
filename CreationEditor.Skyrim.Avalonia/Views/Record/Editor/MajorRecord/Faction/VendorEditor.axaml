@@ -112,7 +112,7 @@
                         <HeaderedContentControl Margin="5"
                                                 Header="Vendor Time Window">
                             <StackPanel Orientation="Horizontal">
-                                <controls:RangeSlider
+                                <controls:FARangeSlider
                                     ShowValueToolTip="True"
                                     ToolTipStringFormat="N0"
                                     MinWidth="250"

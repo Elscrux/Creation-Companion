@@ -4,7 +4,7 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.Views;
 
-public class ActivatableAppWindow : AppWindow, IActivatableView, IDisposable {
+public class ActivatableAppWindow : FAAppWindow, IActivatableView, IDisposable {
     protected readonly IDisposableBucket ActivatedDisposable = new DisposableBucket();
     private readonly IDisposable _activationDisposable;
 

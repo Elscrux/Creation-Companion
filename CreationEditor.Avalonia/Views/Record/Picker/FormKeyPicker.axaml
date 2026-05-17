@@ -73,7 +73,7 @@
                                  x:Name="PART_EditorIDBox"
                                  Margin="-1"
                                  MinHeight="10"
-                                 Watermark="EditorID"
+                                 PlaceholderText="EditorID"
                                  FontSize="{TemplateBinding FontSize}"
                                  Text="{Binding EditorID, RelativeSource={RelativeSource TemplatedParent}}"/>
                         <TextBox Grid.Row="0" Grid.Column="2"
@@ -81,7 +81,7 @@
                                  x:Name="PART_FormKeyBox"
                                  Margin="-1"
                                  MinHeight="10"
-                                 Watermark="FormKey"
+                                 PlaceholderText="FormKey"
                                  FontSize="{TemplateBinding FontSize}"
                                  Text="{Binding FormKeyStr, RelativeSource={RelativeSource TemplatedParent}}"/>
 
@@ -100,7 +100,7 @@
                                 </MultiBinding>
                             </Button.IsVisible>
 
-                            <controls:SymbolIcon Symbol="Dismiss"
+                            <controls:FASymbolIcon Symbol="Dismiss"
                                                  Foreground="{DynamicResource SystemAccentColor}"
                                                  ToolTip.Tip="Clear"/>
                         </Button>
@@ -130,7 +130,7 @@
                                 </MultiBinding>
                             </Button.IsVisible>
 
-                            <controls:SymbolIcon Symbol="Target"
+                            <controls:FASymbolIcon Symbol="Target"
                                                  Foreground="{DynamicResource SystemAccentColor}"
                                                  ToolTip.Tip="Drag"/>
                         </Button>
@@ -207,7 +207,7 @@
                                                    Margin="6,2"/>
 
                                         <Button Grid.Column="1">
-                                            <controls:SymbolIcon Symbol="SettingsFilled"/>
+                                            <controls:FASymbolIcon Symbol="SettingsFilled"/>
 
                                             <Button.Flyout>
                                                 <Flyout Content="{StaticResource FilterGrid}"/>

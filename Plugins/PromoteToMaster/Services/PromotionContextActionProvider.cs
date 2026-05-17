@@ -44,7 +44,7 @@ public sealed partial class PromotionContextActionProvider : IContextActionsProv
                     PromoteCommand,
                     "Promote to Master",
                     context,
-                    Symbol.Up),
+                    FASymbol.Up),
                 IsPrimary: true),
         ];
     }

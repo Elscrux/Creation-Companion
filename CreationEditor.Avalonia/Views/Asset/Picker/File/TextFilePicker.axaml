@@ -24,7 +24,7 @@
                         <Grid>
                             <TextBlock
                                 IsVisible="{TemplateBinding FilePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                Text="{TemplateBinding Watermark}"
+                                Text="{TemplateBinding PlaceholderText}"
                                 Padding="4"/>
 
                             <TextBox
@@ -33,7 +33,7 @@
                                 Padding="4"
                                 BorderThickness="0"
                                 Text="{TemplateBinding FilePath}"
-                                Watermark="{TemplateBinding Watermark}"
+                                PlaceholderText="{TemplateBinding PlaceholderText}"
                                 TextBlock.TextTrimming="{x:Static TextTrimming.CharacterEllipsis}"
                                 ToolTip.Tip="{TemplateBinding FilePath}">
                                 <TextBox.Styles>
@@ -59,7 +59,7 @@
                             BorderBrush="{DynamicResource ButtonBorderBrush}"
                             CornerRadius="0,4,4,0"
                             VerticalAlignment="Center">
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             Symbol="Document"
                             ToolTip.Tip="Open"/>
                     </Button>

@@ -2,12 +2,12 @@
 namespace CreationEditor.Avalonia.Views.Asset.Picker.File;
 
 public class TextFilePicker : AFilePicker {
-    public static readonly StyledProperty<string?> WatermarkProperty
-        = AvaloniaProperty.Register<TextFilePicker, string?>(nameof(Watermark));
+    public static readonly StyledProperty<string?> PlaceholderTextProperty
+        = AvaloniaProperty.Register<TextFilePicker, string?>(nameof(PlaceholderText));
 
-    public string? Watermark {
-        get => GetValue(WatermarkProperty);
-        set => SetValue(WatermarkProperty, value);
+    public string? PlaceholderText {
+        get => GetValue(PlaceholderTextProperty);
+        set => SetValue(PlaceholderTextProperty, value);
     }
 
     public static readonly StyledProperty<bool> AllowTextEditProperty

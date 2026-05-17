@@ -41,11 +41,11 @@
             <Setter Property="Content">
                 <Template>
                     <StackPanel Orientation="Horizontal">
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             FontSize="24"
                             MaxWidth="7"
                             Symbol="MoreVertical"/>
-                        <controls:SymbolIcon
+                        <controls:FASymbolIcon
                             FontSize="24"
                             MaxWidth="7"
                             Symbol="MoreVertical"/>

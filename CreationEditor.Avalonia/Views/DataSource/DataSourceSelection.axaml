@@ -26,7 +26,7 @@
                     Command="{Binding #FolderPicker.Pick}">
                 <Button.Content>
                     <TextBlock>
-                        <controls:SymbolIcon Symbol="Add"/>
+                        <controls:FASymbolIcon Symbol="Add"/>
                         <Run>Add Data Source</Run>
                     </TextBlock>
                 </Button.Content>
@@ -37,7 +37,7 @@
                 IsEnabled="{Binding AnyLocalChanges^}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
-                <controls:SymbolIcon Symbol="Refresh"/>
+                <controls:FASymbolIcon Symbol="Refresh"/>
             </Button>
         </StackPanel>
 

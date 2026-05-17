@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Reference;
@@ -10,9 +11,9 @@ using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.Type;
-using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Actions;
 
@@ -94,7 +95,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                 20,
                 ContextActionGroup.Modification,
                 RemapReferencesCommand,
-                context => menuItemProvider.Custom(RemapReferencesCommand, "Remap References", context, Symbol.Rename)
+                context => menuItemProvider.Custom(RemapReferencesCommand, "Remap References", context, FASymbol.Rename)
             ),
             new ContextAction(context => (context.SelectedRecords.Count == 1 && context.SelectedRecords[0].ReferencedRecord.GetReferenceCount() > 0)
                  || (context.SelectedAssets is [{ ReferencedAsset: {} referencedAsset }] && referencedAsset.GetReferenceCount() > 0),
@@ -290,7 +291,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     private string? GetFormId(SelectedListContext context) {
         if (context.SelectedRecords is not [{ ReferencedRecord.Record: var record, Origin: {} modKey }, ..]) return null;
 
-        var modIndex = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder.IndexOf(modKey);
+        var modIndex = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder.IndexOf(modKey, (mod, key) => mod.ModKey == key);
         var formId = modIndex.ToString("D2") + record.FormKey.IDString();
         return formId;
     }

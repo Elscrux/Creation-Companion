@@ -15,7 +15,7 @@ public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
     bool IsSelected { get; set; }
 
     string? Header { get; set; }
-    IconSource? IconSource { get; set; }
+    FAIconSource? IconSource { get; set; }
 
     double? Size { get; set; }
 

@@ -39,7 +39,7 @@
         <Button IsVisible="{Binding AddNextSelectorCommand.CanExecute^}"
                 Command="{Binding AddNextSelectorCommand}"
                 VerticalAlignment="Stretch">
-            <controls:SymbolIcon Symbol="Add"/>
+            <controls:FASymbolIcon Symbol="Add"/>
         </Button>
     </StackPanel>
 </UserControl>

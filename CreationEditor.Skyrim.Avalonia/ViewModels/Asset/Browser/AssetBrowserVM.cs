@@ -152,7 +152,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     icon.Foreground = Brushes.Gray;
                                 }
                             } else {
-                                icon = AssetIconService.GetIcon(Symbol.Folder);
+                                icon = AssetIconService.GetIcon(FASymbol.Folder);
                                 icon.Foreground = Brushes.Goldenrod;
                             }
 
@@ -221,8 +221,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
                         if (missingLinks.Length > 0) {
                             stackPanel.Children.Add(
-                                new SymbolIcon {
-                                    Symbol = Symbol.ImportantFilled,
+                                new FASymbolIcon {
+                                    Symbol = FASymbol.ImportantFilled,
                                     Foreground = StandardBrushes.InvalidBrush,
                                     VerticalAlignment = VerticalAlignment.Center,
                                     [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
@@ -234,7 +234,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             if (modelService.HasCollision(fileLink)) {
                                 // For models, we show the missing links in a tooltip
                                 stackPanel.Children.Add(
-                                    new FontIcon {
+                                    new FAFontIcon {
                                         Glyph = "⟟",
                                         VerticalAlignment = VerticalAlignment.Center,
                                         [ToolTip.TipProperty] = "Has Collision",
@@ -246,7 +246,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             if (misalignedPaths.Count > 0) {
                                 // For models, we show the misaligned paths in a tooltip
                                 stackPanel.Children.Add(
-                                    new FontIcon {
+                                    new FAFontIcon {
                                         Glyph = "⚠️",
                                         VerticalAlignment = VerticalAlignment.Center,
                                         [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths),

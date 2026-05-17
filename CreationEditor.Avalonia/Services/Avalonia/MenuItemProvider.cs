@@ -16,7 +16,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Save },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Save },
                 Header = customHeader ?? "Save",
             },
             parameter,
@@ -27,7 +27,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.View },
+                Icon = new FASymbolIcon { Symbol = FASymbol.View },
                 Header = customHeader ?? "View",
             },
             parameter);
@@ -37,7 +37,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.OpenFile },
+                Icon = new FASymbolIcon { Symbol = FASymbol.OpenFile },
                 Header = customHeader ?? "Open",
             },
             parameter);
@@ -47,7 +47,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.OpenFolder },
+                Icon = new FASymbolIcon { Symbol = FASymbol.OpenFolder },
                 Header = customHeader ?? "Open Folder",
             },
             parameter);
@@ -57,7 +57,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Rename },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Rename },
                 Header = customHeader ?? "Rename",
             },
             parameter,
@@ -68,7 +68,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.New },
+                Icon = new FASymbolIcon { Symbol = FASymbol.New },
                 Header = customHeader ?? "New",
             },
             parameter);
@@ -78,7 +78,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Edit },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Edit },
                 Header = customHeader ?? "Edit",
             },
             parameter);
@@ -88,7 +88,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Copy },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Copy },
                 Header = customHeader ?? "Duplicate",
             },
             parameter,
@@ -99,7 +99,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Delete },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Delete },
                 Header = customHeader ?? "Delete",
             },
             parameter,
@@ -110,7 +110,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.List },
+                Icon = new FASymbolIcon { Symbol = FASymbol.List },
                 Header = customHeader ?? "Open References",
             },
             parameter,
@@ -121,7 +121,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Copy },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Copy },
                 Header = customHeader ?? "Copy",
             },
             parameter,
@@ -132,7 +132,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
         return Init(
             new MenuItem {
                 Command = command,
-                Icon = new SymbolIcon { Symbol = Symbol.Paste },
+                Icon = new FASymbolIcon { Symbol = FASymbol.Paste },
                 Header = customHeader ?? "Paste",
             },
             parameter,
@@ -144,7 +144,7 @@ public sealed class MenuItemProvider : IMenuItemProvider {
             new MenuItem {
                 Command = command,
                 Icon = icon switch {
-                    Symbol symbol => new SymbolIcon { Symbol = symbol },
+                    FASymbol symbol => new FASymbolIcon { Symbol = symbol },
                     _ => icon,
                 },
                 Header = customHeader,

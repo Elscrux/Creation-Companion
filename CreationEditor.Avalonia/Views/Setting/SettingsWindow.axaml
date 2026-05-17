@@ -1,4 +1,4 @@
-﻿<windowing:AppWindow xmlns="https://github.com/avaloniaui"
+﻿<windowing:FAAppWindow xmlns="https://github.com/avaloniaui"
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,12 +13,12 @@
                      x:Class="CreationEditor.Avalonia.Views.Setting.SettingsWindow"
                      x:Name="Window"
                      Title="Settings">
-    <windowing:AppWindow.KeyBindings>
+    <windowing:FAAppWindow.KeyBindings>
         <KeyBinding
             Gesture="Escape"
             Command="{x:Static command:WindowCommands.Close}"
             CommandParameter="{Binding #Window}"/>
-    </windowing:AppWindow.KeyBindings>
+    </windowing:FAAppWindow.KeyBindings>
 
     <setting:SettingsView DataContext="{Binding}"/>
-</windowing:AppWindow>
+</windowing:FAAppWindow>

@@ -35,7 +35,7 @@
                                 Classes="Transparent"
                                 Foreground="ForestGreen">
                             <StackPanel Orientation="Horizontal">
-                                <controls:SymbolIcon Symbol="Add"/>
+                                <controls:FASymbolIcon Symbol="Add"/>
                                 <TextBlock Text="Add"/>
                             </StackPanel>
                         </Button>

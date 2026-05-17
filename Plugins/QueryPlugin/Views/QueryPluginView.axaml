@@ -23,16 +23,15 @@
                 Content="+ Add Column"
                 Command="{Binding AddColumnCommand}"/>
 
-            <controls:InfoBar
+            <controls:FAInfoBar
                 Grid.Row="0"
                 Grid.Column="0" Grid.ColumnSpan="2"
-                Title="You can restore previously saved columns"
-                IsOpen="{Binding QueryCount}">
-                <controls:InfoBar.ActionButton>
+                Title="You can restore previously saved columns">
+                <controls:FAInfoBar.ActionButton>
                     <Button Content="Restore"
                             Command="{Binding RestoreColumnsCommand}"/>
-                </controls:InfoBar.ActionButton>
-            </controls:InfoBar>
+                </controls:FAInfoBar.ActionButton>
+            </controls:FAInfoBar>
         </Grid>
     </ScrollViewer>
 </UserControl>

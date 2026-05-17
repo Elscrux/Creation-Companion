@@ -7,7 +7,7 @@ public partial class SplashScreen : UserControl {
         InitializeComponent();
     }
 
-    public SplashScreen(IApplicationSplashScreen vm) : this() {
+    public SplashScreen(IFAApplicationSplashScreen vm) : this() {
         DataContext = vm;
     }
 }

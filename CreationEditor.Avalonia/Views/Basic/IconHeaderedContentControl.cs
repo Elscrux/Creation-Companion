@@ -5,10 +5,10 @@ using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Views.Basic;
 
 public class IconHeaderedContentControl : HeaderedContentControl {
-    public static readonly StyledProperty<Symbol> IconProperty
-        = AvaloniaProperty.Register<IconHeaderedContentControl, Symbol>(nameof(Icon));
+    public static readonly StyledProperty<FASymbol> IconProperty
+        = AvaloniaProperty.Register<IconHeaderedContentControl, FASymbol>(nameof(Icon));
 
-    public Symbol Icon {
+    public FASymbol Icon {
         get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }

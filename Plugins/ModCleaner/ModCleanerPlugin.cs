@@ -3,9 +3,9 @@ using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Services.Plugin;
 using FluentAvalonia.UI.Controls;
-using Mutagen.Bethesda.Skyrim;
 using ModCleaner.ViewModels;
 using ModCleaner.Views;
+using Mutagen.Bethesda.Skyrim;
 namespace ModCleaner;
 
 public sealed class ModCleanerPlugin(
@@ -21,5 +21,5 @@ public sealed class ModCleanerPlugin(
 
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
-    public object GetIcon() => new FontIcon { Glyph = "🧹" };
+    public object GetIcon() => new FAFontIcon { Glyph = "🧹" };
 }

@@ -496,8 +496,8 @@ public sealed partial class AnalyzerVM : ViewModel {
                     Background = null,
                     BorderBrush = null,
                     Padding = new Thickness(0, 0),
-                    Content = new SymbolIcon {
-                        Symbol = Symbol.Open,
+                    Content = new FASymbolIcon {
+                        Symbol = FASymbol.Open,
                         Foreground = StandardBrushes.HighlightBrush,
                     },
                     Command = ReactiveCommand.Create(() => {

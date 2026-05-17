@@ -35,7 +35,7 @@
                     Width="20" Height="20"
                     Padding="2"
                     ToolTip.Tip="Clear Log">
-                <controls:SymbolIcon Symbol="DeleteFilled"/>
+                <controls:FASymbolIcon Symbol="DeleteFilled"/>
             </Button>
 
             <Button Classes="Transparent"
@@ -44,9 +44,9 @@
                     Padding="2"
                     ToolTip.Tip="Toggle Auto Scroll">
                 <Grid>
-                    <controls:SymbolIcon Symbol="MapPinFilled"
+                    <controls:FASymbolIcon Symbol="MapPinFilled"
                                          IsVisible="{Binding AutoScroll}"/>
-                    <controls:SymbolIcon Symbol="UnPin"
+                    <controls:FASymbolIcon Symbol="UnPin"
                                          IsVisible="{Binding !AutoScroll}"/>
                 </Grid>
             </Button>
@@ -62,9 +62,9 @@
                 </Button.Flyout>
 
                 <StackPanel>
-                    <controls:SymbolIcon Symbol="Find"
+                    <controls:FASymbolIcon Symbol="Find"
                                          IsVisible="{Binding !SearchText.Length}"/>
-                    <controls:SymbolIcon Symbol="Find"
+                    <controls:FASymbolIcon Symbol="Find"
                                          Foreground="{DynamicResource SystemAccentColor}"
                                          IsVisible="{Binding !!SearchText.Length}"/>
                 </StackPanel>
@@ -99,7 +99,7 @@
                     </Flyout>
                 </Button.Flyout>
 
-                <controls:SymbolIcon Symbol="MoreVertical"/>
+                <controls:FASymbolIcon Symbol="MoreVertical"/>
             </Button>
         </StackPanel>
 

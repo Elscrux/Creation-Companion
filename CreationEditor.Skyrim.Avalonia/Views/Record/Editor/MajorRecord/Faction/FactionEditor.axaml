@@ -15,16 +15,16 @@
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="40,65,*">
-        <controls:CommandBar DefaultLabelPosition="Right">
-            <controls:CommandBar.PrimaryCommands>
-                <controls:CommandBarButton
+        <controls:FACommandBar DefaultLabelPosition="Right">
+            <controls:FACommandBar.PrimaryCommands>
+                <controls:FACommandBarButton
                     IconSource="Save"
                     Label="Save"
                     IsCompact="False"
                     IsVisible="True"
                     Command="{Binding Core.SaveCommand}"/>
-            </controls:CommandBar.PrimaryCommands>
-        </controls:CommandBar>
+            </controls:FACommandBar.PrimaryCommands>
+        </controls:FACommandBar>
 
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal">

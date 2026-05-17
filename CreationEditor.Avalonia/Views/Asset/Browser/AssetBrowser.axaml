@@ -41,7 +41,7 @@
             <Button ToolTip.Tip="Filters"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch">
-                <controls:SymbolIcon Symbol="SettingsFilled"/>
+                <controls:FASymbolIcon Symbol="SettingsFilled"/>
 
                 <Button.Flyout>
                     <Flyout>
@@ -61,7 +61,7 @@
 
                                     <ToggleButton.Content>
                                         <StackPanel>
-                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <controls:FASymbolIcon Symbol="Document"/>
                                             <TextBlock>Referenced</TextBlock>
                                         </StackPanel>
                                     </ToggleButton.Content>
@@ -78,7 +78,7 @@
 
                                     <ToggleButton.Content>
                                         <StackPanel>
-                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <controls:FASymbolIcon Symbol="Document"/>
                                             <TextBlock>Orphaned</TextBlock>
                                         </StackPanel>
                                     </ToggleButton.Content>
@@ -87,7 +87,7 @@
                                 <ToggleButton IsChecked="{Binding ShowOtherFiles}">
                                     <ToggleButton.Content>
                                         <StackPanel>
-                                            <controls:SymbolIcon Symbol="Document"/>
+                                            <controls:FASymbolIcon Symbol="Document"/>
                                             <TextBlock>Other</TextBlock>
                                         </StackPanel>
                                     </ToggleButton.Content>
@@ -155,7 +155,7 @@
                 <TextBox x:Name="SearchBox"
                          Text="{Binding SearchText}"
                          MinWidth="200"
-                         Watermark="Search..."/>
+                         PlaceholderText="Search..."/>
 
                 <avaloniaProgressRing:ProgressRing
                     ToolTip.Tip="Loading References"

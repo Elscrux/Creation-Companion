@@ -5,12 +5,12 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using FluentAvalonia.UI.Controls;
 using MapperPlugin.ViewModels;
 using Mutagen.Bethesda;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 namespace MapperPlugin.Views;
 
 public partial class MapperView : ReactiveUserControl<MapperVM> {
@@ -50,7 +50,7 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
         var drawingsImage = new ReplaySubject<IImage?>();
         drawingsImage.OnNext(Drawings?.Source);
 
-        var dialog = new TaskDialog {
+        var dialog = new FATaskDialog {
             Header = "Export Map",
             Content = new Grid {
                 Children = {
@@ -118,17 +118,17 @@ public partial class MapperView : ReactiveUserControl<MapperVM> {
             },
             XamlRoot = this,
             Buttons = {
-                new TaskDialogButton {
+                new FATaskDialogButton {
                     Text = "Export",
                     IsDefault = true,
-                    DialogResult = TaskDialogStandardResult.OK,
+                    DialogResult = FATaskDialogStandardResult.OK,
                 },
-                TaskDialogButton.CancelButton,
+                FATaskDialogButton.CancelButton,
             },
         };
 
         var exportMode = await dialog.ShowAsync();
-        if (exportMode is TaskDialogStandardResult.Cancel) return;
+        if (exportMode is FATaskDialogStandardResult.Cancel) return;
 
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             Title = "Export image",

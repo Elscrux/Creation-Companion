@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -292,7 +293,7 @@ public sealed partial class ListsVM : ValidatableViewModel {
                 Items = {
                     new MenuItem {
                         Header = "Remove from Tier",
-                        Icon = new SymbolIcon { Symbol = Symbol.Remove },
+                        Icon = new FASymbolIcon { Symbol = FASymbol.Remove },
                         Command = ReactiveCommand.Create(() => {
                             foreach (var record in records) {
                                 _tierController.RemoveRecordTier(record);

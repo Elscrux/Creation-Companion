@@ -74,7 +74,7 @@ public sealed class MainModule : Module {
             .As<IFontProvider>();
 
         builder.RegisterType<StartupSplashScreen>()
-            .As<IApplicationSplashScreen>();
+            .As<IFAApplicationSplashScreen>();
 
         // Services
         builder.RegisterType<DataSourceService>()

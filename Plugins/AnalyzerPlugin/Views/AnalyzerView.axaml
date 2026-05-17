@@ -122,7 +122,7 @@
                                     <TextBlock
                                         Text="Browse Topics"
                                         VerticalAlignment="Center"/>
-                                    <controls:SymbolIcon
+                                    <controls:FASymbolIcon
                                         Grid.Column="1"
                                         Symbol="ChevronRight"
                                         Margin="8,0,0,0"/>
@@ -224,7 +224,7 @@
                         <TextBox
                             MinWidth="280"
                             Text="{Binding ResultsSearchText}"
-                            Watermark="Search results..."
+                            PlaceholderText="Search results..."
                             Padding="12,8"
                             CornerRadius="6"/>
 
@@ -237,7 +237,7 @@
                                 Orientation="Horizontal"
                                 Spacing="8">
                                 <TextBlock Text="Group"/>
-                                <controls:SymbolIcon
+                                <controls:FASymbolIcon
                                     Symbol="Pin"
                                     FontSize="16"/>
                             </StackPanel>
@@ -280,7 +280,7 @@
                                 <TextBlock
                                     Text="Export as CSV"
                                     VerticalAlignment="Center"/>
-                                <controls:SymbolIcon
+                                <controls:FASymbolIcon
                                     Grid.Column="1"
                                     Symbol="Download"
                                     Margin="8,0,0,0"/>

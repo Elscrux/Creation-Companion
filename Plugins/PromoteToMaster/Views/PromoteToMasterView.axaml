@@ -41,10 +41,10 @@
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="10">
                                     <TextBox Text="{Binding RemovePrefix}"
-                                             Watermark="Current"/>
-                                    <controls:SymbolIcon Symbol="ChevronRight"/>
+                                             PlaceholderText="Current"/>
+                                    <controls:FASymbolIcon Symbol="ChevronRight"/>
                                     <TextBox Text="{Binding AddPrefix}"
-                                             Watermark="New"/>
+                                             PlaceholderText="New"/>
                                 </StackPanel>
                             </basic:LabeledContentControl>
 

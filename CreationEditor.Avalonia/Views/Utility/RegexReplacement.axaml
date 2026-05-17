@@ -12,14 +12,14 @@
                     Spacing="10">
             <TextBox
                 Text="{Binding Pattern}"
-                Watermark="Search Pattern"
+                PlaceholderText="Search Pattern"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
                 MinWidth="120"/>
 
             <TextBox
                 Text="{Binding Replacement}"
-                Watermark="Replacement"
+                PlaceholderText="Replacement"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
                 MinWidth="120"/>

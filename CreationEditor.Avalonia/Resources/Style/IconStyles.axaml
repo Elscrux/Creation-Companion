@@ -7,7 +7,7 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="controls|FontIcon">
+    <Style Selector="controls|FAFontIcon">
         <Setter Property="FontFamily" Value="{StaticResource SymbolThemeFontFamily}"/>
     </Style>
 </Styles>

@@ -202,7 +202,7 @@
                     Header="Step 2: Build Reference Graph"
                     Description="Analyze dependencies between records and between assets to understand what can be removed">
                     <basic:ExpanderCard.IconControl>
-                        <controls:SymbolIcon Symbol="Globe"/>
+                        <controls:FASymbolIcon Symbol="Globe"/>
                     </basic:ExpanderCard.IconControl>
 
                     <StackPanel Spacing="12">
@@ -243,7 +243,7 @@
                             Header="Refinement Workflow"
                             Description="Steps to refine the list of retained records">
                             <basic:Card.IconControl>
-                                <controls:FontIcon Glyph="🔍"/>
+                                <controls:FAFontIcon Glyph="🔍"/>
                             </basic:Card.IconControl>
 
                             <TextBlock
@@ -267,26 +267,26 @@
                             Description="Records that are retained but might not belong in this release - investigate these first">
                             <basic:Card.IconControl>
                                 <StackPanel>
-                                    <controls:FontIcon Glyph="✅">
-                                        <controls:FontIcon.IsVisible>
+                                    <controls:FAFontIcon Glyph="✅">
+                                        <controls:FAFontIcon.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
                                                 <Binding Path="!InvalidQuests.Count"/>
                                                 <Binding Path="!InvalidExteriorCells.Count"/>
                                                 <Binding Path="!InteriorCells.Count"/>
                                                 <Binding Path="!InvalidVoiceTypes.Count"/>
                                             </MultiBinding>
-                                        </controls:FontIcon.IsVisible>
-                                    </controls:FontIcon>
-                                    <controls:FontIcon Glyph="⚠">
-                                        <controls:FontIcon.IsVisible>
+                                        </controls:FAFontIcon.IsVisible>
+                                    </controls:FAFontIcon>
+                                    <controls:FAFontIcon Glyph="⚠">
+                                        <controls:FAFontIcon.IsVisible>
                                             <MultiBinding Converter="{x:Static BoolConverters.Or}">
                                                 <Binding Path="!!InvalidQuests.Count"/>
                                                 <Binding Path="!!InvalidExteriorCells.Count"/>
                                                 <Binding Path="!!InteriorCells.Count"/>
                                                 <Binding Path="!!InvalidVoiceTypes.Count"/>
                                             </MultiBinding>
-                                        </controls:FontIcon.IsVisible>
-                                    </controls:FontIcon>
+                                        </controls:FAFontIcon.IsVisible>
+                                    </controls:FAFontIcon>
                                 </StackPanel>
                             </basic:Card.IconControl>
 
@@ -490,7 +490,7 @@
                             Header="Dependency Path Analysis"
                             Description="Find the path between two records to understand why they're linked">
                             <basic:Card.IconControl>
-                                <controls:FontIcon Glyph="🔗"/>
+                                <controls:FAFontIcon Glyph="🔗"/>
                             </basic:Card.IconControl>
 
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto" ColumnSpacing="12">

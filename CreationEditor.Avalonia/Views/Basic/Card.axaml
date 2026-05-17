@@ -9,7 +9,7 @@
             Header="Name"
             Description="Description"
             Icon="Contact">
-            <TextBox Watermark="Enter your name"/>
+            <TextBox PlaceholderText="Enter your name"/>
         </basic:Card>
     </Design.PreviewWith>
 
@@ -29,7 +29,7 @@
                             Spacing="12">
                             <!-- Icon -->
                             <Grid>
-                                <controls:SymbolIcon
+                                <controls:FASymbolIcon
                                     IsVisible="{TemplateBinding IconControl, Converter={x:Static ObjectConverters.IsNull}}"
                                     Symbol="{TemplateBinding Icon}"
                                     FontSize="20"

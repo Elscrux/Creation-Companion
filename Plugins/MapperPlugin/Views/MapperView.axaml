@@ -49,7 +49,7 @@
                 <file:TextFilePicker
                     Grid.Column="2"
                     IsVisible="{Binding !WorldspaceFormKey.IsNull}"
-                    Watermark="Select Map"
+                    PlaceholderText="Select Map"
                     FilePath="{Binding ImageFilePath, Mode=TwoWay}"
                     Margin="5"
                     Filter="{x:Static viewConstants:StandardFileTypes.ImageAll}"/>
@@ -74,7 +74,7 @@
                            Text="{Binding BottomCell}"
                            HorizontalAlignment="Center"/>
 
-                <controls:RangeSlider
+                <controls:FARangeSlider
                     Grid.Column="1"
                     Grid.Row="0"
                     ShowValueToolTip="True"
@@ -94,7 +94,7 @@
                         <RotateTransform Angle="-90"/>
                     </LayoutTransformControl.LayoutTransform>
 
-                    <controls:RangeSlider
+                    <controls:FARangeSlider
                         ShowValueToolTip="True"
                         ToolTipStringFormat="N0"
                         MinWidth="250"
@@ -166,40 +166,40 @@
 
         <Grid Grid.Column="2"
               RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,Auto,5,*">
-            <controls:CommandBar
+            <controls:FACommandBar
                 Grid.Row="0"
                 DefaultLabelPosition="Right">
-                <controls:CommandBar.PrimaryCommands>
-                    <controls:CommandBarButton
+                <controls:FACommandBar.PrimaryCommands>
+                    <controls:FACommandBarButton
                         IconSource="Share"
                         Label="Export"
                         IsCompact="False"
                         Command="{Binding #View.ExportImage}"/>
 
-                    <controls:CommandBarSeparator/>
+                    <controls:FACommandBarSeparator/>
 
-                    <controls:CommandBarButton
+                    <controls:FACommandBarButton
                         IconSource="Save"
                         Label="Save"
                         IsCompact="False">
-                        <controls:CommandBarButton.Flyout>
+                        <controls:FACommandBarButton.Flyout>
                             <Flyout>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox x:Name="MapName"
-                                             Watermark="Enter a name"/>
+                                             PlaceholderText="Enter a name"/>
                                     <Button Content="Save"
                                             Command="{Binding SaveMapCommand}"
                                             CommandParameter="{Binding #MapName.Text}"/>
                                 </StackPanel>
                             </Flyout>
-                        </controls:CommandBarButton.Flyout>
-                    </controls:CommandBarButton>
+                        </controls:FACommandBarButton.Flyout>
+                    </controls:FACommandBarButton>
 
-                    <controls:CommandBarButton
+                    <controls:FACommandBarButton
                         IconSource="Restore"
                         Label="Load"
                         IsCompact="False">
-                        <controls:CommandBarButton.Flyout>
+                        <controls:FACommandBarButton.Flyout>
                             <Flyout>
                                 <ItemsControl ItemsSource="{Binding SavedMaps}">
                                     <ItemsControl.ItemTemplate>
@@ -215,7 +215,7 @@
                                                         VerticalAlignment="Stretch"
                                                         Command="{Binding #View.ViewModel.DeleteMapCommand}"
                                                         CommandParameter="{Binding}">
-                                                    <controls:SymbolIcon
+                                                    <controls:FASymbolIcon
                                                         Symbol="Delete"
                                                         Foreground="IndianRed"/>
                                                 </Button>
@@ -224,10 +224,10 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Flyout>
-                        </controls:CommandBarButton.Flyout>
-                    </controls:CommandBarButton>
-                </controls:CommandBar.PrimaryCommands>
-            </controls:CommandBar>
+                        </controls:FACommandBarButton.Flyout>
+                    </controls:FACommandBarButton>
+                </controls:FACommandBar.PrimaryCommands>
+            </controls:FACommandBar>
 
             <CheckBox
                 Grid.Row="6"

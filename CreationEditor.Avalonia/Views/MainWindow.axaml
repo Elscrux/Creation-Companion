@@ -1,4 +1,4 @@
-﻿<windowing:AppWindow
+﻿<windowing:FAAppWindow
     x:Class="CreationEditor.Avalonia.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -22,7 +22,8 @@
                    x:Name="DockPanel">
             <Panel DockPanel.Dock="Top"
                    VerticalAlignment="Top">
-                <Menu Margin="0,0,150,0">
+                <Menu HorizontalAlignment="Left"
+                      Background="{x:Null}">
                     <Menu.ItemsPanel>
                         <ItemsPanelTemplate>
                             <DockPanel HorizontalAlignment="Stretch"/>
@@ -35,7 +36,7 @@
                                   InputGesture="Ctrl+Alt+D"
                                   Command="{Binding #DataSourceSelectionPopup.Show}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Folder"/>
+                                <controls:FASymbolIcon Symbol="Folder"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -44,26 +45,26 @@
                                   InputGesture="Ctrl+Alt+M"
                                   Command="{Binding #ModSelectionPopup.Show}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Save"/>
+                                <controls:FASymbolIcon Symbol="Save"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
                         <MenuItem Header="_Open">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Open"/>
+                                <controls:FASymbolIcon Symbol="Open"/>
                             </MenuItem.Icon>
 
                             <MenuItem Header="_Game Folder"
                                       Command="{Binding OpenGameFolderCommand}">
                                 <MenuItem.Icon>
-                                    <controls:SymbolIcon Symbol="Message"/>
+                                    <controls:FASymbolIcon Symbol="Message"/>
                                 </MenuItem.Icon>
                             </MenuItem>
 
                             <MenuItem Header="_Data Folder"
                                       Command="{Binding OpenDataFolderCommand}">
                                 <MenuItem.Icon>
-                                    <controls:SymbolIcon Symbol="Message"/>
+                                    <controls:FASymbolIcon Symbol="Message"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
@@ -73,7 +74,7 @@
                                   InputGesture="Ctrl+Alt+S"
                                   Command="{Binding OpenSettingsCommand}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Settings"/>
+                                <controls:FASymbolIcon Symbol="Settings"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -82,7 +83,7 @@
                                   InputGesture="Ctrl+S"
                                   Command="{Binding SaveCommand}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Save"/>
+                                <controls:FASymbolIcon Symbol="Save"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuItem>
@@ -94,7 +95,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.Log}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Message"/>
+                                <controls:FASymbolIcon Symbol="Message"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -104,7 +105,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.RecordBrowser}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="BulletList"/>
+                                <controls:FASymbolIcon Symbol="BulletList"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -114,7 +115,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.CellBrowser}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Image"/>
+                                <controls:FASymbolIcon Symbol="Image"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -124,7 +125,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.AssetBrowser}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Folder"/>
+                                <controls:FASymbolIcon Symbol="Folder"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -132,7 +133,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.ScriptEditor}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Code"/>
+                                <controls:FASymbolIcon Symbol="Code"/>
                             </MenuItem.Icon>
                         </MenuItem>
 
@@ -140,7 +141,7 @@
                                   Command="{Binding OpenDockElementCommand}"
                                   CommandParameter="{x:Static models:DockElement.Viewport}">
                             <MenuItem.Icon>
-                                <controls:SymbolIcon Symbol="Pictures"/>
+                                <controls:FASymbolIcon Symbol="Pictures"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuItem>
@@ -183,7 +184,7 @@
                     <AutoCompleteBox Padding="3"
                                      MaxHeight="26"
                                      Width="500"
-                                     Watermark="Search"
+                                     PlaceholderText="Search"
                                      ItemsSource="{Binding Actions}">
                         <AutoCompleteBox.Styles>
                             <Style Selector="AutoCompleteBox TextBox">
@@ -245,4 +246,4 @@
             </dialog:SaveDialog.Dialog>
         </dialog:SaveDialog>
     </Grid>
-</windowing:AppWindow>
+</windowing:FAAppWindow>

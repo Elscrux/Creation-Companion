@@ -29,7 +29,7 @@
                                 Height="{TemplateBinding Height}"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                            <controls:SymbolIcon
+                            <controls:FASymbolIcon
                                 Symbol="ChevronRight"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"/>
@@ -40,7 +40,7 @@
                 <Style Selector="^:checked /template/ Path#ChevronPath">
                     <Setter Property="Data">
                         <Template>
-                            <controls:SymbolIcon Symbol="ChevronLeft"/>
+                            <controls:FASymbolIcon Symbol="ChevronLeft"/>
                         </Template>
                     </Setter>
                 </Style>

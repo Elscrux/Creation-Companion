@@ -18,11 +18,11 @@
                   ToolTip.Tip="{Binding QueryVM.QueryRunner.Summary^}">
                 <TextBox Grid.Column="0"
                          Text="{Binding QueryVM.Name}"
-                         Watermark="Column Name"/>
+                         PlaceholderText="Column Name"/>
 
                 <Button Grid.Column="2"
                         VerticalAlignment="Stretch">
-                    <controls:SymbolIcon Symbol="ChevronDown"/>
+                    <controls:FASymbolIcon Symbol="ChevronDown"/>
                     <Button.Flyout>
                         <MenuFlyout ItemsSource="{Binding MenuItems}"/>
                     </Button.Flyout>
@@ -30,7 +30,7 @@
 
                 <Button Grid.Column="4"
                         VerticalAlignment="Stretch">
-                    <controls:SymbolIcon Symbol="SettingsFilled"/>
+                    <controls:FASymbolIcon Symbol="SettingsFilled"/>
                     <Button.Flyout>
                         <Flyout FlyoutPresenterClasses="Flyout750x250">
                             <query:QueryView

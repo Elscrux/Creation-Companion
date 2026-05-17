@@ -1,4 +1,4 @@
-﻿<windowing:AppWindow xmlns="https://github.com/avaloniaui"
+﻿<windowing:FAAppWindow xmlns="https://github.com/avaloniaui"
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,12 +9,12 @@
                      x:Name="Window"
                      x:Class="CreationEditor.Avalonia.Views.Reference.ReferenceWindow"
                      Height="750" Width="500">
-    <windowing:AppWindow.KeyBindings>
+    <windowing:FAAppWindow.KeyBindings>
         <KeyBinding
             Gesture="Escape"
             Command="{x:Static command:WindowCommands.Close}"
             CommandParameter="{Binding #Window}"/>
-    </windowing:AppWindow.KeyBindings>
+    </windowing:FAAppWindow.KeyBindings>
 
     <reference:ReferenceBrowser DataContext="{Binding #Window.ReferenceBrowserVM}"/>
-</windowing:AppWindow>
+</windowing:FAAppWindow>

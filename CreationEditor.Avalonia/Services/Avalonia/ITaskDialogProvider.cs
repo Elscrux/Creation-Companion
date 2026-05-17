@@ -6,27 +6,27 @@ using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
 public interface ITaskDialogProvider {
-    TaskDialog CreateTaskDialog(string header, Control? content, Action<TaskDialog>? configure = null, Visual? xamlRoot = null);
+    FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null);
 }
 
 public class TaskDialogProvider(MainWindow mainWindow) : ITaskDialogProvider {
-    public TaskDialog CreateTaskDialog(string header, Control? content, Action<TaskDialog>? configure = null, Visual? xamlRoot = null) {
-        var assetDialog = new TaskDialog {
+    public FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null) {
+        var assetDialog = new FATaskDialog {
             Header = header,
             Content = content,
             XamlRoot = xamlRoot ?? mainWindow,
             Buttons = {
-                TaskDialogButton.OKButton,
-                TaskDialogButton.CancelButton,
+                FATaskDialogButton.OKButton,
+                FATaskDialogButton.CancelButton,
             },
             KeyBindings = {
                 new KeyBinding {
                     Gesture = new KeyGesture(Key.Enter),
-                    Command = TaskDialogButton.OKButton.Command,
+                    Command = FATaskDialogButton.OKButton.Command,
                 },
                 new KeyBinding {
                     Gesture = new KeyGesture(Key.Escape),
-                    Command = TaskDialogButton.CancelButton.Command,
+                    Command = FATaskDialogButton.CancelButton.Command,
                 },
             },
         };

@@ -74,7 +74,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
         Control GetControl(IAssetType assetType, string name) {
             var icon = ViewModel.AssetIconService.GetIcon(assetType);
-            if (icon is FontIcon fontIcon) fontIcon.FontSize = 20;
+            if (icon is FAFontIcon fontIcon) fontIcon.FontSize = 20;
             return new StackPanel {
                 Height = 20,
                 Orientation = Orientation.Horizontal,

@@ -16,14 +16,14 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
     private readonly IDataSourceService _dataSourceService;
     private readonly IFileSystem _fileSystem;
 
-    private const string WatermarkBase = "NewMod";
-    private static string WatermarkName(int index) => $"{WatermarkBase} ({index})";
-    [Reactive] public partial string ModNameWatermark { get; set; }
+    private const string PlaceholderTextBase = "NewMod";
+    private static string PlaceholderText(int index) => $"{PlaceholderTextBase} ({index})";
+    [Reactive] public partial string ModNamePlaceholderText { get; set; }
 
     [Reactive] public partial string? NewModName { get; set; }
     [Reactive] public partial ModType NewModType { get; set; }
 
-    public string ModNameOrBackup => NewModName ?? ModNameWatermark;
+    public string ModNameOrBackup => NewModName ?? ModNamePlaceholderText;
     public ModKey? NewModKey => new ModKey(ModNameOrBackup, NewModType);
     public IObservable<bool> IsValid => this.IsValid();
 
@@ -39,9 +39,9 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
 
         NewModType = ModType.Plugin;
 
-        ModNameWatermark = GetNewWatermark(_editorEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
+        ModNamePlaceholderText = GetNewPlaceholderText(_editorEnvironment.LinkCache.ListedOrder.Select(x => x.ModKey).ToList());
         _editorEnvironment.LoadOrderChanged
-            .Subscribe(loadOrder => ModNameWatermark = GetNewWatermark(loadOrder))
+            .Subscribe(loadOrder => ModNamePlaceholderText = GetNewPlaceholderText(loadOrder))
             .DisposeWith(this);
 
         this.ValidationRule(
@@ -60,23 +60,23 @@ public sealed partial class ModCreationVM : ValidatableViewModel {
 
     [ReactiveCommand(CanExecute = nameof(IsValid))]
     private IMod CreateMod() {
-        var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNameWatermark, NewModType) : new ModKey(NewModName, NewModType);
+        var modKey = string.IsNullOrWhiteSpace(NewModName) ? new ModKey(ModNamePlaceholderText, NewModType) : new ModKey(NewModName, NewModType);
         NewModName = null;
         return _editorEnvironment.AddNewMutableMod(modKey);
     }
 
-    private string GetNewWatermark(IReadOnlyList<ModKey> loadOrder) {
+    private string GetNewPlaceholderText(IReadOnlyList<ModKey> loadOrder) {
         // Assign new placeholder text if the name is already taken
-        var watermark = WatermarkBase;
-        if (NameIsFree(watermark, loadOrder)) return watermark;
+        var placeholderText = PlaceholderTextBase;
+        if (NameIsFree(placeholderText, loadOrder)) return placeholderText;
 
         var counter = 2;
-        while (!NameIsFree(watermark, loadOrder)) {
-            watermark = WatermarkName(counter);
+        while (!NameIsFree(placeholderText, loadOrder)) {
+            placeholderText = PlaceholderText(counter);
             counter++;
         }
 
-        return watermark;
+        return placeholderText;
     }
 
     private bool NameIsFree(string? modName, IEnumerable<ModKey> loadOrder) {

@@ -17,7 +17,7 @@
     <StackPanel Orientation="Horizontal"
                 Spacing="4">
         <TextBox Text="{Binding NewModName}"
-                 Watermark="{Binding ModNameWatermark}"
+                 PlaceholderText="{Binding ModNamePlaceholderText}"
                  VerticalAlignment="Center"
                  KeyUp="TextBox_OnKeyUp"
                  MinWidth="200"

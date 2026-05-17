@@ -4,10 +4,10 @@ using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Views.Basic;
 
 public class ExpanderCard : Expander {
-    public static readonly StyledProperty<Symbol> IconProperty
-        = AvaloniaProperty.Register<ExpanderCard, Symbol>(nameof(Icon));
+    public static readonly StyledProperty<FASymbol> IconProperty
+        = AvaloniaProperty.Register<ExpanderCard, FASymbol>(nameof(Icon));
 
-    public Symbol Icon {
+    public FASymbol Icon {
         get => GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }

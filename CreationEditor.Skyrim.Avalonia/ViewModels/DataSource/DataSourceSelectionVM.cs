@@ -77,7 +77,7 @@ public sealed partial class DataSourceSelectionVM : ViewModel, IDataSourceSelect
                     new FuncDataTemplate<DataSourceItem>((item, _) => {
                         if (item is null) return null;
 
-                        return new FontIcon {
+                        return new FAFontIcon {
                             Glyph = item.DataSource.IsReadOnly ? "🔒" : "🔓",
                             Foreground = item.DataSource.IsReadOnly ? Brushes.Orange : Brushes.ForestGreen,
                         };

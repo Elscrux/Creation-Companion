@@ -41,7 +41,7 @@
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal"
                                 Spacing="8">
-                        <controls:SymbolIcon Symbol="Code"
+                        <controls:FASymbolIcon Symbol="Code"
                                              FontSize="16"/>
                         <TextBlock Text="EditorID Patterns"
                                    FontSize="14"
@@ -56,7 +56,7 @@
                             IsVisible="{Binding ShowNameReplacement}">
                     <StackPanel Orientation="Horizontal"
                                 Spacing="8">
-                        <controls:SymbolIcon Symbol="Rename"
+                        <controls:FASymbolIcon Symbol="Rename"
                                              FontSize="16"/>
                         <TextBlock Text="Name Patterns"
                                    FontSize="14"
