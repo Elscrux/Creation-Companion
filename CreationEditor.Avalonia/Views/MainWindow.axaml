@@ -14,7 +14,7 @@
     xmlns:dialog="clr-namespace:CreationEditor.Avalonia.Views.Dialog"
     xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource"
     Title="{Binding WindowTitleObs^}"
-    MinHeight="480" MinWidth="720"
+    MinHeight="540" MinWidth="960"
     x:DataType="viewModels:MainVM"
     x:Name="Window">
     <Grid>
@@ -162,7 +162,11 @@
                             </Style>
                         </MenuItem.Styles>
                     </MenuItem>
+                </Menu>
 
+                <Menu HorizontalAlignment="Right"
+                      Margin="0,0,150,0"
+                      Background="{x:Null}">
                     <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
                               HorizontalAlignment="Right"
                               ItemsSource="{Binding NotificationVM.LoadingItems}">
@@ -183,7 +187,8 @@
                         VerticalAlignment="Center">
                     <AutoCompleteBox Padding="3"
                                      MaxHeight="26"
-                                     Width="500"
+                                     MinWidth="250"
+                                     MaxWidth="500"
                                      PlaceholderText="Search"
                                      ItemsSource="{Binding Actions}">
                         <AutoCompleteBox.Styles>
