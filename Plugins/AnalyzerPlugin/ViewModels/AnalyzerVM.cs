@@ -30,7 +30,6 @@ using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Analyzers;
-using Mutagen.Bethesda.Analyzers.Drivers;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
@@ -379,7 +378,6 @@ public sealed partial class AnalyzerVM : ViewModel {
                 .RefCount();
 
             var disposableBucket = new DisposableBucket();
-            ProvideCaches x = new ProvideCaches(_editorEnvironment.LinkCache, []);
 
             Dispatcher.UIThread.Post(void () => {
                 Results.Clear();
