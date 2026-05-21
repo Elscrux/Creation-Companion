@@ -5,7 +5,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Book;
-using Mutagen.Bethesda.Strings;
 using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
@@ -22,7 +21,7 @@ public partial class NotePreview : ActivatableUserControl {
 
     private double _totalTextHeight;
     private int _currentLeftPage;
-    private Func<Language, HtmlConverter>? _htmlConverterFactory;
+    private HtmlConverter? _htmlConverter;
 
     public NotePreview() {
         InitializeComponent();
@@ -39,14 +38,20 @@ public partial class NotePreview : ActivatableUserControl {
             .NotNull()
             .OfType<BookEditorVM>()
             .Subscribe(vm => {
-                UpdatePreview(vm.Language, vm.BookText);
+                UpdatePreview(vm.BookText);
                 ScrollDefault();
-                _htmlConverterFactory = language => vm.CreateHtmlConverter(new HtmlConverterOptions(language, PageWidth, LineSpacing));
+
+                vm.WhenAnyValue(x => x.Language)
+                    .Subscribe(language => {
+                        _htmlConverter = vm.CreateHtmlConverter(new HtmlConverterOptions(language, PageWidth, LineSpacing));
+                        UpdatePreview(vm.BookText);
+                    })
+                    .DisposeWith(ActivatedDisposable);
 
                 vm.WhenAnyValue(x => x.BookText)
                     .Subscribe(text => {
                         vm.BookText = text;
-                        UpdatePreview(vm.Language, text);
+                        UpdatePreview(text);
                     })
                     .DisposeWith(ActivatedDisposable);
             })
@@ -91,13 +96,12 @@ public partial class NotePreview : ActivatableUserControl {
         return _currentLeftPage != 0;
     }
 
-    private void UpdatePreview(Language language, string? text) {
-        if (text is null || _htmlConverterFactory is null) return;
+    private void UpdatePreview(string? text) {
+        if (text is null || _htmlConverter is null) return;
 
         var maxSize = new Size(PageWidth, PageHeight * 100);
 
-        var htmlConverter = _htmlConverterFactory(language);
-        var controls = htmlConverter.GenerateControls(text).ToList();
+        var controls = _htmlConverter.GenerateControls(text).ToList();
         foreach (var control in controls) {
             control.Measure(maxSize);
             var desiredSize = control.DesiredSize;

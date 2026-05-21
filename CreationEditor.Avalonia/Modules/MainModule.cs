@@ -25,6 +25,7 @@ using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
+using CreationEditor.Services.Mutagen.Font;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Mutagen.Type;
@@ -196,6 +197,13 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ReferenceBrowserVMFactory>()
             .As<IReferenceBrowserVMFactory>()
+            .SingleInstance();
+
+        builder.RegisterType<FontProviderFactory>()
+            .AsSelf();
+
+        builder.RegisterType<CachedFontProviderFactory>()
+            .As<IFontProviderFactory>()
             .SingleInstance();
 
         // Pipeline
