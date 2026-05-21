@@ -515,7 +515,6 @@ public sealed partial class AnalyzerVM : ViewModel {
     }
 
     private Control GetRecordControl(IFormLinkIdentifier? formLinkIdentifier) {
-        // TODO add button to open record
         return new TextBlock {
             Text = formLinkIdentifier is not null && _editorEnvironment.LinkCache.TryResolve(formLinkIdentifier, out var record)
                 ? record.GetHumanReadableName()
