@@ -49,6 +49,8 @@
     </Application.Resources>
 
     <Application.Styles>
+        <FluentTheme />
+
         <!-- Base Avalonia Style -->
         <styling:FluentAvaloniaTheme PreferUserAccentColor="True" PreferSystemTheme="True"/>
 
