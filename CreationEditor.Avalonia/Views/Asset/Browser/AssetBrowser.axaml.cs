@@ -2,15 +2,12 @@
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using Avalonia.Xaml.Interactions.DragAndDrop;
-using CreationEditor.Avalonia.Attached.DragDrop;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Services.DataSource;
@@ -117,13 +114,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         if (e.TargetRow?.Model is not DataSourceDirectoryLink directoryLink) return false;
         if (e.Position is TreeDataGridRowDropPosition.After or TreeDataGridRowDropPosition.Before) return false;
 
-        // Can't drop on files or in empty space
-        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
-        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
-        if (dataTransferItem is null) return false;
-
-        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return false;
-        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return false;
+        if (!e.TryGetDragInfo(out var dragInfo)) return false;
 
         var dragLinks = dragInfo.Indexes
             .Select(indexPath => {
@@ -152,28 +143,8 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void TrySetDragData(TreeDataGridRowDragEventArgs e) {
-        if (ViewModel is null) return;
-        if (e.TargetRow?.DataContext is not IDataSourceLink dataSourceLink) return;
-
-        var assetLink = ViewModel.GetAssetLink(dataSourceLink);
-        if (assetLink is null) return;
-
-        if (e.Inner.DataTransfer.Items.Any(i => i.Formats.Contains(ContextDropBehaviorBase.ContextDataTransferFormat))) return;
-
-        // Set drag data on first drag over - needed to integrate into the editor wide drag and drop system
-        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
-        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
-        if (dataTransferItem is null) return;
-
-        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
-        if (dataObject.Contains(ContextDropBehaviorBase.ContextDataTransferFormat.Identifier)) return;
-
-        dataObject.Set(ContextDropBehaviorBase.ContextDataTransferFormat.Identifier,
-            new DragContext {
-                Data = {
-                    { AssetLinkDragDrop.Data, new AssetDataSourceLink(dataSourceLink, assetLink) }
-                }
-            });
+        // Avalonia 12/TreeDataGrid drag payload is handled internally; this bridge data is no longer injected here.
+        Console.WriteLine();
     }
 
     private void AssetTree_OnRowDrop(object? sender, TreeDataGridRowDragEventArgs e) {
@@ -184,14 +155,19 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
 
         if (e.TargetRow?.Model is not DataSourceDirectoryLink directoryLink) return;
 
-        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
-        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
-        if (dataTransferItem is null) return;
+        if (!e.TryGetDragInfo(out var dragInfo)) return;
 
-        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
-        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
+        var draggedLinks = dragInfo.Indexes
+            .Select(indexPath => {
+                var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
+                var row = dragInfo.Source.Rows[rowIndex];
+                return row.Model;
+            })
+            .OfType<IDataSourceLink>()
+            .ToArray();
+        if (draggedLinks.Length == 0) return;
 
-        ViewModel?.Drop(directoryLink, dragInfo);
+        ViewModel?.Drop(directoryLink, draggedLinks);
     }
 
     private async void AssetTree_OnKeyDown(object? sender, KeyEventArgs e) {

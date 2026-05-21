@@ -1,11 +1,9 @@
 ﻿using System.Reactive.Linq;
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Input;
 using CreationEditor.Avalonia.Models.DataSource;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Services.DataSource;
-using Noggog;
 using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.DataSource;
 
@@ -37,19 +35,7 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
 
         if (e.TargetRow?.Model is not DataSourceItem item) return;
 
-        var dataFormat = DataFormat.CreateBytesPlatformFormat(DragInfo.DataFormat);
-        var dataTransferItem = e.Inner.DataTransfer.Items.FirstOrDefault(i => i.Formats.Contains(dataFormat));
-        if (dataTransferItem is null) return;
-
-        if (!dataTransferItem.TryGetField<DataObject>("_dataObject", out var dataObject)) return;
-        if (dataObject.Get(DragInfo.DataFormat) is not DragInfo dragInfo) return;
-
-        var indexOf = ViewModel.DataSources.IndexOf(item);
-
-        var targetIndex = e.Position switch {
-            TreeDataGridRowDropPosition.After => indexOf + 1,
-            _ => indexOf
-        };
+        if (!e.TryGetDragInfo(out var dragInfo)) return;
 
         var items = dragInfo.Indexes
             .Select(indexPath => {
@@ -59,9 +45,22 @@ public partial class DataSourceSelection : ReactiveUserControl<IDataSourceSelect
             })
             .OfType<DataSourceItem>()
             .ToArray();
+        if (items.Length == 0) return;
 
-        if (dragInfo.Source.Items is IList<DataSourceItem> l) {
-            l.Remove(items);
+        var indexOf = ViewModel.DataSources.IndexOf(item);
+
+        var targetIndex = e.Position switch {
+            TreeDataGridRowDropPosition.After => indexOf + 1,
+            _ => indexOf
+        };
+
+        var movingDown = items.Any(x => ViewModel.DataSources.IndexOf(x) < targetIndex);
+        if (movingDown) {
+            targetIndex -= items.Length;
+        }
+
+        foreach (var dataSourceItem in items) {
+            ViewModel.DataSources.Remove(dataSourceItem);
         }
         ViewModel.DataSources.InsertRange(items, targetIndex);
     }

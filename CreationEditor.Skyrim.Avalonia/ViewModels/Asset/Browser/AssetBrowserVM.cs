@@ -355,17 +355,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Where(dir => ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(dir.DataRelativePath));
     }
 
-    public async Task Drop(DataSourceDirectoryLink dstDirectory, DragInfo dragInfo) {
-        var draggedAssets = dragInfo.Indexes
-            .Select(indexPath => {
-                var rowIndex = dragInfo.Source.Rows.ModelIndexToRowIndex(indexPath);
-                var row = dragInfo.Source.Rows[rowIndex];
-                return row.Model;
-            })
-            .OfType<IDataSourceLink>()
-            .ToArray();
-
-        await AssetContextActionsProvider.MoveAssets(dstDirectory, draggedAssets);
+    public async Task Drop(DataSourceDirectoryLink dstDirectory, IEnumerable<IDataSourceLink> draggedLinks) {
+        await AssetContextActionsProvider.MoveAssets(dstDirectory, draggedLinks.ToArray());
     }
 
     public IEnumerable<Control> GetContextMenuItems(IEnumerable<IDataSourceLink> assets) {

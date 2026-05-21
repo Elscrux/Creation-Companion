@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Services.Asset;
@@ -50,6 +49,6 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     IAssetIconService AssetIconService { get; }
 
     IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink);
-    Task Drop(DataSourceDirectoryLink dstDirectory, DragInfo dragInfo);
+    Task Drop(DataSourceDirectoryLink dstDirectory, IEnumerable<IDataSourceLink> draggedLinks);
     IEnumerable<Control> GetContextMenuItems(IEnumerable<IDataSourceLink> assets);
 }
