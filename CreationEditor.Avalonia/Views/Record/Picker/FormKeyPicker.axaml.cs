@@ -93,9 +93,6 @@ public class FormKeyPicker : AFormKeyPicker {
 
         FormKey = identifierCustomName.Record.FormKey;
 
-        var focusManager = TopLevel.GetTopLevel(this)?.FocusManager;
-        focusManager?.ClearFocus();
-
         InSearchMode = false;
     }
 }
