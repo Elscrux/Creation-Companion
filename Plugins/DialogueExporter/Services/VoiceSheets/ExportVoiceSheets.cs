@@ -1,4 +1,4 @@
-﻿using CreationEditor;
+using CreationEditor;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
@@ -192,6 +192,7 @@ public class ExportVoiceSheets(
                     var results = referenceService.GetRecordReferences(responses)
                         .Select(reference => linkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
                         .WhereNotNull()
+                        .Where(r => r.Record.ResponseData.Equals(responses))
                         .Select(r => {
                             if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null);
                             if (topic.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null);
