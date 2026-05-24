@@ -41,6 +41,12 @@ public sealed class WriteXlsx(
         Bottom,
     }
 
+    private enum TextSize {
+        Small,
+        Medium,
+        Big,
+    }
+
     public void Write(IEnumerable<ExportLine> lines, string outputDirectory) {
         logger.Here().Verbose("Start writing voice sheets to {OutputDirectory}", outputDirectory);
         var linkCache = editorEnvironment.LinkCache;
@@ -69,6 +75,13 @@ public sealed class WriteXlsx(
                         new Bold(),
                         new FontName { Val = new StringValue("Arial") },
                         new FontSize { Val = 10 }),
+                    new Font(
+                        new FontName { Val = new StringValue("Arial") },
+                        new FontSize { Val = 12 }),
+                    new Font(
+                        new Bold(),
+                        new FontName { Val = new StringValue("Arial") },
+                        new FontSize { Val = 12 }),
                     new Font(
                         new FontName { Val = new StringValue("Arial") },
                         new FontSize { Val = 14 }),
@@ -157,7 +170,7 @@ public sealed class WriteXlsx(
 
             uint GetCellFormat(
                 bool bold,
-                bool bigFont,
+                TextSize textSize,
                 BackgroundColor background,
                 BorderStyle borderStyle,
                 VerticalAlignment verticalAlignment = VerticalAlignment.Center) {
@@ -169,7 +182,7 @@ public sealed class WriteXlsx(
                     BackgroundColor.Blue => 1U,
                     _ => throw new ArgumentOutOfRangeException(nameof(background), background, null)
                 };
-                var fontId = (bold ? 1U : 0U) + (bigFont ? 2U : 0U);
+                var fontId = (bold ? 1U : 0U) + (uint) textSize * 2;
                 var borderId = (uint) borderStyle;
                 var verticalAlignmentValues = verticalAlignment switch {
                     VerticalAlignment.Top => VerticalAlignmentValues.Top,
@@ -305,7 +318,7 @@ public sealed class WriteXlsx(
                         npcInfo += $" who is a {sex} {race?.Name?.String}";
                     }
 
-                    var npcDescriptionStyleId = GetCellFormat(false, true, BackgroundColor.None, BorderStyle.None);
+                    var npcDescriptionStyleId = GetCellFormat(false, TextSize.Big, BackgroundColor.None, BorderStyle.None);
                     row.Append(
                         CreateCell(string.Empty, npcDescriptionStyleId),
                         CreateCell(npcInfo, npcDescriptionStyleId)
@@ -314,7 +327,7 @@ public sealed class WriteXlsx(
                     currentRow++;
 
                     // Add a row to the SheetData
-                    var headerStyleId = GetCellFormat(true, true, BackgroundColor.None, BorderStyle.None);
+                    var headerStyleId = GetCellFormat(true, TextSize.Medium, BackgroundColor.None, BorderStyle.None);
                     row = new Row { CustomHeight = true, Height = new DoubleValue(20.0) };
                     row.Append(
                         CreateCell("Quest", headerStyleId),
@@ -428,10 +441,10 @@ public sealed class WriteXlsx(
                                                 borderStyle = BorderStyle.None;
                                             }
 
-                                            var defaultStyleId = GetCellFormat(false, false, backgroundColor, borderStyle);
-                                            var boldStyleId = GetCellFormat(true, true, backgroundColor, borderStyle);
+                                            var defaultStyleId = GetCellFormat(false, TextSize.Small, backgroundColor, borderStyle);
+                                            var boldStyleId = GetCellFormat(true, TextSize.Medium, backgroundColor, borderStyle);
                                             var questBorder = questId == 0 ? BorderStyle.None : BorderStyle.MediumDashed;
-                                            var questStyleId = GetCellFormat(true, false, BackgroundColor.None, questBorder, VerticalAlignment.Top);
+                                            var questStyleId = GetCellFormat(true, TextSize.Small, BackgroundColor.None, questBorder, VerticalAlignment.Top);
                                             row = new Row { CustomHeight = true, Height = new DoubleValue(40.0) };
                                             row.Append(
                                                 CreateCell(line.Quest.Name?.String ?? line.Quest.EditorID ?? line.Quest.FormKey.ToString(), questStyleId),
