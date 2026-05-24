@@ -204,8 +204,6 @@ public sealed class WriteXlsx(
                     },
                 });
 
-                workbookStylesPart.Stylesheet.Save();
-
                 return (uint) ((workbookStylesPart.Stylesheet.CellFormats?.ToArray().Length) ?? throw new InvalidOperationException("CellFormats Count is null")) - 1;
             }
 
@@ -460,6 +458,7 @@ public sealed class WriteXlsx(
             }
 
             // Save the changes
+            workbookStylesPart.Stylesheet.Save();
             workbookPart.Workbook.Save();
         }
 
