@@ -220,7 +220,7 @@ public sealed class WriteXlsx(
                     new Column {
                         Min = 1,
                         Max = 1,
-                        Width = 10,
+                        Width = 20,
                         CustomWidth = true
                     },
                     // Context
