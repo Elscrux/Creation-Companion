@@ -61,7 +61,8 @@ public sealed partial class DialogueExporterVM : ViewModel {
             .CombineLatest(
                 ExportModPickerVM.HasModSelected,
                 voiceLineOutputValid,
-                (a, b, c) => a && b && c);
+                (a, b, c) => a && b && c)
+            .ObserveOnGui();
         ExportVoiceSheetsCommand = ReactiveCommand.CreateRunInBackground(ExportVoiceSheets, CanExportVoiceSheets);
 
         var csvValid = this.WhenAnyValue(x => x.VoiceTypeMappingCsvFile).Select(csv => fileSystem.File.Exists(csv));
@@ -73,7 +74,8 @@ public sealed partial class DialogueExporterVM : ViewModel {
                 csvValid,
                 vocoderValid,
                 voiceTypeMappingCsvValid,
-                (a, b, c, d, e, f) => a && b && c && d && e && f);
+                (a, b, c, d, e, f) => a && b && c && d && e && f)
+            .ObserveOnGui();
         ExportVaSynthCommand = ReactiveCommand.CreateRunInBackground(ExportVaSynth, CanExportVaSynth);
     }
 
