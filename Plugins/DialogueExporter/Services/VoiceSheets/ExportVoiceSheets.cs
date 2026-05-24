@@ -343,23 +343,33 @@ public class ExportVoiceSheets(
             IDialogResponsesGetter responses,
             string voiceTypeName) {
             var conditions = responses.Conditions.Concat(quest.DialogConditions).ToArray();
+            foreach (var c in conditions.OfType<IConditionFloatGetter>()) {
+                if (!(Math.Abs(c.ComparisonValue - 1) < 0.001)) continue;
+                if (c.Data is not IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsId) continue;
+                if (!getIsId.Object.UsesLink()) continue;
+                if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(linkCache, out var hasVoiceType)) continue;
 
-            var condition = conditions
-                .OfType<IConditionFloatGetter>()
-                .FirstOrDefault(x => x.Data is IGetIsIDConditionDataGetter getIsId
-                 && getIsId.Object.UsesLink()
-                 && getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(linkCache, out var hasVoiceType)
-                 && hasVoiceType.Voice.TryResolve(linkCache, out var voiceType)
-                 && voiceType.EditorID == voiceTypeName);
+                if (hasVoiceType.Voice.TryResolve(linkCache, out var voiceType)) {
+                    if (voiceType.EditorID == voiceTypeName) {
+                        if (linkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                            return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                        }
 
-            if (condition?.Data is IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsID
-             && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
-                if (linkCache.TryResolve<INpcGetter>(getIsID.Object.Link.FormKey, out var npc)) {
-                    return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                }
-
-                if (linkCache.TryResolve<ITalkingActivatorGetter>(getIsID.Object.Link.FormKey, out var talkingActivator)) {
-                    return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                        if (linkCache.TryResolve<ITalkingActivatorGetter>(getIsId.Object.Link.FormKey, out var talkingActivator)) {
+                            return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                        }
+                    }
+                } else {
+                    if (linkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                        var npcVoiceTypes = GetNpcTemplateVoiceTypes(npc.Template);
+                        if (npcVoiceTypes.Any(x => x.TryResolve(linkCache, out var vt) && vt.EditorID == voiceTypeName)) {
+                            return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                        } else {
+                            Console.WriteLine();
+                        }
+                    } else {
+                        Console.WriteLine();
+                    }
                 }
             }
 
@@ -486,6 +496,20 @@ public class ExportVoiceSheets(
                 .Select(reference => linkCache.TryResolve<ISceneGetter>(reference.FormKey, out var scene) ? scene : null)
                 .WhereNotNull()
                 .Where(scene => scene.Quest.FormKey == quest.FormKey);
+        }
+
+        IEnumerable<IFormLinkGetter<IVoiceTypeGetter>> GetNpcTemplateVoiceTypes(IFormLinkGetter template) {
+            if (!template.TryResolve<INpcSpawnGetter>(linkCache, out var npcSpawn)) return [];
+
+            return npcSpawn switch {
+                INpcGetter npc => npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)
+                    ? GetNpcTemplateVoiceTypes(npc.Template)
+                    : [npc.Voice],
+                ILeveledNpcGetter { Entries: {} entries } => entries.Select(entry => entry.Data)
+                    .WhereNotNull()
+                    .SelectMany(entry => GetNpcTemplateVoiceTypes(entry.Reference)),
+                _ => []
+            };
         }
     }
 
