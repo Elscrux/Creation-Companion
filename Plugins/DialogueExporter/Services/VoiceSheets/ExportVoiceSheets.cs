@@ -212,7 +212,7 @@ public class ExportVoiceSheets(
                         .Where(r => r.Record.ResponseData.Equals(responses))
                         .Select(r => {
                             if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null);
-                            if (topic.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null);
+                            if (t.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null);
 
                             return GetContext(q, t, r.Record);
                         })
