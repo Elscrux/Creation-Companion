@@ -258,15 +258,20 @@ public class ExportVoiceSheets(
                                     return ($"You are speaking to {speakers}", scene, action);
                                 }
 
+                                var lastResponse = lastTopic.Responses.FirstOrDefault();
+                                if (lastResponse is null) {
+                                    return ($"You are speaking to {speakers}.", scene, action);
+                                }
+
                                 var lastActor = lastDialog.ActorID == action.ActorID
                                     ? "You"
-                                    : GetAliasName(quest, lastDialog.ActorID.Value, lastTopic.Responses[0]);
+                                    : GetAliasName(quest, lastDialog.ActorID.Value, lastResponse);
                                 string textString;
-                                if (!lastTopic.Responses[0].ResponseData.IsNull
-                                 && lastTopic.Responses[0].ResponseData.TryResolve(linkCache, out var sharedInfo)) {
+                                if (!lastResponse.ResponseData.IsNull
+                                 && lastResponse.ResponseData.TryResolve(linkCache, out var sharedInfo)) {
                                     textString = sharedInfo.Responses[^1].Text.String ?? string.Empty;
                                 } else {
-                                    textString = lastTopic.Responses[0].Responses[^1].Text.String ?? string.Empty;
+                                    textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
                                 }
 
                                 return ($"You are speaking to {speakers}. {lastActor} last said '{textString}'", scene, action);
