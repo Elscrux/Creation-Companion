@@ -359,9 +359,15 @@ public class ExportVoiceSheets(
                 return (speaker, GetNameOrEditorID(speaker), SpeakerType.Npc);
             }
 
-            var conditions = responses.Conditions.Concat(quest.DialogConditions).ToArray();
-            foreach (var c in conditions.OfType<IConditionFloatGetter>()) {
-                if (!(Math.Abs(c.ComparisonValue - 1) < 0.001)) continue;
+            // Only check conditions on the speaker which are compared to 1, everything else is not relevant to the speaker
+            var conditions = responses.Conditions
+                .Concat(quest.DialogConditions)
+                .OfType<IConditionFloatGetter>()
+                .Where(c => c.Data.RunOnType == Condition.RunOnType.Subject)
+                .Where(c => Math.Abs(c.ComparisonValue - 1) < 0.001)
+                .ToArray();
+
+            foreach (var c in conditions) {
                 if (c.Data is not IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsId) continue;
                 if (!getIsId.Object.UsesLink()) continue;
                 if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(LinkCache, out var hasVoiceType)) continue;
@@ -381,62 +387,70 @@ public class ExportVoiceSheets(
                         var npcVoiceTypes = GetNpcTemplateVoiceTypes(npc.Template);
                         if (npcVoiceTypes.Any(x => x.TryResolve(LinkCache, out var vt) && vt.EditorID == voiceTypeName)) {
                             return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                        } else {
-                            Console.WriteLine();
                         }
-                    } else {
-                        Console.WriteLine();
                     }
                 }
             }
 
-            var condition = conditions
-                .OfType<IConditionFloatGetter>()
-                .FirstOrDefault(x => x.Data is IGetIsAliasRefConditionDataGetter);
-            if (condition?.Data is IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference
-             && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
+            // FormList
+            foreach (var c in conditions) {
+                if (c.Data is not IIsInListConditionDataGetter { RunOnType: Condition.RunOnType.Subject } isInList) continue;
+                if (!LinkCache.TryResolve<IFormListGetter>(isInList.FormList.Link.FormKey, out var formList)) continue;
+
+                foreach (var formListEntry in formList.Items) {
+                    if (formListEntry.TryResolve<INpcGetter>(LinkCache, out var npc)) {
+                        // return all speakers? - no all from right voice type?
+                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                    }
+                }
+            }
+
+            // Alias Ref
+            foreach (var c in conditions) {
+                if (c.Data is not IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference) continue;
+
                 var aliasNpc = GetAliasNpc(quest, getIsAliasReference.ReferenceAliasIndex, responses);
                 return aliasNpc is null
                     ? (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias)
                     : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
             }
 
+            // Scene Actor
             if (topic.SubtypeName.ToDialogTopicSubtype() == DialogTopic.SubtypeEnum.Scene) {
                 foreach (var scene in GetQuestScenes(topic.Quest)) {
                     foreach (var action in scene.Actions) {
-                        if (action.Type == SceneAction.TypeEnum.Dialog
-                         && action.Topic.FormKey == topic.FormKey
-                         && action.ActorID.HasValue) {
-                            var aliasNpc = GetAliasNpc(quest, action.ActorID.Value, responses);
-                            return aliasNpc is null
-                                ? (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias)
-                                : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
-                        }
+                        if (action.Type != SceneAction.TypeEnum.Dialog) continue;
+                        if (action.Topic.FormKey != topic.FormKey) continue;
+                        if (!action.ActorID.HasValue) continue;
+
+                        var aliasNpc = GetAliasNpc(quest, action.ActorID.Value, responses);
+                        return aliasNpc is null
+                            ? (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias)
+                            : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
                     }
                 }
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
-                x.Data is GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject }
-             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+            // Faction
+            foreach (var c in conditions) {
+                if (c.Data is not GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject } getInFaction) continue;
+                if (!LinkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) continue;
 
-            if (condition?.Data is GetInFactionConditionData getInFaction && LinkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) {
                 return (null, "Member of faction " + GetNameOrEditorID(faction), SpeakerType.Faction);
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
-                x.Data is IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
-             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+            // Race
+            foreach (var c in conditions) {
+                if (c.Data is not IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsRace) continue;
+                if (!LinkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) continue;
 
-            if (condition?.Data is IGetIsRaceConditionDataGetter getIsRace && LinkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) {
                 return (null, "Any NPC who is a " + GetNameOrEditorID(race), SpeakerType.Race);
             }
 
-            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
-                x.Data is IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
-             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+            // Voice Type
+            foreach (var c in conditions) {
+                if (c.Data is not IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }) continue;
 
-            if (condition is not null) {
                 return (null, "Any NPC using voice type " + voiceTypeName, SpeakerType.VoiceType);
             }
 
