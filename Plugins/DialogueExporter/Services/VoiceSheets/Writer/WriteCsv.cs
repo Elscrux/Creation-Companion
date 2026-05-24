@@ -7,7 +7,7 @@ public sealed class WriteCsv(CommandLineEntryPointVoiceSheets args) {
             var voiceType = voiceTypeGrouping.Key;
             var writer = new StreamWriter(Path.Combine(args.OutputDirectory, $"{voiceType}.csv"));
             writer.WriteLine("""
-                "You are speaking as","Context","Line to speak","Acting Note","Filecutting note","Filename"
+                "You are speaking as","Context","Line to speak","Acting Note","Filecutting Note","Filename"
                 """);
 
             var speakerGrouping = voiceTypeGrouping.GroupBy(x => x.Speaker).ToArray();
