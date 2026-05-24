@@ -314,7 +314,7 @@ public sealed class WriteXlsx(
                     currentRow++;
 
                     // Add a row to the SheetData
-                    var headerStyleId = GetCellFormat(true, false, BackgroundColor.None, BorderStyle.None);
+                    var headerStyleId = GetCellFormat(true, true, BackgroundColor.None, BorderStyle.None);
                     row = new Row { CustomHeight = true, Height = new DoubleValue(20.0) };
                     row.Append(
                         CreateCell("Quest", headerStyleId),
