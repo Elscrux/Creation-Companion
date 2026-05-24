@@ -73,7 +73,7 @@ public sealed partial class QueryPluginVM : ViewModel {
     private async Task CopyColumnText(QueryColumnVM vm) {
         var clipboard = TopLevel.GetTopLevel(_window)?.Clipboard;
         if (clipboard is not null) {
-            var text = string.Join(Environment.NewLine, vm.QueriedFields);
+            var text = string.Join(Environment.NewLine, vm.QueriedFields.Select(x => x.QueriedField));
             await clipboard.SetTextAsync(text);
         }
     }
