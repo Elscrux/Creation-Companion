@@ -77,6 +77,10 @@ public class ExportVoiceSheets(
                                 continue;
                             }
 
+                            if (response.Text.String.IsNullOrEmpty() && response.ScriptNotes.IsNullOrEmpty()) {
+                                logger.Here().Verbose("Skipping topic {Topic} response {ResponseNumber} because it has no text or script notes", topic.FormKey, response.ResponseNumber);
+                            }
+
                             ExportLine? line = null;
                             try {
                                 var (npc, speaker, speakerType, isCombatLine) = GetSpeakerWithSeparateCombatLines(quest, topic, responses, voiceType);
