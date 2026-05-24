@@ -351,6 +351,10 @@ public class ExportVoiceSheets(
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses,
             string voiceTypeName) {
+            if (responses.Speaker.TryResolve(linkCache, out var speaker)) {
+                return (speaker, GetNameOrEditorID(speaker), SpeakerType.Npc);
+            }
+
             var conditions = responses.Conditions.Concat(quest.DialogConditions).ToArray();
             foreach (var c in conditions.OfType<IConditionFloatGetter>()) {
                 if (!(Math.Abs(c.ComparisonValue - 1) < 0.001)) continue;
