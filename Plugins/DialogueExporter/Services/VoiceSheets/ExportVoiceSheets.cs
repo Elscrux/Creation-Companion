@@ -8,6 +8,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Assets;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Records.Assets.VoiceType;
@@ -21,6 +22,8 @@ public class ExportVoiceSheets(
     IReferenceService referenceService,
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
+    private ILinkCache LinkCache => editorEnvironment.LinkCache;
+    
     public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool includeAlreadyVoiced) {
         logger.Here().Verbose("Start finding voice lines for mod {Mod}", currentMod.ModKey);
 
@@ -112,8 +115,9 @@ public class ExportVoiceSheets(
         }
 
         logger.Here().Verbose("Finished finding voice lines for mod {Mod}", currentMod.ModKey);
+    }
 
-        (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction, bool skip) GetContext(
+    private (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction, bool skip) GetContext(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses) {
@@ -209,12 +213,12 @@ public class ExportVoiceSheets(
                     return ("You say something to the player", null, null, false);
                 case DialogTopic.SubtypeEnum.SharedInfo:
                     var results = referenceService.GetRecordReferences(responses)
-                        .Select(reference => linkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
+                        .Select(reference => LinkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
                         .WhereNotNull()
                         .Where(r => r.Record.ResponseData.FormKey.Equals(responses.FormKey))
                         .Select(r => {
                             if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null, false);
-                            if (t.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null, false);
+                            if (t.Quest.TryResolve(LinkCache) is not {} q) return (string.Empty, null, null, false);
 
                             return GetContext(q, t, r.Record);
                         })
@@ -255,7 +259,7 @@ public class ExportVoiceSheets(
                                     return ($"You are speaking to {speakers}", scene, action, false);
                                 }
 
-                                var lastTopic = lastDialog.Topic.TryResolve(linkCache);
+                                var lastTopic = lastDialog.Topic.TryResolve(LinkCache);
                                 if (lastTopic is null) {
                                     return ($"You are speaking to {speakers}", scene, action, false);
                                 }
@@ -270,7 +274,7 @@ public class ExportVoiceSheets(
                                     : GetAliasName(quest, lastDialog.ActorID.Value, lastResponse);
                                 string textString;
                                 if (!lastResponse.ResponseData.IsNull
-                                 && lastResponse.ResponseData.TryResolve(linkCache, out var sharedInfo)) {
+                                 && lastResponse.ResponseData.TryResolve(LinkCache, out var sharedInfo)) {
                                     textString = sharedInfo.Responses[^1].Text.String ?? string.Empty;
                                 } else {
                                     textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
@@ -305,11 +309,11 @@ public class ExportVoiceSheets(
 
             string? GetPromptFromInvisibleContinue(IDialogTopicGetter t, IDialogResponsesGetter r) {
                 foreach (var linkResponses in referenceService.GetRecordReferences(t)
-                        .Select(reference => linkCache.TryResolve<IDialogResponsesGetter>(reference.FormKey, out var response) ? response : null)
+                        .Select(reference => LinkCache.TryResolve<IDialogResponsesGetter>(reference.FormKey, out var response) ? response : null)
                         .WhereNotNull()
                         .Where(response => response.Flags is {} flags && flags.Flags.HasFlag(DialogResponses.Flag.InvisibleContinue))
                     ) {
-                    var responsesContext = linkCache.ResolveSimpleContext<IDialogResponsesGetter>(r.FormKey);
+                    var responsesContext = LinkCache.ResolveSimpleContext<IDialogResponsesGetter>(r.FormKey);
                     if (responsesContext.Parent is not { Record: IDialogTopicGetter linkTopic }) continue;
                     if (linkTopic.FormKey == t.FormKey) continue;
 
@@ -333,7 +337,7 @@ public class ExportVoiceSheets(
             }
         }
 
-        (INpcGetter? npc, string speaker, SpeakerType speakerType, bool isCombatLine) GetSpeakerWithSeparateCombatLines(
+    private (INpcGetter? npc, string speaker, SpeakerType speakerType, bool isCombatLine) GetSpeakerWithSeparateCombatLines(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses,
@@ -346,12 +350,12 @@ public class ExportVoiceSheets(
             return (npc, speaker, speakerType, isCombatLine);
         }
 
-        (INpcGetter? npc, string speaker, SpeakerType speakerType) GetSpeaker(
+    private (INpcGetter? npc, string speaker, SpeakerType speakerType) GetSpeaker(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses,
             string voiceTypeName) {
-            if (responses.Speaker.TryResolve(linkCache, out var speaker)) {
+            if (responses.Speaker.TryResolve(LinkCache, out var speaker)) {
                 return (speaker, GetNameOrEditorID(speaker), SpeakerType.Npc);
             }
 
@@ -360,22 +364,22 @@ public class ExportVoiceSheets(
                 if (!(Math.Abs(c.ComparisonValue - 1) < 0.001)) continue;
                 if (c.Data is not IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsId) continue;
                 if (!getIsId.Object.UsesLink()) continue;
-                if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(linkCache, out var hasVoiceType)) continue;
+                if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(LinkCache, out var hasVoiceType)) continue;
 
-                if (hasVoiceType.Voice.TryResolve(linkCache, out var voiceType)) {
+                if (hasVoiceType.Voice.TryResolve(LinkCache, out var voiceType)) {
                     if (voiceType.EditorID == voiceTypeName) {
-                        if (linkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                        if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
                             return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
                         }
 
-                        if (linkCache.TryResolve<ITalkingActivatorGetter>(getIsId.Object.Link.FormKey, out var talkingActivator)) {
+                        if (LinkCache.TryResolve<ITalkingActivatorGetter>(getIsId.Object.Link.FormKey, out var talkingActivator)) {
                             return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
                         }
                     }
                 } else {
-                    if (linkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                    if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
                         var npcVoiceTypes = GetNpcTemplateVoiceTypes(npc.Template);
-                        if (npcVoiceTypes.Any(x => x.TryResolve(linkCache, out var vt) && vt.EditorID == voiceTypeName)) {
+                        if (npcVoiceTypes.Any(x => x.TryResolve(LinkCache, out var vt) && vt.EditorID == voiceTypeName)) {
                             return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
                         } else {
                             Console.WriteLine();
@@ -386,7 +390,7 @@ public class ExportVoiceSheets(
                 }
             }
 
-            condition = conditions
+            var condition = conditions
                 .OfType<IConditionFloatGetter>()
                 .FirstOrDefault(x => x.Data is IGetIsAliasRefConditionDataGetter);
             if (condition?.Data is IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference
@@ -416,7 +420,7 @@ public class ExportVoiceSheets(
                 x.Data is GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject }
              && Math.Abs(x.ComparisonValue - 1) < 0.001);
 
-            if (condition?.Data is GetInFactionConditionData getInFaction && linkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) {
+            if (condition?.Data is GetInFactionConditionData getInFaction && LinkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) {
                 return (null, "Member of faction " + GetNameOrEditorID(faction), SpeakerType.Faction);
             }
 
@@ -424,7 +428,7 @@ public class ExportVoiceSheets(
                 x.Data is IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
              && Math.Abs(x.ComparisonValue - 1) < 0.001);
 
-            if (condition?.Data is IGetIsRaceConditionDataGetter getIsRace && linkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) {
+            if (condition?.Data is IGetIsRaceConditionDataGetter getIsRace && LinkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) {
                 return (null, "Any NPC who is a " + GetNameOrEditorID(race), SpeakerType.Race);
             }
 
@@ -440,7 +444,7 @@ public class ExportVoiceSheets(
             return (null, "Anyone", SpeakerType.Anyone);
         }
 
-        string GetAliasName(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
+        private string GetAliasName(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
             var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
             if (alias is null) {
                 logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
@@ -450,7 +454,7 @@ public class ExportVoiceSheets(
             return alias.Name ?? throw new InvalidOperationException($"Alias {id} in {quest.EditorID} has no name");
         }
 
-        INpcGetter? GetAliasNpc(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
+        private INpcGetter? GetAliasNpc(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
             var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
             if (alias is null) {
                 logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
@@ -464,16 +468,16 @@ public class ExportVoiceSheets(
             }
 
             if (!alias.ForcedReference.IsNull) {
-                var forcedRef = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(linkCache);
+                var forcedRef = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(LinkCache);
                 if (forcedRef is not null) {
-                    return forcedRef.Base.TryResolve<INpcGetter>(linkCache);
+                    return forcedRef.Base.TryResolve<INpcGetter>(LinkCache);
                 }
             }
 
-            return alias.UniqueActor.TryResolve<INpcGetter>(linkCache);
+            return alias.UniqueActor.TryResolve<INpcGetter>(LinkCache);
         }
 
-        IDialogBranchGetter? GetRootBranch(IDialogTopicGetter topic) {
+        private IDialogBranchGetter? GetRootBranch(IDialogTopicGetter topic) {
             var processedTopics = new List<FormKey>();
 
             return GetRootBranchRec(topic);
@@ -481,14 +485,14 @@ public class ExportVoiceSheets(
             IDialogBranchGetter? GetRootBranchRec(IDialogTopicGetter currentTopic) {
                 // Try to get branch from the starting topic
                 var branch = referenceService.GetRecordReferences(currentTopic)
-                    .Select(reference => linkCache.TryResolve<IDialogBranchGetter>(reference.FormKey, out var branch) ? branch : null)
+                    .Select(reference => LinkCache.TryResolve<IDialogBranchGetter>(reference.FormKey, out var branch) ? branch : null)
                     .WhereNotNull()
                     .FirstOrDefault(branch => branch.StartingTopic.FormKey == currentTopic.FormKey);
                 if (branch is not null) return branch;
 
                 // If not a starting topic, try to find a starting topic linking to this
                 foreach (var linkTopic in referenceService.GetRecordReferences(currentTopic)
-                    .Select(reference => linkCache.TryResolve<IDialogTopicGetter>(reference.FormKey, out var t) ? t : null)
+                    .Select(reference => LinkCache.TryResolve<IDialogTopicGetter>(reference.FormKey, out var t) ? t : null)
                     .WhereNotNull()) {
                     foreach (var responses in linkTopic.Responses) {
                         foreach (var linkTo in responses.LinkTo) {
@@ -512,15 +516,15 @@ public class ExportVoiceSheets(
             }
         }
 
-        IEnumerable<ISceneGetter> GetQuestScenes(IFormLinkNullableGetter<IQuestGetter> quest) {
+        private IEnumerable<ISceneGetter> GetQuestScenes(IFormLinkNullableGetter<IQuestGetter> quest) {
             return referenceService.GetRecordReferences(quest)
-                .Select(reference => linkCache.TryResolve<ISceneGetter>(reference.FormKey, out var scene) ? scene : null)
+                .Select(reference => LinkCache.TryResolve<ISceneGetter>(reference.FormKey, out var scene) ? scene : null)
                 .WhereNotNull()
                 .Where(scene => scene.Quest.FormKey == quest.FormKey);
         }
 
-        IEnumerable<IFormLinkGetter<IVoiceTypeGetter>> GetNpcTemplateVoiceTypes(IFormLinkGetter template) {
-            if (!template.TryResolve<INpcSpawnGetter>(linkCache, out var npcSpawn)) return [];
+        private IEnumerable<IFormLinkGetter<IVoiceTypeGetter>> GetNpcTemplateVoiceTypes(IFormLinkGetter template) {
+            if (!template.TryResolve<INpcSpawnGetter>(LinkCache, out var npcSpawn)) return [];
 
             return npcSpawn switch {
                 INpcGetter npc => npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)
@@ -532,7 +536,6 @@ public class ExportVoiceSheets(
                 _ => []
             };
         }
-    }
 
     private static string GetNameOrEditorID<T>(T named)
         where T : IMajorRecordGetter, INamedGetter =>
