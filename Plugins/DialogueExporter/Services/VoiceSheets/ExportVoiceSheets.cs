@@ -77,7 +77,9 @@ public class ExportVoiceSheets(
                             ExportLine? line = null;
                             try {
                                 var (npc, speaker, speakerType, isCombatLine) = GetSpeakerWithSeparateCombatLines(quest, topic, responses, voiceType);
-                                var (context, scene, sceneAction) = GetContext(quest, topic, responses);
+                                var (context, scene, sceneAction, skip) = GetContext(quest, topic, responses);
+                                if (skip) continue;
+
                                 var rootBranch = GetRootBranch(topic);
                                 line = new ExportLine(
                                     voiceType,
@@ -111,7 +113,7 @@ public class ExportVoiceSheets(
 
         logger.Here().Verbose("Finished finding voice lines for mod {Mod}", currentMod.ModKey);
 
-        (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction) GetContext(
+        (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction, bool skip) GetContext(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses) {
@@ -192,27 +194,27 @@ public class ExportVoiceSheets(
                 _ => null,
             };
 
-            if (type is not null) return (type, null, null);
+            if (type is not null) return (type, null, null, false);
 
             if (GetPromptFromInvisibleContinue(topic, responses) is {} promptFromInvisibleContinue) {
-                return (promptFromInvisibleContinue, null, null);
+                return (promptFromInvisibleContinue, null, null, false);
             }
 
             if (GetPromptFromBranchingDialog(topic, responses) is {} promptFromBranchingDialog) {
-                return (promptFromBranchingDialog, null, null);
+                return (promptFromBranchingDialog, null, null, false);
             }
 
             switch (subtype) {
                 case DialogTopic.SubtypeEnum.Custom or DialogTopic.SubtypeEnum.ForceGreet:
-                    return ("You say something to the player", null, null);
+                    return ("You say something to the player", null, null, false);
                 case DialogTopic.SubtypeEnum.SharedInfo:
                     var results = referenceService.GetRecordReferences(responses)
                         .Select(reference => linkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
                         .WhereNotNull()
-                        .Where(r => r.Record.ResponseData.Equals(responses))
+                        .Where(r => r.Record.ResponseData.FormKey.Equals(responses.FormKey))
                         .Select(r => {
-                            if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null);
-                            if (t.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null);
+                            if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null, false);
+                            if (t.Quest.TryResolve(linkCache) is not {} q) return (string.Empty, null, null, false);
 
                             return GetContext(q, t, r.Record);
                         })
@@ -222,14 +224,14 @@ public class ExportVoiceSheets(
 
                     switch (results) {
                         case []:
-                            break;
+                            // Skip a shared info it is not used by anything - this will not be included in the export
+                            logger.Here().Verbose("Skipping shared info {Responses} because is not used by any dialog topic", responses.FormKey);
+                            return (string.Empty, null, null, true);
                         case [var result]:
                             return result;
-                        case var _:
-                            return ("Used in multiple contexts: \n" + string.Join("\n", results.Select(x => x.Context)), null, null);
+                        default:
+                            return ("Used in multiple contexts: \n" + string.Join("\n", results.Select(x => x.Context)), null, null, false);
                     }
-
-                    break;
                 case DialogTopic.SubtypeEnum.Scene: {
                     foreach (var scene in GetQuestScenes(topic.Quest)) {
                         foreach (var action in scene.Actions) {
@@ -239,7 +241,7 @@ public class ExportVoiceSheets(
                                     .Select(a => GetAliasName(quest, (int) a.ID, responses))
                                     .ToArray();
                                 if (aliases.Length == 0) {
-                                    return ("You are speaking in a scene with no other actors", scene, action);
+                                    return ("You are speaking in a scene with no other actors", scene, action, false);
                                 }
 
                                 var lastDialog = scene.Actions
@@ -250,17 +252,17 @@ public class ExportVoiceSheets(
 
                                 var speakers = string.Join(", ", aliases);
                                 if (lastDialog?.ActorID == null) {
-                                    return ($"You are speaking to {speakers}", scene, action);
+                                    return ($"You are speaking to {speakers}", scene, action, false);
                                 }
 
                                 var lastTopic = lastDialog.Topic.TryResolve(linkCache);
                                 if (lastTopic is null) {
-                                    return ($"You are speaking to {speakers}", scene, action);
+                                    return ($"You are speaking to {speakers}", scene, action, false);
                                 }
 
                                 var lastResponse = lastTopic.Responses.FirstOrDefault();
                                 if (lastResponse is null) {
-                                    return ($"You are speaking to {speakers}.", scene, action);
+                                    return ($"You are speaking to {speakers}.", scene, action, false);
                                 }
 
                                 var lastActor = lastDialog.ActorID == action.ActorID
@@ -274,18 +276,20 @@ public class ExportVoiceSheets(
                                     textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
                                 }
 
-                                return ($"You are speaking to {speakers}. {lastActor} last said '{textString}'", scene, action);
+                                return ($"You are speaking to {speakers}. {lastActor} last said '{textString}'", scene, action, false);
                             }
                         }
                     }
 
-                    logger.Here().Error("Topic {Topic} is not part of a scene", topic.FormKey);
-                    return ("", null, null);
+                    logger.Here().Warning("Skipping scene topic {Topic} because is not part of a scene", topic.FormKey);
+                    return ("", null, null, true);
                 }
             }
 
-            logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}", responses.FormKey, topic.SubtypeName.ToDialogTopicSubtype());
-            return ("", null, null);
+            logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}",
+                responses.FormKey,
+                topic.SubtypeName.ToDialogTopicSubtype());
+            return ("", null, null, false);
 
             string? GetPromptFromBranchingDialog(IDialogTopicGetter t, IDialogResponsesGetter r) {
                 if (r.Prompt is not null && !r.Prompt.String.IsNullOrEmpty()) {
