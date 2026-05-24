@@ -417,6 +417,14 @@ public class ExportVoiceSheets(
             }
 
             condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
+                x.Data is IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
+             && Math.Abs(x.ComparisonValue - 1) < 0.001);
+
+            if (condition?.Data is IGetIsRaceConditionDataGetter getIsRace && linkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) {
+                return (null, "Any NPC who is a " + GetNameOrEditorID(race), SpeakerType.Race);
+            }
+
+            condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
                 x.Data is IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }
              && Math.Abs(x.ComparisonValue - 1) < 0.001);
 
@@ -533,6 +541,7 @@ public enum SpeakerType {
     TalkingActivator,
     Alias,
     Faction,
+    Race,
     VoiceType,
     Anyone
 }
