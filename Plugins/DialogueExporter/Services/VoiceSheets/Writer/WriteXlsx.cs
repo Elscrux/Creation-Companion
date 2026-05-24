@@ -21,6 +21,26 @@ public sealed class WriteXlsx(
     ILogger logger,
     IEditorEnvironment editorEnvironment,
     IFileSystem fileSystem) {
+    private enum BorderStyle {
+        None,
+        MediumDashed,
+        Double,
+        Thin,
+        Dotted,
+    }
+
+    private enum BackgroundColor {
+        None,
+        Green,
+        Blue,
+    }
+
+    private enum VerticalAlignment {
+        Top,
+        Center,
+        Bottom,
+    }
+
     public void Write(IEnumerable<ExportLine> lines, string outputDirectory) {
         logger.Here().Verbose("Start writing voice sheets to {OutputDirectory}", outputDirectory);
         var linkCache = editorEnvironment.LinkCache;
@@ -48,7 +68,14 @@ public sealed class WriteXlsx(
                     new Font(
                         new Bold(),
                         new FontName { Val = new StringValue("Arial") },
-                        new FontSize { Val = 10 })
+                        new FontSize { Val = 10 }),
+                    new Font(
+                        new FontName { Val = new StringValue("Arial") },
+                        new FontSize { Val = 14 }),
+                    new Font(
+                        new Bold(),
+                        new FontName { Val = new StringValue("Arial") },
+                        new FontSize { Val = 14 })
                 ),
                 Fills = new Fills(
                     new Fill(
@@ -70,13 +97,13 @@ public sealed class WriteXlsx(
                 ),
                 Borders = new Borders(
                     new Border(new TopBorder {
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.None),
+                    }),
+                    new Border(new TopBorder {
                         Style = new EnumValue<BorderStyleValues>(BorderStyleValues.MediumDashed),
                     }),
                     new Border(new TopBorder {
                         Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Double),
-                    }),
-                    new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Thin),
                     }),
                     new Border(new TopBorder {
                         Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Thin),
@@ -123,180 +150,71 @@ public sealed class WriteXlsx(
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Top),
                             WrapText = true,
                         },
-                    },
-                    // Non-Bold - Blue
-                    new CellFormat {
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Quest Start - Blue
-                    new CellFormat {
-                        BorderId = 0,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Branch Start - Blue
-                    new CellFormat {
-                        BorderId = 1,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Topic Start - Blue
-                    new CellFormat {
-                        BorderId = 2,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Responses Start - Blue
-                    new CellFormat {
-                        BorderId = 3,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Response Start - Blue
-                    new CellFormat {
-                        BorderId = 4,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 0,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Non-Bold - Green
-                    new CellFormat {
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Quest Start - Green
-                    new CellFormat {
-                        BorderId = 0,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Branch Start - Green
-                    new CellFormat {
-                        BorderId = 1,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Topic Start - Green
-                    new CellFormat {
-                        BorderId = 2,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Responses Start - Green
-                    new CellFormat {
-                        BorderId = 3,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
-                    },
-                    // Response Start - Green
-                    new CellFormat {
-                        BorderId = 4,
-                        ApplyBorder = true,
-                        FontId = 0,
-                        ApplyFont = true,
-                        FillId = 1,
-                        ApplyFill = true,
-                        Alignment = new Alignment {
-                            Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
                     }
                 ),
             };
             workbookStylesPart.Stylesheet.Save();
 
-            const uint nonBoldCellFormatId = 0;
-            const uint boldCellFormatId = 1;
-            const uint questNoBorderCellFormatId = 2;
-            const uint questBorderCellFormatId = 3;
-            const uint blueNonBoldCellFormatId = 4;
-            const uint questStartCellFormatId = 5;
-            const uint branchStartCellFormatId = 6;
-            const uint topicStartCellFormatId = 7;
-            const uint responsesStartCellFormatId = 8;
-            const uint responseStartCellFormatId = 9;
+            uint GetCellFormat(
+                bool bold,
+                bool bigFont,
+                BackgroundColor background,
+                BorderStyle borderStyle,
+                VerticalAlignment verticalAlignment = VerticalAlignment.Center) {
+                if (workbookStylesPart.Stylesheet?.CellFormats is null) throw new InvalidOperationException("CellFormats is null");
+
+                uint? fillId = background switch {
+                    BackgroundColor.None => null,
+                    BackgroundColor.Green => 0U,
+                    BackgroundColor.Blue => 1U,
+                    _ => throw new ArgumentOutOfRangeException(nameof(background), background, null)
+                };
+                var fontId = (bold ? 1U : 0U) + (bigFont ? 2U : 0U);
+                var borderId = (uint) borderStyle;
+                var verticalAlignmentValues = verticalAlignment switch {
+                    VerticalAlignment.Top => VerticalAlignmentValues.Top,
+                    VerticalAlignment.Center => VerticalAlignmentValues.Center,
+                    VerticalAlignment.Bottom => VerticalAlignmentValues.Bottom,
+                    _ => throw new ArgumentOutOfRangeException(nameof(verticalAlignment), verticalAlignment, null)
+                };
+
+                var cellFormats = workbookStylesPart.Stylesheet.CellFormats.OfType<CellFormat>().ToArray();
+                for (uint i = 0; i < cellFormats.Length; i++) {
+                    var cellFormat = cellFormats[i];
+                    if (cellFormat.BorderId is null || cellFormat.FontId is null || cellFormat.FillId is null || cellFormat.Alignment?.Vertical is null) continue;
+
+                    if (cellFormat.BorderId == borderId
+                     && cellFormat.FontId == fontId
+                     && cellFormat.FillId == fillId
+                     && cellFormat.Alignment.Vertical == verticalAlignmentValues) {
+                        return i;
+                    }
+                }
+
+                workbookStylesPart.Stylesheet.CellFormats.AppendChild(new CellFormat {
+                    BorderId = borderId,
+                    ApplyBorder = true,
+                    FontId = fontId,
+                    ApplyFont = true,
+                    FillId = fillId,
+                    ApplyFill = true,
+                    Alignment = new Alignment {
+                        Vertical = new EnumValue<VerticalAlignmentValues>(verticalAlignmentValues),
+                        WrapText = true,
+                    },
+                });
+
+                workbookStylesPart.Stylesheet.Save();
+
+                return (uint) ((workbookStylesPart.Stylesheet.CellFormats?.ToArray().Length) ?? throw new InvalidOperationException("CellFormats Count is null")) - 1;
+            }
 
             // Add Sheets to the Workbook
             var sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-            var speakerGrouping = voiceTypeGrouping.GroupBy(x => x.Speaker).ToArray();
-            for (uint speakerId = 0; speakerId < speakerGrouping.Length; speakerId++) {
-                var speaker = speakerGrouping[speakerId];
+            var isCombatLineGrouping = voiceTypeGrouping.GroupBy(x => x.IsCombatLine).ToArray();
+            for (uint speakerId = 0; speakerId < isCombatLineGrouping.Length; speakerId++) {
+                var combatLinesGrouping = isCombatLineGrouping[speakerId];
 
                 // Add columns
                 var columns = new Columns(
@@ -318,7 +236,7 @@ public sealed class WriteXlsx(
                     new Column {
                         Min = 3,
                         Max = 3,
-                        Width = 100,
+                        Width = 110,
                         CustomWidth = true
                     },
                     // Acting Note
@@ -332,7 +250,7 @@ public sealed class WriteXlsx(
                     new Column {
                         Min = 5,
                         Max = 5,
-                        Width = 75,
+                        Width = 60,
                         CustomWidth = true
                     },
                     // Filename
@@ -351,7 +269,7 @@ public sealed class WriteXlsx(
                 var sheet = new Sheet {
                     Id = workbookPart.GetIdOfPart(worksheetPart),
                     SheetId = new UInt32Value(speakerId),
-                    Name = speaker.Key,
+                    Name = combatLinesGrouping.Key ? "Combat" : "Main",
                 };
                 sheets.AppendChild(sheet);
 
@@ -368,181 +286,177 @@ public sealed class WriteXlsx(
                 // Create a SheetView element
                 var sheetView = new SheetView { TabSelected = true, WorkbookViewId = 0 };
 
-                // Create a Pane element to freeze the top row
-                var pane = new Pane {
-                    VerticalSplit = 2,
-                    TopLeftCell = "A3",
-                    ActivePane = PaneValues.BottomRight,
-                    State = PaneStateValues.Frozen
-                };
-
-                // Add the Pane to the SheetView
-                sheetView.AppendChild(pane);
-                sheetViews.AppendChild(sheetView);
-                worksheetPart.Worksheet.AppendChild(sheetViews);
-
-                // Add a row to the SheetData
-                var row = new Row { CustomHeight = true, Height = new DoubleValue(18.0) };
-                var npc = speaker.FirstOrDefault()?.Npc;
-                var npcInfo = $"You are voicing {speaker.Key}";
-                if (npc is not null && !npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)) {
-                    var race = npc.Race.TryResolve(linkCache);
-                    var sex = npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Female) ? "female" : "male";
-                    npcInfo += $" who is a {sex} {race?.Name?.String}";
-                }
-
-                row.Append(
-                    CreateCell(string.Empty, nonBoldCellFormatId),
-                    CreateCell(npcInfo, nonBoldCellFormatId)
-                );
-                sheetData.AppendChild(row);
-
-                // Add a row to the SheetData
-                row = new Row { CustomHeight = true, Height = new DoubleValue(18.0) };
-                row.Append(
-                    CreateCell("Quest", boldCellFormatId),
-                    CreateCell("Context", boldCellFormatId),
-                    CreateCell("Line to speak", boldCellFormatId),
-                    CreateCell("Acting Note", boldCellFormatId),
-                    CreateCell("Filecutting Note", boldCellFormatId),
-                    CreateCell("Filename", boldCellFormatId)
-                );
-                sheetData.AppendChild(row);
-
                 // Add merged cells
                 var mergeCells = new MergeCells();
                 worksheetPart.Worksheet.InsertAfter(mergeCells, sheetData);
 
-                var isBlue = true;
+                // Add the Pane to the SheetView
+                sheetViews.AppendChild(sheetView);
+                worksheetPart.Worksheet.AppendChild(sheetViews);
 
-                // Start from row 3 due to first two rows being headers
-                var currentRow = 3;
-                var speakerArray = speaker.OrderBy(x => x.Quest.EditorID ?? x.Quest.Name?.String ?? x.Quest.FormKey.ToString()).ToList();
+                var currentRow = 1;
+                var speakersGrouping = combatLinesGrouping.GroupBy(x => x.Speaker).ToArray();
+                foreach (var speakerGrouping in speakersGrouping.OrderBy(x => x.FirstOrDefault()?.SpeakerType)) {
+                    // Add a row to the SheetData
+                    var row = new Row { CustomHeight = true, Height = new DoubleValue(40.0) };
+                    var npc = speakerGrouping.FirstOrDefault()?.Npc;
+                    var npcInfo = $"You are voicing {speakerGrouping.Key}";
+                    if (npc is not null && !npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)) {
+                        var race = npc.Race.TryResolve(linkCache);
+                        var sex = npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Female) ? "female" : "male";
+                        npcInfo += $" who is a {sex} {race?.Name?.String}";
+                    }
 
-                // Move dialogue quests to the start of the list
-                var dialogueQuests = speakerArray
-                    .Where(x => x.Quest.EditorID is not null
-                     && x.Quest.EditorID.Contains("Dialogue", StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-                if (dialogueQuests.Length > 0 && dialogueQuests.Length < speakerArray.Count) {
-                    var dialogueQuestFormKeys = dialogueQuests.Select(x => x.Quest.FormKey).ToArray();
-                    speakerArray.RemoveAll(x => dialogueQuestFormKeys.Contains(x.Quest.FormKey));
-                    speakerArray.InsertRange(0, dialogueQuests);
-                }
+                    var npcDescriptionStyleId = GetCellFormat(false, true, BackgroundColor.None, BorderStyle.None);
+                    row.Append(
+                        CreateCell(string.Empty, npcDescriptionStyleId),
+                        CreateCell(npcInfo, npcDescriptionStyleId)
+                    );
+                    sheetData.AppendChild(row);
+                    currentRow++;
 
-                var questGrouping = speakerArray.GroupBy(x => x.Quest.FormKey.ToString()).ToArray();
-                for (var questId = 0; questId < questGrouping.Length; questId++) {
-                    var quest = questGrouping[questId];
-                    var questArray = quest
-                        .OrderBy(x => x.Branch?.EditorID ?? x.Branch?.FormKey.ToString())
-                        .ToList();
+                    // Add a row to the SheetData
+                    var headerStyleId = GetCellFormat(true, false, BackgroundColor.None, BorderStyle.None);
+                    row = new Row { CustomHeight = true, Height = new DoubleValue(20.0) };
+                    row.Append(
+                        CreateCell("Quest", headerStyleId),
+                        CreateCell("Context", headerStyleId),
+                        CreateCell("Line to speak", headerStyleId),
+                        CreateCell("Acting Note", headerStyleId),
+                        CreateCell("Filecutting Note", headerStyleId),
+                        CreateCell("Filename", headerStyleId)
+                    );
+                    sheetData.AppendChild(row);
+                    currentRow++;
 
-                    mergeCells.AppendChild(new MergeCell { Reference = $"A{currentRow}:A{currentRow + questArray.Count - 1}" });
+                    var backgroundColor = BackgroundColor.Blue;
 
-                    currentRow += questArray.Count;
+                    // Start from row 3 due to first two rows being headers
+                    var speakerArray = speakerGrouping.OrderBy(x => x.Quest.EditorID ?? x.Quest.Name?.String ?? x.Quest.FormKey.ToString()).ToList();
 
-                    var branchGrouping = questArray
-                        .GroupBy(x => x.Branch?.FormKey.ToString())
-                        .OrderBy(x => {
-                            var startingTopic = x.FirstOrDefault(l => l.Branch is {} b && b.StartingTopic.FormKey == l.Topic.FormKey);
-                            if (startingTopic is null) return uint.MinValue;
+                    // Move dialogue quests to the start of the list
+                    var dialogueQuests = speakerArray
+                        .Where(x => x.Quest.EditorID is not null
+                         && x.Quest.EditorID.Contains("Dialogue", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+                    if (dialogueQuests.Length > 0 && dialogueQuests.Length < speakerArray.Count) {
+                        var dialogueQuestFormKeys = dialogueQuests.Select(x => x.Quest.FormKey).ToArray();
+                        speakerArray.RemoveAll(x => dialogueQuestFormKeys.Contains(x.Quest.FormKey));
+                        speakerArray.InsertRange(0, dialogueQuests);
+                    }
 
-                            var c = startingTopic.Responses.Conditions
-                                .OfType<IConditionFloatGetter>()
-                                .FirstOrDefault(c => c.Data is IGetStageConditionDataGetter);
-                            if (c?.ComparisonValue is null) return uint.MinValue;
-
-                            return c.ComparisonValue;
-                        }).ToArray();
-                    for (var branchId = 0; branchId < branchGrouping.Length; branchId++) {
-                        var branch = branchGrouping[branchId];
-                        var branchArray = branch
-                            .OrderBy(x => {
-                                var subtype = x.Topic.SubtypeName.ToDialogTopicSubtype();
-                                if (subtype is not null && subtype.Value.IsCombatLine()) return -1;
-
-                                return 1;
-                            })
-                            .ThenBy(x => x.Action?.Index ?? uint.MaxValue)
-                            .ThenBy(x => x.Topic.EditorID ?? x.Topic.FormKey.ToString())
+                    var questGrouping = speakerArray.GroupBy(x => x.Quest.FormKey.ToString()).ToArray();
+                    for (var questId = 0; questId < questGrouping.Length; questId++) {
+                        var quest = questGrouping[questId];
+                        var questArray = quest
+                            .OrderBy(x => x.Branch?.EditorID ?? x.Branch?.FormKey.ToString())
                             .ToList();
-                        // Move topics in branch to the start of the list that are starting topics
-                        var startingLines = branchArray
-                            .Where(x => x.Branch is {} b && b.StartingTopic.FormKey == x.Topic.FormKey)
-                            .ToArray();
-                        if (startingLines.Length > 0 && startingLines.Length < branchArray.Count) {
-                            var startingTopicFormKey = startingLines[0].Topic.FormKey;
-                            branchArray.RemoveAll(x => x.Topic.FormKey == startingTopicFormKey);
-                            branchArray.InsertRange(0, startingLines);
-                        }
 
-                        var topicGrouping = branchArray.GroupBy(x => x.Topic.FormKey.ToString()).ToArray();
-                        for (var topicId = 0; topicId < topicGrouping.Length; topicId++) {
-                            var topic = topicGrouping[topicId];
-                            var topicArray = topic
-                                .OrderBy(x => x.Responses.EditorID ?? x.Responses.FormKey.ToString())
+                        mergeCells.AppendChild(new MergeCell { Reference = $"A{currentRow}:A{currentRow + questArray.Count - 1}" });
+
+                        currentRow += questArray.Count;
+
+                        var branchGrouping = questArray
+                            .GroupBy(x => x.Branch?.FormKey.ToString())
+                            .OrderBy(x => {
+                                var startingTopic = x.FirstOrDefault(l => l.Branch is {} b && b.StartingTopic.FormKey == l.Topic.FormKey);
+                                if (startingTopic is null) return uint.MinValue;
+
+                                var c = startingTopic.Responses.Conditions
+                                    .OfType<IConditionFloatGetter>()
+                                    .FirstOrDefault(c => c.Data is IGetStageConditionDataGetter);
+                                if (c?.ComparisonValue is null) return uint.MinValue;
+
+                                return c.ComparisonValue;
+                            }).ToArray();
+                        for (var branchId = 0; branchId < branchGrouping.Length; branchId++) {
+                            var branch = branchGrouping[branchId];
+                            var branchArray = branch
+                                .OrderBy(x => {
+                                    var subtype = x.Topic.SubtypeName.ToDialogTopicSubtype();
+                                    if (subtype is not null && subtype.Value.IsCombatLine()) return -1;
+
+                                    return 1;
+                                })
+                                .ThenBy(x => x.Action?.Index ?? uint.MaxValue)
+                                .ThenBy(x => x.Topic.EditorID ?? x.Topic.FormKey.ToString())
                                 .ToList();
-                            var responsesGrouping = topicArray.GroupBy(x => x.Topic.FormKey.ToString()).ToArray();
-                            isBlue = !isBlue;
-                            for (var responsesId = 0; responsesId < responsesGrouping.Length; responsesId++) {
-                                var responses = responsesGrouping[responsesId];
-                                var responsesArray = responses.ToArray();
-                                var responseGrouping = responsesArray.GroupBy(x => x.Responses.FormKey.ToString()).ToArray();
-                                for (var responseId = 0; responseId < responseGrouping.Length; responseId++) {
-                                    var response = responseGrouping[responseId];
-                                    var responseArray = response.OrderBy(x => x.Path).ToArray();
-                                    for (var lineId = 0; lineId < responseArray.Length; lineId++) {
-                                        var line = responseArray[lineId];
-                                        uint styleId;
-                                        var offset = isBlue ? (uint) 6 : 0;
-                                        if (lineId > 0) {
-                                            styleId = blueNonBoldCellFormatId + offset;
-                                        } else if (responseId > 0) {
-                                            styleId = responseStartCellFormatId + offset;
-                                        } else if (responsesId > 0) {
-                                            if (line.Branch is null) {
-                                                // For greetings, goodbyes, etc. use branch separator
-                                                styleId = branchStartCellFormatId + offset;
+                            // Move topics in branch to the start of the list that are starting topics
+                            var startingLines = branchArray
+                                .Where(x => x.Branch is {} b && b.StartingTopic.FormKey == x.Topic.FormKey)
+                                .ToArray();
+                            if (startingLines.Length > 0 && startingLines.Length < branchArray.Count) {
+                                var startingTopicFormKey = startingLines[0].Topic.FormKey;
+                                branchArray.RemoveAll(x => x.Topic.FormKey == startingTopicFormKey);
+                                branchArray.InsertRange(0, startingLines);
+                            }
+
+                            var topicGrouping = branchArray.GroupBy(x => x.Topic.FormKey.ToString()).ToArray();
+                            for (var topicId = 0; topicId < topicGrouping.Length; topicId++) {
+                                var topic = topicGrouping[topicId];
+                                var topicArray = topic
+                                    .OrderBy(x => x.Responses.EditorID ?? x.Responses.FormKey.ToString())
+                                    .ToList();
+                                var responsesGrouping = topicArray.GroupBy(x => x.Topic.FormKey.ToString()).ToArray();
+                                backgroundColor = backgroundColor == BackgroundColor.Blue ? BackgroundColor.Green : BackgroundColor.Blue;
+                                for (var responsesId = 0; responsesId < responsesGrouping.Length; responsesId++) {
+                                    var responses = responsesGrouping[responsesId];
+                                    var responsesArray = responses.ToArray();
+                                    var responseGrouping = responsesArray.GroupBy(x => x.Responses.FormKey.ToString()).ToArray();
+                                    for (var responseId = 0; responseId < responseGrouping.Length; responseId++) {
+                                        var response = responseGrouping[responseId];
+                                        var responseArray = response.OrderBy(x => x.Path).ToArray();
+                                        for (var lineId = 0; lineId < responseArray.Length; lineId++) {
+                                            var line = responseArray[lineId];
+                                            BorderStyle borderStyle;
+                                            if (lineId > 0) {
+                                                borderStyle = BorderStyle.None;
+                                            } else if (responseId > 0) {
+                                                borderStyle = BorderStyle.Dotted;
+                                            } else if (responsesId > 0) {
+                                                if (line.Branch is null) {
+                                                    // For greetings, goodbyes, etc. use branch separator
+                                                    borderStyle = BorderStyle.Double;
+                                                } else {
+                                                    borderStyle = BorderStyle.Thin;
+                                                }
+                                            } else if (topicId > 0) {
+                                                borderStyle = BorderStyle.Thin;
+                                            } else if (branchId > 0) {
+                                                borderStyle = BorderStyle.Double;
+                                            } else if (questId > 0) {
+                                                borderStyle = BorderStyle.MediumDashed;
                                             } else {
-                                                styleId = responsesStartCellFormatId + offset;
+                                                borderStyle = BorderStyle.None;
                                             }
-                                        } else if (topicId > 0) {
-                                            styleId = topicStartCellFormatId + offset;
-                                        } else if (branchId > 0) {
-                                            styleId = branchStartCellFormatId + offset;
-                                        } else if (questId > 0) {
-                                            styleId = questStartCellFormatId + offset;
-                                        } else {
-                                            styleId = blueNonBoldCellFormatId;
+
+                                            var defaultStyleId = GetCellFormat(false, false, backgroundColor, borderStyle);
+                                            var boldStyleId = GetCellFormat(true, true, backgroundColor, borderStyle);
+                                            var questBorder = questId == 0 ? BorderStyle.None : BorderStyle.MediumDashed;
+                                            var questStyleId = GetCellFormat(true, false, BackgroundColor.None, questBorder, VerticalAlignment.Top);
+                                            row = new Row { CustomHeight = true, Height = new DoubleValue(40.0) };
+                                            row.Append(
+                                                CreateCell(line.Quest.Name?.String ?? line.Quest.EditorID ?? line.Quest.FormKey.ToString(), questStyleId),
+                                                CreateCell(lineId > 0 ? string.Empty : line.Context, defaultStyleId),
+                                                CreateCell(line.Line, boldStyleId),
+                                                CreateCell(line.VaNote, defaultStyleId),
+                                                CreateCell(string.Empty, defaultStyleId),
+                                                CreateCell(Path.GetFileNameWithoutExtension(line.Path), defaultStyleId)
+                                            );
+
+                                            sheetData.AppendChild(row);
                                         }
-
-                                        row = new Row { CustomHeight = true, Height = new DoubleValue(36.0) };
-                                        row.Append(
-                                            CreateCell(line.Quest.Name?.String ?? line.Quest.EditorID ?? line.Quest.FormKey.ToString(),
-                                                questId == 0 ? questNoBorderCellFormatId : questBorderCellFormatId),
-                                            CreateCell(lineId > 0 ? string.Empty : line.Context, styleId),
-                                            CreateCell(line.Line, styleId),
-                                            CreateCell(line.VaNote, styleId),
-                                            CreateCell(string.Empty),
-                                            CreateCell(Path.GetFileNameWithoutExtension(line.Path), styleId)
-                                        );
-
-                                        sheetData.AppendChild(row);
                                     }
                                 }
                             }
                         }
                     }
+
+                    sheetData.AppendChild(new Row { CustomHeight = true, Height = new DoubleValue(50.0) });
+                    currentRow++;
                 }
 
                 worksheetPart.Worksheet.Save();
-            }
-
-            // Sort sheets by name
-            var sortedSheets = sheets.Elements<Sheet>().OrderBy(s => s.Name?.Value ?? string.Empty).ToList();
-            sheets.RemoveAllChildren();
-            foreach (var sortedSheet in sortedSheets) {
-                sheets.AppendChild(sortedSheet);
             }
 
             // Save the changes
