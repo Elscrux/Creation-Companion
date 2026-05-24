@@ -11,6 +11,8 @@ public record ExportLine(
     INpcGetter? Npc,
     ISceneGetter? Scene,
     ISceneActionGetter? Action,
+    SpeakerType SpeakerType,
+    bool IsCombatLine,
     string Speaker,
     string Context,
     string Line,

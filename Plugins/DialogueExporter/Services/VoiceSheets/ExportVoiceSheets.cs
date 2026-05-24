@@ -76,7 +76,7 @@ public class ExportVoiceSheets(
 
                             ExportLine? line = null;
                             try {
-                                var (npc, speaker) = GetSpeakerWithSeparateCombatLines(quest, topic, responses, voiceType);
+                                var (npc, speaker, speakerType, isCombatLine) = GetSpeakerWithSeparateCombatLines(quest, topic, responses, voiceType);
                                 var (context, scene, sceneAction) = GetContext(quest, topic, responses);
                                 var rootBranch = GetRootBranch(topic);
                                 line = new ExportLine(
@@ -89,6 +89,8 @@ public class ExportVoiceSheets(
                                     npc,
                                     scene,
                                     sceneAction,
+                                    speakerType,
+                                    isCombatLine,
                                     speaker.Replace('\"', '\''),
                                     context.Replace('\"', '\''),
                                     response.Text.String?.Replace('\"', '\'') ?? "",
@@ -307,22 +309,20 @@ public class ExportVoiceSheets(
             }
         }
 
-        (INpcGetter? npc, string speaker) GetSpeakerWithSeparateCombatLines(
+        (INpcGetter? npc, string speaker, SpeakerType speakerType, bool isCombatLine) GetSpeakerWithSeparateCombatLines(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses,
             string voiceTypeName) {
-            var (npc, speaker) = GetSpeaker(quest, topic, responses, voiceTypeName);
+            var (npc, speaker, speakerType) = GetSpeaker(quest, topic, responses, voiceTypeName);
 
             var subtype = topic.SubtypeName.ToDialogTopicSubtype();
-            if (subtype.HasValue && subtype.Value.IsCombatLine()) {
-                speaker += " (Combat)";
-            }
+            var isCombatLine = subtype.HasValue && subtype.Value.IsCombatLine();
 
-            return (npc, speaker);
+            return (npc, speaker, speakerType, isCombatLine);
         }
 
-        (INpcGetter? npc, string speaker) GetSpeaker(
+        (INpcGetter? npc, string speaker, SpeakerType speakerType) GetSpeaker(
             IQuestGetter quest,
             IDialogTopicGetter topic,
             IDialogResponsesGetter responses,
@@ -340,11 +340,11 @@ public class ExportVoiceSheets(
             if (condition?.Data is IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsID
              && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
                 if (linkCache.TryResolve<INpcGetter>(getIsID.Object.Link.FormKey, out var npc)) {
-                    return (npc, GetNameOrEditorID(npc));
+                    return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
                 }
 
                 if (linkCache.TryResolve<ITalkingActivatorGetter>(getIsID.Object.Link.FormKey, out var talkingActivator)) {
-                    return (null, GetNameOrEditorID(talkingActivator));
+                    return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
                 }
             }
 
@@ -355,8 +355,8 @@ public class ExportVoiceSheets(
              && Math.Abs(condition.ComparisonValue - 1) < 0.001) {
                 var aliasNpc = GetAliasNpc(quest, getIsAliasReference.ReferenceAliasIndex, responses);
                 return aliasNpc is null
-                    ? (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses))
-                    : (aliasNpc, GetNameOrEditorID(aliasNpc));
+                    ? (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias)
+                    : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
             }
 
             if (topic.SubtypeName.ToDialogTopicSubtype() == DialogTopic.SubtypeEnum.Scene) {
@@ -367,8 +367,8 @@ public class ExportVoiceSheets(
                          && action.ActorID.HasValue) {
                             var aliasNpc = GetAliasNpc(quest, action.ActorID.Value, responses);
                             return aliasNpc is null
-                                ? (null, GetAliasName(quest, action.ActorID.Value, responses))
-                                : (aliasNpc, GetNameOrEditorID(aliasNpc));
+                                ? (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias)
+                                : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
                         }
                     }
                 }
@@ -379,7 +379,7 @@ public class ExportVoiceSheets(
              && Math.Abs(x.ComparisonValue - 1) < 0.001);
 
             if (condition?.Data is GetInFactionConditionData getInFaction && linkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) {
-                return (null, "Member of faction " + GetNameOrEditorID(faction));
+                return (null, "Member of faction " + GetNameOrEditorID(faction), SpeakerType.Faction);
             }
 
             condition = conditions.OfType<IConditionFloatGetter>().FirstOrDefault(x =>
@@ -387,11 +387,11 @@ public class ExportVoiceSheets(
              && Math.Abs(x.ComparisonValue - 1) < 0.001);
 
             if (condition is not null) {
-                return (null, "Any NPC using voice type " + voiceTypeName);
+                return (null, "Any NPC using voice type " + voiceTypeName, SpeakerType.VoiceType);
             }
 
             logger.Here().Error("Could not determine speaker for quest {Quest} topic {Topic} responses {Responses}", quest.FormKey, topic.FormKey, responses.FormKey);
-            return (null, "Anyone");
+            return (null, "Anyone", SpeakerType.Anyone);
         }
 
         string GetAliasName(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
@@ -478,4 +478,13 @@ public class ExportVoiceSheets(
         where T : IMajorRecordGetter, INamedGetter =>
         named.Name ?? named.EditorID ?? throw new InvalidOperationException(
             $"Record {named.FormKey} has no name or editor ID");
+}
+
+public enum SpeakerType {
+    Npc,
+    TalkingActivator,
+    Alias,
+    Faction,
+    VoiceType,
+    Anyone
 }
