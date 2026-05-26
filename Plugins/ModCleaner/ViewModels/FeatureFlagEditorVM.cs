@@ -83,6 +83,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         ObservableCollectionExtended<T> GetEssentialRecords<T>()
             where T : class, IMajorRecordQueryableGetter => new(
             featureFlag.EssentialRecords
+                .DistinctBy(x => x.FormKey)
                 .Select(link => LinkCacheProvider.LinkCache.TryResolve<T>(link.FormKey, out var r) ? r : null)
                 .WhereNotNull());
     }
@@ -124,6 +125,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
                     .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
                 .Concat(EssentialIdleAnimations
                     .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
+                .DistinctBy(r => r.FormKey)
                 .ToList());
     }
 }
