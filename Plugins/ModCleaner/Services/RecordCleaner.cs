@@ -385,8 +385,10 @@ public sealed class RecordCleaner(
                 var retainedCoordinate = retainedCell.Grid.Point;
                 var sourceLink = new FormLinkIdentifier(retainedCell.ToFormLinkInformation());
 
-                for (var dx = -3; dx <= 3; dx++) {
-                    for (var dy = -3; dy <= 3; dy++) {
+                // With a default uGridsToLoad = 5 diameter, the radius is 2 
+                const int cellRangeToKeepOutsidePlayableArea = 2;
+                for (var dx = -cellRangeToKeepOutsidePlayableArea; dx <= cellRangeToKeepOutsidePlayableArea; dx++) {
+                    for (var dy = -cellRangeToKeepOutsidePlayableArea; dy <= cellRangeToKeepOutsidePlayableArea; dy++) {
                         var position = new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy);
                         if (retainedCoordinates.Contains(position)) continue;
 
