@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CreationEditor.Services.Environment;
-using CreationEditor.Skyrim;
 using ModCleaner.Services.FeatureFlag;
-using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
@@ -26,20 +24,17 @@ public sealed class EssentialRecordProvider(
         .ToHashSet();
 
     private IEnumerable<FormLinkInformation> EnumerateEssentialRecords() {
+        foreach (var (worldspace, cells) in featureFlagService.EnabledFeatureFlags.EnumerateRetainedCells(editorEnvironment.LinkCache)) {
+            yield return new FormLinkInformation(worldspace, typeof(IWorldspaceGetter));
+
+            foreach (var cell in cells) {
+                yield return cell.ToFormLinkInformation();
+            }
+        }
+
         foreach (var featureFlag in featureFlagService.EnabledFeatureFlags) {
             foreach (var essentialRecord in featureFlag.EssentialRecords) {
                 yield return essentialRecord;
-            }
-
-            foreach (var (worldspaceLink, regions) in featureFlag.AllowedRegions) {
-                if (!worldspaceLink.TryResolve(editorEnvironment.LinkCache, out var worldspace)) continue;
-
-                yield return worldspace.ToFormLinkInformation();
-
-                foreach (var cell in worldspace.EnumerateCells()
-                    .Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any())) {
-                    yield return cell.ToFormLinkInformation();
-                }
             }
         }
     }
