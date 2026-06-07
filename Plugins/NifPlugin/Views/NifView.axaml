@@ -1,0 +1,22 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:NifPlugin.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NifPlugin.Views.NifView"
+             x:Name="Control"
+             x:DataType="viewModels:NifVM">
+    <Grid RowDefinitions="Auto,10,*">
+        <Button Grid.Row="0"
+                Content="Save"
+                Command="{Binding SaveNifCommand}"/>
+
+        <Grid Grid.Row="2">
+            <TreeDataGrid
+                Source="{Binding BlocksTreeSource}"
+                Height="{Binding $parent.Bounds.Height}"
+                ContextRequested="Control_OnContextRequested"/>
+        </Grid>
+    </Grid>
+</UserControl>

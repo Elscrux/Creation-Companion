@@ -1,0 +1,16 @@
+﻿<windowing:FAAppWindow
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
+    xmlns:views="clr-namespace:NifPlugin.Views"
+    xmlns:viewModels="clr-namespace:NifPlugin.ViewModels"
+    mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="500"
+    x:Class="NifPlugin.Views.NifWindow"
+    x:DataType="viewModels:NifVM"
+    MinWidth="500" MinHeight="500"
+    Width="700" Height="700"
+    Title="{Binding NifFileLink.DataRelativePath.Path, StringFormat='{}Edit Nif {0}'}">
+    <views:NifView/>
+</windowing:FAAppWindow>
