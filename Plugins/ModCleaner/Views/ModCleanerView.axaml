@@ -15,6 +15,7 @@
              xmlns:models="clr-namespace:ModCleaner.Models"
              xmlns:comparer="clr-namespace:CreationEditor.Avalonia.Comparer;assembly=CreationEditor.Avalonia"
              xmlns:featureFlag="clr-namespace:ModCleaner.Models.FeatureFlag"
+             xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ModCleaner.Views.ModCleanerView"
              x:Name="Control"
@@ -48,6 +49,10 @@
                         x:Key="ReferenceGetIncomingEdgesConverter"
                         Graph="{Binding ReferenceGraph}"/>
 
+                    <converter1:IsExcludedConverter
+                        x:Key="IsExcludedConverter"
+                        ExcludedLinks="{Binding ExcludedLinks}"/>
+
                     <DataTemplate
                         x:Key="LinkDataTemplate"
                         DataType="models:ILinkIdentifier">
@@ -66,9 +71,18 @@
                                     Command="{Binding #Control.ViewModel.ExcludeRecordCommand}"
                                     CommandParameter="{Binding}"/>
 
-                            <TextBlock
-                                Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
-                                VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock
+                                    x:Name="LinkWhichIsExcluded"
+                                    Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
+                                    IsVisible="{Binding Converter={StaticResource IsExcludedConverter}}"
+                                    Foreground="{x:Static constants:StandardBrushes.InvalidBrush}"
+                                    VerticalAlignment="Center"/>
+                                <TextBlock
+                                    Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
+                                    IsVisible="{Binding !#LinkWhichIsExcluded.IsVisible}"
+                                    VerticalAlignment="Center"/>
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
 
@@ -99,9 +113,18 @@
                                 </Button.Flyout>
                             </Button>
 
-                            <TextBlock
-                                Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
-                                VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock
+                                    x:Name="LinkWhichIsExcluded"
+                                    Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
+                                    IsVisible="{Binding Converter={StaticResource IsExcludedConverter}}"
+                                    Foreground="{x:Static constants:StandardBrushes.InvalidBrush}"
+                                    VerticalAlignment="Center"/>
+                                <TextBlock
+                                    Text="{Binding Converter={StaticResource LinkIdentifierEnricher}}"
+                                    IsVisible="{Binding !#LinkWhichIsExcluded.IsVisible}"
+                                    VerticalAlignment="Center"/>
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </StackPanel.Resources>
