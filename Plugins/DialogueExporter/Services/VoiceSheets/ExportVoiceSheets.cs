@@ -413,10 +413,15 @@ public class ExportVoiceSheets(
             foreach (var c in conditions) {
                 if (c.Data is not IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference) continue;
 
-                var aliasNpc = GetAliasNpc(quest, getIsAliasReference.ReferenceAliasIndex, responses);
-                return aliasNpc is null
-                    ? (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias)
-                    : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
+                var aliasSpeaker = GetAliasSpeaker(quest, getIsAliasReference.ReferenceAliasIndex, responses);
+                if (aliasSpeaker is null) return (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias);
+
+                switch (aliasSpeaker) {
+                    case INpcGetter npc:
+                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                    case ITalkingActivatorGetter talkingActivator:
+                        return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                }
             }
 
             // Scene Actor
@@ -427,10 +432,15 @@ public class ExportVoiceSheets(
                         if (action.Topic.FormKey != topic.FormKey) continue;
                         if (!action.ActorID.HasValue) continue;
 
-                        var aliasNpc = GetAliasNpc(quest, action.ActorID.Value, responses);
-                        return aliasNpc is null
-                            ? (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias)
-                            : (aliasNpc, GetNameOrEditorID(aliasNpc), SpeakerType.Npc);
+                        var aliasSpeaker = GetAliasSpeaker(quest, action.ActorID.Value, responses);
+                        if (aliasSpeaker is null) return (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias);
+
+                        switch (aliasSpeaker) {
+                            case INpcGetter npc:
+                                return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                            case ITalkingActivatorGetter talkingActivator:
+                                return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                        }
                     }
                 }
             }
@@ -472,7 +482,7 @@ public class ExportVoiceSheets(
             return alias.Name ?? throw new InvalidOperationException($"Alias {id} in {quest.EditorID} has no name");
         }
 
-        private INpcGetter? GetAliasNpc(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
+        private IHasVoiceTypeGetter? GetAliasSpeaker(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
             var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
             if (alias is null) {
                 logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
@@ -486,9 +496,14 @@ public class ExportVoiceSheets(
             }
 
             if (!alias.ForcedReference.IsNull) {
-                var forcedRef = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(LinkCache);
-                if (forcedRef is not null) {
-                    return forcedRef.Base.TryResolve<INpcGetter>(LinkCache);
+                var forcedNpc = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(LinkCache);
+                if (forcedNpc is not null) {
+                    return forcedNpc.Base.TryResolve<INpcGetter>(LinkCache);
+                }
+
+                var forcedObject = alias.ForcedReference.TryResolve<IPlacedObjectGetter>(LinkCache);
+                if (forcedObject is not null) {
+                    return forcedObject.Base.TryResolve<ITalkingActivatorGetter>(LinkCache);
                 }
             }
 
