@@ -307,7 +307,9 @@ public sealed class WriteXlsx(
 
                 var currentRow = 1;
                 var speakersGrouping = combatLinesGrouping.GroupBy(x => x.Speaker).ToArray();
-                foreach (var speakerGrouping in speakersGrouping.OrderBy(x => x.FirstOrDefault()?.SpeakerType)) {
+                foreach (var speakerGrouping in speakersGrouping
+                    .OrderBy(x => x.FirstOrDefault()?.SpeakerType)
+                    .ThenBy(x => x.FirstOrDefault()?.Speaker)) {
                     // Add a row to the SheetData
                     var row = new Row { CustomHeight = true, Height = new DoubleValue(40.0) };
                     var npc = speakerGrouping.FirstOrDefault()?.Npc;
