@@ -507,6 +507,18 @@ public class ExportVoiceSheets(
                 }
             }
 
+            if (alias.CreateReferenceToObject is not null) {
+                var npc = alias.CreateReferenceToObject.Object.TryResolve<INpcGetter>(LinkCache);
+                if (npc is not null) {
+                    return npc;
+                }
+
+                var talkingActivator = alias.CreateReferenceToObject.Object.TryResolve<ITalkingActivatorGetter>(LinkCache);
+                if (talkingActivator is not null) {
+                    return talkingActivator;
+                }
+            }
+
             return alias.UniqueActor.TryResolve<INpcGetter>(LinkCache);
         }
 
