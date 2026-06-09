@@ -44,14 +44,33 @@ public sealed class DataSourceDirectoryLink(IDataSource dataSource, DataRelative
     public IEnumerable<DataSourceFileLink> EnumerateFileLinks(string searchPattern, bool includeSubDirectories) {
         if (!FileSystem.Directory.Exists(FullPath)) yield break;
 
-        var files = FileSystem.Directory.EnumerateFiles(
-            FullPath,
-            searchPattern,
-            includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        // If search pattern includes a directory path, remove the directory part from the search pattern and filter out non-fitting files afterward
+        var directory = FileSystem.Path.GetDirectoryName(searchPattern)?.Replace("*", "");
+        var searchPatternIncludesDirectory = !directory.IsNullOrEmpty();
+        if (searchPatternIncludesDirectory) {
+            searchPattern = FileSystem.Path.GetFileName(searchPattern).Replace("*", "");
+        }
+
+        IEnumerable<string> files;
+        try {
+            files = FileSystem.Directory.EnumerateFiles(
+                FullPath,
+                searchPattern,
+                includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        } catch (Exception e) when (e is DirectoryNotFoundException or IOException) {
+            // Ignore exceptions which might be thrown when the search pattern includes a directory which the file system cannot access}
+            yield break;
+        }
 
         foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(DataSource.Path, file);
             var fileDataRelativePath = new DataRelativePath(relativePath);
+
+            // Filter out files that are not part of the directory
+            if (searchPatternIncludesDirectory) {
+                var relativeDirectory = FileSystem.Path.GetDirectoryName(relativePath);
+                if (relativeDirectory is not null && !relativeDirectory.EndsWith(directory!, DataRelativePath.PathComparison)) continue;
+            }
 
             if (DataSource.DeleteDirectoryLink.Contains(relativePath)) continue;
 
