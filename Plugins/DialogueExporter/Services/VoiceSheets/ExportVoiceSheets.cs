@@ -252,34 +252,34 @@ public class ExportVoiceSheets(
                                     return ("You are speaking in a scene with no other actors", scene, action, false);
                                 }
 
-                                var lastDialog = scene.Actions
+                                ISceneActionGetter? lastAction = null;
+                                var lastResponse = scene.Actions
                                     .Where(a => a.Type == SceneAction.TypeEnum.Dialog)
                                     .Where(a => a.EndPhase < action.StartPhase)
                                     .OrderByDescending(a => a.StartPhase)
-                                    .FirstOrDefault();
+                                    .Select(a => {
+                                        lastAction = a;
+                                        return a.Topic.TryResolve(LinkCache);
+                                    })
+                                    .NotNull()
+                                    .Select(t => t.Responses.FirstOrDefault())
+                                    .NotNull()
+                                    .FirstOrDefault(t => t.Responses.Count > 0 || !t.ResponseData.IsNull);
 
                                 var speakers = string.Join(", ", aliases);
-                                if (lastDialog?.ActorID == null) {
-                                    return ($"You are speaking to {speakers}", scene, action, false);
-                                }
-
-                                var lastTopic = lastDialog.Topic.TryResolve(LinkCache);
-                                if (lastTopic is null) {
-                                    return ($"You are speaking to {speakers}", scene, action, false);
-                                }
-
-                                var lastResponse = lastTopic.Responses.FirstOrDefault();
-                                if (lastResponse is null) {
+                                if (lastAction?.ActorID is null || lastResponse is null) {
                                     return ($"You are speaking to {speakers}.", scene, action, false);
                                 }
 
-                                var lastActor = lastDialog.ActorID == action.ActorID
+                                var lastActor = lastAction.ActorID == action.ActorID
                                     ? "You"
-                                    : GetAliasName(quest, lastDialog.ActorID.Value, lastResponse);
+                                    : GetAliasName(quest, lastAction.ActorID.Value, lastResponse);
                                 string textString;
                                 if (!lastResponse.ResponseData.IsNull
                                  && lastResponse.ResponseData.TryResolve(LinkCache, out var sharedInfo)) {
-                                    textString = sharedInfo.Responses[^1].Text.String ?? string.Empty;
+                                    textString = sharedInfo.Responses.Count > 0
+                                        ? sharedInfo.Responses[^1].Text.String ?? string.Empty
+                                        : string.Empty;
                                 } else {
                                     textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
                                 }
