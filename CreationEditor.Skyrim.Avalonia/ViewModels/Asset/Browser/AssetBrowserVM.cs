@@ -588,6 +588,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, link, childRows.Count);
         view.Inner.Add(link);
         OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
+        AssetTreeSource.RowSelection!.Clear();
     }
 
     private void Tree_RemoveLink(IDataSourceLink fileLink) {
@@ -604,6 +605,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, fileLink, view.Inner.IndexOf(fileLink));
         view.Inner.Remove(fileLink);
         OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
+        AssetTreeSource.RowSelection!.Clear();
     }
 
     private void Tree_RenameLink(IUpdate<IDataSourceLink> rename) {
@@ -717,5 +719,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 }
             }
         }
+
+        AssetTreeSource.RowSelection!.Clear();
     }
 }
