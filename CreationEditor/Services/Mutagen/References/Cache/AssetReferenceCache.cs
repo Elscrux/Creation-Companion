@@ -11,10 +11,28 @@ public sealed class AssetReferenceCache<TReference> : IReferenceCache<AssetRefer
     /// Asset for all asset types mapped to a list of their references
     /// </summary>
     public ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> Cache { get; }
+    public ConcurrentDictionary<TReference, HashSet<IAssetLinkGetter>> ReverseCache { get; }
 
     internal AssetReferenceCache(
         ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> cache) {
         Cache = cache;
+        ReverseCache = CreateReverseCache(Cache);
+    }
+
+    private static ConcurrentDictionary<TReference, HashSet<IAssetLinkGetter>> CreateReverseCache(ConcurrentDictionary<IAssetType, ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>> cache) {
+        var reverseCache = new ConcurrentDictionary<TReference, HashSet<IAssetLinkGetter>>();
+        foreach (var assetReferences in cache.Values) {
+            foreach (var (assetLink, references) in assetReferences) {
+                foreach (var reference in references) {
+                    var typeReferences = reverseCache.GetOrAdd(reference, _ => []);
+                    lock (typeReferences) {
+                        typeReferences.Add(assetLink);
+                    }
+                }
+            }
+        }
+
+        return reverseCache;
     }
 
     public static AssetReferenceCache<TReference> CreateNew() {
@@ -32,12 +50,20 @@ public sealed class AssetReferenceCache<TReference> : IReferenceCache<AssetRefer
                 typeReferences.UnionWith(references);
             }
         }
+
+        foreach (var (link, references) in otherCache.ReverseCache) {
+            var typeReferences = ReverseCache.GetOrAdd(link);
+            lock (typeReferences) {
+                typeReferences.UnionWith(references);
+            }
+        }
     }
 
     public void Add(IAssetLinkGetter link, TReference reference) {
         var typeCache = Cache.GetOrAdd(link.Type, CreateNewEntry);
         var references = typeCache.GetOrAdd(link);
         references.Add(reference);
+        ReverseCache.GetOrAdd(reference, _ => []).Add(link);
     }
 
     public void Remove(IReadOnlyList<TReference> referencesToRemove) {
@@ -49,10 +75,15 @@ public sealed class AssetReferenceCache<TReference> : IReferenceCache<AssetRefer
                 }
             }
         }
+
+        foreach (var assetReference in referencesToRemove) {
+            ReverseCache.TryRemove(assetReference, out _);
+        }
     }
 
     public IEnumerable<IAssetLinkGetter> GetAssets(IAssetType assetType) {
         if (!Cache.TryGetValue(assetType, out var assetDictionary)) yield break;
+
         foreach (var asset in assetDictionary.Keys) {
             yield return asset;
         }
@@ -92,28 +123,33 @@ public sealed class AssetReferenceCache<TReference> : IReferenceCache<AssetRefer
             Cache[asset.Type].TryRemove(asset, out _);
         }
 
+        ReverseCache.TryGetValue(oldReference, out var reverseReferences);
+        if (reverseReferences is not null) {
+            lock (reverseReferences) {
+                reverseReferences.Remove(asset);
+            }
+            if (reverseReferences.Count == 0) {
+                ReverseCache.TryRemove(oldReference, out _);
+            }
+        }
+
         return removed;
     }
 
     public bool AddReference(IAssetLinkGetter asset, TReference newReference) {
         var assetDictionary = Cache.GetOrAdd(asset.Type, _ => new ConcurrentDictionary<IAssetLinkGetter, HashSet<TReference>>());
         var references = assetDictionary.GetOrAdd(asset, _ => []);
+        ReverseCache.GetOrAdd(newReference, _ => []).Add(asset);
         lock (references) {
             return references.Add(newReference);
         }
     }
 
-    public IEnumerable<IAssetLinkGetter> FindLinksToReference(TReference reference) {
-        foreach (var assetDictionary in Cache.Values) {
-            foreach (var (assetLink, references) in assetDictionary) {
-                bool contains;
-                lock (references) {
-                    contains = references.Contains(reference);
-                }
-                if (contains) {
-                    yield return assetLink;
-                }
-            }
+    public IEnumerable<IAssetLinkGetter> GetLinks(TReference reference) {
+        if (!ReverseCache.TryGetValue(reference, out var assetLinks)) yield break;
+
+        foreach (var assetLink in assetLinks.ToArray()) {
+            yield return assetLink;
         }
     }
 }

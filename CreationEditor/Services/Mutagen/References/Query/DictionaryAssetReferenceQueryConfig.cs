@@ -18,7 +18,7 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, TCache, TLink>
+    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, TCache, TLink, DataRelativePath>
     where TFileParser : IFileParser<TLink>
     where TCache : IDictionaryReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull {
@@ -50,5 +50,9 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
         return fileParser.ParseFile(element.FullPath, element);
+    }
+
+    public DataRelativePath SourceElementToReference(DataSourceFileLink element) {
+        return element.DataRelativePath;
     }
 }

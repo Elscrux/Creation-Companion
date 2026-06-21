@@ -10,7 +10,7 @@ public sealed class RecordAssetReferenceQueryConfig(
     ReferenceCacheBuilder referenceCacheBuilder,
     ModAssetSerializableQuery modAssetSerializableQuery,
     AssetReferenceCacheSerialization<IModGetter, IFormLinkIdentifier> serialization)
-    : IReferenceQueryConfig<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter> {
+    : IReferenceQueryConfig<IModGetter, RecordModPair, AssetReferenceCache<IFormLinkIdentifier>, IAssetLinkGetter, IFormLinkIdentifier> {
     public IEqualityComparer<IModGetter> EqualityComparer => ModComparer.Instance;
     public bool CanGetLinksFromDeletedElement => true;
     public string Name => modAssetSerializableQuery.Name;
@@ -24,4 +24,6 @@ public sealed class RecordAssetReferenceQueryConfig(
     }
 
     public object GetSourceKey(IModGetter source) => source.ModKey;
+
+    public IFormLinkIdentifier SourceElementToReference(RecordModPair element) => element.Record.ToFormLinkInformation();
 }

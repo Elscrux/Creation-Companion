@@ -33,29 +33,12 @@ public sealed class AssetDictionaryReferenceCacheController<TLink>
     public IEnumerable<TLink> GetLinks(
         IEnumerable<AssetDictionaryReferenceCache<TLink>> caches,
         DataRelativePath reference) {
-        foreach (var cache in caches) {
-            foreach (var (editorId, references) in cache.Cache) {
-                bool contains;
-                lock (references) {
-                    contains = references.Contains(reference);
-                }
-
-                if (!contains) continue;
-
-                yield return editorId;
-            }
-        }
+        return caches.SelectMany(cache => cache.ReverseCache.TryGetValue(reference, out var links) ? links : []).ToArray();
     }
 
     public IEnumerable<DataRelativePath> GetReferences(
         IReadOnlyDictionary<IDataSource, AssetDictionaryReferenceCache<TLink>> caches,
         TLink link) {
-        foreach (var (_, cache) in caches) {
-            if (!cache.Cache.TryGetValue(link, out var references)) continue;
-
-            foreach (var reference in references.ToArray()) {
-                yield return reference;
-            }
-        }
+        return caches.Values.SelectMany(cache => cache.Cache.TryGetValue(link, out var references) ? references : []).ToArray();
     }
 }

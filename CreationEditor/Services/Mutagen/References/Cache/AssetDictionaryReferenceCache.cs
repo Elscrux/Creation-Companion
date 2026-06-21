@@ -9,6 +9,7 @@ public class AssetDictionaryReferenceCache<TLink> : IDictionaryReferenceCache<As
         new(new ConcurrentDictionary<TLink, HashSet<DataRelativePath>>(), DataRelativePathComparer.Instance);
 
     public ConcurrentDictionary<TLink, HashSet<DataRelativePath>> Cache => _cache.Cache;
+    public ConcurrentDictionary<DataRelativePath, HashSet<TLink>> ReverseCache => _cache.ReverseCache;
 
     public static AssetDictionaryReferenceCache<TLink> CreateNew() => new();
 

@@ -9,7 +9,7 @@ public sealed class RecordReferenceQueryConfig(
     ReferenceCacheBuilder referenceCacheBuilder,
     RecordReferenceQuery recordReferenceQuery,
     RecordReferenceCacheSerialization serialization)
-    : IReferenceQueryConfig<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier> {
+    : IReferenceQueryConfig<IModGetter, RecordModPair, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
     public IEqualityComparer<IModGetter> EqualityComparer => ModComparer.Instance;
     public bool CanGetLinksFromDeletedElement => true;
     public string Name => recordReferenceQuery.Name;
@@ -23,4 +23,6 @@ public sealed class RecordReferenceQueryConfig(
     }
 
     public object GetSourceKey(IModGetter source) => source.ModKey;
+
+    public IFormLinkIdentifier SourceElementToReference(RecordModPair element) => element.Record.ToFormLinkInformation();
 }

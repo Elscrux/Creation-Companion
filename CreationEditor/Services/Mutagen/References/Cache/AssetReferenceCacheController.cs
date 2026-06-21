@@ -17,19 +17,7 @@ public sealed class AssetReferenceCacheController<TSource, TReference> : IRefere
     }
 
     public IEnumerable<IAssetLinkGetter> GetLinks(IEnumerable<AssetReferenceCache<TReference>> caches, TReference reference) {
-        foreach (var cache in caches) {
-            foreach (var assetDictionary in cache.Cache.Values) {
-                foreach (var (assetLink, references) in assetDictionary) {
-                    bool contains;
-                    lock (references) {
-                        contains = references.Contains(reference);
-                    }
-                    if (contains) {
-                        yield return assetLink;
-                    }
-                }
-            }
-        }
+        return caches.SelectMany(cache => cache.GetLinks(reference));
     }
 
     public IEnumerable<TReference> GetReferences(IReadOnlyDictionary<TSource, AssetReferenceCache<TReference>> caches, IAssetLinkGetter link) {

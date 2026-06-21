@@ -18,7 +18,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
     private readonly INotificationService _notificationService;
     private readonly IReferenceUpdateTrigger<TSource, TSourceElement, TCache, TLink, TReference, TSubscriber> _updateTrigger;
     private readonly IReferenceCacheController<TSource, TCache, TLink, TReference> _cacheController;
-    private readonly IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink> _queryConfig;
+    private readonly IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink, TReference> _queryConfig;
     private readonly ReferenceSubscriptionManager<TLink, TReference, TSubscriber> _referenceSubscriptionManager;
 
     private readonly ConcurrentQueue<TSourceElement> _pendingCreations = new();
@@ -34,7 +34,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         INotificationService notificationService,
         IReferenceUpdateTrigger<TSource, TSourceElement, TCache, TLink, TReference, TSubscriber> updateTrigger,
         IReferenceCacheController<TSource, TCache, TLink, TReference> cacheController,
-        IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink> queryConfig,
+        IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink, TReference> queryConfig,
         ReferenceSubscriptionManager<TLink, TReference, TSubscriber> referenceSubscriptionManager) {
         _updateTrigger = updateTrigger;
         _cacheController = cacheController;
@@ -145,7 +145,7 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
     }
 
     public IEnumerable<TLink> GetLinks(TSourceElement element) {
-        return _queryConfig.GetLinks(element);
+        return _cacheController.GetLinks(_caches.Values, _queryConfig.SourceElementToReference(element));
     }
 
     private void AddLinks(

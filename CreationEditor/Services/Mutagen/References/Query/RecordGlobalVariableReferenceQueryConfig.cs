@@ -9,7 +9,7 @@ public sealed class RecordGlobalVariableReferenceQueryConfig(
     ReferenceCacheBuilder referenceCacheBuilder,
     RecordGlobalVariableReferenceQuery globalVariableReferenceQuery,
     Func<IReadOnlyList<string>, DictionaryReferenceCacheSerialization<IModGetter, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier>> serializationFactory)
-    : IReferenceQueryConfig<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string> {
+    : IReferenceQueryConfig<IModGetter, RecordModPair, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier> {
     private readonly DictionaryReferenceCacheSerialization<IModGetter, DictionaryReferenceCache<string, IFormLinkIdentifier>, string, IFormLinkIdentifier> _serialization =
         serializationFactory(["References"]);
 
@@ -26,4 +26,6 @@ public sealed class RecordGlobalVariableReferenceQueryConfig(
     }
 
     public object GetSourceKey(IModGetter source) => source.ModKey;
+
+    public IFormLinkIdentifier SourceElementToReference(RecordModPair element) => element.Record.ToFormLinkInformation();
 }

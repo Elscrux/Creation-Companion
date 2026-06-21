@@ -19,7 +19,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
-    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter>
+    : IReferenceQueryConfig<IDataSource, DataSourceFileLink, AssetReferenceCache<DataRelativePath>, IAssetLinkGetter, DataRelativePath>
     where TFileParser : IFileParser<IAssetLinkGetter> {
     private readonly FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifFileSystemQuery =
         new(fileParser, assetTypeService, dataSourceService);
@@ -47,5 +47,9 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
         return fileParser.ParseFile(element.FullPath, element);
+    }
+
+    public DataRelativePath SourceElementToReference(DataSourceFileLink element) {
+        return element.DataRelativePath;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Services.Mutagen.References.Query;
 
-public interface IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink>
+public interface IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink, TReference>
     where TSource : notnull
     where TSourceElement : notnull
     where TCache : notnull
@@ -11,4 +11,5 @@ public interface IReferenceQueryConfig<TSource, TSourceElement, TCache, TLink>
     Task<TCache> BuildCache(TSource source);
     IEnumerable<TLink> GetLinks(TSourceElement element);
     object GetSourceKey(TSource source) => source;
+    TReference SourceElementToReference(TSourceElement element) => default!;
 }

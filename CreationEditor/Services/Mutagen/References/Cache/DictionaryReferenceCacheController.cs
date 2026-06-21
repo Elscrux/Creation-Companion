@@ -18,27 +18,10 @@ public sealed class DictionaryReferenceCacheController<TSource, TLink, TReferenc
     }
 
     public IEnumerable<TLink> GetLinks(IEnumerable<DictionaryReferenceCache<TLink, TReference>> caches, TReference reference) {
-        foreach (var cache in caches) {
-            foreach (var (link, references) in cache.Cache) {
-                bool contains;
-                lock (references) {
-                    contains = references.Contains(reference);
-                }
-
-                if (!contains) continue;
-
-                yield return link;
-            }
-        }
+        return caches.SelectMany(cache => cache.ReverseCache.TryGetValue(reference, out var links) ? links : []).ToArray();
     }
 
     public IEnumerable<TReference> GetReferences(IReadOnlyDictionary<TSource, DictionaryReferenceCache<TLink, TReference>> caches, TLink link) {
-        foreach (var (_, cache) in caches) {
-            if (!cache.Cache.TryGetValue(link, out var references)) continue;
-
-            foreach (var reference in references.ToArray()) {
-                yield return reference;
-            }
-        }
+        return caches.Values.SelectMany(cache => cache.Cache.TryGetValue(link, out var references) ? references : []).ToArray();
     }
 }
