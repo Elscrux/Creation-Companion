@@ -1,4 +1,5 @@
 ﻿using CreationEditor.Services.DataSource;
+using Mutagen.Bethesda.Assets;
 using nifly;
 using Serilog;
 namespace CreationEditor.Services.Asset;
@@ -25,14 +26,14 @@ public sealed class NifModificationService(
             if (shaderTextureSet is not null) {
                 // Find all indices where the old path is used
                 var items = shaderTextureSet.textures.items();
-                var occurenceIndices = new Dictionary<int, string>();
+                var occurenceIndices = new Dictionary<int, string?>();
                 for (var index = 0; index < items.Count; index++) {
                     var niString = items[index];
                     if (niString is null) continue;
 
                     var current = niString.get();
                     var replacement = replace(current);
-                    if (current != replacement) {
+                    if (!string.Equals(current, replacement, DataRelativePath.PathComparison)) {
                         occurenceIndices.Add(index, replacement);
                     }
                 }
@@ -57,37 +58,20 @@ public sealed class NifModificationService(
                 if (effectShader is not null) {
                     var modifiedEffectShader = false;
 
-                    if (replace(effectShader.greyscaleTexture.get()) is {} replacement1) {
-                        effectShader.greyscaleTexture = new NiString(replacement1);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.lightingTexture.get()) is {} replacement2) {
-                        effectShader.lightingTexture = new NiString(replacement2);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.normalTexture.get()) is {} replacement3) {
-                        effectShader.normalTexture = new NiString(replacement3);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.reflectanceTexture.get()) is {} replacement) {
-                        effectShader.reflectanceTexture = new NiString(replacement);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.sourceTexture.get()) is {} replacement4) {
-                        effectShader.sourceTexture = new NiString(replacement4);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.emitGradientTexture.get()) is {} replacement5) {
-                        effectShader.emitGradientTexture = new NiString(replacement5);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.envMapTexture.get()) is {} replacement6) {
-                        effectShader.envMapTexture = new NiString(replacement6);
-                        modifiedEffectShader = true;
-                    }
-                    if (replace(effectShader.envMaskTexture.get()) is {} replacement7) {
-                        effectShader.envMaskTexture = new NiString(replacement7);
-                        modifiedEffectShader = true;
+                    TryReplace(effectShader.lightingTexture, x => effectShader.lightingTexture = x);
+                    TryReplace(effectShader.normalTexture, x => effectShader.normalTexture = x);
+                    TryReplace(effectShader.reflectanceTexture, x => effectShader.reflectanceTexture = x);
+                    TryReplace(effectShader.sourceTexture, x => effectShader.sourceTexture = x);
+                    TryReplace(effectShader.emitGradientTexture, x => effectShader.emitGradientTexture = x);
+                    TryReplace(effectShader.envMapTexture, x => effectShader.envMapTexture = x);
+                    TryReplace(effectShader.envMaskTexture, x => effectShader.envMaskTexture = x);
+                    
+                    void TryReplace(NiString niString, Func<NiString, NiString> update) {
+                        var str = niString.get();
+                        if (replace(str) is {} replacement && !string.Equals(str, replacement, DataRelativePath.PathComparison)) {
+                            update(new NiString(replacement));
+                            modifiedEffectShader = true;
+                        }
                     }
 
                     if (modifiedEffectShader) {
@@ -110,6 +94,7 @@ public sealed class NifModificationService(
         if (modifiedNif) {
             try {
                 nif.Save(fileLink.FullPath);
+                logger.Here().Information("Remapped texture paths in nif {File}", fileLink.FullPath);
             } catch (Exception e) {
                 logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", fileLink, e);
             }
