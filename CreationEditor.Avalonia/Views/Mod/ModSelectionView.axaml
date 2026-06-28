@@ -15,8 +15,7 @@
         <mod:DesignModSelectionVM/>
     </Design.DataContext>
 
-    <Grid MinHeight="400"
-          Height="650">
+    <Grid MinHeight="400">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"
                               MinWidth="200"/>
