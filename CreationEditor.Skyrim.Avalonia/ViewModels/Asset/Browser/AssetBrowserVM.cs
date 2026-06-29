@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -557,12 +556,22 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Concat<IDataSourceLink>(directory.EnumerateFileLinks(false));
     }
 
-    private static Type RowsType => typeof(SortableRowsBase<IDataSourceLink, HierarchicalRow<IDataSourceLink>>);
-    private static MethodInfo OnItemsCollectionChangedMethod =>
-        RowsType.GetMethod("OnItemsCollectionChanged", BindingFlags.Instance | BindingFlags.NonPublic)
-     ?? throw new InvalidOperationException("Could not find OnItemsCollectionChanged method on childRows.");
-    private static FieldInfo ItemsField => RowsType.GetField("_items", BindingFlags.Instance | BindingFlags.NonPublic)
-     ?? throw new InvalidOperationException("Could not find _items field on childRows.");
+    private void UpdateRow(HierarchicalRow<IDataSourceLink> parentRow) {
+        var currentlyExpandedRows = AssetTreeSource.Rows.OfType<IExpander>().Where(x => x.IsExpanded).Cast<IRow>().ToArray();
+
+        ExpandMethod.Invoke(parentRow, null);
+        
+        foreach (var currentlyExpandedRow in currentlyExpandedRows) {
+            var foundRow = AssetTreeSource.Rows.FirstOrDefault(row => Equals(row.Model, currentlyExpandedRow.Model));
+            if (foundRow is IExpander expander) {
+                expander.IsExpanded = true;
+            }
+        }
+    }
+
+    private static Type RowType => typeof(HierarchicalRow<IDataSourceLink>);
+    private static MethodInfo ExpandMethod => RowType.GetMethod("Expand", BindingFlags.Instance | BindingFlags.NonPublic)
+     ?? throw new InvalidOperationException("Could not find Expand method.");
 
     private void Tree_AddLink(IDataSourceLink link) {
         switch (link) {
@@ -577,35 +586,22 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var parentRow = FindParentRow(link);
-        if (parentRow?.Children is not SortableRowsBase<IDataSourceLink, HierarchicalRow<IDataSourceLink>> childRows) return;
+        if (parentRow?.Children is null) return;
+
+        _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
+        _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
+        
+        UpdateRow(parentRow);
+    }
+
+    private void Tree_RemoveLink(IDataSourceLink link) {
+        var parentRow = FindParentRow(link);
+        if (parentRow?.Children is null) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
         _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
 
-        var value = ItemsField.GetValue(childRows);
-        if (value is not TreeDataGridItemsSourceView view) return;
-
-        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, link, childRows.Count);
-        view.Inner.Add(link);
-        OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
-        AssetTreeSource.RowSelection!.Clear();
-    }
-
-    private void Tree_RemoveLink(IDataSourceLink fileLink) {
-        var parentRow = FindParentRow(fileLink);
-        if (parentRow?.Children is not SortableRowsBase<IDataSourceLink, HierarchicalRow<IDataSourceLink>> childRows) return;
-        if (childRows.All(r => !Equals(r.Model, fileLink))) return;
-
-        _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
-        _filteredFileSystemChildrenCache.Remove(fileLink.DataRelativePath.Path);
-
-        var value = ItemsField.GetValue(childRows);
-        if (value is not TreeDataGridItemsSourceView view) return;
-
-        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, fileLink, view.Inner.IndexOf(fileLink));
-        view.Inner.Remove(fileLink);
-        OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
-        AssetTreeSource.RowSelection!.Clear();
+        UpdateRow(parentRow);
     }
 
     private void Tree_RenameLink(IUpdate<IDataSourceLink> rename) {
@@ -624,102 +620,22 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
 
-        var value = ItemsField.GetValue(childRows);
-        if (value is not TreeDataGridItemsSourceView view) return;
-
-        var index = view.Inner.IndexOf(fileLink);
-        if (index < 0) return;
-
-        var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, fileLink, fileLink, index);
-        view.Inner[index] = fileLink;
-        OnItemsCollectionChangedMethod.Invoke(childRows, [null, args]);
+        UpdateRow(parentRow);
     }
 
     private void Tree_UpdateAll() {
         _filteredFileSystemChildrenCache.Clear();
 
-        var rows = AssetTreeSource.Rows.OfType<HierarchicalRow<IDataSourceLink>>().ToList();
-        foreach (var row in rows) {
-            // Handle removing of root items
-            if (row.ModelIndexPath.Count == 1) {
-                switch (row.Model) {
-                    case DataSourceFileLink fileLink: {
-                        if (!SearchAndFilterFile(fileLink)) {
-                            RootItems.Remove(row.Model);
-                        }
-                        break;
-                    }
-                    case DataSourceDirectoryLink dirLink: {
-                        // Specifically handle ignored directories here too to make sure they are removed when the setting changes
-                        if (!SearchAndFilterDirectory(dirLink)) {
-                            RootItems.Remove(row.Model);
-                        }
-                        break;
-                    }
-                }
-            }
+        var currentlyExpandedRows = AssetTreeSource.Rows.OfType<IExpander>().Where(x => x.IsExpanded).Cast<IRow>().ToArray();
 
-            if (row.Children is not SortableRowsBase<IDataSourceLink, HierarchicalRow<IDataSourceLink>> childRows) continue;
+        var filteredRootItems = GetFilteredFileSystemChildren(_rootDirectory).ToArray();
+        RootItems.LoadOptimized(filteredRootItems);
 
-            var value = ItemsField.GetValue(childRows);
-            if (value is not TreeDataGridItemsSourceView view) continue;
-
-            if (row.Model is not DataSourceDirectoryLink directoryLink) continue;
-
-            var dataSourceLinks = GetFilteredFileSystemChildren(directoryLink).ToArray();
-            var oldLinks = view.Inner.OfType<IDataSourceLink>().Except(dataSourceLinks).ToHashSet();
-            var newLinks = dataSourceLinks.Except(view.Inner.OfType<IDataSourceLink>()).ToArray();
-
-            if (oldLinks.Count > 0) {
-                if (oldLinks.Count > 100) {
-                    // If there are too many links to remove, we can just reset the collection
-                    if (view.Inner is IList<IDataSourceLink> list) {
-                        list.Remove(oldLinks);
-                    } else {
-                        foreach (var oldLink in oldLinks) view.Inner.Remove(oldLink);
-                    }
-                    OnItemsCollectionChangedMethod.Invoke(childRows,
-                        [null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)]);
-                } else {
-                    foreach (var oldLink in oldLinks) {
-                        var indexOf = view.Inner.IndexOf(oldLink);
-                        if (indexOf < 0) continue;
-
-                        var removeArgs = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldLink, indexOf);
-                        view.Inner.Remove(oldLink);
-                        OnItemsCollectionChangedMethod.Invoke(childRows, [null, removeArgs]);
-                    }
-                }
-            }
-
-            if (newLinks.Length > 0) {
-                var addArgs = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newLinks, childRows.Count);
-                foreach (var link in newLinks) view.Inner.Add(link);
-                OnItemsCollectionChangedMethod.Invoke(childRows, [null, addArgs]);
+        foreach (var currentlyExpandedRow in currentlyExpandedRows) {
+            var foundRow = AssetTreeSource.Rows.FirstOrDefault(row => Equals(row.Model, currentlyExpandedRow.Model));
+            if (foundRow is IExpander expander) {
+                expander.IsExpanded = true;
             }
         }
-
-        // Handle re-adding of root items
-        var rootRows = rows.Where(r => r.ModelIndexPath.Count == 1).ToArray();
-        foreach (var rootItem in GetAllRootItems()) {
-            if (rootRows.Exists(r => r.Model.Equals(rootItem))) continue;
-
-            switch (rootItem) {
-                case DataSourceFileLink fileLink: {
-                    if (SearchAndFilterFile(fileLink)) {
-                        RootItems.Add(rootItem);
-                    }
-                    break;
-                }
-                case DataSourceDirectoryLink directoryLink: {
-                    if (SearchAndFilterDirectory(directoryLink)) {
-                        RootItems.Add(rootItem);
-                    }
-                    break;
-                }
-            }
-        }
-
-        AssetTreeSource.RowSelection!.Clear();
     }
 }
