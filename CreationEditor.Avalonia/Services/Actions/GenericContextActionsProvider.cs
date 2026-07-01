@@ -13,7 +13,6 @@ using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.Type;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
-using Noggog;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Actions;
 
@@ -289,9 +288,9 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     }
 
     private string? GetFormId(SelectedListContext context) {
-        if (context.SelectedRecords is not [{ ReferencedRecord.Record: var record, Origin: {} modKey }, ..]) return null;
+        if (context.SelectedRecords is not [{ ReferencedRecord.Record: var record }, ..]) return null;
 
-        var modIndex = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder.IndexOf(modKey, (mod, key) => mod.ModKey == key);
+        var modIndex = _editorEnvironment.GameEnvironment.LinkCache.ListedOrder.IndexOf(record.FormKey.ModKey, (mod, key) => mod.ModKey == key);
         var formId = modIndex.ToString("D2") + record.FormKey.IDString();
         return formId;
     }
