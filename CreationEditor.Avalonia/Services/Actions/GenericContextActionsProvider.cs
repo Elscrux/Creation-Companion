@@ -13,6 +13,7 @@ using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Mutagen.Type;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Services.Actions;
 

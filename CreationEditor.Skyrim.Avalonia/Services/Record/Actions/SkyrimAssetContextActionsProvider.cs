@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
@@ -8,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Layout;
@@ -31,43 +31,49 @@ using CreationEditor.Services.Mutagen.References;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using ReactiveUI.SourceGenerators;
 using Key = Avalonia.Input.Key;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider, IAssetContextActionsProvider {
+    private readonly Lazy<IContextMenuProvider> _contextMenuProviderFactory;
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
-    private readonly IAssetTypeProvider _assetTypeProvider;
+    private readonly IFileSystem _fileSystem;
     private readonly MainWindow _mainWindow;
     private readonly IDockFactory _dockFactory;
     private readonly IModelModificationService _modelModificationService;
     private readonly ITaskDialogProvider _taskDialogProvider;
     private readonly IRecordPrefixService _recordPrefixService;
+    private readonly IAssetTypeService _assetTypeService;
     private readonly IAssetController _assetController;
     private readonly IRecordController _recordController;
     private readonly IReferenceService _referenceService;
     private readonly IList<ContextAction> _actions;
 
     public SkyrimAssetContextActionsProvider(
+        Lazy<IContextMenuProvider> contextMenuProviderFactory,
         IReferenceBrowserVMFactory referenceBrowserVMFactory,
         IFileSystem fileSystem,
         MainWindow mainWindow,
         IDockFactory dockFactory,
         IModelModificationService modelModificationService,
-        IAssetTypeProvider assetTypeProvider,
         ITaskDialogProvider taskDialogProvider,
         IRecordPrefixService recordPrefixService,
+        IAssetTypeService assetTypeService,
         IAssetController assetController,
         IRecordController recordController,
         IReferenceService referenceService,
         IMenuItemProvider menuItemProvider) {
+        _contextMenuProviderFactory = contextMenuProviderFactory;
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
-        _assetTypeProvider = assetTypeProvider;
+        _fileSystem = fileSystem;
         _mainWindow = mainWindow;
         _dockFactory = dockFactory;
         _modelModificationService = modelModificationService;
         _taskDialogProvider = taskDialogProvider;
         _recordPrefixService = recordPrefixService;
+        _assetTypeService = assetTypeService;
         _assetController = assetController;
         _recordController = recordController;
         _referenceService = referenceService;
@@ -85,7 +91,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
                     return menuItemProvider.Custom(
                         GoToAssetCommand,
-                        $"Go to {fileSystem.Path.GetFileName(dataRelativePath.Path)}",
+                        $"Go to {_fileSystem.Path.GetFileName(dataRelativePath.Path)}",
                         context,
                         FASymbol.Go);
                 }
@@ -126,7 +132,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     FASymbol.NewFolder,
                     new KeyGesture(Key.N, KeyModifiers.Control | KeyModifiers.Shift))),
             new ContextAction(
-                context => context.HasAnyAssetOfType(_assetTypeProvider.Model),
+                context => context.HasAnyAssetOfType(_assetTypeService.Provider.Model),
                 10,
                 ContextActionGroup.Modification,
                 RemapTexturesCommand,
@@ -142,7 +148,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     "Copy Path",
                     false)),
             new ContextAction(
-                context => context.HasAnyAssetOfType(_assetTypeProvider.Model),
+                context => context.HasAnyAssetOfType(_assetTypeService.Provider.Model),
                 10,
                 ContextActionGroup.Misc,
                 CreateStaticRecordCommand,
@@ -323,22 +329,35 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     private async Task RemapTextures(SelectedListContext context) {
         var assets = context.SelectedAssets
             .Where(assetContext => assetContext.DataSourceLink is DataSourceDirectoryLink
-             || assetContext.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeProvider.Model)
+             || assetContext.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeService.Provider.Model)
             .SelectMany(assetContext => assetContext.DataSourceLink.EnumerateAllFileLinks())
             .ToArray();
 
         if (assets.Length == 0) return;
 
         var textures = assets.SelectMany(a => _referenceService.GetAssetLinks(a))
-            .Where(x => x.AssetTypeInstance == _assetTypeProvider.Texture)
+            .Where(x => x.AssetTypeInstance == _assetTypeService.Provider.Texture)
             .Select(x => x.DataRelativePath.Path)
             .Distinct()
+            .Order()
             .ToArray();
 
-        var firstTexture = textures.FirstOrDefault();
+        var firstTexture = _fileSystem.Path.GetFileName(textures.FirstOrDefault());
         var enableRegex = new CheckBox { Content = "Enable Regex", IsChecked = false };
-        var fromTextBox = new TextBox { Text = firstTexture };
-        var toTextBox = new TextBox { Text = firstTexture };
+        var onlyShowChanges = new CheckBox { Content = "Only Show Changes", IsChecked = true };
+        var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of ) a texture file path to replace" };
+        var toTextBox = new TextBox { Text = "replacement.dds", PlaceholderText = "Enter a replacement path for what you want to replace" };
+
+        var previewObservable = Observable
+            .CombineLatest(
+                fromTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
+                toTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
+                enableRegex.GetObservable(ToggleButton.IsCheckedProperty).Select(x => x is true),
+                (fromValue, toValue, isRegex) => new { FromValue = fromValue, ToValue = toValue, IsRegex = isRegex })
+            .ThrottleMedium()
+            .Replay(1)
+            .RefCount();
+
         var replacementCount = new TextBlock { Foreground = StandardBrushes.HighlightBrush };
         var replacement = new Card {
             Header = "Replace Textures",
@@ -347,7 +366,13 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             Content = new StackPanel {
                 Spacing = 5,
                 Children = {
-                    enableRegex,
+                    new StackPanel {
+                        Orientation = Orientation.Horizontal,
+                        Children = {
+                            enableRegex,
+                            onlyShowChanges,
+                        },
+                    },
                     fromTextBox,
                     toTextBox,
                 }
@@ -358,47 +383,117 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             IsVisible = false,
             TextWrapping = TextWrapping.Wrap,
         };
-        var texturesListBox = new ItemsControl { ItemsSource = textures, [Grid.ColumnProperty] = 0 };
-        var texturesAfterListBox = new ItemsControl { ItemsSource = textures, [Grid.ColumnProperty] = 1 };
+        var texturesListBox = new FAItemsRepeater {
+            Layout = new FAStackLayout(),
+            [!FAItemsRepeater.ItemsSourceProperty] = onlyShowChanges.GetObservable(ToggleButton.IsCheckedProperty)
+                .Select(onlyChanges => {
+                    return onlyChanges is true
+                        ? previewObservable
+                            .ObserveOnTaskpool()
+                            .Select(values => textures
+                                .Where(path => IsMatch(path, values.IsRegex, values.FromValue, values.ToValue))
+                                .ToArray())
+                        : Observable.Return(textures);
+                })
+                .Switch()
+                .ToBinding(),
+            ItemTemplate = new FuncDataTemplate<string>((path, _) => {
+                var grid = new Grid {
+                    ColumnDefinitions = new ColumnDefinitions("*,*"),
+                    DataContext = path, // Set the DataContext to the path itself
+                    ContextFlyout = new MenuFlyout(),
+                };
 
-        var previewObservable = Observable
-            .CombineLatest(
-                fromTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
-                toTextBox.GetObservable(TextBox.TextProperty).Select(x => x ?? string.Empty),
-                enableRegex.GetObservable(ToggleButton.IsCheckedProperty).Select(x => x is true),
-                (fromValue, toValue, isRegex) => new { FromValue = fromValue, ToValue = toValue, IsRegex = isRegex })
-            .Publish()
-            .RefCount();
+                var currentPathObservable = grid.GetObservable(StyledElement.DataContextProperty)
+                    .WhereNotNull()
+                    .OfType<string>();
 
-        using var previewSubscription = previewObservable.Subscribe(values => {
-            if (values.IsRegex) {
-                try {
-                    texturesAfterListBox.ItemsSource = textures.Select(path => Regex.Replace(path, values.FromValue, values.ToValue)).ToArray();
-                    regexErrorText.IsVisible = false;
-                    regexErrorText.Text = string.Empty;
-                } catch (ArgumentException ex) {
-                    texturesAfterListBox.ItemsSource = textures;
-                    regexErrorText.Text = ex.Message;
-                    regexErrorText.IsVisible = true;
+                grid.ContextFlyout[!MenuFlyout.ItemsSourceProperty] = currentPathObservable
+                    .Select(p => {
+                        var dataSourceFileLink = new DataSourceFileLink(assets[0].DataSource, p);
+                        var assetLink = _assetTypeService.GetAssetLink(dataSourceFileLink.DataRelativePath);
+                        IReferencedAsset? referencedAsset;
+                        if (assetLink is not null) {
+                            using var _ = _referenceService.GetReferencedAsset(assetLink, out referencedAsset);
+                        } else {
+                            referencedAsset = null;
+                        }
+
+                        var selectedListContext = new SelectedListContext([],
+                            [new AssetContext(dataSourceFileLink, referencedAsset)]);
+
+                        return _contextMenuProviderFactory.Value.GetMenuItems(selectedListContext);
+                    })
+                    .ToBinding();
+
+                var brushBinding = currentPathObservable.CombineLatest(previewObservable,
+                        (path, values) => IsMatch(path, values.IsRegex, values.FromValue, values.ToValue)
+                            ? StandardBrushes.HighlightBrush
+                            : StandardBrushes.TextBrush)
+                    .ToBinding();
+
+                var replaceBinding = currentPathObservable.CombineLatest(previewObservable,
+                        (path, values) => {
+                            try {
+                                return values.IsRegex
+                                    ? Regex.Replace(path, values.FromValue, values.ToValue)
+                                    : values.FromValue.IsNullOrEmpty()
+                                        ? path
+                                        : path.Replace(values.FromValue, values.ToValue, DataRelativePath.PathComparison);
+                            } catch (Exception e) {
+                                return e.Message;
+                            }
+                        })
+                    .ToBinding();
+
+                grid.Children.Add(new TextBlock {
+                    [!TextBlock.TextProperty] = new Binding(),
+                    [!TextBlock.ForegroundProperty] = brushBinding,
+                    [Grid.ColumnProperty] = 0,
+                });
+
+                grid.Children.Add(new TextBlock {
+                    [!TextBlock.TextProperty] = replaceBinding,
+                    [!TextBlock.ForegroundProperty] = brushBinding,
+                    [Grid.ColumnProperty] = 1,
+                });
+
+                return grid;
+            })
+        };
+
+        using var previewSubscription = previewObservable
+            .ObserveOnTaskpool()
+            .Select(values => {
+                string[] replacements;
+                string? regexError = null;
+                if (values.IsRegex) {
+                    try {
+                        replacements = textures.Select(path => Regex.Replace(path, values.FromValue, values.ToValue)).ToArray();
+                    } catch (ArgumentException ex) {
+                        replacements = textures;
+                        regexError = ex.Message;
+                    }
+                } else {
+                    if (!values.FromValue.IsNullOrEmpty()) {
+                        replacements = textures.Select(path => path.Replace(values.FromValue, values.ToValue, DataRelativePath.PathComparison)).ToArray();
+                    } else {
+                        replacements = textures;
+                    }
                 }
-            } else {
-                texturesAfterListBox.ItemsSource = textures.Select(path => path.Replace(values.FromValue, values.ToValue, StringComparison.OrdinalIgnoreCase)).ToArray();
 
-                regexErrorText.IsVisible = false;
-                regexErrorText.Text = string.Empty;
-            }
-
-            if (texturesAfterListBox.ItemsSource is IEnumerable itemsSource) {
-                var count = itemsSource
-                    .OfType<string>()
+                var count = replacements
                     .Index()
-                    .Count(x => x.Item != textures.ElementAt(x.Index));
+                    .Count(x => !string.Equals(x.Item, textures[x.Index], DataRelativePath.PathComparison));
 
-                replacementCount.Text = $"{count} textures will be replaced";
-            } else {
-                replacementCount.Text = string.Empty;
-            }
-        });
+                return (count, regexError);
+            })
+            .ObserveOnGui()
+            .Subscribe(x => {
+                replacementCount.Text = $"{x.count} textures will be replaced";
+                regexErrorText.Text = x.regexError ?? string.Empty;
+                regexErrorText.IsVisible = x.regexError is not null;
+            });
 
         var content = new DockPanel {
             Children = {
@@ -412,18 +507,26 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                 },
                 new ScrollViewer {
                     Height = 440,
-                    Content = new Grid {
-                        ColumnDefinitions = new ColumnDefinitions("*,*"),
-                        Children = { texturesListBox, texturesAfterListBox }
-                    }
-                }
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Visible,
+                    Content = texturesListBox
+                },
             }
         };
 
         var target = assets is [{ Name: var name }] ? name : $"{assets.Length} assets";
         var remapDialog = CreateAssetDialog($"Remap textures in {target}", content);
         if (await remapDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
-            foreach (var fileLink in assets) {
+            var changedTextures = textures
+                .Where(path => IsMatch(path, enableRegex.IsChecked is true, fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty))
+                .ToArray();
+
+            var assetsToUpdate = assets
+                .Where(asset => _referenceService.GetAssetLinks(asset)
+                    .Any(link => link.AssetTypeInstance == _assetTypeService.Provider.Texture
+                     && changedTextures.Contains(link.DataRelativePath.Path, DataRelativePath.PathComparer)))
+                .ToArray();
+
+            foreach (var fileLink in assetsToUpdate) {
                 _modelModificationService.RemapLinks(
                     fileLink,
                     path => {
@@ -431,8 +534,25 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                             return Regex.Replace(path, fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty);
                         }
 
-                        return path.Replace(fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                        return fromTextBox.Text.IsNullOrEmpty()
+                            ? path
+                            : path.Replace(fromTextBox.Text ?? string.Empty, toTextBox.Text ?? string.Empty, DataRelativePath.PathComparison);
                     });
+            }
+        }
+
+        bool IsMatch(string path, bool isRegex, string fromValue, string toValue) {
+            try {
+                if (isRegex) {
+                    return Regex.IsMatch(path, fromValue)
+                     && !string.Equals(path, Regex.Replace(path, fromValue, toValue), DataRelativePath.PathComparison);
+                }
+
+                return !fromValue.IsNullOrEmpty()
+                 && !string.Equals(path, path.Replace(fromValue, toValue, DataRelativePath.PathComparison), DataRelativePath.PathComparison);
+            } catch (Exception) {
+                // If the regex is invalid, just show all textures without highlights
+                return false;
             }
         }
     }
@@ -471,7 +591,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
 
     [ReactiveCommand]
     private async Task CreateStaticRecord(SelectedListContext context) {
-        foreach (var asset in context.SelectedAssets.Where(c => c.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeProvider.Model)) {
+        foreach (var asset in context.SelectedAssets.Where(c => c.ReferencedAsset?.AssetLink.AssetTypeInstance == _assetTypeService.Provider.Model)) {
             var staticRecord = _recordController.CreateRecord<Static, IStaticGetter>();
             _recordController.RegisterUpdate(staticRecord,
                 () => {
