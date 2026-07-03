@@ -103,7 +103,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                 OpenAssetsCommand,
                 context => menuItemProvider.File(OpenAssetsCommand, context)),
             new ContextAction(
-                context => context.SelectedAssets is [{ DataSourceLink: var asset }] && asset.Exists(),
+                context => context.SelectedAssets is [{ DataSourceLink: DataSourceFileLink asset }] && asset.Exists(),
                 40,
                 ContextActionGroup.Viewing,
                 OpenInFileExplorerCommand,
