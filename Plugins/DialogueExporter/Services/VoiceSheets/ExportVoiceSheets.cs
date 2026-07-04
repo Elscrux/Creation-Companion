@@ -24,8 +24,8 @@ public sealed class ExportVoiceSheets(
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
     private ILinkCache LinkCache => editorEnvironment.LinkCache;
-    public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool includeAlreadyVoiced) {
 
+    public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool skipAlreadyVoiced) {
         logger.Here().Verbose("Start finding voice lines for mod {Mod}", currentMod.ModKey);
 
         var linkCache = editorEnvironment.LinkCache;
@@ -65,7 +65,15 @@ public sealed class ExportVoiceSheets(
                             lastSeparator = voiceTypeFolder.LastIndexOf(Path.DirectorySeparatorChar);
                             var voiceType = voiceTypeFolder[(lastSeparator + 1)..];
                             if (!voiceTypes.Contains(voiceType)) continue;
-                            if (!includeAlreadyVoiced && File.Exists(Path.Combine(dataSourceService.ActiveDataSource.Path, path))) continue;
+                            if (skipAlreadyVoiced) {
+                                if (dataSourceService.FileExists(path)) continue;
+
+                                var skipLine = SkyrimSoundAssetType.Instance.FileExtensions
+                                    .Select(fileExtension => dataSourceService.ActiveDataSource.FileSystem.Path.ChangeExtension(path, fileExtension))
+                                    .Any(soundPath => dataSourceService.FileExists(soundPath));
+
+                                if (skipLine) continue;
+                            }
 
                             var fileName = path[(lastSeparator + 1)..^4];
 
