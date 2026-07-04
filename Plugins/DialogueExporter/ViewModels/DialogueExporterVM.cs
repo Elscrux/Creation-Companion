@@ -20,6 +20,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
     private readonly ExportVaSynth _exportVaSynth;
     private readonly ExportVoiceSheets _exportVoiceSheets;
     private readonly WriteXlsx _writeXlsx;
+    private readonly WriteOverviewXlsx _writeOverviewXlsx;
     public IReadOnlyList<string> VocoderOptions { get; } = ["hifi", "quickanddirty", "waveglow", "waveglowBIGq"];
 
     [Reactive] public partial string VoiceLineOutputFolder { get; set; } = string.Empty;
@@ -44,12 +45,14 @@ public sealed partial class DialogueExporterVM : ViewModel {
         ExportVaSynth exportVaSynth,
         ExportVoiceSheets exportVoiceSheets,
         WriteXlsx writeXlsx,
+        WriteOverviewXlsx writeOverviewXlsx,
         SingleModPickerVM singleModPickerVM) {
         _fileSystem = fileSystem;
         _editorEnvironment = editorEnvironment;
         _exportVaSynth = exportVaSynth;
         _exportVoiceSheets = exportVoiceSheets;
         _writeXlsx = writeXlsx;
+        _writeOverviewXlsx = writeOverviewXlsx;
         ReferenceService = referenceService;
         ExportModPickerVM = singleModPickerVM;
 
@@ -89,8 +92,10 @@ public sealed partial class DialogueExporterVM : ViewModel {
             _fileSystem.Directory.CreateDirectory(VoiceLineOutputFolder);
         }
 
-        var lines = _exportVoiceSheets.GetLines(selectedMod, SkipAlreadyVoiced);
+        var lines = _exportVoiceSheets.GetLines(selectedMod, SkipAlreadyVoiced).ToArray();
         _writeXlsx.Write(lines, VoiceLineOutputFolder);
+        var overviewPath = _fileSystem.Path.Combine(VoiceLineOutputFolder, "SpeakerOverview.xlsx");
+        _writeOverviewXlsx.WriteOverview(lines, overviewPath);
     }
 
     private void ExportVaSynth() {

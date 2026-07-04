@@ -25,5 +25,8 @@ public class DialogueExporterModule : ExtensionModule {
 
         builder.RegisterType<WriteXlsx>()
             .AsSelf();
+
+        builder.RegisterType<WriteOverviewXlsx>()
+            .AsSelf();
     }
 }
