@@ -11,20 +11,21 @@ using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Assets;
 using Mutagen.Bethesda.Skyrim.Records.Assets.VoiceType;
 using Noggog;
 using Serilog;
 namespace DialogueExporter.Services.VoiceSheets;
 
-public class ExportVoiceSheets(
+public sealed class ExportVoiceSheets(
     ILogger logger,
     IModService modService,
     IReferenceService referenceService,
     IDataSourceService dataSourceService,
     IEditorEnvironment editorEnvironment) {
     private ILinkCache LinkCache => editorEnvironment.LinkCache;
-    
     public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool includeAlreadyVoiced) {
+
         logger.Here().Verbose("Start finding voice lines for mod {Mod}", currentMod.ModKey);
 
         var linkCache = editorEnvironment.LinkCache;
@@ -78,7 +79,9 @@ public class ExportVoiceSheets(
                             }
 
                             if (response.Text.String.IsNullOrEmpty() && response.ScriptNotes.IsNullOrEmpty()) {
-                                logger.Here().Verbose("Skipping topic {Topic} response {ResponseNumber} because it has no text or script notes", topic.FormKey, response.ResponseNumber);
+                                logger.Here().Verbose("Skipping topic {Topic} response {ResponseNumber} because it has no text or script notes",
+                                    topic.FormKey,
+                                    response.ResponseNumber);
                             }
 
                             ExportLine? line = null;
@@ -122,465 +125,517 @@ public class ExportVoiceSheets(
     }
 
     private (string Context, ISceneGetter? Scene, ISceneActionGetter? SceneAction, bool skip) GetContext(
-            IQuestGetter quest,
-            IDialogTopicGetter topic,
-            IDialogResponsesGetter responses) {
-            var subtype = topic.SubtypeName.ToDialogTopicSubtype();
-            var type = subtype switch {
-                DialogTopic.SubtypeEnum.ActorCollideWithActor => "Player bumps into you",
-                DialogTopic.SubtypeEnum.AcceptYield => "You accept the player's yield in a fight",
-                DialogTopic.SubtypeEnum.Agree => "You are a follower and agree to do something for the player",
-                DialogTopic.SubtypeEnum.AlertIdle => "You are searching for any enemy",
-                DialogTopic.SubtypeEnum.AllyKilled => "You notice that an allied npc died",
-                DialogTopic.SubtypeEnum.AlertToCombat => "You find an enemy after searching for them",
-                DialogTopic.SubtypeEnum.AlertToNormal => "You fail to find an enemy after searching for them",
-                DialogTopic.SubtypeEnum.AssaultNC => "You see an assault and don't care about it",
-                DialogTopic.SubtypeEnum.Assault => "You see an assault or are assaulted yourself",
-                DialogTopic.SubtypeEnum.Attack => "You attack someone",
-                DialogTopic.SubtypeEnum.Bash => "You perform a shield bash",
-                DialogTopic.SubtypeEnum.Bleedout => "You are bleeding out",
-                DialogTopic.SubtypeEnum.Block => "You block an attack",
-                DialogTopic.SubtypeEnum.CombatToLost => "You lose sight of the enemy in combat",
-                DialogTopic.SubtypeEnum.CombatToNormal => "You have won a fight",
-                DialogTopic.SubtypeEnum.Death => "You are dying",
-                DialogTopic.SubtypeEnum.DetectFriendDie => "You notice that a friendly npcs died from an unknown cause",
-                DialogTopic.SubtypeEnum.ExitFavorState => "You are a follower and the player discords a request for you",
-                DialogTopic.SubtypeEnum.ShootBow => "You notice someone randomly shooting a bow out of combat",
-                DialogTopic.SubtypeEnum.Flee => "You flee from combat",
-                DialogTopic.SubtypeEnum.Goodbye => "You say goodbye to the player after a conversation",
-                DialogTopic.SubtypeEnum.CombatGrunt => "You say this during combat",
-                DialogTopic.SubtypeEnum.Hello => "You greet the player",
-                DialogTopic.SubtypeEnum.Idle => "You are randomly saying this",
-                DialogTopic.SubtypeEnum.Hit => "You were hit",
-                DialogTopic.SubtypeEnum.KnockOverObject => "You notice the player knocking over an object",
-                DialogTopic.SubtypeEnum.LostIdle => "You were searching for an enemy but didn't find them",
-                DialogTopic.SubtypeEnum.LockedObject => "You notice the player looking at a locked object",
-                DialogTopic.SubtypeEnum.LostToCombat => "You previously lost sight of an enemy and now combat starts again",
-                DialogTopic.SubtypeEnum.LostToNormal => "You lost sight of an enemy and now stop the search",
-                DialogTopic.SubtypeEnum.MoralRefusal => "You are a follower and refuse to do something because it's against your morals",
-                DialogTopic.SubtypeEnum.MurderNC => "You see a murder and don't care about it",
-                DialogTopic.SubtypeEnum.Murder => "You see a murder",
-                DialogTopic.SubtypeEnum.NormalToAlert => "You noticed that there is an enemy somewhere and start to search",
-                DialogTopic.SubtypeEnum.NormalToCombat => "A fight starts",
-                DialogTopic.SubtypeEnum.NoticeCorpse => "You notice a corpse",
-                DialogTopic.SubtypeEnum.ObserveCombat => "You observe a fight",
-                DialogTopic.SubtypeEnum.PlayerShout => "You notice the player using a shout out of combat",
-                DialogTopic.SubtypeEnum.PickpocketCombat => "You caught a pickpocket",
-                DialogTopic.SubtypeEnum.PickpocketNC => "You caught a pickpocket but don't care about it",
-                DialogTopic.SubtypeEnum.PickpocketTopic => "You notice the player looking like they're trying to pickpocket",
-                DialogTopic.SubtypeEnum.PlayerInIronSights => "Player aims drawn bow at you",
-                DialogTopic.SubtypeEnum.PowerAttack => "You perform a power attack",
-                DialogTopic.SubtypeEnum.PursueIdleTopic => "You are pursuing a criminal",
-                DialogTopic.SubtypeEnum.Refuse => "You are a follower and refuse to do something because you can't do it",
-                DialogTopic.SubtypeEnum.Rumors => "You say a rumor",
-                DialogTopic.SubtypeEnum.ServiceRefusal => "You refuse to do something for the player",
-                DialogTopic.SubtypeEnum.Show => "You are a follower and the player starts to give you a command",
-                DialogTopic.SubtypeEnum.Steal => "You notice someone stealing something",
-                DialogTopic.SubtypeEnum.StealFromNC => "You notice someone stealing something but don't care about it",
-                DialogTopic.SubtypeEnum.SwingMeleeWeapon => "You notice the player swinging a weapon out of combat",
-                DialogTopic.SubtypeEnum.Taunt => "You taunt an enemy during combat",
-                DialogTopic.SubtypeEnum.TimeToGo => "You say this while the player is trespassing",
-                DialogTopic.SubtypeEnum.TrespassAgainstNC => "You notice the someone trespassing but don't care about it",
-                DialogTopic.SubtypeEnum.Trespass => "You notice the someone trespassing",
-                DialogTopic.SubtypeEnum.WerewolfTransformCrime => "You notice the player transforming into a werewolf",
-                DialogTopic.SubtypeEnum.ZKeyObject => "You notice the player grabbing and moving around an item",
-                DialogTopic.SubtypeEnum.EnterSprintBreath => "You start sprinting",
-                DialogTopic.SubtypeEnum.EnterBowZoomBreath  => "You start zooming with your bow", 
-                DialogTopic.SubtypeEnum.ExitBowZoomBreath   => "You stop zooming with your bow", 
-                DialogTopic.SubtypeEnum.LeaveWaterBreath => "You leave water and start breathing air",
-                DialogTopic.SubtypeEnum.OutOfBreath => "You run out of breath while running",
-                DialogTopic.SubtypeEnum.FlyingMountLand => "Player gave request to land",
-                DialogTopic.SubtypeEnum.FlyingMountCancelLand => "Player cancelled their request to land",
-                DialogTopic.SubtypeEnum.FlyingMountAcceptTarget => "Player gave you a target to attack and you accept",
-                DialogTopic.SubtypeEnum.FlyingMountRejectTarget => "Player gave you a target to attack and you refuse",
-                DialogTopic.SubtypeEnum.FlyingMountNoTarget => "Player gave you a target to attack and you refuse",
-                DialogTopic.SubtypeEnum.FlyingMountDestinationReached => "You are flying the player somewhere and you reached the destination",
-                DialogTopic.SubtypeEnum.VoicePowerStartShort => "You start using a voice power but just say the first word",
-                DialogTopic.SubtypeEnum.VoicePowerStartLong => "You start using a voice power and will continue to say more words",
-                DialogTopic.SubtypeEnum.VoicePowerEndShort => "You finish saying the voice power, just saying word two",
-                DialogTopic.SubtypeEnum.VoicePowerEndLong => "You finish saying the voice power, saying word two and three",
-                _ => null,
-            };
+        IQuestGetter quest,
+        IDialogTopicGetter topic,
+        IDialogResponsesGetter responses) {
+        var subtype = topic.SubtypeName.ToDialogTopicSubtype();
+        var type = subtype switch {
+            DialogTopic.SubtypeEnum.ActorCollideWithActor => "Player bumps into you",
+            DialogTopic.SubtypeEnum.AcceptYield => "You accept the player's yield in a fight",
+            DialogTopic.SubtypeEnum.Agree => "You are a follower and agree to do something for the player",
+            DialogTopic.SubtypeEnum.AlertIdle => "You are searching for any enemy",
+            DialogTopic.SubtypeEnum.AllyKilled => "You notice that an allied npc died",
+            DialogTopic.SubtypeEnum.AlertToCombat => "You find an enemy after searching for them",
+            DialogTopic.SubtypeEnum.AlertToNormal => "You fail to find an enemy after searching for them",
+            DialogTopic.SubtypeEnum.AssaultNC => "You see an assault and don't care about it",
+            DialogTopic.SubtypeEnum.Assault => "You see an assault or are assaulted yourself",
+            DialogTopic.SubtypeEnum.Attack => "You attack someone",
+            DialogTopic.SubtypeEnum.Bash => "You perform a shield bash",
+            DialogTopic.SubtypeEnum.Bleedout => "You are bleeding out",
+            DialogTopic.SubtypeEnum.Block => "You block an attack",
+            DialogTopic.SubtypeEnum.CombatToLost => "You lose sight of the enemy in combat",
+            DialogTopic.SubtypeEnum.CombatToNormal => "You have won a fight",
+            DialogTopic.SubtypeEnum.Death => "You are dying",
+            DialogTopic.SubtypeEnum.DetectFriendDie => "You notice that a friendly npcs died from an unknown cause",
+            DialogTopic.SubtypeEnum.ExitFavorState => "You are a follower and the player discords a request for you",
+            DialogTopic.SubtypeEnum.ShootBow => "You notice someone randomly shooting a bow out of combat",
+            DialogTopic.SubtypeEnum.Flee => "You flee from combat",
+            DialogTopic.SubtypeEnum.Goodbye => "You say goodbye to the player after a conversation",
+            DialogTopic.SubtypeEnum.CombatGrunt => "You say this during combat",
+            DialogTopic.SubtypeEnum.Hello => "You greet the player",
+            DialogTopic.SubtypeEnum.Idle => "You are randomly saying this",
+            DialogTopic.SubtypeEnum.Hit => "You were hit",
+            DialogTopic.SubtypeEnum.KnockOverObject => "You notice the player knocking over an object",
+            DialogTopic.SubtypeEnum.LostIdle => "You were searching for an enemy but didn't find them",
+            DialogTopic.SubtypeEnum.LockedObject => "You notice the player looking at a locked object",
+            DialogTopic.SubtypeEnum.LostToCombat => "You previously lost sight of an enemy and now combat starts again",
+            DialogTopic.SubtypeEnum.LostToNormal => "You lost sight of an enemy and now stop the search",
+            DialogTopic.SubtypeEnum.MoralRefusal => "You are a follower and refuse to do something because it's against your morals",
+            DialogTopic.SubtypeEnum.MurderNC => "You see a murder and don't care about it",
+            DialogTopic.SubtypeEnum.Murder => "You see a murder",
+            DialogTopic.SubtypeEnum.NormalToAlert => "You noticed that there is an enemy somewhere and start to search",
+            DialogTopic.SubtypeEnum.NormalToCombat => "A fight starts",
+            DialogTopic.SubtypeEnum.NoticeCorpse => "You notice a corpse",
+            DialogTopic.SubtypeEnum.ObserveCombat => "You observe a fight",
+            DialogTopic.SubtypeEnum.PlayerShout => "You notice the player using a shout out of combat",
+            DialogTopic.SubtypeEnum.PickpocketCombat => "You caught a pickpocket",
+            DialogTopic.SubtypeEnum.PickpocketNC => "You caught a pickpocket but don't care about it",
+            DialogTopic.SubtypeEnum.PickpocketTopic => "You notice the player looking like they're trying to pickpocket",
+            DialogTopic.SubtypeEnum.PlayerInIronSights => "Player aims drawn bow at you",
+            DialogTopic.SubtypeEnum.PowerAttack => "You perform a power attack",
+            DialogTopic.SubtypeEnum.PursueIdleTopic => "You are pursuing a criminal",
+            DialogTopic.SubtypeEnum.Refuse => "You are a follower and refuse to do something because you can't do it",
+            DialogTopic.SubtypeEnum.Rumors => "You say a rumor",
+            DialogTopic.SubtypeEnum.ServiceRefusal => "You refuse to do something for the player",
+            DialogTopic.SubtypeEnum.Show => "You are a follower and the player starts to give you a command",
+            DialogTopic.SubtypeEnum.Steal => "You notice someone stealing something",
+            DialogTopic.SubtypeEnum.StealFromNC => "You notice someone stealing something but don't care about it",
+            DialogTopic.SubtypeEnum.SwingMeleeWeapon => "You notice the player swinging a weapon out of combat",
+            DialogTopic.SubtypeEnum.Taunt => "You taunt an enemy during combat",
+            DialogTopic.SubtypeEnum.TimeToGo => "You say this while the player is trespassing",
+            DialogTopic.SubtypeEnum.TrespassAgainstNC => "You notice the someone trespassing but don't care about it",
+            DialogTopic.SubtypeEnum.Trespass => "You notice the someone trespassing",
+            DialogTopic.SubtypeEnum.WerewolfTransformCrime => "You notice the player transforming into a werewolf",
+            DialogTopic.SubtypeEnum.ZKeyObject => "You notice the player grabbing and moving around an item",
+            DialogTopic.SubtypeEnum.EnterSprintBreath => "You start sprinting",
+            DialogTopic.SubtypeEnum.EnterBowZoomBreath => "You start zooming with your bow",
+            DialogTopic.SubtypeEnum.ExitBowZoomBreath => "You stop zooming with your bow",
+            DialogTopic.SubtypeEnum.LeaveWaterBreath => "You leave water and start breathing air",
+            DialogTopic.SubtypeEnum.OutOfBreath => "You run out of breath while running",
+            DialogTopic.SubtypeEnum.FlyingMountLand => "Player gave request to land",
+            DialogTopic.SubtypeEnum.FlyingMountCancelLand => "Player cancelled their request to land",
+            DialogTopic.SubtypeEnum.FlyingMountAcceptTarget => "Player gave you a target to attack and you accept",
+            DialogTopic.SubtypeEnum.FlyingMountRejectTarget => "Player gave you a target to attack and you refuse",
+            DialogTopic.SubtypeEnum.FlyingMountNoTarget => "Player gave you a target to attack and you refuse",
+            DialogTopic.SubtypeEnum.FlyingMountDestinationReached => "You are flying the player somewhere and you reached the destination",
+            DialogTopic.SubtypeEnum.VoicePowerStartShort => "You start using a voice power but just say the first word",
+            DialogTopic.SubtypeEnum.VoicePowerStartLong => "You start using a voice power and will continue to say more words",
+            DialogTopic.SubtypeEnum.VoicePowerEndShort => "You finish saying the voice power, just saying word two",
+            DialogTopic.SubtypeEnum.VoicePowerEndLong => "You finish saying the voice power, saying word two and three",
+            _ => null,
+        };
 
-            if (type is not null) return (type, null, null, false);
+        if (type is not null) return (type, null, null, false);
 
-            if (GetPromptFromInvisibleContinue(topic, responses) is {} promptFromInvisibleContinue) {
-                return (promptFromInvisibleContinue, null, null, false);
-            }
-
-            if (GetPromptFromBranchingDialog(topic, responses) is {} promptFromBranchingDialog) {
-                return (promptFromBranchingDialog, null, null, false);
-            }
-
-            switch (subtype) {
-                case DialogTopic.SubtypeEnum.Custom or DialogTopic.SubtypeEnum.ForceGreet:
-                    return ("You say something to the player", null, null, false);
-                case DialogTopic.SubtypeEnum.SharedInfo:
-                    var results = referenceService.GetRecordReferences(responses)
-                        .Select(reference => LinkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
-                        .WhereNotNull()
-                        .Where(r => r.Record.ResponseData.FormKey.Equals(responses.FormKey))
-                        .Select(r => {
-                            if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null, false);
-                            if (t.Quest.TryResolve(LinkCache) is not {} q) return (string.Empty, null, null, false);
-
-                            return GetContext(q, t, r.Record);
-                        })
-                        .Where(c => !c.Context.IsNullOrEmpty())
-                        .DistinctBy(x => x.Context)
-                        .ToArray();
-
-                    switch (results) {
-                        case []:
-                            // Skip a shared info it is not used by anything - this will not be included in the export
-                            logger.Here().Verbose("Skipping shared info {Responses} because is not used by any dialog topic", responses.FormKey);
-                            return (string.Empty, null, null, true);
-                        case [var result]:
-                            return result;
-                        default:
-                            return ("Used in multiple contexts: \n" + string.Join("\n", results.Select(x => x.Context)), null, null, false);
-                    }
-                case DialogTopic.SubtypeEnum.Scene: {
-                    foreach (var scene in GetQuestScenes(topic.Quest)) {
-                        foreach (var action in scene.Actions) {
-                            if (action.Type == SceneAction.TypeEnum.Dialog && action.Topic.FormKey == topic.FormKey) {
-                                var aliases = scene.Actors
-                                    .Where(a => a.ID != action.ActorID)
-                                    .Select(a => GetAliasName(quest, (int) a.ID, responses))
-                                    .ToArray();
-                                if (aliases.Length == 0) {
-                                    return ("You are speaking in a scene with no other actors", scene, action, false);
-                                }
-
-                                ISceneActionGetter? lastAction = null;
-                                var lastResponse = scene.Actions
-                                    .Where(a => a.Type == SceneAction.TypeEnum.Dialog)
-                                    .Where(a => a.EndPhase < action.StartPhase)
-                                    .OrderByDescending(a => a.StartPhase)
-                                    .Select(a => {
-                                        lastAction = a;
-                                        return a.Topic.TryResolve(LinkCache);
-                                    })
-                                    .NotNull()
-                                    .Select(t => t.Responses.FirstOrDefault())
-                                    .NotNull()
-                                    .FirstOrDefault(t => t.Responses.Count > 0 || !t.ResponseData.IsNull);
-
-                                var speakers = string.Join(", ", aliases);
-                                if (lastAction?.ActorID is null || lastResponse is null) {
-                                    return ($"You are speaking to {speakers}.", scene, action, false);
-                                }
-
-                                var lastActor = lastAction.ActorID == action.ActorID
-                                    ? "You"
-                                    : GetAliasName(quest, lastAction.ActorID.Value, lastResponse);
-                                string textString;
-                                if (!lastResponse.ResponseData.IsNull
-                                 && lastResponse.ResponseData.TryResolve(LinkCache, out var sharedInfo)) {
-                                    textString = sharedInfo.Responses.Count > 0
-                                        ? sharedInfo.Responses[^1].Text.String ?? string.Empty
-                                        : string.Empty;
-                                } else {
-                                    textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
-                                }
-
-                                return ($"You are speaking to {speakers}. {lastActor} last said '{textString}'", scene, action, false);
-                            }
-                        }
-                    }
-
-                    logger.Here().Warning("Skipping scene topic {Topic} because is not part of a scene", topic.FormKey);
-                    return ("", null, null, true);
-                }
-            }
-
-            logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}",
-                responses.FormKey,
-                topic.SubtypeName.ToDialogTopicSubtype());
-            return ("", null, null, false);
-
-            string? GetPromptFromBranchingDialog(IDialogTopicGetter t, IDialogResponsesGetter r) {
-                if (r.Prompt is not null && !r.Prompt.String.IsNullOrEmpty()) {
-                    return $"Player said '{r.Prompt.String}'";
-                }
-
-                if (t.Name is not null && !t.Name.String.IsNullOrEmpty()) {
-                    return $"Player said '{t.Name.String}'";
-                }
-
-                return null;
-            }
-
-            string? GetPromptFromInvisibleContinue(IDialogTopicGetter t, IDialogResponsesGetter r) {
-                foreach (var linkResponses in referenceService.GetRecordReferences(t)
-                        .Select(reference => LinkCache.TryResolve<IDialogResponsesGetter>(reference.FormKey, out var response) ? response : null)
-                        .WhereNotNull()
-                        .Where(response => response.Flags is {} flags && flags.Flags.HasFlag(DialogResponses.Flag.InvisibleContinue))
-                    ) {
-                    var responsesContext = LinkCache.ResolveSimpleContext<IDialogResponsesGetter>(r.FormKey);
-                    if (responsesContext.Parent is not { Record: IDialogTopicGetter linkTopic }) continue;
-                    if (linkTopic.FormKey == t.FormKey) continue;
-
-                    if (GetPromptFromInvisibleContinue(linkTopic, linkResponses) is {} p) {
-                        return p;
-                    }
-
-                    if (GetPromptFromBranchingDialog(linkTopic, linkResponses) is {} prompt) {
-                        return prompt;
-                    }
-                }
-
-                var rootBranch = GetRootBranch(t);
-                if (rootBranch?.Flags is not null
-                 && !rootBranch.Flags.Value.HasFlag(DialogBranch.Flag.TopLevel)
-                 && rootBranch.StartingTopic.FormKey == t.FormKey) {
-                    return "You initiate a conversation with the player";
-                }
-
-                return null;
-            }
+        if (GetPromptFromInvisibleContinue(topic, responses) is {} promptFromInvisibleContinue) {
+            return (promptFromInvisibleContinue, null, null, false);
         }
 
-    private (INpcGetter? npc, string speaker, SpeakerType speakerType, bool isCombatLine) GetSpeakerWithSeparateCombatLines(
-            IQuestGetter quest,
-            IDialogTopicGetter topic,
-            IDialogResponsesGetter responses,
-            string voiceTypeName) {
-            var (npc, speaker, speakerType) = GetSpeaker(quest, topic, responses, voiceTypeName);
-
-            var subtype = topic.SubtypeName.ToDialogTopicSubtype();
-            var isCombatLine = subtype.HasValue && subtype.Value.IsCombatLine();
-
-            return (npc, speaker, speakerType, isCombatLine);
+        if (GetPromptFromBranchingDialog(topic, responses) is {} promptFromBranchingDialog) {
+            return (promptFromBranchingDialog, null, null, false);
         }
 
-    private (INpcGetter? npc, string speaker, SpeakerType speakerType) GetSpeaker(
-            IQuestGetter quest,
-            IDialogTopicGetter topic,
-            IDialogResponsesGetter responses,
-            string voiceTypeName) {
-            if (responses.Speaker.TryResolve(LinkCache, out var speaker)) {
-                return (speaker, GetNameOrEditorID(speaker), SpeakerType.Npc);
-            }
+        switch (subtype) {
+            case DialogTopic.SubtypeEnum.Custom or DialogTopic.SubtypeEnum.ForceGreet:
+                return ("You say something to the player", null, null, false);
+            case DialogTopic.SubtypeEnum.SharedInfo:
+                var results = referenceService.GetRecordReferences(responses)
+                    .Select(reference => LinkCache.TryResolveSimpleContext<IDialogResponsesGetter>(reference.FormKey, out var context) ? context : null)
+                    .WhereNotNull()
+                    .Where(r => r.Record.ResponseData.FormKey.Equals(responses.FormKey))
+                    .Select(r => {
+                        if (r.Parent?.Record is not IDialogTopicGetter t) return (string.Empty, null, null, false);
+                        if (t.Quest.TryResolve(LinkCache) is not {} q) return (string.Empty, null, null, false);
 
-            // Only check conditions on the speaker which are compared to 1, everything else is not relevant to the speaker
-            var conditions = responses.Conditions
-                .Concat(quest.DialogConditions)
-                .OfType<IConditionFloatGetter>()
-                .Where(c => c.Data.RunOnType == Condition.RunOnType.Subject)
-                .Where(c => Math.Abs(c.ComparisonValue - 1) < 0.001)
-                .ToArray();
+                        return GetContext(q, t, r.Record);
+                    })
+                    .Where(c => !c.Context.IsNullOrEmpty())
+                    .DistinctBy(x => x.Context)
+                    .ToArray();
 
-            foreach (var c in conditions) {
-                if (c.Data is not IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsId) continue;
-                if (!getIsId.Object.UsesLink()) continue;
-                if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(LinkCache, out var hasVoiceType)) continue;
-
-                if (hasVoiceType.Voice.TryResolve(LinkCache, out var voiceType)) {
-                    if (voiceType.EditorID == voiceTypeName) {
-                        if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
-                            return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                        }
-
-                        if (LinkCache.TryResolve<ITalkingActivatorGetter>(getIsId.Object.Link.FormKey, out var talkingActivator)) {
-                            return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
-                        }
-                    }
-                } else {
-                    if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
-                        var npcVoiceTypes = GetNpcTemplateVoiceTypes(npc.Template);
-                        if (npcVoiceTypes.Any(x => x.TryResolve(LinkCache, out var vt) && vt.EditorID == voiceTypeName)) {
-                            return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                        }
-                    }
+                switch (results) {
+                    case []:
+                        // Skip a shared info it is not used by anything - this will not be included in the export
+                        logger.Here().Verbose("Skipping shared info {Responses} because is not used by any dialog topic", responses.FormKey);
+                        return (string.Empty, null, null, true);
+                    case [var result]:
+                        return result;
+                    default:
+                        return ("Used in multiple contexts: \n" + string.Join("\n", results.Select(x => x.Context)), null, null, false);
                 }
-            }
-
-            // FormList
-            foreach (var c in conditions) {
-                if (c.Data is not IIsInListConditionDataGetter { RunOnType: Condition.RunOnType.Subject } isInList) continue;
-                if (!LinkCache.TryResolve<IFormListGetter>(isInList.FormList.Link.FormKey, out var formList)) continue;
-
-                foreach (var formListEntry in formList.Items) {
-                    if (formListEntry.TryResolve<INpcGetter>(LinkCache, out var npc)) {
-                        // return all speakers? - no all from right voice type?
-                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                    }
-                }
-            }
-
-            // Alias Ref
-            foreach (var c in conditions) {
-                if (c.Data is not IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference) continue;
-
-                var aliasSpeaker = GetAliasSpeaker(quest, getIsAliasReference.ReferenceAliasIndex, responses);
-                if (aliasSpeaker is null) return (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias);
-
-                switch (aliasSpeaker) {
-                    case INpcGetter npc:
-                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                    case ITalkingActivatorGetter talkingActivator:
-                        return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
-                }
-            }
-
-            // Scene Actor
-            if (topic.SubtypeName.ToDialogTopicSubtype() == DialogTopic.SubtypeEnum.Scene) {
+            case DialogTopic.SubtypeEnum.Scene: {
                 foreach (var scene in GetQuestScenes(topic.Quest)) {
                     foreach (var action in scene.Actions) {
-                        if (action.Type != SceneAction.TypeEnum.Dialog) continue;
-                        if (action.Topic.FormKey != topic.FormKey) continue;
-                        if (!action.ActorID.HasValue) continue;
+                        if (action.Type == SceneAction.TypeEnum.Dialog && action.Topic.FormKey == topic.FormKey) {
+                            var aliases = scene.Actors
+                                .Where(a => a.ID != action.ActorID)
+                                .Select(a => GetAliasName(quest, (int) a.ID, responses))
+                                .ToArray();
+                            if (aliases.Length == 0) {
+                                return ("You are speaking in a scene with no other actors", scene, action, false);
+                            }
 
-                        var aliasSpeaker = GetAliasSpeaker(quest, action.ActorID.Value, responses);
-                        if (aliasSpeaker is null) return (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias);
+                            ISceneActionGetter? lastAction = null;
+                            var lastResponse = scene.Actions
+                                .Where(a => a.Type == SceneAction.TypeEnum.Dialog)
+                                .Where(a => a.EndPhase < action.StartPhase)
+                                .OrderByDescending(a => a.StartPhase)
+                                .Select(a => {
+                                    lastAction = a;
+                                    return a.Topic.TryResolve(LinkCache);
+                                })
+                                .NotNull()
+                                .Select(t => t.Responses.FirstOrDefault())
+                                .NotNull()
+                                .FirstOrDefault(t => t.Responses.Count > 0 || !t.ResponseData.IsNull);
 
-                        switch (aliasSpeaker) {
-                            case INpcGetter npc:
-                                return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
-                            case ITalkingActivatorGetter talkingActivator:
-                                return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                            var speakers = string.Join(", ", aliases);
+                            if (lastAction?.ActorID is null || lastResponse is null) {
+                                return ($"You are speaking to {speakers}.", scene, action, false);
+                            }
+
+                            var lastActor = lastAction.ActorID == action.ActorID
+                                ? "You"
+                                : GetAliasName(quest, lastAction.ActorID.Value, lastResponse);
+                            string textString;
+                            if (!lastResponse.ResponseData.IsNull
+                             && lastResponse.ResponseData.TryResolve(LinkCache, out var sharedInfo)) {
+                                textString = sharedInfo.Responses.Count > 0
+                                    ? sharedInfo.Responses[^1].Text.String ?? string.Empty
+                                    : string.Empty;
+                            } else {
+                                textString = lastResponse.Responses[^1].Text.String ?? string.Empty;
+                            }
+
+                            return ($"You are speaking to {speakers}. {lastActor} last said '{textString}'", scene, action, false);
                         }
                     }
                 }
+
+                logger.Here().Warning("Skipping scene topic {Topic} because is not part of a scene", topic.FormKey);
+                return ("", null, null, true);
             }
-
-            // Faction
-            foreach (var c in conditions) {
-                if (c.Data is not GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject } getInFaction) continue;
-                if (!LinkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) continue;
-
-                return (null, "Member of faction " + GetNameOrEditorID(faction), SpeakerType.Faction);
-            }
-
-            // Race
-            foreach (var c in conditions) {
-                if (c.Data is not IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsRace) continue;
-                if (!LinkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) continue;
-
-                return (null, "Any NPC who is a " + GetNameOrEditorID(race), SpeakerType.Race);
-            }
-
-            // Voice Type
-            foreach (var c in conditions) {
-                if (c.Data is not IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }) continue;
-
-                return (null, "Any NPC using voice type " + voiceTypeName, SpeakerType.VoiceType);
-            }
-
-            logger.Here().Error("Could not determine speaker for quest {Quest} topic {Topic} responses {Responses}", quest.FormKey, topic.FormKey, responses.FormKey);
-            return (null, "Anyone", SpeakerType.Anyone);
         }
 
-        private string GetAliasName(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
-            var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
-            if (alias is null) {
-                logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
-                return "";
+        logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}",
+            responses.FormKey,
+            topic.SubtypeName.ToDialogTopicSubtype());
+        return ("", null, null, false);
+
+        string? GetPromptFromBranchingDialog(IDialogTopicGetter t, IDialogResponsesGetter r) {
+            if (r.Prompt is not null && !r.Prompt.String.IsNullOrEmpty()) {
+                return $"Player said '{r.Prompt.String}'";
             }
 
-            return alias.Name ?? throw new InvalidOperationException($"Alias {id} in {quest.EditorID} has no name");
+            if (t.Name is not null && !t.Name.String.IsNullOrEmpty()) {
+                return $"Player said '{t.Name.String}'";
+            }
+
+            return null;
         }
 
-        private IHasVoiceTypeGetter? GetAliasSpeaker(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
-            var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
-            if (alias is null) {
-                logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
-                return null;
-            }
+        string? GetPromptFromInvisibleContinue(IDialogTopicGetter t, IDialogResponsesGetter r) {
+            foreach (var linkResponses in referenceService.GetRecordReferences(t)
+                    .Select(reference => LinkCache.TryResolve<IDialogResponsesGetter>(reference.FormKey, out var response) ? response : null)
+                    .WhereNotNull()
+                    .Where(response => response.Flags is {} flags && flags.Flags.HasFlag(DialogResponses.Flag.InvisibleContinue))
+                ) {
+                var responsesContext = LinkCache.ResolveSimpleContext<IDialogResponsesGetter>(r.FormKey);
+                if (responsesContext.Parent is not { Record: IDialogTopicGetter linkTopic }) continue;
+                if (linkTopic.FormKey == t.FormKey) continue;
 
-            // If the alias is swapped on death, don't associate it with a specific NPC and return null as it's not always the same NPC
-            if (quest.VirtualMachineAdapter is not null && quest.VirtualMachineAdapter.Aliases.Any(x => x.Property.Alias == id
-             && x.Scripts.Any(s => string.Equals(s.Name, "SwapAliasOnDeath", StringComparison.OrdinalIgnoreCase)))) {
-                return null;
-            }
-
-            if (!alias.ForcedReference.IsNull) {
-                var forcedNpc = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(LinkCache);
-                if (forcedNpc is not null) {
-                    return forcedNpc.Base.TryResolve<INpcGetter>(LinkCache);
+                if (GetPromptFromInvisibleContinue(linkTopic, linkResponses) is {} p) {
+                    return p;
                 }
 
-                var forcedObject = alias.ForcedReference.TryResolve<IPlacedObjectGetter>(LinkCache);
-                if (forcedObject is not null) {
-                    return forcedObject.Base.TryResolve<ITalkingActivatorGetter>(LinkCache);
+                if (GetPromptFromBranchingDialog(linkTopic, linkResponses) is {} prompt) {
+                    return prompt;
                 }
             }
 
-            if (alias.CreateReferenceToObject is not null) {
-                var npc = alias.CreateReferenceToObject.Object.TryResolve<INpcGetter>(LinkCache);
+            var rootBranch = GetRootBranch(t);
+            if (rootBranch?.Flags is not null
+             && !rootBranch.Flags.Value.HasFlag(DialogBranch.Flag.TopLevel)
+             && rootBranch.StartingTopic.FormKey == t.FormKey) {
+                return "You initiate a conversation with the player";
+            }
+
+            return null;
+        }
+    }
+
+    private (INpcGetter? npc, string speaker, SpeakerType speakerType, bool isCombatLine) GetSpeakerWithSeparateCombatLines(
+        IQuestGetter quest,
+        IDialogTopicGetter topic,
+        IDialogResponsesGetter responses,
+        string voiceTypeName) {
+        var (npc, speaker, speakerType) = GetSpeaker(quest, topic, responses, voiceTypeName);
+
+        var subtype = topic.SubtypeName.ToDialogTopicSubtype();
+        var isCombatLine = subtype.HasValue && subtype.Value.IsCombatLine();
+
+        return (npc, speaker, speakerType, isCombatLine);
+    }
+
+    private (INpcGetter? npc, string speaker, SpeakerType speakerType) GetSpeaker(
+        IQuestGetter quest,
+        IDialogTopicGetter topic,
+        IDialogResponsesGetter responses,
+        string voiceTypeName) {
+        if (responses.Speaker.TryResolve(LinkCache, out var speaker)) {
+            return (speaker, GetNameOrEditorID(speaker), SpeakerType.Npc);
+        }
+
+        // Only check conditions on the speaker which are compared to 1, everything else is not relevant to the speaker
+        var conditions = responses.Conditions
+            .Concat(quest.DialogConditions)
+            .OfType<IConditionFloatGetter>()
+            .Where(c => c.Data.RunOnType == Condition.RunOnType.Subject)
+            .Where(c => Math.Abs(c.ComparisonValue - 1) < 0.001)
+            .ToArray();
+
+        foreach (var c in conditions) {
+            if (c.Data is not IGetIsIDConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsId) continue;
+            if (!getIsId.Object.UsesLink()) continue;
+            if (!getIsId.Object.Link.TryResolve<IHasVoiceTypeGetter>(LinkCache, out var hasVoiceType)) continue;
+
+            if (hasVoiceType.Voice.TryResolve(LinkCache, out var voiceType)) {
+                if (voiceType.EditorID == voiceTypeName) {
+                    if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                    }
+
+                    if (LinkCache.TryResolve<ITalkingActivatorGetter>(getIsId.Object.Link.FormKey, out var talkingActivator)) {
+                        return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                    }
+                }
+            } else {
+                if (LinkCache.TryResolve<INpcGetter>(getIsId.Object.Link.FormKey, out var npc)) {
+                    var npcVoiceTypes = GetNpcTemplateVoiceTypes(npc.Template);
+                    if (npcVoiceTypes.Any(x => x.TryResolve(LinkCache, out var vt) && vt.EditorID == voiceTypeName)) {
+                        return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                    }
+                }
+            }
+        }
+
+        // FormList
+        foreach (var c in conditions) {
+            if (c.Data is not IIsInListConditionDataGetter { RunOnType: Condition.RunOnType.Subject } isInList) continue;
+            if (!LinkCache.TryResolve<IFormListGetter>(isInList.FormList.Link.FormKey, out var formList)) continue;
+
+            foreach (var formListEntry in formList.Items) {
+                if (formListEntry.TryResolve<INpcGetter>(LinkCache, out var npc)) {
+                    // return all speakers? - no all from right voice type?
+                    return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                }
+            }
+        }
+
+        // Alias Ref
+        foreach (var c in conditions) {
+            if (c.Data is not IGetIsAliasRefConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsAliasReference) continue;
+
+            var aliasSpeaker = GetAliasSpeaker(quest, getIsAliasReference.ReferenceAliasIndex, responses, voiceTypeName);
+            if (aliasSpeaker is null) return (null, GetAliasName(quest, getIsAliasReference.ReferenceAliasIndex, responses), SpeakerType.Alias);
+
+            switch (aliasSpeaker) {
+                case INpcGetter npc:
+                    return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                case ITalkingActivatorGetter talkingActivator:
+                    return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+            }
+        }
+
+        // Scene Actor
+        if (topic.SubtypeName.ToDialogTopicSubtype() == DialogTopic.SubtypeEnum.Scene) {
+            foreach (var scene in GetQuestScenes(topic.Quest)) {
+                foreach (var action in scene.Actions) {
+                    if (action.Type != SceneAction.TypeEnum.Dialog) continue;
+                    if (action.Topic.FormKey != topic.FormKey) continue;
+                    if (!action.ActorID.HasValue) continue;
+
+                    var aliasSpeaker = GetAliasSpeaker(quest, action.ActorID.Value, responses, voiceTypeName);
+                    if (aliasSpeaker is null) return (null, GetAliasName(quest, action.ActorID.Value, responses), SpeakerType.Alias);
+
+                    switch (aliasSpeaker) {
+                        case INpcGetter npc:
+                            return (npc, GetNameOrEditorID(npc), SpeakerType.Npc);
+                        case ITalkingActivatorGetter talkingActivator:
+                            return (null, GetNameOrEditorID(talkingActivator), SpeakerType.TalkingActivator);
+                    }
+                }
+            }
+        }
+
+        // Faction
+        foreach (var c in conditions) {
+            if (c.Data is not GetInFactionConditionData { RunOnType: Condition.RunOnType.Subject } getInFaction) continue;
+            if (!LinkCache.TryResolve<IFactionGetter>(getInFaction.Faction.Link.FormKey, out var faction)) continue;
+
+            return (null, "Member of faction " + GetNameOrEditorID(faction), SpeakerType.Faction);
+        }
+
+        // Race
+        foreach (var c in conditions) {
+            if (c.Data is not IGetIsRaceConditionDataGetter { RunOnType: Condition.RunOnType.Subject } getIsRace) continue;
+            if (!LinkCache.TryResolve<IRaceGetter>(getIsRace.Race.Link.FormKey, out var race)) continue;
+
+            return (null, "Any NPC who is a " + GetNameOrEditorID(race), SpeakerType.Race);
+        }
+
+        // Voice Type
+        foreach (var c in conditions) {
+            if (c.Data is not IGetIsVoiceTypeConditionDataGetter { RunOnType: Condition.RunOnType.Subject }) continue;
+
+            return (null, "Any NPC using voice type " + voiceTypeName, SpeakerType.VoiceType);
+        }
+
+        logger.Here().Error("Could not determine speaker for quest {Quest} topic {Topic} responses {Responses}", quest.FormKey, topic.FormKey, responses.FormKey);
+        return (null, "Anyone", SpeakerType.Anyone);
+    }
+
+    private string GetAliasName(IQuestGetter quest, int id, IDialogResponsesGetter responses) {
+        var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
+        if (alias is null) {
+            logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
+            return "";
+        }
+
+        return alias.Name ?? throw new InvalidOperationException($"Alias {id} in {quest.EditorID} has no name");
+    }
+
+    private IHasVoiceTypeGetter? GetAliasSpeaker(IQuestGetter quest, int id, IDialogResponsesGetter responses, string voiceTypeName) {
+        var alias = quest.Aliases.FirstOrDefault(a => a.ID == id);
+        if (alias is null) {
+            logger.Here().Error("Alias {Alias} not found in quest {Quest} for response {Response}", id, quest.FormKey, responses.FormKey);
+            return null;
+        }
+
+        if (!alias.VoiceTypes.IsNull) {
+            var voiceTypes = alias.VoiceTypes.TryResolve(LinkCache);
+            if (voiceTypes is not null) {
+                switch (voiceTypes) {
+                    case IFormListGetter formList:
+                        // Use the first fitting npc as speaker
+                        return formList.Items.Select(item => item.TryResolve<INpcGetter>(LinkCache))
+                            .WhereNotNull()
+                            .FirstOrDefault(npc => npc.Voice.TryResolveIdentifier(LinkCache, out var editorId) && editorId == voiceTypeName);
+                    case INpcGetter npc:
+                        // Only use the npc as labeled speaker for this voice type if they use the right voice type
+                        var voiceType = npc.Voice.TryResolve(LinkCache);
+                        if (voiceType is not null && voiceType.EditorID == voiceTypeName) {
+                            return npc;
+                        }
+                        break;
+                }
+            }
+        }
+
+        // If the alias is swapped on death, don't associate it with a specific NPC and return null as it's not always the same NPC
+        if (quest.VirtualMachineAdapter is not null && quest.VirtualMachineAdapter.Aliases.Any(x => x.Property.Alias == id
+         && x.Scripts.Any(s => string.Equals(s.Name, "SwapAliasOnDeath", StringComparison.OrdinalIgnoreCase)))) {
+            return null;
+        }
+
+        if (!alias.ForcedReference.IsNull) {
+            var forcedNpc = alias.ForcedReference.TryResolve<IPlacedNpcGetter>(LinkCache);
+            if (forcedNpc is not null) {
+                return forcedNpc.Base.TryResolve<INpcGetter>(LinkCache);
+            }
+
+            var forcedObject = alias.ForcedReference.TryResolve<IPlacedObjectGetter>(LinkCache);
+            if (forcedObject is not null) {
+                return forcedObject.Base.TryResolve<ITalkingActivatorGetter>(LinkCache);
+            }
+        }
+
+        if (alias.CreateReferenceToObject is not null) {
+            var npc = alias.CreateReferenceToObject.Object.TryResolve<INpcGetter>(LinkCache);
+            if (npc is not null) {
+                return npc;
+            }
+
+            var leveledNpc = alias.CreateReferenceToObject.Object.TryResolve<ILeveledNpcGetter>(LinkCache);
+            if (leveledNpc is not null) {
+                var npcs = GetNpcsDefiningVoiceType(leveledNpc);
+                npc = npcs.FirstOrDefault(x => x.Voice.TryResolveIdentifier(LinkCache, out var editorId) && editorId == voiceTypeName);
                 if (npc is not null) {
                     return npc;
                 }
-
-                var talkingActivator = alias.CreateReferenceToObject.Object.TryResolve<ITalkingActivatorGetter>(LinkCache);
-                if (talkingActivator is not null) {
-                    return talkingActivator;
-                }
             }
 
-            return alias.UniqueActor.TryResolve<INpcGetter>(LinkCache);
+            var talkingActivator = alias.CreateReferenceToObject.Object.TryResolve<ITalkingActivatorGetter>(LinkCache);
+            if (talkingActivator is not null) {
+                return talkingActivator;
+            }
         }
 
-        private IDialogBranchGetter? GetRootBranch(IDialogTopicGetter topic) {
-            var processedTopics = new List<FormKey>();
+        if (alias.External is not null) {
+            var externalQuest = alias.External.Quest.TryResolve(LinkCache);
+            if (externalQuest is not null && alias.External.AliasID.HasValue) {
+                return GetAliasSpeaker(externalQuest, alias.External.AliasID.Value, responses, voiceTypeName);
+            }
+        }
 
-            return GetRootBranchRec(topic);
+        return alias.UniqueActor.TryResolve<INpcGetter>(LinkCache);
+    }
 
-            IDialogBranchGetter? GetRootBranchRec(IDialogTopicGetter currentTopic) {
-                // Try to get branch from the starting topic
-                var branch = referenceService.GetRecordReferences(currentTopic)
-                    .Select(reference => LinkCache.TryResolve<IDialogBranchGetter>(reference.FormKey, out var branch) ? branch : null)
-                    .WhereNotNull()
-                    .FirstOrDefault(branch => branch.StartingTopic.FormKey == currentTopic.FormKey);
-                if (branch is not null) return branch;
+    private IDialogBranchGetter? GetRootBranch(IDialogTopicGetter topic) {
+        var processedTopics = new List<FormKey>();
 
-                // If not a starting topic, try to find a starting topic linking to this
-                foreach (var linkTopic in referenceService.GetRecordReferences(currentTopic)
-                    .Select(reference => LinkCache.TryResolve<IDialogTopicGetter>(reference.FormKey, out var t) ? t : null)
-                    .WhereNotNull()) {
-                    foreach (var responses in linkTopic.Responses) {
-                        foreach (var linkTo in responses.LinkTo) {
-                            if (processedTopics.Contains(linkTopic.FormKey)) continue;
+        return GetRootBranchRec(topic);
 
-                            processedTopics.Add(linkTopic.FormKey);
+        IDialogBranchGetter? GetRootBranchRec(IDialogTopicGetter currentTopic) {
+            // Try to get branch from the starting topic
+            var branch = referenceService.GetRecordReferences(currentTopic)
+                .Select(reference => LinkCache.TryResolve<IDialogBranchGetter>(reference.FormKey, out var branch) ? branch : null)
+                .WhereNotNull()
+                .FirstOrDefault(branch => branch.StartingTopic.FormKey == currentTopic.FormKey);
+            if (branch is not null) return branch;
 
-                            if (linkTo.FormKey == currentTopic.FormKey) {
-                                var branchFromLinkTopic = GetRootBranchRec(linkTopic);
-                                if (branchFromLinkTopic is not null) return branchFromLinkTopic;
-                            }
+            // If not a starting topic, try to find a starting topic linking to this
+            foreach (var linkTopic in referenceService.GetRecordReferences(currentTopic)
+                .Select(reference => LinkCache.TryResolve<IDialogTopicGetter>(reference.FormKey, out var t) ? t : null)
+                .WhereNotNull()) {
+                foreach (var responses in linkTopic.Responses) {
+                    foreach (var linkTo in responses.LinkTo) {
+                        if (processedTopics.Contains(linkTopic.FormKey)) continue;
 
-                            if (GetRootBranchRec(linkTopic) is {} rootBranch) {
-                                return rootBranch;
-                            }
+                        processedTopics.Add(linkTopic.FormKey);
+
+                        if (linkTo.FormKey == currentTopic.FormKey) {
+                            var branchFromLinkTopic = GetRootBranchRec(linkTopic);
+                            if (branchFromLinkTopic is not null) return branchFromLinkTopic;
+                        }
+
+                        if (GetRootBranchRec(linkTopic) is {} rootBranch) {
+                            return rootBranch;
                         }
                     }
                 }
-
-                return null;
             }
-        }
 
-        private IEnumerable<ISceneGetter> GetQuestScenes(IFormLinkNullableGetter<IQuestGetter> quest) {
-            return referenceService.GetRecordReferences(quest)
-                .Select(reference => LinkCache.TryResolve<ISceneGetter>(reference.FormKey, out var scene) ? scene : null)
+            return null;
+        }
+    }
+
+    private IEnumerable<ISceneGetter> GetQuestScenes(IFormLinkNullableGetter<IQuestGetter> quest) {
+        return referenceService.GetRecordReferences(quest)
+            .Select(reference => LinkCache.TryResolve<ISceneGetter>(reference.FormKey, out var scene) ? scene : null)
+            .WhereNotNull()
+            .Where(scene => scene.Quest.FormKey == quest.FormKey);
+    }
+
+    private IEnumerable<IFormLinkGetter<IVoiceTypeGetter>> GetNpcTemplateVoiceTypes(IFormLinkGetter template) {
+        if (!template.TryResolve<INpcSpawnGetter>(LinkCache, out var npcSpawn)) return [];
+
+        return npcSpawn switch {
+            INpcGetter npc => npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)
+                ? GetNpcTemplateVoiceTypes(npc.Template)
+                : [npc.Voice],
+            ILeveledNpcGetter { Entries: {} entries } => entries.Select(entry => entry.Data)
                 .WhereNotNull()
-                .Where(scene => scene.Quest.FormKey == quest.FormKey);
-        }
+                .SelectMany(entry => GetNpcTemplateVoiceTypes(entry.Reference)),
+            _ => []
+        };
+    }
 
-        private IEnumerable<IFormLinkGetter<IVoiceTypeGetter>> GetNpcTemplateVoiceTypes(IFormLinkGetter template) {
-            if (!template.TryResolve<INpcSpawnGetter>(LinkCache, out var npcSpawn)) return [];
+    private IEnumerable<INpcGetter> GetNpcsDefiningVoiceType(ILeveledNpcGetter leveledNpc) {
+        if (leveledNpc.Entries is null) return [];
 
-            return npcSpawn switch {
-                INpcGetter npc => npc.Configuration.TemplateFlags.HasFlag(NpcConfiguration.TemplateFlag.Traits)
-                    ? GetNpcTemplateVoiceTypes(npc.Template)
-                    : [npc.Voice],
-                ILeveledNpcGetter { Entries: {} entries } => entries.Select(entry => entry.Data)
-                    .WhereNotNull()
-                    .SelectMany(entry => GetNpcTemplateVoiceTypes(entry.Reference)),
-                _ => []
-            };
-        }
+        return leveledNpc.Entries.Select(entry => entry.Data)
+            .WhereNotNull()
+            .SelectMany(entry => {
+                if (!entry.Reference.TryResolve(LinkCache, out var npcSpawn)) return [];
+
+                return npcSpawn switch {
+                    ILeveledNpcGetter leveled => GetNpcsDefiningVoiceType(leveled),
+                    INpcGetter npc => [npc],
+                    _ => []
+                };
+            });
+    }
 
     private static string GetNameOrEditorID<T>(T named)
         where T : IMajorRecordGetter, INamedGetter =>
