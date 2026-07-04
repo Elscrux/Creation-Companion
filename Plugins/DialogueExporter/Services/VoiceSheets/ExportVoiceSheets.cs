@@ -66,8 +66,6 @@ public sealed class ExportVoiceSheets(
                             var voiceType = voiceTypeFolder[(lastSeparator + 1)..];
                             if (!voiceTypes.Contains(voiceType)) continue;
                             if (skipAlreadyVoiced) {
-                                if (dataSourceService.FileExists(path)) continue;
-
                                 var skipLine = SkyrimSoundAssetType.Instance.FileExtensions
                                     .Select(fileExtension => dataSourceService.ActiveDataSource.FileSystem.Path.ChangeExtension(path, fileExtension))
                                     .Any(soundPath => dataSourceService.FileExists(soundPath));
