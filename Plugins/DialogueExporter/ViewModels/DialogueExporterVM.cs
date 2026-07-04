@@ -15,6 +15,8 @@ using ReactiveUI.SourceGenerators;
 namespace DialogueExporter.ViewModels;
 
 public sealed partial class DialogueExporterVM : ViewModel {
+    public static IReadOnlyList<InclusionMode> InclusionModes { get; } = Enum.GetValues<InclusionMode>();
+
     private readonly IFileSystem _fileSystem;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly ExportVaSynth _exportVaSynth;
@@ -28,7 +30,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
     [Reactive] public partial string VoiceTypeMappingCsvFile { get; set; } = string.Empty;
     [Reactive] public partial string QuestFilterRegex { get; set; } = ".*";
     [Reactive] public partial string Vocoder { get; set; } = "hifi";
-    [Reactive] public partial bool SkipAlreadyVoiced { get; set; } = true;
+    [Reactive] public partial InclusionMode InclusionMode { get; set; } = InclusionMode.All;
 
     public IReferenceService ReferenceService { get; }
     public SingleModPickerVM ExportModPickerVM { get; }
@@ -92,7 +94,7 @@ public sealed partial class DialogueExporterVM : ViewModel {
             _fileSystem.Directory.CreateDirectory(VoiceLineOutputFolder);
         }
 
-        var lines = _exportVoiceSheets.GetLines(selectedMod, SkipAlreadyVoiced).ToArray();
+        var lines = _exportVoiceSheets.GetLines(selectedMod, InclusionMode).ToArray();
         _writeXlsx.Write(lines, VoiceLineOutputFolder);
         var overviewPath = _fileSystem.Path.Combine(VoiceLineOutputFolder, "SpeakerOverview.xlsx");
         _writeOverviewXlsx.WriteOverview(lines, overviewPath);

@@ -35,9 +35,13 @@
                         <mod:ModPicker DataContext="{Binding ExportModPickerVM}"/>
                     </basic:LabeledContentControl>
 
-                    <CheckBox Content="Skip Already Voiced Lines"
-                              IsChecked="{Binding SkipAlreadyVoiced}"
-                              ToolTip.Tip="If checked, voice lines whose files are available in any data source will be skipped during export."/>
+                    <basic:LabeledContentControl
+                        Header="Voice Line Inclusion Mode"
+                        HeaderToolTip="Determines which voice lines will be included in the export.">
+                        <ComboBox
+                            ItemsSource="{x:Static viewModels:DialogueExporterVM.InclusionModes}"
+                            SelectedIndex="{Binding InclusionMode, Mode=TwoWay}"/>
+                    </basic:LabeledContentControl>
 
                     <StackPanel>
                         <Button Content="Export"

@@ -36,10 +36,10 @@ public record CommandLineEntryPointVoiceSheets : ICommandLineEntryPoint, IDataSo
     public string OutputDirectory { get; set; } = null!;
 
     [Option('i',
-        "IncludeAlreadyVoiced",
+        "InclusionMode",
         Required = false,
-        HelpText = "Whether to include lines that already have voice files")]
-    public bool IncludeAlreadyVoiced { get; set; } = false;
+        HelpText = "The inclusion mode for exporting voice sheets")]
+    public InclusionMode InclusionMode { get; set; } = InclusionMode.All;
 
     public IReadOnlySet<string> Verbs { get; } = (HashSet<string>) ["export-voice-sheets"];
 
@@ -59,7 +59,7 @@ public record CommandLineEntryPointVoiceSheets : ICommandLineEntryPoint, IDataSo
                     var editorEnvironment = container.Resolve<IEditorEnvironment>();
                     var writeXlsx = container.Resolve<WriteXlsx>();
                     var currentMod = editorEnvironment.LinkCache.PriorityOrder.First(l => l.ModKey.FileName == cmd.ModFilename);
-                    var lines = exportVoiceSheets.GetLines(currentMod, cmd.IncludeAlreadyVoiced);
+                    var lines = exportVoiceSheets.GetLines(currentMod, cmd.InclusionMode);
                     writeXlsx.Write(lines, cmd.OutputDirectory);
                     return 0;
                 },

@@ -17,6 +17,12 @@ using Noggog;
 using Serilog;
 namespace DialogueExporter.Services.VoiceSheets;
 
+public enum InclusionMode {
+    All,
+    OnlyVoiced,
+    OnlyUnvoiced
+}
+
 public sealed class ExportVoiceSheets(
     ILogger logger,
     IModService modService,
@@ -25,7 +31,7 @@ public sealed class ExportVoiceSheets(
     IEditorEnvironment editorEnvironment) {
     private ILinkCache LinkCache => editorEnvironment.LinkCache;
 
-    public IEnumerable<ExportLine> GetLines(IModGetter currentMod, bool skipAlreadyVoiced) {
+    public IEnumerable<ExportLine> GetLines(IModGetter currentMod, InclusionMode inclusionMode) {
         logger.Here().Verbose("Start finding voice lines for mod {Mod}", currentMod.ModKey);
 
         var linkCache = editorEnvironment.LinkCache;
@@ -65,12 +71,13 @@ public sealed class ExportVoiceSheets(
                             lastSeparator = voiceTypeFolder.LastIndexOf(Path.DirectorySeparatorChar);
                             var voiceType = voiceTypeFolder[(lastSeparator + 1)..];
                             if (!voiceTypes.Contains(voiceType)) continue;
-                            if (skipAlreadyVoiced) {
-                                var skipLine = SkyrimSoundAssetType.Instance.FileExtensions
+                            if (inclusionMode != InclusionMode.All) {
+                                var fileExists = SkyrimSoundAssetType.Instance.FileExtensions
                                     .Select(fileExtension => dataSourceService.ActiveDataSource.FileSystem.Path.ChangeExtension(path, fileExtension))
                                     .Any(soundPath => dataSourceService.FileExists(soundPath));
 
-                                if (skipLine) continue;
+                                if (inclusionMode == InclusionMode.OnlyVoiced && !fileExists) continue;
+                                if (inclusionMode == InclusionMode.OnlyUnvoiced && fileExists) continue;
                             }
 
                             var fileName = path[(lastSeparator + 1)..^4];
