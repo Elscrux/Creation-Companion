@@ -264,7 +264,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Subscribe(loadingReferences => IsBusyLoadingReferences = loadingReferences)
             .DisposeWith(this);
 
-        Observable.CombineLatest(
+        var configChanged = Observable.CombineLatest(
                 this.WhenAnyValue(x => x.ShowTextures),
                 this.WhenAnyValue(x => x.ShowModels),
                 this.WhenAnyValue(x => x.ShowScriptSources),
@@ -283,9 +283,18 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 this.WhenAnyValue(x => x.ShowOrphanedFiles),
                 this.WhenAnyValue(x => x.ShowOtherFiles))
             .CombineLatest(this.WhenAnyValue(x => x.SearchText))
-            .ObserveOnGui()
+            .Publish()
+            .RefCount();
+
+        configChanged.Subscribe(x => Console.WriteLine("yyy"));
+
+        configChanged
             .ThrottleMedium()
-            .Subscribe(Tree_UpdateAll)
+            .ObserveOnGui()
+            .Subscribe(() => {
+                Console.WriteLine();
+                Tree_UpdateAll();
+            })
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.DataSource)
@@ -327,7 +336,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             AssetTreeSource.RowSelection!.SingleSelect = false;
             AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);
             IsBusyLoadingAssets = false;
-            Tree_UpdateAll();
         });
     }
 
@@ -427,25 +435,40 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         if (_filteredFileSystemChildrenCache.TryGetValue(directory.DataRelativePath.Path, out var cachedChildren)) return cachedChildren;
 
         var removeChars = directory.DataRelativePath.Path.Length + 1;
+
+        string SelectRelativePath(IDataSourceLink link) {
+            // Remove common start
+            var span = link.DataRelativePath.Path.AsSpan();
+            span = span[removeChars..];
+
+            // Check for directory separators and remove everything after the first one (only top level files and directories count)
+            var indexOfAny = span.IndexOfAny(directory.FileSystem.Path.DirectorySeparatorChar,
+                directory.FileSystem.Path.AltDirectorySeparatorChar);
+            if (indexOfAny >= 0) {
+                span = span[..indexOfAny];
+            }
+
+            return span.ToString();
+        }
+
         var filteredLinks = directory
             .EnumerateFileLinks(SearchTextPattern(), true)
             .Where(FilterLink)
-            .Select(link => {
-                // Remove common start
-                var span = link.DataRelativePath.Path.AsSpan();
-                span = span[removeChars..];
-
-                // Check for directory separators and remove everything after the first one (only top level files and directories count)
-                var indexOfAny = span.IndexOfAny(directory.FileSystem.Path.DirectorySeparatorChar,
-                    directory.FileSystem.Path.AltDirectorySeparatorChar);
-                if (indexOfAny >= 0) {
-                    span = span[..indexOfAny];
-                }
-
-                return span.ToString();
-            })
+            .Select(SelectRelativePath)
             .DistinctBy(x => x, DataRelativePath.PathComparer)
             .ToHashSet();
+
+        // Also include empty directories if selected
+        if (ShowEmptyDirectories) {
+            var filteredDirectories = directory
+                .EnumerateDirectoryLinks(false)
+                .Where(dir => ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(dir.DataRelativePath))
+                .Where(link => !link.EnumerateFileLinks(true).Any())
+                .Select(SelectRelativePath)
+                .DistinctBy(x => x, DataRelativePath.PathComparer);
+
+            filteredLinks.AddRange(filteredDirectories);
+        }
 
         if (filteredLinks.Count == 0) return [];
 
@@ -616,7 +639,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         }
 
         var parentRow = FindParentRow(fileLink);
-        if (parentRow?.Children is not SortableRowsBase<IDataSourceLink, HierarchicalRow<IDataSourceLink>> childRows) return;
+        if (parentRow?.Children is null) return;
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
 
