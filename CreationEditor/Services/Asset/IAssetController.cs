@@ -13,24 +13,27 @@ public interface IAssetController {
     /// </summary>
     /// <param name="origin">Link to the file or directory that should be moved</param>
     /// <param name="destination">Link to the new location of the file or directory</param>
+    /// <param name="overwrite">If true, any files that already exist in the destination will be replaced with files from the origin</param>
     /// <param name="token">A CancellationToken can be used to cancel the task as long as it hasn't modified anything</param>
-    void Move(IDataSourceLink origin, IDataSourceLink destination, CancellationToken token = default);
+    void Move(IDataSourceLink origin, IDataSourceLink destination, bool overwrite = false, CancellationToken token = default);
 
     /// <summary>
     /// Copy a file or directory to a new location.
     /// </summary>
     /// <param name="origin">Link to the file or directory that should be copied</param>
     /// <param name="destination">Link to the new location of the file or directory</param>
+    /// <param name="overwrite">If true, any files that already exist in the destination will be replaced with files from the origin</param>
     /// <param name="token">A CancellationToken can be used to cancel the task as long as it hasn't modified anything</param>
-    void Copy(IDataSourceLink origin, IDataSourceLink destination, CancellationToken token = default);
+    void Copy(IDataSourceLink origin, IDataSourceLink destination, bool overwrite = false, CancellationToken token = default);
 
     /// <summary>
     /// Rename a file or directory.
     /// </summary>
     /// <param name="origin">Link to the file or directory to rename</param>
     /// <param name="newName">New name of the file or directory</param>
+    /// <param name="overwrite">If true, any files that already exist in the renamed directory will be replaced with files from the origin</param>
     /// <param name="token">A CancellationToken can be used to cancel the task as long as it hasn't modified anything</param>
-    void Rename(IDataSourceLink origin, string newName, CancellationToken token = default);
+    void Rename(IDataSourceLink origin, string newName, bool overwrite = false, CancellationToken token = default);
 
     /// <summary>
     /// Delete a file or directory.

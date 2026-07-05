@@ -38,11 +38,11 @@ public sealed class AssetController(
             switch (link) {
                 case DataSourceDirectoryLink directoryLink:
                     var deleteDirectoryLink = new DataSourceDirectoryLink(link.DataSource, deletePath);
-                    FileSystemMove(directoryLink, deleteDirectoryLink, token);
+                    FileSystemMove(directoryLink, deleteDirectoryLink, true, token);
                     break;
                 case DataSourceFileLink fileLink:
                     var deleteFileLink = new DataSourceFileLink(link.DataSource, deletePath);
-                    FileSystemMove(fileLink, deleteFileLink, token);
+                    FileSystemMove(fileLink, deleteFileLink, true, token);
                     break;
             }
         } catch (Exception e) {
@@ -50,7 +50,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Copy(IDataSourceLink origin, IDataSourceLink destination, CancellationToken token = default) {
+    public void Copy(IDataSourceLink origin, IDataSourceLink destination, bool overwrite, CancellationToken token = default) {
         try {
             switch (origin) {
                 case DataSourceDirectoryLink directoryLink: {
@@ -60,7 +60,7 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(directoryLink, dest);
-                    if (FileSystemCopy(directoryLink, dest, token)) {
+                    if (FileSystemCopy(directoryLink, dest, overwrite, token)) {
                         RemapLinks(links);
                     }
                     break;
@@ -76,7 +76,7 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
-                    if (FileSystemCopy(fileLink, dest, token)) {
+                    if (FileSystemCopy(fileLink, dest, overwrite, token)) {
                         RemapLinks(links);
                     }
                     break;
@@ -87,7 +87,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Move(IDataSourceLink origin, IDataSourceLink destination, CancellationToken token = default) {
+    public void Move(IDataSourceLink origin, IDataSourceLink destination, bool overwrite, CancellationToken token = default) {
         try {
             switch (origin) {
                 case DataSourceDirectoryLink directoryLink: {
@@ -97,7 +97,7 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(directoryLink, dest);
-                    if (FileSystemMove(directoryLink, dest, token)) {
+                    if (FileSystemMove(directoryLink, dest, overwrite, token)) {
                         RemapLinks(links);
                     }
                     break;
@@ -113,7 +113,7 @@ public sealed class AssetController(
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
-                    if (FileSystemMove(fileLink, dest, token)) {
+                    if (FileSystemMove(fileLink, dest, overwrite, token)) {
                         RemapLinks(links);
                     }
                     break;
@@ -124,7 +124,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Rename(IDataSourceLink origin, string newName, CancellationToken token = default) {
+    public void Rename(IDataSourceLink origin, string newName, bool overwrite, CancellationToken token = default) {
         var directoryDataRelativePath = origin.ParentDirectory?.DataRelativePath.Path;
 
         if (directoryDataRelativePath is not null) {
@@ -134,7 +134,7 @@ public sealed class AssetController(
                     case DataSourceFileLink fileLink: {
                         var destinationFileLink = new DataSourceFileLink(fileLink.DataSource, newPath);
                         var links = GetRemapLinks(fileLink, destinationFileLink);
-                        if (FileSystemMove(fileLink, destinationFileLink, token)) {
+                        if (FileSystemMove(fileLink, destinationFileLink, overwrite, token)) {
                             RemapLinks(links);
                         }
                         break;
@@ -142,7 +142,7 @@ public sealed class AssetController(
                     case DataSourceDirectoryLink directoryLink: {
                         var destinationDirectoryLink = new DataSourceDirectoryLink(directoryLink.DataSource, newPath);
                         var links = GetRemapLinks(directoryLink, destinationDirectoryLink);
-                        if (FileSystemMove(directoryLink, destinationDirectoryLink, token)) {
+                        if (FileSystemMove(directoryLink, destinationDirectoryLink, overwrite, token)) {
                             RemapLinks(links);
                         }
                         break;
@@ -218,13 +218,14 @@ public sealed class AssetController(
         }
     }
 
-    private bool FileSystemCopy(DataSourceFileLink origin, DataSourceFileLink destination, CancellationToken token) {
+    private bool FileSystemCopy(DataSourceFileLink origin, DataSourceFileLink destination, bool overwrite, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
             if (destinationDirectory is not null) destination.FileSystem.Directory.CreateDirectory(destinationDirectory);
 
             if (token.IsCancellationRequested) return false;
+            if (!overwrite && destination.FileSystem.File.Exists(destination.FullPath)) return false;
 
             origin.FileSystem.File.Copy(origin.FullPath, destination.FullPath);
         } catch (Exception e) {
@@ -235,15 +236,16 @@ public sealed class AssetController(
         return true;
     }
 
-    private bool FileSystemCopy(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, CancellationToken token) {
+    private bool FileSystemCopy(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, bool overwrite, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
             if (destinationDirectory is not null) destination.FileSystem.Directory.CreateDirectory(destinationDirectory);
 
             if (token.IsCancellationRequested) return false;
+            if (!overwrite && destination.FileSystem.Directory.Exists(destination.FullPath)) return false;
 
-            origin.FileSystem.Directory.DeepCopy(origin.FullPath, destination.FullPath);
+            origin.FileSystem.Directory.DeepCopy(origin.FullPath, destination.FullPath, overwrite);
         } catch (Exception e) {
             logger.Here().Warning(e, "Couldn't copy {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
@@ -252,15 +254,16 @@ public sealed class AssetController(
         return true;
     }
 
-    private bool FileSystemMove(DataSourceFileLink origin, DataSourceFileLink destination, CancellationToken token) {
+    private bool FileSystemMove(DataSourceFileLink origin, DataSourceFileLink destination, bool overwrite, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
             if (destinationDirectory is not null) destination.FileSystem.Directory.CreateDirectory(destinationDirectory);
 
             if (token.IsCancellationRequested) return false;
+            if (!overwrite && destination.FileSystem.File.Exists(destination.FullPath)) return false;
 
-            origin.FileSystem.File.Move(origin.FullPath, destination.FullPath);
+            origin.FileSystem.File.Move(origin.FullPath, destination.FullPath, overwrite);
         } catch (Exception e) {
             logger.Here().Warning(e, "Couldn't move {Origin} to {Destination}: {Exception}", origin, destination, e);
             return false;
@@ -269,7 +272,7 @@ public sealed class AssetController(
         return true;
     }
 
-    private bool FileSystemMove(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, CancellationToken token) {
+    private bool FileSystemMove(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, bool overwrite, CancellationToken token) {
         var destinationDirectory = destination.FileSystem.Path.GetDirectoryName(destination.FullPath);
 
         try {
@@ -285,11 +288,11 @@ public sealed class AssetController(
                     switch (link) {
                         case DataSourceFileLink fileLink:
                             var destinationFileLink = new DataSourceFileLink(destination.DataSource, destinationPath);
-                            FileSystemMove(fileLink, destinationFileLink, token);
+                            FileSystemMove(fileLink, destinationFileLink, overwrite, token);
                             break;
                         case DataSourceDirectoryLink directoryLink:
                             var destinationDirectoryLink = new DataSourceDirectoryLink(destination.DataSource, destinationPath);
-                            FileSystemMove(directoryLink, destinationDirectoryLink, token);
+                            FileSystemMove(directoryLink, destinationDirectoryLink, overwrite, token);
                             break;
                     }
                 }
