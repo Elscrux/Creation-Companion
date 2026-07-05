@@ -196,6 +196,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     }
 
     public async Task RenameAsset(IDataSourceLink asset) {
+        var extension = asset.Name[asset.NameWithoutExtension.Length..];
         var nameWithoutExtension = asset.NameWithoutExtension;
         var textBox = new TextBox { Text = nameWithoutExtension };
         var content = new StackPanel { Children = { textBox } };
@@ -209,16 +210,35 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             content.Children.Add(referenceBrowser);
         }
 
+        var overwriteCheckBox = new CheckBox {
+            [!ContentControl.ContentProperty] = textBox.GetObservable(TextBox.TextProperty)
+                .Select(newName => $"⚠️ '{newName}{extension}' already exists - Do you really want to overwrite it?")
+                .ToBinding(),
+            IsChecked = false,
+            [!Visual.IsVisibleProperty] = textBox.GetObservable(TextBox.TextProperty)
+                .Select(newName => {
+                    newName = newName?.Trim();
+
+                    // If the name doesn't change we don't care
+                    if (newName == asset.NameWithoutExtension) return false;
+
+                    var linkWithNewName = asset.DataSource.FileSystem.Path.Combine(asset.ParentDirectory?.FullPath ?? string.Empty, newName + extension);
+                    return asset.DataSource.FileExists(linkWithNewName) || asset.DataSource.DirectoryExists(linkWithNewName);
+                })
+                .ToBinding(),
+        };
+        content.Children.Add(overwriteCheckBox);
+
         var renameDialog = CreateAssetDialog($"Rename {asset.Name}", content);
         if (await renameDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             if (string.Equals(nameWithoutExtension, textBox.Text, DataRelativePath.PathComparison)) return;
 
             switch (asset) {
                 case DataSourceDirectoryLink directoryLink:
-                    _assetController.Rename(directoryLink, textBox.Text);
+                    _assetController.Rename(directoryLink, textBox.Text, overwriteCheckBox.IsChecked is true);
                     break;
                 case DataSourceFileLink fileLink:
-                    _assetController.Rename(fileLink, textBox.Text + fileLink.Extension);
+                    _assetController.Rename(fileLink, textBox.Text + fileLink.Extension, overwriteCheckBox.IsChecked is true);
                     break;
             }
         }
@@ -278,18 +298,49 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(movingAssets);
         if (referenceBrowserVM is not null) {
             var referenceBrowser = new ReferenceBrowser(referenceBrowserVM);
+            content.Children.Add(new Separator());
             content.Children.Add(new TextBlock {
                 Text = "Do you really want to proceed? These references will be modified to point to the new path.",
+                FontWeight = FontWeight.Bold,
             });
             content.Children.Add(referenceBrowser);
         }
+
+        var overwriteCheckBox = CreateOverwriteCheckBox(dstDirectory, movingAssets, relativeDstDirectory, relativeSrcDirectory, content);
 
         // Show a confirmation dialog
         var moveDialog = CreateAssetDialog(movingAssets, "Confirm", content);
         if (await moveDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             // Move all assets and remap their references
-            foreach (var asset in movingAssets) _assetController.Move(asset, dstDirectory);
+            foreach (var asset in movingAssets) _assetController.Move(asset, dstDirectory, overwriteCheckBox.IsChecked is true);
         }
+    }
+
+    private static CheckBox CreateOverwriteCheckBox(DataSourceDirectoryLink dstDirectory, IReadOnlyList<IDataSourceLink> movingAssets, string relativeDstDirectory, string relativeSrcDirectory, StackPanel content) {
+        var assetsThatWillBeReplaced = movingAssets
+            .Select(asset => {
+                var newPath = dstDirectory.FileSystem.Path.Combine(relativeDstDirectory, dstDirectory.FileSystem.Path.GetRelativePath(relativeSrcDirectory, asset.DataRelativePath.Path));
+                return new DataSourceFileLink(dstDirectory.DataSource, newPath);
+            })
+            .Where(newAsset => newAsset.Exists())
+            .ToArray();
+
+        var replace = new CheckBox {
+            Content = "⚠️ Do you really want to replace these assets?",
+            IsChecked = false,
+        };
+
+        if (assetsThatWillBeReplaced.Length > 0) {
+            content.Children.Add(new Separator());
+            content.Children.Add(replace);
+            content.Children.Add(new FAItemsRepeater {
+                Layout = new FAStackLayout(),
+                ItemsSource = assetsThatWillBeReplaced,
+                ItemTemplate = new FuncDataTemplate<IDataSourceLink>((asset, _) => new TextBlock { Text = asset.DataRelativePath.Path }),
+            });
+        }
+
+        return replace;
     }
 
     [ReactiveCommand]
@@ -427,19 +478,19 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     .ToBinding();
 
                 var brushBinding = currentPathObservable.CombineLatest(previewObservable,
-                        (path, values) => IsMatch(path, values.IsRegex, values.FromValue, values.ToValue)
+                        (currentPath, values) => IsMatch(currentPath, values.IsRegex, values.FromValue, values.ToValue)
                             ? StandardBrushes.HighlightBrush
                             : StandardBrushes.TextBrush)
                     .ToBinding();
 
                 var replaceBinding = currentPathObservable.CombineLatest(previewObservable,
-                        (path, values) => {
+                        (currentPath, values) => {
                             try {
                                 return values.IsRegex
-                                    ? Regex.Replace(path, values.FromValue, values.ToValue)
+                                    ? Regex.Replace(currentPath, values.FromValue, values.ToValue)
                                     : values.FromValue.IsNullOrEmpty()
-                                        ? path
-                                        : path.Replace(values.FromValue, values.ToValue, DataRelativePath.PathComparison);
+                                        ? currentPath
+                                        : currentPath.Replace(values.FromValue, values.ToValue, DataRelativePath.PathComparison);
                             } catch (Exception e) {
                                 return e.Message;
                             }
