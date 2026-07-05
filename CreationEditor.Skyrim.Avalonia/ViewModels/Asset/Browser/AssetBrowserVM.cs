@@ -52,7 +52,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     [Reactive] public partial IDataSource DataSource { get; set; }
     [Reactive] public partial string SearchText { get; set; } = string.Empty;
-    [Reactive] public partial bool ShowEmptyDirectories { get; set; } = false;
+    [Reactive] public partial bool ShowEmptyDirectories { get; set; } = true;
     [Reactive] public partial bool ShowIgnoredDirectories { get; set; } = false;
 
     [Reactive] public partial bool ShowReferencedFiles { get; set; } = true;
