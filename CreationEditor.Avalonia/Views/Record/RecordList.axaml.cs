@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System.Reactive.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using CreationEditor.Avalonia.ViewModels.Record.List;
@@ -94,7 +95,8 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
             .ToList();
 
         var recordListContext = ViewModel.GetRecordListContext(selectedRecords);
-        using var disposable = ViewModel.PrimaryCommand.Execute(recordListContext).Subscribe();
+        var command = ViewModel.PrimaryCommand;
+        Task.Run(async () => await command.Execute(recordListContext));
 
         e.Handled = true;
     }

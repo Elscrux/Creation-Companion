@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input.Platform;
+using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Reference;
@@ -201,13 +202,13 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
 
     public IMajorRecord CreateNewRecord(Type recordType) {
         var newRecord = _recordController.CreateRecord(recordType);
-        _recordEditorController.OpenEditor(newRecord);
+        Dispatcher.UIThread.Post(() => _recordEditorController.OpenEditor(newRecord));
         return newRecord;
     }
 
     public IMajorRecord EditRecord(IMajorRecordGetter record) {
         var newOverride = _recordController.GetOrAddOverride(record);
-        _recordEditorController.OpenEditor(newOverride);
+        Dispatcher.UIThread.Post(() => _recordEditorController.OpenEditor(newOverride));
         return newOverride;
     }
 
@@ -215,7 +216,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedRecord);
         var referenceWindow = new ReferenceWindow(referencedRecord.Record, referenceBrowserVM);
 
-        referenceWindow.Show(_mainWindow);
+        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
@@ -225,8 +226,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedAsset);
         var referenceWindow = new ReferenceWindow(referencedAsset.AssetLink.DataRelativePath.Path, referenceBrowserVM);
 
-
-        referenceWindow.Show(_mainWindow);
+        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
@@ -238,11 +238,10 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
             dataSourceLink.DataRelativePath.Path,
             referenceBrowserVM);
 
-        referenceWindow.Show(_mainWindow);
+        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
-
     }
 
     private static bool HasOneRecordType(SelectedListContext context) {
