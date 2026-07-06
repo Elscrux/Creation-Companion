@@ -13,6 +13,12 @@ public sealed class ModCleaner(
     AssetCleaner assetCleaner,
     RecordCleaner recordCleaner) {
 
+    /// <summary>
+    /// Cleans the given mod by removing records and assets that are not retained.
+    /// </summary>
+    /// <param name="mod">Mod to clean</param>
+    /// <param name="retained">Record and assets links to retain</param>
+    /// <param name="dataSource">Data source to clean</param>
     public void Clean(ISkyrimModGetter mod, HashSet<ILinkIdentifier> retained, IDataSource? dataSource) {
         var recordsToClean = RecordCleaner.GetRecordsToClean(retained, mod);
 
@@ -25,6 +31,12 @@ public sealed class ModCleaner(
         recordCleaner.CreatedCleanedMod(mod, recordsToClean);
     }
 
+    /// <summary>
+    /// Builds a graph for the given mod and its dependencies which lists all the links between within a mod and all linked assets.
+    /// </summary>
+    /// <param name="mod">Mod to build graph for</param>
+    /// <param name="dependencies">List of dependencies</param>
+    /// <returns>Link graph</returns>
     public Graph<ILinkIdentifier, Edge<ILinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var graph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
         var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
@@ -35,6 +47,15 @@ public sealed class ModCleaner(
         return graph;
     }
 
+    /// <summary>
+    /// Finds all records and assets that are retained in the given mod and its dependencies, based on a few essential starting records.
+    /// </summary>
+    /// <param name="essentialRecordProvider">Essential record provider</param>
+    /// <param name="graph">Graph of all links in the mod and its dependencies</param>
+    /// <param name="mod">Mod to find retained records for</param>
+    /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
+    /// <param name="excludedLinks">Set of links to exclude from retention</param>
+    /// <returns>Tuple of retained links and a dependency graph which shows where the retained links were first referenced from for debugging</returns>
     public (HashSet<ILinkIdentifier> AllRetained, Graph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph) FindRetainedRecords(
         IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
