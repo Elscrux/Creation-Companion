@@ -36,6 +36,7 @@ public sealed class ModCleaner(
     }
 
     public (HashSet<ILinkIdentifier> AllRetained, Graph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph) FindRetainedRecords(
+        IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
@@ -49,7 +50,7 @@ public sealed class ModCleaner(
 
             switch (vertex) {
                 case FormLinkIdentifier formLinkIdentifier: {
-                    recordCleaner.RetainLinks(graph, mod, dependencies, formLinkIdentifier, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
+                    recordCleaner.RetainLinks(essentialRecordProvider, graph, mod, dependencies, formLinkIdentifier, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
                     break;
                 }
                 case AssetLinkIdentifier assetLinkIdentifier: {
@@ -59,7 +60,7 @@ public sealed class ModCleaner(
             }
         }
 
-        recordCleaner.FinalRetainLinks(graph, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
+        recordCleaner.FinalRetainLinks(essentialRecordProvider, graph, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
 
         return (retained, dependencyGraph);
 

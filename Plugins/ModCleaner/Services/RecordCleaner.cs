@@ -18,8 +18,6 @@ namespace ModCleaner.Services;
 public sealed class RecordCleaner(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILogger logger,
-    IFeatureFlagService featureFlagService,
-    IEssentialRecordProvider essentialRecordProvider,
     IRecordController recordController,
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
@@ -196,6 +194,7 @@ public sealed class RecordCleaner(
     ];
 
     public void RetainLinks(
+        IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
@@ -255,12 +254,13 @@ public sealed class RecordCleaner(
     ];
 
     public void FinalRetainLinks(
+        IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         HashSet<ILinkIdentifier> retained,
         IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
-        RetainCellsAroundRegion(retained, excludedLinks, graph, retainOutgoingEdges);
+        RetainCellsAroundRegion(essentialRecordProvider, retained, excludedLinks, dependencyGraph, retainOutgoingEdges);
 
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
@@ -367,11 +367,12 @@ public sealed class RecordCleaner(
     }
 
     public void RetainCellsAroundRegion(
+        IEssentialRecordProvider essentialRecordProvider,
         HashSet<ILinkIdentifier> retained,
         IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
-        foreach (var (worldspaceFormKey, retainedCells) in featureFlagService.EnabledFeatureFlags.EnumerateRetainedCells(editorEnvironment.LinkCache)) {
+        foreach (var (worldspaceFormKey, retainedCells) in essentialRecordProvider.EnumerateRetainedExteriorCells(editorEnvironment.LinkCache)) {
             if (!editorEnvironment.LinkCache.TryResolve<IWorldspaceGetter>(worldspaceFormKey, out var worldspace)) continue;
 
             var retainedCoordinates = retainedCells

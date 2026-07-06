@@ -393,7 +393,7 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
 
-        var (retainedLinks, dependencyGraph) = _modCleaner.FindRetainedRecords(ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
+        var (retainedLinks, dependencyGraph) = _modCleaner.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
         _retainedLinks = retainedLinks;
 
         var retainedRecords = retainedLinks.OfType<FormLinkIdentifier>()
