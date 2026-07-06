@@ -37,6 +37,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
     public SingleModPickerVM ModPickerVM { get; }
     public IObservableCollection<IQuestGetter> EssentialQuests { get; }
     public IObservableCollection<IQuestGetter> UnusedQuests { get; }
+    public IObservableCollection<ICellGetter> EssentialInteriorCells { get; }
+    public IObservableCollection<ICellGetter> UnusedInteriorCells { get; }
     public IObservableCollection<ILoadScreenGetter> EssentialLoadScreens { get; }
     public IObservableCollection<ILoadScreenGetter> UnusedLoadScreens { get; }
     public IObservableCollection<IIdleAnimationGetter> EssentialIdleAnimations { get; }
@@ -61,6 +63,9 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
 
         EssentialQuests = GetEssentialRecords<IQuestGetter>();
         UnusedQuests = GetUnusedRecords(EssentialQuests, mod);
+
+        EssentialInteriorCells = GetEssentialRecords<ICellGetter>();
+        UnusedInteriorCells = GetUnusedRecords(EssentialInteriorCells, mod);
 
         EssentialLoadScreens = GetEssentialRecords<ILoadScreenGetter>();
         UnusedLoadScreens = GetUnusedRecords(EssentialLoadScreens, mod);
@@ -92,10 +97,12 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         if (selectedMod is { ModKey: var modKey }) {
             var newMod = LinkCacheProvider.LinkCache.ResolveMod(modKey);
             UnusedQuests.ReplaceWith(GetUnusedRecords(EssentialQuests, newMod));
+            UnusedInteriorCells.ReplaceWith(GetUnusedRecords(EssentialInteriorCells, newMod));
             UnusedLoadScreens.ReplaceWith(GetUnusedRecords(EssentialLoadScreens, newMod));
             UnusedIdleAnimations.ReplaceWith(GetUnusedRecords(EssentialIdleAnimations, newMod));
         } else {
             UnusedQuests.ReplaceWith([]);
+            UnusedInteriorCells.ReplaceWith([]);
             UnusedLoadScreens.ReplaceWith([]);
             UnusedIdleAnimations.ReplaceWith([]);
         }
@@ -107,6 +114,7 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
 
         return new ObservableCollectionExtended<T>(currentMod.EnumerateMajorRecords<T>()
             .Where(q => !essentialRecords.Contains(q))
+            .Where(q => q.EditorID is not null)
             .OrderBy(q => q.EditorID)
         );
     }
@@ -121,6 +129,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
             )).ToList(),
             EssentialQuests
                 .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter)))
+                .Concat(EssentialInteriorCells
+                    .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
                 .Concat(EssentialLoadScreens
                     .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter))))
                 .Concat(EssentialIdleAnimations

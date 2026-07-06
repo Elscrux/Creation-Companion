@@ -139,6 +139,46 @@
         <StackPanel Orientation="Horizontal"
                     Spacing="10">
             <StackPanel.DataTemplates>
+                <DataTemplate DataType="skyrim:ICellGetter">
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0}: {1}">
+                                <Binding Path="EditorID"/>
+                                <Binding Path="Name"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </DataTemplate>
+            </StackPanel.DataTemplates>
+
+            <basic:LabeledContentControl
+                Header="Essential Interior Cells"
+                HeaderToolTip="Keep all interior cells in this list when cleaning.">
+                <ListBox ItemsSource="{Binding EssentialInteriorCells}"
+                         dragDrop:DragDropExtended.AllowDrag="True"
+                         dragDrop:DragDropExtended.AllowDrop="True"
+                         SelectionMode="Multiple"
+                         Padding="10"
+                         Width="500"
+                         Height="500"
+                         Background="{DynamicResource ButtonBackground}"/>
+            </basic:LabeledContentControl>
+
+            <basic:LabeledContentControl Header="Unused Interior Cells">
+                <ListBox ItemsSource="{Binding UnusedInteriorCells}"
+                         dragDrop:DragDropExtended.AllowDrag="True"
+                         dragDrop:DragDropExtended.AllowDrop="True"
+                         SelectionMode="Multiple"
+                         Padding="10"
+                         Width="500"
+                         Height="500"
+                         Background="{DynamicResource ButtonBackground}"/>
+            </basic:LabeledContentControl>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10">
+            <StackPanel.DataTemplates>
                 <DataTemplate DataType="skyrim:ILoadScreenGetter">
                     <TextBlock Text="{Binding EditorID}"/>
                 </DataTemplate>
