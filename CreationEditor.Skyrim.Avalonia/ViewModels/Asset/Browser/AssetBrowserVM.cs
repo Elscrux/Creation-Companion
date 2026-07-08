@@ -286,15 +286,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Publish()
             .RefCount();
 
-        configChanged.Subscribe(x => Console.WriteLine("yyy"));
-
         configChanged
             .ThrottleMedium()
             .ObserveOnGui()
-            .Subscribe(() => {
-                Console.WriteLine();
-                Tree_UpdateAll();
-            })
+            .Subscribe(Tree_UpdateAll)
             .DisposeWith(this);
 
         this.WhenAnyValue(x => x.DataSource)
@@ -336,6 +331,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             AssetTreeSource.RowSelection!.SingleSelect = false;
             AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);
             IsBusyLoadingAssets = false;
+            Tree_UpdateAll();
         });
     }
 
