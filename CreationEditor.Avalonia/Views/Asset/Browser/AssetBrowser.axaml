@@ -36,7 +36,7 @@
                 IsTextSearchEnabled="True"
                 ItemsSource="{Binding DataSourceSelections}"
                 SelectedItem="{Binding DataSource}"
-                DisplayMemberBinding="{Binding Name, DataType=dataSourceLink:IDataSource}"/>
+                DisplayMemberBinding="{Binding Name, x:DataType=dataSourceLink:IDataSource}"/>
 
             <Button ToolTip.Tip="Filters"
                     HorizontalAlignment="Stretch"
