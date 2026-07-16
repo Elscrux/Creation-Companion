@@ -139,6 +139,8 @@ public sealed class HtmlConverter(
                 // Handle leftover controls in case no inlining was needed
                 if (i == counter) {
                     leftoverControls = currentControls.SkipWhile(c => c.Tag is not true).ToList();
+                } else {
+                    i = counter;
                 }
 
                 continue;
