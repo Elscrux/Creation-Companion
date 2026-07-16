@@ -164,6 +164,7 @@ public sealed class HtmlConverter(
             MinWidth = htmlConverterOptions.Width,
             Foreground = textOptions.FontColor,
             HorizontalAlignment = textOptions.Alignment,
+            TextAlignment = textOptions.TextAlignment,
             VerticalAlignment = VerticalAlignment.Bottom,
             TextWrapping = TextWrapping.Wrap,
             LineSpacing = htmlConverterOptions.LineSpacing,
@@ -178,7 +179,7 @@ public sealed class HtmlConverter(
                     inlinedTextBlock.Inlines.AddRange(inlines);
                     break;
                 case TextBlock text:
-                    if (text.Text is null || text.Text.Length == 0) break;
+                    if (string.IsNullOrEmpty(text.Text)) break;
 
                     inlinedTextBlock.Inlines.Add(new Run {
                         Theme = text.Theme,
@@ -277,6 +278,7 @@ public sealed class HtmlConverter(
                 .Select((t, p) => new TextBlock {
                     Foreground = textOptions.FontColor,
                     HorizontalAlignment = textOptions.Alignment,
+                    TextAlignment = textOptions.TextAlignment,
                     VerticalAlignment = VerticalAlignment.Bottom,
                     FontSize = textOptions.FontSize,
                     FontStyle = textOptions.IsItalic ? FontStyle.Italic : FontStyle.Normal,
@@ -301,8 +303,14 @@ public sealed class HtmlConverter(
                 "right" => HorizontalAlignment.Right,
                 _ => HorizontalAlignment.Left,
             };
+            var textAlignment = align switch {
+                "left" => TextAlignment.Left,
+                "center" => TextAlignment.Center,
+                "right" => TextAlignment.Right,
+                _ => TextAlignment.Left,
+            };
 
-            textOptions = textOptions with { Alignment = horizontalAlignment };
+            textOptions = textOptions with { Alignment = horizontalAlignment, TextAlignment = textAlignment };
         }
 
         return GetNodes(node.ChildNodes, textOptions);
@@ -349,6 +357,7 @@ public sealed class HtmlConverter(
         public TextOptions(string font) => FontFamily = FontFamily.Parse(font);
         public FontFamily FontFamily { get; init; }
         public HorizontalAlignment Alignment { get; init; } = HorizontalAlignment.Left;
+        public TextAlignment TextAlignment { get; init; } = TextAlignment.Left;
         public bool IsBold { get; init; }
         public bool IsItalic { get; init; }
         public bool IsUnderlined { get; init; }
