@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Plugins;
 namespace CreationEditor.Services.Mutagen.Mod;
 
-public sealed record ModInfo(
+public record struct ModInfo(
     ModKey ModKey,
     string? Author,
     string? Description,
