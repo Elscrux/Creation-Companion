@@ -9,7 +9,7 @@ namespace ModCleaner.Resources.Converter;
 
 public sealed class GetIncomingEdgesConverter : AvaloniaObject, IValueConverter {
     public static readonly StyledProperty<Graph<ILinkIdentifier, Edge<ILinkIdentifier>>> GraphProperty =
-        AvaloniaProperty.Register<LinkIdentifierEnricher, Graph<ILinkIdentifier, Edge<ILinkIdentifier>>>(nameof(Graph));
+        AvaloniaProperty.Register<GetIncomingEdgesConverter, Graph<ILinkIdentifier, Edge<ILinkIdentifier>>>(nameof(Graph));
 
     public Graph<ILinkIdentifier, Edge<ILinkIdentifier>> Graph {
         get => GetValue(GraphProperty);
