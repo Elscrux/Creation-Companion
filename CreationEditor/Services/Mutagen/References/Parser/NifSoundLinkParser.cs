@@ -2,44 +2,50 @@
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
 using nifly;
+using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
-public sealed class NifSoundLinkParser(IAssetTypeService assetTypeService) : IFileParser<string> {
+public sealed class NifSoundLinkParser(
+    IAssetTypeService assetTypeService,
+    ILogger logger) : IFileParser<string> {
     public string Name => "Nif Sounds";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
     public IEnumerable<string> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
         var results = new HashSet<string>();
-
         if (!fileLink.DataSource.FileSystem.File.Exists(actualFilePath)) return results;
 
-        using var nif = new NifFile();
-        nif.Load(actualFilePath);
+        try {
+            using var nif = new NifFile();
+            nif.Load(actualFilePath);
 
-        if (!nif.IsValid()) return results;
+            if (!nif.IsValid()) return results;
 
-        using var niHeader = nif.GetHeader();
-        for (uint i = 0; i < niHeader.GetStringCount(); i++) {
-            var str = niHeader.GetStringById(i);
-            if (str is null) continue;
+            using var niHeader = nif.GetHeader();
+            for (uint i = 0; i < niHeader.GetStringCount(); i++) {
+                var str = niHeader.GetStringById(i);
+                if (str is null) continue;
 
-            var span = str.AsSpan();
-            if (!span.StartsWith("sound", StringComparison.OrdinalIgnoreCase)) continue;
+                var span = str.AsSpan();
+                if (!span.StartsWith("sound", StringComparison.OrdinalIgnoreCase)) continue;
 
-            const string soundPlay = "soundPlay.";
-            const string soundPlayAt = "SoundPlayAt.";
-            const string soundStop = "SoundStop.";
-            const string sound = "Sound: ";
+                const string soundPlay = "soundPlay.";
+                const string soundPlayAt = "SoundPlayAt.";
+                const string soundStop = "SoundStop.";
+                const string sound = "Sound: ";
 
-            if (span.StartsWith(soundPlay, StringComparison.OrdinalIgnoreCase)) {
-                TryAddAssetFromString(str.AsSpan(soundPlay.Length).ToString());
-            } else if (span.StartsWith(soundPlayAt, StringComparison.OrdinalIgnoreCase)) {
-                TryAddAssetFromString(str.AsSpan(soundPlayAt.Length).ToString());
-            } else if (span.StartsWith(soundStop, StringComparison.OrdinalIgnoreCase)) {
-                TryAddAssetFromString(str.AsSpan(soundStop.Length).ToString());
-            } else if (span.StartsWith(sound, StringComparison.OrdinalIgnoreCase)) {
-                TryAddAssetFromString(str.AsSpan(sound.Length).ToString());
+                if (span.StartsWith(soundPlay, StringComparison.OrdinalIgnoreCase)) {
+                    TryAddAssetFromString(str.AsSpan(soundPlay.Length).ToString());
+                } else if (span.StartsWith(soundPlayAt, StringComparison.OrdinalIgnoreCase)) {
+                    TryAddAssetFromString(str.AsSpan(soundPlayAt.Length).ToString());
+                } else if (span.StartsWith(soundStop, StringComparison.OrdinalIgnoreCase)) {
+                    TryAddAssetFromString(str.AsSpan(soundStop.Length).ToString());
+                } else if (span.StartsWith(sound, StringComparison.OrdinalIgnoreCase)) {
+                    TryAddAssetFromString(str.AsSpan(sound.Length).ToString());
+                }
             }
+        } catch (Exception e) {
+            logger.Here().Error(e, "Error occurred while parsing nif file: {FilePath}", actualFilePath);
         }
 
         return results;

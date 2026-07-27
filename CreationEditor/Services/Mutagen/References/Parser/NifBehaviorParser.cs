@@ -16,26 +16,33 @@ public sealed class NifBehaviorParser(
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
     public IEnumerable<string> ParseFileTextureStrings(string filePath, DataSourceFileLink fileLink) {
-        if (!fileLink.DataSource.FileSystem.File.Exists(filePath)) yield break;
+        if (!fileLink.DataSource.FileSystem.File.Exists(filePath)) return [];
 
-        using var nif = new NifFile();
-        nif.Load(filePath);
+        var results = new HashSet<string>();
+        try {
+            using var nif = new NifFile();
+            nif.Load(filePath);
 
-        if (!nif.IsValid()) yield break;
+            if (!nif.IsValid()) return results;
 
-        using var niHeader = nif.GetHeader();
-        using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-        for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
-            using var bSBehaviorGraphExtraData = blockCache.EditableBlockById<BSBehaviorGraphExtraData>(blockId);
-            if (bSBehaviorGraphExtraData is not null) {
-                if (bSBehaviorGraphExtraData.behaviorGraphFile is null) continue;
+            using var niHeader = nif.GetHeader();
+            using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
+            for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
+                using var bsBehaviorGraphExtraData = blockCache.EditableBlockById<BSBehaviorGraphExtraData>(blockId);
+                if (bsBehaviorGraphExtraData is not null) {
+                    if (bsBehaviorGraphExtraData.behaviorGraphFile is null) continue;
 
-                var assetString = bSBehaviorGraphExtraData.behaviorGraphFile.get();
-                if (string.IsNullOrEmpty(assetString)) continue;
+                    var assetString = bsBehaviorGraphExtraData.behaviorGraphFile.get();
+                    if (string.IsNullOrEmpty(assetString)) continue;
 
-                yield return assetString;
+                    results.Add(assetString);
+                }
             }
+        } catch (Exception e) {
+            logger.Here().Error(e, "Error occurred while parsing nif file: {FilePath}", filePath);
         }
+
+        return results;
     }
 
     public IEnumerable<IAssetLinkGetter> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {

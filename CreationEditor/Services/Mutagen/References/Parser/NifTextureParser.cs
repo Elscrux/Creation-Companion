@@ -19,38 +19,42 @@ public sealed class NifTextureParser(
         var results = new HashSet<string>();
         if (!fileLink.DataSource.FileSystem.File.Exists(filePath)) return results;
 
-        using var nif = new NifFile();
-        nif.Load(filePath);
+        try {
+            using var nif = new NifFile();
+            nif.Load(filePath);
 
-        if (!nif.IsValid()) return results;
+            if (!nif.IsValid()) return results;
 
-        using var niHeader = nif.GetHeader();
-        using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-        for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
-            using var shaderTextureSet = blockCache.EditableBlockById<BSShaderTextureSet>(blockId);
-            if (shaderTextureSet is not null) {
-                using var vectorNiString = shaderTextureSet.textures.items();
-                foreach (var niString in vectorNiString) {
-                    TryAddAsset(niString);
-                }
-            } else {
-                var effectShader = blockCache.EditableBlockById<BSEffectShaderProperty>(blockId);
-                if (effectShader is not null) {
-                    TryAddAsset(effectShader.greyscaleTexture);
-                    TryAddAsset(effectShader.lightingTexture);
-                    TryAddAsset(effectShader.normalTexture);
-                    TryAddAsset(effectShader.reflectanceTexture);
-                    TryAddAsset(effectShader.sourceTexture);
-                    TryAddAsset(effectShader.emitGradientTexture);
-                    TryAddAsset(effectShader.envMapTexture);
-                    TryAddAsset(effectShader.envMaskTexture);
+            using var niHeader = nif.GetHeader();
+            using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
+            for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
+                using var shaderTextureSet = blockCache.EditableBlockById<BSShaderTextureSet>(blockId);
+                if (shaderTextureSet is not null) {
+                    using var vectorNiString = shaderTextureSet.textures.items();
+                    foreach (var niString in vectorNiString) {
+                        TryAddAsset(niString);
+                    }
                 } else {
-                    var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
-                    if (shaderNoLighting is null) continue;
+                    var effectShader = blockCache.EditableBlockById<BSEffectShaderProperty>(blockId);
+                    if (effectShader is not null) {
+                        TryAddAsset(effectShader.greyscaleTexture);
+                        TryAddAsset(effectShader.lightingTexture);
+                        TryAddAsset(effectShader.normalTexture);
+                        TryAddAsset(effectShader.reflectanceTexture);
+                        TryAddAsset(effectShader.sourceTexture);
+                        TryAddAsset(effectShader.emitGradientTexture);
+                        TryAddAsset(effectShader.envMapTexture);
+                        TryAddAsset(effectShader.envMaskTexture);
+                    } else {
+                        var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
+                        if (shaderNoLighting is null) continue;
 
-                    TryAddAsset(shaderNoLighting.baseTexture);
+                        TryAddAsset(shaderNoLighting.baseTexture);
+                    }
                 }
             }
+        } catch (Exception e) {
+            logger.Here().Error(e, "Error occurred while parsing nif file: {FilePath}", filePath);
         }
 
         return results;
