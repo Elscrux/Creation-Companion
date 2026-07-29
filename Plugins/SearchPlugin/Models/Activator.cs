@@ -1,8 +1,9 @@
-﻿using Mutagen.Bethesda.Skyrim;
+﻿using CreationEditor.Services.Mutagen.Record;
+using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 namespace SearchPlugin.Models;
 
-public class Activator : TextSearcher<ISkyrimMod, ISkyrimModGetter, IActivator, IActivatorGetter> {
+public class Activator(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IActivator, IActivatorGetter>(recordController) {
     public override string SearcherName => "Activator";
 
     protected override IEnumerable<string?> GetText(IActivatorGetter record) {

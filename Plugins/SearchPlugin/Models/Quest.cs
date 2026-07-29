@@ -1,8 +1,9 @@
-﻿using Mutagen.Bethesda.Skyrim;
+﻿using CreationEditor.Services.Mutagen.Record;
+using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 namespace SearchPlugin.Models;
 
-public class Quest : TextSearcher<ISkyrimMod, ISkyrimModGetter, IQuest, IQuestGetter> {
+public class Quest(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IQuest, IQuestGetter>(recordController) {
     public override string SearcherName => "Quest";
 
     protected override IEnumerable<string?> GetText(IQuestGetter record) {

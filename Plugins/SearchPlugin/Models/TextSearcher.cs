@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using CreationEditor.Services.Mutagen.Record;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins.Records;
@@ -6,7 +7,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace SearchPlugin.Models;
 
-public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITextSearcher<TMod, TModGetter>
+public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter>(IRecordController recordController) : ITextSearcher<TMod, TModGetter>
     where TMajor : class, TMajorGetter, IMajorRecordQueryable
     where TMajorGetter : class, IMajorRecordQueryableGetter
     where TModGetter : class, IModGetter
@@ -51,20 +52,19 @@ public abstract class TextSearcher<TMod, TModGetter, TMajor, TMajorGetter> : ITe
         string newText,
         StringComparison comparison) {
         if (record is not TMajorGetter) return;
+        if (record is not IMajorRecordGetter majorRecord) return;
 
-        var formKey = ((IMajorRecordIdentifierGetter) record).FormKey;
+        var formKey = majorRecord.FormKey;
         var recordLock = Locks.GetOrAdd(formKey);
 
         lock (recordLock) {
-            if (!linkCache.TryResolveContext<TMajor, TMajorGetter>(formKey, out var context)) return;
+            if (recordController.GetOrAddOverride(majorRecord, mod) is not TMajor overrideRecord) return;
 
-            var overrideRecord = context.GetOrAddAsOverride(mod);
             if (record is IDialogTopicGetter topic) {
                 // TEMP FIX - Make sure response count is sustained as Mutagen currently just counts
                 // the number of responses in the current mod and not the overwritten mods.
                 foreach (var response in topic.Responses) {
-                    var responseContext = linkCache.ResolveContext<IDialogResponses, IDialogResponsesGetter>(response.FormKey);
-                    responseContext.GetOrAddAsOverride(mod);
+                    recordController.GetOrAddOverride(response, mod);
                 }
             }
 
