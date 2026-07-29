@@ -55,6 +55,7 @@ public sealed partial class ModCleanerVM : ViewModel {
 
     private Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? _originalReferenceGraphOnlyRetained;
     private HashSet<ILinkIdentifier>? _retainedLinks;
+    private IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>>? _postProcessSteps;
 
     public IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> EditorEnvironment { get; }
     public IReferenceService ReferenceService { get; }
@@ -281,12 +282,12 @@ public sealed partial class ModCleanerVM : ViewModel {
                         if (placedContext.Record.Placement is null) return true;
 
                         var cellCoordinates = placedContext.Record.Placement.GetCellCoordinates();
-                        if (!placedContext.TryGetParent<IWorldspaceGetter>(out var worldspace)) return true;
+                        if (!placedContext.TryGetParent<IWorldspaceGetter>(out var w)) return true;
 
-                        var cell = worldspace.GetCell(cellCoordinates);
-                        if (cell is null) return true;
+                        var c = w.GetCell(cellCoordinates);
+                        if (c is null) return true;
 
-                        return !retainedLinks.Contains(new FormLinkIdentifier(cell.ToFormLinkInformation()));
+                        return !retainedLinks.Contains(new FormLinkIdentifier(c.ToFormLinkInformation()));
                     })) {
                     interiorCells.Add(cell);
                 }
@@ -393,8 +394,9 @@ public sealed partial class ModCleanerVM : ViewModel {
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
 
-        var (retainedLinks, dependencyGraph) = _modCleaner.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
+        var (retainedLinks, dependencyGraph, postProcessSteps) = _modCleaner.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
         _retainedLinks = retainedLinks;
+        _postProcessSteps = postProcessSteps;
 
         var retainedRecords = retainedLinks.OfType<FormLinkIdentifier>()
             .Where(x => x.FormLink.FormKey.ModKey == mod.ModKey)
@@ -432,7 +434,7 @@ public sealed partial class ModCleanerVM : ViewModel {
         if (!GetModAndDependencies(out var mod, out _)) return;
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
-        _modCleaner.Clean(mod, _retainedLinks, SelectedDataSource);
+        _modCleaner.Clean(mod, _retainedLinks, SelectedDataSource, _postProcessSteps ?? new Dictionary<IFormLinkIdentifier, Action<IMajorRecord>>());
         Dispatcher.UIThread.Post(() => IsBusy = false);
     }
 

@@ -19,7 +19,8 @@ public sealed class ModCleaner(
     /// <param name="mod">Mod to clean</param>
     /// <param name="retained">Record and assets links to retain</param>
     /// <param name="dataSource">Data source to clean</param>
-    public void Clean(ISkyrimModGetter mod, HashSet<ILinkIdentifier> retained, IDataSource? dataSource) {
+    /// <param name="postProcessSteps">Post process steps to run on retained records after cleaning</param>
+    public void Clean(ISkyrimModGetter mod, HashSet<ILinkIdentifier> retained, IDataSource? dataSource, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
         var recordsToClean = RecordCleaner.GetRecordsToClean(retained, mod);
 
         if (dataSource is not null) {
@@ -28,7 +29,7 @@ public sealed class ModCleaner(
             assetCleaner.CleanDataSource(dataSource, assetsToClean);
         }
 
-        recordCleaner.CreatedCleanedMod(mod, recordsToClean);
+        recordCleaner.CreatedCleanedMod(mod, recordsToClean, postProcessSteps);
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public sealed class ModCleaner(
     /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
     /// <param name="excludedLinks">Set of links to exclude from retention</param>
     /// <returns>Tuple of retained links and a dependency graph which shows where the retained links were first referenced from for debugging</returns>
-    public (HashSet<ILinkIdentifier> AllRetained, Graph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph) FindRetainedRecords(
+    public (HashSet<ILinkIdentifier> AllRetained, Graph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> PostProcessSteps) FindRetainedRecords(
         IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         IModGetter mod,
@@ -64,6 +65,7 @@ public sealed class ModCleaner(
         IReadOnlySet<ILinkIdentifier> excludedLinks) {
         var retained = new HashSet<ILinkIdentifier>();
         var dependencyGraph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
+        var postProcessSteps = new Dictionary<IFormLinkIdentifier, Action<IMajorRecord>>();
 
         foreach (var vertex in graph.Vertices) {
             if (retained.Contains(vertex)) continue;
@@ -71,7 +73,15 @@ public sealed class ModCleaner(
 
             switch (vertex) {
                 case FormLinkIdentifier formLinkIdentifier: {
-                    recordCleaner.RetainLinks(essentialRecordProvider, graph, mod, dependencies, formLinkIdentifier, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
+                    recordCleaner.RetainLinks(essentialRecordProvider,
+                        graph,
+                        mod,
+                        dependencies,
+                        formLinkIdentifier,
+                        retained,
+                        excludedLinks,
+                        dependencyGraph,
+                        RetainOutgoingEdges);
                     break;
                 }
                 case AssetLinkIdentifier assetLinkIdentifier: {
@@ -81,9 +91,9 @@ public sealed class ModCleaner(
             }
         }
 
-        recordCleaner.FinalRetainLinks(essentialRecordProvider, graph, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
+        recordCleaner.FinalRetainLinks(essentialRecordProvider, graph, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges, AddPostProcessStep);
 
-        return (retained, dependencyGraph);
+        return (retained, dependencyGraph, postProcessSteps);
 
         void RetainOutgoingEdges(HashSet<Edge<ILinkIdentifier>> edges) {
             if (edges.Count == 0) return;
@@ -105,6 +115,10 @@ public sealed class ModCleaner(
                     queue.Enqueue(edge.Target);
                 }
             }
+        }
+
+        void AddPostProcessStep(IFormLinkIdentifier formLinkIdentifier, Action<IMajorRecord> action) {
+            postProcessSteps.TryAdd(formLinkIdentifier, action);
         }
     }
 }

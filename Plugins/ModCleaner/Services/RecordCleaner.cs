@@ -5,7 +5,6 @@ using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim;
 using ModCleaner.Models;
-using ModCleaner.Services.FeatureFlag;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -110,7 +109,8 @@ public sealed class RecordCleaner(
                      && !dependencies.Contains(modKey)) continue;
 
                     // Remove auto generated entries from locations, and only retain custom referenced record
-                    if (currentReference.Type == typeof(ILocationGetter) && editorEnvironment.LinkCache.TryResolve<ILocationGetter>(currentReference.FormKey, out var location)) {
+                    if (currentReference.Type == typeof(ILocationGetter)
+                     && editorEnvironment.LinkCache.TryResolve<ILocationGetter>(currentReference.FormKey, out var location)) {
                         if (current.FormKey != location.ParentLocation.FormKey
                          && current.FormKey != location.Music.FormKey
                          && current.FormKey != location.UnreportedCrimeFaction.FormKey
@@ -167,12 +167,22 @@ public sealed class RecordCleaner(
             .ToHashSet();
     }
 
-    public void CreatedCleanedMod(ISkyrimModGetter mod, HashSet<FormLinkInformation> recordsToClean) {
+    public void CreatedCleanedMod(ISkyrimModGetter mod, HashSet<FormLinkInformation> recordsToClean, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
         var cleanedModKey = ModKey.FromFileName("Cleaned" + mod.ModKey.FileName);
         var duplicate = mod.Duplicate(cleanedModKey);
 
         var translatedRecordsToClean = recordsToClean.Select(x => new FormLinkInformation(new FormKey(duplicate.ModKey, x.FormKey.ID), x.Type)).ToHashSet();
         duplicate.Remove(translatedRecordsToClean);
+        var linkCache = duplicate.ToUntypedMutableLinkCache();
+
+        foreach (var (formLinkIdentifier, postProcessStep) in postProcessSteps) {
+            var translatedFormKey = new FormKey(duplicate.ModKey, formLinkIdentifier.FormKey.ID);
+            if (linkCache.TryResolve(translatedFormKey, formLinkIdentifier.Type, out var record)) {
+                if (record is IMajorRecord recordSetter) {
+                    postProcessStep(recordSetter);
+                }
+            }
+        }
 
         editorEnvironment.Update(updater => updater
             .LoadOrder.AddMutableMods(duplicate)
@@ -259,8 +269,9 @@ public sealed class RecordCleaner(
         HashSet<ILinkIdentifier> retained,
         IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
-        RetainCellsAroundRegion(essentialRecordProvider, retained, excludedLinks, dependencyGraph, retainOutgoingEdges);
+        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
+        Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
+        RetainCellsAroundRegion(essentialRecordProvider, retained, excludedLinks, dependencyGraph, retainOutgoingEdges, addPostProcessStep);
 
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
@@ -371,7 +382,8 @@ public sealed class RecordCleaner(
         HashSet<ILinkIdentifier> retained,
         IReadOnlySet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
+        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
+        Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
         foreach (var (worldspaceFormKey, retainedCells) in essentialRecordProvider.EnumerateRetainedExteriorCells(editorEnvironment.LinkCache)) {
             if (!editorEnvironment.LinkCache.TryResolve<IWorldspaceGetter>(worldspaceFormKey, out var worldspace)) continue;
 
@@ -388,8 +400,9 @@ public sealed class RecordCleaner(
 
                 // With a default uGridsToLoad = 5 diameter, the radius is 2 
                 const int cellRangeToKeepOutsidePlayableArea = 2;
-                for (var dx = -cellRangeToKeepOutsidePlayableArea; dx <= cellRangeToKeepOutsidePlayableArea; dx++) {
-                    for (var dy = -cellRangeToKeepOutsidePlayableArea; dy <= cellRangeToKeepOutsidePlayableArea; dy++) {
+                const int cellLanscapeRangeToKeepOutsidePlayableArea = 4;
+                for (var dx = -cellLanscapeRangeToKeepOutsidePlayableArea; dx <= cellLanscapeRangeToKeepOutsidePlayableArea; dx++) {
+                    for (var dy = -cellLanscapeRangeToKeepOutsidePlayableArea; dy <= cellLanscapeRangeToKeepOutsidePlayableArea; dy++) {
                         var position = new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy);
                         if (retainedCoordinates.Contains(position)) continue;
 
@@ -400,40 +413,70 @@ public sealed class RecordCleaner(
                         var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
                         if (excludedLinks.Contains(cellLink)) continue;
 
-                        dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
-                        retainOutgoingEdges([
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)),
-                            new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)),
-                            ..cell.Regions is null
-                                ? []
-                                : cell.Regions.Select(r => new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(r))),
-                        ]);
-                        retained.Add(cellLink);
+                        if (dx is < -cellRangeToKeepOutsidePlayableArea or > cellRangeToKeepOutsidePlayableArea
+                         || dy is < -cellRangeToKeepOutsidePlayableArea or > cellRangeToKeepOutsidePlayableArea) {
+                            // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
+                            // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
+                            // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
+                            // To implement this, use a post processing step to clear out all cell contents apart from the landscape shape
+                            addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
 
-                        foreach (var placed in cell.Temporary.Concat(cell.Persistent)) {
-                            if (placed is not IPlacedObjectGetter placedObject) continue;
+                            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
 
-                            // Skip owned stuff because that would retain npcs/factions we don't want to retain necessarily
-                            if (!placed.Owner.IsNull && !retained.Contains(new FormLinkIdentifier(placed.Owner))) continue;
+                            void EmptyCell(IMajorRecord record) {
+                                if (record is not ICell c) return;
 
-                            // Skip stuff with scripts because they might reference anything
-                            if (placed.VirtualMachineAdapter is not null) continue;
-
-                            var placeableObject = placedObject.Base.TryResolve(editorEnvironment.LinkCache);
-                            if (placeableObject is IFloraGetter or IFurnitureGetter or IStaticGetter or IMoveableStaticGetter or ITreeGetter) {
-                                // Exclude markers, we just care about big things that are visible
-                                if (placeableObject.EditorID is not null && placeableObject.EditorID.Contains("Marker")) continue;
-
-                                Retain(placed);
+                                c.Location.SetToNull();
+                                c.Owner.SetToNull();
+                                c.LockList.SetToNull();
+                                c.AcousticSpace.SetToNull();
+                                c.EncounterZone.SetToNull();
+                                c.ImageSpace.SetToNull();
+                                c.Music.SetToNull();
+                                c.Water.SetToNull();
+                                c.LightingTemplate.SetToNull();
+                                c.Landscape?.Textures?.Clear();
+                                c.Landscape?.Layers?.Clear();
                             }
+                        } else {
+                            // Retain the cell and all its references
+                            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
+                            retainOutgoingEdges([
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)),
+                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)),
+                                ..cell.Regions is null
+                                    ? []
+                                    : cell.Regions.Select(r => new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(r))),
+                            ]);
+
+                            foreach (var placed in cell.Temporary.Concat(cell.Persistent)) {
+                                if (placed is not IPlacedObjectGetter placedObject) continue;
+
+                                // Skip owned stuff because that would retain npcs/factions we don't want to retain necessarily
+                                if (!placed.Owner.IsNull && !retained.Contains(new FormLinkIdentifier(placed.Owner))) continue;
+
+                                // Skip stuff with scripts because they might reference anything
+                                if (placed.VirtualMachineAdapter is not null) continue;
+
+                                var placeableObject = placedObject.Base.TryResolve(editorEnvironment.LinkCache);
+                                if (placeableObject is IFloraGetter or IFurnitureGetter or IStaticGetter or IMoveableStaticGetter or ITreeGetter) {
+                                    // Exclude markers, we just care about big things that are visible
+                                    if (placeableObject.EditorID is not null && placeableObject.EditorID.Contains("Marker")) continue;
+
+                                    Retain(placed);
+                                }
+                            }
+
                         }
+
+                        retained.Add(cellLink);
 
                         if (cell.Landscape is not null) {
                             Retain(cell.Landscape);
