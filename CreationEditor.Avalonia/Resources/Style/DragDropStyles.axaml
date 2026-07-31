@@ -102,20 +102,5 @@
         </Setter>
     </Style>
 
-    <Style
-        Selector=":is(ListBox)[(dragDrop|DragDropExtended.AllowDrag)=True] > :is(ListBoxItem)">
-        <Setter Property="ZIndex" Value="0"/>
-        <Setter Property="(Interaction.Behaviors)">
-            <BehaviorCollectionTemplate>
-                <BehaviorCollection>
-                    <ContextDragBehavior
-                        Context="{StaticResource DragContext}"
-                        Handler="{StaticResource ListBoxDragDropDragDropHandler}"/>
-                </BehaviorCollection>
-            </BehaviorCollectionTemplate>
-        </Setter>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-    </Style>
-
     <!-- TODO Add TreeView -->
 </Styles>

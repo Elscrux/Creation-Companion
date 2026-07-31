@@ -1,6 +1,11 @@
-﻿using Avalonia;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.LogicalTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
+using Avalonia.Xaml.Interactivity;
 namespace CreationEditor.Avalonia.Attached.DragDrop;
 
 public sealed class DragDropExtended : AvaloniaObject {
@@ -33,4 +38,49 @@ public sealed class DragDropExtended : AvaloniaObject {
 
     public static IDragHandler? GetDragHandler(AvaloniaObject obj) => obj.GetValue(DragHandlerProperty);
     public static void SetDragHandler(AvaloniaObject obj, IDragHandler? value) => obj.SetValue(DragHandlerProperty, value);
+
+    static DragDropExtended() {
+        AllowDragProperty.Changed.AddClassHandler<ListBox>(OnAllowDragChanged);
+    }
+
+    private static void OnAllowDragChanged(ListBox listBox, AvaloniaPropertyChangedEventArgs e) {
+        if (e.NewValue is true) {
+            listBox.AddHandler(InputElement.PointerEnteredEvent, OnListBoxPointerEntered);
+        } else {
+            listBox.RemoveHandler(InputElement.PointerEnteredEvent, OnListBoxPointerEntered);
+        }
+    }
+
+    private static void OnListBoxPointerEntered(object? sender, PointerEventArgs pointerEventArgs) {
+        if (sender is not ListBox listBox) return;
+
+        // Add drag and drop behaviors to each ListBoxItem in the ListBox needs to be handled outside of styles
+        // because the styles approach wasn't compatible with virtualized ListBox item panels
+        foreach (var item in listBox.GetLogicalChildren().OfType<ListBoxItem>()) {
+            if (item.GetValue(Interaction.BehaviorsProperty) is not {} behaviors) {
+                behaviors = [];
+                item.SetValue(Interaction.BehaviorsProperty, behaviors);
+                item.ZIndex = 0;
+                item.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            }
+
+            if (!behaviors.OfType<ContextDragBehavior>().Any()) {
+                var contextDragBehavior = new ContextDragBehavior {
+                    Context = (DragContext?) listBox.FindResource("DragContext"),
+                    Handler = listBox.FindResource("ListBoxDragDropDragDropHandler") as IDragHandler
+                };
+                contextDragBehavior.Attach(item);
+                behaviors.Add(contextDragBehavior);
+            }
+
+            if (!behaviors.OfType<ContextDropBehavior>().Any()) {
+                var contextDropBehavior = new ContextDropBehavior {
+                    Context = (DragContext?) listBox.FindResource("DragContext"),
+                    Handler = listBox.FindResource("ListBoxDragDropDragDropHandler") as IDropHandler
+                };
+                contextDropBehavior.Attach(item);
+                behaviors.Add(contextDropBehavior);
+            }
+        }
+    }
 }
