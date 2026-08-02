@@ -274,6 +274,7 @@ public sealed partial class BuildStripperVM : ViewModel {
             if (formLinkIdentifier.FormLink.Type != typeof(ICellGetter)) continue;
             if (!EditorEnvironment.LinkCache.TryResolve<ICellGetter>(formLinkIdentifier.FormLink.FormKey, out var cell)) continue;
             if (cell.FormKey.ModKey != mod.ModKey) continue;
+            if (_essentialRecordProvider.IsEssentialRecord(formLinkIdentifier.FormLink)) continue;
 
             var worldspace = cell.GetWorldspace(EditorEnvironment.LinkCache);
             if (worldspace is null || cell.Grid is null) {
