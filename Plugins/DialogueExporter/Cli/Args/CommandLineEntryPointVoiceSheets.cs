@@ -1,9 +1,12 @@
 ﻿using System.Reactive.Linq;
 using Autofac;
 using CommandLine;
+using CreationEditor;
+using CreationEditor.Avalonia.Modules;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Services.Plugin;
+using CreationEditor.Skyrim.Avalonia.Modules;
 using DialogueExporter.Services.VoiceSheets;
 using DialogueExporter.Services.VoiceSheets.Writer;
 namespace DialogueExporter.Cli.Args;
@@ -48,7 +51,13 @@ public record CommandLineEntryPointVoiceSheets : ICommandLineEntryPoint, IDataSo
             .MapResult(async cmd => {
                     Console.WriteLine("Starting export with arguments: " + cmd);
 
-                    await using var container = CommandLineContainerSetup.Setup(cmd, cmd.ModFilename);
+                    await using var container = CommandLineContainerSetup.Setup(cmd,
+                        cmd.ModFilename,
+                        builder => {
+                            builder.RegisterModule<EditorModule>();
+                            builder.RegisterModule<SkyrimModule>();
+                            builder.RegisterModule<DialogueExporterModule>();
+                        });
                     if (container is null) return -1;
 
                     // Wait until record references are loaded

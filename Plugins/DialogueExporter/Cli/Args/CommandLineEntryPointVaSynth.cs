@@ -1,8 +1,10 @@
 ﻿using Autofac;
 using CommandLine;
 using CreationEditor;
+using CreationEditor.Avalonia.Modules;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Plugin;
+using CreationEditor.Skyrim.Avalonia.Modules;
 using DialogueExporter.Services.VaSynth;
 using Mutagen.Bethesda.Plugins;
 namespace DialogueExporter.Cli.Args;
@@ -62,7 +64,12 @@ public record CommandLineEntryPointVaSynth : ICommandLineEntryPoint, IDataSource
         return await Parser.Default.ParseArguments<CommandLineEntryPointVaSynth>(args)
             .MapResult(cmd => {
                     Console.WriteLine("Starting VA Synth Export with arguments: " + cmd);
-                    using var container = CommandLineContainerSetup.Setup(cmd, cmd.ModFilename);
+                    using var container = CommandLineContainerSetup.Setup(cmd, cmd.ModFilename,
+                        builder => {
+                            builder.RegisterModule<EditorModule>();
+                            builder.RegisterModule<SkyrimModule>();
+                            builder.RegisterModule<DialogueExporterModule>();
+                        });
                     if (container is null) return Task.FromResult(-1);
 
                     var exportVaSynth = container.Resolve<ExportVaSynth>();

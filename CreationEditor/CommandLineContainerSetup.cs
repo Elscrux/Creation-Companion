@@ -1,27 +1,22 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using CreationEditor;
-using CreationEditor.Avalonia.Modules;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Plugin;
-using CreationEditor.Skyrim.Avalonia.Modules;
 using Mutagen.Bethesda.Autofac;
 using Mutagen.Bethesda.Plugins;
 using Noggog;
 using Serilog;
-namespace DialogueExporter.Cli.Args;
+namespace CreationEditor;
 
 public static class CommandLineContainerSetup {
-    public static IContainer? Setup<TArguments>(TArguments args, string modFilename)
+    public static IContainer? Setup<TArguments>(TArguments args, string modFilename, Action<ContainerBuilder> additionalBuilderRegistrations)
         where TArguments : class, IDataSourceArguments {
         var builder = new ContainerBuilder();
 
         builder.RegisterModule<MutagenModule>();
-        builder.RegisterModule<EditorModule>();
-        builder.RegisterModule<SkyrimModule>();
-        builder.RegisterModule<DialogueExporterModule>();
+        additionalBuilderRegistrations(builder);
         builder.RegisterInstance(args);
 
         var container = builder.Build();
