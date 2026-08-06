@@ -16,5 +16,6 @@ public sealed class DialogueExporterPlugin(
     public Control GetControl() => new DialogueExporterView(dialogueExporterVM());
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Left;
+    public double? Size { get; set; }
     public object GetIcon() => new TextBlock { Text = "💬️" };
 }

@@ -24,6 +24,7 @@ public sealed class SearchPlugin<TMod, TModGetter>(
     public KeyGesture KeyGesture => new(Key.F, KeyModifiers.Control);
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Top;
+    public double? Size { get; set; }
 
     public Control GetControl() => new TextSearchView(textSearchVMFactory());
 

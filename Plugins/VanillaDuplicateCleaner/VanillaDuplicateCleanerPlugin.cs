@@ -23,5 +23,6 @@ public sealed class VanillaDuplicateCleanerPlugin(
 
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Left;
+    public double? Size { get; set; }
     public object GetIcon() => new FAFontIcon { Glyph = "" };
 }

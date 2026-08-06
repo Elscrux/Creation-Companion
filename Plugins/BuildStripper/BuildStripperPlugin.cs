@@ -21,5 +21,6 @@ public sealed class BuildStripperPlugin(
 
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
+    public double? Size { get; set; }
     public object GetIcon() => new FAFontIcon { Glyph = "✂️" };
 }

@@ -8,6 +8,7 @@ public interface IMenuPluginDefinition : IVisualPluginDefinition {
     KeyGesture? KeyGesture => null;
     DockMode DockMode { get; set; }
     Dock Dock { get; set; }
+    double? Size { get; set; }
     object? GetIcon();
 
     static readonly FuncValueConverter<IMenuPluginDefinition, object?> ToIcon

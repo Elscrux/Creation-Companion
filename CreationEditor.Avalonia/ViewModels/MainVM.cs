@@ -110,7 +110,8 @@ public sealed partial class MainVM : ViewModel {
         DockingManagerService.AddControl(plugin.GetControl(),
             new DockConfig {
                 DockInfo = new DockInfo {
-                    Header = plugin.Name
+                    Header = plugin.Name,
+                    Size = plugin.Size,
                 },
                 DockMode = plugin.DockMode,
                 Dock = plugin.Dock,

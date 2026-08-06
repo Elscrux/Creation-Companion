@@ -21,6 +21,7 @@ public sealed class QueryPlugin(
     public KeyGesture KeyGesture => new(Key.Q, KeyModifiers.Control);
     public DockMode DockMode { get; set; } = DockMode.Document;
     public Dock Dock { get; set; }
+    public double? Size { get; set; }
 
     public Control GetControl() => new QueryPluginView(queryPluginVMFactory());
 
