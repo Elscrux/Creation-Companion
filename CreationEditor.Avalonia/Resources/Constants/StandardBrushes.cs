@@ -6,6 +6,8 @@ namespace CreationEditor.Avalonia.Constants;
 public static class StandardBrushes {
     public static ISolidColorBrush? TextBrush => GetBrush("ButtonForeground");
     public static ISolidColorBrush? HighlightBrush => GetBrush("SystemAccentColor");
+    public static ISolidColorBrush? DarkGrayBrush => GetBrush("SystemControlForegroundBaseMediumLowBrush");
+    public static ISolidColorBrush? LightGrayBrush => GetBrush("SystemControlForegroundBaseMediumHighBrush");
 
     public static ISolidColorBrush? BackgroundBrush => GetBrush("SolidBackgroundFillColorTertiary");
 
