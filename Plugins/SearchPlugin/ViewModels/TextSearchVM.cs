@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive.Linq;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -46,12 +47,13 @@ public sealed partial class TextSearchVM<TMod, TModGetter> : ViewModel, ITextSea
     public StringComparison ComparisonType => CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
     public TextSearchVM(
+        IComponentContext componentContext,
         IEditorEnvironment<TMod, TModGetter> editorEnvironment) {
         _editorEnvironment = editorEnvironment;
 
         Searchers = new ObservableCollectionExtended<SelectableSearcher>(
             typeof(ITextSearcher<TMod, TModGetter>)
-                .GetAllSubClasses<ITextSearcher<TMod, TModGetter>>()
+                .GetAllSubClasses<ITextSearcher<TMod, TModGetter>>(componentContext.Resolve)
                 .Select(searcher => new SelectableSearcher { Searcher = searcher, IsSelected = true }));
 
         Mods = _editorEnvironment.LinkCacheChanged

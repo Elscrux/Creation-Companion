@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace SearchPlugin.Models;
 
-public class EditorID(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IMajorRecord, IMajorRecordGetter>(recordController) {
+public sealed class EditorID(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IMajorRecord, IMajorRecordGetter>(recordController) {
     public override string SearcherName => "EditorID";
 
     protected override IEnumerable<string?> GetText(IMajorRecordGetter record) {

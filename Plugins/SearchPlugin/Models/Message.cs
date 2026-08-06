@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 namespace SearchPlugin.Models;
 
-public class Message(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IMessage, IMessageGetter>(recordController) {
+public sealed class Message(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IMessage, IMessageGetter>(recordController) {
     public override string SearcherName => "Message";
 
     protected override IEnumerable<string?> GetText(IMessageGetter record) {

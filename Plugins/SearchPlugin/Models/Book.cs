@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 namespace SearchPlugin.Models;
 
-public class Book(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IBook, IBookGetter>(recordController) {
+public sealed class Book(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, IBook, IBookGetter>(recordController) {
     public override string SearcherName => "Book";
 
     protected override IEnumerable<string?> GetText(IBookGetter record) {

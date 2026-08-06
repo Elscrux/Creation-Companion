@@ -1,5 +1,7 @@
 ﻿using Autofac;
+using SearchPlugin.Models;
 using SearchPlugin.ViewModels;
+using Activator = SearchPlugin.Models.Activator;
 namespace SearchPlugin;
 
 public class SearchPluginModule : Module {
@@ -11,5 +13,14 @@ public class SearchPluginModule : Module {
 
         builder.RegisterGeneric(typeof(TextSearchVM<,>))
             .AsSelf();
+
+        builder.RegisterType<Activator>();
+        builder.RegisterType<Book>();
+        builder.RegisterType<EditorID>();
+        builder.RegisterType<LoadScreen>();
+        builder.RegisterType<Message>();
+        builder.RegisterType<Name>();
+        builder.RegisterType<Quest>();
+        builder.RegisterType<Topic>();
     }
 }

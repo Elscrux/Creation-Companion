@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
 namespace SearchPlugin.Models;
 
-public class LoadScreen(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, ILoadScreen, ILoadScreenGetter>(recordController) {
+public sealed class LoadScreen(IRecordController recordController) : TextSearcher<ISkyrimMod, ISkyrimModGetter, ILoadScreen, ILoadScreenGetter>(recordController) {
     public override string SearcherName => "LoadScreen";
 
     protected override IEnumerable<string?> GetText(ILoadScreenGetter record) {
