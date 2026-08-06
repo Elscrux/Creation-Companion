@@ -35,6 +35,7 @@
 
                         <!-- Text -->
                         <TextBlock Text="{TemplateBinding Header}"
+                                   VerticalAlignment="Center"
                                    FontSize="18"
                                    FontWeight="SemiBold"/>
                     </StackPanel>
