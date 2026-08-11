@@ -10,7 +10,7 @@ public interface IUpdate<out T> {
     T New { get; }
 }
 
-public sealed record Update<T>(T Old, T New) : IUpdate<T>;
+public record struct Update<T>(T Old, T New) : IUpdate<T>;
 
 public sealed class FileSystemDataSourceWatcher : IDataSourceWatcher {
     private readonly DisposableBucket _disposables = new();
