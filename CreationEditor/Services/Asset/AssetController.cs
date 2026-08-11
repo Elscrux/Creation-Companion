@@ -158,8 +158,7 @@ public sealed class AssetController(
 
     public void RemapDirectoryReferences(DataSourceDirectoryLink oldDirectoryLink, DataSourceDirectoryLink newDirectoryLink) {
         foreach (var fileLink in oldDirectoryLink.EnumerateFileLinks(true)) {
-            var relativePath = oldDirectoryLink.FileSystem.Path.GetRelativePath(oldDirectoryLink.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-            var destinationPath = newDirectoryLink.FileSystem.Path.Combine(newDirectoryLink.DataRelativePath.Path, oldDirectoryLink.Name, relativePath);
+            var destinationPath = GetDestinationPathOfLinkInDirectory(oldDirectoryLink, newDirectoryLink, fileLink);
             var linkDestination = new DataSourceFileLink(newDirectoryLink.DataSource, destinationPath);
             RemapFileReferences(fileLink, linkDestination);
         }
@@ -212,9 +211,10 @@ public sealed class AssetController(
             if (!linkCacheProvider.LinkCache.TryResolve(formLink, out var record)) continue;
 
             var recordOverride = recordController.GetOrAddOverride(record);
-            recordController.RegisterUpdate(recordOverride, () => recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
-                { assetLink, shortenedDataRelativePath },
-            }));
+            recordController.RegisterUpdate(recordOverride,
+                () => recordOverride.RemapListedAssetLinks(new Dictionary<IAssetLinkGetter, string>(AssetLinkEqualityComparer.Instance) {
+                    { assetLink, shortenedDataRelativePath },
+                }));
         }
     }
 
@@ -283,8 +283,7 @@ public sealed class AssetController(
             if (destination.Exists()) {
                 // If the destination directory already exists, integrate the contents with recursive FileSystemMove calls
                 foreach (var link in origin.EnumerateAllLinks(true)) {
-                    var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, link.DataRelativePath.Path);
-                    var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
+                    var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, link);
                     switch (link) {
                         case DataSourceFileLink fileLink:
                             var destinationFileLink = new DataSourceFileLink(destination.DataSource, destinationPath);
@@ -320,12 +319,18 @@ public sealed class AssetController(
         return origin
             .EnumerateFileLinks(true)
             .Select(fileLink => {
-                var relativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-                var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, relativePath);
+                var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, fileLink);
                 var linkDestination = new DataSourceFileLink(destination.DataSource, destinationPath);
                 return new Update<DataSourceFileLink>(fileLink, linkDestination);
             })
+            .Cast<IUpdate<DataSourceFileLink>>()
             .ToArray();
+    }
+
+    private static DataRelativePath GetDestinationPathOfLinkInDirectory(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, IDataSourceLink fileLink) {
+        var originRelativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, fileLink.DataRelativePath.Path);
+        var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, originRelativePath);
+        return new DataRelativePath(destinationPath);
     }
 
     private void RemapLinks(IReadOnlyList<IUpdate<DataSourceFileLink>> links) {
