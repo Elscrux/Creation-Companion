@@ -18,6 +18,6 @@ public interface IDataSource : IMementoProvider<DataSourceMemento> {
     string GetFullPath(DataRelativePath path);
     bool FileExists(DataRelativePath path);
     bool DirectoryExists(DataRelativePath path);
-    IEnumerable<DataRelativePath> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false);
-    IEnumerable<DataRelativePath> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false);
+    IEnumerable<DataSourceFileLink> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false);
+    IEnumerable<DataSourceDirectoryLink> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false);
 }

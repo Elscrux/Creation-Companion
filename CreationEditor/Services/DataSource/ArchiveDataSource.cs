@@ -52,7 +52,7 @@ public sealed class ArchiveDataSource : IDataSource {
 
         return ArchiveReader.TryGetFolder(directoryPath, out _);
     }
-    public IEnumerable<DataRelativePath> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+    public IEnumerable<DataSourceFileLink> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
         if (directoryPath is null || !ArchiveReader.TryGetFolder(directoryPath, out var folder)) yield break;
 
@@ -60,11 +60,11 @@ public sealed class ArchiveDataSource : IDataSource {
             if (!_searchFilter.Filter(file, searchPattern)) continue;
 
             var relativePath = FileSystem.Path.GetRelativePath(Path, file);
-            yield return new DataRelativePath(relativePath);
+            yield return new DataSourceFileLink(this, relativePath);
         }
     }
 
-    public IEnumerable<DataRelativePath> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+    public IEnumerable<DataSourceDirectoryLink> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
         if (directoryPath is null || !ArchiveReader.TryGetFolder(directoryPath, out var folder)) yield break;
 
@@ -72,7 +72,7 @@ public sealed class ArchiveDataSource : IDataSource {
         //     if (!_searchFilter.Filter(subFolder.Path, searchPattern)) continue;
         //
         //     var relativePath = FileSystem.Path.GetRelativePath(Path, subFolder.Path);
-        //     yield return new DataRelativePath(relativePath);
+        //     yield return new DataSourceDirectoryLink(this, relativePath);
         // }
     }
 

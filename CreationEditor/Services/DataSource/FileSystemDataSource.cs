@@ -42,7 +42,7 @@ public sealed class FileSystemDataSource : IDataSource {
         return FileSystem.Directory.Exists(fullPath);
     }
 
-    public IEnumerable<DataRelativePath> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+    public IEnumerable<DataSourceFileLink> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var fullPath = GetFullPath(path.Path);
         var files = FileSystem.Directory
             .EnumerateFiles(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
@@ -53,11 +53,11 @@ public sealed class FileSystemDataSource : IDataSource {
 
             if (DeleteDirectoryLink.Contains(relativePath)) continue;
 
-            yield return fileDataRelativePath;
+            yield return new DataSourceFileLink(this, fileDataRelativePath);
         }
     }
 
-    public IEnumerable<DataRelativePath> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
+    public IEnumerable<DataSourceDirectoryLink> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
         var fullPath = GetFullPath(path.Path);
         var directories = FileSystem.Directory
             .EnumerateDirectories(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
@@ -68,7 +68,7 @@ public sealed class FileSystemDataSource : IDataSource {
 
             if (DeleteDirectoryLink.Contains(relativePath)) continue;
 
-            yield return directoryDataRelativePath;
+            yield return new DataSourceDirectoryLink(this, directoryDataRelativePath);
         }
     }
 

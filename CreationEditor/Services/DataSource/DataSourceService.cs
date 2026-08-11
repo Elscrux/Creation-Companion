@@ -166,13 +166,13 @@ public sealed class DataSourceService : IDataSourceService {
         foreach (var dataSource in PriorityOrder) {
             if (!dataSource.DirectoryExists(directoryPath)) continue;
 
-            var files = dataSource.EnumerateFiles(directoryPath, searchPattern, includeSubDirectories);
+            var fileLinks = dataSource.EnumerateFiles(directoryPath, searchPattern, includeSubDirectories);
 
-            foreach (var dataRelativePath in files) {
-                if (dataSource.DeleteDirectoryLink.Contains(dataRelativePath)) continue;
-                if (!referencedFiles.Add(dataRelativePath)) continue;
+            foreach (var fileLink in fileLinks) {
+                if (dataSource.DeleteDirectoryLink.Contains(fileLink)) continue;
+                if (!referencedFiles.Add(fileLink.DataRelativePath)) continue;
 
-                yield return new DataSourceFileLink(dataSource, dataRelativePath);
+                yield return fileLink;
             }
         }
     }

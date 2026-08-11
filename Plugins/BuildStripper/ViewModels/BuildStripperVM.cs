@@ -329,13 +329,13 @@ public sealed partial class BuildStripperVM : ViewModel {
         if (SelectedDataSource is null) return [];
 
         var path = SelectedDataSource.FileSystem.Path;
-        var directory = path.Combine(SkyrimSoundAssetType.Instance.BaseFolder, "Voice");
-        if (!SelectedDataSource.DirectoryExists(directory)) return [];
+        var voiceDirectory = path.Combine(SkyrimSoundAssetType.Instance.BaseFolder, "Voice");
+        if (!SelectedDataSource.DirectoryExists(voiceDirectory)) return [];
 
         var voiceTypesWithSounds = SelectedDataSource
-            .EnumerateDirectories(directory)
-            .SelectMany(modPath => SelectedDataSource.EnumerateDirectories(modPath))
-            .Select(voiceTypePath => path.GetFileName(voiceTypePath.Path))
+            .EnumerateDirectories(voiceDirectory)
+            .SelectMany(modPath => SelectedDataSource.EnumerateDirectories(modPath.DataRelativePath))
+            .Select(voiceTypePath => voiceTypePath.Name)
             .Select(voiceType => EditorEnvironment.LinkCache.TryResolve<IVoiceTypeGetter>(voiceType, out var voiceTypeRecord)
                 ? voiceTypeRecord
                 : null)
