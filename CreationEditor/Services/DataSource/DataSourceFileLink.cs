@@ -29,6 +29,12 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
 
     public bool Exists() => FileSystem.File.Exists(FullPath);
 
+    public IDataSourceLink WithExtension(string newExtension) {
+        return new DataSourceFileLink(
+            DataSource,
+            FileSystem.Path.ChangeExtension(DataRelativePath.Path, newExtension));
+    }
+
     public Stream? ReadFileStream() {
         if (!FileSystem.File.Exists(FullPath)) return null;
 
