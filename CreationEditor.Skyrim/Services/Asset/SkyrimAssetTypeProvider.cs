@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Skyrim.Assets;
-namespace CreationEditor.Skyrim.Avalonia.Services.Asset;
+namespace CreationEditor.Skyrim.Services.Asset;
 
 public sealed class SkyrimAssetTypeProvider : IAssetTypeProvider {
     public IReadOnlyList<IAssetType> AllAssetTypes { get; } = [

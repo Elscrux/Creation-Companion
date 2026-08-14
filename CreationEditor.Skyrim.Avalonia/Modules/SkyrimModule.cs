@@ -24,7 +24,6 @@ using CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Browser;
 using CreationEditor.Skyrim.Avalonia.Services.Record.Editor;
 using CreationEditor.Skyrim.Avalonia.Services.Record.List;
-using CreationEditor.Skyrim.Avalonia.Services.Types;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
@@ -34,8 +33,10 @@ using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Editor.MajorRecord.Factio
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.List;
 using CreationEditor.Skyrim.Avalonia.ViewModels.Record.Provider;
 using CreationEditor.Skyrim.Avalonia.Views.Record.Editor.MajorRecord.Book.Preview;
+using CreationEditor.Skyrim.Services.Asset;
 using CreationEditor.Skyrim.Services.Mod;
 using CreationEditor.Skyrim.Services.Record;
+using CreationEditor.Skyrim.Services.Types;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Modules;

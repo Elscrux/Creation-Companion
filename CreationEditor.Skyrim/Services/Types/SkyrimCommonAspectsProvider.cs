@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Strings;
-namespace CreationEditor.Skyrim.Avalonia.Services.Types;
+namespace CreationEditor.Skyrim.Services.Types;
 
 public sealed class SkyrimCommonAspectsProvider : IMutagenCommonAspectsProvider {
     public Type AddonNodeRecordType { get; } = typeof(IAddonNodeGetter);
