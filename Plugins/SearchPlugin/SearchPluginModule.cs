@@ -20,6 +20,7 @@ public class SearchPluginModule : Module {
         builder.RegisterType<LoadScreen>();
         builder.RegisterType<Message>();
         builder.RegisterType<Name>();
+        builder.RegisterType<Npc>();
         builder.RegisterType<Quest>();
         builder.RegisterType<Topic>();
     }

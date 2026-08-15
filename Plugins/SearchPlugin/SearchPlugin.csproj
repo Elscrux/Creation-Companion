@@ -38,6 +38,9 @@
       <Compile Update="Models\Book.cs">
         <DependentUpon>ITextSearcher.cs</DependentUpon>
       </Compile>
+      <Compile Update="Models\Npc.cs">
+        <DependentUpon>ITextSearcher.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <Target Name="CopyPlugin" AfterTargets="Build">
