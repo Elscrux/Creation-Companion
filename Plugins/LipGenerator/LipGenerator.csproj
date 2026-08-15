@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CreationEditor.Skyrim.Avalonia\CreationEditor.Skyrim.Avalonia.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ReactiveUI.SourceGenerators">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\LipGeneratorView.axaml.cs">
+        <DependentUpon>LipGeneratorView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Services\XwmEncoderWrapper.cs">
+        <DependentUpon>IAudioEncoder.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\FaceFxWrapper.cs">
+        <DependentUpon>ILipGenerator.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\LipFuzerWrapper.cs">
+        <DependentUpon>IFuzGenerator.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Services\LipGeneratorWrapper.cs">
+        <DependentUpon>ILipGenerator.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <Target Name="CopyPlugin" AfterTargets="Build" Condition="Exists('$(MSBuildThisFileDirectory)..\..\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins')">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\CreationEditor.Skyrim.Avalonia\bin\$(Configuration)\$(TargetFramework)\Plugins"/>
+    </Target>
+
+</Project>

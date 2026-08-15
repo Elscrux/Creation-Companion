@@ -1,0 +1,358 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:LipGenerator.ViewModels"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource;assembly=CreationEditor.Avalonia"
+             xmlns:file="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.File;assembly=CreationEditor.Avalonia"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:services="clr-namespace:LipGenerator.Services"
+             mc:Ignorable="d"
+             d:DesignWidth="1200"
+             d:DesignHeight="700"
+             x:Class="LipGenerator.Views.LipGeneratorView"
+             x:DataType="viewModels:LipGeneratorVM"
+             x:Name="Control"
+             Margin="8">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="10">
+            <!-- Configuration Header -->
+            <basic:Header Header="Lip File Generation"
+                          Description="Generate .lip and .fuz files from .wav voice files for Skyrim mods">
+                <basic:Header.IconControl>
+                    <controls:FAFontIcon Glyph="👄"/>
+                </basic:Header.IconControl>
+            </basic:Header>
+
+            <!-- Divider -->
+            <Separator/>
+
+            <!-- Data Source Card -->
+            <basic:Card Header="Data Source"
+                        Description="Select the data source containing voice files"
+                        Icon="Folder">
+                <StackPanel Spacing="8">
+                    <dataSource:DataSourcePicker DataContext="{Binding DataSourcePicker}"/>
+
+                    <Grid Height="18">
+                        <TextBlock FontSize="12"
+                                   Foreground="{x:Static constants:StandardBrushes.InvalidBrush}"
+                                   IsVisible="{Binding !DataSourcePicker.HasDataSourceSelected^}"
+                                   Text="Select a data source to continue"/>
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource TextFillColorTertiary}"
+                                   IsVisible="{Binding DataSourcePicker.HasDataSourceSelected^}"
+                                   Text="Voice files will be processed from the selected data source"/>
+                    </Grid>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Lip Generator Tool Card -->
+            <basic:Card Header="Lip Generator"
+                        Description="Configure lip generation tool and settings"
+                        Icon="Settings">
+                <StackPanel Spacing="12">
+                    <!-- Tool Selection -->
+                    <basic:LabeledContentControl Header="Tool Selection"
+                                                 HeaderToolTip="Choose which lip generation tool to use">
+                        <ComboBox ItemsSource="{Binding AvailableLipGenerators}"
+                                  SelectedItem="{Binding SelectedLipGenerator, Mode=TwoWay}"
+                                  MinWidth="200"
+                                  CornerRadius="8"
+                                  Padding="12,8"/>
+                    </basic:LabeledContentControl>
+
+                    <!-- FaceFX Settings -->
+                    <StackPanel
+                        IsVisible="{Binding SelectedLipGenerator, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:LipGeneratorTool.FaceFXWrapper}}"
+                        Spacing="12">
+                        <!-- FaceFX Wrapper Path -->
+                        <basic:LabeledContentControl Header="FaceFX Wrapper Path"
+                                                     HeaderToolTip="Path to FaceFXWrapper.exe"
+                                                     IsVisible="{Binding SelectedLipGenerator, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:LipGeneratorTool.FaceFXWrapper}}">
+                            <file:TextFilePicker PlaceholderText="Select FaceFXWrapper.exe"
+                                                 MinWidth="250"
+                                                 CornerRadius="8"
+                                                 AllowTextEdit="True"
+                                                 FilePath="{Binding FaceFxWrapperPath, Mode=TwoWay}"/>
+                        </basic:LabeledContentControl>
+
+                        <!-- FonixData.cdf -->
+                        <basic:LabeledContentControl Header="FonixData.cdf"
+                                                     HeaderToolTip="Phoneme data file for lip sync">
+                            <file:TextFilePicker PlaceholderText="Select FonixData.cdf"
+                                                 MinWidth="250"
+                                                 CornerRadius="8"
+                                                 AllowTextEdit="True"
+                                                 FilePath="{Binding FonixDataPath, Mode=TwoWay}"/>
+                        </basic:LabeledContentControl>
+
+                        <basic:LabeledContentControl Header="Language"
+                                                     HeaderToolTip="Voice type language for lip sync generation">
+                            <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                      SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                                      MinWidth="200"
+                                      CornerRadius="8"
+                                      Padding="12,8"/>
+                        </basic:LabeledContentControl>
+                    </StackPanel>
+
+                    <!-- LipGen Settings -->
+                    <StackPanel
+                        IsVisible="{Binding SelectedLipGenerator, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:LipGeneratorTool.LipGenerator}}"
+                        Spacing="12">
+                        <!-- LipGenerator Path -->
+                        <basic:LabeledContentControl Header="LipGenerator Path"
+                                                     HeaderToolTip="Path to LipGenerator.exe"
+                                                     IsVisible="{Binding SelectedLipGenerator, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:LipGeneratorTool.LipGenerator}}">
+                            <file:TextFilePicker PlaceholderText="Select LipGenerator.exe"
+                                                 MinWidth="250"
+                                                 CornerRadius="8"
+                                                 AllowTextEdit="True"
+                                                 FilePath="{Binding LipGeneratorPath, Mode=TwoWay}"/>
+                        </basic:LabeledContentControl>
+
+                        <!-- Language -->
+                        <basic:LabeledContentControl Header="Language"
+                                                     HeaderToolTip="Voice type language for lip sync generation">
+                            <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                      SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                                      MinWidth="200"
+                                      CornerRadius="8"
+                                      Padding="12,8"/>
+                        </basic:LabeledContentControl>
+
+                        <Expander Header="Advanced Settings"
+                                  IsExpanded="False"
+                                  HorizontalAlignment="Stretch">
+                            <StackPanel Margin="0,16,0,0"
+                                        Spacing="16">
+                                <!-- Gesture Exaggeration -->
+                                <basic:LabeledContentControl Header="Gesture Exaggeration"
+                                                             HeaderToolTip="Intensity of facial gestures (0.5 = subtle, 3.0 = very exaggerated)">
+                                    <StackPanel>
+                                        <Slider Minimum="{Binding MinGestureExaggeration}"
+                                                Maximum="{Binding MaxGestureExaggeration}"
+                                                Value="{Binding GestureExaggeration, Mode=TwoWay}"
+                                                TickFrequency="0.1"
+                                                TickPlacement="BottomRight"
+                                                IsSnapToTickEnabled="True"
+                                                Margin="0,8,0,4"/>
+                                        <TextBlock Text="{Binding GestureExaggeration, StringFormat='{}{0:F1}x'}"
+                                                   HorizontalAlignment="Center"
+                                                   FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </basic:LabeledContentControl>
+
+                                <!-- Lip Animation Speed -->
+                                <basic:LabeledContentControl Header="Lip Animation Speed"
+                                                             HeaderToolTip="Speed multiplier for lip animations">
+                                    <StackPanel>
+                                        <Slider Minimum="{Binding MinLipAnimSpeed}"
+                                                Maximum="{Binding MaxLipAnimSpeed}"
+                                                Value="{Binding LipAnimSpeed, Mode=TwoWay}"
+                                                TickFrequency="0.1"
+                                                TickPlacement="BottomRight"
+                                                IsSnapToTickEnabled="True"
+                                                Margin="0,8,0,4"/>
+                                        <TextBlock Text="{Binding LipAnimSpeed, StringFormat='{}{0:F2}x'}"
+                                                   HorizontalAlignment="Center"
+                                                   FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </basic:LabeledContentControl>
+
+                                <!-- Lip Anim Delay -->
+                                <basic:LabeledContentControl Header="Lip Anim Delay"
+                                                             HeaderToolTip="Delay in seconds before lip animations start">
+                                    <StackPanel>
+                                        <Slider Minimum="{Binding MinLipAnimDelay}"
+                                                Maximum="{Binding MaxLipAnimDelay}"
+                                                Value="{Binding LipAnimDelay, Mode=TwoWay}"
+                                                TickFrequency="0.1"
+                                                TickPlacement="BottomRight"
+                                                IsSnapToTickEnabled="True"
+                                                Margin="0,8,0,4"/>
+                                        <TextBlock Text="{Binding LipAnimDelay, StringFormat='{}{0:F2}s'}"
+                                                   HorizontalAlignment="Center"
+                                                   FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </basic:LabeledContentControl>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Fuz Generator Card -->
+            <basic:Card Header="Fuz Generator"
+                        Description="Configure fuz generation tool"
+                        Icon="Settings">
+                <StackPanel Spacing="12">
+                    <basic:LabeledContentControl Header="Tool Selection"
+                                                 HeaderToolTip="Choose which lip fuzer tool to use">
+                        <ComboBox ItemsSource="{Binding AvailableLipFuzers}"
+                                  SelectedItem="{Binding SelectedLipFuzer, Mode=TwoWay}"
+                                  MinWidth="200"
+                                  CornerRadius="8"
+                                  Padding="12,8"/>
+                    </basic:LabeledContentControl>
+
+                    <!-- LipFuzer Settings -->
+                    <StackPanel
+                        IsVisible="{Binding SelectedLipGenerator, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:LipGeneratorTool.LipGenerator}}"
+                        Spacing="12">
+                        <basic:LabeledContentControl Header="LipFuzer Path"
+                                                     HeaderToolTip="Path to LipFuzer.exe">
+                            <file:TextFilePicker PlaceholderText="Select LipFuzer.exe"
+                                                 MinWidth="250"
+                                                 CornerRadius="8"
+                                                 AllowTextEdit="True"
+                                                 FilePath="{Binding LipFuzerPath, Mode=TwoWay}"/>
+                        </basic:LabeledContentControl>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Audio Compression Card -->
+            <basic:Card Header="Fuz Audio Compression"
+                        Description="Configure audio encoding and compression for the generated .fuz files"
+                        Icon="Settings">
+                <StackPanel Spacing="12">
+                    <basic:LabeledContentControl Header="Output Format"
+                                                 HeaderToolTip="Choose the audio compression format for output fuz files">
+                        <ComboBox ItemsSource="{Binding AvailableAudioFormats}"
+                                  SelectedItem="{Binding SelectedAudioFormat, Mode=TwoWay}"
+                                  MinWidth="200"
+                                  CornerRadius="8"
+                                  Padding="12,8"/>
+                    </basic:LabeledContentControl>
+
+                    <!-- XWM Encoder Settings -->
+                    <StackPanel
+                        IsVisible="{Binding SelectedAudioFormat, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:AudioFormatOption.XWM}}"
+                        Spacing="12">
+                        <!-- XWM Encoder Path -->
+                        <basic:LabeledContentControl Header="XWM Encoder Path"
+                                                     HeaderToolTip="Path to xwmaencode.exe"
+                                                     IsVisible="{Binding SelectedAudioFormat, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:AudioFormatOption.XWM}}">
+                            <file:TextFilePicker PlaceholderText="Select xwmaencode.exe"
+                                                 MinWidth="250"
+                                                 CornerRadius="8"
+                                                 AllowTextEdit="True"
+                                                 FilePath="{Binding XwmEncoderPath, Mode=TwoWay}"/>
+                        </basic:LabeledContentControl>
+
+                        <!-- Bitrate -->
+                        <basic:LabeledContentControl Header="Bitrate"
+                                                     HeaderToolTip="Audio quality for XWM encoding (higher = better quality)">
+                            <ComboBox ItemsSource="{x:Static services:XwmEncoderWrapper.SupportedBitrates}"
+                                      SelectedItem="{Binding XwmBitrate, Mode=TwoWay}"
+                                      MinWidth="200"
+                                      CornerRadius="8"
+                                      Padding="12,8"/>
+                        </basic:LabeledContentControl>
+
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource TextFillColorTertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="Higher bitrates provide better audio quality but larger file sizes."/>
+                    </StackPanel>
+
+                    <!-- WAV Encoder Settings -->
+                    <StackPanel
+                        IsVisible="{Binding SelectedAudioFormat, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static services:AudioFormatOption.WAV}}"
+                        Spacing="12">
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource TextFillColorTertiary}"
+                                   TextWrapping="Wrap"
+                                   Text="Original WAV files will be kept without additional compression."/>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Settings Card -->
+            <basic:Card Header="Settings"
+                        Description="Configure processing options"
+                        Icon="Settings">
+                <StackPanel Spacing="12">
+                    <CheckBox Content="Delete .lip and audio files after generating .fuz files"
+                              ToolTip.Tip="When enabled, temporary .lip and audio files will be deleted after .fuz files are generated"
+                              IsChecked="{Binding CleanupFiles, Mode=TwoWay}"/>
+
+                    <Separator/>
+
+                    <Expander Header="Advanced Settings"
+                              IsExpanded="False"
+                              HorizontalAlignment="Stretch">
+                        <StackPanel Margin="0,16,0,0"
+                                    Spacing="16">
+                            <basic:LabeledContentControl Header="Parallelization Degree"
+                                                         HeaderToolTip="Number of concurrent threads for processing (uses all cores minus one by default)">
+                                <StackPanel>
+                                    <Slider Minimum="{Binding MinParallelizationDegree}"
+                                            Maximum="{Binding MaxParallelizationDegree}"
+                                            Value="{Binding ParallelizationDegree, Mode=TwoWay}"
+                                            TickFrequency="1"
+                                            TickPlacement="BottomRight"
+                                            IsSnapToTickEnabled="True"
+                                            Margin="0,8,0,4"/>
+                                    <TextBlock Text="{Binding ParallelizationDegree, StringFormat='{}{0} threads'}"
+                                               HorizontalAlignment="Center"
+                                               FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </basic:LabeledContentControl>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Divider -->
+            <Separator Height="1"
+                       Margin="0,8"/>
+
+            <!-- Progress Section -->
+            <Border IsVisible="{Binding IsGenerating}"
+                    CornerRadius="8"
+                    Padding="16"
+                    Background="{DynamicResource ControlFillColorSecondary}">
+                <StackPanel Spacing="8">
+                    <ProgressBar Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding ProgressValue, Mode=OneWay}"
+                                 Height="12"
+                                 ShowProgressText="True"/>
+                    <TextBlock Text="{Binding ProgressText, Mode=OneWay}"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               FontWeight="SemiBold"
+                               FontSize="12"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Primary Action Button -->
+            <Button Classes="Primary Accent"
+                    Command="{Binding GenerateLipCommand}"
+                    IsEnabled="{Binding CanGenerateLip^}">
+                <Grid ColumnDefinitions="*,Auto"
+                      HorizontalAlignment="Center">
+                    <TextBlock Grid.Column="0"
+                               Text="Generate Lip Files"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+                    <avaloniaProgressRing:ProgressRing Grid.Column="1"
+                                                       IsVisible="{Binding GenerateLipCommand.IsExecuting^}"
+                                                       Width="18"
+                                                       Height="18"/>
+                </Grid>
+            </Button>
+
+            <!-- Help Text -->
+            <TextBlock FontSize="11"
+                       Foreground="{DynamicResource TextFillColorTertiary}"
+                       Text="Configure paths, then click Generate to process voice files"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
