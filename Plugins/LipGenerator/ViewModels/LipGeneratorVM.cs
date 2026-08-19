@@ -39,7 +39,7 @@ public sealed partial class LipGeneratorVM : ViewModel {
     [Reactive] public partial float GestureExaggeration { get; set; } = 1.0f;
     [Reactive] public partial float LipAnimSpeed { get; set; } = 1.0f;
     [Reactive] public partial float LipAnimDelay { get; set; } = 0.0f;
-    [Reactive] public partial int XwmBitrate { get; set; } = 192000;
+    [Reactive] public partial int XwmBitrate { get; set; } = 96000;
     [Reactive] public partial int ParallelizationDegree { get; set; } = Math.Max(1, Environment.ProcessorCount - 1);
 
     // Slider ranges
