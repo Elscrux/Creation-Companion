@@ -28,9 +28,11 @@ using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Assets;
+using Mutagen.Bethesda.Skyrim.Records.Assets.VoiceType;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -293,8 +295,9 @@ public sealed partial class BuildStripperVM : ViewModel {
                     interiorCells.Add(cell);
                 }
             } else if (_essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), cell)) {
-                var notInRangeOfValidCells = Enumerable.Range(-3, 7)
-                    .SelectMany(dx => Enumerable.Range(-3, 7).Select(dy => (dx, dy)))
+                var notInRangeOfValidCells = Enumerable.Range(-RecordCleaner.CellRangeToKeepOutsidePlayableArea, RecordCleaner.CellRangeToKeepOutsidePlayableArea)
+                    .SelectMany(dx => Enumerable.Range(-RecordCleaner.CellRangeToKeepOutsidePlayableArea, RecordCleaner.CellRangeToKeepOutsidePlayableArea)
+                            .Select(dy => (dx, dy)))
                     .Select(offset => worldspace.GetCell(new P2Int(cell.Grid.Point.X + offset.dx, cell.Grid.Point.Y + offset.dy)))
                     .WhereNotNull()
                     .All(neighborCell => _essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), neighborCell));
@@ -342,9 +345,25 @@ public sealed partial class BuildStripperVM : ViewModel {
             .WhereNotNull()
             .ToHashSet();
 
+        var assetLinkCache = EditorEnvironment.LinkCache.CreateImmutableAssetLinkCache();
+        var voiceTypeAssetLookup = assetLinkCache.GetComponent<VoiceTypeAssetLookup>();
+        var voiceTypes = mod.EnumerateMajorRecords<IDialogResponsesGetter>()
+            .SelectMany(voiceTypeAssetLookup.GetSpeakers)
+            .Select(x => x.TryResolve(EditorEnvironment.LinkCache, out var voiceType) ? voiceType : null)
+            .WhereNotNull()
+            .Select(x => x.Voice)
+            .DistinctBy(x => x.FormKey)
+            .Select(x => x.TryResolve(EditorEnvironment.LinkCache, out var voiceType) ? voiceType : null)
+            .WhereNotNull()
+            .ToHashSet();
+
         return mod.EnumerateMajorRecords<IVoiceTypeGetter>()
+            // Only report voice types where no sounds are recorded
             .Where(voiceType => !voiceTypesWithSounds.Contains(voiceType))
+            // Don't report voice types that are not retained
             .Where(voiceType => retainedLinks.Contains(new FormLinkIdentifier(voiceType.ToFormLinkInformation())))
+            // Ensure that the voice type actually has lines that need to be voiced and don't always use sounds instead
+            .Where(voiceTypes.Contains)
             .ToHashSet();
     }
 
