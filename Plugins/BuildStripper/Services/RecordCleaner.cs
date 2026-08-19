@@ -20,6 +20,8 @@ public sealed class RecordCleaner(
     IRecordController recordController,
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
+    public const int CellRangeToKeepOutsidePlayableArea = 2;
+    public const int CellLanscapeRangeToKeepOutsidePlayableArea = 4;
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
         var processedRecords = new HashSet<FormKey>();
@@ -377,7 +379,7 @@ public sealed class RecordCleaner(
         }
     }
 
-    public void RetainCellsAroundRegion(
+    private void RetainCellsAroundRegion(
         IEssentialRecordProvider essentialRecordProvider,
         HashSet<ILinkIdentifier> retained,
         IReadOnlySet<ILinkIdentifier> excludedLinks,
@@ -399,10 +401,8 @@ public sealed class RecordCleaner(
                 var sourceLink = new FormLinkIdentifier(retainedCell.ToFormLinkInformation());
 
                 // With a default uGridsToLoad = 5 diameter, the radius is 2 
-                const int cellRangeToKeepOutsidePlayableArea = 2;
-                const int cellLanscapeRangeToKeepOutsidePlayableArea = 4;
-                for (var dx = -cellLanscapeRangeToKeepOutsidePlayableArea; dx <= cellLanscapeRangeToKeepOutsidePlayableArea; dx++) {
-                    for (var dy = -cellLanscapeRangeToKeepOutsidePlayableArea; dy <= cellLanscapeRangeToKeepOutsidePlayableArea; dy++) {
+                for (var dx = -CellLanscapeRangeToKeepOutsidePlayableArea; dx <= CellLanscapeRangeToKeepOutsidePlayableArea; dx++) {
+                    for (var dy = -CellLanscapeRangeToKeepOutsidePlayableArea; dy <= CellLanscapeRangeToKeepOutsidePlayableArea; dy++) {
                         var position = new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy);
                         if (retainedCoordinates.Contains(position)) continue;
 
@@ -413,12 +413,12 @@ public sealed class RecordCleaner(
                         var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
                         if (excludedLinks.Contains(cellLink)) continue;
 
-                        if (dx is < -cellRangeToKeepOutsidePlayableArea or > cellRangeToKeepOutsidePlayableArea
-                         || dy is < -cellRangeToKeepOutsidePlayableArea or > cellRangeToKeepOutsidePlayableArea) {
+                        if (dx is < -CellRangeToKeepOutsidePlayableArea or > CellRangeToKeepOutsidePlayableArea
+                         || dy is < -CellRangeToKeepOutsidePlayableArea or > CellRangeToKeepOutsidePlayableArea) {
                             // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
                             // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
                             // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
-                            // To implement this, use a post processing step to clear out all cell contents apart from the landscape shape
+                            // To implement this, use a post-processing step to clear out all cell contents apart from the landscape shape
                             addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
 
                             dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
