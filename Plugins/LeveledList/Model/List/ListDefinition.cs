@@ -149,12 +149,12 @@ public partial record ListDefinition(
                 var (featureWildcardIdentifier, tierDefinition) = tierDefinitionsPerFeature.First();
                 foreach (var (featureIdentifier, tierEntries) in tierDefinition) {
                     foreach (var list in matchingLists) {
-                        // Check if the list has the required feature
-                        var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier.FeatureIdentifierMatches(featureWildcardIdentifier, tierAliases));
-                        if (feature is null) continue;
-
-                        // Check if the feature matches the required identifier
-                        if (featureIdentifier != "_" && !featureIdentifier.FeatureIdentifierEquals(feature.Key.ToString(), tierAliases)) continue;
+                        // If the feature identifier is a wildcard, we always include the list
+                        if (featureIdentifier != "_") {
+                            // Check if the list has the required feature
+                            var feature = list.Features.FirstOrDefault(f => f.Wildcard.Identifier.FeatureIdentifierEquals(featureWildcardIdentifier, tierAliases));
+                            if (!featureIdentifier.FeatureIdentifierEquals(feature?.Key.ToString(), tierAliases)) continue;
+                        }
 
                         // Filter tier entries by the current enchantment level when available
                         var filteredTierEntries = tierEntries;
