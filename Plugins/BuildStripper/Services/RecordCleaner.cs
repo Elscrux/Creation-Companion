@@ -437,6 +437,8 @@ public sealed class RecordCleaner(
                                 c.LightingTemplate.SetToNull();
                                 c.Landscape?.Textures?.Clear();
                                 c.Landscape?.Layers?.Clear();
+                                c.Temporary.Clear();
+                                c.Persistent.Clear();
                             }
                         } else {
                             // Retain the cell and all its references
