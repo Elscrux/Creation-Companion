@@ -10,7 +10,7 @@ using Mutagen.Bethesda.Skyrim;
 using ListDefinition = LeveledList.Model.List.ListDefinition;
 namespace LeveledList.Services.LeveledList;
 
-public class LeveledListGenerator(
+public sealed class LeveledListGenerator(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     IRecordPrefixService recordPrefixService,

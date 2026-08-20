@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 namespace LeveledList.Services.LeveledList;
 
-public partial class EnchantmentProvider(ILinkCacheProvider linkCacheProvider) {
+public sealed partial class EnchantmentProvider(ILinkCacheProvider linkCacheProvider) {
     [GeneratedRegex(@"\d+$")]
     public static partial Regex EnchantmentRegex { get; }
 

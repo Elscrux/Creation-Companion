@@ -12,7 +12,7 @@ using Mutagen.Bethesda.Skyrim;
 using Noggog;
 namespace LeveledList.Services.Enchantments;
 
-public class EnchantmentsGenerator(
+public sealed class EnchantmentsGenerator(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILeveledListRecordTypeProvider leveledListRecordTypeProvider,
     ITierController tierController,
