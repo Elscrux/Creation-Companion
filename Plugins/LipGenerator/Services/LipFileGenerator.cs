@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using CreationEditor;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using Mutagen.Bethesda.Plugins;
@@ -12,6 +13,7 @@ namespace LipGenerator.Services;
 public sealed class LipFileGenerator(
     ILogger logger,
     IFileSystem fileSystem,
+    IAssetController assetController,
     IEditorEnvironment editorEnvironment,
     ILipGenerator lipGenerator,
     IFuzGenerator fuzGenerator,
@@ -151,18 +153,18 @@ public sealed class LipFileGenerator(
                             if (audioEncoder is not null) {
                                 var otherAudioFileLink = fileLink.WithExtension("." + audioEncoder.AudioExtension);
                                 if (otherAudioFileLink.Exists()) {
-                                    dataSource.FileSystem.File.Delete(otherAudioFileLink.FullPath);
+                                    assetController.Delete(otherAudioFileLink);
                                 }
                             }
 
                             var lipFileLink = fileLink.WithExtension(".lip");
                             if (lipFileLink.Exists()) {
-                                dataSource.FileSystem.File.Delete(lipFileLink.FullPath);
+                                assetController.Delete(lipFileLink);
                             }
 
                             var wavFileLink = fileLink.WithExtension(".wav");
                             if (wavFileLink.Exists()) {
-                                dataSource.FileSystem.File.Delete(wavFileLink.FullPath);
+                                assetController.Delete(wavFileLink);
                             }
                         } catch (Exception e) {
                             logger.Here().Warning(e, "Error cleaning up files for {FileLink}", fileLink.FullPath);

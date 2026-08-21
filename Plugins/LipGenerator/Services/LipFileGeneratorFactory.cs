@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
 using Serilog;
 namespace LipGenerator.Services;
@@ -6,6 +7,7 @@ namespace LipGenerator.Services;
 public sealed class LipFileGeneratorFactory(
     ILogger logger,
     IFileSystem fileSystem,
+    IAssetController assetController,
     IEditorEnvironment editorEnvironment,
     Func<FaceFxWrapperArgs, FaceFxWrapper> createFaceFx,
     Func<LipGeneratorArgs, LipGeneratorWrapper> createLipGen,
@@ -37,6 +39,6 @@ public sealed class LipFileGeneratorFactory(
             _ => throw new NotSupportedException($"Unsupported audio encoder arguments type: {xwmEncoderArgs.GetType().Name}")
         };
 
-        return new LipFileGenerator(logger, fileSystem, editorEnvironment, lipGenerator, fuzGenerator, audioEncoder);
+        return new LipFileGenerator(logger, fileSystem, assetController, editorEnvironment, lipGenerator, fuzGenerator, audioEncoder);
     }
 }
