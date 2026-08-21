@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_sectorIndex m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_offsetInSector m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 36 flags: FLAGS_NONE enum: 
-    public partial class hkpSerializedSubTrack1nInfo : hkpSerializedTrack1nInfo, IEquatable<hkpSerializedSubTrack1nInfo?>
+    public sealed partial class hkpSerializedSubTrack1nInfo : hkpSerializedTrack1nInfo, IEquatable<hkpSerializedSubTrack1nInfo?>
     {
         public int m_sectorIndex { set; get; }
         public int m_offsetInSector { set; get; }

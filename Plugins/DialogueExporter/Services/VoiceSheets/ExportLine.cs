@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Skyrim;
 namespace DialogueExporter.Services.VoiceSheets;
 
-public record ExportLine(
+public sealed record ExportLine(
     string VoiceType,
     IDialogResponseGetter Response,
     IDialogResponsesGetter Responses,

@@ -7,7 +7,7 @@ namespace HKX2
     // m_worldUpWS m_class:  Type.TYPE_VECTOR4 Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_stringData m_class: hkbProjectStringData Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_defaultEventMode m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 40 flags: FLAGS_NONE enum: EventMode
-    public partial class hkbProjectData : hkReferencedObject, IEquatable<hkbProjectData?>
+    public sealed partial class hkbProjectData : hkReferencedObject, IEquatable<hkbProjectData?>
     {
         public Vector4 m_worldUpWS { set; get; }
         public hkbProjectStringData? m_stringData { set; get; }

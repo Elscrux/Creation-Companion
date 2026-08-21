@@ -4,7 +4,7 @@ namespace HKX2
     // BSIStateManagerModifierBSIStateManagerStateListener Signatire: 0x99463586 size: 24 flags: FLAGS_NONE
 
     // m_pStateManager m_class:  Type.TYPE_POINTER Type.TYPE_VOID arrSize: 0 offset: 16 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class BSIStateManagerModifierBSIStateManagerStateListener : hkbStateListener, IEquatable<BSIStateManagerModifierBSIStateManagerStateListener?>
+    public sealed partial class BSIStateManagerModifierBSIStateManagerStateListener : hkbStateListener, IEquatable<BSIStateManagerModifierBSIStateManagerStateListener?>
     {
         private object? m_pStateManager { set; get; }
 

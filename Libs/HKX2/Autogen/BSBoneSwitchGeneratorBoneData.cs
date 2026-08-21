@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_pGenerator m_class: hkbGenerator Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 48 flags: ALIGN_16|FLAGS_NONE enum: 
     // m_spBoneWeight m_class: hkbBoneWeightArray Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
-    public partial class BSBoneSwitchGeneratorBoneData : hkbBindable, IEquatable<BSBoneSwitchGeneratorBoneData?>
+    public sealed partial class BSBoneSwitchGeneratorBoneData : hkbBindable, IEquatable<BSBoneSwitchGeneratorBoneData?>
     {
         public hkbGenerator? m_pGenerator { set; get; }
         public hkbBoneWeightArray? m_spBoneWeight { set; get; }

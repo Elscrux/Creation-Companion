@@ -9,7 +9,7 @@ namespace HKX2
     // m_materialIndices m_class:  Type.TYPE_ARRAY Type.TYPE_UINT8 arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
     // m_materials m_class:  Type.TYPE_ARRAY Type.TYPE_UINT32 arrSize: 0 offset: 80 flags: FLAGS_NONE enum: 
     // m_materialIndices16 m_class:  Type.TYPE_ARRAY Type.TYPE_UINT16 arrSize: 0 offset: 96 flags: FLAGS_NONE enum: 
-    public partial class hkpStorageMeshShapeSubpartStorage : hkReferencedObject, IEquatable<hkpStorageMeshShapeSubpartStorage?>
+    public sealed partial class hkpStorageMeshShapeSubpartStorage : hkReferencedObject, IEquatable<hkpStorageMeshShapeSubpartStorage?>
     {
         public IList<float> m_vertices { set; get; } = Array.Empty<float>();
         public IList<ushort> m_indices16 { set; get; } = Array.Empty<ushort>();

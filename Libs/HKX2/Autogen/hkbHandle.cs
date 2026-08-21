@@ -7,7 +7,7 @@ namespace HKX2
     // m_rigidBody m_class: hkpRigidBody Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_character m_class: hkbCharacter Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_animationBoneIndex m_class:  Type.TYPE_INT16 Type.TYPE_VOID arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
-    public partial class hkbHandle : hkReferencedObject, IEquatable<hkbHandle?>
+    public sealed partial class hkbHandle : hkReferencedObject, IEquatable<hkbHandle?>
     {
         public hkLocalFrame? m_frame { set; get; }
         public hkpRigidBody? m_rigidBody { set; get; }

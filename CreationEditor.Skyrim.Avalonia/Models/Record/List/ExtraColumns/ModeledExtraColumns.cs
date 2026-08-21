@@ -6,7 +6,7 @@ using CreationEditor.Skyrim.Avalonia.Resources.Comparer;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.List.ExtraColumns;
 
-public class ModeledExtraColumns : ExtraColumns<IModeledGetter> {
+public sealed class ModeledExtraColumns : ExtraColumns<IModeledGetter> {
     public override IEnumerable<ExtraColumn> CreateColumns() {
         yield return new ExtraColumn(new DataGridTextColumn {
                 Header = "Model",

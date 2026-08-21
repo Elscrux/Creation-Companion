@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_chainedEntities m_class: hkpEntity Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 112 flags: FLAGS_NONE enum: 
     // m_action m_class: hkpConstraintChainInstanceAction Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 128 flags: FLAGS_NONE enum: 
-    public partial class hkpConstraintChainInstance : hkpConstraintInstance, IEquatable<hkpConstraintChainInstance?>
+    public sealed partial class hkpConstraintChainInstance : hkpConstraintInstance, IEquatable<hkpConstraintChainInstance?>
     {
         public IList<hkpEntity> m_chainedEntities { set; get; } = Array.Empty<hkpEntity>();
         public hkpConstraintChainInstanceAction? m_action { set; get; }

@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_hands m_class: hkbHandIkDriverInfoHand Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_fadeInOutCurve m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: BlendCurve
-    public partial class hkbHandIkDriverInfo : hkReferencedObject, IEquatable<hkbHandIkDriverInfo?>
+    public sealed partial class hkbHandIkDriverInfo : hkReferencedObject, IEquatable<hkbHandIkDriverInfo?>
     {
         public IList<hkbHandIkDriverInfoHand> m_hands { set; get; } = Array.Empty<hkbHandIkDriverInfoHand>();
         public sbyte m_fadeInOutCurve { set; get; }

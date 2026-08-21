@@ -12,7 +12,7 @@ namespace HKX2
     // m_cfmAngAdd m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 80 flags: FLAGS_NONE enum: 
     // m_cfmAngMul m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 84 flags: FLAGS_NONE enum: 
     // m_maxErrorDistance m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 88 flags: FLAGS_NONE enum: 
-    public partial class hkpPoweredChainData : hkpConstraintChainData, IEquatable<hkpPoweredChainData?>
+    public sealed partial class hkpPoweredChainData : hkpConstraintChainData, IEquatable<hkpPoweredChainData?>
     {
         public hkpBridgeAtoms m_atoms { set; get; } = new();
         public IList<hkpPoweredChainDataConstraintInfo> m_infos { set; get; } = Array.Empty<hkpPoweredChainDataConstraintInfo>();

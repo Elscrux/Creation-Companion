@@ -4,7 +4,7 @@ namespace HKX2
     // hkpNamedMeshMaterial Signatire: 0x66b42df1 size: 16 flags: FLAGS_NONE
 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 8 flags: FLAGS_NONE enum: 
-    public partial class hkpNamedMeshMaterial : hkpMeshMaterial, IEquatable<hkpNamedMeshMaterial?>
+    public sealed partial class hkpNamedMeshMaterial : hkpMeshMaterial, IEquatable<hkpNamedMeshMaterial?>
     {
         public string m_name { set; get; } = "";
 

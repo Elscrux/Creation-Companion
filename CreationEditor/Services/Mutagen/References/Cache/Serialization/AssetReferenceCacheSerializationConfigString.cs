@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Cache.Serialization;
 
-public class AssetReferenceCacheSerializationConfigString<TSource> : IReferenceCacheSerializationConfigLink<TSource, string, DataRelativePath>
+public sealed class AssetReferenceCacheSerializationConfigString<TSource> : IReferenceCacheSerializationConfigLink<TSource, string, DataRelativePath>
     where TSource : IDataSource {
     public Version CacheVersion { get; } = new(1, 0);
     public bool IsCacheUpToDate(BinaryReader reader, TSource source) => true;

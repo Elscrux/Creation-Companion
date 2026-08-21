@@ -9,7 +9,7 @@ public interface ITaskDialogProvider {
     FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null);
 }
 
-public class TaskDialogProvider(MainWindow mainWindow) : ITaskDialogProvider {
+public sealed class TaskDialogProvider(MainWindow mainWindow) : ITaskDialogProvider {
     public FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null) {
         var assetDialog = new FATaskDialog {
             Header = header,

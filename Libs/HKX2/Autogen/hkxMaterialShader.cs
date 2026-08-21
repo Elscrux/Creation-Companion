@@ -9,7 +9,7 @@ namespace HKX2
     // m_geomEntryName m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_pixelEntryName m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
     // m_data m_class:  Type.TYPE_ARRAY Type.TYPE_UINT8 arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
-    public partial class hkxMaterialShader : hkReferencedObject, IEquatable<hkxMaterialShader?>
+    public sealed partial class hkxMaterialShader : hkReferencedObject, IEquatable<hkxMaterialShader?>
     {
         public string m_name { set; get; } = "";
         public byte m_type { set; get; }

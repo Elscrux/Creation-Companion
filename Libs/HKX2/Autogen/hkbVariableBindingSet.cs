@@ -6,7 +6,7 @@ namespace HKX2
     // m_bindings m_class: hkbVariableBindingSetBinding Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_indexOfBindingToEnable m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_hasOutputBinding m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 36 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbVariableBindingSet : hkReferencedObject, IEquatable<hkbVariableBindingSet?>
+    public sealed partial class hkbVariableBindingSet : hkReferencedObject, IEquatable<hkbVariableBindingSet?>
     {
         public IList<hkbVariableBindingSetBinding> m_bindings { set; get; } = Array.Empty<hkbVariableBindingSetBinding>();
         public int m_indexOfBindingToEnable { set; get; }

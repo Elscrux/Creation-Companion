@@ -2,7 +2,7 @@
 using System.Text;
 namespace HKX2
 {
-    public class BinaryWriterEx
+    public sealed class BinaryWriterEx
     {
         public readonly BinaryWriter bw;
         private readonly Dictionary<string, long> reservations;

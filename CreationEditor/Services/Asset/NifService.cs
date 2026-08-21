@@ -7,7 +7,7 @@ using nifly;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
-public class NifService(
+public sealed class NifService(
     ILogger logger,
     IFileSystem fileSystem,
     NifTextureParser nifTextureParser) : IModelService {

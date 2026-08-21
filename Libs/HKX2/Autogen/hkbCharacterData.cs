@@ -18,7 +18,7 @@ namespace HKX2
     // m_scale m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 168 flags: FLAGS_NONE enum: 
     // m_numHands m_class:  Type.TYPE_INT16 Type.TYPE_VOID arrSize: 0 offset: 172 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_numFloatSlots m_class:  Type.TYPE_INT16 Type.TYPE_VOID arrSize: 0 offset: 174 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbCharacterData : hkReferencedObject, IEquatable<hkbCharacterData?>
+    public sealed partial class hkbCharacterData : hkReferencedObject, IEquatable<hkbCharacterData?>
     {
         public hkbCharacterDataCharacterControllerInfo m_characterControllerInfo { set; get; } = new();
         public Vector4 m_modelUpMS { set; get; }

@@ -3,7 +3,7 @@ using Mutagen.Bethesda.Fonts.DI;
 using Mutagen.Bethesda.Strings;
 namespace CreationEditor.Services.Mutagen.Font;
 
-public class CachedFontProviderFactory(FontProviderFactory fontProviderFactory) : IFontProviderFactory {
+public sealed class CachedFontProviderFactory(FontProviderFactory fontProviderFactory) : IFontProviderFactory {
     private readonly Dictionary<Language, IFontProvider> _cache = new();
 
     public IFontProvider Create(Language language) {

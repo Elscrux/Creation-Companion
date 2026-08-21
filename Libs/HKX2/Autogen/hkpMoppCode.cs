@@ -6,7 +6,7 @@ namespace HKX2
     // m_info m_class: hkpMoppCodeCodeInfo Type.TYPE_STRUCT Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_data m_class:  Type.TYPE_ARRAY Type.TYPE_UINT8 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_buildType m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 48 flags: FLAGS_NONE enum: BuildType
-    public partial class hkpMoppCode : hkReferencedObject, IEquatable<hkpMoppCode?>
+    public sealed partial class hkpMoppCode : hkReferencedObject, IEquatable<hkpMoppCode?>
     {
         public hkpMoppCodeCodeInfo m_info { set; get; } = new();
         public IList<byte> m_data { set; get; } = Array.Empty<byte>();

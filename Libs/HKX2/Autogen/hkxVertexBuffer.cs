@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_data m_class: hkxVertexBufferVertexData Type.TYPE_STRUCT Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_desc m_class: hkxVertexDescription Type.TYPE_STRUCT Type.TYPE_VOID arrSize: 0 offset: 120 flags: FLAGS_NONE enum: 
-    public partial class hkxVertexBuffer : hkReferencedObject, IEquatable<hkxVertexBuffer?>
+    public sealed partial class hkxVertexBuffer : hkReferencedObject, IEquatable<hkxVertexBuffer?>
     {
         public hkxVertexBufferVertexData m_data { set; get; } = new();
         public hkxVertexDescription m_desc { set; get; } = new();

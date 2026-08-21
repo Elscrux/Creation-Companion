@@ -2,7 +2,7 @@
 using System.Xml.Linq;
 namespace HKX2
 {
-    public class XmlSerializer
+    public sealed class XmlSerializer
     {
         private int _index = 0050;
         private HKXHeader _header = null!;

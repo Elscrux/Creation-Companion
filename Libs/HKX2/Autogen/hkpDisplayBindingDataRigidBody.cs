@@ -7,7 +7,7 @@ namespace HKX2
     // m_rigidBody m_class: hkpRigidBody Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_displayObjectPtr m_class: hkReferencedObject Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_rigidBodyFromDisplayObjectTransform m_class:  Type.TYPE_MATRIX4 Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkpDisplayBindingDataRigidBody : hkReferencedObject, IEquatable<hkpDisplayBindingDataRigidBody?>
+    public sealed partial class hkpDisplayBindingDataRigidBody : hkReferencedObject, IEquatable<hkpDisplayBindingDataRigidBody?>
     {
         public hkpRigidBody? m_rigidBody { set; get; }
         public hkReferencedObject? m_displayObjectPtr { set; get; }

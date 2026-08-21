@@ -4,7 +4,7 @@ namespace HKX2
     // hkbBoneIndexArray Signatire: 0xaa8619 size: 64 flags: FLAGS_NONE
 
     // m_boneIndices m_class:  Type.TYPE_ARRAY Type.TYPE_INT16 arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
-    public partial class hkbBoneIndexArray : hkbBindable, IEquatable<hkbBoneIndexArray?>
+    public sealed partial class hkbBoneIndexArray : hkbBindable, IEquatable<hkbBoneIndexArray?>
     {
         public IList<short> m_boneIndices { set; get; } = Array.Empty<short>();
 

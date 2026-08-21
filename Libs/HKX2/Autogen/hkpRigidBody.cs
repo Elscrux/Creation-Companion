@@ -4,7 +4,7 @@ namespace HKX2
     // hkpRigidBody Signatire: 0x75f8d805 size: 720 flags: FLAGS_NONE
 
 
-    public partial class hkpRigidBody : hkpEntity, IEquatable<hkpRigidBody?>
+    public sealed partial class hkpRigidBody : hkpEntity, IEquatable<hkpRigidBody?>
     {
 
 

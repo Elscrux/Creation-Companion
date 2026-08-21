@@ -4,7 +4,7 @@ namespace HKX2
     // hkpMaxSizeMotion Signatire: 0x64abf85c size: 320 flags: FLAGS_NONE
 
 
-    public partial class hkpMaxSizeMotion : hkpKeyframedRigidMotion, IEquatable<hkpMaxSizeMotion?>
+    public sealed partial class hkpMaxSizeMotion : hkpKeyframedRigidMotion, IEquatable<hkpMaxSizeMotion?>
     {
 
 

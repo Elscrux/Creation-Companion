@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using HKX2.Utils;
 namespace HKX2
 {
-    public class XmlDeserializer
+    public sealed class XmlDeserializer
     {
         public XDocument _xdoc = null!;
         private HKXHeader _header = null!;

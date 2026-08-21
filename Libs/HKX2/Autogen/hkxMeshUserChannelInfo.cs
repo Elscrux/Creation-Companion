@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_className m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
-    public partial class hkxMeshUserChannelInfo : hkxAttributeHolder, IEquatable<hkxMeshUserChannelInfo?>
+    public sealed partial class hkxMeshUserChannelInfo : hkxAttributeHolder, IEquatable<hkxMeshUserChannelInfo?>
     {
         public string m_name { set; get; } = "";
         public string m_className { set; get; } = "";

@@ -4,7 +4,7 @@ namespace HKX2
     // hkpLinkedCollidable Signatire: 0xe1a81497 size: 128 flags: FLAGS_NONE
 
     // m_collisionEntries m_class:  Type.TYPE_ARRAY Type.TYPE_VOID arrSize: 0 offset: 112 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkpLinkedCollidable : hkpCollidable, IEquatable<hkpLinkedCollidable?>
+    public sealed partial class hkpLinkedCollidable : hkpCollidable, IEquatable<hkpLinkedCollidable?>
     {
         public IList<object> m_collisionEntries { set; get; } = Array.Empty<object>();
 

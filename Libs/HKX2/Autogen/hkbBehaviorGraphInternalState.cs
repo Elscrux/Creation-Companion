@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_nodeInternalStateInfos m_class: hkbNodeInternalStateInfo Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_variableValueSet m_class: hkbVariableValueSet Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkbBehaviorGraphInternalState : hkReferencedObject, IEquatable<hkbBehaviorGraphInternalState?>
+    public sealed partial class hkbBehaviorGraphInternalState : hkReferencedObject, IEquatable<hkbBehaviorGraphInternalState?>
     {
         public IList<hkbNodeInternalStateInfo> m_nodeInternalStateInfos { set; get; } = Array.Empty<hkbNodeInternalStateInfo>();
         public hkbVariableValueSet? m_variableValueSet { set; get; }

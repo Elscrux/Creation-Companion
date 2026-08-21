@@ -4,7 +4,7 @@ namespace HKX2
     // hkbExpressionDataArray Signatire: 0x4b9ee1a2 size: 32 flags: FLAGS_NONE
 
     // m_expressionsData m_class: hkbExpressionData Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkbExpressionDataArray : hkReferencedObject, IEquatable<hkbExpressionDataArray?>
+    public sealed partial class hkbExpressionDataArray : hkReferencedObject, IEquatable<hkbExpressionDataArray?>
     {
         public IList<hkbExpressionData> m_expressionsData { set; get; } = Array.Empty<hkbExpressionData>();
 

@@ -4,7 +4,7 @@ namespace HKX2
     // hkbEventSequencedData Signatire: 0x76798eb8 size: 32 flags: FLAGS_NONE
 
     // m_events m_class: hkbEventSequencedDataSequencedEvent Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkbEventSequencedData : hkbSequencedData, IEquatable<hkbEventSequencedData?>
+    public sealed partial class hkbEventSequencedData : hkbSequencedData, IEquatable<hkbEventSequencedData?>
     {
         public IList<hkbEventSequencedDataSequencedEvent> m_events { set; get; } = Array.Empty<hkbEventSequencedDataSequencedEvent>();
 

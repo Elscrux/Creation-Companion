@@ -4,7 +4,7 @@ namespace HKX2
     // hkpConstraintChainInstanceAction Signatire: 0xc3971189 size: 56 flags: FLAGS_NONE
 
     // m_constraintInstance m_class: hkpConstraintChainInstance Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 48 flags: NOT_OWNED|FLAGS_NONE enum: 
-    public partial class hkpConstraintChainInstanceAction : hkpAction, IEquatable<hkpConstraintChainInstanceAction?>
+    public sealed partial class hkpConstraintChainInstanceAction : hkpAction, IEquatable<hkpConstraintChainInstanceAction?>
     {
         public hkpConstraintChainInstance? m_constraintInstance { set; get; }
 

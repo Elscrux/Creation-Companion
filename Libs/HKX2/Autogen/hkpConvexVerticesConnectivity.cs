@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_vertexIndices m_class:  Type.TYPE_ARRAY Type.TYPE_UINT16 arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_numVerticesPerFace m_class:  Type.TYPE_ARRAY Type.TYPE_UINT8 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkpConvexVerticesConnectivity : hkReferencedObject, IEquatable<hkpConvexVerticesConnectivity?>
+    public sealed partial class hkpConvexVerticesConnectivity : hkReferencedObject, IEquatable<hkpConvexVerticesConnectivity?>
     {
         public IList<ushort> m_vertexIndices { set; get; } = Array.Empty<ushort>();
         public IList<byte> m_numVerticesPerFace { set; get; } = Array.Empty<byte>();

@@ -11,7 +11,7 @@ namespace HKX2
     // m_maxLinearDistance m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 36 flags: FLAGS_NONE enum: 
     // m_maxAngularDistance m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_attachmentType m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 44 flags: FLAGS_NONE enum: AttachmentType
-    public partial class hkbAttachmentSetup : hkReferencedObject, IEquatable<hkbAttachmentSetup?>
+    public sealed partial class hkbAttachmentSetup : hkReferencedObject, IEquatable<hkbAttachmentSetup?>
     {
         public float m_blendInTime { set; get; }
         public float m_moveAttacherFraction { set; get; }

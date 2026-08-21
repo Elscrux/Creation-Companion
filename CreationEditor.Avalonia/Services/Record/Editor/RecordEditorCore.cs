@@ -28,7 +28,7 @@ public enum RecordUpdateReason {
     External,
 }
 
-public record RecordUpdate<TMajorRecord>(TMajorRecord Record, RecordUpdateReason Reason)
+public sealed record RecordUpdate<TMajorRecord>(TMajorRecord Record, RecordUpdateReason Reason)
     where TMajorRecord : class, IMajorRecordGetter;
 
 public interface IRecordEditorCore : IDisposableDropoff {
@@ -50,7 +50,7 @@ public interface IRecordEditorCore<TEditableRecord, TMajorRecord, TMajorRecordGe
     IObservable<RecordUpdate<TMajorRecordGetter>> RecordChanged { get; }
 }
 
-public class EditableRecordConverter<TEditableRecord, TMajorRecord, TMajorRecordGetter>(
+public sealed class EditableRecordConverter<TEditableRecord, TMajorRecord, TMajorRecordGetter>(
     Func<TMajorRecordGetter, TEditableRecord> convertToEditable,
     Func<TEditableRecord, TMajorRecord> convertToRecord)
     where TEditableRecord : class, IEditableRecord<TMajorRecord>, TMajorRecord

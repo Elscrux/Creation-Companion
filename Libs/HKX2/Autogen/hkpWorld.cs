@@ -91,7 +91,7 @@ namespace HKX2
     // m_broadPhaseQuerySize m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 1048 flags: FLAGS_NONE enum: 
     // m_broadPhaseUpdateSize m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 1052 flags: FLAGS_NONE enum: 
     // m_contactPointGeneration m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 1056 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkpWorld : hkReferencedObject, IEquatable<hkpWorld?>
+    public sealed partial class hkpWorld : hkReferencedObject, IEquatable<hkpWorld?>
     {
         public hkpSimulation? m_simulation { set; get; }
         public Vector4 m_gravity { set; get; }

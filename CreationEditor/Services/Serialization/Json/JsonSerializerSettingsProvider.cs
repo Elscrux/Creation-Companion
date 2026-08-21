@@ -7,7 +7,7 @@ public interface IJsonSerializerSettingsProvider {
     public JsonSerializerSettings SerializerSettings { get; }
 }
 
-public class JsonSerializerSettingsProvider(IContractResolver contractResolver) : IJsonSerializerSettingsProvider {
+public sealed class JsonSerializerSettingsProvider(IContractResolver contractResolver) : IJsonSerializerSettingsProvider {
     public JsonSerializerSettings SerializerSettings { get; } = new() {
         Formatting = Formatting.Indented,
         TypeNameHandling = TypeNameHandling.Auto,

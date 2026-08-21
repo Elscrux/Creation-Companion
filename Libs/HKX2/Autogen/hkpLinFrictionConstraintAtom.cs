@@ -6,7 +6,7 @@ namespace HKX2
     // m_isEnabled m_class:  Type.TYPE_UINT8 Type.TYPE_VOID arrSize: 0 offset: 2 flags: FLAGS_NONE enum: 
     // m_frictionAxis m_class:  Type.TYPE_UINT8 Type.TYPE_VOID arrSize: 0 offset: 3 flags: FLAGS_NONE enum: 
     // m_maxFrictionForce m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 4 flags: FLAGS_NONE enum: 
-    public partial class hkpLinFrictionConstraintAtom : hkpConstraintAtom, IEquatable<hkpLinFrictionConstraintAtom?>
+    public sealed partial class hkpLinFrictionConstraintAtom : hkpConstraintAtom, IEquatable<hkpLinFrictionConstraintAtom?>
     {
         public byte m_isEnabled { set; get; }
         public byte m_frictionAxis { set; get; }

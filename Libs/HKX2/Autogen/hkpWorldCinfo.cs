@@ -61,7 +61,7 @@ namespace HKX2
     // m_allowIntegrationOfIslandsWithoutConstraintsInASeparateJob m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 241 flags: FLAGS_NONE enum: 
     // m_frameMarkerPsiSnap m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 244 flags: FLAGS_NONE enum: 
     // m_fireCollisionCallbacks m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 248 flags: FLAGS_NONE enum: 
-    public partial class hkpWorldCinfo : hkReferencedObject, IEquatable<hkpWorldCinfo?>
+    public sealed partial class hkpWorldCinfo : hkReferencedObject, IEquatable<hkpWorldCinfo?>
     {
         public Vector4 m_gravity { set; get; }
         public int m_broadPhaseQuerySize { set; get; }

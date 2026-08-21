@@ -4,7 +4,7 @@ namespace HKX2
     // hkLocalFrameGroup Signatire: 0xb1a96c2f size: 24 flags: FLAGS_NONE
 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkLocalFrameGroup : hkReferencedObject, IEquatable<hkLocalFrameGroup?>
+    public sealed partial class hkLocalFrameGroup : hkReferencedObject, IEquatable<hkLocalFrameGroup?>
     {
         public string m_name { set; get; } = "";
 

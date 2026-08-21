@@ -11,7 +11,7 @@ namespace HKX2
     // m_data m_class: hkbCharacterData Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
     // m_mirroredSkeleton m_class:  Type.TYPE_POINTER Type.TYPE_VOID arrSize: 0 offset: 72 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_characterPropertyIdMap m_class:  Type.TYPE_POINTER Type.TYPE_VOID arrSize: 0 offset: 80 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbCharacterSetup : hkReferencedObject, IEquatable<hkbCharacterSetup?>
+    public sealed partial class hkbCharacterSetup : hkReferencedObject, IEquatable<hkbCharacterSetup?>
     {
         public IList<hkaSkeletonMapper> m_retargetingSkeletonMappers { set; get; } = Array.Empty<hkaSkeletonMapper>();
         public hkaSkeleton? m_animationSkeleton { set; get; }

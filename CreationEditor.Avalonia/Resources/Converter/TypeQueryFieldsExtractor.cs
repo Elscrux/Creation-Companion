@@ -5,7 +5,7 @@ using CreationEditor.Services.Query;
 using CreationEditor.Services.Query.Select;
 namespace CreationEditor.Avalonia.Converter;
 
-public class TypeQueryFieldsExtractor : AvaloniaObject, IValueConverter {
+public sealed class TypeQueryFieldsExtractor : AvaloniaObject, IValueConverter {
     private readonly IQueryFieldProvider _queryFieldProvider = new ReflectionIQueryFieldProvider();
 
     public static readonly StyledProperty<Func<IQueryField, bool>?> FilterProperty

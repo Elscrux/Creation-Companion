@@ -16,7 +16,7 @@ namespace HKX2
     // m_rigName m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 168 flags: FLAGS_NONE enum: 
     // m_ragdollName m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 176 flags: FLAGS_NONE enum: 
     // m_behaviorFilename m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 184 flags: FLAGS_NONE enum: 
-    public partial class hkbCharacterStringData : hkReferencedObject, IEquatable<hkbCharacterStringData?>
+    public sealed partial class hkbCharacterStringData : hkReferencedObject, IEquatable<hkbCharacterStringData?>
     {
         public IList<string> m_deformableSkinNames { set; get; } = Array.Empty<string>();
         public IList<string> m_rigidSkinNames { set; get; } = Array.Empty<string>();

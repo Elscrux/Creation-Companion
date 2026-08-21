@@ -11,7 +11,7 @@ namespace HKX2
     // m_far m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 68 flags: FLAGS_NONE enum: 
     // m_near m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 72 flags: FLAGS_NONE enum: 
     // m_leftHanded m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 76 flags: FLAGS_NONE enum: 
-    public partial class hkxCamera : hkReferencedObject, IEquatable<hkxCamera?>
+    public sealed partial class hkxCamera : hkReferencedObject, IEquatable<hkxCamera?>
     {
         public Vector4 m_from { set; get; }
         public Vector4 m_focus { set; get; }

@@ -4,7 +4,7 @@ namespace HKX2
     // hkaSkeletonMapper Signatire: 0x12df42a5 size: 144 flags: FLAGS_NONE
 
     // m_mapping m_class: hkaSkeletonMapperData Type.TYPE_STRUCT Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkaSkeletonMapper : hkReferencedObject, IEquatable<hkaSkeletonMapper?>
+    public sealed partial class hkaSkeletonMapper : hkReferencedObject, IEquatable<hkaSkeletonMapper?>
     {
         public hkaSkeletonMapperData m_mapping { set; get; } = new();
 

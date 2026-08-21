@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace AnalyzerPlugin.Services;
 
-public class TopicEnricher(ILinkCacheProvider linkCacheProvider) {
+public sealed class TopicEnricher(ILinkCacheProvider linkCacheProvider) {
     private bool HasEnrichTargets((string Name, object Value)[] metaData) {
         return metaData
             .Select(x => x.Value)

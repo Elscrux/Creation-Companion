@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_sections m_class: hkxMeshSection Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_userChannelInfos m_class: hkxMeshUserChannelInfo Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkxMesh : hkReferencedObject, IEquatable<hkxMesh?>
+    public sealed partial class hkxMesh : hkReferencedObject, IEquatable<hkxMesh?>
     {
         public IList<hkxMeshSection> m_sections { set; get; } = Array.Empty<hkxMeshSection>();
         public IList<hkxMeshUserChannelInfo> m_userChannelInfos { set; get; } = Array.Empty<hkxMeshUserChannelInfo>();

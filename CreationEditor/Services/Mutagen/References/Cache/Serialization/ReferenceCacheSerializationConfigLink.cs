@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.References.Cache.Serialization;
 
-public class ReferenceCacheSerializationConfigLink(IMutagenTypeProvider mutagenTypeProvider) : IReferenceCacheSerializationConfigLink<IModGetter, string, IFormLinkIdentifier> {
+public sealed class ReferenceCacheSerializationConfigLink(IMutagenTypeProvider mutagenTypeProvider) : IReferenceCacheSerializationConfigLink<IModGetter, string, IFormLinkIdentifier> {
     public Version CacheVersion { get; } = new(1, 0);
     public bool IsCacheUpToDate(BinaryReader reader, IModGetter source) => true;
     public string ReadSource(BinaryReader reader) => reader.ReadString();

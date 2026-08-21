@@ -1,6 +1,6 @@
 ﻿namespace HKX2
 {
-    public class HKXHeader
+    public sealed class HKXHeader
     {
         public byte BaseClass;
         public int ContentsClassNameSectionIndex;
@@ -180,7 +180,7 @@
     {
     }
 
-    public class LocalFixup : Fixup
+    public sealed class LocalFixup : Fixup
     {
         public LocalFixup()
         {
@@ -219,7 +219,7 @@
         }
     }
 
-    public class GlobalFixup : Fixup
+    public sealed class GlobalFixup : Fixup
     {
         public GlobalFixup()
         {
@@ -261,7 +261,7 @@
         }
     }
 
-    public class VirtualFixup : Fixup
+    public sealed class VirtualFixup : Fixup
     {
         internal VirtualFixup()
         {
@@ -303,7 +303,7 @@
         }
     }
 
-    public class HKXClassName
+    public sealed class HKXClassName
     {
         public string ClassName = "";
         public uint Signature;
@@ -328,7 +328,7 @@
     }
 
     // Class names data found in the __classnames__ section of the hkx
-    internal class HKXClassNames
+    internal sealed class HKXClassNames
     {
         private readonly List<HKXClassName> ClassNames = [];
         public readonly Dictionary<uint, HKXClassName> OffsetClassNamesMap = [];
@@ -359,7 +359,7 @@
         }
     }
 
-    public class HKXSection
+    public sealed class HKXSection
     {
         public readonly Dictionary<uint, GlobalFixup> _globalMap = new();
 

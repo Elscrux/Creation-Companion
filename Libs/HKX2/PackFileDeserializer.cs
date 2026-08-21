@@ -2,7 +2,7 @@
 using HKX2.Utils;
 namespace HKX2
 {
-    public class PackFileDeserializer
+    public sealed class PackFileDeserializer
     {
         private HKXClassNames _classnames = null!;
         private HKXSection _classSection = null!;

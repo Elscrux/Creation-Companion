@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_samples m_class: hkbBoolVariableSequencedDataSample Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_variableIndex m_class:  Type.TYPE_INT32 Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkbBoolVariableSequencedData : hkbSequencedData, IEquatable<hkbBoolVariableSequencedData?>
+    public sealed partial class hkbBoolVariableSequencedData : hkbSequencedData, IEquatable<hkbBoolVariableSequencedData?>
     {
         public IList<hkbBoolVariableSequencedDataSample> m_samples { set; get; } = Array.Empty<hkbBoolVariableSequencedDataSample>();
         public int m_variableIndex { set; get; }

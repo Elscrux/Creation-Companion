@@ -7,7 +7,7 @@ namespace HKX2
     // m_attributeNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_variableNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
     // m_characterPropertyNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
-    public partial class hkbBehaviorGraphStringData : hkReferencedObject, IEquatable<hkbBehaviorGraphStringData?>
+    public sealed partial class hkbBehaviorGraphStringData : hkReferencedObject, IEquatable<hkbBehaviorGraphStringData?>
     {
         public IList<string> m_eventNames { set; get; } = Array.Empty<string>();
         public IList<string> m_attributeNames { set; get; } = Array.Empty<string>();

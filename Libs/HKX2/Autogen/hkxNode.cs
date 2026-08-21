@@ -11,7 +11,7 @@ namespace HKX2
     // m_annotations m_class: hkxNodeAnnotationData Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 80 flags: FLAGS_NONE enum: 
     // m_userProperties m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 96 flags: FLAGS_NONE enum: 
     // m_selected m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 104 flags: FLAGS_NONE enum: 
-    public partial class hkxNode : hkxAttributeHolder, IEquatable<hkxNode?>
+    public sealed partial class hkxNode : hkxAttributeHolder, IEquatable<hkxNode?>
     {
         public string m_name { set; get; } = "";
         public hkReferencedObject? m_object { set; get; }

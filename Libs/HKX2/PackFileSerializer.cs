@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 namespace HKX2
 {
-    public class PackFileSerializer
+    public sealed class PackFileSerializer
     {
         private int _currentLocalWriteQueue;
         private int _currentSerializationQueue;

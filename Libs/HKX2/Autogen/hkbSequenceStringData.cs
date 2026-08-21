@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_eventNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_variableNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkbSequenceStringData : hkReferencedObject, IEquatable<hkbSequenceStringData?>
+    public sealed partial class hkbSequenceStringData : hkReferencedObject, IEquatable<hkbSequenceStringData?>
     {
         public IList<string> m_eventNames { set; get; } = Array.Empty<string>();
         public IList<string> m_variableNames { set; get; } = Array.Empty<string>();

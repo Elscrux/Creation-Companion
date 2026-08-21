@@ -11,7 +11,7 @@ namespace HKX2
     // m_wordMaxVariableValues m_class: hkbVariableValue Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 96 flags: FLAGS_NONE enum: 
     // m_variableInitialValues m_class: hkbVariableValueSet Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 112 flags: FLAGS_NONE enum: 
     // m_stringData m_class: hkbBehaviorGraphStringData Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 120 flags: FLAGS_NONE enum: 
-    public partial class hkbBehaviorGraphData : hkReferencedObject, IEquatable<hkbBehaviorGraphData?>
+    public sealed partial class hkbBehaviorGraphData : hkReferencedObject, IEquatable<hkbBehaviorGraphData?>
     {
         public IList<float> m_attributeDefaults { set; get; } = Array.Empty<float>();
         public IList<hkbVariableInfo> m_variableInfos { set; get; } = Array.Empty<hkbVariableInfo>();

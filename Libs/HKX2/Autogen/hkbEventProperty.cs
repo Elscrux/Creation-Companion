@@ -4,7 +4,7 @@ namespace HKX2
     // hkbEventProperty Signatire: 0xdb38a15 size: 16 flags: FLAGS_NONE
 
 
-    public partial class hkbEventProperty : hkbEventBase, IEquatable<hkbEventProperty?>
+    public sealed partial class hkbEventProperty : hkbEventBase, IEquatable<hkbEventProperty?>
     {
 
 

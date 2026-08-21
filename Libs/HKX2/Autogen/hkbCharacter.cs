@@ -22,7 +22,7 @@ namespace HKX2
     // m_poseLocal m_class:  Type.TYPE_SIMPLEARRAY Type.TYPE_VOID arrSize: 0 offset: 144 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_deleteWorldFromModel m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 156 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_deletePoseLocal m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 157 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbCharacter : hkReferencedObject, IEquatable<hkbCharacter?>
+    public sealed partial class hkbCharacter : hkReferencedObject, IEquatable<hkbCharacter?>
     {
         public IList<hkbCharacter> m_nearbyCharacters { set; get; } = Array.Empty<hkbCharacter>();
         public short m_currentLod { set; get; }

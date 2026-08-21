@@ -12,7 +12,7 @@ namespace HKX2
     // m_characterPath m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 96 flags: FLAGS_NONE enum: 
     // m_fullPathToSource m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 104 flags: FLAGS_NONE enum: 
     // m_rootPath m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 112 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbProjectStringData : hkReferencedObject, IEquatable<hkbProjectStringData?>
+    public sealed partial class hkbProjectStringData : hkReferencedObject, IEquatable<hkbProjectStringData?>
     {
         public IList<string> m_animationFilenames { set; get; } = Array.Empty<string>();
         public IList<string> m_behaviorFilenames { set; get; } = Array.Empty<string>();

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public class DictionaryReferenceCache<TLink, TReference>(
+public sealed class DictionaryReferenceCache<TLink, TReference>(
     ConcurrentDictionary<TLink, HashSet<TReference>> cache,
     IEqualityComparer<TReference>? comparer)
     : IDictionaryReferenceCache<DictionaryReferenceCache<TLink, TReference>, TLink, TReference>

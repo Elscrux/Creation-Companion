@@ -6,7 +6,7 @@ namespace HKX2
 
     // m_mirrorAxis m_class:  Type.TYPE_VECTOR4 Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_bonePairMap m_class:  Type.TYPE_ARRAY Type.TYPE_INT16 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkbMirroredSkeletonInfo : hkReferencedObject, IEquatable<hkbMirroredSkeletonInfo?>
+    public sealed partial class hkbMirroredSkeletonInfo : hkReferencedObject, IEquatable<hkbMirroredSkeletonInfo?>
     {
         public Vector4 m_mirrorAxis { set; get; }
         public IList<short> m_bonePairMap { set; get; } = Array.Empty<short>();

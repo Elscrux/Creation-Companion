@@ -9,7 +9,7 @@ namespace HKX2
     // m_attachment m_class: hkReferencedObject Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 96 flags: FLAGS_NONE enum: 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 104 flags: FLAGS_NONE enum: 
     // m_boneIndex m_class:  Type.TYPE_INT16 Type.TYPE_VOID arrSize: 0 offset: 112 flags: FLAGS_NONE enum: 
-    public partial class hkaBoneAttachment : hkReferencedObject, IEquatable<hkaBoneAttachment?>
+    public sealed partial class hkaBoneAttachment : hkReferencedObject, IEquatable<hkaBoneAttachment?>
     {
         public string m_originalSkeletonName { set; get; } = "";
         public Matrix4x4 m_boneFromAttachment { set; get; }

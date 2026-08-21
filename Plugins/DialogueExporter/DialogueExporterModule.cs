@@ -6,7 +6,7 @@ using DialogueExporter.Services.VoiceSheets.Writer;
 using DialogueExporter.ViewModels;
 namespace DialogueExporter;
 
-public class DialogueExporterModule : ExtensionModule {
+public sealed class DialogueExporterModule : ExtensionModule {
     protected override void Load(ContainerBuilder builder) {
         builder.RegisterType<DialogueExporterPlugin>()
             .AsSelf();

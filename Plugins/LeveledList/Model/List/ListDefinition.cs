@@ -28,7 +28,7 @@ public static class ListDefinitionExtensions {
     }
 }
 
-public partial record ListDefinition(
+public sealed partial record ListDefinition(
     ListDefinitionIdentifier Name,
     Dictionary<FeatureWildcardIdentifier, List<FeatureIdentifier>>? Restrict = null,
     Dictionary<TierIdentifier, List<ListEntryDefinition>>? Tiers = null,

@@ -12,7 +12,7 @@ public interface IDatedItem<out T> {
     DateTime Date { get; }
 }
 
-public record DatedItem<T>(T Item, DateTime Date) : IDatedItem<T>;
+public sealed record DatedItem<T>(T Item, DateTime Date) : IDatedItem<T>;
 
 public sealed partial class RecordEditorHistory<TEditableRecord, TMajorRecord, TMajorRecordGetter>
     where TEditableRecord : class, IEditableRecord<TMajorRecord>, TMajorRecord

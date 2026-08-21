@@ -13,7 +13,7 @@ namespace HKX2
     // m_subMaterials m_class: hkxMaterial Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 128 flags: FLAGS_NONE enum: 
     // m_extraData m_class: hkReferencedObject Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 144 flags: FLAGS_NONE enum: 
     // m_properties m_class: hkxMaterialProperty Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 152 flags: FLAGS_NONE enum: 
-    public partial class hkxMaterial : hkxAttributeHolder, IEquatable<hkxMaterial?>
+    public sealed partial class hkxMaterial : hkxAttributeHolder, IEquatable<hkxMaterial?>
     {
         public string m_name { set; get; } = "";
         public IList<hkxMaterialTextureStage> m_stages { set; get; } = Array.Empty<hkxMaterialTextureStage>();

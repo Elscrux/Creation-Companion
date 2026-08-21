@@ -3,7 +3,7 @@ using Avalonia.Media;
 using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Avalonia.Services.Avalonia.Font;
 
-public class GameFontLoader : IGameFontLoader {
+public sealed class GameFontLoader : IGameFontLoader {
     private readonly IFileSystem _fileSystem;
     private readonly Uri _fontsDirectoryUri = new(new Uri(AppContext.BaseDirectory), "./Resources/Fonts");
     private readonly string _fontCollectionName;

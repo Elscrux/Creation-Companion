@@ -1,7 +1,7 @@
 ﻿using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Asset;
 
-public class IgnoredDirectoriesProvider : IIgnoredDirectoriesProvider {
+public sealed class IgnoredDirectoriesProvider : IIgnoredDirectoriesProvider {
     private readonly HashSet<DataRelativePath> _ignoredDirectories = [".git"];
 
     public bool IsIgnored(DataRelativePath path) {

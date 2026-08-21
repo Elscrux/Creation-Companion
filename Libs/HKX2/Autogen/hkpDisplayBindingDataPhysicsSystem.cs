@@ -5,7 +5,7 @@ namespace HKX2
 
     // m_bindings m_class: hkpDisplayBindingDataRigidBody Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_system m_class: hkpPhysicsSystem Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkpDisplayBindingDataPhysicsSystem : hkReferencedObject, IEquatable<hkpDisplayBindingDataPhysicsSystem?>
+    public sealed partial class hkpDisplayBindingDataPhysicsSystem : hkReferencedObject, IEquatable<hkpDisplayBindingDataPhysicsSystem?>
     {
         public IList<hkpDisplayBindingDataRigidBody> m_bindings { set; get; } = Array.Empty<hkpDisplayBindingDataRigidBody>();
         public hkpPhysicsSystem? m_system { set; get; }

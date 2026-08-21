@@ -4,7 +4,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.Models.DataSource;
 
-public partial class DataSourceItem(IDataSource dataSource, IEnumerable<IDataSource>? children = null) : ReactiveObject, IReactiveSelectable {
+public sealed partial class DataSourceItem(IDataSource dataSource, IEnumerable<IDataSource>? children = null) : ReactiveObject, IReactiveSelectable {
     [Reactive] public partial bool IsSelected { get; set; }
     [Reactive] public partial bool IsActive { get; set; }
     public IDataSource DataSource { get; } = dataSource;

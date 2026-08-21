@@ -33,7 +33,7 @@ namespace HKX2
     // m_isLinked m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 301 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_updateActiveNodes m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 302 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
     // m_stateOrTransitionChanged m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 303 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbBehaviorGraph : hkbGenerator, IEquatable<hkbBehaviorGraph?>
+    public sealed partial class hkbBehaviorGraph : hkbGenerator, IEquatable<hkbBehaviorGraph?>
     {
         public sbyte m_variableMode { set; get; }
         public IList<object> m_uniqueIdPool { set; get; } = Array.Empty<object>();

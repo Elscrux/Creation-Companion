@@ -6,8 +6,8 @@ using Mutagen.Bethesda.Plugins;
 using Noggog;
 namespace CreationEditor.Avalonia.Services.Actions;
 
-public record RecordContext(ModKey? Origin, IReferencedRecord ReferencedRecord);
-public record AssetContext(IDataSourceLink DataSourceLink, IReferencedAsset? ReferencedAsset);
+public sealed record RecordContext(ModKey? Origin, IReferencedRecord ReferencedRecord);
+public sealed record AssetContext(IDataSourceLink DataSourceLink, IReferencedAsset? ReferencedAsset);
 
 public sealed record SelectedListContext(
     IReadOnlyList<RecordContext> SelectedRecords,

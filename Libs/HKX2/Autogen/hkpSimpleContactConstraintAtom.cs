@@ -11,7 +11,7 @@ namespace HKX2
     // m_contactPointPropertiesStriding m_class:  Type.TYPE_UINT8 Type.TYPE_VOID arrSize: 0 offset: 10 flags: FLAGS_NONE enum: 
     // m_maxNumContactPoints m_class:  Type.TYPE_UINT16 Type.TYPE_VOID arrSize: 0 offset: 12 flags: FLAGS_NONE enum: 
     // m_info m_class: hkpSimpleContactConstraintDataInfo Type.TYPE_STRUCT Type.TYPE_VOID arrSize: 0 offset: 16 flags: ALIGN_16|FLAGS_NONE enum: 
-    public partial class hkpSimpleContactConstraintAtom : hkpConstraintAtom, IEquatable<hkpSimpleContactConstraintAtom?>
+    public sealed partial class hkpSimpleContactConstraintAtom : hkpConstraintAtom, IEquatable<hkpSimpleContactConstraintAtom?>
     {
         public ushort m_sizeOfAllAtoms { set; get; }
         public ushort m_numContactPoints { set; get; }

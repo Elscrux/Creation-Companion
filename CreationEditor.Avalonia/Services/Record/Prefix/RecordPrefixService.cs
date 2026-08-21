@@ -11,7 +11,7 @@ namespace CreationEditor.Avalonia.Services.Record.Prefix;
 public sealed record RecordPrefixMemento(
     string Prefix);
 
-public partial class RecordPrefixService(
+public sealed partial class RecordPrefixService(
     IEditorEnvironment editorEnvironment,
     IStateRepositoryFactory<RecordPrefixMemento, RecordPrefixMemento, string> stateRepositoryFactory)
     : ReactiveObject, IRecordPrefixService, ILifecycleTask {

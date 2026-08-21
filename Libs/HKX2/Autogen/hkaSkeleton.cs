@@ -11,7 +11,7 @@ namespace HKX2
     // m_referenceFloats m_class:  Type.TYPE_ARRAY Type.TYPE_REAL arrSize: 0 offset: 72 flags: FLAGS_NONE enum: 
     // m_floatSlots m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 88 flags: FLAGS_NONE enum: 
     // m_localFrames m_class: hkaSkeletonLocalFrameOnBone Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 104 flags: FLAGS_NONE enum: 
-    public partial class hkaSkeleton : hkReferencedObject, IEquatable<hkaSkeleton?>
+    public sealed partial class hkaSkeleton : hkReferencedObject, IEquatable<hkaSkeleton?>
     {
         public string m_name { set; get; } = "";
         public IList<short> m_parentIndices { set; get; } = Array.Empty<short>();

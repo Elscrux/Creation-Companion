@@ -6,7 +6,7 @@ namespace HKX2
     // m_variant m_class: hkReferencedObject Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_references m_class: hkMemoryResourceHandleExternalLink Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkMemoryResourceHandle : hkResourceHandle, IEquatable<hkMemoryResourceHandle?>
+    public sealed partial class hkMemoryResourceHandle : hkResourceHandle, IEquatable<hkMemoryResourceHandle?>
     {
         public hkReferencedObject? m_variant { set; get; }
         public string m_name { set; get; } = "";

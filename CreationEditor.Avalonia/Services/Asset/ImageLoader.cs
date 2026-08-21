@@ -4,7 +4,7 @@ using CreationEditor.Services.DataSource;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Asset;
 
-public class ImageLoader(
+public sealed class ImageLoader(
     ILogger logger,
     IDataSourceService dataSourceService)
     : IImageLoader {

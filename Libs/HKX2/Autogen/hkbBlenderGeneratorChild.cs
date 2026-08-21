@@ -7,7 +7,7 @@ namespace HKX2
     // m_boneWeights m_class: hkbBoneWeightArray Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
     // m_weight m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
     // m_worldFromModelWeight m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 68 flags: FLAGS_NONE enum: 
-    public partial class hkbBlenderGeneratorChild : hkbBindable, IEquatable<hkbBlenderGeneratorChild?>
+    public sealed partial class hkbBlenderGeneratorChild : hkbBindable, IEquatable<hkbBlenderGeneratorChild?>
     {
         public hkbGenerator? m_generator { set; get; }
         public hkbBoneWeightArray? m_boneWeights { set; get; }

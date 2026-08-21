@@ -4,7 +4,7 @@ namespace HKX2
     // hkbEvent Signatire: 0x3e0fd810 size: 24 flags: FLAGS_NONE
 
     // m_sender m_class:  Type.TYPE_POINTER Type.TYPE_VOID arrSize: 0 offset: 16 flags: SERIALIZE_IGNORED|FLAGS_NONE enum: 
-    public partial class hkbEvent : hkbEventBase, IEquatable<hkbEvent?>
+    public sealed partial class hkbEvent : hkbEventBase, IEquatable<hkbEvent?>
     {
         private object? m_sender { set; get; }
 

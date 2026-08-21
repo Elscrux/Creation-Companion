@@ -3,7 +3,7 @@ using CreationEditor.Resources.Comparer;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public class AssetDictionaryReferenceCache<TLink> : IDictionaryReferenceCache<AssetDictionaryReferenceCache<TLink>, TLink, DataRelativePath>
+public sealed class AssetDictionaryReferenceCache<TLink> : IDictionaryReferenceCache<AssetDictionaryReferenceCache<TLink>, TLink, DataRelativePath>
     where TLink : notnull {
     private readonly DictionaryReferenceCache<TLink, DataRelativePath> _cache =
         new(new ConcurrentDictionary<TLink, HashSet<DataRelativePath>>(), DataRelativePathComparer.Instance);

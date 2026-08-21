@@ -7,7 +7,7 @@ namespace HKX2
     // m_data m_class:  Type.TYPE_ARRAY Type.TYPE_UINT8 arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_originalFilename m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
-    public partial class hkxTextureInplace : hkReferencedObject, IEquatable<hkxTextureInplace?>
+    public sealed partial class hkxTextureInplace : hkReferencedObject, IEquatable<hkxTextureInplace?>
     {
         public string m_fileType { set; get; } = "";
         public IList<byte> m_data { set; get; } = Array.Empty<byte>();

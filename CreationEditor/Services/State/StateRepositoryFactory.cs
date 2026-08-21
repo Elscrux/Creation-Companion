@@ -1,6 +1,6 @@
 ﻿namespace CreationEditor.Services.State;
 
-public class StateRepositoryFactory<TState, TStateIn, TIdentifier>(
+public sealed class StateRepositoryFactory<TState, TStateIn, TIdentifier>(
     Func<IEnumerable<string>, IStateRepository<TState, TStateIn, TIdentifier>> factory,
     Func<IEnumerable<string>, ICachedStateRepository<TState, TStateIn, TIdentifier>> factoryCached)
     : IStateRepositoryFactory<TState, TStateIn, TIdentifier>

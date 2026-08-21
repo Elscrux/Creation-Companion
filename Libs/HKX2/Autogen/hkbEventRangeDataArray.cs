@@ -4,7 +4,7 @@ namespace HKX2
     // hkbEventRangeDataArray Signatire: 0x330a56ee size: 32 flags: FLAGS_NONE
 
     // m_eventData m_class: hkbEventRangeData Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkbEventRangeDataArray : hkReferencedObject, IEquatable<hkbEventRangeDataArray?>
+    public sealed partial class hkbEventRangeDataArray : hkReferencedObject, IEquatable<hkbEventRangeDataArray?>
     {
         public IList<hkbEventRangeData> m_eventData { set; get; } = Array.Empty<hkbEventRangeData>();
 

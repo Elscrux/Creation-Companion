@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 namespace CreationEditor.Skyrim.Services.Record;
 
-public class LightRecordRemappingPreprocessor(
+public sealed class LightRecordRemappingPreprocessor(
     ILinkCacheProvider linkCacheProvider,
     IRecordController recordController) : IRecordRemappingPreprocessor {
     public string Description => "Keep light radius for placed lights";

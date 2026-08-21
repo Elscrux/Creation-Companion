@@ -8,7 +8,7 @@ namespace HKX2
     // m_nodeNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_bindPose m_class:  Type.TYPE_ARRAY Type.TYPE_MATRIX4 arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_initSkinTransform m_class:  Type.TYPE_MATRIX4 Type.TYPE_VOID arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
-    public partial class hkxSkinBinding : hkReferencedObject, IEquatable<hkxSkinBinding?>
+    public sealed partial class hkxSkinBinding : hkReferencedObject, IEquatable<hkxSkinBinding?>
     {
         public hkxMesh? m_mesh { set; get; }
         public IList<string> m_nodeNames { set; get; } = Array.Empty<string>();

@@ -9,7 +9,7 @@ namespace HKX2
     // m_skeleton m_class: hkaSkeleton Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_mappings m_class: hkaMeshBindingMapping Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_boneFromSkinMeshTransforms m_class:  Type.TYPE_ARRAY Type.TYPE_TRANSFORM arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
-    public partial class hkaMeshBinding : hkReferencedObject, IEquatable<hkaMeshBinding?>
+    public sealed partial class hkaMeshBinding : hkReferencedObject, IEquatable<hkaMeshBinding?>
     {
         public hkxMesh? m_mesh { set; get; }
         public string m_originalSkeletonName { set; get; } = "";

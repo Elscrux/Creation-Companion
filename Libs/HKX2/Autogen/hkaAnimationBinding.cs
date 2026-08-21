@@ -8,7 +8,7 @@ namespace HKX2
     // m_transformTrackToBoneIndices m_class:  Type.TYPE_ARRAY Type.TYPE_INT16 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_floatTrackToFloatSlotIndices m_class:  Type.TYPE_ARRAY Type.TYPE_INT16 arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
     // m_blendHint m_class:  Type.TYPE_ENUM Type.TYPE_INT8 arrSize: 0 offset: 64 flags: FLAGS_NONE enum: BlendHint
-    public partial class hkaAnimationBinding : hkReferencedObject, IEquatable<hkaAnimationBinding?>
+    public sealed partial class hkaAnimationBinding : hkReferencedObject, IEquatable<hkaAnimationBinding?>
     {
         public string m_originalSkeletonName { set; get; } = "";
         public hkaAnimation? m_animation { set; get; }

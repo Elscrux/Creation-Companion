@@ -7,7 +7,7 @@ namespace HKX2
     // m_wordVariableValues m_class: hkbVariableValue Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_quadVariableValues m_class:  Type.TYPE_ARRAY Type.TYPE_VECTOR4 arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
     // m_variantVariableValues m_class: hkReferencedObject Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
-    public partial class hkbVariableValueSet : hkReferencedObject, IEquatable<hkbVariableValueSet?>
+    public sealed partial class hkbVariableValueSet : hkReferencedObject, IEquatable<hkbVariableValueSet?>
     {
         public IList<hkbVariableValue> m_wordVariableValues { set; get; } = Array.Empty<hkbVariableValue>();
         public IList<Vector4> m_quadVariableValues { set; get; } = Array.Empty<Vector4>();

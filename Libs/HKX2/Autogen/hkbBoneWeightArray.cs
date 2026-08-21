@@ -4,7 +4,7 @@ namespace HKX2
     // hkbBoneWeightArray Signatire: 0xcd902b77 size: 64 flags: FLAGS_NONE
 
     // m_boneWeights m_class:  Type.TYPE_ARRAY Type.TYPE_REAL arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
-    public partial class hkbBoneWeightArray : hkbBindable, IEquatable<hkbBoneWeightArray?>
+    public sealed partial class hkbBoneWeightArray : hkbBindable, IEquatable<hkbBoneWeightArray?>
     {
         public IList<float> m_boneWeights { set; get; } = Array.Empty<float>();
 

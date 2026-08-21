@@ -4,7 +4,7 @@ namespace HKX2
     // hkxEnum Signatire: 0xc4e1211 size: 32 flags: FLAGS_NONE
 
     // m_items m_class: hkxEnumItem Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkxEnum : hkReferencedObject, IEquatable<hkxEnum?>
+    public sealed partial class hkxEnum : hkReferencedObject, IEquatable<hkxEnum?>
     {
         public IList<hkxEnumItem> m_items { set; get; } = Array.Empty<hkxEnumItem>();
 

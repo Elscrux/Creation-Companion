@@ -8,7 +8,7 @@ namespace HKX2
     // m_internalState m_class: hkReferencedObject Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 104 flags: FLAGS_NONE enum: 
     // m_nodeId m_class:  Type.TYPE_INT16 Type.TYPE_VOID arrSize: 0 offset: 112 flags: FLAGS_NONE enum: 
     // m_hasActivateBeenCalled m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 114 flags: FLAGS_NONE enum: 
-    public partial class hkbNodeInternalStateInfo : hkReferencedObject, IEquatable<hkbNodeInternalStateInfo?>
+    public sealed partial class hkbNodeInternalStateInfo : hkReferencedObject, IEquatable<hkbNodeInternalStateInfo?>
     {
         public hkbGeneratorSyncInfo m_syncInfo { set; get; } = new();
         public string m_name { set; get; } = "";

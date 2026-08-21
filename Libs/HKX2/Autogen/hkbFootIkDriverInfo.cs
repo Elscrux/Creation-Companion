@@ -15,7 +15,7 @@ namespace HKX2
     // m_lockFeetWhenPlanted m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
     // m_useCharacterUpVector m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 65 flags: FLAGS_NONE enum: 
     // m_isQuadrupedNarrow m_class:  Type.TYPE_BOOL Type.TYPE_VOID arrSize: 0 offset: 66 flags: FLAGS_NONE enum: 
-    public partial class hkbFootIkDriverInfo : hkReferencedObject, IEquatable<hkbFootIkDriverInfo?>
+    public sealed partial class hkbFootIkDriverInfo : hkReferencedObject, IEquatable<hkbFootIkDriverInfo?>
     {
         public IList<hkbFootIkDriverInfoLeg> m_legs { set; get; } = Array.Empty<hkbFootIkDriverInfoLeg>();
         public float m_raycastDistanceUp { set; get; }

@@ -7,7 +7,7 @@ namespace HKX2
     // m_depth m_class:  Type.TYPE_UINT8 Type.TYPE_VOID arrSize: 0 offset: 17 flags: FLAGS_NONE enum: 
     // m_referenceBehaviorName m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_selfTransitionNames m_class:  Type.TYPE_ARRAY Type.TYPE_STRINGPTR arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkbAuxiliaryNodeInfo : hkReferencedObject, IEquatable<hkbAuxiliaryNodeInfo?>
+    public sealed partial class hkbAuxiliaryNodeInfo : hkReferencedObject, IEquatable<hkbAuxiliaryNodeInfo?>
     {
         public byte m_type { set; get; }
         public byte m_depth { set; get; }

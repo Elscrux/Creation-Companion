@@ -4,7 +4,7 @@ namespace HKX2
     // hkbClipTriggerArray Signatire: 0x59c23a0f size: 32 flags: FLAGS_NONE
 
     // m_triggers m_class: hkbClipTrigger Type.TYPE_ARRAY Type.TYPE_STRUCT arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
-    public partial class hkbClipTriggerArray : hkReferencedObject, IEquatable<hkbClipTriggerArray?>
+    public sealed partial class hkbClipTriggerArray : hkReferencedObject, IEquatable<hkbClipTriggerArray?>
     {
         public IList<hkbClipTrigger> m_triggers { set; get; } = Array.Empty<hkbClipTrigger>();
 

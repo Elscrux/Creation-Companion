@@ -6,7 +6,7 @@ namespace HKX2
     // m_filename m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 16 flags: FLAGS_NONE enum: 
     // m_name m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_originalFilename m_class:  Type.TYPE_STRINGPTR Type.TYPE_VOID arrSize: 0 offset: 32 flags: FLAGS_NONE enum: 
-    public partial class hkxTextureFile : hkReferencedObject, IEquatable<hkxTextureFile?>
+    public sealed partial class hkxTextureFile : hkReferencedObject, IEquatable<hkxTextureFile?>
     {
         public string m_filename { set; get; } = "";
         public string m_name { set; get; } = "";

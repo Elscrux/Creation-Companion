@@ -1,6 +1,6 @@
 ﻿namespace LeveledList.Model.List;
 
-public record ListEntryDefinition(
+public sealed record ListEntryDefinition(
     short Level,
     short Count = 1,
     int Amount = 1,

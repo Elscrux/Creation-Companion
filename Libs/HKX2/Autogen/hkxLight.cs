@@ -9,7 +9,7 @@ namespace HKX2
     // m_direction m_class:  Type.TYPE_VECTOR4 Type.TYPE_VOID arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
     // m_color m_class:  Type.TYPE_UINT32 Type.TYPE_VOID arrSize: 0 offset: 64 flags: FLAGS_NONE enum: 
     // m_angle m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 68 flags: FLAGS_NONE enum: 
-    public partial class hkxLight : hkReferencedObject, IEquatable<hkxLight?>
+    public sealed partial class hkxLight : hkReferencedObject, IEquatable<hkxLight?>
     {
         public sbyte m_type { set; get; }
         public Vector4 m_position { set; get; }

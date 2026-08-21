@@ -8,7 +8,7 @@ namespace HKX2
     // m_indices32 m_class:  Type.TYPE_ARRAY Type.TYPE_UINT32 arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_vertexBaseOffset m_class:  Type.TYPE_UINT32 Type.TYPE_VOID arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
     // m_length m_class:  Type.TYPE_UINT32 Type.TYPE_VOID arrSize: 0 offset: 60 flags: FLAGS_NONE enum: 
-    public partial class hkxIndexBuffer : hkReferencedObject, IEquatable<hkxIndexBuffer?>
+    public sealed partial class hkxIndexBuffer : hkReferencedObject, IEquatable<hkxIndexBuffer?>
     {
         public sbyte m_indexType { set; get; }
         public IList<ushort> m_indices16 { set; get; } = Array.Empty<ushort>();

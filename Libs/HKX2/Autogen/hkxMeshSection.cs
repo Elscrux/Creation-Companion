@@ -7,7 +7,7 @@ namespace HKX2
     // m_indexBuffers m_class: hkxIndexBuffer Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 24 flags: FLAGS_NONE enum: 
     // m_material m_class: hkxMaterial Type.TYPE_POINTER Type.TYPE_STRUCT arrSize: 0 offset: 40 flags: FLAGS_NONE enum: 
     // m_userChannels m_class: hkReferencedObject Type.TYPE_ARRAY Type.TYPE_POINTER arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
-    public partial class hkxMeshSection : hkReferencedObject, IEquatable<hkxMeshSection?>
+    public sealed partial class hkxMeshSection : hkReferencedObject, IEquatable<hkxMeshSection?>
     {
         public hkxVertexBuffer? m_vertexBuffer { set; get; }
         public IList<hkxIndexBuffer> m_indexBuffers { set; get; } = Array.Empty<hkxIndexBuffer>();

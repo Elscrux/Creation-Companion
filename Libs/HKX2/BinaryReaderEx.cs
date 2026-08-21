@@ -2,7 +2,7 @@
 using System.Text;
 namespace HKX2
 {
-    public class BinaryReaderEx
+    public sealed class BinaryReaderEx
     {
         private readonly BinaryReader br;
         private readonly Stack<long> steps;

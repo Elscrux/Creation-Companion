@@ -3,7 +3,7 @@ using CreationEditor.Services.Query.Select;
 using Noggog;
 namespace CreationEditor.Services.Query;
 
-public class ReflectionIQueryFieldProvider : IQueryFieldProvider {
+public sealed class ReflectionIQueryFieldProvider : IQueryFieldProvider {
     public IEnumerable<IQueryField> FromType(Type? type) {
         return type.GetAllMemberInfos<PropertyInfo>()
             .Where(field => {

@@ -12,7 +12,7 @@ namespace HKX2
     // m_simulateUntilTime m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 48 flags: FLAGS_NONE enum: 
     // m_frameMarkerPsiSnap m_class:  Type.TYPE_REAL Type.TYPE_VOID arrSize: 0 offset: 52 flags: FLAGS_NONE enum: 
     // m_previousStepResult m_class:  Type.TYPE_UINT32 Type.TYPE_VOID arrSize: 0 offset: 56 flags: FLAGS_NONE enum: 
-    public partial class hkpSimulation : hkReferencedObject, IEquatable<hkpSimulation?>
+    public sealed partial class hkpSimulation : hkReferencedObject, IEquatable<hkpSimulation?>
     {
         public uint m_determinismCheckFrameCounter { set; get; }
         public hkpWorld? m_world { set; get; }

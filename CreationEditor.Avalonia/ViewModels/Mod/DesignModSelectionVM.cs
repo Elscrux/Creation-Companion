@@ -9,7 +9,7 @@ using Mutagen.Bethesda.Plugins;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Mod;
 
-public class DesignModSelectionVM : IModSelectionVM {
+public sealed class DesignModSelectionVM : IModSelectionVM {
     public IObservableCollection<LoadOrderModItem> DisplayedMods { get; } = new ObservableCollectionExtended<LoadOrderModItem> {
         new(new ModInfo(ModKey.FromFileName("Skyrim.esm")), true, 0),
         new(new ModInfo(ModKey.FromFileName("Update.esm")), true, 1),
