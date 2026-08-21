@@ -50,6 +50,11 @@ public sealed class MainModule : Module {
             .AssignableTo<ILifecycleTask>()
             .As<ILifecycleTask>();
 
+        builder.Register<Func<Type, object?>>(x => {
+            var c = x.Resolve<IComponentContext>();
+            return c.ResolveOptional;
+        });
+
         builder.RegisterAssemblyTypes(assemblies)
             .AssignableTo<ISetting>()
             .As<ISetting>();
