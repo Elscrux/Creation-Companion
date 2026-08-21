@@ -43,8 +43,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     public IModInfoProvider ModInfoProvider { get; }
     public IModGetterVM SelectedModDetails { get; init; }
     public ModCreationVM ModCreationVM { get; }
-    public bool MissingPluginsFile { get; }
-    public string PluginsFilePath { get; }
 
     public ModKey? ActiveMod => _mods.FirstOrDefault(x => x.IsActive)?.ModKey;
     public IEnumerable<ModKey> SelectedMods => _mods.Where(mod => mod.IsSelected).Select(x => x.ModKey);
@@ -86,8 +84,6 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         ModInfoProvider = modInfoProvider;
         SelectedModDetails = modGetterVM;
         ModCreationVM = modCreationVM;
-        PluginsFilePath = listingsPathProvider.Get(editorEnvironment.GameEnvironment.GameRelease) ?? "Could not retrieve plugins file path";
-        MissingPluginsFile = !fileSystem.File.Exists(PluginsFilePath);
         ModSearchText = string.Empty;
 
         // Mods listed in the plugins file

@@ -2,11 +2,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
-using ReactiveUI.Avalonia;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.Views.Dialog;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
+using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Mod;
 
 public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
@@ -33,17 +31,6 @@ public partial class ModSelectionView : ReactiveUserControl<ModSelectionVM> {
 
         var window = this.FindLogicalAncestorOfType<Window>();
         if (window is null) return;
-
-        if (modSelectionVM.MissingPluginsFile) {
-            var messageBox = MessageBoxManager.GetMessageBoxStandard(
-                "Warning",
-                $"Make sure {modSelectionVM.PluginsFilePath} exists.",
-                ButtonEnum.Ok,
-                Icon.Warning,
-                WindowStartupLocation.CenterOwner);
-
-            messageBox.ShowWindowDialogAsync(window);
-        }
 
         modSelectionVM.RefreshListings();
     }
