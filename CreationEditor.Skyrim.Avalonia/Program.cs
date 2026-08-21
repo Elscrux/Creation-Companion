@@ -51,6 +51,22 @@ internal static class Program {
         var exception = (Exception) e.ExceptionObject;
 
         using var log = new StreamWriter(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CrashLog.txt"), false);
+
+        var innerException = exception.InnerException;
+        while (innerException is not null) {
+            if (innerException is DirectoryNotFoundException { Message: var message } && message.Contains("Data folder for SkyrimSE cannot be found automatically")) {
+                const string note = "The Skyrim data folder could not be found automatically. Add the start argument --game-directory <path> or -g <path> to specify the game directory, or ensure that Skyrim is installed in a standard location.";
+                log.WriteLine(note);
+
+                Console.WriteLine(note);
+                Console.ReadKey();
+
+                break;
+            }
+            
+            innerException = innerException.InnerException;
+        }
+
         log.WriteLine(exception);
     }
 
