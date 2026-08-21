@@ -1,16 +1,19 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CommandLine;
 using CreationEditor.Avalonia.Modules;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Lifecycle;
+using CreationEditor.Services.Mutagen;
 using CreationEditor.Services.Plugin;
 using CreationEditor.Skyrim.Avalonia.Modules;
+using CreationEditor.Skyrim.Avalonia.Options;
 using Mutagen.Bethesda.Autofac;
 using Noggog;
 using Serilog;
@@ -23,11 +26,22 @@ public class App : Application {
 
     public override void OnFrameworkInitializationCompleted() {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
+            var globalOptionsParsed = Parser.Default.ParseArguments<GlobalOptions>(desktop.Args);
+
             var builder = new ContainerBuilder();
 
             builder.RegisterModule<MutagenModule>();
             builder.RegisterModule<EditorModule>();
             builder.RegisterModule<SkyrimModule>();
+
+            if (globalOptionsParsed.Value?.GameDirectory is not null) {
+                builder.Register<InjectedGameDirectoryLookup>(x => {
+                        var fileSystem = x.Resolve<IFileSystem>();
+                        return new InjectedGameDirectoryLookup(fileSystem, globalOptionsParsed.Value.GameDirectory);
+                    })
+                    .SingleInstance()
+                    .AsImplementedInterfaces();
+            }
 
             LoadPluginModules(builder);
 

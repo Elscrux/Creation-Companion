@@ -19,7 +19,7 @@ internal static class Program {
         AppDomain.CurrentDomain.UnhandledException += LogCrashes;
 
         switch (args) {
-            case [var verb, ..]:
+            case [var verb, ..] when !verb.StartsWith('-'):
                 var pluginService = new PluginsFolderAssemblyProvider(new FileSystem());
 
                 var entryPoint = pluginService.GetAssemblies()
