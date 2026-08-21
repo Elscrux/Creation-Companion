@@ -144,7 +144,7 @@ public sealed class LipFileGenerator(
             void CleanupFiles() {
                 // Enumerate all fuz files and delete the corresponding wav, lip, and other audio files if they exist
                 Parallel.ForEach(
-                    modVoiceDirectory.EnumerateFileLinks("*.wav", true),
+                    modVoiceDirectory.EnumerateFileLinks("*.fuz", true),
                     new ParallelOptions { MaxDegreeOfParallelism = degree },
                     fileLink => {
                         try {
