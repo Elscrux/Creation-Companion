@@ -80,16 +80,9 @@ public sealed class DataSourceService : IDataSourceService {
 
         var (archiveDataSources, fileSystemDataSources) = GetMementoDataSources();
 
-        // If there is no data folder source, add it
-        var dataDirectoryDataSource =
-            fileSystemDataSources.FirstOrDefault(fs => DataRelativePath.PathComparer.Equals(fs.Path, dataDirectoryProvider.Path));
-        if (dataDirectoryDataSource is null) {
-            dataDirectoryDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
-        } else {
-            // Move the data directory data source to the front of the list
-            fileSystemDataSources.Remove(dataDirectoryDataSource);
-        }
-
+        // Ensure there is only ever one data directory source - the one based on the current data directory path
+        fileSystemDataSources.RemoveAll(x => x.Name == "Data");
+        var dataDirectoryDataSource =new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
         fileSystemDataSources.Insert(0, dataDirectoryDataSource);
 
         ActiveDataSource = DataDirectoryDataSource = dataDirectoryDataSource;
