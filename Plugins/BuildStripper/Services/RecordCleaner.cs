@@ -1,4 +1,5 @@
-﻿using BuildStripper.Models;
+﻿using System.IO.Abstractions;
+using BuildStripper.Models;
 using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -17,6 +18,7 @@ namespace BuildStripper.Services;
 public sealed class RecordCleaner(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
     ILogger logger,
+    IFileSystem fileSystem,
     IRecordController recordController,
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
@@ -89,6 +91,20 @@ public sealed class RecordCleaner(
                     foreach (var responses in topic.Responses) {
                         var responsesIdentifier = new FormLinkIdentifier(responses.ToFormLinkInformation());
                         graph.AddEdge(new Edge<ILinkIdentifier>(topicIdentifier, responsesIdentifier));
+                    }
+                    break;
+                // Force add links from music tracks to their music files with all possible extensions, as the game doesn't actually care which extension is used
+                case IMusicTrackGetter musicTrack:
+                    var musicTrackIdentifier = new FormLinkIdentifier(musicTrack.ToFormLinkInformation());
+                    foreach (var musicFileExtension in assetTypeService.Provider.Music.FileExtensions) {
+                        var musicFilePathWithOtherExtension = fileSystem.Path.ChangeExtension(musicTrack.TrackFilename, musicFileExtension);
+                        if (musicFilePathWithOtherExtension is null) continue;
+
+                        var assetLink = assetTypeService.GetAssetLink(musicFilePathWithOtherExtension);
+                        if (assetLink is null) continue;
+
+                        var assetLinkIdentifier = new AssetLinkIdentifier(assetLink);
+                        graph.AddEdge(new Edge<ILinkIdentifier>(musicTrackIdentifier, assetLinkIdentifier));
                     }
                     break;
             }
