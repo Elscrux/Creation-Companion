@@ -5,6 +5,7 @@ public enum ListRecordType {
     Weapon,
     Poison,
     Potion,
+    Scroll,
     SpellTome,
     Staff,
     Ingredient,

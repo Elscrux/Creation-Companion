@@ -43,6 +43,12 @@ public sealed class FeatureProvider(
                             var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
                             return objectEffect?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
                         }
+                        case IScrollGetter scroll: {
+                            return scroll.GetSchoolOfMagic(linkCacheProvider.LinkCache);
+                        }
+                        case ISpellGetter spell: {
+                            return spell.GetSchoolOfMagic(linkCacheProvider.LinkCache);
+                        }
                         case IBookGetter { Teaches: IBookSpellGetter bookSpell }: {
                             var spell = bookSpell.Spell.TryResolve(linkCacheProvider.LinkCache);
                             return spell?.GetSchoolOfMagic(linkCacheProvider.LinkCache);
@@ -58,6 +64,12 @@ public sealed class FeatureProvider(
                         case IEnchantableGetter enchantable: {
                             var objectEffect = enchantable.ObjectEffect.TryResolve(linkCacheProvider.LinkCache);
                             return objectEffect?.GetMagicLevel(linkCacheProvider.LinkCache);
+                        }
+                        case IScrollGetter scroll: {
+                            return scroll.GetMagicLevel(linkCacheProvider.LinkCache);
+                        }
+                        case ISpellGetter spell: {
+                            return spell.GetMagicLevel(linkCacheProvider.LinkCache);
                         }
                         case IBookGetter { Teaches: IBookSpellGetter bookSpell }: {
                             var spell = bookSpell.Spell.TryResolve(linkCacheProvider.LinkCache);

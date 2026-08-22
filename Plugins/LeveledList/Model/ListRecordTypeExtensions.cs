@@ -9,6 +9,7 @@ public static class ListRecordTypeExtensions {
                 ListRecordType.Weapon => new[] { typeof(IWeaponGetter), typeof(IAmmunitionGetter) },
                 ListRecordType.Poison => new[] { typeof(IIngestibleGetter) },
                 ListRecordType.Potion => new[] { typeof(IIngestibleGetter) },
+                ListRecordType.Scroll => new[] { typeof(IScrollGetter) },
                 ListRecordType.SpellTome => new[] { typeof(IBookGetter) },
                 ListRecordType.Staff => new[] { typeof(IWeaponGetter) },
                 ListRecordType.Ingredient => new[] { typeof(IIngredientGetter) },

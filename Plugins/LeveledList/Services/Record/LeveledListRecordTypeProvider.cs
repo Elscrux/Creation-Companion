@@ -17,6 +17,7 @@ public sealed class LeveledListRecordTypeProvider(ITierController tierController
                 .Where(i => i.IsPoison()),
             ListRecordType.Potion => mod.EnumerateMajorRecords<IIngestibleGetter>()
                 .Where(i => i.IsPotion()),
+            ListRecordType.Scroll => mod.EnumerateMajorRecords<IScrollGetter>(),
             ListRecordType.SpellTome => mod.EnumerateMajorRecords<IBookGetter>()
                 .Where(b => b.Teaches is IBookSpellGetter),
             ListRecordType.Staff => mod.EnumerateMajorRecords<IWeaponGetter>()
@@ -42,6 +43,7 @@ public sealed class LeveledListRecordTypeProvider(ITierController tierController
             return book.Teaches is IBookSpellGetter ? ListRecordType.SpellTome : ListRecordType.Staff;
         }
         if (record is IIngredientGetter) return ListRecordType.Ingredient;
+        if (record is IScrollGetter) return ListRecordType.Scroll;
 
         return null;
     }
