@@ -22,6 +22,7 @@ public sealed class RecordCleaner(
     IRecordController recordController,
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
+    // TODO make configurable parameters in the UI - based on uGridsToLoad (5 => 2), and extended uGridsToLoadOnlyLandscape (9 => 4)
     public const int CellRangeToKeepOutsidePlayableArea = 2;
     public const int CellLanscapeRangeToKeepOutsidePlayableArea = 4;
 
@@ -228,7 +229,7 @@ public sealed class RecordCleaner(
         IReadOnlyList<ModKey> dependencies,
         FormLinkIdentifier formLinkIdentifier,
         HashSet<ILinkIdentifier> retained,
-        IReadOnlySet<ILinkIdentifier> excluded,
+        ISet<ILinkIdentifier> excluded,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
         var formLink = formLinkIdentifier.FormLink;
@@ -285,7 +286,7 @@ public sealed class RecordCleaner(
         IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         HashSet<ILinkIdentifier> retained,
-        IReadOnlySet<ILinkIdentifier> excludedLinks,
+        ISet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
@@ -398,7 +399,7 @@ public sealed class RecordCleaner(
     private void RetainCellsAroundRegion(
         IEssentialRecordProvider essentialRecordProvider,
         HashSet<ILinkIdentifier> retained,
-        IReadOnlySet<ILinkIdentifier> excludedLinks,
+        ISet<ILinkIdentifier> excludedLinks,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
         Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
@@ -422,6 +423,15 @@ public sealed class RecordCleaner(
                         var position = new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy);
                         if (retainedCoordinates.Contains(position)) continue;
 
+                        var minDistanceToRetainedCoordinates = retainedCoordinates
+                            .Select(c => {
+                                // We need to find the maximum distance to either direction to see if we're still inside the uGridsToLoad range
+                                var distX = Math.Abs(c.X - position.X);
+                                var distY = Math.Abs(c.Y - position.Y);
+                                return Math.Max(distX, distY);
+                            })
+                            .Min();
+
                         var cell = worldspace.GetCell(position);
                         if (cell is null) continue;
 
@@ -429,8 +439,7 @@ public sealed class RecordCleaner(
                         var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
                         if (excludedLinks.Contains(cellLink)) continue;
 
-                        if (dx is < -CellRangeToKeepOutsidePlayableArea or > CellRangeToKeepOutsidePlayableArea
-                         || dy is < -CellRangeToKeepOutsidePlayableArea or > CellRangeToKeepOutsidePlayableArea) {
+                        if (minDistanceToRetainedCoordinates > CellRangeToKeepOutsidePlayableArea) {
                             // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
                             // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
                             // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
@@ -475,23 +484,16 @@ public sealed class RecordCleaner(
                             ]);
 
                             foreach (var placed in cell.Temporary.Concat(cell.Persistent)) {
-                                if (placed is not IPlacedObjectGetter placedObject) continue;
-
-                                // Skip owned stuff because that would retain npcs/factions we don't want to retain necessarily
-                                if (!placed.Owner.IsNull && !retained.Contains(new FormLinkIdentifier(placed.Owner))) continue;
-
-                                // Skip stuff with scripts because they might reference anything
-                                if (placed.VirtualMachineAdapter is not null) continue;
-
-                                var placeableObject = placedObject.Base.TryResolve(editorEnvironment.LinkCache);
-                                if (placeableObject is IFloraGetter or IFurnitureGetter or IStaticGetter or IMoveableStaticGetter or ITreeGetter) {
-                                    // Exclude markers, we just care about big things that are visible
-                                    if (placeableObject.EditorID is not null && placeableObject.EditorID.Contains("Marker")) continue;
-
+                                if (ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(placed, retained, editorEnvironment)) {
                                     Retain(placed);
+                                } else {
+                                    // If the placed shouldn't be retained, we want to make sure it actually stays excluded
+                                    // And in case of other records linking to it, it should also not be included
+                                    var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
+                                    retained.Remove(formLinkIdentifier);
+                                    excludedLinks.Add(formLinkIdentifier);
                                 }
                             }
-
                         }
 
                         retained.Add(cellLink);
@@ -513,5 +515,23 @@ public sealed class RecordCleaner(
                 }
             }
         }
+    }
+
+    private static bool ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(IPlacedGetter placed, HashSet<ILinkIdentifier> retained, IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment) {
+        if (placed is not IPlacedObjectGetter placedObject) return false;
+
+        // Skip owned stuff because that would retain npcs/factions we don't want to retain necessarily
+        if (!placed.Owner.IsNull && !retained.Contains(new FormLinkIdentifier(placed.Owner))) return false;
+
+        // Skip stuff with scripts because they might reference anything
+        if (placed.VirtualMachineAdapter is not null) return false;
+
+        var placeableObject = placedObject.Base.TryResolve(editorEnvironment.LinkCache);
+        if (placeableObject is IFloraGetter or IFurnitureGetter or IStaticGetter or IMoveableStaticGetter or ITreeGetter) {
+            // Exclude markers, we just care about big things that are visible
+            return placeableObject.EditorID is null || !placeableObject.EditorID.Contains("Marker");
+        }
+
+        return false;
     }
 }

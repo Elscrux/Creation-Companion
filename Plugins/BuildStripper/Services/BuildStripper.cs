@@ -62,7 +62,7 @@ public sealed class BuildStripper(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
-        IReadOnlySet<ILinkIdentifier> excludedLinks) {
+        ISet<ILinkIdentifier> excludedLinks) {
         var retained = new HashSet<ILinkIdentifier>();
         var dependencyGraph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
         var postProcessSteps = new Dictionary<IFormLinkIdentifier, Action<IMajorRecord>>();
@@ -102,6 +102,15 @@ public sealed class BuildStripper(
             var source = edges.First().Source;
             while (queue.Count > 0) {
                 var current = queue.Dequeue();
+                if (current is FormLinkIdentifier formLinkIdentifier && formLinkIdentifier.FormLink.FormKey.ToString().Contains("0EAF3E", StringComparison.OrdinalIgnoreCase)) {
+                    Console.WriteLine();
+                }
+                if (current is FormLinkIdentifier formLinkIdentifier2 && formLinkIdentifier2.FormLink.FormKey.ToString().Contains("16EED1", StringComparison.OrdinalIgnoreCase)) {
+                    Console.WriteLine();
+                }
+                if (current is FormLinkIdentifier formLinkIdentifier3 && formLinkIdentifier3.FormLink.FormKey.ToString().Contains("09FEA5", StringComparison.OrdinalIgnoreCase)) {
+                    Console.WriteLine();
+                }
                 if (excludedLinks.Contains(current)) continue;
 
                 if (current != source) {
@@ -112,6 +121,15 @@ public sealed class BuildStripper(
                 if (!graph.OutgoingEdges.TryGetValue(current, out var currentEdges)) continue;
 
                 foreach (var edge in currentEdges) {
+                    if (edge.Target is FormLinkIdentifier f2 && f2.FormLink.FormKey.ToString().Contains("0EAF3E", StringComparison.OrdinalIgnoreCase)) {
+                        Console.WriteLine();
+                    }
+                    if (edge.Target is FormLinkIdentifier f3 && f3.FormLink.FormKey.ToString().Contains("16EED1", StringComparison.OrdinalIgnoreCase)) {
+                        Console.WriteLine();
+                    }
+                    if (edge.Target is FormLinkIdentifier f4 && f4.FormLink.FormKey.ToString().Contains("09FEA5", StringComparison.OrdinalIgnoreCase)) {
+                        Console.WriteLine();
+                    }
                     queue.Enqueue(edge.Target);
                 }
             }
