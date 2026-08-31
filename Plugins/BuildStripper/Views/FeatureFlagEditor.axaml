@@ -11,235 +11,321 @@
              xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
              xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
              xmlns:skyrim="clr-namespace:Mutagen.Bethesda.Skyrim;assembly=Mutagen.Bethesda.Skyrim"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="800"
              x:Class="BuildStripper.Views.FeatureFlagEditor"
              x:DataType="viewModels:FeatureFlagEditorVM"
-             x:Name="Control">
-    <StackPanel Spacing="10">
-        <basic:LabeledContentControl Header="Name">
-            <TextBox Text="{Binding Name}"/>
-        </basic:LabeledContentControl>
+             x:Name="Control"
+             Margin="8">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="10">
+            <!-- Header -->
+            <basic:Header Header="Feature Flag Configuration"
+                          Description="Configure what parts of the mod to retain during mod cleaning">
+                <basic:Header.IconControl>
+                    <controls:FAFontIcon Glyph="🏷️"/>
+                </basic:Header.IconControl>
+            </basic:Header>
 
-        <basic:LabeledContentControl
-            Header="Mod"
-            HeaderToolTip="The feature flag applies when cleaning this mod.">
-            <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
-        </basic:LabeledContentControl>
+            <Separator/>
 
-        <basic:LabeledContentControl
-            Header="Allowed Regions"
-            HeaderToolTip="Cells in this worldspace that are in these regions will be kept in the cleaning process. Additionally, cells at the border of the regions that can be loaded while in these regions will also be kept.">
-            <DataGrid
-                ItemsSource="{Binding AllowedRegions}"
-                Background="{DynamicResource SystemControlTransparentBrush}"
-                AutoGenerateColumns="False"
-                Classes="Small Mutable"
-                IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Worldspace Regions">
-                        <DataTemplate DataType="viewModels:ReactiveWorldspaceRegions">
-                            <StackPanel>
-                                <basic:LabeledContentControl Header="Worldspace">
-                                    <picker:FormKeyPicker
-                                        LinkCache="{Binding #Control.ViewModel.LinkCacheProvider.LinkCache}"
-                                        FormKey="{Binding Worldspace}"
-                                        ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"/>
-                                </basic:LabeledContentControl>
+            <!-- Name -->
+            <basic:Card Header="Name"
+                        Description="A name for this feature flag"
+                        Icon="Tag">
+                <TextBox Text="{Binding Name}"
+                         MinWidth="300"/>
+            </basic:Card>
 
-                                <DataGrid
-                                    ItemsSource="{Binding Regions}"
-                                    Background="{DynamicResource SystemControlTransparentBrush}"
-                                    AutoGenerateColumns="False"
-                                    Classes="Small Mutable"
-                                    IsReadOnly="True">
-                                    <DataGrid.Columns>
-                                        <DataGridTemplateColumn Header="Region">
-                                            <DataTemplate DataType="viewModels:ReactiveFormKey">
-                                                <picker:FormKeyPicker
-                                                    LinkCache="{Binding #Control.ViewModel.LinkCacheProvider.LinkCache}"
-                                                    FormKey="{Binding FormKey}"
-                                                    Filter="{ReflectionBinding $parent[DataGrid].DataContext.Filter}"
-                                                    ScopedTypes="{x:Static constants:RecordTypeConstants.RegionTypes}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
+            <!-- Mod -->
+            <basic:Card Header="Mod"
+                        Description="The feature flag applies when cleaning this mod."
+                        Icon="Tag">
+                <mod:ModPicker DataContext="{Binding ModPickerVM}"/>
+            </basic:Card>
 
-                                    <attached:ListShortcuts.Add>
-                                        <command:AddElement
-                                            x:TypeArguments="viewModels:ReactiveFormKey"
-                                            List="{Binding Regions}"/>
-                                    </attached:ListShortcuts.Add>
+            <!-- Allowed Regions -->
+            <basic:Card Header="Allowed Regions"
+                        Description="Define worldspace regions and cell retention distances"
+                        Icon="Map">
+                <StackPanel Spacing="10">
+                    <DataGrid ItemsSource="{Binding AllowedRegions}"
+                              Background="{DynamicResource SystemControlTransparentBrush}"
+                              AutoGenerateColumns="False"
+                              Classes="Small Mutable"
+                              IsReadOnly="True"
+                              CanUserResizeColumns="True">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Worldspace &amp; Retention Settings"
+                                                    Width="*">
+                                <DataTemplate DataType="viewModels:ReactiveWorldspaceRegions">
+                                    <StackPanel Spacing="8">
+                                        <basic:LabeledContentControl Header="Worldspace"
+                                                                     HeaderToolTip="Define the worldspace that is allowed to be retained.">
+                                            <picker:FormKeyPicker
+                                                LinkCache="{Binding #Control.ViewModel.LinkCacheProvider.LinkCache}"
+                                                FormKey="{Binding Worldspace}"
+                                                ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"/>
+                                        </basic:LabeledContentControl>
 
-                                    <attached:ListShortcuts.Remove>
-                                        <command:RemoveElement
-                                            x:TypeArguments="viewModels:ReactiveFormKey"
-                                            List="{Binding Regions}"/>
-                                    </attached:ListShortcuts.Remove>
-                                </DataGrid>
-                            </StackPanel>
+                                        <basic:LabeledContentControl
+                                            Header="Regions"
+                                            HeaderToolTip="Define the regions within the worldspace that are allowed to be retained. If no regions are defined, the whole worldspace will be retained.">
+                                            <StackPanel>
+                                                <DataGrid
+                                                    ItemsSource="{Binding Regions}"
+                                                    Background="{DynamicResource SystemControlTransparentBrush}"
+                                                    AutoGenerateColumns="False"
+                                                    Classes="Small Mutable"
+                                                    IsReadOnly="True"
+                                                    MaxHeight="200">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTemplateColumn
+                                                            Header="Region"
+                                                            Width="*">
+                                                            <DataTemplate DataType="viewModels:ReactiveFormKey">
+                                                                <picker:FormKeyPicker
+                                                                    LinkCache="{Binding #Control.ViewModel.LinkCacheProvider.LinkCache}"
+                                                                    FormKey="{Binding FormKey}"
+                                                                    Filter="{ReflectionBinding $parent[DataGrid].DataContext.Filter}"
+                                                                    ScopedTypes="{x:Static constants:RecordTypeConstants.RegionTypes}"/>
+                                                            </DataTemplate>
+                                                        </DataGridTemplateColumn>
+                                                    </DataGrid.Columns>
+
+                                                    <attached:ListShortcuts.Add>
+                                                        <command:AddElement
+                                                            x:TypeArguments="viewModels:ReactiveFormKey"
+                                                            List="{Binding Regions}"/>
+                                                    </attached:ListShortcuts.Add>
+
+                                                    <attached:ListShortcuts.Remove>
+                                                        <command:RemoveElement
+                                                            x:TypeArguments="viewModels:ReactiveFormKey"
+                                                            List="{Binding Regions}"/>
+                                                    </attached:ListShortcuts.Remove>
+                                                </DataGrid>
+                                            </StackPanel>
+                                        </basic:LabeledContentControl>
+
+                                        <Separator Margin="0,4"/>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="16">
+                                            <basic:LabeledContentControl
+                                                Header="View Distance Radius"
+                                                HeaderToolTip="Cell range to keep outside playable area because they are visible within the uGridsToLoad distance. Note that uGridsToLoad is the diameter around the player and this is a radius, so the default uGridsToLoad of 5 means a radius of 2 around the player is visible.">
+                                                <NumericUpDown Value="{Binding CellRangeToKeepOutsidePlayableArea}"
+                                                               HorizontalAlignment="Left"
+                                                               Minimum="2" Maximum="20"/>
+                                            </basic:LabeledContentControl>
+
+                                            <basic:LabeledContentControl
+                                                Header="Landscape Radius"
+                                                HeaderToolTip="Cell range to keep landscape outside playable area to make sure higher uGridsToLoad values don't lead to crashes within the playable area and to warn players with disabled borders that they are exiting the playable area when they only see landscape without any placed objects.">
+                                                <NumericUpDown
+                                                    Value="{Binding CellLandscapeRangeToKeepOutsidePlayableArea}"
+                                                    HorizontalAlignment="Left"
+                                                    Minimum="4" Maximum="20"/>
+                                            </basic:LabeledContentControl>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+
+                        <attached:ListShortcuts.Add>
+                            <command:AddElementCustom
+                                x:TypeArguments="viewModels:ReactiveWorldspaceRegions"
+                                List="{Binding AllowedRegions}"
+                                Factory="{Binding ReactiveWorldspaceRegionsFactory}"/>
+                        </attached:ListShortcuts.Add>
+
+                        <attached:ListShortcuts.Remove>
+                            <command:RemoveElement
+                                x:TypeArguments="viewModels:ReactiveWorldspaceRegions"
+                                List="{Binding AllowedRegions}"/>
+                        </attached:ListShortcuts.Remove>
+                    </DataGrid>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Quests -->
+            <basic:Card Header="Quests"
+                        Icon="List">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <StackPanel.DataTemplates>
+                        <DataTemplate DataType="skyrim:IQuestGetter">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}: {1}">
+                                        <Binding Path="EditorID"/>
+                                        <Binding Path="Name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </DataTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
+                    </StackPanel.DataTemplates>
 
-                <attached:ListShortcuts.Add>
-                    <command:AddElementCustom
-                        x:TypeArguments="viewModels:ReactiveWorldspaceRegions"
-                        List="{Binding AllowedRegions}"
-                        Factory="{Binding ReactiveWorldspaceRegionsFactory}"/>
-                </attached:ListShortcuts.Add>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Essential Quests"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding EssentialQuests}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
 
-                <attached:ListShortcuts.Remove>
-                    <command:RemoveElement
-                        x:TypeArguments="viewModels:ReactiveWorldspaceRegions"
-                        List="{Binding AllowedRegions}"/>
-                </attached:ListShortcuts.Remove>
-            </DataGrid>
-        </basic:LabeledContentControl>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Unused Quests"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding UnusedQuests}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <StackPanel.DataTemplates>
-                <DataTemplate DataType="skyrim:IQuestGetter">
-                    <TextBlock>
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}: {1}">
-                                <Binding Path="EditorID"/>
-                                <Binding Path="Name"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </DataTemplate>
-            </StackPanel.DataTemplates>
+            <!-- Interior Cells -->
+            <basic:Card Header="Interior Cells"
+                        Icon="Home">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="16">
+                    <StackPanel.DataTemplates>
+                        <DataTemplate DataType="skyrim:ICellGetter">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}: {1}">
+                                        <Binding Path="EditorID"/>
+                                        <Binding Path="Name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </StackPanel.DataTemplates>
 
-            <basic:LabeledContentControl
-                Header="Essential Quests"
-                HeaderToolTip="Keep all quests in this list when cleaning.">
-                <ListBox ItemsSource="{Binding EssentialQuests}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Essential Interior Cells"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding EssentialInteriorCells}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
 
-            <basic:LabeledContentControl Header="Unused Quests">
-                <ListBox ItemsSource="{Binding UnusedQuests}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Unused Interior Cells"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding UnusedInteriorCells}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Load Screens -->
+            <basic:Card Header="Load Screens"
+                        Icon="Image">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="16">
+                    <StackPanel.DataTemplates>
+                        <DataTemplate DataType="skyrim:ILoadScreenGetter">
+                            <TextBlock Text="{Binding EditorID}"/>
+                        </DataTemplate>
+                    </StackPanel.DataTemplates>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Essential Load Screens"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding EssentialLoadScreens}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Unused Load Screens"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding UnusedLoadScreens}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Idle Animations -->
+            <basic:Card Header="Idle Animations"
+                        Icon="Play">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="16">
+                    <StackPanel.DataTemplates>
+                        <DataTemplate DataType="skyrim:IIdleAnimationGetter">
+                            <TextBlock Text="{Binding EditorID}"/>
+                        </DataTemplate>
+                    </StackPanel.DataTemplates>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Essential Idle Animations"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding EssentialIdleAnimations}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Unused Idle Animations"
+                                   FontWeight="SemiBold"/>
+                        <ListBox ItemsSource="{Binding UnusedIdleAnimations}"
+                                 dragDrop:DragDropExtended.AllowDrag="True"
+                                 dragDrop:DragDropExtended.AllowDrop="True"
+                                 SelectionMode="Multiple"
+                                 Padding="10"
+                                 Width="400"
+                                 Height="400"
+                                 Background="{DynamicResource ControlFillColorSecondary}"
+                                 CornerRadius="4"/>
+                    </StackPanel>
+                </StackPanel>
+            </basic:Card>
         </StackPanel>
-
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <StackPanel.DataTemplates>
-                <DataTemplate DataType="skyrim:ICellGetter">
-                    <TextBlock>
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}: {1}">
-                                <Binding Path="EditorID"/>
-                                <Binding Path="Name"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </DataTemplate>
-            </StackPanel.DataTemplates>
-
-            <basic:LabeledContentControl
-                Header="Essential Interior Cells"
-                HeaderToolTip="Keep all interior cells in this list when cleaning.">
-                <ListBox ItemsSource="{Binding EssentialInteriorCells}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-
-            <basic:LabeledContentControl Header="Unused Interior Cells">
-                <ListBox ItemsSource="{Binding UnusedInteriorCells}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <StackPanel.DataTemplates>
-                <DataTemplate DataType="skyrim:ILoadScreenGetter">
-                    <TextBlock Text="{Binding EditorID}"/>
-                </DataTemplate>
-            </StackPanel.DataTemplates>
-
-            <basic:LabeledContentControl
-                Header="Essential Load Screens"
-                HeaderToolTip="Keep all load screens in this list when cleaning.">
-                <ListBox ItemsSource="{Binding EssentialLoadScreens}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-
-            <basic:LabeledContentControl Header="Unused Load Screens">
-                <ListBox ItemsSource="{Binding UnusedLoadScreens}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <StackPanel.DataTemplates>
-                <DataTemplate DataType="skyrim:IIdleAnimationGetter">
-                    <TextBlock Text="{Binding EditorID}"/>
-                </DataTemplate>
-            </StackPanel.DataTemplates>
-
-            <basic:LabeledContentControl
-                Header="Essential Idle Animations"
-                HeaderToolTip="Keep all idle animations in this list when cleaning.">
-                <ListBox ItemsSource="{Binding EssentialIdleAnimations}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-
-            <basic:LabeledContentControl Header="Unused Idle Animations">
-                <ListBox ItemsSource="{Binding UnusedIdleAnimations}"
-                         dragDrop:DragDropExtended.AllowDrag="True"
-                         dragDrop:DragDropExtended.AllowDrop="True"
-                         SelectionMode="Multiple"
-                         Padding="10"
-                         Width="500"
-                         Height="500"
-                         Background="{DynamicResource ButtonBackground}"/>
-            </basic:LabeledContentControl>
-        </StackPanel>
-    </StackPanel>
+    </ScrollViewer>
 </UserControl>
