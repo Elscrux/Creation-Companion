@@ -21,6 +21,17 @@ public sealed class FeatureFlagService : IFeatureFlagService {
         StateRepository = stateRepositoryFactory.CreateCached("FeatureFlags");
 
         foreach (var featureFlag in StateRepository.LoadAll()) {
+            // Ensure radius settings are not below their minimum values
+            for (var i = 0; i < featureFlag.AllowedRegions.Count; i++) {
+                if (featureFlag.AllowedRegions[i].CellViewDistanceRangeToKeepOutsidePlayableArea < 2) {
+                    featureFlag.AllowedRegions[i] = featureFlag.AllowedRegions[i] with { CellViewDistanceRangeToKeepOutsidePlayableArea = 2 };
+                }
+
+                if (featureFlag.AllowedRegions[i].CellLandscapeRangeToKeepOutsidePlayableArea < 4) {
+                    featureFlag.AllowedRegions[i] = featureFlag.AllowedRegions[i] with { CellLandscapeRangeToKeepOutsidePlayableArea = 4 };
+                }
+            }
+
             _featureFlags.Add(featureFlag, true);
         }
 

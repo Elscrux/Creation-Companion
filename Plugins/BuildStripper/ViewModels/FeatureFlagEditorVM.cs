@@ -26,6 +26,8 @@ public sealed partial class ReactiveWorldspaceRegions : ReactiveObject {
     }
 
     [Reactive] public partial FormKey Worldspace { get; set; }
+    [Reactive] public partial int CellRangeToKeepOutsidePlayableArea { get; set; } = 2;
+    [Reactive] public partial int CellLandscapeRangeToKeepOutsidePlayableArea { get; set; } = 4;
     public IObservableCollection<ReactiveFormKey> Regions { get; init; } = new ObservableCollectionExtended<ReactiveFormKey>();
     public Func<FormKey, string?, bool> Filter { get; }
 }
@@ -76,6 +78,8 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
         AllowedRegions = new ObservableCollectionExtended<ReactiveWorldspaceRegions>(
             featureFlag.AllowedRegions.Select(wr => new ReactiveWorldspaceRegions(LinkCacheProvider) {
                 Worldspace = wr.Worldspace.FormKey,
+                CellRangeToKeepOutsidePlayableArea = wr.CellViewDistanceRangeToKeepOutsidePlayableArea,
+                CellLandscapeRangeToKeepOutsidePlayableArea = wr.CellLandscapeRangeToKeepOutsidePlayableArea,
                 Regions = new ObservableCollectionExtended<ReactiveFormKey>(
                     wr.Regions.Select(r => new ReactiveFormKey { FormKey = r.FormKey })),
             })
@@ -125,7 +129,9 @@ public sealed partial class FeatureFlagEditorVM : ViewModel {
             ModPickerVM.SelectedMod?.ModKey ?? ModKey,
             AllowedRegions.Select(wr => new WorldspaceRegions(
                 new FormLinkGetter<IWorldspaceGetter>(wr.Worldspace),
-                wr.Regions.Select(IFormLinkGetter<IRegionGetter> (r) => new FormLink<IRegionGetter>(r.FormKey)).ToList()
+                wr.Regions.Select(IFormLinkGetter<IRegionGetter> (r) => new FormLink<IRegionGetter>(r.FormKey)).ToList(),
+                wr.CellRangeToKeepOutsidePlayableArea,
+                wr.CellLandscapeRangeToKeepOutsidePlayableArea
             )).ToList(),
             EssentialQuests
                 .Select(FormLinkInformation (r) => new FormLinkInformation(r.FormKey, typeof(ISkyrimMajorRecordGetter)))

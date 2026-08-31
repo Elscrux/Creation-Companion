@@ -1,4 +1,4 @@
-﻿using CreationEditor.Avalonia.Models.Selectables;
+using CreationEditor.Avalonia.Models.Selectables;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace BuildStripper.Models.FeatureFlag;
