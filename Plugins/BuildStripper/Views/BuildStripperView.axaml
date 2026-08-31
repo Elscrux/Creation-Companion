@@ -129,10 +129,10 @@
                     </DataTemplate>
                 </StackPanel.Resources>
 
-                <!-- Step : Configuration -->
+                <!-- Step 1: Configuration -->
                 <basic:ExpanderCard
                     IsExpanded="True"
-                    Header="Step : Configuration"
+                    Header="Step 1: Configuration"
                     Description="Select what data source and mod to clean"
                     Icon="Settings">
                     <StackPanel Spacing="12">
