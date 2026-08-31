@@ -4,7 +4,7 @@ using QuickGraph;
 using QuickGraph.Algorithms;
 namespace BuildStripper.Models;
 
-public sealed class Graph<TVertex, TEdge>() : IVertexAndEdgeListGraph<TVertex, TEdge>
+public class Graph<TVertex, TEdge>() : IVertexAndEdgeListGraph<TVertex, TEdge>
     where TVertex : notnull
     where TEdge : Edge<TVertex> {
     private readonly HashSet<TVertex> _vertices = [];

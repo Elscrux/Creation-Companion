@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using BuildStripper.Models.FeatureFlag;
 using BuildStripper.Services.FeatureFlag;
 using CreationEditor.Services.Environment;
 using CreationEditor.Skyrim;
@@ -14,21 +14,22 @@ public sealed class EssentialRecordProvider(
     IEditorEnvironment editorEnvironment,
     IFeatureFlagService featureFlagService) : IEssentialRecordProvider {
 
-    public bool IsEssentialRecord(IFormLinkGetter formLink) {
-        if (EssentialRecords.Contains(formLink)) return true;
+    public bool IsEssentialRecord(ModKey mod, IFormLinkGetter formLink) {
+        if (!EssentialRecords.TryGetValue(mod, out var essentialRecords)) {
+            essentialRecords = EnumerateEssentialRecords(mod)
+                .Select(x => x.FormKey)
+                .ToHashSet();
 
-        return FormKeysEssentialRecords.Contains(formLink.FormKey);
+            EssentialRecords[mod] = essentialRecords;
+        }
+
+        return essentialRecords.Contains(formLink.FormKey);
     }
 
-    [field: AllowNull, MaybeNull]
-    public IReadOnlySet<FormLinkInformation> EssentialRecords => field ??= EnumerateEssentialRecords().ToHashSet();
+    private Dictionary<ModKey, IReadOnlySet<FormKey>> EssentialRecords { get; } = new();
 
-    private IReadOnlySet<FormKey> FormKeysEssentialRecords => field ??= EssentialRecords
-        .Select(fli => fli.FormKey)
-        .ToHashSet();
-
-    private IEnumerable<FormLinkInformation> EnumerateEssentialRecords() {
-        foreach (var (worldspace, cells) in EnumerateRetainedExteriorCells(editorEnvironment.LinkCache)) {
+    private IEnumerable<FormLinkInformation> EnumerateEssentialRecords(ModKey mod) {
+        foreach (var (worldspace, cells) in EnumerateEssentialExteriorCells(mod, editorEnvironment.LinkCache)) {
             yield return new FormLinkInformation(worldspace, typeof(IWorldspaceGetter));
 
             foreach (var cell in cells) {
@@ -36,25 +37,87 @@ public sealed class EssentialRecordProvider(
             }
         }
 
-        foreach (var featureFlag in featureFlagService.EnabledFeatureFlags) {
+        foreach (var featureFlag in featureFlagService.EnabledFeatureFlags.Where(f => f.ModKey == mod)) {
             foreach (var essentialRecord in featureFlag.EssentialRecords) {
                 yield return essentialRecord;
             }
         }
     }
 
-    public bool IsInvalidExteriorCell(IFormLinkGetter<IWorldspaceGetter> worldspace, ICellGetter cell) {
-        var allowedRegions = GetAllowedRegions(worldspace);
+    public Dictionary<FormKey, List<(ICellGetter Cell, ExteriorCellRetainReason RetainReason)>> EnumerateRetainedExteriorCells(ModKey mod, ILinkCache linkCache) {
+        var mergedFeatureFlags = EnumerateWorldspaceRegions(mod)
+            .GroupBy(x => x.Worldspace);
 
-        // When there is no reference of the worldspace in any feature flag, all cells are valid
-        if (allowedRegions.Count == 0) return false;
+        var retainedCells = new Dictionary<FormKey, List<(ICellGetter Cell, ExteriorCellRetainReason RetainReason)>>();
+        foreach (var group in mergedFeatureFlags) {
+            if (!group.Key.TryResolve(linkCache, out var worldspace)) continue;
 
-        return cell.Regions is null || !cell.Regions.Intersect(allowedRegions).Any();
+            var regions = group.SelectMany(y => y.Regions).ToHashSet();
+            var cells = regions.Count == 0
+                ? worldspace.EnumerateCells()
+                : worldspace.EnumerateCells().Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any());
+
+            var retainedCellsInWorldspace = cells.ToArray();
+
+            var retainedCoordinates = retainedCellsInWorldspace
+                .Select(x => x.Grid?.Point)
+                .WhereNotNull()
+                .ToHashSet();
+
+            var cellLandscapeRange = group.Max(x => x.CellLandscapeRangeToKeepOutsidePlayableArea);
+            var cellViewDistanceRangeToKeep = group.Max(x => x.CellViewDistanceRangeToKeepOutsidePlayableArea);
+
+            var cellsWithinRange = new List<(ICellGetter Cell, ExteriorCellRetainReason RetainReason)>();
+            retainedCells[worldspace.FormKey] = cellsWithinRange;
+
+            // Get all coordinates for cells within the landscape range of retained cells
+            var processedCoordinates = new HashSet<P2Int>();
+            foreach (var retainedCell in retainedCellsInWorldspace) {
+                if (retainedCell.Grid is null) continue;
+
+                var retainedCoordinate = retainedCell.Grid.Point;
+                processedCoordinates.Add(retainedCoordinate);
+
+                // With a default uGridsToLoad = 5 diameter, the radius is 2
+                for (var dx = -cellLandscapeRange; dx <= cellLandscapeRange; dx++) {
+                    for (var dy = -cellLandscapeRange; dy <= cellLandscapeRange; dy++) {
+                        processedCoordinates.Add(new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy));
+                    }
+                }
+            }
+
+            // Add cells to the list based on their distance to retained cells
+            foreach (var coordinate in processedCoordinates) {
+                if (retainedCoordinates.Contains(coordinate)) continue;
+
+                var minDistanceToRetainedCoordinates = retainedCoordinates
+                    .Select(c => {
+                        // We need to find the maximum distance to either direction to see if we're still inside the uGridsToLoad range
+                        var distX = Math.Abs(c.X - coordinate.X);
+                        var distY = Math.Abs(c.Y - coordinate.Y);
+                        return Math.Max(distX, distY);
+                    })
+                    .Min();
+
+                var cell = worldspace.GetCell(coordinate);
+                if (cell is null) continue;
+
+                if (minDistanceToRetainedCoordinates >= cellLandscapeRange) {
+                    cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinLandscapeRangeOfRetainedCell));
+                } else if (minDistanceToRetainedCoordinates <= 0) {
+                    throw new InvalidOperationException(
+                        $"Cell {cell.FormKey} is already retained, but was found in the list of cells within range. This should never happen.");
+                } else {
+                    cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell));
+                }
+            }
+        }
+
+        return retainedCells;
     }
 
-    public Dictionary<FormKey, List<ICellGetter>> EnumerateRetainedExteriorCells(ILinkCache linkCache) {
-        var mergedFeatureFlags = featureFlagService.EnabledFeatureFlags
-            .SelectMany(x => x.AllowedRegions)
+    public Dictionary<FormKey, List<ICellGetter>> EnumerateEssentialExteriorCells(ModKey mod, ILinkCache linkCache) {
+        var mergedFeatureFlags = EnumerateWorldspaceRegions(mod)
             .GroupBy(x => x.Worldspace);
 
         var retainedCells = new Dictionary<FormKey, List<ICellGetter>>();
@@ -74,9 +137,20 @@ public sealed class EssentialRecordProvider(
         return retainedCells;
     }
 
-    public IReadOnlyList<IFormLinkGetter<IRegionGetter>> GetAllowedRegions(IFormLinkGetter<IWorldspaceGetter> worldspace) {
+    public IEnumerable<WorldspaceRegions> EnumerateWorldspaceRegions(ModKey mod) {
         return featureFlagService.EnabledFeatureFlags
-            .SelectMany(f => f.AllowedRegions.Find(ar => ar.Worldspace.Equals(worldspace))?.Regions ?? [])
+            .Where(f => f.ModKey == mod)
+            .SelectMany(x => x.AllowedRegions);
+    }
+
+    public IEnumerable<WorldspaceRegions> EnumerateWorldspaceRegions(ModKey mod, IFormLinkGetter<IWorldspaceGetter> worldspace) {
+        return EnumerateWorldspaceRegions(mod)
+            .Where(ar => ar.Worldspace.Equals(worldspace));
+    }
+
+    public IReadOnlyList<IFormLinkGetter<IRegionGetter>> GetAllowedRegions(ModKey mod, IFormLinkGetter<IWorldspaceGetter> worldspace) {
+        return EnumerateWorldspaceRegions(mod, worldspace)
+            .SelectMany(f => f.Regions)
             .ToArray();
     }
 }

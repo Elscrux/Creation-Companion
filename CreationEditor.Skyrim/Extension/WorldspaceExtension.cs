@@ -25,6 +25,35 @@ public static class WorldspaceExtension {
             var subBlock = worldspace.GetSubBlock(cellCoordinates);
             return subBlock?.Items.FirstOrDefault(b => b.Grid is not null && b.Grid.Point == cellCoordinates);
         }
+
+        /// <summary>
+        /// Gets all placed objects in the exterior cell at the specified coordinates in the persistent cell of the worldspace.
+        /// </summary>
+        /// <param name="cellCoordinates">Coordinates of the exterior cell to get placed objects for</param>
+        /// <returns>All placed objects in the exterior cell at the specified coordinates in the persistent cell of the worldspace</returns>
+        public IEnumerable<IPlacedGetter> GetPersistentPlacedInExteriorCell(P2Int cellCoordinates) {
+            var persistentCell = worldspace.TopCell;
+            if (persistentCell is null) return [];
+
+            return persistentCell.Temporary
+                .Concat(persistentCell.Persistent)
+                .Where(p => p.Placement is not null && p.Placement.GetCellCoordinates() == cellCoordinates);
+        }
+
+        /// <summary>
+        /// Gets all placed objects in the exterior cell at the specified coordinates, including both temporary and persistent placed objects.
+        /// </summary>
+        /// <param name="cellCoordinates">Coordinates of the exterior cell to get placed objects for</param>
+        /// <returns>All placed objects in the exterior cell at the specified coordinates, including both temporary and persistent placed objects</returns>
+        public IEnumerable<IPlacedGetter> GetAllPlacedInExteriorCell(P2Int cellCoordinates) {
+            var cell = worldspace.GetCell(cellCoordinates);
+            if (cell?.Grid?.Point is null) return [];
+
+            return worldspace.GetPersistentPlacedInExteriorCell(cell.Grid.Point)
+                .Concat(cell.Temporary)
+                .Concat(cell.Persistent);
+        }
+
         /// <summary>
         /// Gets a block for the specified cell coordinates if it exists.
         /// </summary>

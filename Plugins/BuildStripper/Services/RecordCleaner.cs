@@ -1,5 +1,7 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using BuildStripper.Models;
+using BuildStripper.Models.FeatureFlag;
 using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Environment;
@@ -22,12 +24,9 @@ public sealed class RecordCleaner(
     IRecordController recordController,
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
-    // TODO make configurable parameters in the UI - based on uGridsToLoad (5 => 2), and extended uGridsToLoadOnlyLandscape (9 => 4)
-    public const int CellRangeToKeepOutsidePlayableArea = 2;
-    public const int CellLanscapeRangeToKeepOutsidePlayableArea = 4;
 
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
-        var processedRecords = new HashSet<FormKey>();
+        var processedRecords = new ConcurrentDictionary<FormKey, bool>();
         foreach (var record in mod.EnumerateMajorRecords()) {
             // Record specific pre-processing
             switch (record) {
@@ -114,7 +113,7 @@ public sealed class RecordCleaner(
             var queue = new Queue<IFormLinkIdentifier>([record.ToFormLinkInformation()]);
             while (queue.Count > 0) {
                 var current = queue.Dequeue();
-                if (!processedRecords.Add(current.FormKey)) {
+                if (!processedRecords.TryAdd(current.FormKey, true)) {
                     continue;
                 }
 
@@ -140,14 +139,14 @@ public sealed class RecordCleaner(
                         }
                     }
 
-                    // Is regenerated
+                    // NAVI is going to be regenerated anyway, don't include that
                     if (currentReference.Type == typeof(INavigationMeshInfoMapGetter)) continue;
 
                     // Removing references from worldspaces to something like large refs or all recursive nodes from cells etc
                     if (currentReference.Type == typeof(IWorldspaceGetter)) continue;
 
                     // Navmesh to navmesh links will connect all cells in the worldspace which we don't want - re-finalize navmesh after cleaning!
-                    if (current.Type == typeof(INavigationMeshGetter) && currentReference.Type == typeof(INavigationMeshGetter)) continue;
+                    if (currentReference.Type == typeof(INavigationMeshGetter) && current.Type == typeof(INavigationMeshGetter)) continue;
 
                     var currentReferenceLink = new FormLinkIdentifier(currentReference);
                     queue.Enqueue(currentReference);
@@ -186,7 +185,10 @@ public sealed class RecordCleaner(
             .ToHashSet();
     }
 
-    public void CreatedCleanedMod(ISkyrimModGetter mod, HashSet<FormLinkInformation> recordsToClean, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
+    public void CreatedCleanedMod(
+        ISkyrimModGetter mod,
+        HashSet<FormLinkInformation> recordsToClean,
+        IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
         var cleanedModKey = ModKey.FromFileName("Cleaned" + mod.ModKey.FileName);
         var duplicate = mod.Duplicate(cleanedModKey);
 
@@ -224,51 +226,25 @@ public sealed class RecordCleaner(
 
     public void RetainLinks(
         IEssentialRecordProvider essentialRecordProvider,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
+        FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
-        FormLinkIdentifier formLinkIdentifier,
-        HashSet<ILinkIdentifier> retained,
-        ISet<ILinkIdentifier> excluded,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
+        FormLinkIdentifier formLinkIdentifier) {
         var formLink = formLinkIdentifier.FormLink;
         if (formLink.FormKey.ModKey != mod.ModKey
-         || essentialRecordProvider.IsEssentialRecord(formLink)
+         || essentialRecordProvider.IsEssentialRecord(mod.ModKey, formLink)
          || (dependencies.Count > 0 && editorEnvironment.LinkCache.ResolveAllSimpleContexts(formLink).Any(c => dependencies.Contains(c.ModKey)))) {
             // Retain overrides of records from other mods
             // Retain records that are essential and all their transitive dependencies
-            // Retain placeholder records that are going to be replaced by Creation Club records via patch
             // Retain things that are overridden by dependencies
-            retained.Add(formLinkIdentifier);
-            if (excluded.Contains(formLinkIdentifier)) return;
+            if (retainedGraph.ExcludedVertices.Contains(formLinkIdentifier)) return;
 
-            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, formLinkIdentifier));
-
-            if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) return;
-
-            retainOutgoingEdges(edges);
+            retainedGraph.IncludeVertex(formLinkIdentifier, formLinkIdentifier);
         } else if (formLink.Type.InheritsFromAny(SelfRetainedRecordTypes)) {
-            // Retain records that are self-retained, and keep adding all other records that are linked to them
-            var queue = new Queue<ILinkIdentifier>([formLinkIdentifier]);
-            while (queue.Count > 0) {
-                var current = queue.Dequeue();
-                dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(formLinkIdentifier, current));
+            // Retain all records that are self-retained
+            if (retainedGraph.ExcludedVertices.Contains(formLinkIdentifier)) return;
 
-                if (!retained.Add(current)) continue;
-                if (excluded.Contains(current)) continue;
-
-                // Ensure all referenced links are retained for self-retained records as well
-                if (graph.OutgoingEdges.TryGetValue(current, out var links)) {
-                    retainOutgoingEdges(links);
-                }
-
-                if (!graph.IncomingEdges.TryGetValue(current, out var incomingEdges)) continue;
-
-                queue.Enqueue(incomingEdges.Select(x => x.Target)
-                    .OfType<FormLinkIdentifier>()
-                    .Where(link => link.FormLink.Type.InheritsFromAny(SelfRetainedRecordTypes)));
-            }
+            retainedGraph.IncludeVertex(formLinkIdentifier, formLinkIdentifier);
         }
     }
 
@@ -283,82 +259,69 @@ public sealed class RecordCleaner(
     ];
 
     public void FinalRetainLinks(
+        IModGetter mod,
         IEssentialRecordProvider essentialRecordProvider,
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
-        HashSet<ILinkIdentifier> retained,
-        ISet<ILinkIdentifier> excludedLinks,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
+        FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
-        RetainCellsAroundRegion(essentialRecordProvider, retained, excludedLinks, dependencyGraph, retainOutgoingEdges, addPostProcessStep);
+        RetainCellsAroundRegion(mod, essentialRecordProvider, retainedGraph, addPostProcessStep);
 
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
-        foreach (var implicitType in ImplicitRetainedRecordTypes) {
-            foreach (var vertex in graph.Vertices) {
-                if (excludedLinks.Contains(vertex)) continue;
-                if (vertex is not FormLinkIdentifier formLinkIdentifier) continue;
-                if (formLinkIdentifier.FormLink.Type != implicitType) continue;
-                if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
+        foreach (var vertex in graph.Vertices) {
+            if (retainedGraph.ExcludedVertices.Contains(vertex)) continue;
+            if (vertex is not FormLinkIdentifier formLinkIdentifier) continue;
+            if (!ImplicitRetainedRecordTypes.Contains(formLinkIdentifier.FormLink.Type)) continue;
+            if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
 
-                // Don't retain links to parent or previous nodes
-                if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)) {
-                    edges = edges
-                        .Where(x => x.Target is FormLinkIdentifier f
-                         && f.FormLink.Type != typeof(IStoryManagerQuestNodeGetter)
-                         && f.FormLink.Type != typeof(IStoryManagerBranchNodeGetter))
-                        .ToHashSet();
-                }
-
-                if (edges.Count == 0) continue;
-
-                if (formLinkIdentifier.FormLink.Type == typeof(IConstructibleObjectGetter) || formLinkIdentifier.FormLink.Type == typeof(IRelationshipGetter)) {
-                    // Constructible objects and relationships should only be retained if all their references are retained
-                    if (edges.Any(x => !retained.Contains(x.Target))) continue;
-                } else {
-                    // Other types should be retained if any of their references are retained
-                    if (!edges.Any(x => retained.Contains(x.Target))) continue;
-                }
-
-                // Keep parent nodes of quest nodes
-                if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)
-                 && editorEnvironment.LinkCache.TryResolve<IStoryManagerQuestNodeGetter>(formLinkIdentifier.FormLink.FormKey, out var questNode)) {
-                    // Only keep quest edges for quests that are retained
-                    var retainedQuests = questNode.Quests
-                        .Select(x => x.Quest.ToStandardizedIdentifier())
-                        .Where(x => retained.Contains(new FormLinkIdentifier(x)))
-                        .ToArray();
-
-                    if (retainedQuests.Length == 0) continue;
-
-                    edges = edges
-                        .Where(x => x.Target is not FormLinkIdentifier f
-                         || f.FormLink.Type != typeof(IQuestGetter)
-                         || retainedQuests.Contains(f.FormLink.ToStandardizedIdentifier()))
-                        .ToHashSet();
-
-                    // Retain parent story manager nodes, they are required
-                    var parentNode = questNode.Parent.TryResolve(editorEnvironment.LinkCache);
-                    while (parentNode is not null) {
-                        var link = new FormLinkIdentifier(parentNode.ToFormLinkInformation());
-                        if (excludedLinks.Contains(link)) break;
-
-                        var edge = new Edge<ILinkIdentifier>(vertex, link);
-                        dependencyGraph.AddEdge(edge);
-                        retained.Add(link);
-                        retainOutgoingEdges([edge]);
-                        parentNode = parentNode.Parent.TryResolve(editorEnvironment.LinkCache);
-                    }
-                }
-
-                retained.Add(vertex);
-
-                retainOutgoingEdges(edges);
+            // Don't retain links to parent or previous nodes
+            if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)) {
+                edges = edges
+                    .Where(x => x.Target is FormLinkIdentifier f
+                     && f.FormLink.Type != typeof(IStoryManagerQuestNodeGetter)
+                     && f.FormLink.Type != typeof(IStoryManagerBranchNodeGetter))
+                    .ToHashSet();
             }
+
+            if (edges.Count == 0) continue;
+
+            var builtFilteredGraph = retainedGraph.Build();
+
+            if (formLinkIdentifier.FormLink.Type == typeof(IConstructibleObjectGetter) || formLinkIdentifier.FormLink.Type == typeof(IRelationshipGetter)) {
+                // Constructible objects and relationships should only be retained if all their references are retained
+                if (edges.Any(x => !builtFilteredGraph.ContainsVertex(x.Target))) continue;
+            } else {
+                // Other types should be retained if any of their references are retained
+                if (!edges.Any(x => builtFilteredGraph.ContainsVertex(x.Target))) continue;
+            }
+
+            // Keep parent nodes of quest nodes
+            if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)
+             && editorEnvironment.LinkCache.TryResolve<IStoryManagerQuestNodeGetter>(formLinkIdentifier.FormLink.FormKey, out var questNode)) {
+                // Only keep quest edges for quests that are retained
+                var retainedQuests = questNode.Quests
+                    .Select(x => x.Quest.ToStandardizedIdentifier())
+                    .Where(x => builtFilteredGraph.ContainsVertex(new FormLinkIdentifier(x)))
+                    .ToArray();
+
+                if (retainedQuests.Length == 0) continue;
+
+                // Retain parent story manager nodes, they are required
+                var parentNode = questNode.Parent.TryResolve(editorEnvironment.LinkCache);
+                while (parentNode is not null) {
+                    var link = new FormLinkIdentifier(parentNode.ToFormLinkInformation());
+                    if (retainedGraph.ExcludedVertices.Contains(link)) break;
+
+                    retainedGraph.IncludeVertex(link, vertex);
+                    parentNode = parentNode.Parent.TryResolve(editorEnvironment.LinkCache);
+                }
+            }
+
+            retainedGraph.IncludeVertex(vertex, vertex);
         }
 
         foreach (var vertex in graph.Vertices) {
-            if (excludedLinks.Contains(vertex)) continue;
+            if (retainedGraph.ExcludedVertices.Contains(vertex)) continue;
             if (vertex is not FormLinkIdentifier { FormLink: var formLink } formLinkIdentifier) continue;
 
             if (formLink.Type == typeof(ISceneGetter)) {
@@ -369,159 +332,138 @@ public sealed class RecordCleaner(
                 }
 
                 if (scene.Flags is null || !scene.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) continue;
-                if (!retained.Contains(new FormLinkIdentifier(scene.Quest))) continue;
 
-                retained.Add(formLinkIdentifier);
-
-                if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
-
-                retainOutgoingEdges(edges);
+                retainedGraph.IncludeVertex(formLinkIdentifier, new FormLinkIdentifier(scene.Quest));
             } else if (formLink.Type == typeof(IDialogTopicGetter)) {
-                // Only scene dialog topics can be unused, everything else is implicitly retained
+                // Only scene dialog topics can be unused, everything else is implicitly retained by the quest
                 if (!editorEnvironment.LinkCache.TryResolve<IDialogTopicGetter>(formLink.FormKey, out var topic)) {
                     logger.Here().Warning("Failed to resolve dialog topic {Topic}", formLink.FormKey);
                     continue;
                 }
 
                 if (topic.SubtypeName.ToDialogTopicSubtype() != DialogTopic.SubtypeEnum.Scene) {
-                    if (!retained.Contains(new FormLinkIdentifier(topic.Quest))) continue;
-
-                    retained.Add(formLinkIdentifier);
-
-                    if (!graph.OutgoingEdges.TryGetValue(formLinkIdentifier, out var edges)) continue;
-
-                    retainOutgoingEdges(edges);
+                    retainedGraph.IncludeVertex(formLinkIdentifier, new FormLinkIdentifier(topic.Quest));
                 }
             }
         }
     }
 
     private void RetainCellsAroundRegion(
+        IModGetter mod,
         IEssentialRecordProvider essentialRecordProvider,
-        HashSet<ILinkIdentifier> retained,
-        ISet<ILinkIdentifier> excludedLinks,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges,
+        FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
-        foreach (var (worldspaceFormKey, retainedCells) in essentialRecordProvider.EnumerateRetainedExteriorCells(editorEnvironment.LinkCache)) {
+        foreach (var (worldspaceFormKey, retainedCells) in essentialRecordProvider.EnumerateRetainedExteriorCells(mod.ModKey, editorEnvironment.LinkCache)) {
             if (!editorEnvironment.LinkCache.TryResolve<IWorldspaceGetter>(worldspaceFormKey, out var worldspace)) continue;
 
-            var retainedCoordinates = retainedCells
-                .Select(x => x.Grid?.Point)
-                .WhereNotNull()
-                .ToHashSet();
+            foreach (var (cell, retainReason) in retainedCells) {
+                if (cell.Grid is null) continue;
 
-            foreach (var retainedCell in retainedCells) {
-                if (retainedCell.Grid is null) continue;
+                var position = cell.Grid.Point;
+                var sourceCell = new FormLinkIdentifier(cell.ToFormLinkInformation());
 
-                var retainedCoordinate = retainedCell.Grid.Point;
-                var sourceLink = new FormLinkIdentifier(retainedCell.ToFormLinkInformation());
+                // Skip cells referencing everything their placed objects are referencing, but we don't retain all of them
+                var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
+                if (retainedGraph.ExcludedVertices.Contains(cellLink)) continue;
 
-                // With a default uGridsToLoad = 5 diameter, the radius is 2 
-                for (var dx = -CellLanscapeRangeToKeepOutsidePlayableArea; dx <= CellLanscapeRangeToKeepOutsidePlayableArea; dx++) {
-                    for (var dy = -CellLanscapeRangeToKeepOutsidePlayableArea; dy <= CellLanscapeRangeToKeepOutsidePlayableArea; dy++) {
-                        var position = new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy);
-                        if (retainedCoordinates.Contains(position)) continue;
+                switch (retainReason) {
+                    case ExteriorCellRetainReason.WithinLandscapeRangeOfRetainedCell: {
+                        // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
+                        // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
+                        // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
+                        // To implement this, use a post-processing step to clear out all cell contents apart from the landscape shape
+                        addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
 
-                        var minDistanceToRetainedCoordinates = retainedCoordinates
-                            .Select(c => {
-                                // We need to find the maximum distance to either direction to see if we're still inside the uGridsToLoad range
-                                var distX = Math.Abs(c.X - position.X);
-                                var distY = Math.Abs(c.Y - position.Y);
-                                return Math.Max(distX, distY);
-                            })
-                            .Min();
+                        // Force exclude everything placed in the cell
+                        foreach (var placed in worldspace.GetAllPlacedInExteriorCell(position)) {
+                            var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
+                            retainedGraph.ExcludeVertex(formLinkIdentifier);
+                        }
+                        break;
 
-                        var cell = worldspace.GetCell(position);
-                        if (cell is null) continue;
+                        void EmptyCell(IMajorRecord record) {
+                            if (record is not ICell c) return;
 
-                        // Skip cells referencing everything their placed objects are referencing, but we don't retain all of them
-                        var cellLink = new FormLinkIdentifier(cell.ToFormLinkInformation());
-                        if (excludedLinks.Contains(cellLink)) continue;
-
-                        if (minDistanceToRetainedCoordinates > CellRangeToKeepOutsidePlayableArea) {
-                            // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
-                            // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
-                            // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
-                            // To implement this, use a post-processing step to clear out all cell contents apart from the landscape shape
-                            addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
-
-                            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
-
-                            void EmptyCell(IMajorRecord record) {
-                                if (record is not ICell c) return;
-
-                                c.Location.SetToNull();
-                                c.Owner.SetToNull();
-                                c.LockList.SetToNull();
-                                c.AcousticSpace.SetToNull();
-                                c.EncounterZone.SetToNull();
-                                c.ImageSpace.SetToNull();
-                                c.Music.SetToNull();
-                                c.Water.SetToNull();
-                                c.LightingTemplate.SetToNull();
-                                c.Landscape?.Textures?.Clear();
-                                c.Landscape?.Layers?.Clear();
-                                c.Temporary.Clear();
-                                c.Persistent.Clear();
-                            }
-                        } else {
-                            // Retain the cell and all its references
-                            dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(sourceLink, cellLink));
-                            retainOutgoingEdges([
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)),
-                                new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)),
-                                ..cell.Regions is null
-                                    ? []
-                                    : cell.Regions.Select(r => new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(r))),
-                            ]);
-
-                            foreach (var placed in cell.Temporary.Concat(cell.Persistent)) {
-                                if (ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(placed, retained, editorEnvironment)) {
-                                    Retain(placed);
-                                } else {
-                                    // If the placed shouldn't be retained, we want to make sure it actually stays excluded
-                                    // And in case of other records linking to it, it should also not be included
-                                    var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
-                                    retained.Remove(formLinkIdentifier);
-                                    excludedLinks.Add(formLinkIdentifier);
-                                }
+                            c.Location.SetToNull();
+                            c.Owner.SetToNull();
+                            c.LockList.SetToNull();
+                            c.AcousticSpace.SetToNull();
+                            c.EncounterZone.SetToNull();
+                            c.ImageSpace.SetToNull();
+                            c.Music.SetToNull();
+                            c.Water.SetToNull();
+                            c.LightingTemplate.SetToNull();
+                            c.Landscape?.Textures?.Clear();
+                            c.Landscape?.Layers.Clear();
+                            c.NavigationMeshes.Clear();
+                            c.Temporary.Clear();
+                            c.Persistent.Clear();
+                        }
+                    }
+                    case ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell: {
+                        // Retain the cell and all its references
+                        Retain(new FormLinkIdentifier(cell.Location));
+                        Retain(new FormLinkIdentifier(cell.Owner));
+                        Retain(new FormLinkIdentifier(cell.LockList));
+                        Retain(new FormLinkIdentifier(cell.AcousticSpace));
+                        Retain(new FormLinkIdentifier(cell.EncounterZone));
+                        Retain(new FormLinkIdentifier(cell.ImageSpace));
+                        Retain(new FormLinkIdentifier(cell.Music));
+                        Retain(new FormLinkIdentifier(cell.Water));
+                        Retain(new FormLinkIdentifier(cell.LightingTemplate));
+                        if (cell.Regions is not null) {
+                            foreach (var region in cell.Regions) {
+                                retainedGraph.IncludeVertex(new FormLinkIdentifier(region), sourceCell);
                             }
                         }
 
-                        retained.Add(cellLink);
-
-                        if (cell.Landscape is not null) {
-                            Retain(cell.Landscape);
+                        // Include only relevant visible placed objects
+                        foreach (var placed in worldspace.GetAllPlacedInExteriorCell(position)) {
+                            if (ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(placed, retainedGraph, editorEnvironment)) {
+                                RetainRecord(placed);
+                            } else {
+                                // If the placed shouldn't be retained, we want to make sure it actually stays excluded
+                                var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
+                                retainedGraph.ExcludeVertex(formLinkIdentifier);
+                            }
                         }
+                        break;
                     }
                 }
 
-                void Retain(IMajorRecordGetter record) {
-                    var link = new FormLinkIdentifier(record.ToFormLinkInformation());
-                    if (excludedLinks.Contains(link)) return;
+                // Always include the cell itself and its landscape
+                retainedGraph.IncludeVertex(cellLink, sourceCell);
+                if (cell.Landscape is not null) {
+                    RetainRecord(cell.Landscape);
+                }
 
-                    var edge = new Edge<ILinkIdentifier>(sourceLink, link);
-                    dependencyGraph.AddEdge(edge);
-                    retainOutgoingEdges([edge]);
-                    retained.Add(link);
+                // Exclude navmeshes outside the playable area
+                foreach (var navigationMesh in cell.NavigationMeshes) {
+                    var formLinkIdentifier = new FormLinkIdentifier(navigationMesh.ToFormLinkInformation());
+                    retainedGraph.ExcludeVertex(formLinkIdentifier);
+                }
+
+                void RetainRecord(IMajorRecordGetter record) {
+                    var link = new FormLinkIdentifier(record.ToFormLinkInformation());
+                    Retain(link);
+                }
+                void Retain(FormLinkIdentifier link) {
+                    if (retainedGraph.ExcludedVertices.Contains(link)) return;
+
+                    retainedGraph.IncludeVertex(link, sourceCell);
                 }
             }
         }
     }
 
-    private static bool ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(IPlacedGetter placed, HashSet<ILinkIdentifier> retained, IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment) {
+    private static bool ShouldBeRetainedOutsidePlayableAreaWithinUGridsToLoad(
+        IPlacedGetter placed,
+        FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
+        IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment) {
         if (placed is not IPlacedObjectGetter placedObject) return false;
 
         // Skip owned stuff because that would retain npcs/factions we don't want to retain necessarily
-        if (!placed.Owner.IsNull && !retained.Contains(new FormLinkIdentifier(placed.Owner))) return false;
+        if (!placed.Owner.IsNull && !retainedGraph.IncludedVertices.Contains(new FormLinkIdentifier(placed.Owner))) return false;
 
         // Skip stuff with scripts because they might reference anything
         if (placed.VirtualMachineAdapter is not null) return false;

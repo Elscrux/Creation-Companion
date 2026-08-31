@@ -20,7 +20,11 @@ public sealed class BuildStripper(
     /// <param name="retained">Record and assets links to retain</param>
     /// <param name="dataSource">Data source to clean</param>
     /// <param name="postProcessSteps">Post process steps to run on retained records after cleaning</param>
-    public void Clean(ISkyrimModGetter mod, HashSet<ILinkIdentifier> retained, IDataSource? dataSource, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
+    public void Clean(
+        ISkyrimModGetter mod,
+        HashSet<ILinkIdentifier> retained,
+        IDataSource? dataSource,
+        IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> postProcessSteps) {
         var recordsToClean = RecordCleaner.GetRecordsToClean(retained, mod);
 
         if (dataSource is not null) {
@@ -57,83 +61,46 @@ public sealed class BuildStripper(
     /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
     /// <param name="excludedLinks">Set of links to exclude from retention</param>
     /// <returns>Tuple of retained links and a dependency graph which shows where the retained links were first referenced from for debugging</returns>
-    public (HashSet<ILinkIdentifier> AllRetained, Graph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> PostProcessSteps) FindRetainedRecords(
-        IEssentialRecordProvider essentialRecordProvider,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
-        IModGetter mod,
-        IReadOnlyList<ModKey> dependencies,
-        ISet<ILinkIdentifier> excludedLinks) {
-        var retained = new HashSet<ILinkIdentifier>();
-        var dependencyGraph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
+    public (FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> DependencyGraph, IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>> PostProcessSteps)
+        FindRetainedRecords(
+            IEssentialRecordProvider essentialRecordProvider,
+            Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
+            IModGetter mod,
+            IReadOnlyList<ModKey> dependencies,
+            IReadOnlySet<ILinkIdentifier> excludedLinks) {
+        var retainedGraph = new FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>>(graph);
+        foreach (var excludedLink in excludedLinks) {
+            retainedGraph.ExcludeVertex(excludedLink);
+        }
         var postProcessSteps = new Dictionary<IFormLinkIdentifier, Action<IMajorRecord>>();
 
         foreach (var vertex in graph.Vertices) {
-            if (retained.Contains(vertex)) continue;
-            if (excludedLinks.Contains(vertex)) continue;
+            // Skip if excluded
+            if (retainedGraph.ExcludedVertices.Contains(vertex)) continue;
+
+            // Skip if already added explicitly
+            if (retainedGraph.IncludedVertices.Contains(vertex)) continue;
 
             switch (vertex) {
                 case FormLinkIdentifier formLinkIdentifier: {
-                    recordCleaner.RetainLinks(essentialRecordProvider,
-                        graph,
+                    recordCleaner.RetainLinks(
+                        essentialRecordProvider,
+                        retainedGraph,
                         mod,
                         dependencies,
-                        formLinkIdentifier,
-                        retained,
-                        excludedLinks,
-                        dependencyGraph,
-                        RetainOutgoingEdges);
+                        formLinkIdentifier);
                     break;
                 }
                 case AssetLinkIdentifier assetLinkIdentifier: {
-                    assetCleaner.RetainLinks(graph, mod, dependencies, assetLinkIdentifier, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges);
+                    assetCleaner.RetainLinks(graph, retainedGraph, mod, dependencies, assetLinkIdentifier);
                     break;
                 }
             }
         }
 
-        recordCleaner.FinalRetainLinks(essentialRecordProvider, graph, retained, excludedLinks, dependencyGraph, RetainOutgoingEdges, AddPostProcessStep);
+        recordCleaner.FinalRetainLinks(mod, essentialRecordProvider, graph, retainedGraph, AddPostProcessStep);
 
-        return (retained, dependencyGraph, postProcessSteps);
-
-        void RetainOutgoingEdges(HashSet<Edge<ILinkIdentifier>> edges) {
-            if (edges.Count == 0) return;
-
-            var queue = new Queue<ILinkIdentifier>(edges.Select(x => x.Target));
-            var source = edges.First().Source;
-            while (queue.Count > 0) {
-                var current = queue.Dequeue();
-                if (current is FormLinkIdentifier formLinkIdentifier && formLinkIdentifier.FormLink.FormKey.ToString().Contains("0EAF3E", StringComparison.OrdinalIgnoreCase)) {
-                    Console.WriteLine();
-                }
-                if (current is FormLinkIdentifier formLinkIdentifier2 && formLinkIdentifier2.FormLink.FormKey.ToString().Contains("16EED1", StringComparison.OrdinalIgnoreCase)) {
-                    Console.WriteLine();
-                }
-                if (current is FormLinkIdentifier formLinkIdentifier3 && formLinkIdentifier3.FormLink.FormKey.ToString().Contains("09FEA5", StringComparison.OrdinalIgnoreCase)) {
-                    Console.WriteLine();
-                }
-                if (excludedLinks.Contains(current)) continue;
-
-                if (current != source) {
-                    dependencyGraph.AddEdge(new Edge<ILinkIdentifier>(source, current));
-                }
-
-                if (!retained.Add(current)) continue;
-                if (!graph.OutgoingEdges.TryGetValue(current, out var currentEdges)) continue;
-
-                foreach (var edge in currentEdges) {
-                    if (edge.Target is FormLinkIdentifier f2 && f2.FormLink.FormKey.ToString().Contains("0EAF3E", StringComparison.OrdinalIgnoreCase)) {
-                        Console.WriteLine();
-                    }
-                    if (edge.Target is FormLinkIdentifier f3 && f3.FormLink.FormKey.ToString().Contains("16EED1", StringComparison.OrdinalIgnoreCase)) {
-                        Console.WriteLine();
-                    }
-                    if (edge.Target is FormLinkIdentifier f4 && f4.FormLink.FormKey.ToString().Contains("09FEA5", StringComparison.OrdinalIgnoreCase)) {
-                        Console.WriteLine();
-                    }
-                    queue.Enqueue(edge.Target);
-                }
-            }
-        }
+        return (retainedGraph, postProcessSteps);
 
         void AddPostProcessStep(IFormLinkIdentifier formLinkIdentifier, Action<IMajorRecord> action) {
             postProcessSteps.TryAdd(formLinkIdentifier, action);

@@ -77,16 +77,13 @@ public sealed class AssetCleaner(
 
     public void RetainLinks(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
+        FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
-        AssetLinkIdentifier assetLinkIdentifier,
-        HashSet<ILinkIdentifier> retained,
-        ISet<ILinkIdentifier> excluded,
-        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> dependencyGraph,
-        Action<HashSet<Edge<ILinkIdentifier>>> retainOutgoingEdges) {
+        AssetLinkIdentifier assetLinkIdentifier) {
         if (_selfRetainingAssetTypes.Contains(assetLinkIdentifier.AssetLink.Type)) {
             // Always retain behavior assets
-            retained.Add(assetLinkIdentifier);
+            retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
         }
     }
 }

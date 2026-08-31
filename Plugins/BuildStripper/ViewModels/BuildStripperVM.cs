@@ -55,7 +55,7 @@ public sealed partial class BuildStripperVM : ViewModel {
     private readonly Services.BuildStripper _buildStripper;
     private readonly IEssentialRecordProvider _essentialRecordProvider;
 
-    private Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? _originalReferenceGraphOnlyRetained;
+    private Graph<ILinkIdentifier, Edge<ILinkIdentifier>>? _filteredGraph;
     private HashSet<ILinkIdentifier>? _retainedLinks;
     private IReadOnlyDictionary<IFormLinkIdentifier, Action<IMajorRecord>>? _postProcessSteps;
 
@@ -84,14 +84,14 @@ public sealed partial class BuildStripperVM : ViewModel {
     [Reactive] public partial bool IsBusy { get; set; }
 
     public ReactiveCommand<Unit, Unit> BuildReferenceGraphCommand { get; }
-    public ReactiveCommand<Unit, Unit> BuildRetainedLinksCommand { get; }
+    public ReactiveCommand<Unit, Task> BuildRetainedLinksCommand { get; }
     public ReactiveCommand<Unit, Unit> CleanCommand { get; }
     public ReactiveCommand<Unit, Unit> SearchForSelectedPathCommand { get; }
     public ReactiveCommand<IList, Unit> SearchForRecordsCommand { get; }
     public Func<FeatureFlag, FeatureFlagEditorVM> FeatureFlagEditorVMFactory { get; }
 
     public IDataSource? SelectedDataSource => CleanAssets ? CleaningDataSourcePicker.SelectedDataSource : null;
-    public IObservable<bool> RequirementsMet { get; }
+    public IObservable<bool> ReadyForProcessing { get; }
     public IObservable<bool> CanClean { get; }
 
     public BuildStripperVM(
@@ -136,7 +136,7 @@ public sealed partial class BuildStripperVM : ViewModel {
             .Subscribe(OnCleaningModSelected)
             .DisposeWith(this);
 
-        RequirementsMet = CleaningModPickerVM.HasModSelected
+        ReadyForProcessing = CleaningModPickerVM.HasModSelected
             .CombineLatest(FeatureFlagService.FeatureFlagsChanged, (a, _) => a && FeatureFlagService.FeatureFlags.Values.Any(x => x));
 
         CanClean = this.WhenAnyValue(x => x.CleanAssets)
@@ -144,8 +144,8 @@ public sealed partial class BuildStripperVM : ViewModel {
                 CleaningDataSourcePicker.HasDataSourceSelected,
                 (cleanAssets, dataSourceSelected) => !cleanAssets || dataSourceSelected);
 
-        BuildReferenceGraphCommand = ReactiveCommand.CreateRunInBackground(BuildReferenceGraph, RequirementsMet);
-        BuildRetainedLinksCommand = ReactiveCommand.CreateRunInBackground(BuildRetainedLinks, RequirementsMet);
+        BuildReferenceGraphCommand = ReactiveCommand.CreateRunInBackground(BuildReferenceGraph, ReadyForProcessing);
+        BuildRetainedLinksCommand = ReactiveCommand.CreateRunInBackground(BuildRetainedLinks, ReadyForProcessing);
         CleanCommand = ReactiveCommand.CreateRunInBackground(Clean, CanClean);
         SearchForSelectedPathCommand = ReactiveCommand.CreateRunInBackground(SearchForSelectedPath);
         SearchForRecordsCommand = ReactiveCommand.CreateRunInBackground<IList>(SearchForRecords);
@@ -240,23 +240,21 @@ public sealed partial class BuildStripperVM : ViewModel {
         }
     }
 
-    private void UpdateInvalidRecords(HashSet<ILinkIdentifier> retainedLinks) {
+    private async Task UpdateInvalidRecords(HashSet<ILinkIdentifier> retainedLinks) {
         if (!GetModAndDependencies(out var mod, out _)) return;
 
         // Checking if there is any exterior cell retained that shouldn't be retained
-        var (invalidExteriorCells, invalidInteriorCells) = GetInvalidCells(retainedLinks, mod);
+        var invalidCellsTask = Task.Run(() => GetInvalidCells(retainedLinks, mod));
+        var invalidQuestsTask = Task.Run(() => GetInvalidQuests(retainedLinks, mod));
+        var voiceTypesWithoutSoundsTask = Task.Run(() => GetVoiceTypesWithoutSounds(retainedLinks, mod));
 
-        var invalidQuests = GetInvalidQuests(retainedLinks, mod);
-
-        var voiceTypesWithoutSounds = GetVoiceTypesWithoutSounds(retainedLinks, mod);
-
-        // Retain dialog without voiced lines?
+        await Task.WhenAll(invalidCellsTask, invalidQuestsTask, voiceTypesWithoutSoundsTask);
 
         Dispatcher.UIThread.Post(() => {
-            InvalidExteriorCells = invalidExteriorCells;
-            InteriorCells = invalidInteriorCells;
-            InvalidQuests = invalidQuests;
-            InvalidVoiceTypes = voiceTypesWithoutSounds;
+            InvalidExteriorCells = invalidCellsTask.Result.invalidExteriorCells;
+            InteriorCells = invalidCellsTask.Result.invalidInteriorCells;
+            InvalidQuests = invalidQuestsTask.Result;
+            InvalidVoiceTypes = voiceTypesWithoutSoundsTask.Result;
         });
     }
 
@@ -269,17 +267,19 @@ public sealed partial class BuildStripperVM : ViewModel {
     private (HashSet<ExteriorCell> invalidExteriorCells, HashSet<ICellGetter> invalidInteriorCells) GetInvalidCells(
         HashSet<ILinkIdentifier> retainedLinks,
         ISkyrimModGetter mod) {
+        var retainedExteriorCells = _essentialRecordProvider.EnumerateRetainedExteriorCells(mod.ModKey, EditorEnvironment.LinkCache);
         var invalidExteriorCells = new HashSet<ExteriorCell>();
-        var interiorCells = new HashSet<ICellGetter>();
+        var invalidInteriorCells = new HashSet<ICellGetter>();
         foreach (var linkIdentifier in retainedLinks) {
             if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
             if (formLinkIdentifier.FormLink.Type != typeof(ICellGetter)) continue;
             if (!EditorEnvironment.LinkCache.TryResolve<ICellGetter>(formLinkIdentifier.FormLink.FormKey, out var cell)) continue;
             if (cell.FormKey.ModKey != mod.ModKey) continue;
-            if (_essentialRecordProvider.IsEssentialRecord(formLinkIdentifier.FormLink)) continue;
+            if (_essentialRecordProvider.IsEssentialRecord(mod.ModKey, formLinkIdentifier.FormLink)) continue;
 
             var worldspace = cell.GetWorldspace(EditorEnvironment.LinkCache);
             if (worldspace is null || cell.Grid is null) {
+                // For an interior cell, check if it has any exterior doors going into interior cells that are not retained
                 if (cell.GetExteriorDoorsGoingIntoInteriorRecursively(EditorEnvironment.LinkCache)
                     .All(placedContext => {
                         if (placedContext.Record.Placement is null) return true;
@@ -292,23 +292,18 @@ public sealed partial class BuildStripperVM : ViewModel {
 
                         return !retainedLinks.Contains(new FormLinkIdentifier(c.ToFormLinkInformation()));
                     })) {
-                    interiorCells.Add(cell);
+                    invalidInteriorCells.Add(cell);
                 }
-            } else if (_essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), cell)) {
-                var notInRangeOfValidCells = Enumerable.Range(-RecordCleaner.CellRangeToKeepOutsidePlayableArea, RecordCleaner.CellRangeToKeepOutsidePlayableArea)
-                    .SelectMany(dx => Enumerable.Range(-RecordCleaner.CellRangeToKeepOutsidePlayableArea, RecordCleaner.CellRangeToKeepOutsidePlayableArea)
-                            .Select(dy => (dx, dy)))
-                    .Select(offset => worldspace.GetCell(new P2Int(cell.Grid.Point.X + offset.dx, cell.Grid.Point.Y + offset.dy)))
-                    .WhereNotNull()
-                    .All(neighborCell => _essentialRecordProvider.IsInvalidExteriorCell(worldspace.ToLinkGetter(), neighborCell));
+            } else {
+                // For an exterior cell, check if it within the range of valid cells for the worldspace, if not, add it to the invalid exterior cells
+                retainedExteriorCells.TryGetValue(worldspace.FormKey, out var validCellsForWorldspace);
+                if (validCellsForWorldspace is not null && validCellsForWorldspace.Any(x => x.Cell.FormKey == cell.FormKey)) continue;
 
-                if (notInRangeOfValidCells) {
-                    invalidExteriorCells.Add(new ExteriorCell(worldspace, cell));
-                }
+                invalidExteriorCells.Add(new ExteriorCell(worldspace, cell));
             }
         }
 
-        return (invalidExteriorCells, interiorCells);
+        return (invalidExteriorCells, invalidInteriorCells);
     }
 
     private HashSet<IQuestGetter> GetInvalidQuests(
@@ -317,7 +312,7 @@ public sealed partial class BuildStripperVM : ViewModel {
         var invalidQuests = new HashSet<IQuestGetter>();
         foreach (var linkIdentifier in retainedLinks) {
             if (linkIdentifier is not FormLinkIdentifier formLinkIdentifier) continue;
-            if (_essentialRecordProvider.IsEssentialRecord(formLinkIdentifier.FormLink)) continue;
+            if (_essentialRecordProvider.IsEssentialRecord(mod.ModKey, formLinkIdentifier.FormLink)) continue;
             if (formLinkIdentifier.FormLink.FormKey.ModKey != mod.ModKey) continue;
             if (formLinkIdentifier.FormLink.Type != typeof(IQuestGetter)) continue;
             if (!EditorEnvironment.LinkCache.TryResolve<IQuestGetter>(formLinkIdentifier.FormLink.FormKey, out var quest)) continue;
@@ -368,11 +363,11 @@ public sealed partial class BuildStripperVM : ViewModel {
     }
 
     private void FindShortestPath(ILinkIdentifier source, ILinkIdentifier target) {
-        if (_originalReferenceGraphOnlyRetained is null) return;
+        if (_filteredGraph is null) return;
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
 
-        var path = _originalReferenceGraphOnlyRetained.ShortestPath(source, target);
+        var path = _filteredGraph.ShortestPath(source, target);
 
         Dispatcher.UIThread.Post(() => {
             Path = path;
@@ -407,18 +402,25 @@ public sealed partial class BuildStripperVM : ViewModel {
         Dispatcher.UIThread.Post(() => IsBusy = false);
     }
 
-    public void BuildRetainedLinks() {
+    public async Task BuildRetainedLinks() {
         if (CleaningModPickerVM.SelectedMod is null) return;
         if (ReferenceGraph is null) return;
         if (!GetModAndDependencies(out var mod, out var dependencies)) return;
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
 
-        var (retainedLinks, dependencyGraph, postProcessSteps) = _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, ExcludedLinks.ToHashSet());
-        _retainedLinks = retainedLinks;
+        var excludedQuests = mod.Quests
+            .Select(q => q.ToFormLinkInformation())
+            .Where(q => !_essentialRecordProvider.IsEssentialRecord(mod.ModKey, q))
+            .Select(q => new FormLinkIdentifier(q));
+        var allExcluded = ExcludedLinks.Concat(excludedQuests);
+        var (filteredGraph, postProcessSteps) = _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, allExcluded.ToHashSet());
+        _filteredGraph = filteredGraph.Build();
+        _retainedLinks = filteredGraph.Build().Vertices.ToHashSet();
+        var dependencyGraph = filteredGraph.BuildDependencyGraph();
         _postProcessSteps = postProcessSteps;
 
-        var retainedRecords = retainedLinks.OfType<FormLinkIdentifier>()
+        var retainedRecords = _retainedLinks.OfType<FormLinkIdentifier>()
             .Where(x => x.FormLink.FormKey.ModKey == mod.ModKey)
             .Select(link => EditorEnvironment.LinkCache.TryResolveIdentifier(link.FormLink, out var editorId) && editorId is not null
                 ? new FormLinkWithEditorID(link, editorId) : null)
@@ -426,25 +428,11 @@ public sealed partial class BuildStripperVM : ViewModel {
             .OrderBy(r => r.EditorID)
             .ToList();
 
-        var referenceGraphOnlyRetained = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
-        foreach (var link in retainedLinks) {
-            if (ReferenceGraph.OutgoingEdges.TryGetValue(link, out var outgoing)) {
-                foreach (var edge in outgoing) {
-                    referenceGraphOnlyRetained.AddEdge(edge);
-                }
-            }
-        }
-
-        _originalReferenceGraphOnlyRetained = referenceGraphOnlyRetained;
+        await UpdateInvalidRecords(_retainedLinks);
 
         Dispatcher.UIThread.Post(() => {
             RetainedRecords = retainedRecords;
             DependencyGraph = dependencyGraph;
-        });
-
-        UpdateInvalidRecords(retainedLinks);
-
-        Dispatcher.UIThread.Post(() => {
             IsBusy = false;
         });
     }
