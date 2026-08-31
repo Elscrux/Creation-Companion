@@ -93,16 +93,13 @@ public static class CellExtension {
 
             return null;
         }
-        public bool IsInteriorCell()
-        {
+        public bool IsInteriorCell() {
             return (cell.Flags & Cell.Flag.IsInteriorCell) != 0;
         }
-        public bool IsExteriorCell()
-        {
+        public bool IsExteriorCell() {
             return (cell.Flags & Cell.Flag.IsInteriorCell) == 0;
         }
-        public bool IsPublic()
-        {
+        public bool IsPublic() {
             return (cell.Flags & Cell.Flag.PublicArea) != 0;
         }
         /// <summary>
@@ -111,18 +108,15 @@ public static class CellExtension {
         /// </summary>
         /// <param name="linkCache">Link cache to resolve cell links</param>
         /// <returns>All doors leading to an exterior cell</returns>
-        public IEnumerable<IModContext<IPlacedObjectGetter>> GetExteriorDoorsGoingIntoInteriorRecursively(ILinkCache linkCache)
-        {
+        public IEnumerable<IModContext<IPlacedObjectGetter>> GetExteriorDoorsGoingIntoInteriorRecursively(ILinkCache linkCache) {
             HashSet<FormKey> visitedCells = [cell.FormKey];
             var queue = new Queue<ICellGetter>();
             queue.Enqueue(cell);
 
-            while (queue.Count > 0)
-            {
+            while (queue.Count > 0) {
                 var currentCell = queue.Dequeue();
 
-                foreach (var placedObject in currentCell.GetAllPlaced(linkCache).OfType<IPlacedObjectGetter>())
-                {
+                foreach (var placedObject in currentCell.GetAllPlaced(linkCache).OfType<IPlacedObjectGetter>()) {
                     // Has a teleport destination
                     if (placedObject.TeleportDestination is null || placedObject.TeleportDestination.Door.IsNull) continue;
 
@@ -130,17 +124,12 @@ public static class CellExtension {
                     if (!linkCache.TryResolve<IDoorGetter>(placedObject.Base.FormKey, out _)) continue;
 
                     if (placedObject.TeleportDestination.Door.TryResolveSimpleContext(linkCache, out var destinationDoor)
-                     && destinationDoor.Parent?.Record is ICellGetter destinationCell)
-                    {
-                        if (destinationCell.IsInteriorCell())
-                        {
-                            if (visitedCells.Add(destinationCell.FormKey))
-                            {
+                     && destinationDoor.Parent?.Record is ICellGetter destinationCell) {
+                        if (destinationCell.IsInteriorCell()) {
+                            if (visitedCells.Add(destinationCell.FormKey)) {
                                 queue.Enqueue(destinationCell);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             yield return destinationDoor;
                         }
                     }

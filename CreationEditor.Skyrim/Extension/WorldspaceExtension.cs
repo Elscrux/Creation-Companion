@@ -21,8 +21,7 @@ public static class WorldspaceExtension {
         /// </summary>
         /// <param name="cellCoordinates">Cell coordinates to get the cell for</param>
         /// <returns>The cell at the specified coordinates or null if it does not exist</returns>
-        public ICellGetter? GetCell(P2Int cellCoordinates)
-        {
+        public ICellGetter? GetCell(P2Int cellCoordinates) {
             var subBlock = worldspace.GetSubBlock(cellCoordinates);
             return subBlock?.Items.FirstOrDefault(b => b.Grid is not null && b.Grid.Point == cellCoordinates);
         }
@@ -31,11 +30,10 @@ public static class WorldspaceExtension {
         /// </summary>
         /// <param name="blockCoordinates">Coordinates of the cell to get a block for</param>
         /// <returns>The block for the specified cell coordinates or null if it does not exist</returns>
-        public IWorldspaceBlockGetter? GetBlock(P2Int blockCoordinates)
-        {
+        public IWorldspaceBlockGetter? GetBlock(P2Int blockCoordinates) {
             // Formula as it can be seen here https://en.uesp.net/wiki/Skyrim_Mod:Mod_File_Format/CELL
-            var blockNumberX = (short)Math.Floor(blockCoordinates.X / 32.0);
-            var blockNumberY = (short)Math.Floor(blockCoordinates.Y / 32.0);
+            var blockNumberX = (short) Math.Floor(blockCoordinates.X / 32.0);
+            var blockNumberY = (short) Math.Floor(blockCoordinates.Y / 32.0);
 
             return worldspace.SubCells.FirstOrDefault(b => b.BlockNumberX == blockNumberX && b.BlockNumberY == blockNumberY);
         }
@@ -44,11 +42,10 @@ public static class WorldspaceExtension {
         /// </summary>
         /// <param name="blockCoordinates">Coordinates of the cell to get a subblock for</param>
         /// <returns>The subblock for the specified cell coordinates or null if it does not exist</returns>
-        public IWorldspaceSubBlockGetter? GetSubBlock(P2Int blockCoordinates)
-        {
+        public IWorldspaceSubBlockGetter? GetSubBlock(P2Int blockCoordinates) {
             // Formula as it can be seen here https://en.uesp.net/wiki/Skyrim_Mod:Mod_File_Format/CELL
-            var subBlockNumberX = (short)Math.Floor(blockCoordinates.X / 8.0);
-            var subBlockNumberY = (short)Math.Floor(blockCoordinates.Y / 8.0);
+            var subBlockNumberX = (short) Math.Floor(blockCoordinates.X / 8.0);
+            var subBlockNumberY = (short) Math.Floor(blockCoordinates.Y / 8.0);
 
             var block = worldspace.GetBlock(blockCoordinates);
             return block?.Items.FirstOrDefault(b => b.BlockNumberX == subBlockNumberX && b.BlockNumberY == subBlockNumberY);
