@@ -171,6 +171,7 @@
                                 MaxHeight="300"/>
                         </basic:Card>
 
+                        <!-- Feature Flags -->
                         <basic:Card
                             Header="Feature Flags"
                             Description="Required • Select which features to retain"
@@ -187,9 +188,18 @@
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Header="Enabled" Width="60">
                                         <DataTemplate DataType="featureFlag:FeatureFlagItem">
-                                            <CheckBox
-                                                HorizontalAlignment="Center"
-                                                IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                            <CheckBox HorizontalAlignment="Center"
+                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      ToolTip.Tip="Enable feature flag only when its mod matches the selected cleaning mod">
+                                                <CheckBox.IsEnabled>
+                                                    <MultiBinding
+                                                        Converter="{x:Static converter:ObjectConverters.EqualsTwoBindings}">
+                                                        <Binding Path="FeatureFlag.ModKey"/>
+                                                        <Binding
+                                                            Path="#Control.ViewModel.CleaningModPickerVM.SelectedMod.ModKey"/>
+                                                    </MultiBinding>
+                                                </CheckBox.IsEnabled>
+                                            </CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn>
                                     <DataGridTextColumn
