@@ -54,6 +54,22 @@ public class Graph<TVertex, TEdge>() : IVertexAndEdgeListGraph<TVertex, TEdge>
         _incomingEdges.GetOrAdd(edge.Target, () => []).Add(edge);
     }
 
+    public void RemoveEdge(TEdge edge) {
+        if (_outgoingEdges.TryGetValue(edge.Source, out var outgoingEdges)) {
+            outgoingEdges.Remove(edge);
+            if (outgoingEdges.Count == 0) {
+                _outgoingEdges.Remove(edge.Source);
+            }
+        }
+
+        if (_incomingEdges.TryGetValue(edge.Target, out var incomingEdges)) {
+            incomingEdges.Remove(edge);
+            if (incomingEdges.Count == 0) {
+                _incomingEdges.Remove(edge.Target);
+            }
+        }
+    }
+
     public List<TVertex>? ShortestPath(TVertex source, TVertex target) {
         if (!_tryGetOutEdgesCache.TryGetValue(source, out var shortestPathsDijkstra)) {
             shortestPathsDijkstra = this.ShortestPathsDijkstra(_ => 1, source);
