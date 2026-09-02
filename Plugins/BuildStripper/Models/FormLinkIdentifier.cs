@@ -6,4 +6,6 @@ public sealed record FormLinkIdentifier(FormLinkInformation FormLink) : ILinkIde
     public override string ToString() {
         return $"{FormLink.FormKey} ({FormLink.Type.Name})";
     }
+
+    public bool IsNull => FormLink.IsNull;
 }

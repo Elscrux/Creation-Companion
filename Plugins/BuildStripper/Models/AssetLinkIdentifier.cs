@@ -5,4 +5,6 @@ public sealed record AssetLinkIdentifier(IAssetLinkGetter AssetLink) : ILinkIden
     public override string ToString() {
         return AssetLink.DataRelativePath.ToString();
     }
+
+    public bool IsNull => AssetLink.IsNull;
 }

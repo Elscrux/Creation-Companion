@@ -37,8 +37,8 @@ public sealed class FilteredGraph<TVertex, TEdge>(IVertexAndEdgeListGraph<TVerte
     private readonly Dictionary<TVertex, HashSet<TVertex>> _includedVertexReasons = new();
 
     public void IncludeVertex(TVertex vertex, TVertex reasonToIncludeVertex) {
-        if (vertex is FormLinkIdentifier { FormLink.IsNull: true }) return;
-        if (reasonToIncludeVertex is FormLinkIdentifier { FormLink.IsNull: true }) return;
+        if (vertex is ILinkIdentifier { IsNull: true }) return;
+        if (reasonToIncludeVertex is ILinkIdentifier { IsNull: true }) return;
 
         _includedVertices.Add(vertex);
         _excludedVertices.Remove(vertex);
@@ -100,8 +100,8 @@ public sealed class FilteredGraph<TVertex, TEdge>(IVertexAndEdgeListGraph<TVerte
 
     private void IncludeVertexChain(Graph<TVertex, TEdge> graph, Graph<TVertex, Edge<TVertex>> depGraph, TVertex vertex, TVertex reason) {
         if (_excludedVertices.Contains(reason)) return;
-        if (vertex is FormLinkIdentifier { FormLink.IsNull: true }) return;
-        if (reason is FormLinkIdentifier { FormLink.IsNull: true }) return;
+        if (vertex is ILinkIdentifier { IsNull: true }) return;
+        if (reason is ILinkIdentifier { IsNull: true }) return;
 
         _includedVertices.Add(vertex);
         _excludedVertices.Remove(vertex);
@@ -118,7 +118,7 @@ public sealed class FilteredGraph<TVertex, TEdge>(IVertexAndEdgeListGraph<TVerte
         foreach (var outEdge in baseGraph.OutEdges(vertex)) {
             var linkedVertex = outEdge.Target;
             if (_excludedVertices.Contains(linkedVertex)) continue;
-            if (linkedVertex is FormLinkIdentifier { FormLink.IsNull: true }) continue;
+            if (linkedVertex is ILinkIdentifier { IsNull: true }) continue;
 
             IncludeVertexChain(graph, depGraph, linkedVertex, reason);
             graph.AddEdge(outEdge);
