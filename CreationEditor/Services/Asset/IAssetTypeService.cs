@@ -12,7 +12,7 @@ public interface IAssetTypeService {
     /// </summary>
     /// <param name="filePath">File path to determine asset type of</param>
     /// <returns>The singleton instance of the asset type, or null if no asset type could be found</returns>
-    IAssetType? GetAssetType(string filePath);
+    IAssetType? GetAssetType(DataRelativePath filePath);
 
     /// <summary>
     /// Builds an asset link for a file path

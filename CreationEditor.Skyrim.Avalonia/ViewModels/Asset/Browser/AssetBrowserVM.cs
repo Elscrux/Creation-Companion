@@ -130,7 +130,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             // Icon
                             FAIconElement icon;
                             if (asset is DataSourceFileLink) {
-                                var assetType = AssetTypeService.GetAssetType(asset.DataRelativePath.Path);
+                                var assetType = AssetTypeService.GetAssetType(asset.DataRelativePath);
                                 icon = assetType is null
                                     ? AssetIconService.GetIcon(asset.DataRelativePath.Extension)
                                     : AssetIconService.GetIcon(assetType);

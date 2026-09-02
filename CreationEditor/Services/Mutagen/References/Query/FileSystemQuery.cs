@@ -27,7 +27,7 @@ public sealed class FileSystemQuery<TCache, TLink>(
         foreach (var fileExtension in fileParser.AssetType.FileExtensions) {
             var searchPattern = "*" + fileExtension;
             foreach (var file in rootLink.EnumerateFileLinks(searchPattern, true)) {
-                var assetType = assetTypeService.GetAssetType(file.FullPath);
+                var assetType = assetTypeService.GetAssetType(file.DataRelativePath);
                 if (fileParser.AssetType != assetType) continue;
 
                 foreach (var result in fileParser.ParseFile(file.FullPath, file)) {
@@ -40,7 +40,7 @@ public sealed class FileSystemQuery<TCache, TLink>(
     public void FillCache(DataRelativePath reference, TCache cache) {
         if (!dataSourceService.TryGetFileLink(reference.Path, out var fileLink)) return;
 
-        var assetType = assetTypeService.GetAssetType(fileLink.FullPath);
+        var assetType = assetTypeService.GetAssetType(fileLink.DataRelativePath);
         if (fileParser.AssetType != assetType) return;
 
         foreach (var result in fileParser.ParseFile(fileLink.FullPath, fileLink)) {

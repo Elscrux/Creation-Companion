@@ -36,14 +36,14 @@ public sealed class AssetTypeService : IAssetTypeService {
         }
     }
 
-    public IAssetType? GetAssetType(string filePath) {
-        var extension = _fileSystem.Path.GetExtension(filePath);
+    public IAssetType? GetAssetType(DataRelativePath filePath) {
+        var extension = _fileSystem.Path.GetExtension(filePath.Path);
         if (extension.Length == 0) return null;
 
         // Temporary adjustments
-        if (extension is ".xwm" or ".wav" && filePath.Contains("music", DataRelativePath.PathComparison)) return Provider.Music;
-        if (filePath.Contains("interface", DataRelativePath.PathComparison)) return null;
-        if (filePath.Contains("source\\scripts", DataRelativePath.PathComparison)) return null;
+        if (extension is ".xwm" or ".wav" && filePath.Path.StartsWith("music\\", DataRelativePath.PathComparison)) return Provider.Music;
+        if (filePath.Path.Contains("interface", DataRelativePath.PathComparison)) return null;
+        if (filePath.Path.Contains("source\\scripts", DataRelativePath.PathComparison)) return null;
 
         _assetTypesExtensions.TryGetValue(extension, out var assetType);
 
@@ -51,7 +51,7 @@ public sealed class AssetTypeService : IAssetTypeService {
     }
 
     public IAssetLink? GetAssetLink(DataRelativePath filePath) {
-        var assetType = GetAssetType(filePath.Path);
+        var assetType = GetAssetType(filePath);
         if (assetType is null) return null;
 
         return GetAssetLink(filePath, assetType);
