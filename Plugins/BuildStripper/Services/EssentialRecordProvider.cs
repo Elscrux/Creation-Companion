@@ -102,13 +102,14 @@ public sealed class EssentialRecordProvider(
                 var cell = worldspace.GetCell(coordinate);
                 if (cell is null) continue;
 
-                if (minDistanceToRetainedCoordinates >= cellLandscapeRange) {
+                if (minDistanceToRetainedCoordinates > cellLandscapeRange) {
+                    throw new InvalidOperationException($"Cell {cell.FormKey} is outside the landscape range of retained cells, but was found in the list of cells within range. This should never happen.");
+                } else if (minDistanceToRetainedCoordinates > cellViewDistanceRangeToKeep) {
                     cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinLandscapeRangeOfRetainedCell));
-                } else if (minDistanceToRetainedCoordinates <= 0) {
-                    throw new InvalidOperationException(
-                        $"Cell {cell.FormKey} is already retained, but was found in the list of cells within range. This should never happen.");
-                } else {
+                } else if (minDistanceToRetainedCoordinates > 0) {
                     cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell));
+                } else {
+                    throw new InvalidOperationException($"Cell {cell.FormKey} is a retained cell, but was found in the list of cells within range. This should never happen.");
                 }
             }
         }
