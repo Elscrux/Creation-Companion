@@ -1,4 +1,5 @@
-﻿using BuildStripper.Models;
+﻿using System.Text.RegularExpressions;
+using BuildStripper.Models;
 using CreationEditor;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
@@ -14,7 +15,7 @@ using Serilog;
 using ILinkIdentifier = BuildStripper.Models.ILinkIdentifier;
 namespace BuildStripper.Services;
 
-public sealed class AssetCleaner(
+public sealed partial class AssetCleaner(
     ILogger logger,
     IAssetTypeProvider assetTypeProvider,
     IAssetTypeService assetTypeService,
@@ -91,15 +92,69 @@ public sealed class AssetCleaner(
         assetTypeProvider.Behavior,
     ];
 
+    [GeneratedRegex(@"Function\s+(\w|_)(\w|_|\d)*\s*\(.+\).+Global")]
+    private static partial Regex GlobalFunctionRegex { get; }
+
+    /// <summary>
+    /// Adds link to the retained graph if the given asset link should always be retained.
+    /// This includes:
+    /// - behavior assets which currently have no way to track references to them.
+    /// - scripts with global functions
+    /// - voice files that are voicing lines from other mods
+    /// </summary>
+    /// <param name="graph">Reference graph of all links in the mod and its dependencies</param>
+    /// <param name="retainedGraph">Filtered graph of all links that are retained in the mod and its dependencies</param>
+    /// <param name="selectedDataSource">Selected data source for the mod</param>
+    /// <param name="mod">Mod to find retained records for</param>
+    /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
+    /// <param name="assetLinkIdentifier">Asset link identifier to check for retention</param>
     public void RetainLinks(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
+        IDataSource? selectedDataSource,
         IModGetter mod,
         IReadOnlyList<ModKey> dependencies,
         AssetLinkIdentifier assetLinkIdentifier) {
         if (_selfRetainingAssetTypes.Contains(assetLinkIdentifier.AssetLink.Type)) {
             // Always retain behavior assets
             retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
+        }
+
+        // Ensure to retain scripts that have global functions as long as there is no system to track references to global function calls between scripts
+        // TODO: replace with system to track global script calls so we don't need to keep scripts with global functions that are never called
+        if (selectedDataSource is not null && assetLinkIdentifier.AssetLink.Type == SkyrimScriptSourceAssetType.Instance) {
+            var fileLink = new DataSourceFileLink(selectedDataSource, assetLinkIdentifier.AssetLink.DataRelativePath);
+            using var stream = fileLink.ReadFileStream();
+            if (stream is not null) {
+                using var streamReader = new StreamReader(stream);
+                var scriptSource = streamReader.ReadToEnd();
+                if (GlobalFunctionRegex.IsMatch(scriptSource)) {
+                    retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
+
+                    // Also retain the compiled script
+                    var compiledPath = selectedDataSource.FileSystem.Path.ChangeExtension(assetLinkIdentifier.AssetLink.DataRelativePath.Path, ".pex");
+                    var compiledAssetLink = assetTypeService.GetAssetLink(compiledPath);
+                    if (compiledAssetLink is not null) {
+                        var compiledScriptLink = new AssetLinkIdentifier(compiledAssetLink);
+                        retainedGraph.IncludeVertex(compiledScriptLink, compiledScriptLink);
+                    }
+                }
+            }
+        }
+
+        // Retain voice files that are voicing lines from other mods, like follower dialogue defined in Skyrim to have them join the blades
+        if (selectedDataSource is not null && assetLinkIdentifier.AssetLink.Type == SkyrimSoundAssetType.Instance && assetLinkIdentifier.AssetLink.DataRelativePath.Path.StartsWith(@"Sound\Voice\", DataRelativePath.PathComparison)) {
+            // Data relative paths for voices are always structured as follows:
+            // Sound/Voice/<mod name>/<voice type>/<voice file>
+            var voiceTypeDirectory = selectedDataSource.FileSystem.Path.GetDirectoryName(assetLinkIdentifier.AssetLink.DataRelativePath.Path);
+            var modDirectory = selectedDataSource.FileSystem.Path.GetDirectoryName(voiceTypeDirectory);
+            var modName = selectedDataSource.FileSystem.Path.GetFileName(modDirectory);
+            if (modName is not null) {
+                var modKey = ModKey.FromFileName(modName);
+                if (!modKey.Equals(mod.ModKey)) {
+                    retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
+                }
+            }
         }
     }
 }
