@@ -25,6 +25,13 @@ public sealed class RecordCleaner(
     IAssetTypeService assetTypeService,
     IReferenceService referenceService) {
 
+    /// <summary>
+    /// Adds all references to records to the reference graph.
+    /// </summary>
+    /// <param name="graph">Reference graph to add references to</param>
+    /// <param name="mod">Mod to get references for</param>
+    /// <param name="dependencies">List of mods that are dependent on the mod in question and are relevant for the reference graph</param>
+    /// <param name="masters">List of masters of the mod</param>
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
         var processedRecords = new ConcurrentDictionary<FormKey, bool>();
         foreach (var record in mod.EnumerateMajorRecords()) {
@@ -224,6 +231,18 @@ public sealed class RecordCleaner(
         typeof(IAnimatedObjectGetter),
     ];
 
+    /// <summary>
+    /// Adds link to the retained graph if the given form link is:
+    /// - an override of a record from another mod
+    /// - configured as a record that is essential for the mod
+    /// - being overridden by a dependency of the mod
+    /// - a record that is always retained due to lacking tracking capabilities currently (like an animated object or addon node)
+    /// </summary>
+    /// <param name="essentialRecordProvider">Provider for essential records</param>
+    /// <param name="retainedGraph">Filtered graph of all links that are retained in the mod and its dependencies</param>
+    /// <param name="mod">Mod to find retained records for</param>
+    /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
+    /// <param name="formLinkIdentifier">Form link identifier to check for retention</param>
     public void RetainLinks(
         IEssentialRecordProvider essentialRecordProvider,
         FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
@@ -258,6 +277,18 @@ public sealed class RecordCleaner(
         typeof(IDialogViewGetter),
     ];
 
+    /// <summary>
+    /// After the initial retention of records, this method will retain any records based on the existing retained records.
+    /// This includes:
+    /// - retaining cells around retained regions, with different retention rules based on the distance from the retained region
+    /// - implicitly retained records that are only retained if they are linked to by any retained records
+    /// - 
+    /// </summary>
+    /// <param name="mod"></param>
+    /// <param name="essentialRecordProvider"></param>
+    /// <param name="graph"></param>
+    /// <param name="retainedGraph"></param>
+    /// <param name="addPostProcessStep"></param>
     public void FinalRetainLinks(
         IModGetter mod,
         IEssentialRecordProvider essentialRecordProvider,

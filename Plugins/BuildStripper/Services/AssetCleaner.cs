@@ -22,7 +22,17 @@ public sealed class AssetCleaner(
     IReferenceService referenceService,
     IDataSourceService dataSourceService) {
 
+    /// <summary>
+    /// Adds all references to assets to the reference graph.
+    /// </summary>
+    /// <param name="graph">Reference graph to add references to</param>
+    /// <param name="mod">Mod to get references for</param>
+    /// <param name="dependencies">List of mods that are dependent on the mod in question and are relevant for the reference graph</param>
+    /// <param name="masters">List of masters of the mod</param>
     public void BuildGraph(Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph, IModGetter mod, IReadOnlyList<ModKey> dependencies, IReadOnlyList<ModKey> masters) {
+        // Build graph with all files in all loaded data sources, not just the selected data source
+        // Some assets in the selected data source might also be used by files in data sources of mods dependent on the selected mod
+        // So we'd expect that the mods using our selected mod as a dependency also
         foreach (var fileLink in dataSourceService.EnumerateFileLinksInAllDataSources(new DataRelativePath(string.Empty), true)) {
             var assetLink = assetTypeService.GetAssetLink(fileLink.DataRelativePath);
             if (assetLink is null) continue;
