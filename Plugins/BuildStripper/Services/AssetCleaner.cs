@@ -34,6 +34,12 @@ public sealed class AssetCleaner(
                 if (mod.ModKey == recordReference.FormKey.ModKey
                  || masters.Contains(recordReference.FormKey.ModKey)
                  || dependencies.Contains(recordReference.FormKey.ModKey)) {
+                    // Worldspace references everything that any of its nested cells reference, ignore all this
+                    if (recordReference.Type == typeof(IWorldspaceGetter)
+                     && assetLink.DataRelativePath.Path.StartsWith(@"Textures\Water\", DataRelativePath.PathComparison)) {
+                        continue;
+                    }
+
                     graph.AddEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(recordReference), assetLinkIdentifier));
                 }
             }
