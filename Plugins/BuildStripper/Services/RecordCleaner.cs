@@ -155,6 +155,13 @@ public sealed class RecordCleaner(
                     // Navmesh to navmesh links will connect all cells in the worldspace which we don't want - re-finalize navmesh after cleaning!
                     if (currentReference.Type == typeof(INavigationMeshGetter) && current.Type == typeof(INavigationMeshGetter)) continue;
 
+                    // Don't retain links previous story manager nodes - this can be regenerated later on and has no semantic meaning
+                    if ((currentReference.Type == typeof(IStoryManagerQuestNodeGetter) || currentReference.Type == typeof(IStoryManagerBranchNodeGetter))
+                     && editorEnvironment.LinkCache.TryResolve<IAStoryManagerNodeGetter>(currentReference.FormKey, out var storyManagerNode)
+                     && current.FormKey == storyManagerNode.PreviousSibling.FormKey) {
+                        continue;
+                    }
+
                     var currentReferenceLink = new FormLinkIdentifier(currentReference);
                     queue.Enqueue(currentReference);
 
@@ -305,8 +312,8 @@ public sealed class RecordCleaner(
             if (!ImplicitRetainedRecordTypes.Contains(formLinkIdentifier.FormLink.Type)) continue;
             if (!graph.OutgoingEdges.TryGetValue(vertex, out var edges)) continue;
 
-            // Don't retain links to parent or previous nodes
-            if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter)) {
+            // Don't retain these if based on having parent or previous nodes that are retained - so filter them out for this check
+            if (formLinkIdentifier.FormLink.Type == typeof(IStoryManagerQuestNodeGetter) || formLinkIdentifier.FormLink.Type == typeof(IStoryManagerBranchNodeGetter)) {
                 edges = edges
                     .Where(x => x.Target is FormLinkIdentifier f
                      && f.FormLink.Type != typeof(IStoryManagerQuestNodeGetter)
@@ -336,16 +343,6 @@ public sealed class RecordCleaner(
                     .ToArray();
 
                 if (retainedQuests.Length == 0) continue;
-
-                // Retain parent story manager nodes, they are required
-                var parentNode = questNode.Parent.TryResolve(editorEnvironment.LinkCache);
-                while (parentNode is not null) {
-                    var link = new FormLinkIdentifier(parentNode.ToFormLinkInformation());
-                    if (retainedGraph.ExcludedVertices.Contains(link)) break;
-
-                    retainedGraph.IncludeVertex(link, vertex);
-                    parentNode = parentNode.Parent.TryResolve(editorEnvironment.LinkCache);
-                }
             }
 
             retainedGraph.IncludeVertex(vertex, vertex);
