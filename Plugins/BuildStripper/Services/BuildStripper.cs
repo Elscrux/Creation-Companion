@@ -39,10 +39,11 @@ public sealed class BuildStripper(
     /// <summary>
     /// Builds a graph for the given mod and its dependencies which lists all the links between within a mod and all linked assets.
     /// </summary>
+    /// <param name="selectedDataSource">The data source to use for the graph</param>
     /// <param name="mod">Mod to build graph for</param>
     /// <param name="dependencies">List of dependencies</param>
     /// <returns>Link graph</returns>
-    public Graph<ILinkIdentifier, Edge<ILinkIdentifier>> BuildGraph(IModGetter mod, IReadOnlyList<ModKey> dependencies) {
+    public Graph<ILinkIdentifier, Edge<ILinkIdentifier>> BuildGraph(IDataSource? selectedDataSource, IModGetter mod, IReadOnlyList<ModKey> dependencies) {
         var graph = new Graph<ILinkIdentifier, Edge<ILinkIdentifier>>();
         var masters = mod.GetTransitiveMasters(editorEnvironment.GameEnvironment).ToArray();
 
@@ -57,6 +58,7 @@ public sealed class BuildStripper(
     /// </summary>
     /// <param name="essentialRecordProvider">Essential record provider</param>
     /// <param name="graph">Graph of all links in the mod and its dependencies</param>
+    /// <param name="selectedDataSource">The data source to use for the graph</param>
     /// <param name="mod">Mod to find retained records for</param>
     /// <param name="dependencies">List of mods that are dependent on the mod, any links to the mod in the dependencies will be retained</param>
     /// <param name="excludedLinks">Set of links to exclude from retention</param>
@@ -65,6 +67,7 @@ public sealed class BuildStripper(
         FindRetainedRecords(
             IEssentialRecordProvider essentialRecordProvider,
             Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
+            IDataSource? selectedDataSource,
             IModGetter mod,
             IReadOnlyList<ModKey> dependencies,
             IReadOnlySet<ILinkIdentifier> excludedLinks) {
@@ -92,7 +95,7 @@ public sealed class BuildStripper(
                     break;
                 }
                 case AssetLinkIdentifier assetLinkIdentifier: {
-                    assetCleaner.RetainLinks(graph, retainedGraph, mod, dependencies, assetLinkIdentifier);
+                    assetCleaner.RetainLinks(graph, retainedGraph, selectedDataSource, mod, dependencies, assetLinkIdentifier);
                     break;
                 }
             }

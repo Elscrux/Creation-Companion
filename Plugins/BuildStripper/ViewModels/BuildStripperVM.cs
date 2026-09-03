@@ -397,7 +397,7 @@ public sealed partial class BuildStripperVM : ViewModel {
         if (!GetModAndDependencies(out var mod, out var dependencies)) return;
 
         Dispatcher.UIThread.Post(() => IsBusy = true);
-        var graph = _buildStripper.BuildGraph(mod, dependencies);
+        var graph = _buildStripper.BuildGraph(SelectedDataSource, mod, dependencies);
         Dispatcher.UIThread.Post(() => ReferenceGraph = graph);
         Dispatcher.UIThread.Post(() => IsBusy = false);
     }
@@ -414,7 +414,7 @@ public sealed partial class BuildStripperVM : ViewModel {
             .Where(q => !_essentialRecordProvider.IsEssentialRecord(mod.ModKey, q))
             .Select(q => new FormLinkIdentifier(q));
         var allExcluded = ExcludedLinks.Concat(excludedQuests);
-        var (filteredGraph, postProcessSteps) = _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, mod, dependencies, allExcluded.ToHashSet());
+        var (filteredGraph, postProcessSteps) = _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, SelectedDataSource, mod, dependencies, allExcluded.ToHashSet());
         _filteredGraph = filteredGraph.Build();
         _retainedLinks = filteredGraph.Build().Vertices.ToHashSet();
         var dependencyGraph = filteredGraph.BuildDependencyGraph();
