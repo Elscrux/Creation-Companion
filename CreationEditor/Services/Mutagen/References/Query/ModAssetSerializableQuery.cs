@@ -40,6 +40,7 @@ public sealed class ModAssetSerializableQuery
         foreach (var record in source.EnumerateMajorRecords()) {
             try {
                 var recordLink = record.ToLinkFromRuntimeType();
+                // TODO mutagen needs to be updated to support non nested asset links
                 foreach (var assetLinkGetter in record.EnumerateAllAssetLinks(_assetLinkCache).Where(l => !l.IsNull)) {
                     // TODO remove when Mutagen fixes bugs with Behavior and BodyTexture files in races (after that run this again to see if anything else doesn't match)
                     if (!assetLinkGetter.AssetTypeInstance.FileExtensions.Contains(assetLinkGetter.DataRelativePath.Extension)) {
