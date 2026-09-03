@@ -302,7 +302,7 @@ public sealed class RecordCleaner(
         Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
-        RetainCellsAroundRegion(mod, essentialRecordProvider, retainedGraph, addPostProcessStep);
+        RetainCellsAroundRegion(mod, essentialRecordProvider, graph, retainedGraph, addPostProcessStep);
 
         // Retain records that link to any records that are retained
         // These records don't retain any other records implicitly in the current selection
@@ -379,6 +379,7 @@ public sealed class RecordCleaner(
     private void RetainCellsAroundRegion(
         IModGetter mod,
         IEssentialRecordProvider essentialRecordProvider,
+        Graph<ILinkIdentifier, Edge<ILinkIdentifier>> graph,
         FilteredGraph<ILinkIdentifier, Edge<ILinkIdentifier>> retainedGraph,
         Action<IFormLinkIdentifier, Action<IMajorRecord>> addPostProcessStep) {
         foreach (var (worldspaceFormKey, retainedCells) in essentialRecordProvider.EnumerateRetainedExteriorCells(mod.ModKey, editorEnvironment.LinkCache)) {
@@ -407,11 +408,47 @@ public sealed class RecordCleaner(
                             var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
                             retainedGraph.ExcludeVertex(formLinkIdentifier);
                         }
+
+                        // Remove links from the cell to anything that we remove as part of the empty cell generation
+                        // to make sure they are not retained due to this cell being retained
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)));
+
+                        if (cell.Landscape is not null) {
+                            if (cell.Landscape.Textures is not null) {
+                                foreach (var texture in cell.Landscape.Textures) {
+                                    graph.RemoveEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(cell.Landscape), new FormLinkIdentifier(texture)));
+                                }
+                            }
+
+                            foreach (var layer in cell.Landscape.Layers) {
+                                if (layer.Header is null) continue;
+
+                                graph.RemoveEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(cell.Landscape), new FormLinkIdentifier(layer.Header.Texture)));
+                            }
+                        }
+
+                        foreach (var navigationMesh in cell.NavigationMeshes) {
+                            graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(navigationMesh.ToFormLinkInformation())));
+                        }
+
+                        foreach (var temporary in cell.Temporary) {
+                            graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(temporary)));
+                        }
+
                         break;
 
                         void EmptyCell(IMajorRecord record) {
                             if (record is not ICell c) return;
 
+                            c.EditorID = null;
                             c.Location.SetToNull();
                             c.Owner.SetToNull();
                             c.LockList.SetToNull();
@@ -426,6 +463,8 @@ public sealed class RecordCleaner(
                             c.NavigationMeshes.Clear();
                             c.Temporary.Clear();
                             c.Persistent.Clear();
+
+                            // TODO also remove persistent records from the top level cell
                         }
                     }
                     case ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell: {
@@ -455,7 +494,42 @@ public sealed class RecordCleaner(
                                 retainedGraph.ExcludeVertex(formLinkIdentifier);
                             }
                         }
+                        
+                        addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
+
+                        // Remove links from the cell to anything that we remove as part of the empty cell generation
+                        // to make sure they are not retained due to this cell being retained
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)));
+                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)));
+
+                        foreach (var navigationMesh in cell.NavigationMeshes) {
+                            graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(navigationMesh.ToFormLinkInformation())));
+                        }
+
                         break;
+
+                        void EmptyCell(IMajorRecord record) {
+                            if (record is not ICell c) return;
+
+                            c.EditorID = null;
+                            c.Location.SetToNull();
+                            c.Owner.SetToNull();
+                            c.LockList.SetToNull();
+                            c.AcousticSpace.SetToNull();
+                            c.EncounterZone.SetToNull();
+                            c.ImageSpace.SetToNull();
+                            c.Music.SetToNull();
+                            c.Water.SetToNull();
+                            c.LightingTemplate.SetToNull();
+                            c.NavigationMeshes.Clear();
+                        }
                     }
                 }
 
