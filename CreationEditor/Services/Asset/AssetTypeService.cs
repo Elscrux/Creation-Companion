@@ -42,7 +42,6 @@ public sealed class AssetTypeService : IAssetTypeService {
 
         // Temporary adjustments
         if (extension is ".xwm" or ".wav" && filePath.Path.StartsWith("music\\", DataRelativePath.PathComparison)) return Provider.Music;
-        if (filePath.Path.Contains("interface", DataRelativePath.PathComparison)) return null;
         if (filePath.Path.Contains("source\\scripts", DataRelativePath.PathComparison)) return null;
 
         _assetTypesExtensions.TryGetValue(extension, out var assetType);
