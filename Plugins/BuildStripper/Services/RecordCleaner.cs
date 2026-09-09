@@ -114,6 +114,14 @@ public sealed class RecordCleaner(
                         graph.AddEdge(new Edge<ILinkIdentifier>(musicTrackIdentifier, assetLinkIdentifier));
                     }
                     break;
+                case ISceneGetter scene:
+                    var sceneIdentifier = new FormLinkIdentifier(scene.ToFormLinkInformation());
+
+                    // Scenes that begin on quest start should be retained if the quest is retained, so add a link from the quest to the scene
+                    if (scene.Flags is null || !scene.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) break;
+
+                    graph.AddEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(scene.Quest), sceneIdentifier));
+                    break;
             }
 
             // Add all transitive dependencies of the record
@@ -352,17 +360,7 @@ public sealed class RecordCleaner(
             if (retainedGraph.ExcludedVertices.Contains(vertex)) continue;
             if (vertex is not FormLinkIdentifier { FormLink: var formLink } formLinkIdentifier) continue;
 
-            if (formLink.Type == typeof(ISceneGetter)) {
-                // Retain scenes that begin on quest start                                                                       
-                if (!editorEnvironment.LinkCache.TryResolve<ISceneGetter>(formLink.FormKey, out var scene)) {
-                    logger.Here().Warning("Failed to resolve scene {Scene}", formLink.FormKey);
-                    continue;
-                }
-
-                if (scene.Flags is null || !scene.Flags.Value.HasFlag(Scene.Flag.BeginOnQuestStart)) continue;
-
-                retainedGraph.IncludeVertex(formLinkIdentifier, new FormLinkIdentifier(scene.Quest));
-            } else if (formLink.Type == typeof(IDialogTopicGetter)) {
+            if (formLink.Type == typeof(IDialogTopicGetter)) {
                 // Only scene dialog topics can be unused, everything else is implicitly retained by the quest
                 if (!editorEnvironment.LinkCache.TryResolve<IDialogTopicGetter>(formLink.FormKey, out var topic)) {
                     logger.Here().Warning("Failed to resolve dialog topic {Topic}", formLink.FormKey);
