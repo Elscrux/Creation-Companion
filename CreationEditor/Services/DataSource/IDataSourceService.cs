@@ -47,6 +47,13 @@ public interface IDataSourceService {
     FuncComparer<IDataSource> DataSourceComparer { get; }
 
     /// <summary>
+    /// Checks if the given data source path exists in the data sources.
+    /// </summary>
+    /// <param name="dataSourcePath">Path to the data source.</param>
+    /// <returns>True if the data source exists, false otherwise.</returns>
+    bool HasDataSource(string dataSourcePath);
+
+    /// <summary>
     /// Returns the data source for the given path.
     /// </summary>
     /// <param name="dataSourcePath">Path to the data source.</param>

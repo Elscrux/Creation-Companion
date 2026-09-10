@@ -123,6 +123,10 @@ public sealed class DataSourceService : IDataSourceService {
         return (archiveDataSources, fileSystemDataSources);
     }
 
+    public bool HasDataSource(string dataSourcePath) {
+        return PriorityOrder.Any(x => DataRelativePath.PathComparer.Equals(x.Path, dataSourcePath));
+    }
+
     public bool TryGetDataSource(string dataSourcePath, [NotNullWhen(true)] out IDataSource? dataSource) {
         dataSource = PriorityOrder.FirstOrDefault(x => DataRelativePath.PathComparer.Equals(x.Path, dataSourcePath));
         return dataSource is not null;
