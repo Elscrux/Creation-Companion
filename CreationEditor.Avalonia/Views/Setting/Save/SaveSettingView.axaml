@@ -30,6 +30,20 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 
+                    <!-- Data Source -->
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="2">
+                        <StackPanel.IsVisible>
+                            <Binding Path="Settings.SaveLocation"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <save1:SaveLocation>DataSource</save1:SaveLocation>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </StackPanel.IsVisible>
+
+                        <dataSource:DataSourcePicker DataContext="{Binding DataSourcePicker}"/>
+                    </StackPanel>
 
                     <!-- Custom Path -->
                     <StackPanel Orientation="Horizontal"
