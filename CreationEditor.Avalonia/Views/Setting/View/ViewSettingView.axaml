@@ -8,6 +8,48 @@
              x:Class="CreationEditor.Avalonia.Views.Setting.View.ViewSettingView"
              x:DataType="view:ViewSettingVM">
     <StackPanel Spacing="5">
+        <controls:FASettingsExpander Header="Appearance"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Image"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem Content="Theme">
+                <controls:FASettingsExpanderItem.IconSource>
+                    <controls:FASymbolIconSource Symbol="DarkTheme"/>
+                </controls:FASettingsExpanderItem.IconSource>
+        
+                <controls:FASettingsExpanderItem.Footer>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <ComboBox ItemsSource="{x:Static view:ViewSettingVM.Themes}"
+                                  SelectedItem="{Binding Setting.Theme}"
+                                  IsEnabled="{Binding !Setting.UseSystemTheme}"/>
+
+                        <CheckBox Content="Use System Theme"
+                                  IsChecked="{Binding Setting.UseSystemTheme}" />
+                    </StackPanel>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Accent Color">
+                <controls:FASettingsExpanderItem.IconSource>
+                    <controls:FASymbolIconSource Symbol="ColorLine"/>
+                </controls:FASettingsExpanderItem.IconSource>
+        
+                <controls:FASettingsExpanderItem.Footer>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="10">
+                        <ColorPicker Color="{Binding Setting.AccentColor}"
+                                     IsEnabled="{Binding Setting.UseCustomAccessColor}"/>
+
+                        <CheckBox Content="Use Custom Accent Color"
+                                  IsChecked="{Binding Setting.UseCustomAccessColor}" />
+                    </StackPanel>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
+
         <controls:FASettingsExpander Header="View Mode"
                                      Description="Adjusts the size of the text and controls in the application">
             <controls:FASettingsExpander.IconSource>
