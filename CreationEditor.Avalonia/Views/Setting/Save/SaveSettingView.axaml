@@ -4,44 +4,73 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:save="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Save"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:save1="clr-namespace:CreationEditor.Avalonia.Models.Settings.Save"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Setting.Save.SaveSettingView"
              x:DataType="save:SaveSettingVM">
     <StackPanel Spacing="5">
-        <HeaderedContentControl Header="Save Location">
-            <StackPanel Spacing="2">
-                <ComboBox ItemsSource="{Binding SaveLocations}"
-                          SelectedItem="{Binding Settings.SaveLocation}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate DataType="save:SaveLocation">
-                            <TextBlock
-                                Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+        <controls:FASettingsExpander Header="Save Location"
+                                     Description="Where will mods be saved">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Folder"/>
+            </controls:FASettingsExpander.IconSource>
+        
+            <controls:FASettingsExpander.Footer>
+                <StackPanel Spacing="2"
+                            Orientation="Horizontal">
+                    <ComboBox ItemsSource="{Binding SaveLocations}"
+                              SelectedItem="{Binding Settings.SaveLocation}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="save1:SaveLocation">
+                                <TextBlock
+                                    Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                <StackPanel Orientation="Horizontal"
-                            Spacing="2">
-                    <StackPanel.IsVisible>
-                        <Binding Path="Settings.SaveLocation"
-                                 Converter="{x:Static converter:ObjectConverters.Equals}">
-                            <Binding.ConverterParameter>
-                                <save:SaveLocation>Custom</save:SaveLocation>
-                            </Binding.ConverterParameter>
-                        </Binding>
-                    </StackPanel.IsVisible>
 
-                    <TextBox IsReadOnly="True"
-                             Text="{Binding Settings.DataRelativeOrFullCustomSaveLocation, FallbackValue='None'}"
-                             VerticalAlignment="Center"/>
+                    <!-- Custom Path -->
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="2">
+                        <StackPanel.IsVisible>
+                            <Binding Path="Settings.SaveLocation"
+                                     Converter="{x:Static converter:ObjectConverters.Equals}">
+                                <Binding.ConverterParameter>
+                                    <save1:SaveLocation>Custom</save1:SaveLocation>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </StackPanel.IsVisible>
 
-                    <Button Content="..."
-                            Command="{Binding SelectCustomDirectoryCommand}"/>
+                        <TextBox IsReadOnly="True"
+                                 Text="{Binding Settings.DataRelativeOrFullCustomSaveLocation, FallbackValue='None'}"
+                                 VerticalAlignment="Center"/>
+
+                        <Button Content="..."
+                                Command="{Binding SelectCustomDirectoryCommand}"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </HeaderedContentControl>
+            </controls:FASettingsExpander.Footer>
+        </controls:FASettingsExpander>
 
-        <CheckBox Content="Remove 'Identical to Master' Records"
-                  IsChecked="{Binding Settings.RemoveIdenticalToMasterRecords}"/>
+        <controls:FASettingsExpander Header="Save Options"
+                                     Description="Extra options that will be applied when saving"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Settings"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem Content="Remove 'Identical to Master' Records"
+                                             Description="Records that are identical to their master record will be removed&#x0a;⚠️ Saving will be slower when this option is enabled">
+                <controls:FASettingsExpanderItem.IconSource>
+                    <controls:FASymbolIconSource Symbol="Copy"/>
+                </controls:FASettingsExpanderItem.IconSource>
+        
+                <controls:FASettingsExpanderItem.Footer>
+                    <ToggleSwitch IsChecked="{Binding Settings.RemoveIdenticalToMasterRecords}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
     </StackPanel>
 </UserControl>

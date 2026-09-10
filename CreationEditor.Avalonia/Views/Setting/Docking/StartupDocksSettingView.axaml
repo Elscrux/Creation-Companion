@@ -7,43 +7,54 @@
              xmlns:docking1="clr-namespace:CreationEditor.Avalonia.Models.Settings.Docking"
              xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
              xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="docking:StartupDocksSettingVM"
              x:Class="CreationEditor.Avalonia.Views.Setting.Docking.StartupDocksSettingView">
-    <DataGrid ItemsSource="{Binding Docks}"
-              Background="{DynamicResource SystemControlTransparentBrush}"
-              GridLinesVisibility="Horizontal"
-              attached:ListShortcuts.Add="{Binding AddStartupDockCommand}"
-              attached:ListShortcuts.Remove="{Binding RemoveStartupDockCommand}"
-              Classes="NoCellSelection Medium Mutable">
-        <DataGrid.Columns>
-            <DataGridTemplateColumn Header="Dock Type">
-                <DataTemplate DataType="docking1:StartupDock">
-                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
-                              SelectedItem="{Binding DockElement}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate DataType="models:DockElement">
-                                <TextBlock
-                                    Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </DataTemplate>
-            </DataGridTemplateColumn>
+    <StackPanel Spacing="5">
+        <controls:FASettingsExpander Header="Startup Docks"
+                                     Description="Will be opened when the application starts"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="DockLeft"/>
+            </controls:FASettingsExpander.IconSource>
 
-            <DataGridTemplateColumn Header="Dock Mode">
-                <DataTemplate DataType="docking1:StartupDock">
-                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockModeTypes}"
-                              SelectedItem="{Binding DockMode}"/>
-                </DataTemplate>
-            </DataGridTemplateColumn>
+            <DataGrid ItemsSource="{Binding Docks}"
+                      Background="{DynamicResource SystemControlTransparentBrush}"
+                      GridLinesVisibility="Horizontal"
+                      attached:ListShortcuts.Add="{Binding AddStartupDockCommand}"
+                      attached:ListShortcuts.Remove="{Binding RemoveStartupDockCommand}"
+                      Classes="NoCellSelection Medium Mutable">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Dock Type">
+                        <DataTemplate DataType="docking1:StartupDock">
+                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
+                                      SelectedItem="{Binding DockElement}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate DataType="models:DockElement">
+                                        <TextBlock
+                                            Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
 
-            <DataGridTemplateColumn Header="Dock Layout">
-                <DataTemplate DataType="docking1:StartupDock">
-                    <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockTypes}"
-                              SelectedItem="{Binding Dock}"/>
-                </DataTemplate>
-            </DataGridTemplateColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+                    <DataGridTemplateColumn Header="Dock Mode">
+                        <DataTemplate DataType="docking1:StartupDock">
+                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockModeTypes}"
+                                      SelectedItem="{Binding DockMode}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Dock Layout">
+                        <DataTemplate DataType="docking1:StartupDock">
+                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockTypes}"
+                                      SelectedItem="{Binding Dock}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </controls:FASettingsExpander>
+    </StackPanel>
 </UserControl>

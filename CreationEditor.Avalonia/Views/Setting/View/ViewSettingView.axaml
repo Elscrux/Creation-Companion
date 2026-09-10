@@ -3,11 +3,21 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:view="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.View"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Setting.View.ViewSettingView"
              x:DataType="view:ViewSettingVM">
-    <HeaderedContentControl Header="Mode">
-        <ComboBox ItemsSource="{x:Static view:ViewSettingVM.ViewModes}"
-                  SelectedItem="{Binding Setting.ViewMode}"/>
-    </HeaderedContentControl>
+    <StackPanel Spacing="5">
+        <controls:FASettingsExpander Header="View Mode"
+                                     Description="Adjusts the size of the text and controls in the application">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="FontSize"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpander.Footer>
+            <ComboBox ItemsSource="{x:Static view:ViewSettingVM.ViewModes}"
+                      SelectedItem="{Binding Setting.ViewMode}"/>
+            </controls:FASettingsExpander.Footer>
+        </controls:FASettingsExpander>
+    </StackPanel>
 </UserControl>

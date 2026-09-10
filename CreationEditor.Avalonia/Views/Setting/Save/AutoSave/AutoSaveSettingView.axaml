@@ -3,32 +3,51 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:autoSave="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Save.AutoSave"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Setting.Save.AutoSave.AutoSaveSettingView"
              x:DataType="autoSave:AutoSaveSettingVM">
     <StackPanel Spacing="5">
-        <TextBlock Text="Auto Save on:"/>
+        <controls:FASettingsExpander Header="Auto Save Triggers"
+                                     Description="What events will trigger an auto save"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Save"/>
+            </controls:FASettingsExpander.IconSource>
+        
+            <controls:FASettingsExpanderItem>
+                    <CheckBox Content="On Shutdown"
+                              IsChecked="{Binding Settings.OnShutdown}"/>
+            </controls:FASettingsExpanderItem>
 
-        <CheckBox Content="Shutdown"
-                  IsChecked="{Binding Settings.OnShutdown}"/>
+            <controls:FASettingsExpanderItem>
+                <StackPanel Spacing="2"
+                            Orientation="Horizontal">
+                    <CheckBox Content="Interval"
+                              IsChecked="{Binding Settings.OnInterval}"/>
 
-        <StackPanel Spacing="2"
-                    Orientation="Horizontal">
-            <CheckBox Content="Interval"
-                      IsChecked="{Binding Settings.OnInterval}"/>
+                    <NumericUpDown Minimum="1"
+                                   Maximum="60"
+                                   Increment="1"
+                                   Value="{Binding Settings.IntervalInMinutes}"
+                                   FormatString="{}Every {0} Minutes"
+                                   IsEnabled="{Binding Settings.OnInterval}"/>
+                </StackPanel>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
 
-            <NumericUpDown Minimum="1"
-                           Maximum="60"
-                           Increment="1"
-                           Value="{Binding Settings.IntervalInMinutes}"
-                           FormatString="{}{0} Minutes"
-                           IsEnabled="{Binding Settings.OnInterval}"/>
-        </StackPanel>
-
-        <TextBlock Text="Maximum Auto Save Count:"/>
-        <NumericUpDown Minimum="1"
-                       Maximum="100"
-                       Increment="1"
-                       Value="{Binding Settings.MaxAutSaveCount}"/>
+        <controls:FASettingsExpander Header="Maximum Auto Save Count"
+                                     Description="Oldest auto saves will be deleted when the maximum count is reached">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="SaveAs"/>
+            </controls:FASettingsExpander.IconSource>
+        
+            <controls:FASettingsExpander.Footer>
+                <NumericUpDown Minimum="1"
+                               Maximum="100"
+                               Increment="1"
+                               Value="{Binding Settings.MaxAutoSaveCount}"/>
+            </controls:FASettingsExpander.Footer>
+        </controls:FASettingsExpander>
     </StackPanel>
 </UserControl>
