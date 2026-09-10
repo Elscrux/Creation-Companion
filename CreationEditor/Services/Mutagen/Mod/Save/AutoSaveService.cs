@@ -36,7 +36,7 @@ public sealed class AutoSaveService(
     }
 
     public void SetSettings(AutoSaveSettings settings) {
-        _maxBackups = settings.MaxAutSaveCount;
+        _maxBackups = settings.MaxAutoSaveCount;
 
         if (settings.OnInterval) {
             OnInterval(settings.IntervalInMinutes);

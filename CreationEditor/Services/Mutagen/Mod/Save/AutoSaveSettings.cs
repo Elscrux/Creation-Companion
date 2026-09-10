@@ -8,5 +8,5 @@ public sealed partial class AutoSaveSettings : ReactiveObject, ISettingModel {
     [JsonProperty, Reactive] public partial bool OnShutdown { get; set; } = true;
     [JsonProperty, Reactive] public partial bool OnInterval { get; set; } = true;
     [JsonProperty, Reactive] public partial double IntervalInMinutes { get; set; } = 5;
-    [JsonProperty, Reactive] public partial int MaxAutSaveCount { get; set; } = 10;
+    [JsonProperty, Reactive] public partial int MaxAutoSaveCount { get; set; } = 10;
 }
