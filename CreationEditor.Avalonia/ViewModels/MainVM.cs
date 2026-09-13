@@ -8,10 +8,12 @@ using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Avalonia.ViewModels.DataSource;
+using CreationEditor.Avalonia.ViewModels.Integrations;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Notification;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views;
+using CreationEditor.Avalonia.Views.Integrations;
 using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
@@ -24,6 +26,7 @@ namespace CreationEditor.Avalonia.ViewModels;
 
 public sealed partial class MainVM : ViewModel {
     private readonly Func<ISettingsVM> _settingsVMFactory;
+    private readonly Func<IntegrationsVM> _integrationsVMFactory;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDockFactory _dockFactory;
     private readonly MainWindow _mainWindow;
@@ -70,6 +73,7 @@ public sealed partial class MainVM : ViewModel {
 
     public MainVM(
         Func<ISettingsVM> settingsVMFactory,
+        Func<IntegrationsVM> integrationsVMFactory,
         INotificationVM notificationVM,
         IBusyService busyService,
         IEditorEnvironment editorEnvironment,
@@ -83,6 +87,7 @@ public sealed partial class MainVM : ViewModel {
         IFAApplicationSplashScreen splashScreen,
         IFileSystem fileSystem) {
         _settingsVMFactory = settingsVMFactory;
+        _integrationsVMFactory = integrationsVMFactory;
         _editorEnvironment = editorEnvironment;
         _dockFactory = dockFactory;
         _mainWindow = mainWindow;
@@ -144,6 +149,13 @@ public sealed partial class MainVM : ViewModel {
         var settingsVM = _settingsVMFactory();
         var settingsWindow = new SettingsWindow(settingsVM);
         settingsWindow.ShowDialog(_mainWindow);
+    }
+
+    [ReactiveCommand]
+    private void OpenIntegrations() {
+        var integrationsVM = _integrationsVMFactory();
+        var integrationsWindow = new IntegrationsWindow(integrationsVM);
+        integrationsWindow.ShowDialog(_mainWindow);
     }
 
     [ReactiveCommand]

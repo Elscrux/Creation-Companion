@@ -14,6 +14,7 @@ using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.DataSource;
+using CreationEditor.Avalonia.ViewModels.Integrations;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
 using CreationEditor.Avalonia.ViewModels.Record.List;
@@ -24,6 +25,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Filter;
+using CreationEditor.Services.Integrations;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Font;
 using CreationEditor.Services.Mutagen.Mod;
@@ -262,5 +264,22 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<ModCreationVM>()
             .AsSelf();
+
+        // Integrations
+        builder.RegisterType<IntegrationProvider>()
+            .As<IIntegrationProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<IntegrationsSettingVM>()
+            .As<IIntegrationRegistry>()
+            .As<ISetting>()
+            .SingleInstance();
+
+        builder.RegisterType<IntegrationsVM>()
+            .AsSelf();
+
+        builder.RegisterAssemblyTypes(typeof(IIntegration).Assembly)
+            .AssignableTo<IIntegration>()
+            .As<IIntegration>();
     }
 }

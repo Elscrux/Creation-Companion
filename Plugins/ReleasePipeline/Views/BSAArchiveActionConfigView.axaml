@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:ReleasePipeline.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:DataType="viewModels:BSAArchiveActionConfigVM"
+             x:Class="ReleasePipeline.Views.BSAArchiveActionConfigView">
+    <StackPanel Spacing="12">
+        <basic:LabeledContentControl Header="BSA Archive Creator"
+                                     HeaderToolTip="Select a configured BSA archive creator integration">
+            <ComboBox ItemsSource="{Binding AvailableIntegrations}"
+                      SelectedItem="{Binding SelectedIntegration}"
+                      DisplayMemberBinding="{Binding DisplayName}"
+                      MinWidth="220"
+                      CornerRadius="8"
+                      Padding="12,8"/>
+        </basic:LabeledContentControl>
+
+        <!-- No integrations configured -->
+        <StackPanel IsVisible="{Binding !AvailableIntegrations.Count}"
+                    Spacing="8">
+            <TextBlock Text="No BSA archive creator integrations are configured."
+                       Opacity="0.7"/>
+            <TextBlock Text="Add one via File → Integrations."
+                       Opacity="0.5"
+                       FontSize="12"/>
+        </StackPanel>
+
+        <!-- Selected integration's config view -->
+        <ContentControl Content="{Binding IntegrationConfigVM}"
+                        IsVisible="{Binding IntegrationConfigVM, Converter={x:Static converter:ObjectConverters.IsNotNull}}"/>
+    </StackPanel>
+</UserControl>

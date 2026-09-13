@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:bsa="clr-namespace:CreationEditor.Avalonia.ViewModels.Integrations.BSA"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:DataType="bsa:BSAArchiveCreatorConfigVM"
+             x:Class="CreationEditor.Avalonia.Views.Integrations.BSA.BSAArchiveCreatorConfigView">
+    <StackPanel Spacing="12">
+        <basic:LabeledContentControl Header="Compression Level"
+                                     HeaderToolTip="0 = none, higher = more compression">
+            <NumericUpDown Value="{Binding CompressionLevel}"
+                           Minimum="0"
+                           Maximum="9"
+                           MinWidth="160"/>
+        </basic:LabeledContentControl>
+
+        <basic:LabeledContentControl Header="Compress"
+                                     HeaderToolTip="Whether to compress the archive contents">
+            <CheckBox IsChecked="{Binding Compress}"/>
+        </basic:LabeledContentControl>
+
+        <basic:LabeledContentControl Header="Include Subdirectories"
+                                     HeaderToolTip="Whether to include subdirectories when archiving">
+            <CheckBox IsChecked="{Binding IncludeSubdirectories}"/>
+        </basic:LabeledContentControl>
+    </StackPanel>
+</UserControl>

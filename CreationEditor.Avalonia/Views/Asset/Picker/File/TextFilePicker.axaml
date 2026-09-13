@@ -12,10 +12,10 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="Auto,Auto,*"
-                      MinWidth="100"
                       MaxHeight="27">
                     <Border Grid.Column="0"
                             x:Name="Border"
+                            MinWidth="100"
                             BorderThickness="1,1,0,1"
                             Background="{StaticResource SystemControlTransparentBrush}"
                             BorderBrush="{DynamicResource ButtonBorderBrush}"

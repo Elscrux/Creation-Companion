@@ -1,0 +1,44 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:views="clr-namespace:ReleasePipeline.Views"
+             xmlns:viewModels="clr-namespace:ReleasePipeline.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="900"
+             d:DesignHeight="600"
+             x:Class="ReleasePipeline.Views.ReleasePipelineView"
+             x:DataType="viewModels:ReleasePipelineWizardVM"
+             x:Name="Control">
+    <basic:PageHost HasFinalButton="False">
+        <basic:PageHost.Pages>
+            <!-- Page 1: Data Source -->
+            <basic:PageData OnNext="{Binding SelectDataSourceCommand}">
+                <basic:PageData.DataTemplate>
+                    <DataTemplate DataType="viewModels:ReleasePipelineWizardVM">
+                        <views:DataSourceStepView DataContext="{Binding DataSourceStep}"/>
+                    </DataTemplate>
+                </basic:PageData.DataTemplate>
+            </basic:PageData>
+
+            <!-- Page 2: Checks -->
+            <basic:PageData OnNext="{Binding ProceedFromChecksCommand}">
+                <basic:PageData.DataTemplate>
+                    <DataTemplate DataType="viewModels:ReleasePipelineWizardVM">
+                        <views:ChecksStepView DataContext="{Binding ChecksStep}"/>
+                    </DataTemplate>
+                </basic:PageData.DataTemplate>
+            </basic:PageData>
+
+            <!-- Page 3: Pipeline selection + editor/runtime -->
+            <basic:PageData>
+                <basic:PageData.DataTemplate>
+                    <DataTemplate DataType="viewModels:ReleasePipelineWizardVM">
+                        <views:PipelineSelectionStepView DataContext="{Binding PipelineSelectionStep}"/>
+                    </DataTemplate>
+                </basic:PageData.DataTemplate>
+            </basic:PageData>
+        </basic:PageHost.Pages>
+    </basic:PageHost>
+</UserControl>

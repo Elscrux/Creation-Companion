@@ -331,6 +331,9 @@
         <Compile Update="Services\Mutagen\References\Parser\NifBehaviorParser.cs">
           <DependentUpon>IFileParser.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Integrations\IntegrationProvider.cs">
+          <DependentUpon>IIntegrationProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

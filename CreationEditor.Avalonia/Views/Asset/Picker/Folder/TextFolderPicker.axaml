@@ -12,7 +12,6 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="Auto,Auto,*"
-                      MinWidth="100"
                       MaxHeight="27">
                     <Border Grid.Column="0"
                             x:Name="Border"

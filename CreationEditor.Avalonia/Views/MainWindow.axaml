@@ -78,6 +78,13 @@
                             </MenuItem.Icon>
                         </MenuItem>
 
+                        <MenuItem Header="Integrations"
+                                  Command="{Binding OpenIntegrationsCommand}">
+                            <MenuItem.Icon>
+                                <controls:FASymbolIcon Symbol="Globe"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+
                         <MenuItem Header="Save"
                                   HotKey="Ctrl+S"
                                   InputGesture="Ctrl+S"

@@ -1,0 +1,180 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:behavior="clr-namespace:ReleasePipeline.Behavior"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
+             xmlns:rpConverter="clr-namespace:ReleasePipeline.Resources.Converter"
+             xmlns:viewLocators="clr-namespace:CreationEditor.Avalonia.ViewLocators;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:ReleasePipeline.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="600"
+             d:DesignHeight="500"
+             x:Class="ReleasePipeline.Views.ReleasePipelineEditorView"
+             x:DataType="viewModels:ReleasePipelineEditorVM"
+             x:Name="Control">
+    <UserControl.Resources>
+        <viewLocators:RegisteredViewLocator x:Key="ViewLocator"/>
+        <rpConverter:ConfigFieldDataTemplate x:Key="ConfigFieldTemplate"/>
+    </UserControl.Resources>
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+        <!-- Pipeline Settings Card -->
+        <basic:Card Grid.Row="0"
+                    Header="Pipeline Settings"
+                    Description="Name the pipeline"
+                    Icon="Settings">
+            <StackPanel Spacing="8">
+                <basic:LabeledContentControl Header="Name"
+                                             HeaderToolTip="The pipeline name, e.g. 'PC'">
+                    <TextBox Text="{Binding Name, Mode=TwoWay}"
+                             MinWidth="220"
+                             CornerRadius="8"
+                             Padding="12,8"/>
+                </basic:LabeledContentControl>
+            </StackPanel>
+        </basic:Card>
+
+        <!-- Actions Card -->
+        <basic:Card Grid.Row="1"
+                    Header="Actions"
+                    Description="Add configurable steps that run in order when the pipeline is released. Drag the handle to reorder."
+                    Icon="List">
+            <Grid RowDefinitions="Auto,*,Auto"
+                  RowSpacing="12">
+                <!-- Add action -->
+                <Button Grid.Row="0"
+                        Content="+ Add Action"
+                        HorizontalAlignment="Stretch"
+                        Padding="12,8">
+                    <Button.Flyout>
+                        <Flyout FlyoutPresenterClasses="Flyout750x250">
+                            <ItemsControl ItemsSource="{Binding AvailableActions}"
+                                          HorizontalAlignment="Stretch">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="8"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding DisplayName}"
+                                                Command="{Binding #Control.ViewModel.AddActionCommand}"
+                                                CommandParameter="{Binding Id}"
+                                                HorizontalAlignment="Stretch"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+
+                <!-- Actions list -->
+                <ItemsControl Grid.Row="1"
+                         x:Name="ActionsListBox"
+                         ItemsSource="{Binding ActionVMs}"
+                         dragDrop:DragDropExtended.AllowDrag="True"
+                         dragDrop:DragDropExtended.AllowDrop="True"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="2"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Expander IsExpanded="False"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="0,4">
+                                <Expander.Header>
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <!-- Drag handle: transparent background so the whole handle area is draggable -->
+                                            <Border Grid.Column="0"
+                                                    x:Name="DragHandle"
+                                                    Cursor="Hand"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,4,0"
+                                                    ToolTip.Tip="Drag to reorder"
+                                                    Background="Transparent"
+                                                    CornerRadius="4"
+                                                    Padding="6">
+                                                <Interaction.Behaviors>
+                                                    <behavior:DragHandleBehavior/>
+                                                </Interaction.Behaviors>
+                                                <UniformGrid Columns="2" Rows="3" Width="14" Height="21">
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                    <Ellipse Width="4" Height="4" Fill="{DynamicResource TextFillColorSecondary}" Margin="1"/>
+                                                </UniformGrid>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Opacity="0.6"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="2"
+                                                    Content="&#10005;"
+                                                    ToolTip.Tip="Remove"
+                                                    Margin="4,0,0,0"
+                                                    VerticalAlignment="Top"
+                                                    Command="{Binding RemoveCommand}"/>
+                                        </Grid>
+                                    </Expander.Header>
+
+                                    <!-- Action configuration (shown when expanded) -->
+                                    <StackPanel Margin="8,8,8,4" Spacing="8">
+                                        <TextBlock Text="Configuration"
+                                                   FontWeight="SemiBold"
+                                                   Opacity="0.7"
+                                                   FontSize="12"/>
+                                        <Panel>
+                                            <!-- Custom config view (e.g. BSA archive action) -->
+                                            <ContentControl Content="{Binding ConfigVM}"
+                                                            ContentTemplate="{StaticResource ViewLocator}"
+                                                            IsVisible="{Binding ConfigVM, Converter={x:Static converter:ObjectConverters.IsNotNull}}"/>
+
+                                            <!-- Reflection-based config fields -->
+                                            <ItemsControl ItemsSource="{Binding ConfigFields}"
+                                                          IsVisible="{Binding ConfigVM, Converter={x:Static converter:ObjectConverters.IsNull}}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <basic:LabeledContentControl Header="{Binding Name}"
+                                                                                     Margin="0,4">
+                                                            <ContentControl Content="{Binding}"
+                                                                            ContentTemplate="{StaticResource ConfigFieldTemplate}"/>
+                                                        </basic:LabeledContentControl>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Panel>
+                                    </StackPanel>
+                                </Expander>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Save footer -->
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="8">
+                    <Button Content="Save Pipeline"
+                            Classes="accent"
+                            Command="{Binding SaveCommand}"
+                            Padding="16,10"
+                            CornerRadius="8"/>
+                </StackPanel>
+            </Grid>
+        </basic:Card>
+    </Grid>
+</UserControl>

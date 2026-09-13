@@ -1,0 +1,32 @@
+<windowing:FAAppWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:integrations="clr-namespace:CreationEditor.Avalonia.Views.Integrations"
+                     xmlns:integrations1="clr-namespace:CreationEditor.Avalonia.ViewModels.Integrations"
+                     xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
+                     xmlns:command="clr-namespace:CreationEditor.Avalonia.Command"
+                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                     Width="1000" Height="650"
+                     MinHeight="480" MinWidth="720"
+                     x:DataType="integrations1:IntegrationsVM"
+                     x:Class="CreationEditor.Avalonia.Views.Integrations.IntegrationsWindow"
+                     x:Name="Window"
+                     Title="Integrations">
+    <windowing:FAAppWindow.KeyBindings>
+        <KeyBinding
+            Gesture="Escape"
+            Command="{x:Static command:WindowCommands.Close}"
+            CommandParameter="{Binding #Window}"/>
+    </windowing:FAAppWindow.KeyBindings>
+
+    <Grid RowDefinitions="*,Auto">
+        <integrations:IntegrationsView Grid.Row="0" DataContext="{Binding}"/>
+        <Button Grid.Row="1"
+                Margin="10"
+                Classes="Accent"
+                HorizontalAlignment="Right"
+                Content="Save"
+                Command="{Binding SaveCommand}"/>
+    </Grid>
+</windowing:FAAppWindow>
