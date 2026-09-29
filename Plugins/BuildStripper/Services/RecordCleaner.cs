@@ -367,7 +367,7 @@ public sealed class RecordCleaner(
                     continue;
                 }
 
-                if (topic.SubtypeName.ToDialogTopicSubtype() != DialogTopic.SubtypeEnum.Scene) {
+                if (topic.Subtype != DialogTopic.SubtypeEnum.Scene) {
                     retainedGraph.IncludeVertex(formLinkIdentifier, new FormLinkIdentifier(topic.Quest));
                 }
             }

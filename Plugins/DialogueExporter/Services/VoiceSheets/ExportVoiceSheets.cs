@@ -71,6 +71,7 @@ public sealed class ExportVoiceSheets(
                             lastSeparator = voiceTypeFolder.LastIndexOf(Path.DirectorySeparatorChar);
                             var voiceType = voiceTypeFolder[(lastSeparator + 1)..];
                             if (!voiceTypes.Contains(voiceType)) continue;
+
                             if (inclusionMode != InclusionMode.All) {
                                 var fileExists = SkyrimSoundAssetType.Instance.FileExtensions
                                     .Select(fileExtension => dataSourceService.ActiveDataSource.FileSystem.Path.ChangeExtension(path, fileExtension))
@@ -141,8 +142,7 @@ public sealed class ExportVoiceSheets(
         IQuestGetter quest,
         IDialogTopicGetter topic,
         IDialogResponsesGetter responses) {
-        var subtype = topic.SubtypeName.ToDialogTopicSubtype();
-        var type = subtype switch {
+        var type = topic.Subtype switch {
             DialogTopic.SubtypeEnum.ActorCollideWithActor => "Player bumps into you",
             DialogTopic.SubtypeEnum.AcceptYield => "You accept the player's yield in a fight",
             DialogTopic.SubtypeEnum.Agree => "You are a follower and agree to do something for the player",
@@ -215,7 +215,7 @@ public sealed class ExportVoiceSheets(
             DialogTopic.SubtypeEnum.VoicePowerStartLong => "You start using a voice power and will continue to say more words",
             DialogTopic.SubtypeEnum.VoicePowerEndShort => "You finish saying the voice power, just saying word two",
             DialogTopic.SubtypeEnum.VoicePowerEndLong => "You finish saying the voice power, saying word two and three",
-            _ => null,
+            _ => null
         };
 
         if (type is not null) return (type, null, null, false);
@@ -228,7 +228,7 @@ public sealed class ExportVoiceSheets(
             return (promptFromBranchingDialog, null, null, false);
         }
 
-        switch (subtype) {
+        switch (topic.Subtype) {
             case DialogTopic.SubtypeEnum.Custom or DialogTopic.SubtypeEnum.ForceGreet:
                 return ("You say something to the player", null, null, false);
             case DialogTopic.SubtypeEnum.SharedInfo:
@@ -310,9 +310,7 @@ public sealed class ExportVoiceSheets(
             }
         }
 
-        logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}",
-            responses.FormKey,
-            topic.SubtypeName.ToDialogTopicSubtype());
+        logger.Here().Error("Could not determine context for responses {Responses} with subtype {Subtype}", responses.FormKey, topic.Subtype);
         return ("", null, null, false);
 
         string? GetPromptFromBranchingDialog(IDialogTopicGetter t, IDialogResponsesGetter r) {
@@ -364,8 +362,7 @@ public sealed class ExportVoiceSheets(
         string voiceTypeName) {
         var (npc, speaker, speakerType) = GetSpeaker(quest, topic, responses, voiceTypeName);
 
-        var subtype = topic.SubtypeName.ToDialogTopicSubtype();
-        var isCombatLine = subtype.HasValue && subtype.Value.IsCombatLine();
+        var isCombatLine = topic.Subtype.IsCombatLine();
 
         return (npc, speaker, speakerType, isCombatLine);
     }
@@ -441,7 +438,7 @@ public sealed class ExportVoiceSheets(
         }
 
         // Scene Actor
-        if (topic.SubtypeName.ToDialogTopicSubtype() == DialogTopic.SubtypeEnum.Scene) {
+        if (topic.Subtype == DialogTopic.SubtypeEnum.Scene) {
             foreach (var scene in GetQuestScenes(topic.Quest)) {
                 foreach (var action in scene.Actions) {
                     if (action.Type != SceneAction.TypeEnum.Dialog) continue;

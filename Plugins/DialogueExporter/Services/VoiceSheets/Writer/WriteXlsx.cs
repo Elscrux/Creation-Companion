@@ -26,25 +26,25 @@ public sealed class WriteXlsx(
         MediumDashed,
         Double,
         Thin,
-        Dotted,
+        Dotted
     }
 
     private enum BackgroundColor {
         None,
         Green,
-        Blue,
+        Blue
     }
 
     private enum VerticalAlignment {
         Top,
         Center,
-        Bottom,
+        Bottom
     }
 
     private enum TextSize {
         Small,
         Medium,
-        Big,
+        Big
     }
 
     public void Write(IEnumerable<ExportLine> lines, string outputDirectory) {
@@ -110,19 +110,19 @@ public sealed class WriteXlsx(
                 ),
                 Borders = new Borders(
                     new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.None),
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.None)
                     }),
                     new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.MediumDashed),
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.MediumDashed)
                     }),
                     new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Double),
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Double)
                     }),
                     new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Thin),
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Thin)
                     }),
                     new Border(new TopBorder {
-                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Dotted),
+                        Style = new EnumValue<BorderStyleValues>(BorderStyleValues.Dotted)
                     })
                 ),
                 CellFormats = new CellFormats(
@@ -132,8 +132,8 @@ public sealed class WriteXlsx(
                         ApplyFont = true,
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
+                            WrapText = true
+                        }
                     },
                     // Bold
                     new CellFormat {
@@ -141,8 +141,8 @@ public sealed class WriteXlsx(
                         ApplyFont = true,
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Center),
-                            WrapText = true,
-                        },
+                            WrapText = true
+                        }
                     },
                     // Quest No Border
                     new CellFormat {
@@ -150,8 +150,8 @@ public sealed class WriteXlsx(
                         ApplyFont = true,
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Top),
-                            WrapText = true,
-                        },
+                            WrapText = true
+                        }
                     },
                     // Quest Border
                     new CellFormat {
@@ -161,10 +161,10 @@ public sealed class WriteXlsx(
                         ApplyBorder = true,
                         Alignment = new Alignment {
                             Vertical = new EnumValue<VerticalAlignmentValues>(VerticalAlignmentValues.Top),
-                            WrapText = true,
-                        },
+                            WrapText = true
+                        }
                     }
-                ),
+                )
             };
             workbookStylesPart.Stylesheet.Save();
 
@@ -213,11 +213,11 @@ public sealed class WriteXlsx(
                     ApplyFill = true,
                     Alignment = new Alignment {
                         Vertical = new EnumValue<VerticalAlignmentValues>(verticalAlignmentValues),
-                        WrapText = true,
-                    },
+                        WrapText = true
+                    }
                 });
 
-                return (uint) ((workbookStylesPart.Stylesheet.CellFormats?.ToArray().Length) ?? throw new InvalidOperationException("CellFormats Count is null")) - 1;
+                return (uint) (workbookStylesPart.Stylesheet.CellFormats?.ToArray().Length ?? throw new InvalidOperationException("CellFormats Count is null")) - 1;
             }
 
             // Add Sheets to the Workbook
@@ -280,7 +280,7 @@ public sealed class WriteXlsx(
                 var sheet = new Sheet {
                     Id = workbookPart.GetIdOfPart(worksheetPart),
                     SheetId = new UInt32Value(speakerId),
-                    Name = combatLinesGrouping.Key ? "Combat" : "Main",
+                    Name = combatLinesGrouping.Key ? "Combat" : "Main"
                 };
                 sheets.AppendChild(sheet);
 
@@ -386,8 +386,7 @@ public sealed class WriteXlsx(
                             var branch = branchGrouping[branchId];
                             var branchArray = branch
                                 .OrderBy(x => {
-                                    var subtype = x.Topic.SubtypeName.ToDialogTopicSubtype();
-                                    if (subtype is not null && subtype.Value.IsCombatLine()) return -1;
+                                    if (x.Topic.Subtype.IsCombatLine()) return -1;
 
                                     return 1;
                                 })
