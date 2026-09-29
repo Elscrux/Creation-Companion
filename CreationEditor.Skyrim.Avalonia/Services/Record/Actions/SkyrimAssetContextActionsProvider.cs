@@ -312,14 +312,22 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         var moveDialog = CreateAssetDialog(movingAssets, "Confirm", content);
         if (await moveDialog.ShowAsync(true) is FATaskDialogStandardResult.OK) {
             // Move all assets and remap their references
-            foreach (var asset in movingAssets) _assetController.Move(asset, dstDirectory, overwriteCheckBox.IsChecked is true);
+            foreach (var asset in movingAssets) {
+                _assetController.Move(asset, dstDirectory, overwriteCheckBox.IsChecked is true);
+            }
         }
     }
 
-    private static CheckBox CreateOverwriteCheckBox(DataSourceDirectoryLink dstDirectory, IReadOnlyList<IDataSourceLink> movingAssets, string relativeDstDirectory, string relativeSrcDirectory, StackPanel content) {
+    private static CheckBox CreateOverwriteCheckBox(
+        DataSourceDirectoryLink dstDirectory,
+        IReadOnlyList<IDataSourceLink> movingAssets,
+        string relativeDstDirectory,
+        string relativeSrcDirectory,
+        StackPanel content) {
         var assetsThatWillBeReplaced = movingAssets
             .Select(asset => {
-                var newPath = dstDirectory.FileSystem.Path.Combine(relativeDstDirectory, dstDirectory.FileSystem.Path.GetRelativePath(relativeSrcDirectory, asset.DataRelativePath.Path));
+                var newPath = dstDirectory.FileSystem.Path.Combine(relativeDstDirectory,
+                    dstDirectory.FileSystem.Path.GetRelativePath(relativeSrcDirectory, asset.DataRelativePath.Path));
                 return new DataSourceFileLink(dstDirectory.DataSource, newPath);
             })
             .Where(newAsset => newAsset.Exists())
@@ -358,7 +366,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             content = new StackPanel {
                 Children = {
                     new TextBlock {
-                        Text = "Do you really want to proceed? There are still references to these assets."
+                        Text = "Do you really want to proceed? There are still references to these assets.",
                     },
                     referenceBrowser,
                 },
@@ -394,7 +402,12 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             .ToArray();
 
         var firstTexture = _fileSystem.Path.GetFileName(textures.FirstOrDefault());
-        var enableRegex = new CheckBox { Content = "Enable Regex", IsChecked = false };
+        var enableRegex = new CheckBox {
+            Content = "Enable Regex",
+            [ToolTip.TipProperty] =
+                "Enable regular expressions for more complex replacements. Search for a regex pattern like 'tree(\\d+)' to match tree1, tree2, etc. and replace it with the pattern 'rock$1' to rock1, rock2, etc.",
+            IsChecked = false,
+        };
         var onlyShowChanges = new CheckBox { Content = "Only Show Changes", IsChecked = true };
         var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of ) a texture file path to replace" };
         var toTextBox = new TextBox { Text = "replacement.dds", PlaceholderText = "Enter a replacement path for what you want to replace" };
@@ -426,8 +439,8 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     },
                     fromTextBox,
                     toTextBox,
-                }
-            }
+                },
+            },
         };
         var regexErrorText = new TextBlock {
             Foreground = Brushes.IndianRed,
@@ -510,7 +523,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                 });
 
                 return grid;
-            })
+            }),
         };
 
         using var previewSubscription = previewObservable
@@ -554,14 +567,14 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                         replacement,
                         regexErrorText,
                         replacementCount,
-                    }
+                    },
                 },
                 new ScrollViewer {
                     Height = 440,
                     VerticalScrollBarVisibility = ScrollBarVisibility.Visible,
-                    Content = texturesListBox
+                    Content = texturesListBox,
                 },
-            }
+            },
         };
 
         var target = assets is [{ Name: var name }] ? name : $"{assets.Length} assets";
