@@ -8,22 +8,21 @@
              xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              xmlns:dataSourceLink="clr-namespace:CreationEditor.Services.DataSource;assembly=CreationEditor"
              xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
              x:Class="CreationEditor.Avalonia.Views.Asset.Browser.AssetBrowser"
              x:Name="Control"
              x:DataType="browser:IAssetBrowserVM">
     <UserControl.KeyBindings>
-        <KeyBinding
-            Gesture="Ctrl+Z"
-            Command="{Binding UndoCommand}"/>
+        <KeyBinding Gesture="Ctrl+Z"
+                    Command="{Binding UndoCommand}"/>
 
-        <KeyBinding
-            Gesture="Ctrl+Y"
-            Command="{Binding RedoCommand}"/>
+        <KeyBinding Gesture="Ctrl+Y"
+                    Command="{Binding RedoCommand}"/>
 
-        <KeyBinding
-            Gesture="Ctrl+Shift+Z"
-            Command="{Binding RedoCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Z"
+                    Command="{Binding RedoCommand}"/>
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="Auto,*">
@@ -31,12 +30,11 @@
                     Orientation="Horizontal"
                     Margin="5"
                     Spacing="5">
-            <controls:FAComboBox
-                IsEditable="True"
-                IsTextSearchEnabled="True"
-                ItemsSource="{Binding DataSourceSelections}"
-                SelectedItem="{Binding DataSource}"
-                DisplayMemberBinding="{Binding Name, x:DataType=dataSourceLink:IDataSource}"/>
+            <controls:FAComboBox IsEditable="True"
+                                 IsTextSearchEnabled="True"
+                                 ItemsSource="{Binding DataSourceSelections}"
+                                 SelectedItem="{Binding DataSource}"
+                                 DisplayMemberBinding="{Binding Name, x:DataType=dataSourceLink:IDataSource}"/>
 
             <Button ToolTip.Tip="Filters"
                     HorizontalAlignment="Stretch"
@@ -100,6 +98,9 @@
                             <CheckBox IsChecked="{Binding ShowIgnoredDirectories}"
                                       Content="Ignored Directories"/>
 
+                            <CheckBox IsChecked="{Binding ShowOnlyMissingLinks}"
+                                      Content="Only Files With Missing Links"/>
+
                             <WrapPanel>
                                 <ToggleButton x:Name="TextureButton"
                                               IsChecked="{Binding ShowTextures}"/>
@@ -119,7 +120,9 @@
                                 <ToggleButton x:Name="MusicButton"
                                               IsChecked="{Binding ShowMusic}"/>
 
-                                <Button x:Name="ExtraModel" Content="..." VerticalContentAlignment="Center">
+                                <Button x:Name="ExtraModel"
+                                        Content="..."
+                                        VerticalContentAlignment="Center">
                                     <Button.Flyout>
                                         <Flyout>
                                             <WrapPanel MaxWidth="250">
@@ -157,27 +160,26 @@
                          MinWidth="200"
                          PlaceholderText="Search..."/>
 
-                <avaloniaProgressRing:ProgressRing
-                    ToolTip.Tip="Loading References"
-                    HorizontalAlignment="Right"
-                    IsVisible="{Binding IsBusyLoadingReferences}"
-                    Foreground="{DynamicResource SystemAccentColor}"
-                    Width="20" Height="20"/>
+                <avaloniaProgressRing:ProgressRing ToolTip.Tip="Loading References"
+                                                   HorizontalAlignment="Right"
+                                                   IsVisible="{Binding IsBusyLoadingReferences}"
+                                                   Foreground="{DynamicResource SystemAccentColor}"
+                                                   Width="20"
+                                                   Height="20"/>
             </StackPanel>
         </StackPanel>
 
         <Grid Grid.Row="1">
-            <TreeDataGrid
-                x:Name="AssetTree"
-                Classes="Select"
-                Height="{Binding $parent.Bounds.Height}"
-                Source="{Binding AssetTreeSource}"
-                AutoDragDropRows="True"
-                RowDragStarted="AssetTree_OnRowDragStarted"
-                RowDragOver="AssetTree_OnRowDragOver"
-                RowDrop="AssetTree_OnRowDrop"
-                DoubleTapped="AssetTree_OnDoubleTapped"
-                KeyDown="AssetTree_OnKeyDown">
+            <TreeDataGrid x:Name="AssetTree"
+                          Classes="Select"
+                          Height="{Binding $parent.Bounds.Height}"
+                          Source="{Binding AssetTreeSource}"
+                          AutoDragDropRows="True"
+                          RowDragStarted="AssetTree_OnRowDragStarted"
+                          RowDragOver="AssetTree_OnRowDragOver"
+                          RowDrop="AssetTree_OnRowDrop"
+                          DoubleTapped="AssetTree_OnDoubleTapped"
+                          KeyDown="AssetTree_OnKeyDown">
                 <Interaction.Behaviors>
                     <treeDataGrid:ScrollToSelection/>
                     <treeDataGrid:ExpandAllChildren x:TypeArguments="dataSourceLink:IDataSourceLink"/>
@@ -185,11 +187,12 @@
                 </Interaction.Behaviors>
             </TreeDataGrid>
 
-            <avaloniaProgressRing:ProgressRing
-                IsActive="{Binding IsBusyLoadingAssets}"
-                HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="100" Height="100"
-                Margin="50"/>
+            <avaloniaProgressRing:ProgressRing IsActive="{Binding IsBusyLoadingAssets}"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Top"
+                                               Width="100"
+                                               Height="100"
+                                               Margin="50"/>
         </Grid>
     </Grid>
 </UserControl>

@@ -58,6 +58,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [Reactive] public partial bool ShowReferencedFiles { get; set; } = true;
     [Reactive] public partial bool ShowOrphanedFiles { get; set; } = true;
     [Reactive] public partial bool ShowOtherFiles { get; set; } = true;
+    [Reactive] public partial bool ShowOnlyMissingLinks { get; set; } = false;
 
     [Reactive] public partial bool ShowTextures { get; set; } = true;
     [Reactive] public partial bool ShowModels { get; set; } = true;
@@ -120,7 +121,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             var textBlock = new TextBlock {
                                 Text = asset.Name,
                                 [ToolTip.TipProperty] = asset.DataRelativePath.Path,
-                                VerticalAlignment = VerticalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Center
                             };
 
                             if (asset.DataSource.IsReadOnly) {
@@ -160,8 +161,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 Spacing = 5,
                                 Children = {
                                     icon,
-                                    textBlock,
-                                },
+                                    textBlock
+                                }
                             };
                         }),
                         null,
@@ -178,7 +179,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             CompareDescending = (x, y) => {
                                 var checkNull = ObjectComparers.CheckNull(x, y);
                                 return checkNull ?? x!.CompareToDirectoriesFirst(y);
-                            },
+                            }
                         }),
                     x => x is DataSourceDirectoryLink directoryLink ? GetFilteredFileSystemChildren(directoryLink) : [],
                     link => link is DataSourceDirectoryLink),
@@ -205,7 +206,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         CompareDescending = (x, y) => {
                             var checkNull = ObjectComparers.CheckNull(x, y);
                             return -(checkNull ?? x!.CompareTo(y));
-                        },
+                        }
                     }),
                 new TemplateColumn<IDataSourceLink>(
                     "Flags",
@@ -224,7 +225,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     Symbol = FASymbol.ImportantFilled,
                                     Foreground = StandardBrushes.InvalidBrush,
                                     VerticalAlignment = VerticalAlignment.Center,
-                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
+                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks)
                                 }
                             );
                         }
@@ -236,7 +237,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     new FAFontIcon {
                                         Glyph = "⟟",
                                         VerticalAlignment = VerticalAlignment.Center,
-                                        [ToolTip.TipProperty] = "Has Collision",
+                                        [ToolTip.TipProperty] = "Has Collision"
                                     }
                                 );
                             }
@@ -248,15 +249,15 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     new FAFontIcon {
                                         Glyph = "⚠️",
                                         VerticalAlignment = VerticalAlignment.Center,
-                                        [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths),
+                                        [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths)
                                     }
                                 );
                             }
                         }
 
                         return stackPanel;
-                    })),
-            },
+                    }))
+            }
         };
 
         _referenceService.IsLoading
@@ -281,7 +282,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                 this.WhenAnyValue(x => x.ShowIgnoredDirectories),
                 this.WhenAnyValue(x => x.ShowReferencedFiles),
                 this.WhenAnyValue(x => x.ShowOrphanedFiles),
-                this.WhenAnyValue(x => x.ShowOtherFiles))
+                this.WhenAnyValue(x => x.ShowOtherFiles),
+                this.WhenAnyValue(x => x.ShowOnlyMissingLinks))
             .CombineLatest(this.WhenAnyValue(x => x.SearchText))
             .Publish()
             .RefCount();
@@ -416,9 +418,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         AssetTreeSource.RowSelection.Select(pathIndices);
     }
 
-    public IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink) {
-        return AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
-    }
+    public IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink) => AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
 
     private string SearchTextPattern() {
         // Surround with * and remove invalid chars
@@ -483,14 +483,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return filteredFileSystemChildren;
     }
 
-    private bool SearchAndFilterFile(DataSourceFileLink fileLink) {
-        return _searchFilter.Filter(fileLink.DataRelativePath.Path, SearchTextPattern()) && FilterLink(fileLink);
-    }
+    private bool SearchAndFilterFile(DataSourceFileLink fileLink) => _searchFilter.Filter(fileLink.DataRelativePath.Path, SearchTextPattern()) && FilterLink(fileLink);
 
-    private bool SearchAndFilterDirectory(DataSourceDirectoryLink directoryLink) {
-        return (ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(directoryLink.DataRelativePath))
-         && (ShowEmptyDirectories || GetFilteredFileSystemChildren(directoryLink).Any());
-    }
+    private bool SearchAndFilterDirectory(DataSourceDirectoryLink directoryLink) =>
+        (ShowIgnoredDirectories || !_ignoredDirectoriesProvider.IsIgnored(directoryLink.DataRelativePath))
+     && (ShowEmptyDirectories || GetFilteredFileSystemChildren(directoryLink).Any());
 
     private bool FilterLink(DataSourceFileLink fileLink) {
         if (fileLink.DataSource.DeleteDirectoryLink.Contains(fileLink.DataRelativePath)) return false;
@@ -561,6 +558,10 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     return false;
                 }
             }
+
+            if (ShowOnlyMissingLinks && !HasMissingLinks(fileLink, assetLink)) {
+                return false;
+            }
         } else {
             if (!ShowOtherFiles) {
                 return false;
@@ -570,16 +571,16 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         return true;
     }
 
-    private static IEnumerable<IDataSourceLink> GetAllFileSystemChildren(DataSourceDirectoryLink directory) {
-        return directory.EnumerateDirectoryLinks(false)
-            .Concat<IDataSourceLink>(directory.EnumerateFileLinks(false));
-    }
+    private bool HasMissingLinks(DataSourceFileLink fileLink, IAssetLinkGetter assetLink) => GetMissingLinks(fileLink, assetLink).Any();
+
+    private static IEnumerable<IDataSourceLink> GetAllFileSystemChildren(DataSourceDirectoryLink directory) => directory.EnumerateDirectoryLinks(false)
+        .Concat<IDataSourceLink>(directory.EnumerateFileLinks(false));
 
     private void UpdateRow(HierarchicalRow<IDataSourceLink> parentRow) {
         var currentlyExpandedRows = AssetTreeSource.Rows.OfType<IExpander>().Where(x => x.IsExpanded).Cast<IRow>().ToArray();
 
         ExpandMethod.Invoke(parentRow, null);
-        
+
         foreach (var currentlyExpandedRow in currentlyExpandedRows) {
             var foundRow = AssetTreeSource.Rows.FirstOrDefault(row => Equals(row.Model, currentlyExpandedRow.Model));
             if (foundRow is IExpander expander) {
@@ -609,7 +610,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
         _filteredFileSystemChildrenCache.Remove(parentRow.Model.DataRelativePath.Path);
         _filteredFileSystemChildrenCache.Remove(link.DataRelativePath.Path);
-        
+
         UpdateRow(parentRow);
     }
 

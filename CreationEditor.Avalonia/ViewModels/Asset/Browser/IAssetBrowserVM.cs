@@ -18,6 +18,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool ShowReferencedFiles { get; set; }
     bool ShowOrphanedFiles { get; set; }
     bool ShowOtherFiles { get; set; }
+    bool ShowOnlyMissingLinks { get; set; }
     bool ShowTextures { get; set; }
     bool ShowModels { get; set; }
     bool ShowScriptSources { get; set; }
