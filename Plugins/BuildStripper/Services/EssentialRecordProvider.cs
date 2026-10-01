@@ -53,9 +53,21 @@ public sealed class EssentialRecordProvider(
             if (!group.Key.TryResolve(linkCache, out var worldspace)) continue;
 
             var regions = group.SelectMany(y => y.Regions).ToHashSet();
-            var cells = regions.Count == 0
-                ? worldspace.EnumerateCells()
-                : worldspace.EnumerateCells().Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any());
+
+            var cellsWithinRange = new List<(ICellGetter Cell, ExteriorCellRetainReason RetainReason)>();
+            retainedCells[worldspace.FormKey] = cellsWithinRange;
+
+            if (regions.Count == 0) {
+                foreach (var cell in worldspace.EnumerateCells()) {
+                    cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinRegionBorder));
+                }
+                continue;
+            }
+
+            var cells = worldspace
+                .EnumerateCells()
+                .Where(c => c.Regions is not null && c.Regions.Intersect(regions).Any())
+                .ToArray();
 
             var retainedCellsInWorldspace = cells.ToArray();
 
@@ -64,23 +76,21 @@ public sealed class EssentialRecordProvider(
                 .WhereNotNull()
                 .ToHashSet();
 
-            var cellLandscapeRange = group.Max(x => x.CellLandscapeRangeToKeepOutsidePlayableArea);
             var cellViewDistanceRangeToKeep = group.Max(x => x.CellViewDistanceRangeToKeepOutsidePlayableArea);
-
-            var cellsWithinRange = new List<(ICellGetter Cell, ExteriorCellRetainReason RetainReason)>();
-            retainedCells[worldspace.FormKey] = cellsWithinRange;
 
             // Get all coordinates for cells within the landscape range of retained cells
             var processedCoordinates = new HashSet<P2Int>();
             foreach (var retainedCell in retainedCellsInWorldspace) {
+                cellsWithinRange.Add((retainedCell, ExteriorCellRetainReason.WithinRegionBorder));
+
                 if (retainedCell.Grid is null) continue;
 
                 var retainedCoordinate = retainedCell.Grid.Point;
                 processedCoordinates.Add(retainedCoordinate);
 
                 // With a default uGridsToLoad = 5 diameter, the radius is 2
-                for (var dx = -cellLandscapeRange; dx <= cellLandscapeRange; dx++) {
-                    for (var dy = -cellLandscapeRange; dy <= cellLandscapeRange; dy++) {
+                for (var dx = -cellViewDistanceRangeToKeep; dx <= cellViewDistanceRangeToKeep; dx++) {
+                    for (var dy = -cellViewDistanceRangeToKeep; dy <= cellViewDistanceRangeToKeep; dy++) {
                         processedCoordinates.Add(new P2Int(retainedCoordinate.X + dx, retainedCoordinate.Y + dy));
                     }
                 }
@@ -102,14 +112,8 @@ public sealed class EssentialRecordProvider(
                 var cell = worldspace.GetCell(coordinate);
                 if (cell is null) continue;
 
-                if (minDistanceToRetainedCoordinates > cellLandscapeRange) {
-                    throw new InvalidOperationException($"Cell {cell.FormKey} is outside the landscape range of retained cells, but was found in the list of cells within range. This should never happen.");
-                } else if (minDistanceToRetainedCoordinates > cellViewDistanceRangeToKeep) {
-                    cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinLandscapeRangeOfRetainedCell));
-                } else if (minDistanceToRetainedCoordinates > 0) {
+                if (minDistanceToRetainedCoordinates > 0 && minDistanceToRetainedCoordinates <= cellViewDistanceRangeToKeep) {
                     cellsWithinRange.Add((cell, ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell));
-                } else {
-                    throw new InvalidOperationException($"Cell {cell.FormKey} is a retained cell, but was found in the list of cells within range. This should never happen.");
                 }
             }
         }

@@ -143,7 +143,8 @@ public sealed partial class AssetCleaner(
         }
 
         // Retain voice files that are voicing lines from other mods, like follower dialogue defined in Skyrim to have them join the blades
-        if (selectedDataSource is not null && assetLinkIdentifier.AssetLink.Type == SkyrimSoundAssetType.Instance && assetLinkIdentifier.AssetLink.DataRelativePath.Path.StartsWith(@"Sound\Voice\", DataRelativePath.PathComparison)) {
+        if (selectedDataSource is not null && assetLinkIdentifier.AssetLink.Type == SkyrimSoundAssetType.Instance
+         && assetLinkIdentifier.AssetLink.DataRelativePath.Path.StartsWith(@"Sound\Voice\", DataRelativePath.PathComparison)) {
             // Data relative paths for voices are always structured as follows:
             // Sound/Voice/<mod name>/<voice type>/<voice file>
             var voiceTypeDirectory = selectedDataSource.FileSystem.Path.GetDirectoryName(assetLinkIdentifier.AssetLink.DataRelativePath.Path);

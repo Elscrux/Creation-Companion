@@ -26,10 +26,6 @@ public sealed class FeatureFlagService : IFeatureFlagService {
                 if (featureFlag.AllowedRegions[i].CellViewDistanceRangeToKeepOutsidePlayableArea < 2) {
                     featureFlag.AllowedRegions[i] = featureFlag.AllowedRegions[i] with { CellViewDistanceRangeToKeepOutsidePlayableArea = 2 };
                 }
-
-                if (featureFlag.AllowedRegions[i].CellLandscapeRangeToKeepOutsidePlayableArea < 4) {
-                    featureFlag.AllowedRegions[i] = featureFlag.AllowedRegions[i] with { CellLandscapeRangeToKeepOutsidePlayableArea = 4 };
-                }
             }
 
             _featureFlags.Add(featureFlag, true);
@@ -38,9 +34,7 @@ public sealed class FeatureFlagService : IFeatureFlagService {
         _featureFlagsChanged.OnNext(Unit.Default);
     }
 
-    public bool IsFeatureEnabled(Models.FeatureFlag.FeatureFlag featureFlag) {
-        return FeatureFlags.GetValueOrDefault(featureFlag, false);
-    }
+    public bool IsFeatureEnabled(Models.FeatureFlag.FeatureFlag featureFlag) => FeatureFlags.GetValueOrDefault(featureFlag, false);
 
     public void SetFeatureEnabled(Models.FeatureFlag.FeatureFlag featureFlag, bool enabled) {
         var previouslyEnabled = IsFeatureEnabled(featureFlag);
