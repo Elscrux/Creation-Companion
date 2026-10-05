@@ -44,9 +44,10 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
                         editorEnvironment.LinkCache.ListedOrder.Count,
                         e));
 
-                recordController.RecordChangedDiff
-                    .Subscribe(referenceController.RegisterUpdate)
-                    .DisposeWith(_loadOrderChangedDisposables);
+                DisposableExtensions.DisposeWith(
+                    recordController.RecordChangedDiff
+                        .Subscribe(referenceController.RegisterUpdate),
+                    _loadOrderChangedDisposables);
             })
             .DisposeWithComposite(disposables);
     }
