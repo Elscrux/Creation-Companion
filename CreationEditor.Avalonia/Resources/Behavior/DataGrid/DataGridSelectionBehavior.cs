@@ -169,10 +169,10 @@ public sealed partial class DataGridSelectionBehavior : Behavior<DataGrid>, IDis
                         HorizontalAlignment = HorizontalAlignment.Center,
                     };
 
-                    checkBox.WhenAnyValue(x => x.IsChecked)
-                        .Skip(1)
-                        .Subscribe(isChecked => SelectAllItems(isChecked is true))
-                        .DisposeWith(_attachedDisposable);
+                    DisposableExtensions.DisposeWith(checkBox.WhenAnyValue(x => x.IsChecked)
+                            .Skip(1)
+                            .Subscribe(isChecked => SelectAllItems(isChecked is true)),
+                        _attachedDisposable);
 
                     return checkBox;
                 }),
