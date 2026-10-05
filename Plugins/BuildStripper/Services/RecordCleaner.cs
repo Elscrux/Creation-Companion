@@ -139,7 +139,9 @@ public sealed class RecordCleaner(
                     var modKey = currentReference.FormKey.ModKey;
                     if (modKey != mod.ModKey
                      && !masters.Contains(modKey)
-                     && !dependencies.Contains(modKey)) continue;
+                     && !dependencies.Contains(modKey)) {
+                        continue;
+                    }
 
                     // Remove auto generated entries from locations, and only retain custom referenced record
                     if (currentReference.Type == typeof(ILocationGetter)
@@ -220,10 +222,8 @@ public sealed class RecordCleaner(
 
         foreach (var (formLinkIdentifier, postProcessStep) in postProcessSteps) {
             var translatedFormKey = new FormKey(duplicate.ModKey, formLinkIdentifier.FormKey.ID);
-            if (linkCache.TryResolve(translatedFormKey, formLinkIdentifier.Type, out var record)) {
-                if (record is IMajorRecord recordSetter) {
-                    postProcessStep(recordSetter);
-                }
+            if (linkCache.TryResolve(translatedFormKey, formLinkIdentifier.Type, out var record) && record is IMajorRecord recordSetter) {
+                postProcessStep(recordSetter);
             }
         }
 
@@ -242,7 +242,6 @@ public sealed class RecordCleaner(
     }
 
     private static readonly Type[] SelfRetainedRecordTypes = [
-        typeof(IAddonNodeGetter),
         typeof(IAnimatedObjectGetter),
     ];
 
