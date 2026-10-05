@@ -394,77 +394,6 @@ public sealed class RecordCleaner(
                 if (retainedGraph.ExcludedVertices.Contains(cellLink)) continue;
 
                 switch (retainReason) {
-                    case ExteriorCellRetainReason.WithinLandscapeRangeOfRetainedCell: {
-                        // If the cell is just outside the playable area, we want to retain the landscape shape but nothing else
-                        // This is done so we can ensure that players who have region borders disabled don't crash directly when loading a cell
-                        // that is outside the playable area, and they know when they are getting out of bounds because they will see only brown landscape
-                        // To implement this, use a post-processing step to clear out all cell contents apart from the landscape shape
-                        addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
-
-                        // Force exclude everything placed in the cell
-                        foreach (var placed in worldspace.GetAllPlacedInExteriorCell(position)) {
-                            var formLinkIdentifier = new FormLinkIdentifier(placed.ToFormLinkInformation());
-                            retainedGraph.ExcludeVertex(formLinkIdentifier);
-                        }
-
-                        // Remove links from the cell to anything that we remove as part of the empty cell generation
-                        // to make sure they are not retained due to this cell being retained
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Location)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Owner)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LockList)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.AcousticSpace)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.EncounterZone)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.ImageSpace)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Music)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.Water)));
-                        graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(cell.LightingTemplate)));
-
-                        if (cell.Landscape is not null) {
-                            if (cell.Landscape.Textures is not null) {
-                                foreach (var texture in cell.Landscape.Textures) {
-                                    graph.RemoveEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(cell.Landscape), new FormLinkIdentifier(texture)));
-                                }
-                            }
-
-                            foreach (var layer in cell.Landscape.Layers) {
-                                if (layer.Header is null) continue;
-
-                                graph.RemoveEdge(new Edge<ILinkIdentifier>(new FormLinkIdentifier(cell.Landscape), new FormLinkIdentifier(layer.Header.Texture)));
-                            }
-                        }
-
-                        foreach (var navigationMesh in cell.NavigationMeshes) {
-                            graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(navigationMesh.ToFormLinkInformation())));
-                        }
-
-                        foreach (var temporary in cell.Temporary) {
-                            graph.RemoveEdge(new Edge<ILinkIdentifier>(cellLink, new FormLinkIdentifier(temporary)));
-                        }
-
-                        break;
-
-                        void EmptyCell(IMajorRecord record) {
-                            if (record is not ICell c) return;
-
-                            c.EditorID = null;
-                            c.Location.SetToNull();
-                            c.Owner.SetToNull();
-                            c.LockList.SetToNull();
-                            c.AcousticSpace.SetToNull();
-                            c.EncounterZone.SetToNull();
-                            c.ImageSpace.SetToNull();
-                            c.Music.SetToNull();
-                            c.Water.SetToNull();
-                            c.LightingTemplate.SetToNull();
-                            c.Landscape?.Textures?.Clear();
-                            c.Landscape?.Layers.Clear();
-                            c.NavigationMeshes.Clear();
-                            c.Temporary.Clear();
-                            c.Persistent.Clear();
-
-                            // TODO also remove persistent records from the top level cell
-                        }
-                    }
                     case ExteriorCellRetainReason.WithinViewDistanceOfRetainedCell: {
                         // Retain the cell and all its references
                         Retain(new FormLinkIdentifier(cell.Location));
@@ -492,7 +421,7 @@ public sealed class RecordCleaner(
                                 retainedGraph.ExcludeVertex(formLinkIdentifier);
                             }
                         }
-                        
+
                         addPostProcessStep(cell.ToFormLinkInformation(), EmptyCell);
 
                         // Remove links from the cell to anything that we remove as part of the empty cell generation
