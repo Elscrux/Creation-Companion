@@ -45,7 +45,7 @@ public sealed class LipFileGenerator(
         foreach (var modVoiceDirectory in modVoiceDirectories) {
             currentMod++;
             var modFileName = modVoiceDirectory.Name;
-            onProgress?.Invoke((int) ((currentMod / (float) totalMods) * 100), $"Processing {modFileName} ({currentMod}/{totalMods})...");
+            onProgress?.Invoke((int) (currentMod / (float) totalMods * 100), $"Processing {modFileName} ({currentMod}/{totalMods})...");
 
             // Get audio files that need lip files generated
             var voiceFiles = modVoiceDirectory.EnumerateFileLinks("*.wav", true)
@@ -59,23 +59,40 @@ public sealed class LipFileGenerator(
             foreach (var voiceFile in voiceFiles) {
                 var fileName = voiceFile.NameWithoutExtension;
                 var responseId = fileName[^1..];
-                if (!int.TryParse(responseId, out var id)) continue;
+                if (!int.TryParse(responseId, out var id)) {
+                    logger.Here().Warning("Skipping {VoiceFile} for {VoiceType} because it does not have a valid response ID like '_1', or '_2'",
+                        voiceFile.Name,
+                        voiceFile.ParentDirectory?.Name);
+                    continue;
+                }
 
                 var formId = fileName[^8..^2];
-                if (!FormKey.TryFactory(formId + ":" + modFileName, out var formKey)) continue;
-
-                if (editorEnvironment.LinkCache.TryResolve<IDialogResponsesGetter>(formKey, out var responses)) {
-                    var response = responses.Responses.FirstOrDefault(r => r.ResponseNumber == id);
-                    if (response?.Text.String is not {} text) continue;
-                    if (text.Trim().Length == 0) continue;
-
-                    workItems.Add((voiceFile.FullPath, text));
+                if (!FormKey.TryFactory(formId + ":" + modFileName, out var formKey)) {
+                    logger.Here().Warning("Skipping {VoiceFile} for {VoiceType} because it does not have a valid formid like '00123ABC'",
+                        voiceFile.Name,
+                        voiceFile.ParentDirectory?.Name);
+                    continue;
                 }
+
+                if (!editorEnvironment.LinkCache.TryResolve<IDialogResponsesGetter>(formKey, out var responses)) {
+                    logger.Here().Warning("Skipping {VoiceFile} for {VoiceType} because the dialog {FormKey} does not exist in the load order {LoadOrder}",
+                        voiceFile.Name,
+                        voiceFile.ParentDirectory?.Name,
+                        formKey,
+                        string.Join(", ", editorEnvironment.LinkCache.ListedOrder.Select(m => m.ModKey.FileName)));
+                    continue;
+                }
+
+                var response = responses.Responses.FirstOrDefault(r => r.ResponseNumber == id);
+                if (response?.Text.String is not {} text) continue;
+                if (text.Trim().Length == 0) continue;
+
+                workItems.Add((voiceFile.FullPath, text));
             }
 
             // Generate lip files
             var processedItems = 0;
-            onProgress?.Invoke((int) ((currentMod / (float) totalMods) * 100), $"Generating {workItems.Count} lip files for {modFileName}...");
+            onProgress?.Invoke((int) (currentMod / (float) totalMods * 100), $"Generating {workItems.Count} lip files for {modFileName}...");
             logger.Here().Debug("Generating lip files for {ModFileName} with parallelization degree {Degree}", modFileName, degree);
 
             var mod = currentMod;
@@ -85,7 +102,7 @@ public sealed class LipFileGenerator(
                 workItem => GenerateLipFile(workItem.VoiceFullPath, workItem.Text));
 
             // Generate fuz files
-            onProgress?.Invoke((int) ((currentMod / (float) totalMods) * 100), $"Generating .fuz files for {modFileName}...");
+            onProgress?.Invoke((int) (currentMod / (float) totalMods * 100), $"Generating .fuz files for {modFileName}...");
             logger.Here().Information("Generating .fuz files for {ModFileName}", modFileName);
 
             var audioExt = audioEncoder is not null ? audioEncoder.AudioExtension : "wav";
@@ -93,7 +110,7 @@ public sealed class LipFileGenerator(
             fuzGenerator.GenerateFuz(
                 modVoiceDirectory.FullPath,
                 modVoiceDirectory.FullPath,
-                audioExt: audioExt);
+                audioExt);
 
             // Cleanup intermediate files if requested
             if (cleanupFiles) {
@@ -115,7 +132,7 @@ public sealed class LipFileGenerator(
                         WaveFileWriter.CreateWaveFile16(tempPath, reader.ToMono());
                         reader.Dispose();
 
-                        fileSystem.File.Move(tempPath, voiceFullPath, overwrite: true);
+                        fileSystem.File.Move(tempPath, voiceFullPath, true);
 
                         logger.Here().Debug("Converted {WavPath} to mono 16-bit at {TempPath}", voiceFullPath, tempPath);
                     }
@@ -134,7 +151,7 @@ public sealed class LipFileGenerator(
 
                     var itemsProcessed = Interlocked.Increment(ref processedItems);
                     if (itemsProcessed % 10 == 0 || itemsProcessed == workItems.Count) {
-                        onProgress?.Invoke((int) ((mod / (float) totalMods) * 100), $"{modFileName}: {itemsProcessed}/{workItems.Count}");
+                        onProgress?.Invoke((int) (mod / (float) totalMods * 100), $"{modFileName}: {itemsProcessed}/{workItems.Count}");
                     }
                 } catch (Exception ex) {
                     logger.Here().Error(ex, "Error generating .lip files for {WavPath}", voiceFullPath);
