@@ -1,14 +1,15 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using CreationEditor.Avalonia.Models.Mod.Editor;
+﻿using CreationEditor.Avalonia.Models.Mod.Editor;
 using CreationEditor.Skyrim.Avalonia.Models.Record.Editor.Subrecord;
 using DynamicData.Binding;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 
-public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
+[IReactiveObject]
+public sealed partial class EditableFaction : Faction, IEditableRecord<Faction> {
     public new ObservableCollectionExtended<EditableRelation> Relations { get; set; }
     public new ObservableCollectionExtended<Rank> Ranks { get; set; }
     public new ObservableCollectionExtended<EditableCondition> Conditions { get; set; }
@@ -21,7 +22,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.HiddenFromPC) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.HiddenFromPC, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -29,7 +30,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.SpecialCombat) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.SpecialCombat, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -37,7 +38,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.CanBeOwner) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.CanBeOwner, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -45,7 +46,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => Name?.String;
         set {
             Name = value;
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -53,7 +54,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnoreAssault) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnoreAssault, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -61,7 +62,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnoreMurder) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnoreMurder, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -69,7 +70,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnorePickpocket) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnorePickpocket, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -77,7 +78,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnoreStealing) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnoreStealing, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -85,7 +86,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnoreTrespass) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnoreTrespass, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -93,7 +94,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.IgnoreWerewolf) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.IgnoreWerewolf, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -101,7 +102,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.DoNotReportCrimesAgainstMembers) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.DoNotReportCrimesAgainstMembers, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -109,7 +110,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.TrackCrime) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.TrackCrime, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -118,7 +119,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         set {
             Flags = Flags.SetFlag(FactionFlag.CrimeGoldUseDefaults, value);
             CrimeValues = GetDefaultCrimeValues();
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -126,7 +127,7 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         get => (Flags & FactionFlag.Vendor) != 0;
         set {
             Flags = Flags.SetFlag(FactionFlag.Vendor, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -154,7 +155,9 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
             .Where(r => !r.TargetFormKey.IsNull)
             .Select(r => r.ToRelation()));
 
-        for (var i = 0; i < Ranks.Count; i++) Ranks[i].Number = (uint) i;
+        for (var i = 0; i < Ranks.Count; i++) {
+            Ranks[i].Number = (uint) i;
+        }
         faction.Ranks.ReplaceWith(Ranks);
 
         faction.CrimeValues = CrimeGoldUseDefaults ? GetDefaultCrimeValues() : CrimeValues;
@@ -163,22 +166,15 @@ public sealed class EditableFaction : Faction, IEditableRecord<Faction> {
         faction.Conditions = Conditions.Select(c => c.ToCondition()).ToExtendedList();
     }
 
-    private CrimeValues GetDefaultCrimeValues() {
-        return new CrimeValues {
-            Arrest = CrimeValues.Arrest,
-            AttackOnSight = CrimeValues.AttackOnSight,
-            Murder = 1000,
-            Assault = 40,
-            Pickpocket = 25,
-            Trespass = 5,
-            StealMult = 0.5f,
-            Escape = 100,
-            Werewolf = 1000,
-        };
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+    private CrimeValues GetDefaultCrimeValues() => new() {
+        Arrest = CrimeValues.Arrest,
+        AttackOnSight = CrimeValues.AttackOnSight,
+        Murder = 1000,
+        Assault = 40,
+        Pickpocket = 25,
+        Trespass = 5,
+        StealMult = 0.5f,
+        Escape = 100,
+        Werewolf = 1000,
+    };
 }

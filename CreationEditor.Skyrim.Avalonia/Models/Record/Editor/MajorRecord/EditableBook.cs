@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using CreationEditor.Avalonia.Models.Mod.Editor;
+﻿using CreationEditor.Avalonia.Models.Mod.Editor;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Noggog;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Skyrim.Avalonia.Models.Record.Editor.MajorRecord;
 
 public enum BookTeaches {
@@ -12,7 +12,8 @@ public enum BookTeaches {
     Spell,
 }
 
-public sealed class EditableBook : Book, IEditableRecord<Book> {
+[IReactiveObject]
+public sealed partial class EditableBook : Book, IEditableRecord<Book> {
     public static BookTeaches[] BookTeachesValues { get; } = Enum.GetValues<BookTeaches>();
 
     public override string? EditorID { get; set; }
@@ -21,7 +22,7 @@ public sealed class EditableBook : Book, IEditableRecord<Book> {
         get => Name?.String;
         set {
             Name = value;
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -29,7 +30,7 @@ public sealed class EditableBook : Book, IEditableRecord<Book> {
         get => (Flags & Flag.CantBeTaken) != 0;
         set {
             Flags = Flags.SetFlag(Flag.CantBeTaken, value);
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
 
@@ -37,7 +38,7 @@ public sealed class EditableBook : Book, IEditableRecord<Book> {
         get;
         set {
             field = value;
-            OnPropertyChanged();
+            this.RaisePropertyChanged();
         }
     }
     public Skill? Skill { get; set; }
@@ -77,10 +78,5 @@ public sealed class EditableBook : Book, IEditableRecord<Book> {
             BookTeaches.Spell => BookSpell,
             _ => throw new InvalidOperationException(),
         };
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
