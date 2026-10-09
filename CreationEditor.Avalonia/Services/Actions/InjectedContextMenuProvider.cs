@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Actions;
 
 public sealed class InjectedContextMenuProvider : IContextMenuProvider {
@@ -41,22 +42,46 @@ public sealed class InjectedContextMenuProvider : IContextMenuProvider {
             .Select(p => p.Value
                 .Where(x => x.IsVisible(context))
                 .OrderByDescending(x => x.Priority)
-                .Select(action => action.MenuItemFactory(context)));
+                .ToList());
 
         // Flatten the groups into a single list and add separators between groups
         var needSeparator = false;
         foreach (var group in groups) {
-            if (!group.Any()) continue;
+            var items = MergeByParent(group, context).ToList();
+            if (items.Count == 0) continue;
 
             if (needSeparator) {
                 yield return new Separator();
             }
 
-            foreach (var item in group) {
+            foreach (var item in items) {
                 yield return item;
             }
 
             needSeparator = true;
+        }
+    }
+
+    private static IEnumerable<object> MergeByParent(IReadOnlyList<ContextAction> actions, SelectedListContext context) {
+        // Actions sharing the same parent are merged into a single parent menu item.
+        // GroupBy preserves first-occurrence order, so a parent appears at the position
+        // of its highest-priority action (actions are sorted by priority descending).
+        foreach (var parentGroup in actions.GroupBy(x => x.Parent)) {
+            if (parentGroup.Key is null) {
+                foreach (var action in parentGroup) {
+                    yield return action.MenuItemFactory(context);
+                }
+            } else {
+                yield return new MenuItem {
+                    Header = parentGroup.Key.Header,
+                    Icon = parentGroup.Key.Icon is FASymbol symbol
+                        ? new FASymbolIcon { Symbol = symbol }
+                        : new FAFontIcon { Glyph = parentGroup.Key.Icon?.ToString() },
+                    ItemsSource = parentGroup
+                        .Select(action => action.MenuItemFactory(context))
+                        .ToList(),
+                };
+            }
         }
     }
 

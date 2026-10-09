@@ -11,4 +11,5 @@ public sealed record ContextAction(
     ReactiveCommand<SelectedListContext, Unit>? Command,
     Func<SelectedListContext, MenuItem> MenuItemFactory,
     Func<KeyGesture?>? HotKeyFactory = null,
-    bool IsPrimary = false);
+    bool IsPrimary = false,
+    ContextActionParent? Parent = null);

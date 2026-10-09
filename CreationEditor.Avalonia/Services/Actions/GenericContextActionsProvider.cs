@@ -62,7 +62,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                     EditCommand,
                     context,
                     context.Count > 1
-                        ? $"Edit All ({context.Count}"
+                        ? $"Edit All ({context.Count})"
                         : "Edit"),
                 () => menuItemProvider.Edit(EditCommand).HotKey,
                 true
