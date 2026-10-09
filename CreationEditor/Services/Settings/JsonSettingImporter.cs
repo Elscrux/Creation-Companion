@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.Serialization.Json;
 using Newtonsoft.Json;
 using Serilog;
 namespace CreationEditor.Services.Settings;
@@ -6,7 +7,8 @@ namespace CreationEditor.Services.Settings;
 public sealed class JsonSettingImporter<TSetting>(
     ILogger logger,
     IFileSystem fileSystem,
-    ISettingPathProvider settingPathProvider)
+    ISettingPathProvider settingPathProvider,
+    IJsonSerializerSettingsProvider jsonSerializerSettingsProvider)
     : ISettingImporter<TSetting> {
 
     public TSetting? Import(ISetting setting) {
@@ -15,6 +17,6 @@ public sealed class JsonSettingImporter<TSetting>(
 
         logger.Here().Verbose("Importing setting {Name} from {Path}", setting.Name, filePath);
         var content = fileSystem.File.ReadAllText(filePath.FullName);
-        return JsonConvert.DeserializeObject<TSetting>(content);
+        return JsonConvert.DeserializeObject<TSetting>(content, jsonSerializerSettingsProvider.SerializerSettings);
     }
 }

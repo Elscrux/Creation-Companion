@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using CreationEditor.Services.Serialization.Json;
 using Newtonsoft.Json;
 using Serilog;
 namespace CreationEditor.Services.Settings;
@@ -6,7 +7,8 @@ namespace CreationEditor.Services.Settings;
 public sealed class JsonSettingExporter(
     ILogger logger,
     IFileSystem fileSystem,
-    ISettingPathProvider settingPathProvider)
+    ISettingPathProvider settingPathProvider,
+    IJsonSerializerSettingsProvider jsonSerializerSettingsProvider)
     : ISettingExporter {
 
     public bool Export(ISetting setting) {
@@ -16,7 +18,7 @@ public sealed class JsonSettingExporter(
         if (!filePath.Directory.Exists) filePath.Directory.Create();
 
         logger.Here().Verbose("Exporting setting {Name} to {Path}", setting.Name, filePath);
-        var content = JsonConvert.SerializeObject(setting.Model, Formatting.Indented);
+        var content = JsonConvert.SerializeObject(setting.Model, Formatting.Indented, jsonSerializerSettingsProvider.SerializerSettings);
         fileSystem.File.WriteAllText(filePath.FullName, content);
 
         return true;
