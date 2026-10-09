@@ -17,4 +17,11 @@ public interface IRecordPrefixService {
     /// <param name="editorId">EditorID to apply the prefix to</param>
     /// <returns>Prefixed EditorID</returns>
     string ApplyPrefix(string editorId);
+
+    /// <summary>
+    /// Removes the current prefix from the given EditorID if it has it.
+    /// </summary>
+    /// <param name="editorId">EditorID to remove the prefix from</param>
+    /// <returns>EditorID without the prefix</returns>
+    string RemovePrefix(string editorId);
 }

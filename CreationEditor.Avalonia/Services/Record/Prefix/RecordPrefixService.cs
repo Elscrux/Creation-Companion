@@ -30,6 +30,14 @@ public sealed partial class RecordPrefixService(
         return Prefix + editorId;
     }
 
+    public string RemovePrefix(string editorId) {
+        if (editorId.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase)) {
+            return editorId[Prefix.Length..];
+        }
+
+        return editorId;
+    }
+
     public void PreStartup() {
         // No work needed
     }
