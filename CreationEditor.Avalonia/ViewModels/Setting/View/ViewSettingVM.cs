@@ -9,13 +9,13 @@ using CreationEditor.Services.Settings;
 using FluentAvalonia.Styling;
 namespace CreationEditor.Avalonia.ViewModels.Setting.View;
 
-public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed class ViewSettingVM : ViewModel, ISettingNode, ILifecycleTask {
     public static readonly IEnumerable<ViewMode> ViewModes = Enum.GetValues<ViewMode>();
     public static readonly IEnumerable<PlatformThemeVariant> Themes = Enum.GetValues<PlatformThemeVariant>();
 
     public string Name => "View";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = [];
+    public List<ISettingNode> Children { get; } = [];
 
     public ISettingModel Model => Setting;
     public ViewSetting Setting { get; }
@@ -24,7 +24,7 @@ public sealed class ViewSettingVM : ViewModel, ISetting, ILifecycleTask {
     private readonly Dictionary<ViewMode, IViewModeTemplate> _viewModeTemplates;
     private readonly Dictionary<PlatformThemeVariant, ThemeVariant> _themeVariantMapping = new() {
         { PlatformThemeVariant.Light, ThemeVariant.Light },
-        { PlatformThemeVariant.Dark, ThemeVariant.Dark }
+        { PlatformThemeVariant.Dark, ThemeVariant.Dark },
     };
 
     public ViewSettingVM(

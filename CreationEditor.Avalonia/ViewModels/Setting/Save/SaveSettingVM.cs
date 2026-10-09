@@ -11,7 +11,7 @@ using Mutagen.Bethesda.Environments.DI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Save;
 
-public sealed partial class SaveSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed partial class SaveSettingVM : ViewModel, ISettingNode, ILifecycleTask {
     private readonly IDataDirectoryProvider _dataDirectoryProvider;
     private readonly IFileSystem _fileSystem;
     private readonly ISavePipeline _savePipeline;
@@ -21,7 +21,7 @@ public sealed partial class SaveSettingVM : ViewModel, ISetting, ILifecycleTask 
 
     public string Name => "Save";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = [];
+    public List<ISettingNode> Children { get; } = [];
 
     public string FullCustomSaveLocation => _fileSystem.Path.IsPathRooted(Settings.DataRelativeOrFullCustomSaveLocation)
         ? Settings.DataRelativeOrFullCustomSaveLocation

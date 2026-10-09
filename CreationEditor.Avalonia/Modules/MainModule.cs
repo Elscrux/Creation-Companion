@@ -56,6 +56,10 @@ public sealed class MainModule : Module {
         });
 
         builder.RegisterAssemblyTypes(assemblies)
+            .AssignableTo<ISettingNode>()
+            .As<ISettingNode>();
+
+        builder.RegisterAssemblyTypes(assemblies)
             .AssignableTo<ISetting>()
             .As<ISetting>();
 

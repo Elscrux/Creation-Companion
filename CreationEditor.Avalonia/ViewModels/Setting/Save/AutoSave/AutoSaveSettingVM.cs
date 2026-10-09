@@ -3,12 +3,12 @@ using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Settings;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Save.AutoSave;
 
-public sealed class AutoSaveSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed class AutoSaveSettingVM : ViewModel, ISettingNode, ILifecycleTask {
     private readonly IAutoSaveService _autoSaveService;
 
     public string Name => "Auto Save";
     public Type Parent => typeof(SaveSettingVM);
-    public List<ISetting> Children { get; } = [];
+    public List<ISettingNode> Children { get; } = [];
 
     public AutoSaveSettings Settings { get; }
     public ISettingModel Model => Settings;

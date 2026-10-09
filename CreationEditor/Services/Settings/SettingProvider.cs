@@ -4,10 +4,10 @@ namespace CreationEditor.Services.Settings;
 
 public sealed class SettingProvider : ISettingProvider, IDisposableDropoff {
     private readonly DisposableBucket _disposables = new();
-    public IEnumerable<ISetting> Settings { get; }
+    public IEnumerable<ISettingNode> Settings { get; }
 
     public SettingProvider(
-        IEnumerable<ISetting> settings,
+        IEnumerable<ISettingNode> settings,
         ILogger logger) {
         // Get setting classes via reflection
         var settingsList = settings.ToList();

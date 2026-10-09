@@ -18,7 +18,7 @@
                   ItemsSource="{Binding RootSettings}"
                   SelectedItem="{Binding SelectedSetting}">
             <TreeView.DataTemplates>
-                <TreeDataTemplate DataType="settings:ISetting" ItemsSource="{Binding Children}">
+                <TreeDataTemplate DataType="settings:ISettingNode" ItemsSource="{Binding Children}">
                     <StackPanel>
                         <TextBlock Text="{Binding Name}"/>
                     </StackPanel>

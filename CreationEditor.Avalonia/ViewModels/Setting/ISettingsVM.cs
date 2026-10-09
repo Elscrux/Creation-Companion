@@ -5,8 +5,8 @@ using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
 public interface ISettingsVM : IDisposableDropoff {
-    IEnumerable<ISetting> RootSettings { get; }
-    ISetting? SelectedSetting { get; set; }
+    IEnumerable<ISettingNode> RootSettings { get; }
+    ISettingNode? SelectedSetting { get; set; }
 
     ReactiveCommand<Unit, Unit> SaveCommand { get; }
 }

@@ -11,7 +11,7 @@ using DynamicData.Binding;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting.Docking;
 
-public sealed partial class StartupDocksSettingVM : ViewModel, ISetting, ILifecycleTask {
+public sealed partial class StartupDocksSettingVM : ViewModel, ISettingNode, ILifecycleTask {
     public static readonly IEnumerable<DockElement> StartupDockTypes = Enum.GetValues<DockElement>();
     public static readonly IEnumerable<DockMode> DockModeTypes = Enum.GetValues<DockMode>();
     public static readonly IEnumerable<Dock> DockTypes = Enum.GetValues<Dock>();
@@ -20,7 +20,7 @@ public sealed partial class StartupDocksSettingVM : ViewModel, ISetting, ILifecy
 
     public string Name => "Startup Docks";
     public Type? Parent => null;
-    public List<ISetting> Children { get; } = [];
+    public List<ISettingNode> Children { get; } = [];
 
     public IObservableCollection<StartupDock> Docks { get; }
 

@@ -4,5 +4,5 @@ public interface ISettingProvider {
     /// <summary>
     /// Enumerable of all settings
     /// </summary>
-    IEnumerable<ISetting> Settings { get; }
+    IEnumerable<ISettingNode> Settings { get; }
 }

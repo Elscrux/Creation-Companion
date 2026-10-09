@@ -3,25 +3,19 @@ using DynamicData.Binding;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels.Setting;
 
-public sealed partial class SettingsVM : ViewModel, ISettingsVM {
-    private readonly ISettingExporter _settingExporter;
-    public IEnumerable<ISetting> RootSettings => ObservableSettings;
-    private IObservableCollection<ISetting> ObservableSettings { get; }
+public sealed partial class SettingsVM(
+    ISettingProvider settingProvider,
+    ISettingExporter settingExporter) : ViewModel, ISettingsVM {
+    public IEnumerable<ISettingNode> RootSettings => ObservableSettings;
+    private IObservableCollection<ISettingNode> ObservableSettings { get; } = new ObservableCollectionExtended<ISettingNode>(settingProvider.Settings);
 
-    [Reactive] public partial ISetting? SelectedSetting { get; set; }
-
-    public SettingsVM(
-        ISettingProvider settingProvider,
-        ISettingExporter settingExporter) {
-        _settingExporter = settingExporter;
-        ObservableSettings = new ObservableCollectionExtended<ISetting>(settingProvider.Settings);
-    }
+    [Reactive] public partial ISettingNode? SelectedSetting { get; set; }
 
     [ReactiveCommand]
     private void Save() {
         foreach (var setting in RootSettings.GetAllChildren(s => s.Children, true)) {
             setting.Apply();
-            _settingExporter.Export(setting);
+            settingExporter.Export(setting);
         }
     }
 }
