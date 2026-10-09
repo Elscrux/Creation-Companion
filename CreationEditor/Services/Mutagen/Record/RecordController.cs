@@ -35,6 +35,8 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         });
     }
 
+    public ILinkCacheProvider LinkCacheProvider => _editorEnvironment;
+
     private readonly Subject<RecordModPair> _recordChanged = new();
     public IObservable<IMajorRecordGetter> RecordInActiveModChanged => OnlyActiveMod(_recordChanged);
     public IObservable<RecordModPair> RecordChanged => _recordChanged;
@@ -161,15 +163,13 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-        where TMajorRecordGetter : class, IMajorRecordGetter {
-        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
-    }
+        where TMajorRecordGetter : class, IMajorRecordGetter =>
+        DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
 
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
-        where TMajorRecordGetter : class, IMajorRecordGetter {
-        return DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
-    }
+        where TMajorRecordGetter : class, IMajorRecordGetter =>
+        DuplicateRecord<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
 
     public TMajorRecord DuplicateRecord<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter
@@ -248,15 +248,13 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter {
-        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
-    }
+        where TMajorRecordGetter : class, IMajorRecordGetter =>
+        GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), _editorEnvironment.ActiveMod);
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(TMajorRecordGetter record, IMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
-        where TMajorRecordGetter : class, IMajorRecordGetter {
-        return GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
-    }
+        where TMajorRecordGetter : class, IMajorRecordGetter =>
+        GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(record.ToStandardizedIdentifier(), CastOrThrow<TMod>(mod));
 
     public TMajorRecord GetOrAddOverride<TMajorRecord, TMajorRecordGetter>(IFormLinkIdentifier record, TMod mod)
         where TMajorRecord : class, IMajorRecord, TMajorRecordGetter, IMajorRecordQueryable
@@ -282,16 +280,14 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         IMod editMod,
         Func<IFormLinkIdentifier, IEnumerable<IFormLinkIdentifier>> referenceGetter,
         Func<IMajorRecordGetter, string?> editorIdMapper,
-        bool forceDelete = false) {
-        return InjectRecords(
-            records,
-            CastOrThrow<TModGetter>(injectionTarget),
-            CastOrThrow<TMod>(newRecordMod),
-            CastOrThrow<TMod>(editMod),
-            referenceGetter,
-            editorIdMapper,
-            forceDelete);
-    }
+        bool forceDelete = false) => InjectRecords(
+        records,
+        CastOrThrow<TModGetter>(injectionTarget),
+        CastOrThrow<TMod>(newRecordMod),
+        CastOrThrow<TMod>(editMod),
+        referenceGetter,
+        editorIdMapper,
+        forceDelete);
 
     public IReadOnlyList<IMajorRecord> InjectRecords(
         IReadOnlyList<IMajorRecordGetter> records,
@@ -377,9 +373,7 @@ public sealed class RecordController<TMod, TModGetter> : IRecordController
         IMajorRecordGetter record,
         IMod mod,
         Func<IEnumerable<IFormLinkIdentifier>> referenceGetter,
-        bool forceDelete = false) {
-        return MarkForDeletion(record, CastOrThrow<TMod>(mod), referenceGetter, forceDelete);
-    }
+        bool forceDelete = false) => MarkForDeletion(record, CastOrThrow<TMod>(mod), referenceGetter, forceDelete);
     public bool MarkForDeletion(
         IMajorRecordGetter record,
         TMod mod,

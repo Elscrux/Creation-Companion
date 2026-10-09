@@ -1,4 +1,5 @@
-﻿using CreationEditor.Services.Mutagen.References;
+﻿using CreationEditor.Services.Environment;
+using CreationEditor.Services.Mutagen.References;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 namespace CreationEditor.Services.Mutagen.Record;
@@ -266,6 +267,8 @@ public interface IRecordController {
     /// <param name="updateAction">An action that must update to the given record</param>
     void RegisterUpdate(IMajorRecord record, IMod mod, Action updateAction);
     #endregion
+
+    ILinkCacheProvider LinkCacheProvider { get; }
 
     /// <summary>
     /// Can be subscribed to in order to call a function before and after record changes
