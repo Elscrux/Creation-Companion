@@ -332,6 +332,33 @@
         <Compile Update="Services\Mutagen\References\Parser\NifBehaviorParser.cs">
             <DependentUpon>IFileParser.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Integrations\IntegrationProvider.cs">
+            <DependentUpon>IIntegrationProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\IntegrationsRegistry.cs">
+            <DependentUpon>IIntegrationRegistry.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Sources\IntegrationSourceProvider.cs">
+            <DependentUpon>IIntegrationSourceProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Sources\IntegrationSourceManager.cs">
+            <DependentUpon>IIntegrationSourceManager.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Lip\LipFuzerWrapper.cs">
+            <DependentUpon>ILipFuzer.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Lip\FaceFxWrapper.cs">
+            <DependentUpon>ILipGenerator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Lip\LipGeneratorWrapper.cs">
+            <DependentUpon>ILipGenerator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Integrations\Lip\NativeLipFuzer.cs">
+            <DependentUpon>ILipFuzer.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Environment\LoadOrderSorter.cs">
+            <DependentUpon>ILoadOrderSorter.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
