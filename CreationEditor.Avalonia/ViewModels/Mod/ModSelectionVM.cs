@@ -69,6 +69,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         IModSaveService modSaveService,
         IDataSourceService dataSourceService,
         IEditorEnvironment editorEnvironment,
+        ILoadOrderSorter loadOrderSorter,
         IModInfoProvider modInfoProvider,
         IModGetterVM modGetterVM,
         ModCreationVM modCreationVM,
@@ -95,7 +96,17 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         var listedModInfos = listedMods.CombineLatest(dataSourceMods,
                 (listed, dataSource) => listed.Concat(dataSource).DistinctBy(x => x.Name)
             )
-            .Select(x => x.Select(ModInfoProvider.GetModInfo).WhereNotNull().ToArray());
+            .Select(modFiles => {
+                var modInfos = modFiles.Select(ModInfoProvider.GetModInfo).WhereNotNull().ToArray();
+                var result = loadOrderSorter
+                    .Sort(modInfos.Select(x => x.ModKey).ToArray(),
+                        modKey => {
+                            var modInfo = modInfos.Find(info => info.ModKey == modKey);
+                            return modInfo.DirectMasters;
+                        });
+
+                return modInfos.OrderBy(i => result.Order.IndexOf(i.ModKey));
+            });
 
         // Mods (also memory-only) in the current load order
         var loadOrderModInfos = _editorEnvironment.LinkCacheChanged
