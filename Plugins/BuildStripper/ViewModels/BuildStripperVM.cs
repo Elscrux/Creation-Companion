@@ -172,7 +172,7 @@ public sealed partial class BuildStripperVM : ViewModel {
         var assetDialog = new FATaskDialog {
             Title = $"Feature Flag {featureFlag.Name}",
             Content = new FeatureFlagEditor(flagEditorVM) {
-                Width = 1200
+                Width = 1200,
             },
             XamlRoot = _mainWindow,
             Buttons = {
@@ -183,7 +183,7 @@ public sealed partial class BuildStripperVM : ViewModel {
                 FATaskDialogButton.CancelButton,
             },
             Classes = {
-                "No"
+                "No",
             },
             Styles = {
                 new Style(x => x.OfType<FATaskDialog>().Class("No").Template().OfType<Border>().Name("ContentRoot")) {
@@ -384,7 +384,7 @@ public sealed partial class BuildStripperVM : ViewModel {
 
         mod = EditorEnvironment.ResolveMod(CleaningModPickerVM.SelectedMod.ModKey);
         if (mod is null) {
-            _logger.Error("{Mod} not found in load order", CleaningModPickerVM.SelectedMod.ModKey);
+            _logger.Here().Error("{Mod} not found in load order", CleaningModPickerVM.SelectedMod.ModKey);
             dependencies = null;
             return false;
         }
@@ -414,7 +414,8 @@ public sealed partial class BuildStripperVM : ViewModel {
             .Where(q => !_essentialRecordProvider.IsEssentialRecord(mod.ModKey, q))
             .Select(q => new FormLinkIdentifier(q));
         var allExcluded = ExcludedLinks.Concat(excludedQuests);
-        var (filteredGraph, postProcessSteps) = _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, SelectedDataSource, mod, dependencies, allExcluded.ToHashSet());
+        var (filteredGraph, postProcessSteps) =
+            _buildStripper.FindRetainedRecords(_essentialRecordProvider, ReferenceGraph, SelectedDataSource, mod, dependencies, allExcluded.ToHashSet());
         _filteredGraph = filteredGraph.Build();
         _retainedLinks = filteredGraph.Build().Vertices.ToHashSet();
         var dependencyGraph = filteredGraph.BuildDependencyGraph();

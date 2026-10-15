@@ -465,12 +465,6 @@ public sealed class RecordCleaner(
                     RetainRecord(cell.Landscape);
                 }
 
-                // Exclude navmeshes outside the playable area
-                foreach (var navigationMesh in cell.NavigationMeshes) {
-                    var formLinkIdentifier = new FormLinkIdentifier(navigationMesh.ToFormLinkInformation());
-                    retainedGraph.ExcludeVertex(formLinkIdentifier);
-                }
-
                 void RetainRecord(IMajorRecordGetter record) {
                     var link = new FormLinkIdentifier(record.ToFormLinkInformation());
                     Retain(link);
