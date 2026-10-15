@@ -29,7 +29,7 @@ public sealed class TexDiag(IFileSystem fileSystem, ILogger logger, ConfigValues
         "Texture Info Provider",
         typeof(ITextureInfoProvider),
         new TexDiagRegistrationConfig(),
-        new TexConvRuntimeConfig(),
+        null,
         [
             new GitHubIntegrationSourceDescriptor {
                 Owner = "microsoft",
