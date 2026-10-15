@@ -18,6 +18,8 @@ using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Asset.Browser;
 
 public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
+    public static readonly IReadOnlyList<TextureFormatFilter> TextureFormats = Enum.GetValues<TextureFormatFilter>();
+
     public AssetBrowser() {
         InitializeComponent();
     }
@@ -79,7 +81,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
                 Children = {
                     icon,
                     new TextBlock { Text = name, VerticalAlignment = VerticalAlignment.Center },
-                }
+                },
             };
         }
     }
@@ -103,8 +105,6 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
     }
 
     private void AssetTree_OnRowDragOver(object? sender, TreeDataGridRowDragEventArgs e) {
-        TrySetDragData(e);
-
         e.Inner.DragEffects = CanDrop(e)
             ? DragDropEffects.Move
             : DragDropEffects.None;
@@ -124,7 +124,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             })
             .OfType<IDataSourceLink>();
 
-        if (!dragLinks.Any(dragLink => (dragLink) switch {
+        if (!dragLinks.Any(dragLink => dragLink switch {
             DataSourceDirectoryLink dragDirectoryLink =>
                 // Can't drop a directory into
                 // Itself
@@ -136,15 +136,12 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
             DataSourceFileLink dragFileLink =>
                 // Can't drop a file into the same directory it's already in
                 directoryLink.Equals(dragFileLink.ParentDirectory),
-            _ => false
-        })) return true;
+            _ => false,
+        })) {
+            return true;
+        }
 
         return false;
-    }
-
-    private void TrySetDragData(TreeDataGridRowDragEventArgs e) {
-        // Avalonia 12/TreeDataGrid drag payload is handled internally; this bridge data is no longer injected here.
-        Console.WriteLine();
     }
 
     private void AssetTree_OnRowDrop(object? sender, TreeDataGridRowDragEventArgs e) {
@@ -177,7 +174,7 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         var dataGridRow = visual.FindAncestorOfType<TreeDataGridRow>();
         if (dataGridRow is null) return;
 
-        var selectedItems = AssetTree.RowSelection!.SelectedItems.ToHashSet();
+        var selectedItems = AssetTree.RowSelection.SelectedItems.ToHashSet();
         if (!selectedItems.Contains(dataGridRow.Model)) {
             // We got an outdated selected items list - just use the current asset
             selectedItems = [dataGridRow.Model];

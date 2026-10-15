@@ -11,6 +11,17 @@ using Noggog;
 using ReactiveUI;
 namespace CreationEditor.Avalonia.ViewModels.Asset.Browser;
 
+public enum TextureFormatFilter {
+    All,
+    BC1_UNORM,
+    BC2_UNORM,
+    BC3_UNORM,
+    BC4_UNORM,
+    BC5_UNORM,
+    BC7_UNORM,
+    Other,
+}
+
 public interface IAssetBrowserVM : IDisposableDropoff {
     string SearchText { get; set; }
     bool ShowEmptyDirectories { get; set; }
@@ -20,6 +31,13 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool ShowOtherFiles { get; set; }
     bool ShowOnlyMissingLinks { get; set; }
     bool ShowTextures { get; set; }
+    TextureFormatFilter TextureFormatFilter { get; set; }
+    double TextureMinWidth { get; set; }
+    double TextureMaxWidth { get; set; }
+    double TextureMinHeight { get; set; }
+    double TextureMaxHeight { get; set; }
+    bool HasTextureFilters { get; set; }
+    bool IsBusyFilteringTextures { get; set; }
     bool ShowModels { get; set; }
     bool ShowScriptSources { get; set; }
     bool ShowScripts { get; set; }
@@ -32,6 +50,7 @@ public interface IAssetBrowserVM : IDisposableDropoff {
     bool ShowSeq { get; set; }
     bool ShowTranslations { get; set; }
 
+    ReactiveCommand<Unit, Unit> ClearTextureFiltersCommand { get; }
     ReactiveCommand<Unit, Unit> UndoCommand { get; }
     ReactiveCommand<Unit, Unit> RedoCommand { get; }
 

@@ -16,11 +16,15 @@ using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
+using CreationEditor.Avalonia.ViewModels.Setting.AssetBrowser;
+using CreationEditor.Avalonia.Views.Asset.Browser;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Filter;
+using CreationEditor.Services.Integrations.Textures;
 using CreationEditor.Services.Mutagen.References;
+using CreationEditor.Services.Settings;
 using DynamicData.Binding;
 using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Assets;
@@ -36,6 +40,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
     private readonly IDataSourceWatcherProvider _dataSourceWatcherProvider;
+    private readonly ITextureInfoService _textureInfoService;
     private DataSourceDirectoryLink _rootDirectory = null!;
 
     private readonly Dictionary<string, IReadOnlyList<IDataSourceLink>> _filteredFileSystemChildrenCache = [];
@@ -61,6 +66,13 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     [Reactive] public partial bool ShowOnlyMissingLinks { get; set; } = false;
 
     [Reactive] public partial bool ShowTextures { get; set; } = true;
+    [Reactive] public partial TextureFormatFilter TextureFormatFilter { get; set; } = TextureFormatFilter.All;
+    [Reactive] public partial double TextureMinWidth { get; set; } = double.NaN;
+    [Reactive] public partial double TextureMaxWidth { get; set; } = double.NaN;
+    [Reactive] public partial double TextureMinHeight { get; set; } = double.NaN;
+    [Reactive] public partial double TextureMaxHeight { get; set; } = double.NaN;
+    [Reactive] public partial bool HasTextureFilters { get; set; }
+    [Reactive] public partial bool IsBusyFilteringTextures { get; set; } = false;
     [Reactive] public partial bool ShowModels { get; set; } = true;
     [Reactive] public partial bool ShowScriptSources { get; set; } = true;
     [Reactive] public partial bool ShowScripts { get; set; } = true;
@@ -91,6 +103,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IModelService modelService,
         IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         ISearchFilter searchFilter,
+        ITextureInfoService textureInfoService,
+        ISettingProvider settingProvider,
         IAssetContextActionsProvider assetContextActionsProvider,
         IGenericContextActionsProvider genericContextActionsProvider) {
         DataSourceService = dataSourceService;
@@ -101,8 +115,22 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _searchFilter = searchFilter;
         _dataSourceWatcherProvider = dataSourceWatcherProvider;
+        _textureInfoService = textureInfoService;
         AssetContextActionsProvider = assetContextActionsProvider;
         GenericContextActionsProvider = genericContextActionsProvider;
+
+        // Apply default filter visibility from the asset browser settings
+        var assetBrowserSetting = settingProvider.Settings
+            .OfType<AssetBrowserSettingVM>()
+            .FirstOrDefault()
+            ?.Setting;
+        if (assetBrowserSetting is not null) {
+            ShowReferencedFiles = assetBrowserSetting.ShowReferencedFiles;
+            ShowOrphanedFiles = assetBrowserSetting.ShowOrphanedFiles;
+            ShowOtherFiles = assetBrowserSetting.ShowOtherFiles;
+            ShowEmptyDirectories = assetBrowserSetting.ShowEmptyDirectories;
+            ShowIgnoredDirectories = assetBrowserSetting.ShowIgnoredDirectories;
+        }
 
         DataSource = DataSourceService.ListedOrder.OfType<FileSystemDataSource>().First();
         DataSourceSelections = DataSourceService.DataSourcesChanged.ToObservableCollection(this);
@@ -119,7 +147,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             var textBlock = new TextBlock {
                                 Text = asset.Name,
                                 [ToolTip.TipProperty] = asset.DataRelativePath.Path,
-                                VerticalAlignment = VerticalAlignment.Center
+                                VerticalAlignment = VerticalAlignment.Center,
                             };
 
                             if (asset.DataSource.IsReadOnly) {
@@ -159,8 +187,8 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                 Spacing = 5,
                                 Children = {
                                     icon,
-                                    textBlock
-                                }
+                                    textBlock,
+                                },
                             };
                         }),
                         null,
@@ -177,7 +205,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                             CompareDescending = (x, y) => {
                                 var checkNull = ObjectComparers.CheckNull(x, y);
                                 return checkNull ?? x!.CompareToDirectoriesFirst(y);
-                            }
+                            },
                         }),
                     x => x is DataSourceDirectoryLink directoryLink ? GetFilteredFileSystemChildren(directoryLink) : [],
                     link => link is DataSourceDirectoryLink),
@@ -204,11 +232,11 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         CompareDescending = (x, y) => {
                             var checkNull = ObjectComparers.CheckNull(x, y);
                             return -(checkNull ?? x!.CompareTo(y));
-                        }
+                        },
                     }),
                 new TemplateColumn<IDataSourceLink>(
                     "Flags",
-                    new FuncDataTemplate<IDataSourceLink>((asset, _) => {
+                    new FuncDataTemplate<IDataSourceLink>((asset, n) => {
                         if (asset is not DataSourceFileLink fileLink) return null;
 
                         var assetLink = AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
@@ -217,13 +245,27 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         var missingLinks = GetMissingLinks(fileLink, assetLink).ToArray();
                         var stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
 
+                        // Texture info icon
+                        if (asset is DataSourceFileLink textureLink
+                         && _textureInfoService.Provider is not null
+                         && AssetTypeService.GetAssetType(textureLink.DataRelativePath) is SkyrimTextureAssetType or SkyrimBodyTextureAssetType) {
+                            var infoIcon = new FASymbolIcon {
+                                Symbol = FASymbol.Help,
+                                Foreground = Brushes.Gray,
+                                VerticalAlignment = VerticalAlignment.Center,
+                                [ToolTip.TipProperty] = "Loading texture info...",
+                            };
+                            _ = LoadTextureInfoTooltip(textureLink, infoIcon);
+                            stackPanel.Children.Add(infoIcon);
+                        }
+
                         if (missingLinks.Length > 0) {
                             stackPanel.Children.Add(
                                 new FASymbolIcon {
                                     Symbol = FASymbol.ImportantFilled,
                                     Foreground = StandardBrushes.InvalidBrush,
                                     VerticalAlignment = VerticalAlignment.Center,
-                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks)
+                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
                                 }
                             );
                         }
@@ -235,7 +277,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     new FAFontIcon {
                                         Glyph = "⟟",
                                         VerticalAlignment = VerticalAlignment.Center,
-                                        [ToolTip.TipProperty] = "Has Collision"
+                                        [ToolTip.TipProperty] = "Has Collision",
                                     }
                                 );
                             }
@@ -247,15 +289,15 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                                     new FAFontIcon {
                                         Glyph = "⚠️",
                                         VerticalAlignment = VerticalAlignment.Center,
-                                        [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths)
+                                        [ToolTip.TipProperty] = "Has Misaligned Paths:\n" + string.Join('\n', misalignedPaths),
                                     }
                                 );
                             }
                         }
 
                         return stackPanel;
-                    }))
-            }
+                    })),
+            },
         };
 
         _referenceService.IsLoading
@@ -292,12 +334,96 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Subscribe(Tree_UpdateAll)
             .DisposeWith(this);
 
+        // Texture filter changes also refresh the tree
+        Observable.CombineLatest(
+                this.WhenAnyValue(x => x.TextureFormatFilter),
+                this.WhenAnyValue(x => x.TextureMinWidth),
+                this.WhenAnyValue(x => x.TextureMaxWidth),
+                this.WhenAnyValue(x => x.TextureMinHeight),
+                this.WhenAnyValue(x => x.TextureMaxHeight),
+                (_, _, _, _, _) => Unit.Default)
+            .ThrottleMedium()
+            .ObserveOnGui()
+            .Skip(1) // Skip the initial value to avoid unnecessary refresh on startup
+            .Subscribe(_ => Tree_UpdateAll())
+            .DisposeWith(this);
+
         this.WhenAnyValue(x => x.DataSource)
             .Subscribe(SetupDataSourceWatcher)
             .DisposeWith(this);
 
+        _textureInfoService.ProviderChanged
+            .ObserveOnGui()
+            .Subscribe(Tree_UpdateAll)
+            .DisposeWith(this);
+
+        this.WhenAnyValue(
+                x => x.TextureFormatFilter,
+                x => x.TextureMinWidth,
+                x => x.TextureMaxWidth,
+                x => x.TextureMinHeight,
+                x => x.TextureMaxHeight,
+                (format, minWidth, maxWidth, minHeight, maxHeight) => format != TextureFormatFilter.All
+                 || !double.IsNaN(minWidth) || !double.IsNaN(maxWidth)
+                 || !double.IsNaN(minHeight) || !double.IsNaN(maxHeight))
+            .Subscribe(hasFilters => HasTextureFilters = hasFilters)
+            .DisposeWith(this);
+
+        // Fill the texture info cache in the background when texture filters are in use
+        this.WhenAnyValue(x => x.HasTextureFilters)
+            .CombineLatest(this.WhenAnyValue(x => x.DataSource), (hasFilters, _) => hasFilters)
+            .CombineLatest(_textureInfoService.ProviderChanged.Unit().StartWith(Unit.Default), (hasFilters, _) => hasFilters)
+            .Where(hasFilters => hasFilters)
+            .ThrottleMedium()
+            .SubscribeAsyncConcat(_ => PrefetchTextureInfo())
+            .DisposeWith(this);
+
         UndoCommand = ReactiveCommand.Create(assetController.Undo);
         RedoCommand = ReactiveCommand.Create(assetController.Redo);
+    }
+
+    [ReactiveCommand]
+    private void ClearTextureFilters() {
+        TextureFormatFilter = TextureFormatFilter.All;
+        TextureMinWidth = double.NaN;
+        TextureMaxWidth = double.NaN;
+        TextureMinHeight = double.NaN;
+        TextureMaxHeight = double.NaN;
+    }
+
+    private bool PassesTextureFilter(DataSourceFileLink fileLink) {
+        if (!HasTextureFilters) return true;
+
+        // Only consult the cache here, fetching runs on the UI thread.
+        // Missing entries are filled in by the background prefetch, which refreshes the tree afterwards.
+        var result = _textureInfoService.GetCached(fileLink);
+        if (!result.HasValue) return false;
+
+        if (TextureFormatFilter != TextureFormatFilter.All
+         && !string.Equals(result.Value.FormatName, TextureFormatFilter.ToString(), StringComparison.OrdinalIgnoreCase)
+         && (TextureFormatFilter != TextureFormatFilter.Other || AssetBrowser.TextureFormats.Any(f => f.ToString() == result.Value.FormatName))) {
+            return false;
+        }
+
+        if (!double.IsNaN(TextureMinWidth) && result.Value.Width < TextureMinWidth) return false;
+        if (!double.IsNaN(TextureMaxWidth) && result.Value.Width > TextureMaxWidth) return false;
+        if (!double.IsNaN(TextureMinHeight) && result.Value.Height < TextureMinHeight) return false;
+        if (!double.IsNaN(TextureMaxHeight) && result.Value.Height > TextureMaxHeight) return false;
+
+        return true;
+    }
+
+    private async Task PrefetchTextureInfo() {
+        if (!HasTextureFilters || _textureInfoService.Provider is null || DataSource is not FileSystemDataSource) return;
+
+        IsBusyFilteringTextures = true;
+        try {
+            await _textureInfoService.Prefetch(DataSource);
+        } finally {
+            IsBusyFilteringTextures = false;
+        }
+
+        Dispatcher.UIThread.Post(Tree_UpdateAll);
     }
 
     private void SetupDataSourceWatcher(IDataSource dataSource) {
@@ -419,6 +545,21 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public IAssetLinkGetter? GetAssetLink(IDataSourceLink fileLink) => AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
 
+    private async Task LoadTextureInfoTooltip(DataSourceFileLink fileLink, FASymbolIcon infoIcon) {
+        var result = await _textureInfoService.GetTextureInfo(fileLink);
+
+        Dispatcher.UIThread.Post(() => {
+            infoIcon[ToolTip.TipProperty] = result.HasValue
+                ? FormatTextureInfo(result.Value)
+                : "No texture info provider configured";
+        });
+    }
+
+    private static string FormatTextureInfo(TextureInfo result) => $"Width: {result.Width}\n"
+      + $"Height: {result.Height}\n"
+      + $"Format: {result.FormatName}\n"
+      + $"Mip Levels: {result.MipCount}";
+
     private string SearchTextPattern() {
         // Surround with * and remove invalid chars
         return '*' + DataSource.FileSystem.Path.GetInvalidPathChars()
@@ -501,6 +642,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     break;
                 case SkyrimBodyTextureAssetType:
                     if (!ShowBodyTextures) return false;
+                    if (!PassesTextureFilter(fileLink)) return false;
 
                     break;
                 case SkyrimDeformedModelAssetType:
@@ -537,6 +679,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                     break;
                 case SkyrimTextureAssetType:
                     if (!ShowTextures) return false;
+                    if (!PassesTextureFilter(fileLink)) return false;
 
                     break;
                 case SkyrimTranslationAssetType:
