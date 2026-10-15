@@ -15,6 +15,7 @@ public sealed class JsonSerializerSettingsProvider(IContractResolver contractRes
         Converters = {
             JsonConvertersMixIn.FormKey,
             JsonConvertersMixIn.ModKey,
+            new ConfiguredValuesJsonConverter(),
         },
     };
 }
