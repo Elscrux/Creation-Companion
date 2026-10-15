@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 using BuildStripper.Models;
 using CreationEditor;
 using CreationEditor.Services.Asset;
@@ -18,6 +19,7 @@ namespace BuildStripper.Services;
 public sealed partial class AssetCleaner(
     ILogger logger,
     IAssetTypeProvider assetTypeProvider,
+    IFileSystem fileSystem,
     IAssetTypeService assetTypeService,
     IAssetController assetController,
     IReferenceService referenceService,
@@ -89,7 +91,7 @@ public sealed partial class AssetCleaner(
     }
 
     private readonly IAssetType[] _selfRetainingAssetTypes = [
-        assetTypeProvider.Behavior,
+        assetTypeProvider.Interface,
     ];
 
     [GeneratedRegex(@"Function\s+(\w|_)(\w|_|\d)*\s*\(.+\).+Global")]
@@ -98,7 +100,8 @@ public sealed partial class AssetCleaner(
     /// <summary>
     /// Adds link to the retained graph if the given asset link should always be retained.
     /// This includes:
-    /// - behavior assets which currently have no way to track references to them.
+    /// - interface assets
+    /// - actor behaviors
     /// - scripts with global functions
     /// - voice files that are voicing lines from other mods
     /// </summary>
@@ -116,14 +119,25 @@ public sealed partial class AssetCleaner(
         IReadOnlyList<ModKey> dependencies,
         AssetLinkIdentifier assetLinkIdentifier) {
         if (_selfRetainingAssetTypes.Contains(assetLinkIdentifier.AssetLink.Type)) {
-            // Always retain behavior assets
+            // Always retain interface assets
+            retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
+        }
+
+        if (assetLinkIdentifier.AssetLink.Type == SkyrimBehaviorAssetType.Instance
+         && assetLinkIdentifier.AssetLink.DataRelativePath.Path.StartsWith(fileSystem.Path.Combine("Meshes", "Actors"))) {
+            // Always retain actor behaviors
             retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
         }
 
         // Ensure to retain scripts that have global functions as long as there is no system to track references to global function calls between scripts
         // TODO: replace with system to track global script calls so we don't need to keep scripts with global functions that are never called
         if (selectedDataSource is not null && assetLinkIdentifier.AssetLink.Type == SkyrimScriptSourceAssetType.Instance) {
-            var fileLink = new DataSourceFileLink(selectedDataSource, assetLinkIdentifier.AssetLink.DataRelativePath);
+            var fileLink = dataSourceService.GetFileLink(assetLinkIdentifier.AssetLink.DataRelativePath);
+            if (fileLink is null) {
+                logger.Here().Error("Could not find file link for {Asset}", assetLinkIdentifier.AssetLink.DataRelativePath);
+                return;
+            }
+
             using var stream = fileLink.ReadFileStream();
             if (stream is not null) {
                 using var streamReader = new StreamReader(stream);
@@ -151,8 +165,8 @@ public sealed partial class AssetCleaner(
             var modDirectory = selectedDataSource.FileSystem.Path.GetDirectoryName(voiceTypeDirectory);
             var modName = selectedDataSource.FileSystem.Path.GetFileName(modDirectory);
             if (modName is not null) {
-                var modKey = ModKey.FromFileName(modName);
-                if (!modKey.Equals(mod.ModKey)) {
+                var modKey = ModKey.TryFromFileName(modName);
+                if (modKey is not null && !modKey.Equals(mod.ModKey)) {
                     retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
                 }
             }
