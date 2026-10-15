@@ -14,6 +14,7 @@ using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.Services.Viewport;
 using CreationEditor.Avalonia.Services.Viewport.BSE;
 using CreationEditor.Avalonia.ViewModels;
+using CreationEditor.Avalonia.ViewModels.Analyzer;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Record.Browser;
@@ -275,6 +276,9 @@ public sealed class MainModule : Module {
             .AsSelf();
 
         builder.RegisterType<ModCreationVM>()
+            .AsSelf();
+
+        builder.RegisterType<AnalyzerResultVM>()
             .AsSelf();
     }
 }

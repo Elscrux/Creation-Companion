@@ -1,0 +1,53 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:analyzer="clr-namespace:CreationEditor.Avalonia.Views.Analyzer"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Analyzer"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Analyzer.AnalyzerResultContentView"
+             x:Name="Control"
+             x:DataType="vm:AnalyzerResultVM">
+    <Grid ColumnDefinitions="Auto,6,*,Auto">
+        <!-- Record Identifier -->
+        <Button Grid.Column="0"
+                Content="{Binding RecordDisplayName}"
+                Background="Transparent"
+                BorderThickness="0"
+                Padding="0"
+                RightTapped="InputElement_OnRightTapped"
+                Click="Copy_PointerPressed"
+                ToolTip.Tip="Copy Record Identifier"
+                FontSize="12"
+                FontWeight="Medium"
+                Foreground="{DynamicResource SystemControlForegroundBaseMediumHighBrush}"
+                VerticalAlignment="Center"/>
+
+        <!-- Colon -->
+        <TextBlock Grid.Column="1"
+                   Text=":"
+                   FontSize="12"
+                   FontWeight="Medium"
+                   Foreground="{DynamicResource SystemControlForegroundBaseMediumHighBrush}"
+                   VerticalAlignment="Center"/>
+
+        <!-- Message -->
+        <analyzer:FormattedTopicBlock Grid.Column="2"
+                                      Segments="{Binding MessageSegments}"/>
+
+        <!-- Parent -->
+        <Button Grid.Column="3"
+                Content="{Binding ParentDisplayName}"
+                Background="Transparent"
+                BorderThickness="0"
+                Padding="2"
+                ToolTip.Tip="Copy Parent Identifier"
+                Click="Copy_PointerPressed"
+                FontSize="12"
+                FontWeight="Medium"
+                Foreground="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                VerticalAlignment="Center"/>
+    </Grid>
+</UserControl>
