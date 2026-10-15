@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Notification;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments;
@@ -28,18 +29,27 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
     private readonly IDataSourceService _dataSourceService;
     private readonly INotificationService _notificationService;
     private readonly IGameReleaseContext _gameReleaseContext;
+    private readonly ILoadOrderSorter _loadOrderSorter;
+    private readonly IModInfoProvider _modInfoProvider;
+
+    // Masters of immutable mods are read from the data source files
+    private readonly Dictionary<ModKey, ModKey[]> _fileMastersCache = [];
 
     public EditorEnvironmentUpdater(
         ILogger logger,
         IFileSystem fileSystem,
         IDataSourceService dataSourceService,
         INotificationService notificationService,
-        IGameReleaseContext gameReleaseContext) {
+        IGameReleaseContext gameReleaseContext,
+        ILoadOrderSorter loadOrderSorter,
+        IModInfoProvider modInfoProvider) {
         _logger = logger;
         _fileSystem = fileSystem;
         _dataSourceService = dataSourceService;
         _notificationService = notificationService;
         _gameReleaseContext = gameReleaseContext;
+        _loadOrderSorter = loadOrderSorter;
+        _modInfoProvider = modInfoProvider;
         ActiveMod = new ActiveModBuilder(this);
         LoadOrder = new LoadOrderBuilder(this);
     }
@@ -60,25 +70,53 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
     }
 
     public IEnumerable<ModKey> GetLoadOrder() {
-        return LoadOrder.ImmutableMods
+        var modKeys = LoadOrder.ImmutableMods
             .Concat(LoadOrder.MutableMods.Select(x => x.ModKey))
             .Concat(LoadOrder.NewMutableMods)
             .Where(modKey => modKey != ActiveMod.ModKey)
-            .Append(ActiveMod.ModKey)
-            .Distinct();
+            .Distinct()
+            .ToList();
+
+        var result = _loadOrderSorter.Sort(modKeys, GetDirectMasters);
+        foreach (var issue in result.Issues) {
+            _logger.Here().Warning("Invalid load order detected: {Issue}", issue);
+        }
+
+        return result.Order.Append(ActiveMod.ModKey);
+    }
+
+    private IEnumerable<ModKey> GetDirectMasters(ModKey modKey) {
+        var mod = LoadOrder.MutableMods.Find(x => x.ModKey == modKey);
+        if (mod is not null) return mod.MasterReferences.Select(x => x.Master);
+
+        if (ActiveMod.LastMod is not null && ActiveMod.LastMod.ModKey == modKey) {
+            return ActiveMod.LastMod.MasterReferences.Select(x => x.Master);
+        }
+
+        if (_fileMastersCache.TryGetValue(modKey, out var cachedMasters)) return cachedMasters;
+
+        if (_dataSourceService.TryGetFileLink(modKey.FileName.String, out var fileLink)
+         && _modInfoProvider.GetModInfo(fileLink) is {} modInfo) {
+            return _fileMastersCache[modKey] = modInfo.DirectMasters;
+        }
+
+        return _fileMastersCache[modKey] = [];
     }
 
     public IEditorEnvironmentResult Build() {
         var linearNotifier = new LinearNotifier(_notificationService, 3);
 
         linearNotifier.Next("Preparing immutable mods");
+        var loadOrder = GetLoadOrder().ToArray();
         var builder = GameEnvironmentBuilder<TMod, TModGetter>
             .Create(_gameReleaseContext.Release)
-            .WithLoadOrder(GetLoadOrder().ToArray())
+            .WithLoadOrder(loadOrder)
             .TransformModListings(x => x.Select(TryLoadListingFromDataSource));
 
         linearNotifier.Next("Preparing mutable mods");
-        foreach (var mutableMod in LoadOrder.MutableMods) {
+        // Output mods are placed in the environment in the order they are added, so they follow the sorted load order
+        var loadOrderIndices = loadOrder.Select((key, i) => (key, i)).ToDictionary(x => x.key, x => x.i);
+        foreach (var mutableMod in LoadOrder.MutableMods.OrderBy(x => loadOrderIndices.GetValueOrDefault(x.ModKey, int.MaxValue))) {
             if (mutableMod is not TMod mod) throw new ArgumentException($"Mutable mod is of type {mutableMod.GetType()} but expected {typeof(TMod)}");
 
             builder = builder.WithOutputMod(mod, OutputModTrimming.Self);
@@ -109,7 +147,9 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
         var environment = builder
             .WithOutputMod(activeMod, OutputModTrimming.Self);
 
-        return new EditorEnvironmentResult<TMod, TModGetter>(environment, activeMod);
+        var result = new EditorEnvironmentResult<TMod, TModGetter>(environment, activeMod);
+        _fileMastersCache.Clear();
+        return result;
     }
 
     private IModListingGetter<TModGetter> TryLoadListingFromDataSource(IModListingGetter<TModGetter> listing) {
@@ -118,7 +158,7 @@ public sealed class EditorEnvironmentUpdater<TMod, TModGetter> : IEditorEnvironm
             var mod = ModFactory<TModGetter>.Importer(modPath,
                 _gameReleaseContext.Release,
                 new BinaryReadParameters {
-                    FileSystem = _fileSystem
+                    FileSystem = _fileSystem,
                 });
             return new ModListing<TModGetter>(mod, listing.Enabled, listing.GhostSuffix);
         }
