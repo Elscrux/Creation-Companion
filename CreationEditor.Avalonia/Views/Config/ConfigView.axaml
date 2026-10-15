@@ -1,0 +1,99 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Config"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic"
+             mc:Ignorable="d"
+             d:DesignWidth="400"
+             d:DesignHeight="300"
+             x:DataType="vm:ConfigVM"
+             x:Class="CreationEditor.Avalonia.Views.Config.ConfigView">
+    <ItemsControl ItemsSource="{Binding OptionVMs}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Spacing="4"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                    <!-- Config Option -->
+                    <basic:LabeledContentControl HeaderToolTip="{Binding Option.Description}"
+                                                 VerticalAlignment="Center">
+                        <basic:LabeledContentControl.Header>
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="4">
+                                <!-- Toggle Option Active -->
+                                <CheckBox IsVisible="{Binding Option.IsOptional}"
+                                          IsChecked="{Binding IsActive}"
+                                          ToolTip.Tip="{Binding Option.Description}">
+                                    <!-- <ToggleButton.Template> -->
+                                    <!--     <ControlTemplate> -->
+                                    <!--         <StackPanel Orientation="Horizontal" -->
+                                    <!--                     Spacing="4" -->
+                                    <!--                     Background="Transparent"> -->
+                                    <!--             <controls:FASymbolIcon Symbol="ChevronDown" -->
+                                    <!--                                    IsVisible="{Binding !IsActive}"/> -->
+                                    <!--             <controls:FASymbolIcon Symbol="ChevronUp" -->
+                                    <!--                                    IsVisible="{Binding IsActive}"/> -->
+                                    <!-- -->
+                                    <!--             ~1~ Option Name @1@ -->
+                                    <!--             <TextBlock Text="{Binding Option.Name}" -->
+                                    <!--                        FontSize="16" -->
+                                    <!--                        FontWeight="SemiBold" -->
+                                    <!--                        VerticalAlignment="Center"/> -->
+                                    <!--         </StackPanel> -->
+                                    <!--     </ControlTemplate> -->
+                                    <!-- </ToggleButton.Template> -->
+
+                                    <!-- <ToggleButton.Styles> -->
+                                    <!--     <Style Selector="ToggleButton:pointerover"> -->
+                                    <!--         <Setter Property="Foreground" -->
+                                    <!--                 Value="{DynamicResource ButtonForegroundPressed}"/> -->
+                                    <!--     </Style> -->
+                                    <!-- </ToggleButton.Styles> -->
+                                    <TextBlock Text="{Binding Option.Name}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                </CheckBox>
+
+                                <!-- Option Name -->
+                                <TextBlock Text="{Binding Option.Name}"
+                                           IsVisible="{Binding !Option.IsOptional}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </basic:LabeledContentControl.Header>
+
+                        <basic:LabeledContentControl.Styles>
+                            <Style Selector="basic|LabeledContentControl /template/ StackPanel#PART_HeaderPanel">
+                                <Setter Property="MinHeight"
+                                        Value="30"/>
+                            </Style>
+
+                            <Style Selector="basic|LabeledContentControl /template/ ContentPresenter#PART_Label">
+                                <Setter Property="VerticalContentAlignment"
+                                        Value="Center"/>
+                            </Style>
+                        </basic:LabeledContentControl.Styles>
+
+                        <ContentControl Content="{Binding}"
+                                        IsVisible="{Binding IsActive}"/>
+                    </basic:LabeledContentControl>
+
+                    <!-- Validation Error -->
+                    <controls:FAFontIcon Glyph="⚠"
+                                         VerticalAlignment="Top"
+                                         Margin="0,4"
+                                         FontSize="32"
+                                         IsVisible="{Binding ValidationErrorChanged^, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                         ToolTip.Tip="{Binding ValidationErrorChanged^.ErrorMessage}"/>
+                </StackPanel>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

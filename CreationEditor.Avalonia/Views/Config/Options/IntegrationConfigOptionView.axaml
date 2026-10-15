@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Config.Options"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="400"
+             d:DesignHeight="200"
+             x:DataType="vm:IntegrationConfigOptionVM"
+             x:Class="CreationEditor.Avalonia.Views.Config.Options.IntegrationConfigOptionView">
+    <Border>
+        <StackPanel Spacing="12">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="4">
+                <!-- Integrations Selection -->
+                <ComboBox IsVisible="{Binding !!AvailableIntegrations.Count}"
+                          ItemsSource="{Binding AvailableIntegrations}"
+                          SelectedItem="{Binding SelectedIntegration}"
+                          DisplayMemberBinding="{Binding Descriptor.DisplayName}"
+                          MinWidth="220"
+                          CornerRadius="8"
+                          Padding="12,8"/>
+
+                <!-- Selected Integration's Config View -->
+                <Button VerticalAlignment="Stretch"
+                        IsVisible="{Binding IntegrationConfigVM, Converter={x:Static converter:ObjectConverters.IsNotNull}}">
+                    <controls:FASymbolIcon Symbol="SettingsFilled"/>
+                    <Button.Flyout>
+                        <Flyout>
+                            <ContentControl Content="{Binding IntegrationConfigVM}"/>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
+
+            <!-- No integrations registered -->
+            <StackPanel IsVisible="{Binding !AvailableIntegrations.Count}"
+                        Spacing="8">
+                <TextBlock Text="No integrations are registered for this capability."
+                           Opacity="0.7"/>
+                <TextBlock Text="Add one via File → Integrations."
+                           Opacity="0.5"
+                           FontSize="12"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

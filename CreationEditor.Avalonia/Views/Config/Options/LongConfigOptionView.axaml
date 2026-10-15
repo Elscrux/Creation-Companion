@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Config.Options"
+             mc:Ignorable="d"
+             d:DesignWidth="400"
+             d:DesignHeight="100"
+             x:DataType="vm:LongConfigOptionVM"
+             x:Class="CreationEditor.Avalonia.Views.Config.Options.LongConfigOptionView">
+    <NumericUpDown Value="{Binding Long}"
+                   Minimum="{Binding LongOption.MinValue}"
+                   Maximum="{Binding LongOption.MaxValue}"
+                   Increment="{Binding LongOption.Increment}"
+                   MinWidth="160"/>
+</UserControl>

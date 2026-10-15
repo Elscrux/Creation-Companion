@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Config.Options"
+             xmlns:config="clr-namespace:CreationEditor.Avalonia.Views.Config"
+             xmlns:avalonia="clr-namespace:Sortable.Avalonia;assembly=Sortable.Avalonia"
+             xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="500"
+             d:DesignHeight="400"
+             x:DataType="vm:ListConfigOptionVM"
+             x:Name="Control"
+             x:Class="CreationEditor.Avalonia.Views.Config.Options.ListConfigOptionView">
+    <StackPanel Spacing="8">
+        <ItemsControl x:Name="ItemsList"
+                      ItemsSource="{Binding Items}"
+                      avalonia:Sortable.Sortable="True"
+                      avalonia:Sortable.UpdateCommand="{x:Static command:SortableCommands.UpdateCommand}"
+                      Background="Transparent"
+                      BorderThickness="0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="4"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Expander HorizontalAlignment="Stretch"
+                              Margin="0">
+                        <Expander.Header>
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="4">
+                                <!-- Drag handle -->
+                                <Border Grid.Column="0"
+                                        Cursor="Hand"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,4,0"
+                                        ToolTip.Tip="Drag to reorder"
+                                        avalonia:Sortable.IsSortable="True"
+                                        Background="Transparent"
+                                        CornerRadius="4"
+                                        Padding="6">
+                                    <TextBlock Text="&#x283F;"/>
+                                </Border>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Summary}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+
+                                <Button Grid.Column="2"
+                                        Content="&#10005;"
+                                        ToolTip.Tip="Remove item"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding #Control.ViewModel.RemoveItemCommand}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </Expander.Header>
+
+                        <config:ConfigView DataContext="{Binding ConfigVM}"
+                                           Margin="8,8,8,4"/>
+                    </Expander>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Content="+ Add Item"
+                Command="{Binding AddItemCommand}"
+                HorizontalAlignment="Left"
+                Padding="12,8"
+                CornerRadius="8"/>
+    </StackPanel>
+</UserControl>

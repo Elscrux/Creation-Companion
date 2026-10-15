@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter;assembly=CreationEditor.Avalonia"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Config.Options"
+             mc:Ignorable="d"
+             d:DesignWidth="400"
+             d:DesignHeight="100"
+             x:DataType="vm:EnumConfigOptionVM"
+             x:Class="CreationEditor.Avalonia.Views.Config.Options.EnumConfigOptionView">
+    <ComboBox ItemsSource="{Binding EnumOption.ValueType, Converter={x:Static converter:EnumConverters.ToValues}}"
+              SelectedItem="{Binding Enum}"
+              DisplayMemberBinding="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"
+              MinWidth="220"
+              CornerRadius="8"
+              Padding="12,8"/>
+</UserControl>
