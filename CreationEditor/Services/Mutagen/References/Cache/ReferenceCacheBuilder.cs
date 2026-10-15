@@ -97,7 +97,9 @@ public sealed class ReferenceCacheBuilder(ILogger logger) {
             // If fully invalidated, parse from the ground up
             if (validationResult.CacheFullyInvalidated) {
                 logger.Here().Debug("Fully invalidated {QueryName} cache content for {Source}, parsing everything", query.Name, sourceName);
-                return FullyParseCache();
+                var cache = FullyParseCache();
+                validationResult.UpdateCache();
+                return cache;
             }
 
             // Otherwise, deserialize existing cache
