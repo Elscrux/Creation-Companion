@@ -13,12 +13,5 @@ public sealed class LipGeneratorModule : ExtensionModule {
 
         // Register services
         builder.RegisterType<LipFileGenerator>();
-        builder.RegisterType<LipFileGeneratorFactory>();
-        
-        // Register both lip generator implementations separately (not as ILipGenerator interface)
-        builder.RegisterType<FaceFxWrapper>();
-        builder.RegisterType<LipGeneratorWrapper>();
-        builder.RegisterType<LipFuzerWrapper>();
-        builder.RegisterType<XwmEncoderWrapper>();
     }
 }
