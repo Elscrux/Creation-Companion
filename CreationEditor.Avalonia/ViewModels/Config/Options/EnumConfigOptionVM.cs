@@ -20,6 +20,8 @@ public sealed partial class EnumConfigOptionVM(EnumConfigOption option) : ViewMo
         set {
             if (value is Enum e) {
                 Enum = e;
+            } else if (value is not null) {
+                Enum = (Enum) Enum.ToObject(option.ValueType, value);
             }
         }
     }
