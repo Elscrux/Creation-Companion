@@ -33,5 +33,6 @@ public static class DataSourceExtensions {
             relativePath = new DataRelativePath(dataSource.FileSystem.Path.GetRelativePath(dataSource.Path, fullPath));
             return true;
         }
+        public DataSourceDirectoryLink GetRootLink() => new(dataSource, string.Empty);
     }
 }
