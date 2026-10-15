@@ -14,13 +14,10 @@ public struct CacheValidationResult<TContent> {
         _updateCache = updateCache;
     }
 
-    public static CacheValidationResult<TContent> FullyInvalid(Action updateCache) {
-        return new CacheValidationResult<TContent>(true, [], updateCache);
-    }
+    public static CacheValidationResult<TContent> FullyInvalid(Action updateCache) => new(true, [], updateCache);
 
-    public static CacheValidationResult<TContent> PartlyInvalid(IReadOnlyList<TContent> invalidatedContent, Action updateCache) {
-        return new CacheValidationResult<TContent>(false, invalidatedContent, updateCache);
-    }
+    public static CacheValidationResult<TContent> PartlyInvalid(IReadOnlyList<TContent> invalidatedContent, Action updateCache) =>
+        new(false, invalidatedContent, updateCache);
 
     public static CacheValidationResult<TContent> Valid() {
         return new CacheValidationResult<TContent>(false, [], () => {});
@@ -30,8 +27,8 @@ public struct CacheValidationResult<TContent> {
     /// Receiver is responsible for calling this action to update the cache
     /// </summary>
     public void UpdateCache() {
-        if (Interlocked.Exchange(ref _hasUpdatedCache, 1) == 0) return;
+        if (Interlocked.Exchange(ref _hasUpdatedCache, 1) == 1) return;
 
         _updateCache();
-    } 
+    }
 }
