@@ -1,7 +1,8 @@
 <Project>
   <ItemGroup>
     <PackageVersion Include="Autofac" Version="9.3.4" />
-    <PackageVersion Include="Avalonia" Version="12.0.4" />
+    <PackageVersion Include="AutoFixture" Version="4.18.1" />
+    <PackageVersion Include="Avalonia" Version="12.0.5" />
     <PackageVersion Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
     <PackageVersion Include="Avalonia.HtmlRenderer" Version="12.0.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.0.4" />
