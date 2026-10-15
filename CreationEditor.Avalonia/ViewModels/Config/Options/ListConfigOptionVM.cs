@@ -15,19 +15,17 @@ namespace CreationEditor.Avalonia.ViewModels.Config.Options;
 /// definition, writing changes back on every edit.
 /// </summary>
 public sealed partial class ListItemVM : ViewModel {
-    public object Item { get; }
+    public IConfiguredValues Item { get; }
     public ConfigVM ConfigVM { get; }
 
     /// <summary>Short single-line summary of the item's first set value, shown in the editor header</summary>
     [Reactive] public partial string Summary { get; set; }
 
     public ListItemVM(object item, IConfigVMFactory configVMFactory) {
-        Item = item;
+        Item = (IConfiguredValues) item;
         Summary = item.GetType().Name;
 
-        var configured = (IConfiguredValues)item;
-
-        ConfigVM = configVMFactory.Create(configured.ConfigDefinition, configured.ConfigValues);
+        ConfigVM = configVMFactory.Create(Item.ConfigDefinition, Item.ConfigValues);
         ConfigVM.ConfigChanged
             .Subscribe(_ => WriteToItem())
             .DisposeWith(this);
@@ -36,18 +34,17 @@ public sealed partial class ListItemVM : ViewModel {
     }
 
     private void WriteToItem() {
-        var configured = (IConfiguredValues)Item;
-        configured.ConfigValues = ConfigVM.GetConfigValues();
+        Item.ConfigValues = ConfigVM.GetConfigValues();
 
-        UpdateSummary(configured.ConfigValues);
+        UpdateSummary(Item.ConfigValues);
     }
 
     private void UpdateSummary(ConfigValues configValues) {
-        var summary = ((IConfiguredValues)Item).ConfigDefinition.Options
-            .Select(option => configValues.TryGetValue(option.Name, out var value) ? value?.ToString() : null)
-            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+        var option = Item.ConfigDefinition.Options
+            .Select(option => configValues.TryGetValue(option.Name, out var value) ? $"{option.Name} = {value}" : null)
+            .WhereNotNull();
 
-        Summary = summary ?? Item.GetType().Name;
+        Summary = string.Join(", ", option);
     }
 }
 

@@ -47,6 +47,8 @@
 
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Summary}"
+                                           MaxWidth="500"
+                                           TextWrapping="Wrap"
                                            VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis"/>
 
