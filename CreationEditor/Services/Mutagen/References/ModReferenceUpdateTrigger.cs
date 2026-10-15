@@ -31,22 +31,32 @@ public sealed class ModReferenceUpdateTrigger<TCache, TLink, TSubscriber>(
 
                 _loadOrderChangedDisposables.Clear();
 
+                _tokenSource = new CancellationTokenSource();
+                var token = _tokenSource.Token;
+
                 Task.Run(async () => {
-                        _tokenSource = new CancellationTokenSource();
-                        await referenceController.UpdateSources(editorEnvironment.LinkCache.ListedOrder, _tokenSource.Token);
-                        logger.Here().Information("Loaded all {Name} References for {Count} Mods",
+                            await referenceController.UpdateSources(editorEnvironment.LinkCache.ListedOrder, token);
+                            logger.Here().Information("Loaded all {Name} References for {Count} Mods",
+                                referenceController.Name,
+                                editorEnvironment.LinkCache.ListedOrder.Count);
+                        },
+                        token)
+                    .FireAndForget(e => {
+                        logger.Here().Error(e,
+                            "Failed to load {Name} References for {Count} Mods {Exception}",
                             referenceController.Name,
-                            editorEnvironment.LinkCache.ListedOrder.Count);
-                    })
-                    .FireAndForget(e => logger.Here().Error(e,
-                        "Failed to load {Name} References for {Count} Mods {Exception}",
-                        referenceController.Name,
-                        editorEnvironment.LinkCache.ListedOrder.Count,
-                        e));
+                            editorEnvironment.LinkCache.ListedOrder.Count,
+                            e);
+                    });
 
                 DisposableExtensions.DisposeWith(
                     recordController.RecordChangedDiff
                         .Subscribe(referenceController.RegisterUpdate),
+                    _loadOrderChangedDisposables);
+
+                DisposableExtensions.DisposeWith(
+                    recordController.RecordDeleted
+                        .Subscribe(referenceController.RegisterDeletion),
                     _loadOrderChangedDisposables);
             })
             .DisposeWithComposite(disposables);
