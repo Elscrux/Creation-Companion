@@ -1,0 +1,75 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:setting="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.AssetBrowser"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Setting.AssetBrowser.AssetBrowserSettingView"
+             x:DataType="setting:AssetBrowserSettingVM">
+    <StackPanel Spacing="5">
+        <controls:FASettingsExpander Header="Texture Info Provider"
+                                     Description="Integration used to gather texture information (format, dimensions, mips) in the asset browser"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Image"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem Content="Integration">
+                <controls:FASettingsExpanderItem.Footer>
+                    <StackPanel Spacing="8">
+                        <ComboBox IsVisible="{Binding !!TextureInfoIntegrations.Count}"
+                                  ItemsSource="{Binding TextureInfoIntegrations}"
+                                  SelectedItem="{Binding SelectedTextureInfoIntegration}"
+                                  DisplayMemberBinding="{Binding Descriptor.DisplayName}"
+                                  MinWidth="220"/>
+
+                        <TextBlock IsVisible="{Binding !TextureInfoIntegrations.Count}"
+                                   Text="No texture info provider integrations are registered. Add one via File → Integrations."
+                                   Opacity="0.7"/>
+                    </StackPanel>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
+
+        <controls:FASettingsExpander Header="Default Filters"
+                                     Description="Default visibility filters for newly opened asset browsers"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Filter"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem Content="Referenced Files">
+                <controls:FASettingsExpanderItem.Footer>
+                    <CheckBox IsChecked="{Binding Setting.ShowReferencedFiles}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Orphaned Files">
+                <controls:FASettingsExpanderItem.Footer>
+                    <CheckBox IsChecked="{Binding Setting.ShowOrphanedFiles}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Other Files">
+                <controls:FASettingsExpanderItem.Footer>
+                    <CheckBox IsChecked="{Binding Setting.ShowOtherFiles}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Empty Directories">
+                <controls:FASettingsExpanderItem.Footer>
+                    <CheckBox IsChecked="{Binding Setting.ShowEmptyDirectories}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Ignored Directories">
+                <controls:FASettingsExpanderItem.Footer>
+                    <CheckBox IsChecked="{Binding Setting.ShowIgnoredDirectories}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
+    </StackPanel>
+</UserControl>
