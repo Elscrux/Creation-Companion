@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 namespace CreationEditor.Avalonia.Services.Actions;
 
 public interface IContextMenuProvider {
@@ -7,7 +8,7 @@ public interface IContextMenuProvider {
     /// </summary>
     /// <param name="context">Context of the selected list</param>
     /// <returns>Context menu list for actions that can be performed on a record or asset</returns>
-    IEnumerable<object> GetMenuItems(SelectedListContext context);
+    IEnumerable<Control> GetMenuItems(SelectedListContext context);
 
     /// <summary>
     /// Execute the primary action on a record or asset based on the context of the selected list

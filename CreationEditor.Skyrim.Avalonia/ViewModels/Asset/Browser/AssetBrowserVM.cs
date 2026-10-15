@@ -505,8 +505,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .ToArray();
 
         var context = new SelectedListContext([], assetContexts);
-        var menuItems = _contextMenuProvider.GetMenuItems(context);
-        return menuItems.OfType<Control>();
+        return _contextMenuProvider.GetMenuItems(context);
     }
 
     [ReactiveCommand]

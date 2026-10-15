@@ -256,14 +256,14 @@ public sealed partial class AnalyzerVM : ViewModel {
                                             _ => new TextBlock {
                                                 Text = groupInstance.Class?.ToString(),
                                                 VerticalAlignment = VerticalAlignment.Center,
-                                            }
-                                        }
+                                            },
+                                        },
                                     },
                                 },
                                 TopicItem => new CheckBox {
-                                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(TopicItem.IsActive))
+                                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(TopicItem.IsActive)),
                                 },
-                                _ => null
+                                _ => null,
                             };
                         })),
                     x => x switch {
@@ -287,7 +287,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                             _ => null,
                         };
                     })),
-            }
+            },
         };
 
         ResultsTreeSource = new HierarchicalTreeDataGridSource<object>(GroupedResults.Items) {
@@ -304,10 +304,10 @@ public sealed partial class AnalyzerVM : ViewModel {
                                 _ => new TextBlock {
                                     Text = groupInstance.Class?.ToString(),
                                     VerticalAlignment = VerticalAlignment.Center,
-                                }
+                                },
                             },
                             AnalyzerResult result => GetRecordControl(result.Record),
-                            _ => null
+                            _ => null,
                         })),
                     x => x switch {
                         GroupInstance groupInstance => groupInstance.Items,
@@ -338,7 +338,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                             _ => null,
                         };
                     })),
-            }
+            },
         };
     }
 
@@ -435,7 +435,7 @@ public sealed partial class AnalyzerVM : ViewModel {
                     .Cast<object>()
                     .Select(key => $"{Stringifier(key)}={Stringifier(dictionary[key])}")) + ']',
             IEnumerable enumerable => $"[{string.Join(", ", enumerable.Cast<object>().Select(Stringifier))}]",
-            _ => value?.ToString() ?? string.Empty
+            _ => value?.ToString() ?? string.Empty,
         };
 
         static string EscapeCsvField(string field) {
@@ -504,31 +504,27 @@ public sealed partial class AnalyzerVM : ViewModel {
                             UseShellExecute = true,
                             Verb = "open",
                         });
-                    })
+                    }),
                 },
                 new TextBlock {
                     Text = topicDefinition.ToString(),
                     VerticalAlignment = VerticalAlignment.Center,
                 },
-            }
+            },
         };
     }
 
-    private Control GetRecordControl(IFormLinkIdentifier? formLinkIdentifier) {
-        return new TextBlock {
-            Text = formLinkIdentifier is not null && _editorEnvironment.LinkCache.TryResolve(formLinkIdentifier, out var record)
-                ? record.GetHumanReadableName()
-                : formLinkIdentifier?.FormKey.ToString() ?? "Unknown Record",
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-    }
+    private Control GetRecordControl(IFormLinkIdentifier? formLinkIdentifier) => new TextBlock {
+        Text = formLinkIdentifier is not null && _editorEnvironment.LinkCache.TryResolve(formLinkIdentifier, out var record)
+            ? record.GetHumanReadableName()
+            : formLinkIdentifier?.FormKey.ToString() ?? "Unknown Record",
+        VerticalAlignment = VerticalAlignment.Center,
+    };
 
-    private Control GetRecordTypeControl(string typeName) {
-        return new TextBlock {
-            Text = typeName,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-    }
+    private Control GetRecordTypeControl(string typeName) => new TextBlock {
+        Text = typeName,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
 
     private string GetRecordTypeName(Type? type) {
         var typeName = type?.Name;
@@ -543,29 +539,25 @@ public sealed partial class AnalyzerVM : ViewModel {
         return "None";
     }
 
-    private Control GetSeverityControl(Severity severity) {
-        return new TextBlock {
-            Text = severity.ToString(),
-            VerticalAlignment = VerticalAlignment.Center,
-            Foreground = SeverityToBrushConverter.Convert(severity),
-        };
-    }
+    private Control GetSeverityControl(Severity severity) => new TextBlock {
+        Text = severity.ToString(),
+        VerticalAlignment = VerticalAlignment.Center,
+        Foreground = SeverityToBrushConverter.Convert(severity),
+    };
 
-    private Control GetFormattedTopicControl(IFormattedTopicDefinition formattedTopic) {
+    private Control GetFormattedTopicControl(IFormattedTopicDefinition formattedTopic) =>
         // TODO add clickable buttons for items (records, files etc) in message (use spans to separate text and links)
-        return new TextBlock {
+        new TextBlock {
             Text = formattedTopic.FormattedMessage,
             VerticalAlignment = VerticalAlignment.Center,
         };
-    }
 
     public IEnumerable<Control> GetContextMenuItems(AnalyzerResult result) {
         if (result.Record is null) return [];
         if (!_editorEnvironment.LinkCache.TryResolve(result.Record, out var record)) return [];
 
         using var disposable = _referenceService.GetReferencedRecord(record, out var referencedRecord);
-        var menuItems = _contextMenuProvider.GetMenuItems(new SelectedListContext([new RecordContext(result.ModKey, referencedRecord)], []));
-        return menuItems.OfType<Control>();
+        return _contextMenuProvider.GetMenuItems(new SelectedListContext([new RecordContext(result.ModKey, referencedRecord)], []));
     }
 
     private void SearchTopics(string searchText) {

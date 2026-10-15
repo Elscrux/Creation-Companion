@@ -36,7 +36,7 @@ public sealed class InjectedContextMenuProvider : IContextMenuProvider {
         using var disposable = contextAction.Command?.Execute(contextFactory()).Subscribe();
     }
 
-    public IEnumerable<object> GetMenuItems(SelectedListContext context) {
+    public IEnumerable<Control> GetMenuItems(SelectedListContext context) {
         var groups = _groups.OrderByDescending(x => x.Key.Priority)
             // Get all the menu items for each group
             .Select(p => p.Value
@@ -62,7 +62,7 @@ public sealed class InjectedContextMenuProvider : IContextMenuProvider {
         }
     }
 
-    private static IEnumerable<object> MergeByParent(IReadOnlyList<ContextAction> actions, SelectedListContext context) {
+    private static IEnumerable<Control> MergeByParent(IReadOnlyList<ContextAction> actions, SelectedListContext context) {
         // Actions sharing the same parent are merged into a single parent menu item.
         // GroupBy preserves first-occurrence order, so a parent appears at the position
         // of its highest-priority action (actions are sorted by priority descending).
