@@ -4,8 +4,12 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog;
 namespace CreationEditor.Services.Mutagen.References.Cache;
 
-public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvironment) : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
+public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvironment)
+    : IReferenceCacheController<IModGetter, RecordReferenceCache, IFormLinkIdentifier, IFormLinkIdentifier> {
     public void AddLink(RecordReferenceCache cache, IFormLinkIdentifier reference, IEnumerable<IFormLinkIdentifier> linksToAdd) {
+        // Register the reference record itself
+        cache.FormKeys.Add(reference.FormKey);
+
         foreach (var link in linksToAdd) {
             var references = cache.Cache.GetOrAdd(link.FormKey);
 
@@ -27,9 +31,7 @@ public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvi
         }
     }
 
-    public IEnumerable<IFormLinkIdentifier> GetLinks(IEnumerable<RecordReferenceCache> caches, IFormLinkIdentifier reference) {
-        return [];
-    }
+    public IEnumerable<IFormLinkIdentifier> GetLinks(IEnumerable<RecordReferenceCache> caches, IFormLinkIdentifier reference) => [];
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(IReadOnlyDictionary<IModGetter, RecordReferenceCache> caches, IFormLinkIdentifier link) {
         var modKeys = editorEnvironment.LinkCache.PriorityOrder.Select(x => x.ModKey).ToArray();
@@ -42,8 +44,8 @@ public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvi
 
             foreach (var reference in references.ToArray()) {
                 // Skip references that are overridden by another mod
-                var containingMod = priorityOrderedCaches.FirstOrDefault(x => x.Value.FormKeys.Contains(reference.FormKey));
-                if (containingMod.Key.ModKey != mod.ModKey) continue;
+                var containingMod = priorityOrderedCaches.Find(x => x.Value.FormKeys.Contains(reference.FormKey));
+                if (containingMod.Key is null || containingMod.Key.ModKey != mod.ModKey) continue;
 
                 yield return reference;
             }
