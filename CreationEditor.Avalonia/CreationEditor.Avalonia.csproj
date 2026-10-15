@@ -6,32 +6,33 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" />
-        <PackageReference Include="Avalonia.AvaloniaEdit" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" />
-        <PackageReference Include="Avalonia.HtmlRenderer" />
-        <PackageReference Include="Avalonia.Desktop" />
-        <PackageReference Include="Avalonia.Themes.Fluent" />
-        <PackageReference Include="AvaloniaEdit.TextMate" />
-        <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
-        <PackageReference Include="Deadpikle.AvaloniaProgressRing" />
-        <PackageReference Include="FluentAvaloniaUI" />
-        <PackageReference Include="HtmlAgilityPack" />
-        <PackageReference Include="MessageBox.Avalonia" />
-        <PackageReference Include="PanAndZoom" />
-        <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
-        <PackageReference Include="ReactiveUI" />
-        <PackageReference Include="ReactiveUI.Avalonia" />
-        <PackageReference Include="ReactiveUI.Avalonia.Autofac" />
+        <PackageReference Include="Avalonia"/>
+        <PackageReference Include="Avalonia.AvaloniaEdit"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid"/>
+        <PackageReference Include="Avalonia.HtmlRenderer"/>
+        <PackageReference Include="Avalonia.Desktop"/>
+        <PackageReference Include="Avalonia.Themes.Fluent"/>
+        <PackageReference Include="AvaloniaEdit.TextMate"/>
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport"/>
+        <PackageReference Include="Deadpikle.AvaloniaProgressRing"/>
+        <PackageReference Include="FluentAvaloniaUI"/>
+        <PackageReference Include="HtmlAgilityPack"/>
+        <PackageReference Include="MessageBox.Avalonia"/>
+        <PackageReference Include="PanAndZoom"/>
+        <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator"/>
+        <PackageReference Include="ReactiveUI"/>
+        <PackageReference Include="ReactiveUI.Avalonia"/>
+        <PackageReference Include="ReactiveUI.Avalonia.Autofac"/>
         <PackageReference Include="ReactiveUI.SourceGenerators">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="ReactiveUI.Validation" />
-        <PackageReference Include="Serilog.Sinks.Console" />
-        <PackageReference Include="Serilog.Sinks.File" />
-        <PackageReference Include="TreeDataGrid" />
-        <PackageReference Include="Xaml.Behaviors.Avalonia" />
+        <PackageReference Include="ReactiveUI.Validation"/>
+        <PackageReference Include="Serilog.Sinks.Console"/>
+        <PackageReference Include="Serilog.Sinks.File"/>
+        <PackageReference Include="Sortable.Avalonia"/>
+        <PackageReference Include="TreeDataGrid"/>
+        <PackageReference Include="Xaml.Behaviors.Avalonia"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -40,9 +41,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj" />
-        <ProjectReference Include="..\Interop\ProjectBSE.Interop\ProjectBSE.Interop.csproj" />
-        <ProjectReference Include="..\Interop\Windows.Interop\Windows.Interop.csproj" />
+        <ProjectReference Include="..\CreationEditor\CreationEditor.csproj"/>
+        <ProjectReference Include="..\Interop\ProjectBSE.Interop\ProjectBSE.Interop.csproj"/>
+        <ProjectReference Include="..\Interop\Windows.Interop\Windows.Interop.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -92,73 +93,73 @@
             <DependentUpon>IRecordFilter.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Command\AddElement.cs">
-          <DependentUpon>ListCommand.cs</DependentUpon>
+            <DependentUpon>ListCommand.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Command\RemoveElement.cs">
-          <DependentUpon>ListCommand.cs</DependentUpon>
+            <DependentUpon>ListCommand.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Setting\SettingsVM.cs">
-          <DependentUpon>ISettingsVM.cs</DependentUpon>
+            <DependentUpon>ISettingsVM.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Avalonia\MenuItemProvider.cs">
-          <DependentUpon>IMenuItemProvider.cs</DependentUpon>
+            <DependentUpon>IMenuItemProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Record\Actions\GenericContextActionsProvider.cs">
-          <DependentUpon>IContextActionsProvider.cs</DependentUpon>
+            <DependentUpon>IContextActionsProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Record\Actions\InjectedContextMenuProvider.cs">
-          <DependentUpon>IContextMenuProvider.cs</DependentUpon>
+            <DependentUpon>IContextMenuProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Mod\SingleModPickerVM.cs">
-          <DependentUpon>IModPickerVM.cs</DependentUpon>
+            <DependentUpon>IModPickerVM.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Mod\MultiModPickerVM.cs">
-          <DependentUpon>IModPickerVM.cs</DependentUpon>
+            <DependentUpon>IModPickerVM.cs</DependentUpon>
         </Compile>
         <Compile Update="Views\Basic\PageData.cs">
-          <DependentUpon>PageHost.axaml</DependentUpon>
+            <DependentUpon>PageHost.axaml</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Reference\RecordReferenceVM.cs">
-          <DependentUpon>IReferenceVM.cs</DependentUpon>
+            <DependentUpon>IReferenceVM.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Reference\AssetReferenceVM.cs">
-          <DependentUpon>IReferenceVM.cs</DependentUpon>
+            <DependentUpon>IReferenceVM.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Record\Browser\ModScopeProviderVM.cs">
-          <DependentUpon>IModScopeProviderVM.cs</DependentUpon>
+            <DependentUpon>IModScopeProviderVM.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Attached\DragDrop\AssetLinkDragDrop.cs">
-          <DependentUpon>ICustomDragDropData.cs</DependentUpon>
+            <DependentUpon>ICustomDragDropData.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Attached\DragDrop\FormLinkDragDrop.cs">
-          <DependentUpon>ICustomDragDropData.cs</DependentUpon>
+            <DependentUpon>ICustomDragDropData.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Attached\DragDrop\ListBoxDragDropHandler.cs">
-          <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
+            <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Attached\DragDrop\DataGridDragDropHandler.cs">
-          <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
+            <DependentUpon>CollectionDragDropHandler.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\DataSource\SingleDataSourcePickerVM.cs">
-          <DependentUpon>IDataSourcePickerVM.cs</DependentUpon>
+            <DependentUpon>IDataSourcePickerVM.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Mod\ModGetterVM.cs">
-          <DependentUpon>IModGetterVM.cs</DependentUpon>
+            <DependentUpon>IModGetterVM.cs</DependentUpon>
         </Compile>
         <Compile Update="Resources\Command\AddElementCustom.cs">
-          <DependentUpon>ListCommand.cs</DependentUpon>
+            <DependentUpon>ListCommand.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Record\Prefix\RecordPrefixService.cs">
-          <DependentUpon>IRecordPrefixService.cs</DependentUpon>
+            <DependentUpon>IRecordPrefixService.cs</DependentUpon>
         </Compile>
         <Compile Update="Services\Actions\GenericContextActionsProvider.cs">
-          <DependentUpon>IGenericContextActionsProvider.cs</DependentUpon>
+            <DependentUpon>IGenericContextActionsProvider.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Reference\ReferenceBrowserVMFactory.cs">
-          <DependentUpon>IReferenceBrowserVMFactory.cs</DependentUpon>
+            <DependentUpon>IReferenceBrowserVMFactory.cs</DependentUpon>
         </Compile>
         <Compile Update="ViewModels\Logging\LogVM.cs">
-          <DependentUpon>ILogVM.cs</DependentUpon>
+            <DependentUpon>ILogVM.cs</DependentUpon>
         </Compile>
     </ItemGroup>
 
