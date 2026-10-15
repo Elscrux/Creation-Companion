@@ -15,7 +15,7 @@ public sealed class WildcardSearchFilter : ISearchFilter {
             var indexOfTermInContent = contentSpan[contentIndex..].IndexOf(term, StringComparison.OrdinalIgnoreCase);
             if (indexOfTermInContent == -1) return false;
 
-            contentIndex = indexOfTermInContent;
+            contentIndex += indexOfTermInContent + term.Length;
         }
 
         return true;
