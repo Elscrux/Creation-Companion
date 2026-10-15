@@ -1,4 +1,3 @@
-﻿using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
@@ -14,7 +13,6 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     Func<IReadOnlyList<string>, DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath>> archiveSerializationFactory,
     Func<IEnumerable<string>, IFileSystemValidation> fileSystemValidationFactory,
     IDataSourceService dataSourceService,
-    IArchiveService archiveService,
     IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
@@ -23,7 +21,7 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
     where TCache : IDictionaryReferenceCache<TCache, TLink, DataRelativePath>
     where TLink : notnull {
     private readonly FileSystemQuery<TCache, TLink> _nifFileSystemQuery = new(fileParser, assetTypeService, dataSourceService);
-    private readonly ArchiveQuery<TCache, TLink> _nifArchiveQuery = new(fileParser, assetTypeService, archiveService);
+    private readonly ArchiveQuery<TCache, TLink> _nifArchiveQuery = new(fileParser, assetTypeService);
     private readonly DictionaryReferenceCacheSerialization<FileSystemDataSource, TCache, TLink, DataRelativePath> _fileSystemSerialization =
         fileSystemSerializationFactory(["References"]);
     private readonly DictionaryReferenceCacheSerialization<ArchiveDataSource, TCache, TLink, DataRelativePath> _archiveSerialization =
@@ -41,7 +39,7 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
                 referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, _fileSystemSerialization, _cacheValidation),
             ArchiveDataSource archiveDataSource =>
                 referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, _archiveSerialization),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
         };
     }
 
@@ -49,10 +47,9 @@ public sealed class DictionaryAssetReferenceQueryConfig<TFileParser, TCache, TLi
         var extension = element.Extension;
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
-        return fileParser.ParseFile(element.FullPath, element);
+        using var stream = element.ReadFileStream();
+        return fileParser.ParseFile(stream, element).ToArray();
     }
 
-    public DataRelativePath SourceElementToReference(DataSourceFileLink element) {
-        return element.DataRelativePath;
-    }
+    public DataRelativePath SourceElementToReference(DataSourceFileLink element) => element.DataRelativePath;
 }

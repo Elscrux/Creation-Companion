@@ -10,28 +10,29 @@ public sealed class BehaviorAnimationLinkParser(IAssetTypeService assetTypeServi
     public string Name => "Behavior Animation Links";
     public IAssetType AssetType => assetTypeService.Provider.Behavior;
 
-    public IEnumerable<IAssetLinkGetter> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
-        using var rs = File.OpenRead(actualFilePath);
-        var br = new BinaryReaderEx(rs);
+    public IEnumerable<IAssetLinkGetter> ParseFile(Stream? stream, DataSourceFileLink fileLink) {
+        if (stream is null) yield break;
+
+        var br = new BinaryReaderEx(stream);
         var des = new PackFileDeserializer();
 
         Dictionary<uint, IHavokObject> objects;
         try {
             des.Deserialize(br, out objects);
         } catch (Exception e) {
-            logger.Here().Error(e, "Failed to parse Behavior file {FilePath}: {Exception}", actualFilePath, e);
+            logger.Here().Error(e, "Failed to parse Behavior file {FilePath}: {Exception}", fileLink.FullPath, e);
             yield break;
         }
 
         var directory = Path.GetDirectoryName(fileLink.DataRelativePath.Path);
         if (directory is null) {
-            logger.Here().Error("Failed to get the directory for Behavior file {FilePath}", actualFilePath);
+            logger.Here().Error("Failed to get the directory for Behavior file {FilePath}", fileLink.FullPath);
             yield break;
         }
 
         var parentDirectory = Path.GetDirectoryName(directory);
         if (parentDirectory is null) {
-            logger.Here().Error("Failed to get parent directory for Behavior file {FilePath}", actualFilePath);
+            logger.Here().Error("Failed to get parent directory for Behavior file {FilePath}", fileLink.FullPath);
             yield break;
         }
 

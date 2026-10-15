@@ -1,7 +1,8 @@
 ﻿using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
-using nifly;
+using NiflySharp;
+using NiflySharp.Blocks;
 using Serilog;
 namespace CreationEditor.Services.Mutagen.References.Parser;
 
@@ -11,28 +12,18 @@ public sealed class NifAddonNodeLinkParser(
     public string Name => "Nif Addon Nodes";
     public IAssetType AssetType => assetTypeService.Provider.Model;
 
-    public IEnumerable<uint> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
+    public IEnumerable<uint> ParseFile(Stream? stream, DataSourceFileLink fileLink) {
         var results = new HashSet<uint>();
-        if (!fileLink.FileSystem.File.Exists(actualFilePath)) return results;
+        if (stream is null) return results;
 
         try {
-            using var fileStream = fileLink.FileSystem.File.Open(actualFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var nif = new NifFile(stream);
 
-            using var nif = new NifFile();
-            nif.Load(actualFilePath);
-
-            if (!nif.IsValid()) return results;
-
-            var niHeader = nif.GetHeader();
-            using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-            for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); blockId++) {
-                using var bsValueNode = blockCache.EditableBlockById<BSValueNode>(blockId);
-                if (bsValueNode is null) continue;
-
-                results.Add((uint) bsValueNode.value);
+            foreach (var bsValueNode in nif.Blocks.OfType<BSValueNode>()) {
+                results.Add(bsValueNode.Value);
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Failed to parse nif file {FilePath} for addon nodes", actualFilePath);
+            logger.Here().Error(e, "Failed to parse nif file {FilePath} for addon nodes", fileLink.FullPath);
         }
 
         return results;

@@ -30,7 +30,8 @@ public sealed class FileSystemQuery<TCache, TLink>(
                 var assetType = assetTypeService.GetAssetType(file.DataRelativePath);
                 if (fileParser.AssetType != assetType) continue;
 
-                foreach (var result in fileParser.ParseFile(file.FullPath, file)) {
+                using var stream = file.ReadFileStream();
+                foreach (var result in fileParser.ParseFile(stream, file)) {
                     cache.Add(result, file.DataRelativePath);
                 }
             }
@@ -43,7 +44,8 @@ public sealed class FileSystemQuery<TCache, TLink>(
         var assetType = assetTypeService.GetAssetType(fileLink.DataRelativePath);
         if (fileParser.AssetType != assetType) return;
 
-        foreach (var result in fileParser.ParseFile(fileLink.FullPath, fileLink)) {
+        using var stream = fileLink.ReadFileStream();
+        foreach (var result in fileParser.ParseFile(stream, fileLink)) {
             cache.Add(result, fileLink.DataRelativePath);
         }
     }

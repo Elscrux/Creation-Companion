@@ -17,13 +17,12 @@ public sealed partial class ScriptFileParser(
     public string Name => "Scripts";
     public IAssetType AssetType => assetTypeService.Provider.ScriptSource;
 
-    public IEnumerable<IAssetLinkGetter> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
+    public IEnumerable<IAssetLinkGetter> ParseFile(Stream? stream, DataSourceFileLink fileLink) {
         var results = new HashSet<IAssetLinkGetter>();
-        if (!fileLink.DataSource.FileSystem.File.Exists(actualFilePath)) return results;
+        if (stream is null) return results;
 
         try {
-            using var stream = fileLink.FileSystem.File.Open(actualFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var reader = new StreamReader(stream);
+            using var reader = new StreamReader(stream, leaveOpen: true);
             var line = reader.ReadLine();
             while (line is not null) {
                 var match = ScriptNameRegex.Match(line);
@@ -48,7 +47,7 @@ public sealed partial class ScriptFileParser(
                 line = reader.ReadLine();
             }
         } catch (Exception e) {
-            logger.Here().Error(e, "Error occurred while parsing script file: {FilePath}", actualFilePath);
+            logger.Here().Error(e, "Error occurred while parsing script file: {FilePath}", fileLink.FullPath);
         }
 
         // TODO also include check for global script calls, and include those scripts as reference

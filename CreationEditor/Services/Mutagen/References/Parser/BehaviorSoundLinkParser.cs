@@ -9,16 +9,17 @@ public sealed class BehaviorSoundLinkParser(IAssetTypeService assetTypeService, 
     public string Name => "Behavior Sounds";
     public IAssetType AssetType => assetTypeService.Provider.Behavior;
 
-    public IEnumerable<string> ParseFile(string actualFilePath, DataSourceFileLink fileLink) {
-        using var rs = File.OpenRead(actualFilePath);
-        var br = new BinaryReaderEx(rs);
+    public IEnumerable<string> ParseFile(Stream? stream, DataSourceFileLink fileLink) {
+        if (stream is null) yield break;
+
+        var br = new BinaryReaderEx(stream);
         var des = new PackFileDeserializer();
 
         Dictionary<uint, IHavokObject> objects;
         try {
             des.Deserialize(br, out objects);
         } catch (Exception e) {
-            logger.Here().Error(e, "Failed to parse Behavior file {FilePath}: {Exception}", actualFilePath, e);
+            logger.Here().Error(e, "Failed to parse Behavior file {FilePath}: {Exception}", fileLink.FullPath, e);
             yield break;
         }
 

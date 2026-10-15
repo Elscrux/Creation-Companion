@@ -1,4 +1,3 @@
-﻿using CreationEditor.Services.Archive;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache.Validation;
 using CreationEditor.Services.DataSource;
@@ -15,7 +14,6 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     IDataSourceService dataSourceService,
     AssetReferenceCacheSerialization<FileSystemDataSource, DataRelativePath> fileSystemSerialization,
     AssetReferenceCacheSerialization<ArchiveDataSource, DataRelativePath> archiveSerialization,
-    IArchiveService archiveService,
     IAssetTypeService assetTypeService,
     ReferenceCacheBuilder referenceCacheBuilder,
     TFileParser fileParser)
@@ -24,7 +22,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
     private readonly FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifFileSystemQuery =
         new(fileParser, assetTypeService, dataSourceService);
     private readonly ArchiveQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> _nifArchiveQuery =
-        new(fileParser, assetTypeService, archiveService);
+        new(fileParser, assetTypeService);
     private readonly IInternalCacheValidation<FileSystemDataSource, DataRelativePath> _cacheValidation =
         fileSystemValidationFactory(fileParser.AssetType.FileExtensions);
 
@@ -38,7 +36,7 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
                 referenceCacheBuilder.BuildCache(fileSystemDataSource, _nifFileSystemQuery, fileSystemSerialization, _cacheValidation),
             ArchiveDataSource archiveDataSource =>
                 referenceCacheBuilder.BuildCache(archiveDataSource, _nifArchiveQuery, archiveSerialization),
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
         };
     }
 
@@ -46,10 +44,9 @@ public sealed class AssetReferenceCacheQueryConfig<TFileParser>(
         var extension = element.Extension;
         if (!fileParser.AssetType.FileExtensions.Contains(extension)) return [];
 
-        return fileParser.ParseFile(element.FullPath, element);
+        using var stream = element.ReadFileStream();
+        return fileParser.ParseFile(stream, element).ToArray();
     }
 
-    public DataRelativePath SourceElementToReference(DataSourceFileLink element) {
-        return element.DataRelativePath;
-    }
+    public DataRelativePath SourceElementToReference(DataSourceFileLink element) => element.DataRelativePath;
 }
