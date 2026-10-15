@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -70,12 +69,10 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         IModSaveService modSaveService,
         IDataSourceService dataSourceService,
         IEditorEnvironment editorEnvironment,
-        IFileSystem fileSystem,
         IModInfoProvider modInfoProvider,
         IModGetterVM modGetterVM,
         ModCreationVM modCreationVM,
-        ILoadOrderListingsProvider listingsProvider,
-        IPluginListingsPathProvider listingsPathProvider) {
+        ILoadOrderListingsProvider listingsProvider) {
         _editorEnvironment = editorEnvironment;
         _mainWindow = mainWindow;
         _recordEditorController = recordEditorController;
@@ -152,10 +149,10 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             .AutoRefresh(modItem => modItem.IsActive);
 
         AnyModsActive = modActivated
-            .Select(collection => 
+            .Select(collection =>
                 collection.Any(mod => mod is { Type: ChangeType.Item, Item.Current.IsActive: true }) ||
                 collection.Any(mod => mod is { Type: ChangeType.Range, Reason: ListChangeReason.AddRange }
-                     && mod.Range.FirstOrDefault(i => i.IsActive) is not null));
+                 && mod.Range.FirstOrDefault(i => i.IsActive) is not null));
 
         modActivated
             .CombineLatest(
@@ -258,7 +255,9 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     private async Task<bool> CheckPendingSave() {
         if (_editorEnvironment.ActiveMod.ModKey.IsNull
          || _editorEnvironment.ActiveMod.ModKey == ActiveMod
-         || !_editorEnvironment.ActiveMod.EnumerateMajorRecords().Any()) return true;
+         || !_editorEnvironment.ActiveMod.EnumerateMajorRecords().Any()) {
+            return true;
+        }
 
         var anyEditorsOpen = _recordEditorController.AnyEditorsOpen();
         var appendix = anyEditorsOpen ? "\nUnless you cancel, this will close all open editors." : string.Empty;
