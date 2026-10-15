@@ -51,6 +51,7 @@ public sealed class EditorEnvironmentCustomization(
 
         // Custom customizations
         fixture.Register<INotificationService>(fixture.Create<NotificationService>);
+        fixture.Register<ILoadOrderSorter>(fixture.Create<LoadOrderSorter>);
         fixture.Register<IMutagenCommonAspectsProvider>(fixture.Create<SkyrimCommonAspectsProvider>);
         fixture.Register<IModInfoProvider>(fixture.Create<SkyrimModInfoProvider>);
         fixture.Register<IModService>(fixture.Create<ModService>);
