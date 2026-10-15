@@ -3,23 +3,19 @@
         xmlns:controls="using:CreationEditor.Avalonia.Views.Basic">
     <Design.PreviewWith>
         <StackPanel Spacing="10">
-            <controls:LabeledContentControl
-                Margin="10"
-                Header="Test"
-                HeaderToolTip="Useful tooltip">
-                <Rectangle
-                    Fill="CornflowerBlue"
-                    Width="100"
-                    Height="50"/>
+            <controls:LabeledContentControl Margin="10"
+                                            Header="Test"
+                                            HeaderToolTip="Useful tooltip">
+                <Rectangle Fill="CornflowerBlue"
+                           Width="100"
+                           Height="50"/>
             </controls:LabeledContentControl>
 
-            <controls:LabeledContentControl
-                Margin="10"
-                Header="Test 2">
-                <Rectangle
-                    Fill="Yellow"
-                    Width="100"
-                    Height="50"/>
+            <controls:LabeledContentControl Margin="10"
+                                            Header="Test 2">
+                <Rectangle Fill="Yellow"
+                           Width="100"
+                           Height="50"/>
             </controls:LabeledContentControl>
         </StackPanel>
     </Design.PreviewWith>
@@ -29,38 +25,34 @@
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,4,*">
                     <StackPanel Grid.Row="0"
+                                x:Name="PART_HeaderPanel"
                                 Spacing="5"
                                 Orientation="Horizontal"
                                 ToolTip.Tip="{TemplateBinding HeaderToolTip}">
-                        <ContentPresenter
-                            x:Name="PART_Label"
-                            Content="{TemplateBinding Header}"
-                            ContentTemplate="{TemplateBinding HeaderTemplate}"/>
+                        <ContentControl x:Name="PART_Label"
+                                        Content="{TemplateBinding Header}"
+                                        ContentTemplate="{TemplateBinding HeaderTemplate}"/>
 
-                        <Grid
-                            Background="{DynamicResource SystemControlTransparentBrush}"
-                            IsVisible="{TemplateBinding HeaderToolTip, Converter={x:Static ObjectConverters.IsNotNull}}">
-                            <Ellipse
-                                Stroke="{TemplateBinding Foreground}"
-                                StrokeThickness="1.5"
-                                Height="18"
-                                Width="18"/>
-                            <TextBlock
-                                Text="?"
-                                FontSize="16"
-                                Margin="1, 0, 0, 0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontWeight="SemiBold"/>
+                        <Grid Background="{DynamicResource SystemControlTransparentBrush}"
+                              IsVisible="{TemplateBinding HeaderToolTip, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <Ellipse Stroke="{TemplateBinding Foreground}"
+                                     StrokeThickness="1.5"
+                                     Height="18"
+                                     Width="18"/>
+                            <TextBlock Text="?"
+                                       FontSize="16"
+                                       Margin="1, 0, 0, 0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"/>
                         </Grid>
                     </StackPanel>
 
-                    <ContentPresenter
-                        Grid.Row="2"
-                        x:Name="PART_ContentPresenter"
-                        Content="{TemplateBinding Content}"
-                        ContentTemplate="{TemplateBinding ContentTemplate}"
-                        VerticalAlignment="Stretch"/>
+                    <ContentPresenter Grid.Row="2"
+                                      x:Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      VerticalAlignment="Stretch"/>
                 </Grid>
             </ControlTemplate>
         </Setter>
