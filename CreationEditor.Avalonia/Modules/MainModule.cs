@@ -3,6 +3,7 @@ using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
+using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
@@ -23,6 +24,7 @@ using CreationEditor.Avalonia.Views.Startup;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
+using CreationEditor.Services.Environment;
 using CreationEditor.Services.Filter;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Font;
@@ -74,6 +76,10 @@ public sealed class MainModule : Module {
         builder.RegisterType<RecordBrowserSettings>()
             .As<IRecordBrowserSettings>();
 
+        builder.RegisterType<TextureInfoService>()
+            .As<ITextureInfoService>()
+            .SingleInstance();
+
         builder.RegisterType<GetFontConfigListing>()
             .As<IGetFontConfigListing>();
 
@@ -87,6 +93,10 @@ public sealed class MainModule : Module {
             .As<IFAApplicationSplashScreen>();
 
         // Services
+        builder.RegisterType<LoadOrderSorter>()
+            .As<ILoadOrderSorter>()
+            .SingleInstance();
+
         builder.RegisterType<DataSourceService>()
             .As<IDataSourceService>()
             .SingleInstance();
