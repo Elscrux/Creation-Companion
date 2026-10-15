@@ -1,6 +1,5 @@
 ﻿using Avalonia.Media;
 using NiflySharp.Structs;
-using BSVertexData = nifly.BSVertexData;
 using Color4 = NiflySharp.Structs.Color4;
 namespace CreationEditor.Avalonia;
 
@@ -8,9 +7,9 @@ public static class NifExtension {
     extension(BSVertexData bsVertexData) {
         public Color ToRgbColor() => new(
             255,
-            (byte) (bsVertexData.vert.x * 255),
-            (byte) (bsVertexData.vert.y * 255),
-            (byte) (bsVertexData.vert.z * 255));
+            (byte) (bsVertexData.Vertex.X * 255),
+            (byte) (bsVertexData.Vertex.Y * 255),
+            (byte) (bsVertexData.Vertex.Z * 255));
     }
 
     extension(BSVertexDataSSE bsVertexData) {
@@ -27,7 +26,7 @@ public static class NifExtension {
             (byte) (color4.R * 255),
             (byte) (color4.G * 255),
             (byte) (color4.B * 255));
-        
+
         public ByteColor4 ToByteColor4() => new() {
             R = (byte) (color4.R * 255),
             G = (byte) (color4.G * 255),

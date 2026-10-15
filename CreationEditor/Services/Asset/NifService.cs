@@ -3,7 +3,8 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Parser;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Exceptions;
-using nifly;
+using NiflySharp;
+using NiflySharp.Blocks;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
@@ -17,31 +18,21 @@ public sealed class NifService(
         try {
             using var fileStream = fileLink.ReadFileStream();
 
-            var nif = new NifFile();
-            nif.Load(fileLink.FullPath);
+            var nif = new NifFile(fileStream);
 
-            var niHeader = nif.GetHeader();
-            using var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-            for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); blockId++) {
-                using var bhkCollisionObject = blockCache.EditableBlockById<bhkCollisionObject>(blockId);
-                if (bhkCollisionObject is null) continue;
-
-                return true;
-            }
+            return nif.Blocks.OfType<bhkCollisionObject>().Any();
         } catch (Exception e) {
-            logger.Here().Warning(e,
-                "Failed to parse nif file {Path}: {Exception} for asset references",
-                fileLink,
-                e);
+            logger.Here().Warning(e, "Failed to parse nif file {Path} for asset references", fileLink);
         }
 
         return false;
     }
 
     public IEnumerable<string> GetMisalignedPaths(DataSourceFileLink fileLink) {
-        if (!fileLink.Exists()) yield break;
+        using var stream = fileLink.ReadFileStream();
+        if (stream is null) yield break;
 
-        foreach (var textureString in nifTextureParser.ParseFileTextureStrings(fileLink.FullPath, fileLink)) {
+        foreach (var textureString in nifTextureParser.ParseFileTextureStrings(stream, fileLink)) {
             string? misalignedPath = null;
 
             try {

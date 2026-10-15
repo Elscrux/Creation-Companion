@@ -1,6 +1,7 @@
 ﻿using CreationEditor.Services.DataSource;
 using Mutagen.Bethesda.Assets;
-using nifly;
+using NiflySharp;
+using NiflySharp.Blocks;
 using Serilog;
 namespace CreationEditor.Services.Asset;
 
@@ -11,93 +12,56 @@ public sealed class NifModificationService(
     public void RemapLinks(DataSourceFileLink fileLink, Func<string, string> replace) {
         if (!fileLink.Exists()) return;
 
-        using var nif = new NifFile();
-        nif.Load(fileLink.FullPath);
+        var fileStream = fileLink.ReadFileStream();
+        if (fileStream == null) return;
 
-        if (!nif.IsValid()) return;
+        var nif = new NifFile(fileStream);
 
         var modifiedNif = false;
 
-        var niHeader = nif.GetHeader();
-        var blockCache = new niflycpp.BlockCache(niflycpp.BlockCache.SafeClone<NiHeader>(niHeader));
-        for (uint blockId = 0; blockId < blockCache.Header.GetNumBlocks(); ++blockId) {
-            // Remap BS Shader Texture Set
-            using var shaderTextureSet = blockCache.EditableBlockById<BSShaderTextureSet>(blockId);
-            if (shaderTextureSet is not null) {
-                // Find all indices where the old path is used
-                var items = shaderTextureSet.textures.items();
-                var occurenceIndices = new Dictionary<int, string?>();
-                for (var index = 0; index < items.Count; index++) {
-                    var niString = items[index];
-                    if (niString is null) continue;
-
-                    var current = niString.get();
-                    var replacement = replace(current);
-                    if (!string.Equals(current, replacement, DataRelativePath.PathComparison)) {
-                        occurenceIndices.Add(index, replacement);
+        foreach (var block in nif.Blocks) {
+            switch (block) {
+                case BSShaderTextureSet bsShaderTextureSet:
+                    foreach (var texture in bsShaderTextureSet.Textures) {
+                        var current = texture.Content;
+                        var replacement = replace(current);
+                        if (!string.Equals(current, replacement, DataRelativePath.PathComparison)) {
+                            texture.Content = replacement;
+                            modifiedNif = true;
+                        }
                     }
-                }
+                    break;
+                case BSEffectShaderProperty bsEffectShaderProperty:
+                    TryReplace(bsEffectShaderProperty.LightingTexture, x => bsEffectShaderProperty.LightingTexture = x);
+                    TryReplace(bsEffectShaderProperty.NormalTexture, x => bsEffectShaderProperty.NormalTexture = x);
+                    TryReplace(bsEffectShaderProperty.ReflectanceTexture, x => bsEffectShaderProperty.ReflectanceTexture = x);
+                    TryReplace(bsEffectShaderProperty.SourceTexture, x => bsEffectShaderProperty.SourceTexture = x);
+                    TryReplace(bsEffectShaderProperty.EmitGradientTexture, x => bsEffectShaderProperty.EmitGradientTexture = x);
+                    TryReplace(bsEffectShaderProperty.EnvMapTexture, x => bsEffectShaderProperty.EnvMapTexture = x);
+                    TryReplace(bsEffectShaderProperty.EnvMaskTexture, x => bsEffectShaderProperty.EnvMaskTexture = x);
 
-                if (occurenceIndices.Count <= 0) continue;
-
-                // Replace all occurrences with the new path
-                foreach (var (occurenceIndex, replacement) in occurenceIndices) {
-                    items[occurenceIndex] = new NiString(replacement);
-                }
-
-                using var textureWrapper = new NiStringVector();
-                textureWrapper.SetItems(items);
-                shaderTextureSet.textures = textureWrapper;
-                niHeader.ReplaceBlock(blockId, shaderTextureSet);
-
-                modifiedNif = true;
-            } else {
-                // Remap BS Effect Shader Property
-                var effectShader = blockCache.EditableBlockById<BSEffectShaderProperty>(blockId);
-
-                if (effectShader is not null) {
-                    var modifiedEffectShader = false;
-
-                    TryReplace(effectShader.lightingTexture, x => effectShader.lightingTexture = x);
-                    TryReplace(effectShader.normalTexture, x => effectShader.normalTexture = x);
-                    TryReplace(effectShader.reflectanceTexture, x => effectShader.reflectanceTexture = x);
-                    TryReplace(effectShader.sourceTexture, x => effectShader.sourceTexture = x);
-                    TryReplace(effectShader.emitGradientTexture, x => effectShader.emitGradientTexture = x);
-                    TryReplace(effectShader.envMapTexture, x => effectShader.envMapTexture = x);
-                    TryReplace(effectShader.envMaskTexture, x => effectShader.envMaskTexture = x);
-                    
-                    void TryReplace(NiString niString, Func<NiString, NiString> update) {
-                        var str = niString.get();
+                    void TryReplace(NiString4 niString, Func<NiString4, NiString4> update) {
+                        var str = niString.Content;
                         if (replace(str) is {} replacement && !string.Equals(str, replacement, DataRelativePath.PathComparison)) {
-                            update(new NiString(replacement));
-                            modifiedEffectShader = true;
+                            update(new NiString4(replacement));
+                            modifiedNif = true;
                         }
                     }
 
-                    if (modifiedEffectShader) {
-                        niHeader.ReplaceBlock(blockId, effectShader);
-                        modifiedNif = true;
-                    }
-                } else {
-                    // Remap BS Shader No  Lighting Property
-                    var shaderNoLighting = blockCache.EditableBlockById<BSShaderNoLightingProperty>(blockId);
-                    if (shaderNoLighting is not null && replace(shaderNoLighting.baseTexture.get()) is {} replacement) {
-                        shaderNoLighting.baseTexture = new NiString(replacement);
-                        niHeader.ReplaceBlock(blockId, shaderNoLighting);
-
-                        modifiedNif = true;
-                    }
-                }
+                    break;
             }
         }
 
         if (modifiedNif) {
             try {
+                fileStream.Dispose();
                 nif.Save(fileLink.FullPath);
                 logger.Here().Information("Remapped texture paths in nif {File}", fileLink.FullPath);
             } catch (Exception e) {
                 logger.Here().Error(e, "Couldn't save modified nif {File}: {Exception}", fileLink, e);
             }
+        } else {
+            fileStream.Dispose();
         }
     }
 }
