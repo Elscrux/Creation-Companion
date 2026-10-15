@@ -1,8 +1,9 @@
-﻿using Mutagen.Bethesda.Assets;
+﻿using CreationEditor.Services.DataSource;
+using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.Asset;
 
 public sealed class IgnoredDirectoriesProvider : IIgnoredDirectoriesProvider {
-    private readonly HashSet<DataRelativePath> _ignoredDirectories = [".git"];
+    private readonly HashSet<DataRelativePath> _ignoredDirectories = [".git", FileSystemDataSource.DeleteDirectoryName];
 
     public bool IsIgnored(DataRelativePath path) {
         // Check if the path starts with any of the ignored directories
