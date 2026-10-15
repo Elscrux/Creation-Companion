@@ -105,9 +105,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         GenericContextActionsProvider = genericContextActionsProvider;
 
         DataSource = DataSourceService.ListedOrder.OfType<FileSystemDataSource>().First();
-        DataSourceSelections = DataSourceService.DataSourcesChanged
-            .Select(x => x.OfType<FileSystemDataSource>().Cast<IDataSource>())
-            .ToObservableCollection(this);
+        DataSourceSelections = DataSourceService.DataSourcesChanged.ToObservableCollection(this);
 
         AssetTreeSource = new HierarchicalTreeDataGridSource<IDataSourceLink>(RootItems) {
             Columns = {
@@ -303,32 +301,33 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     }
 
     private void SetupDataSourceWatcher(IDataSource dataSource) {
-        var watcher = _dataSourceWatcherProvider.GetWatcher(dataSource);
-        watcher.Created
-            .ObserveOnGui()
-            .Where(x => Equals(x.DataSource, DataSource))
-            .Subscribe(Tree_AddLink)
-            .DisposeWith(this);
-        watcher.Deleted
-            .ObserveOnGui()
-            .Where(x => Equals(x.DataSource, DataSource))
-            .Subscribe(Tree_RemoveLink)
-            .DisposeWith(this);
-        watcher.Renamed
-            .ObserveOnGui()
-            .Where(x => Equals(x.Old.DataSource, DataSource) || Equals(x.New.DataSource, DataSource))
-            .Subscribe(Tree_RenameLink)
-            .DisposeWith(this);
-        watcher.ChangedFile
-            .ObserveOnGui()
-            .Where(x => Equals(x.DataSource, DataSource))
-            .Subscribe(Tree_UpdateFileLink)
-            .DisposeWith(this);
+        if (!dataSource.IsReadOnly) {
+            var watcher = _dataSourceWatcherProvider.GetWatcher(dataSource);
+            watcher.Created
+                .ObserveOnGui()
+                .Where(x => Equals(x.DataSource, DataSource))
+                .Subscribe(Tree_AddLink)
+                .DisposeWith(this);
+            watcher.Deleted
+                .ObserveOnGui()
+                .Where(x => Equals(x.DataSource, DataSource))
+                .Subscribe(Tree_RemoveLink)
+                .DisposeWith(this);
+            watcher.Renamed
+                .ObserveOnGui()
+                .Where(x => Equals(x.Old.DataSource, DataSource) || Equals(x.New.DataSource, DataSource))
+                .Subscribe(Tree_RenameLink)
+                .DisposeWith(this);
+            watcher.ChangedFile
+                .ObserveOnGui()
+                .Where(x => Equals(x.DataSource, DataSource))
+                .Subscribe(Tree_UpdateFileLink)
+                .DisposeWith(this);
+        }
 
         Dispatcher.UIThread.Post(() => {
             IsBusyLoadingAssets = true;
-            _rootDirectory = (DataSource as FileSystemDataSource)?.GetRootLink()
-             ?? throw new InvalidOperationException("Only FileSystemDataSource is supported currently.");
+            _rootDirectory = new DataSourceDirectoryLink(DataSource, string.Empty);
             RootItems.LoadOptimized(GetAllRootItems());
             AssetTreeSource.RowSelection!.SingleSelect = false;
             AssetTreeSource.SortBy(AssetTreeSource.Columns[0], ListSortDirection.Descending);

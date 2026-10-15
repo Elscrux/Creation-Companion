@@ -1,5 +1,5 @@
-﻿using System.IO.Abstractions;
-using CreationEditor.Services.Filter;
+using System.IO.Abstractions;
+using CreationEditor.Services.Archive.FileSystem;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Services.DataSource;
@@ -8,75 +8,54 @@ namespace CreationEditor.Services.DataSource;
 /// A data source that represents a game archive.
 /// </summary>
 public sealed class ArchiveDataSource : IDataSource {
-    private readonly WildcardSearchFilter _searchFilter = new();
-
     public IArchiveReader ArchiveReader { get; }
     public DataSourceFileLink ArchiveFileLink { get; }
 
     public string Name { get; }
     public string Path { get; }
     public bool IsReadOnly => true;
-    public DataSourceDirectoryLink DeleteDirectoryLink => null!;
+    public DataSourceDirectoryLink DeleteDirectoryLink { get; }
     public IFileSystem FileSystem { get; }
 
     public ArchiveDataSource(IFileSystem fileSystem, string fullPath, IArchiveReader archiveReader, DataSourceFileLink archiveFileLink) {
         ArchiveReader = archiveReader;
         ArchiveFileLink = archiveFileLink;
-        FileSystem = fileSystem;
-        Name = FileSystem.Path.GetFileName(fullPath);
+        FileSystem = new ArchiveFileSystem(fileSystem, archiveReader, fullPath);
+        Name = fileSystem.Path.GetFileName(fullPath);
         Path = fullPath;
+        DeleteDirectoryLink = new DataSourceDirectoryLink(this, FileSystemDataSource.DeleteDirectoryName);
     }
 
-    public DataSourceMemento CreateMemento() {
-        return new DataSourceMemento(DataSourceType.Archive, Name, Path, IsReadOnly);
-    }
+    public DataSourceMemento CreateMemento() => new(DataSourceType.Archive, Name, Path, IsReadOnly);
 
-    public DataSourceFileLink GetRootLink() => ArchiveFileLink;
+    public string GetFullPath(DataRelativePath path) => FileSystem.Path.Combine(Path, path.Path);
 
-    public string GetFullPath(DataRelativePath path) {
-        return FileSystem.Path.Combine(Path, path.Path);
-    }
+    public bool FileExists(DataRelativePath path) => FileSystem.File.Exists(GetFullPath(path));
 
-    public bool FileExists(DataRelativePath path) {
-        var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
-        if (directoryPath is null) return false;
-        if (!ArchiveReader.TryGetFolder(directoryPath, out var folder)) return false;
+    public bool DirectoryExists(DataRelativePath path) => FileSystem.Directory.Exists(GetFullPath(path));
 
-        var fileName = FileSystem.Path.GetFileName(path.Path);
-        return folder.Files.Any(f => DataRelativePath.PathComparer.Equals(FileSystem.Path.GetFileName(f.Path), fileName));
-    }
-
-    public bool DirectoryExists(DataRelativePath path) {
-        var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
-        if (directoryPath is null) return false;
-
-        return ArchiveReader.TryGetFolder(directoryPath, out _);
-    }
     public IEnumerable<DataSourceFileLink> EnumerateFiles(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
-        var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
-        if (directoryPath is null || !ArchiveReader.TryGetFolder(directoryPath, out var folder)) yield break;
+        var fullPath = GetFullPath(path.Path);
+        var files = FileSystem.Directory.EnumerateFiles(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
-        foreach (var file in folder.Files.Select(x => x.Path)) {
-            if (!_searchFilter.Filter(file, searchPattern)) continue;
-
+        foreach (var file in files) {
             var relativePath = FileSystem.Path.GetRelativePath(Path, file);
             yield return new DataSourceFileLink(this, relativePath);
         }
     }
 
     public IEnumerable<DataSourceDirectoryLink> EnumerateDirectories(DataRelativePath path, string searchPattern = "*", bool includeSubDirectories = false) {
-        var directoryPath = FileSystem.Path.GetDirectoryName(path.Path);
-        if (directoryPath is null || !ArchiveReader.TryGetFolder(directoryPath, out var folder)) yield break;
+        var fullPath = GetFullPath(path.Path);
+        var directories =
+            FileSystem.Directory.EnumerateDirectories(fullPath, searchPattern, includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
-        // foreach (var subFolder in folder.SubFolders) {
-        //     if (!_searchFilter.Filter(subFolder.Path, searchPattern)) continue;
-        //
-        //     var relativePath = FileSystem.Path.GetRelativePath(Path, subFolder.Path);
-        //     yield return new DataSourceDirectoryLink(this, relativePath);
-        // }
+        foreach (var directory in directories) {
+            var relativePath = FileSystem.Path.GetRelativePath(Path, directory);
+            yield return new DataSourceDirectoryLink(this, relativePath);
+        }
     }
 
     private bool Equals(ArchiveDataSource other) => DataRelativePath.PathComparer.Equals(Path, other.Path);
-    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is ArchiveDataSource other && Equals(other);
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || (obj is ArchiveDataSource other && Equals(other));
     public override int GetHashCode() => Path.GetHashCode();
 }

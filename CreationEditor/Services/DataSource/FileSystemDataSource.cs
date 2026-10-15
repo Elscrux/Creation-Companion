@@ -6,6 +6,8 @@ namespace CreationEditor.Services.DataSource;
 /// A data source that lies in a file system.
 /// </summary>
 public sealed class FileSystemDataSource : IDataSource {
+    public const string DeleteDirectoryName = "_DELETE_";
+
     public string Name { get; }
     public string Path { get; }
     public bool IsReadOnly { get; }
@@ -17,20 +19,12 @@ public sealed class FileSystemDataSource : IDataSource {
         Name = FileSystem.Path.GetFileName(fullPath);
         Path = fullPath;
         IsReadOnly = isReadOnly;
-        DeleteDirectoryLink = new DataSourceDirectoryLink(this, "_DELETE_");
+        DeleteDirectoryLink = new DataSourceDirectoryLink(this, DeleteDirectoryName);
     }
 
-    public DataSourceMemento CreateMemento() {
-        return new DataSourceMemento(DataSourceType.FileSystem, Name, Path, IsReadOnly);
-    }
+    public DataSourceMemento CreateMemento() => new(DataSourceType.FileSystem, Name, Path, IsReadOnly);
 
-    public DataSourceDirectoryLink GetRootLink() {
-        return new DataSourceDirectoryLink(this, string.Empty);
-    }
-
-    public string GetFullPath(DataRelativePath path) {
-        return FileSystem.Path.Combine(Path, path.Path);
-    }
+    public string GetFullPath(DataRelativePath path) => FileSystem.Path.Combine(Path, path.Path);
 
     public bool FileExists(DataRelativePath path) {
         var fullPath = GetFullPath(path.Path);
@@ -110,6 +104,6 @@ public sealed class FileSystemDataSource : IDataSource {
     }
 
     private bool Equals(FileSystemDataSource other) => DataRelativePath.PathComparer.Equals(Path, other.Path);
-    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is FileSystemDataSource other && Equals(other);
+    public override bool Equals(object? obj) => ReferenceEquals(this, obj) || (obj is FileSystemDataSource other && Equals(other));
     public override int GetHashCode() => Path.GetHashCode();
 }
