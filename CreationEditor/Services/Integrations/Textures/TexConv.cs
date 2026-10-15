@@ -107,7 +107,7 @@ public sealed class TexConv(IFileSystem fileSystem, ILogger logger, ConfigValues
         // Separates alpha channel for resize/mipmap generation
         arguments += " --separate-alpha";
 
-        if (targetFormat is null) {
+        if (targetFormat is not null) {
             arguments += $" -f {targetFormat}";
         }
 
@@ -130,8 +130,6 @@ public sealed class TexConv(IFileSystem fileSystem, ILogger logger, ConfigValues
             arguments += " -m 0";
         }
 
-        logger.Here().Information("Processing texture: {Source} ⟶ {Target} ({Arguments})", sourceFilePath, targetFolder, arguments);
-
         try {
             var (exitCode, output, error) = await ProcessRunner.RunProcessAsync(toolPath, arguments, token);
 
@@ -149,7 +147,7 @@ public sealed class TexConv(IFileSystem fileSystem, ILogger logger, ConfigValues
                 return TextureProcessResult.Fail($"TexConv reported success but no output file was created: {outputFilePath}\n{output}");
             }
 
-            logger.Here().Information("Texture processed: {Output}", outputFilePath);
+            logger.Here().Verbose("Texture processed: {Output}", outputFilePath);
             return TextureProcessResult.Ok("Texture processed.", outputFilePath);
         } catch (OperationCanceledException e) {
             logger.Here().Warning(e, "Texture processing was cancelled: {Source}", sourceFilePath);
