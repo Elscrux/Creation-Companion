@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using CreationEditor.Services.DataSource;
+using CreationEditor.Skyrim.Tests.Archive;
 using CreationEditor.Skyrim.Tests.AutoData;
-using CreationEditor.Skyrim.Tests.FileSystem;
 using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Skyrim.Tests.DataSource;
