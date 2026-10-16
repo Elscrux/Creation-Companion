@@ -55,6 +55,15 @@ public sealed class ArchiveDataSource : IDataSource {
         }
     }
 
+    public bool ExtractFile(DataRelativePath path, string destinationPath) {
+        var file = ArchiveReader.Files.FirstOrDefault(f => DataRelativePath.PathComparer.Equals(f.Path, path.Path));
+        if (file is null) return false;
+
+        new BinaryWriter(File.OpenWrite(destinationPath)).Write(file.GetSpan());
+
+        return true;
+    }
+
     private bool Equals(ArchiveDataSource other) => DataRelativePath.PathComparer.Equals(Path, other.Path);
     public override bool Equals(object? obj) => ReferenceEquals(this, obj) || (obj is ArchiveDataSource other && Equals(other));
     public override int GetHashCode() => Path.GetHashCode();

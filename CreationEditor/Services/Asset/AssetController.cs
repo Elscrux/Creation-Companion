@@ -22,9 +22,19 @@ public sealed class AssetController(
     public void Open(IDataSourceLink link) {
         if (!link.Exists()) return;
 
+        var path = link.FullPath;
+
+        // For archive data sources, extract the file to a temporary location and open it from there
+        if (link.DataSource is ArchiveDataSource archiveDataSource) {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), link.Name);
+            if (!archiveDataSource.ExtractFile(link.DataRelativePath, tempFilePath)) return;
+
+            path = tempFilePath;
+        }
+
         // Open the file via the standard program
         Process.Start(new ProcessStartInfo {
-            FileName = link.FullPath,
+            FileName = path,
             WorkingDirectory = link.ParentDirectory?.FullPath,
             UseShellExecute = true,
             Verb = "open",
@@ -50,7 +60,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Copy(IDataSourceLink origin, IDataSourceLink destination, bool overwrite, CancellationToken token = default) {
+    public void Copy(IDataSourceLink origin, IDataSourceLink destination, bool overwrite = false, CancellationToken token = default) {
         try {
             switch (origin) {
                 case DataSourceDirectoryLink directoryLink: {
@@ -72,7 +82,7 @@ public sealed class AssetController(
                             new DataSourceFileLink(
                                 destinationDirectoryLink.DataSource,
                                 destinationDirectoryLink.FileSystem.Path.Combine(destinationDirectoryLink.DataRelativePath.Path, fileLink.Name)),
-                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null)
+                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null),
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
@@ -87,7 +97,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Move(IDataSourceLink origin, IDataSourceLink destination, bool overwrite, CancellationToken token = default) {
+    public void Move(IDataSourceLink origin, IDataSourceLink destination, bool overwrite = false, CancellationToken token = default) {
         try {
             switch (origin) {
                 case DataSourceDirectoryLink directoryLink: {
@@ -109,7 +119,7 @@ public sealed class AssetController(
                             new DataSourceFileLink(
                                 destinationDirectoryLink.DataSource,
                                 destinationDirectoryLink.FileSystem.Path.Combine(destinationDirectoryLink.DataRelativePath.Path, fileLink.Name)),
-                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null)
+                        _ => throw new ArgumentOutOfRangeException(nameof(destination), destination, null),
                     };
 
                     var links = GetRemapLinks(fileLink, dest);
@@ -124,7 +134,7 @@ public sealed class AssetController(
         }
     }
 
-    public void Rename(IDataSourceLink origin, string newName, bool overwrite, CancellationToken token = default) {
+    public void Rename(IDataSourceLink origin, string newName, bool overwrite = false, CancellationToken token = default) {
         var directoryDataRelativePath = origin.ParentDirectory?.DataRelativePath.Path;
 
         if (directoryDataRelativePath is not null) {
@@ -311,9 +321,8 @@ public sealed class AssetController(
         return true;
     }
 
-    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) {
-        return [new Update<DataSourceFileLink>(origin, destination)];
-    }
+    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) =>
+        [new Update<DataSourceFileLink>(origin, destination)];
 
     private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
         return origin
