@@ -1,6 +1,5 @@
 ﻿using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Views;
 using Mutagen.Bethesda.Skyrim.Assets;
 using NifPlugin.Views;
 using ReactiveUI.SourceGenerators;
@@ -8,15 +7,15 @@ namespace NifPlugin.Services.Record.Actions;
 
 public sealed partial class NifActionsProvider : IContextActionsProvider {
     private readonly NifVMFactory _nifVMFactory;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IList<ContextAction> _actions;
 
     public NifActionsProvider(
         NifVMFactory nifVMFactory,
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         IMenuItemProvider menuItemProvider) {
         _nifVMFactory = nifVMFactory;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
 
         _actions = [
             new ContextAction(context =>
@@ -31,12 +30,14 @@ public sealed partial class NifActionsProvider : IContextActionsProvider {
 
     [ReactiveCommand]
     private void OpenEditMenu(SelectedListContext context) {
+        if (_mainWindowProvider.Current is not {} mainWindow) return;
+
         foreach (var asset in context.SelectedAssets) {
             var nifWindow = new NifWindow {
                 DataContext = _nifVMFactory.Create(asset.DataSourceLink),
             };
 
-            nifWindow.Show(_mainWindow);
+            nifWindow.Show(mainWindow);
         }
     }
 

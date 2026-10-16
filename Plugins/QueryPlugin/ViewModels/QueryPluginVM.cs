@@ -2,7 +2,6 @@
 using Avalonia.Input.Platform;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Query;
 using CreationEditor.Services.State;
 using QueryPlugin.Views;
@@ -17,7 +16,7 @@ public sealed partial class QueryPluginVM : ViewModel {
 
     private readonly Func<QueryColumnVM> _queryColumnVMFactory;
     private readonly IMenuItemProvider _menuItemProvider;
-    private readonly MainWindow _window;
+    private readonly IMainWindowProvider _mainWindowProvider;
 
     public Grid ColumnsGrid { get; } = new() {
         ColumnDefinitions = [new ColumnDefinition()],
@@ -30,10 +29,10 @@ public sealed partial class QueryPluginVM : ViewModel {
         Func<QueryColumnVM> queryColumnVMFactory,
         IStateRepositoryFactory<QueryRunnerMemento, QueryRunnerMemento, Guid> stateRepositoryFactory,
         IMenuItemProvider menuItemProvider,
-        MainWindow window) {
+        IMainWindowProvider mainWindowProvider) {
         _queryColumnVMFactory = queryColumnVMFactory;
         _menuItemProvider = menuItemProvider;
-        _window = window;
+        _mainWindowProvider = mainWindowProvider;
         ColumnsGrid.Children.Add(_paddingRight);
 
         StateRepository = stateRepositoryFactory.Create("Query");
@@ -71,7 +70,7 @@ public sealed partial class QueryPluginVM : ViewModel {
 
     [ReactiveCommand]
     private async Task CopyColumnText(QueryColumnVM vm) {
-        var clipboard = TopLevel.GetTopLevel(_window)?.Clipboard;
+        var clipboard = _mainWindowProvider.Current is {} window ? TopLevel.GetTopLevel(window)?.Clipboard : null;
         if (clipboard is not null) {
             var text = string.Join(Environment.NewLine, vm.QueriedFields.Select(x => x.QueriedField));
             await clipboard.SetTextAsync(text);
@@ -152,12 +151,10 @@ public sealed partial class QueryPluginVM : ViewModel {
         return true;
     }
 
-    private MenuItem[] GetColumnMenuItems(QueryColumnVM queryColumnVM) {
-        return [
-            _menuItemProvider.Save(SaveColumnCommand, queryColumnVM),
-            _menuItemProvider.Duplicate(DuplicateColumnCommand, queryColumnVM),
-            _menuItemProvider.Delete(DeleteColumnCommand, queryColumnVM),
-            _menuItemProvider.Copy(CopyColumnTextCommand, queryColumnVM).Name("Copy Entries Text"),
-        ];
-    }
+    private MenuItem[] GetColumnMenuItems(QueryColumnVM queryColumnVM) => [
+        _menuItemProvider.Save(SaveColumnCommand, queryColumnVM),
+        _menuItemProvider.Duplicate(DuplicateColumnCommand, queryColumnVM),
+        _menuItemProvider.Delete(DeleteColumnCommand, queryColumnVM),
+        _menuItemProvider.Copy(CopyColumnTextCommand, queryColumnVM).Name("Copy Entries Text"),
+    ];
 }

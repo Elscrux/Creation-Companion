@@ -4,7 +4,6 @@ using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.ViewModels.Reference;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
@@ -25,7 +24,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     private readonly IDataSourceService _dataSourceService;
     private readonly IRecordEditorController _recordEditorController;
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IList<ContextAction> _actions;
 
     public GenericContextActionsProvider(
@@ -37,14 +36,14 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         IMenuItemProvider menuItemProvider,
         IMutagenTypeProvider mutagenTypeProvider,
         IReferenceBrowserVMFactory referenceBrowserVMFactory,
-        MainWindow mainWindow) {
+        IMainWindowProvider mainWindowProvider) {
         _editorEnvironment = editorEnvironment;
         _recordController = recordController;
         _assetController = assetController;
         _dataSourceService = dataSourceService;
         _recordEditorController = recordEditorController;
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
 
         _actions = [
             new ContextAction(HasOneRecordType,
@@ -216,7 +215,9 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedRecord);
         var referenceWindow = new ReferenceWindow(referencedRecord.Record, referenceBrowserVM);
 
-        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
+        Dispatcher.UIThread.Post(() => {
+            if (_mainWindowProvider.Current is {} mainWindow) referenceWindow.Show(mainWindow);
+        });
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
@@ -226,7 +227,9 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
         var referenceBrowserVM = _referenceBrowserVMFactory.GetReferenceBrowserVM(referencedAsset);
         var referenceWindow = new ReferenceWindow(referencedAsset.AssetLink.DataRelativePath.Path, referenceBrowserVM);
 
-        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
+        Dispatcher.UIThread.Post(() => {
+            if (_mainWindowProvider.Current is {} mainWindow) referenceWindow.Show(mainWindow);
+        });
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
@@ -238,7 +241,9 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
             dataSourceLink.DataRelativePath.Path,
             referenceBrowserVM);
 
-        Dispatcher.UIThread.Post(() => referenceWindow.Show(_mainWindow));
+        Dispatcher.UIThread.Post(() => {
+            if (_mainWindowProvider.Current is {} mainWindow) referenceWindow.Show(mainWindow);
+        });
         if (remap) {
             referenceBrowserVM?.ReferenceRemapperVM?.Remap();
         }
@@ -269,7 +274,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     public async Task CopyFormKey(SelectedListContext context) {
         if (context.SelectedRecords is not [{ ReferencedRecord.Record: var record }, ..]) return;
 
-        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+        var clipboard = GetClipboard();
         if (clipboard is null) return;
 
         var formKey = record.FormKey.ToString();
@@ -278,7 +283,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
 
     [ReactiveCommand]
     public async Task CopyFormId(SelectedListContext context) {
-        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+        var clipboard = GetClipboard();
         if (clipboard is null) return;
 
         var formId = GetFormId(context);
@@ -299,10 +304,16 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
     public async Task CopyEditorId(SelectedListContext context) {
         if (context.SelectedRecords is not [{ ReferencedRecord.Record.EditorID: var editorId }, ..]) return;
 
-        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+        var clipboard = GetClipboard();
         if (clipboard is null) return;
 
         await clipboard.SetTextAsync(editorId);
+    }
+
+    private IClipboard? GetClipboard() {
+        if (_mainWindowProvider.Current is not {} mainWindow) return null;
+
+        return TopLevel.GetTopLevel(mainWindow)?.Clipboard;
     }
 
     public IEnumerable<ContextAction> GetActions() => _actions;

@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions;
 using Avalonia.Platform.Storage;
 using CreationEditor.Avalonia.Models.Settings.Save;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels.DataSource;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Lifecycle;
 using CreationEditor.Services.Mutagen.Mod.Save;
@@ -17,7 +17,7 @@ public sealed partial class SaveSettingVM : ViewModel, ISettingNode, ILifecycleT
     private readonly ISavePipeline _savePipeline;
     private readonly IModSaveLocationProvider _modSaveLocationProvider;
     private readonly IDataSourceService _dataSourceService;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
 
     public string Name => "Save";
     public Type? Parent => null;
@@ -42,14 +42,14 @@ public sealed partial class SaveSettingVM : ViewModel, ISettingNode, ILifecycleT
         ISavePipeline savePipeline,
         IModSaveLocationProvider modSaveLocationProvider,
         IDataSourceService dataSourceService,
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         SingleDataSourcePickerVM dataSourcePicker) {
         _dataDirectoryProvider = dataDirectoryProvider;
         _fileSystem = fileSystem;
         _savePipeline = savePipeline;
         _modSaveLocationProvider = modSaveLocationProvider;
         _dataSourceService = dataSourceService;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
         DataSourcePicker = dataSourcePicker;
         DataSourcePicker.Filter = ds => !ds.IsReadOnly;
         Settings = settingsImporter.Import(this) ?? new SaveSettings();
@@ -64,7 +64,9 @@ public sealed partial class SaveSettingVM : ViewModel, ISettingNode, ILifecycleT
 
     [ReactiveCommand]
     private async Task SelectCustomDirectory() {
-        var startLocation = await _mainWindow.StorageProvider.TryGetFolderFromPathAsync(_modSaveLocationProvider.GetSaveLocation())
+        if (_mainWindowProvider.Current is not {} mainWindow) return;
+
+        var startLocation = await mainWindow.StorageProvider.TryGetFolderFromPathAsync(_modSaveLocationProvider.GetSaveLocation())
             .ConfigureAwait(true);
 
         var folderPickerOpenOptions = new FolderPickerOpenOptions {
@@ -72,7 +74,7 @@ public sealed partial class SaveSettingVM : ViewModel, ISettingNode, ILifecycleT
             SuggestedStartLocation = startLocation,
         };
 
-        var pickedDirectories = await _mainWindow.StorageProvider.OpenFolderPickerAsync(folderPickerOpenOptions)
+        var pickedDirectories = await mainWindow.StorageProvider.OpenFolderPickerAsync(folderPickerOpenOptions)
             .ConfigureAwait(true);
 
         var directory = pickedDirectories.Count > 0 ? pickedDirectories[0] : null;

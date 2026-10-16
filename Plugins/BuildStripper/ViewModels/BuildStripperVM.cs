@@ -15,10 +15,10 @@ using BuildStripper.Services.FeatureFlag;
 using BuildStripper.Views;
 using CreationEditor;
 using CreationEditor.Avalonia.Models.Mod;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Mod;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References;
@@ -50,7 +50,7 @@ public sealed record FormLinkWithEditorID(FormLinkIdentifier Link, string? Edito
 }
 
 public sealed partial class BuildStripperVM : ViewModel {
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly ILogger _logger;
     private readonly Services.BuildStripper _buildStripper;
     private readonly IEssentialRecordProvider _essentialRecordProvider;
@@ -96,7 +96,7 @@ public sealed partial class BuildStripperVM : ViewModel {
 
     public BuildStripperVM(
         Func<FeatureFlag, FeatureFlagEditorVM> featureFlagEditorVMFactory,
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         ILogger logger,
         IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment,
         Services.BuildStripper buildStripper,
@@ -106,7 +106,7 @@ public sealed partial class BuildStripperVM : ViewModel {
         SingleModPickerVM cleaningModPickerVM,
         MultiModPickerVM dependenciesModPickerVM,
         IFeatureFlagService featureFlagService) {
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
         _logger = logger;
         _buildStripper = buildStripper;
         _essentialRecordProvider = essentialRecordProvider;
@@ -174,7 +174,7 @@ public sealed partial class BuildStripperVM : ViewModel {
             Content = new FeatureFlagEditor(flagEditorVM) {
                 Width = 1200,
             },
-            XamlRoot = _mainWindow,
+            XamlRoot = _mainWindowProvider.Current,
             Buttons = {
                 new FATaskDialogButton {
                     Text = "Save",

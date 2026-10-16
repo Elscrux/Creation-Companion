@@ -21,7 +21,6 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Reference;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Basic;
 using CreationEditor.Avalonia.Views.Reference;
 using CreationEditor.Services.Asset;
@@ -40,7 +39,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     private readonly Lazy<IContextMenuProvider> _contextMenuProviderFactory;
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IDockFactory _dockFactory;
     private readonly IModelModificationService _modelModificationService;
     private readonly ITaskDialogProvider _taskDialogProvider;
@@ -55,7 +54,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         Lazy<IContextMenuProvider> contextMenuProviderFactory,
         IReferenceBrowserVMFactory referenceBrowserVMFactory,
         IFileSystem fileSystem,
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         IDockFactory dockFactory,
         IModelModificationService modelModificationService,
         ITaskDialogProvider taskDialogProvider,
@@ -68,7 +67,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         _contextMenuProviderFactory = contextMenuProviderFactory;
         _referenceBrowserVMFactory = referenceBrowserVMFactory;
         _fileSystem = fileSystem;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
         _dockFactory = dockFactory;
         _modelModificationService = modelModificationService;
         _taskDialogProvider = taskDialogProvider;
@@ -647,7 +646,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     }
 
     public async Task CopyAssetPath(IDataSourceLink dataSourceLink) {
-        var clipboard = TopLevel.GetTopLevel(_mainWindow)?.Clipboard;
+        var clipboard = _mainWindowProvider.Current is {} mainWindow ? TopLevel.GetTopLevel(mainWindow)?.Clipboard : null;
         if (clipboard is not null) {
             await clipboard.SetTextAsync(dataSourceLink.DataRelativePath.Path);
         }

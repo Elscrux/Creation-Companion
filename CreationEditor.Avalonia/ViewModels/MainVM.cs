@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
@@ -29,7 +30,8 @@ public sealed partial class MainVM : ViewModel {
     private readonly Func<IntegrationsVM> _integrationsVMFactory;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDockFactory _dockFactory;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
+    private readonly IFAApplicationSplashScreen _splashScreen;
     private readonly IModSaveService _modSaveService;
     private readonly IFileSystem _fileSystem;
     private const string BaseWindowTitle = "Creation Companion";
@@ -81,7 +83,7 @@ public sealed partial class MainVM : ViewModel {
         IDataSourceSelectionVM dataSourceSelectionVM,
         IDockingManagerService dockingManagerService,
         IDockFactory dockFactory,
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         IPluginService? pluginService,
         IModSaveService modSaveService,
         IFAApplicationSplashScreen splashScreen,
@@ -90,16 +92,20 @@ public sealed partial class MainVM : ViewModel {
         _integrationsVMFactory = integrationsVMFactory;
         _editorEnvironment = editorEnvironment;
         _dockFactory = dockFactory;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
         _modSaveService = modSaveService;
         _fileSystem = fileSystem;
+        _splashScreen = splashScreen;
         NotificationVM = notificationVM;
         BusyService = busyService;
         ModSelectionVM = modSelectionVM;
         DataSourceSelectionVM = dataSourceSelectionVM;
         DockingManagerService = dockingManagerService;
         PluginService = pluginService;
-        _mainWindow.SplashScreen = splashScreen;
+        mainWindowProvider.MainWindowChanged
+            .Subscribe(OnMainWindowChanged)
+            .DisposeWith(this);
+        if (mainWindowProvider.Current is {} currentWindow) OnMainWindowChanged(currentWindow);
 
         PluginService?.PluginsRegistered
             .Subscribe(newPlugins => MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>()))
@@ -108,6 +114,10 @@ public sealed partial class MainVM : ViewModel {
         WindowTitleObs = _editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
+    }
+
+    private void OnMainWindowChanged(MainWindow window) {
+        window.SplashScreen = _splashScreen;
     }
 
     [ReactiveCommand]
@@ -146,16 +156,20 @@ public sealed partial class MainVM : ViewModel {
 
     [ReactiveCommand]
     private void OpenSettings() {
+        if (_mainWindowProvider.Current is not {} mainWindow) return;
+
         var settingsVM = _settingsVMFactory();
         var settingsWindow = new SettingsWindow(settingsVM);
-        settingsWindow.ShowDialog(_mainWindow);
+        settingsWindow.ShowDialog(mainWindow);
     }
 
     [ReactiveCommand]
     private void OpenIntegrations() {
+        if (_mainWindowProvider.Current is not {} mainWindow) return;
+
         var integrationsVM = _integrationsVMFactory();
         var integrationsWindow = new IntegrationsWindow(integrationsVM);
-        integrationsWindow.ShowDialog(_mainWindow);
+        integrationsWindow.ShowDialog(mainWindow);
     }
 
     [ReactiveCommand]

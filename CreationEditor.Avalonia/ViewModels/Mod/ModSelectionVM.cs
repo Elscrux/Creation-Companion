@@ -6,8 +6,8 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using CreationEditor.Avalonia.Models.Mod;
 using CreationEditor.Avalonia.Models.Selectables;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Record.Editor;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod;
@@ -35,7 +35,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     [Reactive] public partial string ModSearchText { get; set; }
 
     [Reactive] public partial LoadOrderModItem? SelectedMod { get; set; }
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IRecordEditorController _recordEditorController;
     private readonly IModSaveService _modSaveService;
     private readonly IDataSourceService _dataSourceService;
@@ -64,7 +64,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
     public IObservable<bool> SelectedModValid { get; set; }
 
     public ModSelectionVM(
-        MainWindow mainWindow,
+        IMainWindowProvider mainWindowProvider,
         IRecordEditorController recordEditorController,
         IModSaveService modSaveService,
         IDataSourceService dataSourceService,
@@ -75,7 +75,7 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
         ModCreationVM modCreationVM,
         ILoadOrderListingsProvider listingsProvider) {
         _editorEnvironment = editorEnvironment;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
         _recordEditorController = recordEditorController;
         _modSaveService = modSaveService;
         _dataSourceService = dataSourceService;
@@ -279,7 +279,9 @@ public sealed partial class ModSelectionVM : ViewModel, IModSelectionVM {
             Icon.Warning,
             WindowStartupLocation.CenterOwner);
 
-        var pressedButton = await messageBox.ShowWindowDialogAsync(_mainWindow);
+        if (_mainWindowProvider.Current is not {} mainWindow) return false;
+
+        var pressedButton = await messageBox.ShowWindowDialogAsync(mainWindow);
         switch (pressedButton) {
             case ButtonResult.Yes:
                 _modSaveService.SaveMod(_editorEnvironment.ActiveMod);

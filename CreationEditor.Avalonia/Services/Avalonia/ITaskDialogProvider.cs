@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using CreationEditor.Avalonia.Views;
 using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
@@ -9,12 +8,12 @@ public interface ITaskDialogProvider {
     FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null);
 }
 
-public sealed class TaskDialogProvider(MainWindow mainWindow) : ITaskDialogProvider {
+public sealed class TaskDialogProvider(IMainWindowProvider mainWindowProvider) : ITaskDialogProvider {
     public FATaskDialog CreateTaskDialog(string header, Control? content, Action<FATaskDialog>? configure = null, Visual? xamlRoot = null) {
         var assetDialog = new FATaskDialog {
             Header = header,
             Content = content,
-            XamlRoot = xamlRoot ?? mainWindow,
+            XamlRoot = xamlRoot ?? mainWindowProvider.Current,
             Buttons = {
                 FATaskDialogButton.OKButton,
                 FATaskDialogButton.CancelButton,

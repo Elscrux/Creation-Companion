@@ -1,7 +1,6 @@
 ﻿using CreationEditor;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
-using CreationEditor.Avalonia.Views;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.References;
 using CreationEditor.Skyrim.Definitions;
@@ -13,15 +12,15 @@ namespace PromoteToMaster.Services;
 
 public sealed partial class PromotionContextActionProvider : IContextActionsProvider {
     private readonly Func<IReadOnlyList<IReferencedRecord>, PromoteToMasterVM> _promoteToMasterVMFactory;
-    private readonly MainWindow _mainWindow;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IList<ContextAction> _actions;
     public PromotionContextActionProvider(
         ILinkCacheProvider linkCacheProvider,
         IMenuItemProvider menuItemProvider,
         Func<IReadOnlyList<IReferencedRecord>, PromoteToMasterVM> promoteToMasterVMFactory,
-        MainWindow mainWindow) {
+        IMainWindowProvider mainWindowProvider) {
         _promoteToMasterVMFactory = promoteToMasterVMFactory;
-        _mainWindow = mainWindow;
+        _mainWindowProvider = mainWindowProvider;
 
         _actions = [
             new ContextAction(
@@ -55,7 +54,9 @@ public sealed partial class PromotionContextActionProvider : IContextActionsProv
             DataContext = _promoteToMasterVMFactory(context.SelectedRecords.Select(x => x.ReferencedRecord).ToArray()),
         };
 
-        referenceWindow.Show(_mainWindow);
+        if (_mainWindowProvider.Current is not {} mainWindow) return;
+
+        referenceWindow.Show(mainWindow);
     }
 
     public IEnumerable<ContextAction> GetActions() => _actions;

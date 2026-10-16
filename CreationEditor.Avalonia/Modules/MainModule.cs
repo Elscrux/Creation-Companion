@@ -206,6 +206,10 @@ public sealed class MainModule : Module {
             .As<ITaskDialogProvider>()
             .SingleInstance();
 
+        builder.RegisterType<MainWindowProvider>()
+            .As<IMainWindowProvider>()
+            .SingleInstance();
+
         // Factory
         builder.RegisterType<DockFactory>()
             .As<IDockFactory>()
