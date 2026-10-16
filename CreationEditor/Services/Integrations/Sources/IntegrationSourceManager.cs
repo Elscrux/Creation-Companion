@@ -88,6 +88,7 @@ public sealed class IntegrationSourceManager(
         var executablePath = downloadedPath;
         if (extractor.IsArchive(downloadedPath)) {
             executablePath = extractor.Extract(downloadedPath, installFolder);
+            fileSystem.File.Delete(downloadedPath);
         }
 
         if (executablePath is null) {
