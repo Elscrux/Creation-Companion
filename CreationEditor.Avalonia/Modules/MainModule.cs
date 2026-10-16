@@ -38,6 +38,8 @@ using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
 using CreationEditor.Services.UserInput;
 using FluentAvalonia.UI.Windowing;
+using ktsu.CredentialCache;
+using ktsu.CredentialCache.Storage;
 using Mutagen.Bethesda.Fonts;
 using Mutagen.Bethesda.Fonts.DI;
 using Mutagen.Bethesda.Plugins;
@@ -93,6 +95,10 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<StartupSplashScreen>()
             .As<IFAApplicationSplashScreen>();
+
+        // Credential cache backed by the OS keyring, used to store the API keys
+        builder.Register(_ => new CredentialCache(CredentialStoreFactory.CreateDefault("CreationCompanion")))
+            .SingleInstance();
 
         // Services
         builder.RegisterType<AvaloniaUserInputService>()
