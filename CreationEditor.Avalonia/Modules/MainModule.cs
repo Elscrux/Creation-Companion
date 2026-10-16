@@ -36,6 +36,7 @@ using CreationEditor.Services.Plugin;
 using CreationEditor.Services.Serialization.Json;
 using CreationEditor.Services.Settings;
 using CreationEditor.Services.State;
+using CreationEditor.Services.UserInput;
 using FluentAvalonia.UI.Windowing;
 using Mutagen.Bethesda.Fonts;
 using Mutagen.Bethesda.Fonts.DI;
@@ -94,6 +95,10 @@ public sealed class MainModule : Module {
             .As<IFAApplicationSplashScreen>();
 
         // Services
+        builder.RegisterType<AvaloniaUserInputService>()
+            .As<IUserInputService>()
+            .SingleInstance();
+
         builder.RegisterType<LoadOrderSorter>()
             .As<ILoadOrderSorter>()
             .SingleInstance();
