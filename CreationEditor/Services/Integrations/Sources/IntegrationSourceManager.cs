@@ -59,7 +59,7 @@ public sealed class IntegrationSourceManager(
             var downloadResult = await source.DownloadAsync(sourceDefinition, version.LatestVersion, installFolder, token);
             switch (downloadResult) {
                 case DownloadResult.Succeeded succeeded:
-                    return CompleteInstall(descriptor, sourceDefinition, succeeded.InstalledPath);
+                    return CompleteInstall(descriptor, sourceDefinition, succeeded.InstalledPath, version.LatestVersion);
                 case DownloadResult.Failed failed:
                     logger.Here().Error("Download failed for integration {Integration}: {Message}", descriptor.DisplayName, failed.Message);
                     return failed;
@@ -73,14 +73,18 @@ public sealed class IntegrationSourceManager(
                         return new DownloadResult.Failed(
                             $"Manual download timed out. Please download '{manual.ExpectedFileName}' from {manual.BrowserUrl} and place it in the tools folder.");
                     }
-                    return CompleteInstall(descriptor, sourceDefinition, downloadedPath);
+                    return CompleteInstall(descriptor, sourceDefinition, downloadedPath, version.LatestVersion);
             }
         }
 
         return new DownloadResult.Failed($"Integration '{descriptor.DisplayName}' has no usable sources.");
     }
 
-    private DownloadResult CompleteInstall(IntegrationDescriptor descriptor, IIntegrationSourceDescriptor sourceDescriptor, string downloadedPath) {
+    private DownloadResult CompleteInstall(
+        IntegrationDescriptor descriptor,
+        IIntegrationSourceDescriptor sourceDescriptor,
+        string downloadedPath,
+        string version) {
         var installFolder = GetInstallFolder(descriptor);
 
         // Extract archives automatically and locate the executable.
@@ -114,7 +118,7 @@ public sealed class IntegrationSourceManager(
             IntegrationId = descriptor.Id,
             RegistrationConfig = registrationConfig,
             SourceName = sourceDescriptor.SourceName,
-            InstalledVersion = null, // set after a successful update check
+            InstalledVersion = version,
         });
 
         logger.Here().Information("Installed integration {Integration} from {Source} to {Path}", descriptor.DisplayName, sourceDescriptor.SourceName, executablePath);

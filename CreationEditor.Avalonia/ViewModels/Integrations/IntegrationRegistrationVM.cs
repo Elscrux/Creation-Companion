@@ -1,5 +1,4 @@
 ﻿using CreationEditor.Avalonia.ViewModels.Config;
-using CreationEditor.Services.Config.Options;
 using CreationEditor.Services.Integrations;
 using CreationEditor.Services.Integrations.Sources;
 using ReactiveUI.SourceGenerators;
@@ -79,21 +78,12 @@ public sealed partial class IntegrationRegistrationVM(
         StatusMessage = null;
         try {
             var result = await sourceManager.InstallOrUpdateAsync(Descriptor, CancellationToken.None);
-            switch (result) {
-                case DownloadResult.Succeeded succeeded:
-                    RegisterWithInstalledPath(succeeded.InstalledPath);
-                    StatusMessage = "Installed successfully.";
-                    break;
-                case DownloadResult.Failed failed:
-                    StatusMessage = $"Install failed: {failed.Message}";
-                    break;
-                case DownloadResult.ManualDownloadRequired manual:
-                    StatusMessage = $"Manual download required: {manual.BrowserUrl}";
-                    break;
-                default:
-                    StatusMessage = "Unknown install result.";
-                    break;
-            }
+            StatusMessage = result switch {
+                DownloadResult.Succeeded => "Installed successfully.",
+                DownloadResult.Failed failed => $"Install failed: {failed.Message}",
+                DownloadResult.ManualDownloadRequired manual => $"Manual download required: {manual.BrowserUrl}",
+                _ => "Unknown install result.",
+            };
         } catch (Exception e) {
             StatusMessage = $"Install failed: {e.Message}";
         } finally {
@@ -102,23 +92,4 @@ public sealed partial class IntegrationRegistrationVM(
     }
 
     private bool CanInstallFromSource() => HasSource && !IsBusy && sourceManager is not null;
-
-    private void RegisterWithInstalledPath(string installedPath) {
-        var values = SettingsVM?.GetConfigValues() ?? new ConfigValues();
-
-        // Write the installed executable path into the registration settings (e.g. the Tool Path option)
-        var toolPathOption = Descriptor.RegistrationConfigDefinition?.Options
-            .OfType<FileConfigOption>()
-            .FirstOrDefault();
-        if (toolPathOption is not null) {
-            values[toolPathOption.Name] = installedPath;
-        }
-
-        registry.Register(new IntegrationRegistration {
-            IntegrationId = Descriptor.Id,
-            RegistrationConfig = values,
-            SourceName = Descriptor.Sources.FirstOrDefault()?.SourceName,
-        });
-        IsAdding = false;
-    }
 }
