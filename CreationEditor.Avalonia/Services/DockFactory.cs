@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CreationEditor.Avalonia.Models;
@@ -123,10 +123,10 @@ public sealed class DockFactory(
                 break;
             case DockElement.AssetBrowser:
                 var assetBrowserVM = await Dispatcher.UIThread.InvokeAsync(assetBrowserVMFactory);
-                getControl = () => new AssetBrowser(assetBrowserVM);
+                getControl = () => new AssetBrowser(assetBrowserVM, parameter as IDataSourceLink);
                 dockConfig = new DockConfig {
                     DockInfo = new DockInfo {
-                        Header = $"Asset Browser{(parameter is string str ? $" - {fileSystem.Path.GetFileName(str)}" : string.Empty)}",
+                        Header = "Asset Browser",
                         Size = 400,
                     },
                     Dock = Dock.Left,

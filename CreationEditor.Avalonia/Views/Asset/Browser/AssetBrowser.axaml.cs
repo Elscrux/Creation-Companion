@@ -24,11 +24,26 @@ public partial class AssetBrowser : ReactiveUserControl<IAssetBrowserVM> {
         InitializeComponent();
     }
 
-    public AssetBrowser(IAssetBrowserVM assetBrowserVM) : this() {
+    public AssetBrowser(IAssetBrowserVM assetBrowserVM, IDataSourceLink? dataSourceLink = null) : this() {
         ViewModel = assetBrowserVM;
         this.WhenActivated(d => {
             AssetTree.ContextRequested += ContextRequestHandler;
             d.Add(Disposable.Create(() => AssetTree.ContextRequested -= ContextRequestHandler));
+
+            // Select the provided data source link if any
+            if (dataSourceLink is not null && ViewModel is not null) {
+                ViewModel.DataSource = dataSourceLink.DataSource;
+
+                // Delay the execution to ensure the view updated to the data source before executing the command
+                Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => {
+                    Dispatcher.Post(() => {
+                        ViewModel.MoveToPathCommand.Execute(dataSourceLink.DataRelativePath).Subscribe();
+
+                        // Reset the dataSourceLink to avoid re-selecting it on subsequent activations
+                        dataSourceLink = null;
+                    });
+                });
+            }
         });
     }
 
