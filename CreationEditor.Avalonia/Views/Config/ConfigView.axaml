@@ -18,9 +18,10 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <StackPanel Orientation="Horizontal">
+                <Grid ColumnDefinitions="*,Auto">
                     <!-- Config Option -->
-                    <basic:LabeledContentControl HeaderToolTip="{Binding Option.Description}"
+                    <basic:LabeledContentControl Grid.Column="0"
+                                                 HeaderToolTip="{Binding Option.Description}"
                                                  VerticalAlignment="Center">
                         <basic:LabeledContentControl.Header>
                             <StackPanel Orientation="Horizontal"
@@ -29,31 +30,6 @@
                                 <CheckBox IsVisible="{Binding Option.IsOptional}"
                                           IsChecked="{Binding IsActive}"
                                           ToolTip.Tip="{Binding Option.Description}">
-                                    <!-- <ToggleButton.Template> -->
-                                    <!--     <ControlTemplate> -->
-                                    <!--         <StackPanel Orientation="Horizontal" -->
-                                    <!--                     Spacing="4" -->
-                                    <!--                     Background="Transparent"> -->
-                                    <!--             <controls:FASymbolIcon Symbol="ChevronDown" -->
-                                    <!--                                    IsVisible="{Binding !IsActive}"/> -->
-                                    <!--             <controls:FASymbolIcon Symbol="ChevronUp" -->
-                                    <!--                                    IsVisible="{Binding IsActive}"/> -->
-                                    <!-- -->
-                                    <!--             ~1~ Option Name @1@ -->
-                                    <!--             <TextBlock Text="{Binding Option.Name}" -->
-                                    <!--                        FontSize="16" -->
-                                    <!--                        FontWeight="SemiBold" -->
-                                    <!--                        VerticalAlignment="Center"/> -->
-                                    <!--         </StackPanel> -->
-                                    <!--     </ControlTemplate> -->
-                                    <!-- </ToggleButton.Template> -->
-
-                                    <!-- <ToggleButton.Styles> -->
-                                    <!--     <Style Selector="ToggleButton:pointerover"> -->
-                                    <!--         <Setter Property="Foreground" -->
-                                    <!--                 Value="{DynamicResource ButtonForegroundPressed}"/> -->
-                                    <!--     </Style> -->
-                                    <!-- </ToggleButton.Styles> -->
                                     <TextBlock Text="{Binding Option.Name}"
                                                FontSize="16"
                                                FontWeight="SemiBold"
@@ -86,13 +62,14 @@
                     </basic:LabeledContentControl>
 
                     <!-- Validation Error -->
-                    <controls:FAFontIcon Glyph="⚠"
+                    <controls:FAFontIcon Grid.Column="1"
+                                         Glyph="⚠"
                                          VerticalAlignment="Top"
                                          Margin="0,4"
                                          FontSize="32"
                                          IsVisible="{Binding ValidationErrorChanged^, Converter={x:Static ObjectConverters.IsNotNull}}"
                                          ToolTip.Tip="{Binding ValidationErrorChanged^.ErrorMessage}"/>
-                </StackPanel>
+                </Grid>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>
