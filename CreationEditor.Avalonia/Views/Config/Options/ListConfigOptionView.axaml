@@ -6,6 +6,7 @@
              xmlns:config="clr-namespace:CreationEditor.Avalonia.Views.Config"
              xmlns:avalonia="clr-namespace:Sortable.Avalonia;assembly=Sortable.Avalonia"
              xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d"
              d:DesignWidth="500"
              d:DesignHeight="400"
@@ -53,11 +54,12 @@
                                            TextTrimming="CharacterEllipsis"/>
 
                                 <Button Grid.Column="2"
-                                        Content="&#10005;"
                                         ToolTip.Tip="Remove item"
                                         VerticalAlignment="Center"
                                         Command="{Binding #Control.ViewModel.RemoveItemCommand}"
-                                        CommandParameter="{Binding}"/>
+                                        CommandParameter="{Binding}">
+                                    <controls:FASymbolIcon Symbol="Clear"/>
+                                </Button>
                             </Grid>
                         </Expander.Header>
 

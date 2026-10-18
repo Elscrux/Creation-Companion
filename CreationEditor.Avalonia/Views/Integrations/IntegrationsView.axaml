@@ -146,11 +146,10 @@
                                                         Height="32"
                                                         Width="32"
                                                         CornerRadius="8">
-                                                    <TextBlock Text="&#10005;"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="IndianRed"
-                                                               VerticalAlignment="Center"/>
+                                                    <controls:FASymbolIcon Symbol="Clear"
+                                                                           FontSize="14"
+                                                                           Foreground="IndianRed"
+                                                                           VerticalAlignment="Center"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
