@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
+using FluentAvalonia.UI.Controls;
 using LipGenerator.ViewModels;
 using LipGenerator.Views;
 using Mutagen.Bethesda.Skyrim;
@@ -17,5 +18,5 @@ public sealed class LipGeneratorPlugin(
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Left;
     public double? Size { get; set; } = 700;
-    public object GetIcon() => new TextBlock { Text = "👄" };
+    public object Icon => new FAFontIconSource { Glyph = "👄" };
 }

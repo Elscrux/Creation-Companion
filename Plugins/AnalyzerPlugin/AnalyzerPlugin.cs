@@ -1,8 +1,9 @@
-﻿using AnalyzerPlugin.ViewModels;
+using AnalyzerPlugin.ViewModels;
 using AnalyzerPlugin.Views;
 using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
+using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Plugins.Records;
 namespace AnalyzerPlugin;
 
@@ -17,7 +18,5 @@ public sealed class AnalyzerPlugin<TMod, TModGetter>(
 
     public Control GetControl() => new AnalyzerView(analyzerVM());
     public DockMode DockMode { get; set; } = DockMode.Document;
-    public Dock Dock { get; set; }
-    public double? Size { get; set; }
-    public object GetIcon() => new TextBlock { Text = "✅️️️" };
+    public object Icon => new FAFontIconSource { Glyph = "✅️️️" };
 }

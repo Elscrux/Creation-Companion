@@ -1,7 +1,7 @@
-﻿using CreationEditor.Avalonia.Models;
-using CreationEditor.Avalonia.Services;
+﻿using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
+using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
@@ -15,6 +15,7 @@ public sealed partial class PlacedActionsProvider : IContextActionsProvider {
     private readonly IRecordEditorController _recordEditorController;
     private readonly IRecordController _recordController;
     private readonly IDockFactory _dockFactory;
+    private readonly IDockableDefinition? _viewport;
     private readonly IList<ContextAction> _actions;
 
     public PlacedActionsProvider(
@@ -22,11 +23,13 @@ public sealed partial class PlacedActionsProvider : IContextActionsProvider {
         ILinkCacheProvider linkCacheProvider,
         IRecordEditorController recordEditorController,
         IRecordController recordController,
+        IDockableRegistry dockableRegistry,
         IDockFactory dockFactory) {
         _linkCacheProvider = linkCacheProvider;
         _recordEditorController = recordEditorController;
         _recordController = recordController;
         _dockFactory = dockFactory;
+        _viewport = dockableRegistry.GetByType(DockableTypes.Viewport);
 
         _actions = [
             new ContextAction(context => context is { SelectedRecords: [{ ReferencedRecord.Record: IPlacedObjectGetter }], SelectedAssets.Count: 0 },
@@ -70,7 +73,7 @@ public sealed partial class PlacedActionsProvider : IContextActionsProvider {
         var cellLoadStrategy = context.GetSetting<ICellLoadStrategy>();
 
         try {
-            await _dockFactory.Open(DockElement.Viewport);
+            if (_viewport is not null) await _dockFactory.Open(_viewport);
         } catch (Exception) {
             // ignored
         }

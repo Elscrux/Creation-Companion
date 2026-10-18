@@ -1,6 +1,7 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
+using FluentAvalonia.UI.Controls;
 using LeveledList.ViewModels;
 using LeveledList.Views;
 using Mutagen.Bethesda.Skyrim;
@@ -15,7 +16,5 @@ public sealed class LeveledListPlugin(
 
     public Control GetControl() => new LeveledListView(leveledListVM());
     public DockMode DockMode { get; set; } = DockMode.Document;
-    public Dock Dock { get; set; }
-    public double? Size { get; set; }
-    public object GetIcon() => new TextBlock { Text = "🎚️️️" };
+    public object Icon => new FAFontIconSource { Glyph = "🎚️️️" };
 }

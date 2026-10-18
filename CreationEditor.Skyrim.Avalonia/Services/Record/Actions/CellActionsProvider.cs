@@ -1,7 +1,7 @@
-﻿using CreationEditor.Avalonia.Models;
-using CreationEditor.Avalonia.Services;
+﻿using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
+using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Skyrim.Avalonia.Services.Viewport;
 using Mutagen.Bethesda.Skyrim;
 using ReactiveUI.SourceGenerators;
@@ -9,12 +9,15 @@ namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public sealed partial class CellActionsProvider : IContextActionsProvider {
     private readonly IDockFactory _dockFactory;
+    private readonly IDockableDefinition? _viewport;
     private readonly IList<ContextAction> _actions;
 
     public CellActionsProvider(
         IMenuItemProvider menuItemProvider,
+        IDockableRegistry dockableRegistry,
         IDockFactory dockFactory) {
         _dockFactory = dockFactory;
+        _viewport = dockableRegistry.GetByType(DockableTypes.Viewport);
 
         _actions = [
             new ContextAction(context => context is { SelectedRecords: [{ ReferencedRecord.Record: ICellGetter }], SelectedAssets.Count: 0 },
@@ -34,7 +37,7 @@ public sealed partial class CellActionsProvider : IContextActionsProvider {
         var cellLoadStrategy = context.GetSetting<ICellLoadStrategy>();
 
         try {
-            await _dockFactory.Open(DockElement.Viewport);
+            if (_viewport is not null) await _dockFactory.Open(_viewport);
         } catch (Exception) {
             // ignored
         }

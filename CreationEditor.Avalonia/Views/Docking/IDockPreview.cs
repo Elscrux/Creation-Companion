@@ -6,7 +6,23 @@ using CreationEditor.Avalonia.Constants;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 public interface IDockPreview {
+    /// <summary>
+    /// Preview for a drop that puts the dock into the specified dock.
+    /// </summary>
+    /// <param name="dock"></param>
     void ShowPreview(Dock dock) {
+        AdornerLayer.SetAdorner((Visual) this,
+            new Rectangle {
+                Fill = StandardBrushes.HighlightBrush,
+                IsHitTestVisible = false,
+                Opacity = 0.5,
+            });
+    }
+
+    /// <summary>
+    /// Preview for a drop that converts the dock into a document dock.
+    /// </summary>
+    void ShowDocumentPreview() {
         AdornerLayer.SetAdorner((Visual) this,
             new Rectangle {
                 Fill = StandardBrushes.HighlightBrush,

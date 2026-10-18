@@ -3,13 +3,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached"
-             xmlns:docking="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Docking"
-             xmlns:docking1="clr-namespace:CreationEditor.Avalonia.Models.Settings.Docking"
-             xmlns:models="clr-namespace:CreationEditor.Avalonia.Models"
-             xmlns:converter="clr-namespace:CreationEditor.Avalonia.Converter"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Docking"
+             xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Settings.Docking"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="docking:StartupDocksSettingVM"
+             xmlns:docking="clr-namespace:CreationEditor.Avalonia.Services.Docking"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:DataType="vm:StartupDocksSettingVM"
+             x:Name="Root"
              x:Class="CreationEditor.Avalonia.Views.Setting.Docking.StartupDocksSettingView">
     <StackPanel Spacing="5">
         <controls:FASettingsExpander Header="Startup Docks"
@@ -27,29 +29,29 @@
                       Classes="NoCellSelection Medium Mutable">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Dock Type">
-                        <DataTemplate DataType="docking1:StartupDock">
-                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.StartupDockTypes}"
-                                      SelectedItem="{Binding DockElement}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate DataType="models:DockElement">
-                                        <TextBlock
-                                            Text="{Binding Converter={x:Static converter:EnumConverters.ToStringWithSpaces}}"/>
+                        <DataTemplate DataType="model:StartupDock">
+                            <ComboBox ItemsSource="{Binding #Root.ViewModel.DockableDefinitions}"
+                                      SelectedValue="{Binding Identifier}"
+                                      SelectedValueBinding="{Binding Type}">
+                                <ComboBox.DataTemplates>
+                                    <DataTemplate DataType="docking:IDockableDefinition">
+                                        <TextBlock Text="{Binding Header}"/>
                                     </DataTemplate>
-                                </ComboBox.ItemTemplate>
+                                </ComboBox.DataTemplates>
                             </ComboBox>
                         </DataTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Header="Dock Mode">
-                        <DataTemplate DataType="docking1:StartupDock">
-                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockModeTypes}"
+                        <DataTemplate DataType="model:StartupDock">
+                            <ComboBox ItemsSource="{x:Static vm:StartupDocksSettingVM.DockModeTypes}"
                                       SelectedItem="{Binding DockMode}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Header="Dock Layout">
-                        <DataTemplate DataType="docking1:StartupDock">
-                            <ComboBox ItemsSource="{x:Static docking:StartupDocksSettingVM.DockTypes}"
+                        <DataTemplate DataType="model:StartupDock">
+                            <ComboBox ItemsSource="{x:Static vm:StartupDocksSettingVM.DockTypes}"
                                       SelectedItem="{Binding Dock}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn>

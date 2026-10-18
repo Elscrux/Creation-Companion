@@ -15,9 +15,7 @@ public abstract partial class TabbedDockVM : DockContainerVM {
 
     public abstract DockMode DockMode { get; }
 
-    protected TabbedDockVM(DockContainerVM dockParent) {
-        DockParent = dockParent;
-    }
+    protected TabbedDockVM(DockContainerVM dockParent) => DockParent = dockParent;
 
     [ReactiveCommand]
     private void Activate(IDockedItem tab) {

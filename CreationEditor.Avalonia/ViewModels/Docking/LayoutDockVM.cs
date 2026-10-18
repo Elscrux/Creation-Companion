@@ -27,7 +27,7 @@ public sealed class LayoutDockVM : DockContainerVM {
                         break;
                     // Found docked item
                     case DockedControl dockedControl:
-                        yield return dockedControl;
+                        yield return dockedControl.DockedItem;
 
                         break;
                 }
@@ -45,7 +45,7 @@ public sealed class LayoutDockVM : DockContainerVM {
                     // Found matching docked item
                     case DockedControl dockedControl when ReferenceEquals(dockedControl.Control, control):
                         dockedControl.Focus();
-                        outDock = dockedControl;
+                        outDock = dockedControl.DockedItem;
                         return true;
                     // Found dock container
                     case { DataContext: DockContainerVM dockableVM }:
@@ -60,7 +60,9 @@ public sealed class LayoutDockVM : DockContainerVM {
                 foreach (var layoutChild in LayoutGrid.Children) {
                     if (layoutChild.DataContext is not DockContainerVM dockContainerVM
                      || layoutChild.DataContext == this
-                     || !dockContainerVM.TryGetDock(control, out var dock)) continue;
+                     || !dockContainerVM.TryGetDock(control, out var dock)) {
+                        continue;
+                    }
 
                     outDock = dock;
                     return true;
@@ -95,6 +97,7 @@ public sealed class LayoutDockVM : DockContainerVM {
             case DockMode.Side:
                 break;
             case null:
+            case DockMode.Floating:
             case DockMode.Layout:
                 AddDockedControl(dockedItem, config);
                 break;
@@ -120,6 +123,26 @@ public sealed class LayoutDockVM : DockContainerVM {
         }
     }
 
+    /// <summary>
+    /// Converts a layout docked control into a document dock, containing the existing item
+    /// and the given dragged items as document tabs. The document dock replaces the docked
+    /// control at its previous grid position.
+    /// </summary>
+    public void ConvertToDocumentDock(DockedControl existingControl, IReadOnlyList<IDockedItem> draggedItems) {
+        using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
+            var documentDockVM = new DocumentDockVM(this);
+
+            // The existing item becomes the first tab, the dragged items are appended in order
+            documentDockVM.Add(existingControl.DockedItem, DockConfig.Default);
+            foreach (var item in draggedItems) {
+                documentDockVM.Add(item, DockConfig.Default);
+            }
+
+            // Replace the docked control at its previous grid position
+            LayoutGrid.Replace(existingControl, new DocumentDock(documentDockVM));
+        }
+    }
+
     private void AddDockedControl(IDockedItem dockedItem, DockConfig config) {
         using ((this as IDockObject).DockRoot.CleanUpLock.Lock()) {
             switch (LayoutGrid.Children) {
@@ -135,7 +158,7 @@ public sealed class LayoutDockVM : DockContainerVM {
                     // Remove docked control
                     if (LayoutGrid.Remove(dockedControl)) {
                         // Add layout grid instead
-                        var convertedLayoutDock = new LayoutDockVM(dockedControl, this);
+                        var convertedLayoutDock = new LayoutDockVM(dockedControl.DockedItem, this);
                         LayoutGrid.Add(convertedLayoutDock.LayoutGrid, DockConfig.Default);
                     }
                     break;
@@ -176,7 +199,9 @@ public sealed class LayoutDockVM : DockContainerVM {
             if (child.DataContext is not DockContainerVM childVM || childVM == this) continue;
 
             // Recursively clean all children
-            while (childVM.CleanUp()) anyChanges = true;
+            while (childVM.CleanUp()) {
+                anyChanges = true;
+            }
 
             // Flatten dock grids with only one child
             if (child is DockGrid { Children: [DockGrid { DataContext: DockContainerVM grandchildVM } grandchildGrid] } childGrid) {

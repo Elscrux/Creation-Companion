@@ -4,12 +4,10 @@ using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.VisualTree;
-using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Docking;
-using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Integrations;
 using CreationEditor.Avalonia.ViewModels.Mod;
@@ -21,9 +19,9 @@ using CreationEditor.Avalonia.Views.Setting;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Mod.Save;
 using CreationEditor.Services.Plugin;
-using DynamicData.Binding;
 using FluentAvalonia.UI.Windowing;
 using Noggog;
+using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 namespace CreationEditor.Avalonia.ViewModels;
 
@@ -32,6 +30,7 @@ public sealed partial class MainVM : ViewModel {
     private readonly Func<IntegrationsVM> _integrationsVMFactory;
     private readonly IEditorEnvironment _editorEnvironment;
     private readonly IDockFactory _dockFactory;
+    private readonly IDockableRegistry _dockableRegistry;
     private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IFAApplicationSplashScreen _splashScreen;
     private readonly IModSaveService _modSaveService;
@@ -47,7 +46,6 @@ public sealed partial class MainVM : ViewModel {
 
     public IDockingManagerService DockingManagerService { get; }
     public IPluginService? PluginService { get; }
-    public IObservableCollection<IMenuPluginDefinition> MenuBarPlugins { get; } = new ObservableCollectionExtended<IMenuPluginDefinition>();
     public IObservableCollection<string> Actions { get; } = new ObservableCollectionExtended<string> {
         "Save",
         "Save As",
@@ -74,6 +72,7 @@ public sealed partial class MainVM : ViewModel {
         "Create Record in New Tab",
         "Create Record in New Window",
     };
+    [Reactive] public partial IReadOnlyList<MenuItemVM> MenuItems { get; set; }
 
     public MainVM(
         Func<ISettingsVM> settingsVMFactory,
@@ -85,6 +84,7 @@ public sealed partial class MainVM : ViewModel {
         IDataSourceSelectionVM dataSourceSelectionVM,
         IDockingManagerService dockingManagerService,
         IDockFactory dockFactory,
+        IDockableRegistry dockableRegistry,
         IMainWindowProvider mainWindowProvider,
         IPluginService? pluginService,
         IModSaveService modSaveService,
@@ -94,6 +94,7 @@ public sealed partial class MainVM : ViewModel {
         _integrationsVMFactory = integrationsVMFactory;
         _editorEnvironment = editorEnvironment;
         _dockFactory = dockFactory;
+        _dockableRegistry = dockableRegistry;
         _mainWindowProvider = mainWindowProvider;
         _modSaveService = modSaveService;
         _fileSystem = fileSystem;
@@ -110,12 +111,20 @@ public sealed partial class MainVM : ViewModel {
         if (mainWindowProvider.Current is {} currentWindow) OnMainWindowChanged(currentWindow);
 
         PluginService?.PluginsRegistered
-            .Subscribe(newPlugins => MenuBarPlugins.AddRange(newPlugins.OfType<IMenuPluginDefinition>()))
+            .ObserveOnGui()
+            .Subscribe(_ => MenuItems = BuildMenuItems())
+            .DisposeWith(this);
+
+        PluginService?.PluginsUnregistered
+            .ObserveOnGui()
+            .Subscribe(_ => MenuItems = BuildMenuItems())
             .DisposeWith(this);
 
         WindowTitleObs = _editorEnvironment.ActiveModChanged
             .Select(activeMod => $"{BaseWindowTitle} - {activeMod}")
             .StartWith(BaseWindowTitle);
+
+        MenuItems = BuildMenuItems();
     }
 
     private void OnMainWindowChanged(MainWindow window) {
@@ -127,19 +136,6 @@ public sealed partial class MainVM : ViewModel {
         }
 
         window.SplashScreen = _splashScreen;
-    }
-
-    [ReactiveCommand]
-    private void OpenPlugin(IMenuPluginDefinition plugin) {
-        DockingManagerService.AddControl(plugin.GetControl(),
-            new DockConfig {
-                DockInfo = new DockInfo {
-                    Header = plugin.Name,
-                    Size = plugin.Size,
-                },
-                DockMode = plugin.DockMode,
-                Dock = plugin.Dock,
-            });
     }
 
     [ReactiveCommand]
@@ -187,7 +183,52 @@ public sealed partial class MainVM : ViewModel {
     }
 
     [ReactiveCommand]
-    private Task OpenDockElement(DockElement element) => _dockFactory.Open(element);
+    private Task OpenDockable(IDockableDefinition dockable) => _dockFactory.Open(dockable);
+
+    private IReadOnlyList<MenuItemVM> BuildMenuItems() {
+        var root = new MenuNode(string.Empty);
+        foreach (var definition in _dockableRegistry.Definitions) {
+            // Categories are root based: the first segment becomes a top level menu item, deeper segments become nested submenus
+            var node = root;
+            foreach (var segment in definition.Category.Split('/')) {
+                node = node.GetOrAddChild(segment);
+            }
+            node.Definitions.Add(definition);
+        }
+
+        return [.. root.Children.Select(BuildNode)];
+
+        MenuItemVM BuildNode(MenuNode node) {
+            var children = node.Definitions.Select(CreateItem)
+                .Concat(node.Children.Select(BuildNode))
+                .ToList();
+            return new MenuItemVM(node.Header, children);
+        }
+
+        MenuItemVM CreateItem(IDockableDefinition definition) {
+            return new MenuItemVM(
+                definition.Header,
+                [],
+                definition.Icon,
+                definition.HotKey,
+                ReactiveCommand.Create(() => _dockFactory.OpenFireAndForget(definition)));
+        }
+    }
+
+    private sealed class MenuNode(string header) {
+        public string Header { get; } = header;
+        public List<MenuNode> Children { get; } = [];
+        public List<IDockableDefinition> Definitions { get; } = [];
+
+        public MenuNode GetOrAddChild(string header) {
+            var child = Children.Find(node => node.Header == header);
+            if (child is not null) return child;
+
+            child = new MenuNode(header);
+            Children.Add(child);
+            return child;
+        }
+    }
 
     public bool IsEnvironmentUninitialized() => _editorEnvironment.ActiveMod.ModKey.IsNull;
 }

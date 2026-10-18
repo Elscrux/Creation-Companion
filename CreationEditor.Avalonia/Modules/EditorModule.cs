@@ -6,6 +6,7 @@ public sealed class EditorModule : Module {
         base.Load(builder);
 
         builder.RegisterModule<MainModule>();
+        builder.RegisterModule<DockingModule>();
         builder.RegisterModule<NotificationModule>();
         builder.RegisterModule<QueryModule>();
         builder.RegisterModule<AssetModule>();

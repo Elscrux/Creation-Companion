@@ -20,6 +20,9 @@ public interface IDockedItem : IDockObject, IEquatable<IDockedItem> {
     double? Size { get; set; }
 
     bool CanClose { get; set; }
+
+    string? DockableType { get; }
+
     ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand { get; }
 
     DisposableCounterLock RemovalLock { get; }

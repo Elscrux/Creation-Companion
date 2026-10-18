@@ -25,6 +25,8 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
 
     [Reactive] public partial bool CanClose { get; set; }
     private IObservable<bool> CanCloseObservable => this.WhenAnyValue(x => x.CanClose);
+
+    public string? DockableType { get; }
     public ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand { get; }
 
     public DisposableCounterLock RemovalLock { get; }
@@ -40,9 +42,10 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
         IconSource = info.IconSource;
         Size = info.Size;
         CanClose = info.CanClose;
+        DockableType = info.DockableType;
 
         RemovalLock = new DisposableCounterLock(CheckRemoved);
-        
+
         CloseCommand = ReactiveCommand.Create(Close, CanCloseObservable);
 
         Control.DetachedFromLogicalTree += CheckRemoved;
@@ -60,14 +63,14 @@ public sealed partial class DockedItemVM : ViewModel, IDockedItem {
     private void CheckRemoved() {
         if (RemovalLock.IsLocked()
          || Control.GetValue(Visual.VisualParentProperty) is not null
-         || DockParent.TryGetDock(Control, out _)) return;
+         || DockParent.TryGetDock(Control, out _)) {
+            return;
+        }
 
         _closed.OnNext(this);
         (this as IDockObject).DockRoot.OnDockRemoved(this);
         Control.DetachedFromLogicalTree -= CheckRemoved;
     }
 
-    public bool Equals(IDockedItem? other) {
-        return Id == other?.Id;
-    }
+    public bool Equals(IDockedItem? other) => Id == other?.Id;
 }

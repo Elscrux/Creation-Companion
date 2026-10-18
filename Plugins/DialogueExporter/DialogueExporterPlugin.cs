@@ -1,8 +1,9 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
 using DialogueExporter.ViewModels;
 using DialogueExporter.Views;
+using FluentAvalonia.UI.Controls;
 using Mutagen.Bethesda.Skyrim;
 namespace DialogueExporter;
 
@@ -16,6 +17,5 @@ public sealed class DialogueExporterPlugin(
     public Control GetControl() => new DialogueExporterView(dialogueExporterVM());
     public DockMode DockMode { get; set; } = DockMode.Side;
     public Dock Dock { get; set; } = Dock.Left;
-    public double? Size { get; set; }
-    public object GetIcon() => new TextBlock { Text = "💬️" };
+    public object Icon => new FAFontIconSource { Glyph = "💬️" };
 }

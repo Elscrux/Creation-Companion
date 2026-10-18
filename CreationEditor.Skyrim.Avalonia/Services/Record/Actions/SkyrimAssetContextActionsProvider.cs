@@ -14,10 +14,10 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using CreationEditor.Avalonia.Constants;
-using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Avalonia;
+using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Reference;
@@ -41,6 +41,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     private readonly IFileSystem _fileSystem;
     private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IDockFactory _dockFactory;
+    private readonly IDockableDefinition? _assetBrowser;
     private readonly IModelModificationService _modelModificationService;
     private readonly ITaskDialogProvider _taskDialogProvider;
     private readonly IRecordPrefixService _recordPrefixService;
@@ -55,6 +56,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         IReferenceBrowserVMFactory referenceBrowserVMFactory,
         IFileSystem fileSystem,
         IMainWindowProvider mainWindowProvider,
+        IDockableRegistry dockableRegistry,
         IDockFactory dockFactory,
         IModelModificationService modelModificationService,
         ITaskDialogProvider taskDialogProvider,
@@ -69,6 +71,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         _fileSystem = fileSystem;
         _mainWindowProvider = mainWindowProvider;
         _dockFactory = dockFactory;
+        _assetBrowser = dockableRegistry.GetByType(DockableTypes.AssetBrowser);
         _modelModificationService = modelModificationService;
         _taskDialogProvider = taskDialogProvider;
         _recordPrefixService = recordPrefixService;
@@ -159,7 +162,9 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
     private async Task GoToAsset(SelectedListContext context) {
         if (context.SelectedRecords[0].ReferencedRecord.Record is not IModeledGetter { Model.File.DataRelativePath: var dataRelativePath }) return;
 
-        var assetBrowser = await _dockFactory.GetOrOpenDock(DockElement.AssetBrowser);
+        if (_assetBrowser is null) return;
+
+        var assetBrowser = await _dockFactory.GetOrOpenDock(_assetBrowser);
         if (assetBrowser.DataContext is not IAssetBrowserVM assetBrowserVM) return;
 
         await assetBrowserVM.MoveToPathCommand.Execute(dataRelativePath);

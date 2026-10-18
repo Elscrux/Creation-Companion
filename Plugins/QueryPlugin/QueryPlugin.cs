@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Plugin;
@@ -18,12 +18,10 @@ public sealed class QueryPlugin(
     public string Name => "Query";
     public string Description => "Query records.";
     public Guid Guid => new("e07d38ba-10fd-44b9-9a91-f87095ef316b");
-    public KeyGesture KeyGesture => new(Key.Q, KeyModifiers.Control);
+    public KeyGesture HotKey => new(Key.Q, KeyModifiers.Control);
     public DockMode DockMode { get; set; } = DockMode.Document;
-    public Dock Dock { get; set; }
-    public double? Size { get; set; }
 
     public Control GetControl() => new QueryPluginView(queryPluginVMFactory());
 
-    public object GetIcon() => new FASymbolIcon { Symbol = FASymbol.List };
+    public object Icon => FASymbol.List;
 }

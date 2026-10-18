@@ -15,7 +15,7 @@ using ReactiveUI.Avalonia;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 [DebuggerDisplay("Header = {Header}")]
-public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedItem, IDockPreview {
+public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockPreview {
     public IDockedItem DockedItem { get; } = null!;
 
     public Guid Id => DockedItem.Id;
@@ -51,6 +51,8 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         set => DockedItem.CanClose = value;
     }
 
+    public string? DockableType => DockedItem.DockableType;
+
     public ReactiveCommand<Unit, IObservable<IDockedItem>> CloseCommand => DockedItem.CloseCommand;
 
     public DisposableCounterLock RemovalLock => DockedItem.RemovalLock;
@@ -84,9 +86,11 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         if (RemovalLock.IsLocked()
          || GetValue(VisualParentProperty) is not null
          || Control.GetValue(VisualParentProperty) is not null
-         || DockParent.TryGetDock(Control, out _)) return;
+         || DockParent.TryGetDock(Control, out _)) {
+            return;
+        }
 
-        (this as IDockObject).DockRoot.OnDockRemoved(this);
+        DockedItem.DockRoot.OnDockRemoved(DockedItem);
     }
 
     public void ShowPreview(Dock dock) {
@@ -124,7 +128,5 @@ public partial class DockedControl : ReactiveUserControl<IDockedItem>, IDockedIt
         AdornerLayer.SetAdorner(this, grid);
     }
 
-    public bool Equals(IDockedItem? other) {
-        return Id == other?.Id;
-    }
+    public bool Equals(IDockedItem? other) => Id == other?.Id;
 }

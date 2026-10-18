@@ -1,173 +1,88 @@
-using System.IO.Abstractions;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using CreationEditor.Avalonia.Models;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
-using CreationEditor.Avalonia.Services.Record.Browser;
-using CreationEditor.Avalonia.Services.Viewport;
-using CreationEditor.Avalonia.ViewModels.Asset.Browser;
-using CreationEditor.Avalonia.ViewModels.Logging;
-using CreationEditor.Avalonia.ViewModels.Record.Browser;
-using CreationEditor.Avalonia.ViewModels.Scripting;
-using CreationEditor.Avalonia.Views.Asset.Browser;
-using CreationEditor.Avalonia.Views.Logging;
-using CreationEditor.Avalonia.Views.Record;
-using CreationEditor.Avalonia.Views.Scripting;
+using FluentAvalonia.UI.Controls;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services;
 
-using DockResult = (Func<Control> GetControl, DockConfig DockConfig);
-
 public sealed class DockFactory(
-    Func<ILogVM> logVMFactory,
-    Func<IRecordBrowserVM> recordBrowserVMFactory,
-    Func<IAssetBrowserVM> assetBrowserVMFactory,
-    Func<IScriptVM> scriptVMFactory,
-    ILogger logger,
-    IFileSystem fileSystem,
-    IViewportFactory viewportFactory,
     IDockingManagerService dockingManagerService,
-    ICellBrowserFactory cellBrowserFactory)
+    ILogger logger)
     : IDockFactory {
-    private bool _viewportCreated;
-
-    public void OpenFireAndForget(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+    public void OpenFireAndForget(IDockableDefinition dockable, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
         Task.Run(async () => {
-                var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
-                if (dockResult.HasValue) {
-                    Dispatcher.UIThread.Post(() => dockingManagerService.AddControl(dockResult.Value.GetControl(), dockResult.Value.DockConfig));
-                } else {
-                    throw new InvalidOperationException($"Failed to open dock {dockElement}");
-                }
+                var dockResult = await CreateDockConfig(dockable, dockMode, dock, parameter)
+                 ?? throw new InvalidOperationException($"Failed to open dock {dockable.Type}");
+
+                Dispatcher.UIThread.Post(() => dockingManagerService.AddControl(dockResult.Control, dockResult.Config));
             })
-            .FireAndForget(e => logger.Here().Warning(e, "Couldn't open dock {DockElement}: {Message}", dockElement, e));
+            .FireAndForget(e => logger.Here().Warning(e, "Couldn't open dock {Identifier}: {Message}", dockable.Type, e));
     }
 
-    public Task Open(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        return Task.Run(async () => await CreateDock(dockElement, dockMode, dock, parameter));
+    public Task Open(IDockableDefinition dockable, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        return Task.Run(async () => await CreateDock(dockable, dockMode, dock, parameter));
     }
 
-    public Control? TryGetDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        return dockElement switch {
-            DockElement.Log => dockingManagerService.TryGetControl<LogView>(),
-            DockElement.RecordBrowser => dockingManagerService.TryGetControl<RecordBrowser>(),
-            DockElement.CellBrowser => dockingManagerService.TryGetControl<ICellBrowser>() as Control,
-            DockElement.AssetBrowser => dockingManagerService.TryGetControl<AssetBrowser>(),
-            DockElement.ScriptEditor => dockingManagerService.TryGetControl<ScriptEditor>(),
-            DockElement.Viewport => dockingManagerService.TryGetControl<IViewport>() as Control,
-            _ => throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null),
-        };
+    public Control? TryGetDock(IDockableDefinition dockable) {
+        return dockingManagerService.Root.IterateAllChildren()
+            .OfType<IDockedItem>()
+            .FirstOrDefault(item => item.DockableType == dockable.Type)
+            ?.Control;
     }
 
-    public Task<Control> GetOrOpenDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        var openDock = TryGetDock(dockElement);
-        if (openDock is null) return CreateDock(dockElement);
+    public Task<Control> GetOrOpenDock(IDockableDefinition dockable, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        var openDock = TryGetDock(dockable);
+        if (openDock is null) return CreateDock(dockable, dockMode, dock, parameter);
 
-        dockingManagerService.Focus(openDock);
+        Dispatcher.UIThread.Post(() => dockingManagerService.Focus(openDock));
         return Task.FromResult(openDock);
     }
 
-    private async Task<Control> CreateDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        var dockResult = await GetDock(dockElement, dockMode, dock, parameter);
-        if (!dockResult.HasValue) throw new InvalidOperationException($"Failed to open dock {dockElement}");
+    private readonly Lock _dockCreationLock = new();
+
+    private async Task<Control> CreateDock(IDockableDefinition dockable, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
+        var dockResult = await CreateDockConfig(dockable, dockMode, dock, parameter)
+         ?? throw new InvalidOperationException($"Failed to open dock {dockable.Type}");
 
         return await Dispatcher.UIThread.InvokeAsync(() => {
-            var control = dockResult.Value.GetControl();
-            dockingManagerService.AddControl(control, dockResult.Value.DockConfig);
-            return control;
+            // Check if the dock was already created by someone else while we were waiting for the UI thread
+            lock (_dockCreationLock) {
+                var openDock = TryGetDock(dockable);
+                if (openDock is not null) {
+                    dockingManagerService.Focus(openDock);
+                    return openDock;
+                }
+
+                dockingManagerService.AddControl(dockResult.Control, dockResult.Config);
+            }
+            return dockResult.Control;
         });
     }
 
-    private async Task<DockResult?> GetDock(DockElement dockElement, DockMode? dockMode = null, Dock? dock = null, object? parameter = null) {
-        Func<Control> getControl;
-        DockConfig dockConfig;
+    private async Task<(Control Control, DockConfig Config)?> CreateDockConfig(IDockableDefinition dockable, DockMode? dockMode, Dock? dock, object? parameter) {
+        // Controls must be created on the UI thread - make sure heavy work inside CreateControl is offloaded to a background thread
+        var control = await Dispatcher.UIThread.InvokeAsync(() => dockable.CreateControl(parameter));
+        if (control is null) return null;
 
-        switch (dockElement) {
-            case DockElement.Log:
-                var logVM = logVMFactory();
-                getControl = () => new LogView(logVM);
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Log",
-                        Size = 150,
-                    },
-                    Dock = Dock.Bottom,
-                    DockMode = DockMode.Side,
-                };
-                break;
-            case DockElement.RecordBrowser:
-                var recordBrowserVM = recordBrowserVMFactory();
-                getControl = () => new RecordBrowser(recordBrowserVM);
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Record Browser",
-                        Size = 500,
-                    },
-                    Dock = Dock.Left,
-                    DockMode = DockMode.Side,
-                    GridSize = new GridLength(3, GridUnitType.Star),
-                };
-                break;
-            case DockElement.CellBrowser:
-                getControl = cellBrowserFactory.GetBrowser;
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Cell Browser",
-                        Size = 400,
-                    },
-                    Dock = Dock.Left,
-                    DockMode = DockMode.Side,
-                };
-                break;
-            case DockElement.AssetBrowser:
-                var assetBrowserVM = await Dispatcher.UIThread.InvokeAsync(assetBrowserVMFactory);
-                getControl = () => new AssetBrowser(assetBrowserVM, parameter as IDataSourceLink);
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Asset Browser",
-                        Size = 400,
-                    },
-                    Dock = Dock.Left,
-                    DockMode = DockMode.Side,
-                };
-                break;
-            case DockElement.ScriptEditor:
-                var vm = scriptVMFactory();
-                getControl = () => new ScriptEditor(vm);
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Script Editor",
-                        Size = 300,
-                    },
-                    Dock = Dock.Left,
-                    DockMode = DockMode.Document,
-                };
-                break;
-            case DockElement.Viewport:
-                if (_viewportCreated && !viewportFactory.IsMultiInstanceCapable) return null;
+        var config = new DockConfig {
+            DockInfo = new DockInfo {
+                Header = dockable.Header,
+                IconSource = dockable.Icon switch {
+                    null => null,
+                    FASymbol symbol => new FASymbolIconSource { Symbol = symbol },
+                    _ => new FAFontIconSource { Glyph = dockable.Icon.ToString() },
+                },
+                Size = dockable.Size,
+                CanClose = dockable.CanClose,
+                DockableType = dockable.Type,
+            },
+            DockMode = dockMode ?? dockable.DockMode,
+            Dock = dock ?? dockable.Dock,
+            GridSize = dockable.GridSize,
+        };
 
-                getControl = await viewportFactory.CreateViewport();
-                _viewportCreated = true;
-
-                dockConfig = new DockConfig {
-                    DockInfo = new DockInfo {
-                        Header = "Viewport",
-                        CanClose = viewportFactory.IsMultiInstanceCapable,
-                    },
-                    Dock = Dock.Right,
-                    DockMode = DockMode.Layout,
-                    GridSize = new GridLength(3, GridUnitType.Star),
-                };
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(dockElement), dockElement, null);
-        }
-
-        if (dockMode is not null) dockConfig = dockConfig with { DockMode = dockMode.Value };
-        if (dock is not null) dockConfig = dockConfig with { Dock = dock.Value };
-
-        return (getControl, dockConfig);
+        return (control, config);
     }
 }

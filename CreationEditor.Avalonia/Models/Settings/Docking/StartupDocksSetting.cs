@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
+using CreationEditor.Avalonia.Services.Docking;
 using CreationEditor.Services.Settings;
 using Newtonsoft.Json;
 namespace CreationEditor.Avalonia.Models.Settings.Docking;
@@ -7,17 +8,17 @@ namespace CreationEditor.Avalonia.Models.Settings.Docking;
 public sealed class StartupDocksSetting(IList<StartupDock> docks) : ISettingModel {
     public static readonly StartupDocksSetting Default = new([
         new StartupDock {
-            DockElement = DockElement.RecordBrowser,
+            Identifier = DockableTypes.RecordBrowser,
             DockMode = DockMode.Side,
             Dock = Dock.Left,
         },
         new StartupDock {
-            DockElement = DockElement.CellBrowser,
+            Identifier = DockableTypes.CellBrowser,
             DockMode = DockMode.Side,
             Dock = Dock.Right,
         },
         new StartupDock {
-            DockElement = DockElement.Log,
+            Identifier = DockableTypes.Log,
             DockMode = DockMode.Side,
             Dock = Dock.Bottom,
         },

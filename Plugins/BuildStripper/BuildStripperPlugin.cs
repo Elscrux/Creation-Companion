@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using BuildStripper.ViewModels;
 using BuildStripper.Views;
 using CreationEditor.Avalonia.Models.Docking;
@@ -20,7 +20,5 @@ public sealed class BuildStripperPlugin(
     public Control GetControl() => new BuildStripperView(buildStripperFactory());
 
     public DockMode DockMode { get; set; } = DockMode.Document;
-    public Dock Dock { get; set; }
-    public double? Size { get; set; }
-    public object GetIcon() => new FAFontIcon { Glyph = "✂️" };
+    public object Icon => new FAFontIconSource { Glyph = "✂️" };
 }

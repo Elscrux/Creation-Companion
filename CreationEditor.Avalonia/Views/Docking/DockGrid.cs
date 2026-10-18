@@ -6,8 +6,8 @@ using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Views.Docking;
 
 public sealed class DockGrid : Grid {
-    private double MinLayoutSize { get; set; } = 50;
-    private double GridSplitterSize { get; set; } = 5;
+    public double MinLayoutSize { get; private set; } = 50;
+    public double GridSplitterSize { get; private set; } = 5;
 
     public DockGrid(IDockObject dataContext) {
         DataContext = dataContext;
@@ -109,6 +109,21 @@ public sealed class DockGrid : Grid {
                 throw new ArgumentOutOfRangeException(nameof(config));
         }
 
+    }
+
+    /// <summary>
+    /// Replaces a control in the grid, keeping its grid position and spans.
+    /// </summary>
+    public void Replace(Control oldControl, Control newControl) {
+        var index = Children.IndexOf(oldControl);
+        if (index < 0) return;
+
+        SetRow(newControl, GetRow(oldControl));
+        SetColumn(newControl, GetColumn(oldControl));
+        SetRowSpan(newControl, GetRowSpan(oldControl));
+        SetColumnSpan(newControl, GetColumnSpan(oldControl));
+
+        Children[index] = newControl;
     }
 
     public bool Remove(Control control) {

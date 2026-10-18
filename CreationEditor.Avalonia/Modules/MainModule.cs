@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using CreationEditor.Avalonia.Models.Record.List.ExtraColumns;
-using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
@@ -226,10 +225,6 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         // Factory
-        builder.RegisterType<DockFactory>()
-            .As<IDockFactory>()
-            .SingleInstance();
-
         builder.RegisterType<BSEViewportFactory>()
             .As<IViewportFactory>()
             .SingleInstance();
