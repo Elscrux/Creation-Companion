@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Linq;
-using CreationEditor.Avalonia.Models;
+using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services;
 using CreationEditor.Avalonia.Services.Avalonia;
@@ -117,6 +119,13 @@ public sealed partial class MainVM : ViewModel {
     }
 
     private void OnMainWindowChanged(MainWindow window) {
+        // The splash screen content view is reused across UI restarts; detach it from the
+        // previous window's visual tree before assigning it to the new one
+        if (_splashScreen.SplashScreenContent is Control content
+         && content.GetVisualParent() is ContentPresenter presenter) {
+            presenter.Content = null;
+        }
+
         window.SplashScreen = _splashScreen;
     }
 

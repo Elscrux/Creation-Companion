@@ -1,4 +1,6 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.VisualTree;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using ReactiveUI;
@@ -44,7 +46,27 @@ public sealed class DockingManagerService : ReactiveObject, IDockingManagerServi
         }
     }
 
-    public void SaveLayout() {}
+    public void DetachControls() {
+        // The central layout subtree is moved to the new window as a whole, keeping its view instances and bindings intact
+        DetachFromVisualParent(Root.Layout.LayoutGrid);
 
-    public void LoadLayout() {}
+        // Side docked items are re-wrapped by the fresh side dock views of the new window,
+        // so their controls are detached from the old wrappers individually
+        foreach (var side in new[] { Root.TopSide, Root.BottomSide, Root.LeftSide, Root.RightSide }) {
+            foreach (var tab in side.Tabs) {
+                DetachFromVisualParent(tab.Control);
+            }
+        }
+    }
+
+    private static void DetachFromVisualParent(Control control) {
+        switch (control.GetVisualParent()) {
+            case ContentPresenter presenter:
+                presenter.Content = null;
+                break;
+            case Panel panel:
+                panel.Children.Remove(control);
+                break;
+        }
+    }
 }

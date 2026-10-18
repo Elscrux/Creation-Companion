@@ -10,6 +10,7 @@ public sealed class NotificationModule : Module {
             .SingleInstance();
 
         builder.RegisterType<NotificationVM>()
-            .As<INotificationVM>();
+            .As<INotificationVM>()
+            .SingleInstance();
     }
 }

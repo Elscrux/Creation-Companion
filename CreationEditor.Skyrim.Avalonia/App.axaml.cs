@@ -1,22 +1,7 @@
-using System.IO.Abstractions;
-using System.Reactive.Subjects;
 using Autofac;
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using CommandLine;
-using CreationEditor.Avalonia.Modules;
-using CreationEditor.Avalonia.Services.Docking;
-using CreationEditor.Avalonia.ViewModels;
-using CreationEditor.Avalonia.Views;
-using CreationEditor.Services.Lifecycle;
-using CreationEditor.Services.Mutagen;
-using CreationEditor.Services.Plugin;
-using CreationEditor.Skyrim.Avalonia.Modules;
-using CreationEditor.Skyrim.Avalonia.Options;
-using Mutagen.Bethesda.Autofac;
-using Noggog;
-using Serilog;
+using CreationEditor.Avalonia.Services.Exceptions;
 namespace CreationEditor.Skyrim.Avalonia;
 
 public class App : Application {
@@ -25,68 +10,8 @@ public class App : Application {
     }
 
     public override void OnFrameworkInitializationCompleted() {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
-            var globalOptionsParsed = Parser.Default.ParseArguments<GlobalOptions>(desktop.Args);
-
-            var builder = new ContainerBuilder();
-
-            builder.RegisterModule<MutagenModule>();
-            builder.RegisterModule<EditorModule>();
-            builder.RegisterModule<SkyrimModule>();
-
-            if (globalOptionsParsed.Value?.GameDirectory is not null) {
-                builder.Register<InjectedGameDirectoryLookup>(x => {
-                        var fileSystem = x.Resolve<IFileSystem>();
-                        return new InjectedGameDirectoryLookup(fileSystem, globalOptionsParsed.Value.GameDirectory);
-                    })
-                    .SingleInstance()
-                    .AsImplementedInterfaces();
-            }
-
-            LoadPluginModules(builder);
-
-            var window = new MainWindow();
-            builder.RegisterInstance(window).As<MainWindow>();
-
-            var dockingManagerService = new DockingManagerService();
-            builder.RegisterInstance(dockingManagerService).As<IDockingManagerService>();
-
-            var container = builder.Build();
-
-            // Do startup
-            var lifecycleStartup = container.Resolve<ILifecycleStartup>();
-            var logger = container.Resolve<ILogger>();
-            logger.Here().Information("Starting the application");
-            lifecycleStartup.PreStartup();
-
-            logger.Here().Information("Initializing the UI");
-            window.ViewModel = container.Resolve<MainVM>();
-            desktop.MainWindow = window;
-
-            desktop.Exit += (_, _) => lifecycleStartup.Exit();
-
-            Task.Run(() => lifecycleStartup.PostStartupAsync(new Subject<string>()));
-        }
+        Program.Host.Container.Resolve<UiCrashHandler>().Attach();
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private static void LoadPluginModules(ContainerBuilder builder) {
-        // Load plugins extension modules to include in the base container
-        // TODO: Maybe show a confirmation dialog to select which plugins to load?
-        var pluginService = new PluginsFolderAssemblyProvider(new FileSystem());
-
-        // Note that loading the assemblies alone can lead to
-        // additional registrations being made through assembly scanning
-        var extensionModules = pluginService.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(type => type.InheritsFrom(typeof(ExtensionModule)))
-            .Select(Activator.CreateInstance)
-            .OfType<ExtensionModule>()
-            .ToList();
-
-        foreach (var extensionModule in extensionModules) {
-            builder.RegisterModule(extensionModule);
-        }
     }
 }

@@ -7,6 +7,7 @@ using CreationEditor.Avalonia.Services.Asset;
 using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
+using CreationEditor.Avalonia.Services.Exceptions;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.Prefix;
@@ -219,6 +220,9 @@ public sealed class MainModule : Module {
 
         builder.RegisterType<MainWindowProvider>()
             .As<IMainWindowProvider>()
+            .SingleInstance();
+
+        builder.RegisterType<UiCrashHandler>()
             .SingleInstance();
 
         // Factory

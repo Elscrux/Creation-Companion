@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 namespace CreationEditor.Avalonia.Services.Docking;
@@ -38,6 +38,13 @@ public interface IDockingManagerService {
     void Focus(Control control);
 
     /// <summary>
+    /// Detaches all docked controls from their visual parents in case the ui needs to be restarted.
+    /// The controls are not removed from the docking manager, they are just detached from the visual tree.
+    /// The docking state is kept.
+    /// </summary>
+    void DetachControls();
+
+    /// <summary>
     /// Emits when a new dock is opened
     /// </summary>
     IObservable<IDockedItem> Opened { get; }
@@ -45,7 +52,4 @@ public interface IDockingManagerService {
     /// Emits when a dock was closed
     /// </summary>
     IObservable<IDockedItem> Closed { get; }
-
-    void SaveLayout();
-    void LoadLayout();
 }
