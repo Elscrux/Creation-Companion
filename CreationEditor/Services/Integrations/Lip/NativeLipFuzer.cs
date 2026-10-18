@@ -17,14 +17,8 @@ public sealed class CustomFuzPackagerRuntimeRuntimeConfig : IFuzGeneratorRuntime
         ".xwm",
         true);
 
-    public static BoolConfigOption OnlyGenerateIfLipExistsOption { get; } = new(
-        "Only Generate If Lip Exists",
-        "Fuz files will only be generated if a corresponding lip file exists",
-        true);
-
     public IReadOnlyList<IConfigOption> Options { get; } = [
         AudioExtensionOption,
-        OnlyGenerateIfLipExistsOption,
     ];
 }
 
@@ -50,50 +44,44 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
     public string FuzeFileExtension => ".fuz";
 
     public Task<IntegrationRunResult> PackageFuz(string dir, ConfigValues config, CancellationToken token) {
-        var onlyGenerateIfLipExists = config.Get(CustomFuzPackagerRuntimeRuntimeConfig.OnlyGenerateIfLipExistsOption);
         var audioExtension = config.TryGet(CustomFuzPackagerRuntimeRuntimeConfig.AudioExtensionOption)
          ?? CustomFuzPackagerRuntimeRuntimeConfig.AudioExtensionOption.DefaultValue;
 
         fileSystem.Directory.EnumerateFiles(dir, "*" + audioExtension, SearchOption.AllDirectories)
             .AsParallel()
             .WithCancellation(token)
-            .ForAll(audioFilePath => PackageFuz(audioFilePath, onlyGenerateIfLipExists));
+            .ForAll(PackageFuz);
 
         return Task.FromResult(new IntegrationRunResult(true, "Fuz files packaged successfully"));
     }
 
-    public Task<IntegrationRunResult> PackageFuz(DataSourceFileLink file, ConfigValues config, CancellationToken token) {
-        var onlyGenerateIfLipExists = config.Get(CustomFuzPackagerRuntimeRuntimeConfig.OnlyGenerateIfLipExistsOption);
-        PackageFuz(file.FullPath, onlyGenerateIfLipExists);
+    public Task<IntegrationRunResult> PackageFuz(DataSourceFileLink file, ConfigValues config, CancellationToken token) =>
+        Task.FromResult(new IntegrationRunResult(true, "Fuz file packaged successfully"));
 
-        return Task.FromResult(new IntegrationRunResult(true, "Fuz file packaged successfully"));
-    }
-
-    private void PackageFuz(string audioFilePath, bool onlyGenerateIfLipExists) {
+    public void PackageFuz(string audioFilePath) {
         var lipFile = fileSystem.Path.ChangeExtension(audioFilePath, LipFileExtension);
         if (!fileSystem.File.Exists(lipFile)) {
-            if (onlyGenerateIfLipExists) return;
-
-            logger.Here().Warning("Lip file does not exist for audio file {AudioFilePath}", audioFilePath);
+            logger.Here().Information("Lip file does not exist for audio file {AudioFilePath}, skipping fuz packaging", audioFilePath);
+            return;
         }
 
         var fuzPath = fileSystem.Path.ChangeExtension(audioFilePath, FuzeFileExtension);
 
-        using var fileStream = fileSystem.File.OpenWrite(fuzPath);
+        using var fileStream = fileSystem.File.Create(fuzPath);
 
         // Write header
         fileStream.Write(FuzeMagicStringBytes, 0, FuzeMagicStringBytes.Length);
         fileStream.Write(FuzeVersion, 0, FuzeVersion.Length);
 
         // Write lip
-        var bytes = BitConverter.GetBytes((uint) lipFile.Length);
-        fileStream.Write(bytes, 0, bytes.Length);
-        var lipBytes = fileSystem.File.ReadAllBytes(lipFile);
-        fileStream.Write(lipBytes, 0, lipBytes.Length);
+        using var lipStream = fileSystem.File.OpenRead(lipFile);
+        var bytes = BitConverter.GetBytes((uint) lipStream.Length);
+        fileStream.Write(bytes);
+        lipStream.CopyTo(fileStream);
 
         // Write audio
-        bytes = fileSystem.File.ReadAllBytes(audioFilePath);
-        fileStream.Write(bytes, 0, bytes.Length);
+        using var audioStream = fileSystem.File.OpenRead(lipFile);
+        audioStream.CopyTo(fileStream);
     }
 
     public Task<IntegrationRunResult> ExtractFuz(string dir, ConfigValues config, CancellationToken token) {
@@ -117,7 +105,7 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
         return Task.FromResult(new IntegrationRunResult(true, "Fuz file extracted successfully"));
     }
 
-    private void ExtractFuz(string fuzFilePath, string audioExtension) {
+    public void ExtractFuz(string fuzFilePath, string audioExtension) {
         var fuzFileInfo = fileSystem.FileInfo.New(fuzFilePath);
 
         var minSize = FuzeVersion.Length + FuzeMagicStringBytes.Length + 4;
@@ -126,21 +114,21 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
         using var fuzFile = fuzFileInfo.OpenRead();
         var fuzReader = new BinaryReader(fuzFile);
 
-        // Read header
-        var magicString = new string(fuzReader.ReadChars(FuzeMagicStringBytes.Length));
-        fuzReader.ReadUInt32(); // Skip version
+        // Read header - magic string and version
+        Span<byte> header = stackalloc byte[8];
+        fuzReader.ReadExactly(header);
+        if (!header[..4].SequenceEqual(FuzeMagicStringBytes)) {
+            logger.Here().Error(
+                "Invalid fuz file {FuzFilePath}: magic string is {MagicString} but expected {ExpectedMagicString}",
+                fuzFilePath,
+                Encoding.UTF8.GetString(header[..4]),
+                FuzeMagicString);
+            return;
+        }
 
         // Validate header
         var lipLength = fuzReader.ReadUInt32();
         var audioLength = fuzFileInfo.Length - (minSize + lipLength);
-        if (magicString != FuzeMagicString) {
-            logger.Here().Error(
-                "Invalid fuz file {FuzFilePath}: magic string is {MagicString} but expected {ExpectedMagicString}",
-                fuzFilePath,
-                magicString,
-                FuzeMagicString);
-            return;
-        }
 
         if (audioLength <= 0) {
             logger.Here().Error("Invalid fuz file {FuzFilePath}: audio length is {AudioLength} but expected greater than 0", fuzFilePath, audioLength);
@@ -148,9 +136,9 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
         }
 
         // Read lip
-        var lipFilePath = fileSystem.Path.ChangeExtension(fuzFilePath, LipFileExtension);
-        var lipData = fuzReader.ReadBytes((int) lipLength);
         if (lipLength != 0) {
+            var lipFilePath = fileSystem.Path.ChangeExtension(fuzFilePath, LipFileExtension);
+            var lipData = fuzReader.ReadBytes((int) lipLength);
             using var binaryWriter = new BinaryWriter(fileSystem.FileStream.New(lipFilePath, FileMode.Create));
             binaryWriter.Write(lipData);
         }
