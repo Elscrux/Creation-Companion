@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using FluentAvalonia.UI.Controls;
 namespace CreationEditor.Avalonia.Services.Avalonia;
 
@@ -15,22 +14,10 @@ public sealed class TaskDialogProvider(IMainWindowProvider mainWindowProvider) :
             Content = content,
             XamlRoot = xamlRoot ?? mainWindowProvider.Current,
             Buttons = {
-                FATaskDialogButton.OKButton,
-                FATaskDialogButton.CancelButton,
-            },
-            KeyBindings = {
-                new KeyBinding {
-                    Gesture = new KeyGesture(Key.Enter),
-                    Command = FATaskDialogButton.OKButton.Command,
-                },
-                new KeyBinding {
-                    Gesture = new KeyGesture(Key.Escape),
-                    Command = FATaskDialogButton.CancelButton.Command,
-                },
+                new FATaskDialogButton("OK", FATaskDialogStandardResult.OK) { IsDefault = true },
+                new FATaskDialogButton("Cancel", FATaskDialogStandardResult.Cancel),
             },
         };
-
-        content?.KeyBindings.AddRange(assetDialog.KeyBindings);
 
         configure?.Invoke(assetDialog);
 
