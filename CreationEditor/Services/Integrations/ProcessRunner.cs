@@ -20,19 +20,27 @@ public static class ProcessRunner {
             UseShellExecute = false,
             CreateNoWindow = true,
         };
-        process.Start();
 
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        try {
+            process.Start();
 
-        await process.WaitForExitAsync(cancellationToken);
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        var output = await outputTask;
-        var error = await errorTask;
+            await process.WaitForExitAsync(cancellationToken);
 
-        return new ProcessRunnerResult(
-            process.ExitCode,
-            output,
-            error);
+            var output = await outputTask;
+            var error = await errorTask;
+
+            return new ProcessRunnerResult(
+                process.ExitCode,
+                output,
+                error);
+        } catch (Exception e) {
+            return new ProcessRunnerResult(
+                -1,
+                string.Empty,
+                $"Failed to run process {executablePath} with arguments {arguments}: {e.Message}");
+        }
     }
 }
