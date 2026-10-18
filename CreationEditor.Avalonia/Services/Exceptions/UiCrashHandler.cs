@@ -1,3 +1,4 @@
+using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Serilog;
 namespace CreationEditor.Avalonia.Services.Exceptions;
@@ -13,7 +14,7 @@ public sealed class UiCrashHandler(ILogger logger) {
     /// Exception types that leave the UI in a broken state and require a UI restart.
     /// </summary>
     private static readonly HashSet<Type> FatalExceptionTypes = [
-        typeof(global::Avalonia.Markup.Xaml.XamlLoadException),
+        typeof(XamlLoadException),
     ];
 
     public void Attach() {
