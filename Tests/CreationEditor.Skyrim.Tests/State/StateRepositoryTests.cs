@@ -59,7 +59,9 @@ public sealed class JsonStateRepositoryTests {
         return (fileSystem, repository);
     }
 
-    private static DataSourceMemento CreateMemento(string path = @"C:\SomeSource") => new(DataSourceType.FileSystem, "SomeSource", path, false);
+    private static readonly string SomeSourcePath = Path.Combine(Path.GetTempPath(), "SomeSource");
+
+    private static DataSourceMemento CreateMemento(string? path = null) => new(DataSourceType.FileSystem, "SomeSource", path ?? SomeSourcePath, false);
 
     [Fact]
     public void SaveThenLoad_RoundTripsState() {
@@ -83,8 +85,8 @@ public sealed class JsonStateRepositoryTests {
     [Fact]
     public void LoadAll_ReturnsAllSavedStates() {
         var (_, repository) = CreateRepository();
-        var memento1 = CreateMemento(@"C:\Source1");
-        var memento2 = CreateMemento(@"C:\Source2");
+        var memento1 = CreateMemento(Path.Combine(Path.GetTempPath(), "Source1"));
+        var memento2 = CreateMemento(Path.Combine(Path.GetTempPath(), "Source2"));
         repository.Save(memento1, new NamedGuid(Guid.NewGuid(), "Source1"));
         repository.Save(memento2, new NamedGuid(Guid.NewGuid(), "Source2"));
 
@@ -181,7 +183,7 @@ public sealed class CachedStateRepositoryTests {
     public void Load_CachesLoadedState() {
         var (_, repository) = CreateRepository();
         var id = new NamedGuid(Guid.NewGuid(), "SomeSource");
-        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", @"C:\Source", false), id);
+        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", Path.Combine(Path.GetTempPath(), "Source"), false), id);
 
         var loaded1 = repository.Load(id);
         var loaded2 = repository.Load(id);
@@ -193,7 +195,7 @@ public sealed class CachedStateRepositoryTests {
     public void Delete_InvalidatesCache() {
         var (_, repository) = CreateRepository();
         var id = new NamedGuid(Guid.NewGuid(), "SomeSource");
-        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", @"C:\Source", false), id);
+        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", Path.Combine(Path.GetTempPath(), "Source"), false), id);
         Assert.NotNull(repository.Load(id));
 
         repository.Delete(id);
@@ -206,8 +208,8 @@ public sealed class CachedStateRepositoryTests {
         var (_, repository) = CreateRepository();
         var id = new NamedGuid(Guid.NewGuid(), "SomeSource");
 
-        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", @"C:\Source", false), id);
-        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", @"C:\Source", true), id);
+        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", Path.Combine(Path.GetTempPath(), "Source"), false), id);
+        repository.Save(new DataSourceMemento(DataSourceType.FileSystem, "SomeSource", Path.Combine(Path.GetTempPath(), "Source"), true), id);
 
         Assert.True(repository.Load(id)!.IsReadyOnly);
     }

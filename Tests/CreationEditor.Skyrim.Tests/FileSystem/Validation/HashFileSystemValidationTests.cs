@@ -6,7 +6,7 @@ using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.FileSystem.Validation;
 
 public sealed class HashFileSystemValidationTests {
-    private const string SourcePath = @"C:\TestData";
+    private static readonly string SourcePath = Path.Combine(Path.GetTempPath(), "TestData");
 
     private static (HashFileSystemValidation Validation, MockFileSystem FileSystem, FileSystemDataSource Source) CreateValidation() {
         var fileSystem = new MockFileSystem();
@@ -40,7 +40,7 @@ public sealed class HashFileSystemValidationTests {
     [Fact]
     public async Task GetInvalidatedContent_NoCache_FullyInvalidated() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
 
         var result = await validation.GetInvalidatedContent(source);
 
@@ -50,7 +50,7 @@ public sealed class HashFileSystemValidationTests {
     [Fact]
     public async Task GetInvalidatedContent_UnchangedSource_ReturnsValid() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
         var result = await validation.GetInvalidatedContent(source);
@@ -62,52 +62,52 @@ public sealed class HashFileSystemValidationTests {
     [Fact]
     public async Task GetInvalidatedContent_ChangedFile_ReturnsPartlyInvalid() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        WriteFile(fileSystem, @"meshes\test.nif", 7, 8, 9);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 7, 8, 9);
         var result = await validation.GetInvalidatedContent(source);
 
         Assert.False(result.CacheFullyInvalidated);
         var invalidated = result.InvalidatedContent.Select(c => c.Path).ToList();
-        Assert.Contains(@"meshes\test.nif", invalidated);
+        Assert.Contains(Path.Combine("meshes", "test.nif"), invalidated);
     }
 
     [Fact]
     public async Task GetInvalidatedContent_NewFile_ReturnsPartlyInvalid() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        WriteFile(fileSystem, @"meshes\new.nif", 4, 5, 6);
+        WriteFile(fileSystem, Path.Combine("meshes", "new.nif"), 4, 5, 6);
         var result = await validation.GetInvalidatedContent(source);
 
         Assert.False(result.CacheFullyInvalidated);
         var invalidated = result.InvalidatedContent.Select(c => c.Path).ToList();
-        Assert.Contains(@"meshes\new.nif", invalidated);
+        Assert.Contains(Path.Combine("meshes", "new.nif"), invalidated);
     }
 
     [Fact]
     public async Task GetInvalidatedContent_DeletedFile_ReturnsValid() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        fileSystem.File.Delete(fileSystem.Path.Combine(SourcePath, @"meshes\test.nif"));
+        fileSystem.File.Delete(fileSystem.Path.Combine(SourcePath, "meshes", "test.nif"));
         var result = await validation.GetInvalidatedContent(source);
 
         Assert.False(result.CacheFullyInvalidated);
         var invalidated = result.InvalidatedContent.Select(c => c.Path).ToList();
-        Assert.DoesNotContain(@"meshes\test.nif", invalidated);
+        Assert.DoesNotContain(Path.Combine("meshes", "test.nif"), invalidated);
     }
 
     [Fact]
     public async Task GetInvalidatedContent_ChangedFileOfOtherExtension_NotInvalidated() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        WriteFile(fileSystem, @"meshes\readme.txt", 1, 1, 1);
+        WriteFile(fileSystem, Path.Combine("meshes", "readme.txt"), 1, 1, 1);
         var result = await validation.GetInvalidatedContent(source);
 
         Assert.False(result.CacheFullyInvalidated);
@@ -117,10 +117,10 @@ public sealed class HashFileSystemValidationTests {
     [Fact]
     public async Task UpdateCache_AfterPartlyInvalid_NextValidationIsValid() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        WriteFile(fileSystem, @"meshes\test.nif", 7, 8, 9);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 7, 8, 9);
         var result = await validation.GetInvalidatedContent(source);
         Assert.NotEmpty(result.InvalidatedContent);
         result.UpdateCache();
@@ -133,10 +133,10 @@ public sealed class HashFileSystemValidationTests {
     [Fact]
     public async Task UpdateCache_CalledTwice_OnlyUpdatesOnce() {
         var (validation, fileSystem, source) = CreateValidation();
-        WriteFile(fileSystem, @"meshes\test.nif", 1, 2, 3);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 1, 2, 3);
         await BuildCacheAndGetValidResult(validation, source);
 
-        WriteFile(fileSystem, @"meshes\test.nif", 7, 8, 9);
+        WriteFile(fileSystem, Path.Combine("meshes", "test.nif"), 7, 8, 9);
         var result = await validation.GetInvalidatedContent(source);
         result.UpdateCache();
         // A second call must be a no-op, not throw or corrupt state

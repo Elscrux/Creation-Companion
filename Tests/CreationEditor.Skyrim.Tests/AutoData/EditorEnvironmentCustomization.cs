@@ -40,7 +40,8 @@ public sealed class EditorEnvironmentCustomization(
     GameRelease release = GameRelease.SkyrimSE,
     TargetFileSystem targetFileSystem = TargetFileSystem.Fake) : ICustomization {
 
-    private const string DataDirectoryPath = @"C:\GameDirectory\Data";
+    private static readonly string GameDirectoryPath = Path.Combine(Path.GetTempPath(), "GameDirectory");
+    private static readonly string DataDirectoryPath = Path.Combine(GameDirectoryPath, "Data");
 
     public void Customize(IFixture fixture) {
         // Mutagen customizations
@@ -98,7 +99,7 @@ public sealed class EditorEnvironmentCustomization(
         var dataDirectoryProvider = new DataDirectoryInjection(new DirectoryPath(DataDirectoryPath));
         var archiveService = new ArchiveService(
             fileSystem,
-            new GetArchiveIniListings(fileSystem, new IniPathInjection(new FilePath(@"C:\GameDirectory\Skyrim.ini"))),
+            new GetArchiveIniListings(fileSystem, new IniPathInjection(new FilePath(Path.Combine(GameDirectoryPath, "Skyrim.ini")))),
             new ArchiveExtensionProvider(gameReleaseContext),
             editorEnvironment);
         var jsonSerializerSettings = new JsonSerializerSettingsProvider(new DefaultContractResolver());

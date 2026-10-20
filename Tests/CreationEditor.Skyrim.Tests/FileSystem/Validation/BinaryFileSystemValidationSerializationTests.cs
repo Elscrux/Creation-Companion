@@ -5,11 +5,13 @@ using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.FileSystem.Validation;
 
 public sealed class BinaryFileSystemValidationSerializationTests {
+    private static readonly string TestDataPath = Path.Combine(Path.GetTempPath(), "TestData");
+
     private static (BinaryFileSystemValidationSerialization Serialization, MockFileSystem FileSystem, string CacheFile) CreateSerialization() {
         var fileSystem = new MockFileSystem();
         ICacheLocationProvider CacheLocationProviderFactory(IReadOnlyList<string> subDirectories) => new CacheLocationProvider(fileSystem, subDirectories);
         var serialization = new BinaryFileSystemValidationSerialization(Logger.None, CacheLocationProviderFactory, fileSystem);
-        var cacheFile = new CacheLocationProvider(fileSystem, "Validation", "FileSystem").CacheFile(@"C:\TestData");
+        var cacheFile = new CacheLocationProvider(fileSystem, "Validation", "FileSystem").CacheFile(TestDataPath);
         return (serialization, fileSystem, cacheFile);
     }
 
@@ -25,16 +27,16 @@ public sealed class BinaryFileSystemValidationSerializationTests {
     public void SerializeThenValidate_ReturnsTrue() {
         var (serialization, _, _) = CreateSerialization();
 
-        serialization.Serialize(CreateCacheData(), @"C:\TestData");
+        serialization.Serialize(CreateCacheData(), TestDataPath);
 
-        Assert.True(serialization.Validate(@"C:\TestData"));
+        Assert.True(serialization.Validate(TestDataPath));
     }
 
     [Fact]
     public void Validate_MissingCacheFile_ReturnsFalse() {
         var (serialization, _, _) = CreateSerialization();
 
-        Assert.False(serialization.Validate(@"C:\TestData"));
+        Assert.False(serialization.Validate(TestDataPath));
     }
 
     [Fact]
@@ -46,17 +48,17 @@ public sealed class BinaryFileSystemValidationSerializationTests {
             writer.Write("0.0.0.1");
         }
 
-        Assert.False(serialization.Validate(@"C:\TestData"));
+        Assert.False(serialization.Validate(TestDataPath));
     }
 
     [Fact]
     public void Validate_CorruptedCacheFile_ReturnsFalse() {
         var (serialization, fileSystem, cacheFile) = CreateSerialization();
-        serialization.Serialize(CreateCacheData(), @"C:\TestData");
+        serialization.Serialize(CreateCacheData(), TestDataPath);
 
         fileSystem.File.WriteAllBytes(cacheFile, [1, 2, 3]);
 
-        Assert.False(serialization.Validate(@"C:\TestData"));
+        Assert.False(serialization.Validate(TestDataPath));
     }
 
     [Fact]
@@ -64,8 +66,8 @@ public sealed class BinaryFileSystemValidationSerializationTests {
         var (serialization, _, _) = CreateSerialization();
         var cacheData = CreateCacheData();
 
-        serialization.Serialize(cacheData, @"C:\TestData");
-        var success = serialization.TryDeserialize(@"C:\TestData", out var deserialized);
+        serialization.Serialize(cacheData, TestDataPath);
+        var success = serialization.TryDeserialize(TestDataPath, out var deserialized);
 
         Assert.True(success);
         Assert.Equal(cacheData.HashLength, deserialized!.HashLength);
@@ -84,6 +86,6 @@ public sealed class BinaryFileSystemValidationSerializationTests {
     public void TryDeserialize_MissingCacheFile_Throws() {
         var (serialization, _, _) = CreateSerialization();
 
-        Assert.ThrowsAny<IOException>(() => serialization.TryDeserialize(@"C:\TestData", out _));
+        Assert.ThrowsAny<IOException>(() => serialization.TryDeserialize(TestDataPath, out _));
     }
 }

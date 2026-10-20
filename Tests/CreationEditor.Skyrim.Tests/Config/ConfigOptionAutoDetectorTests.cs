@@ -9,19 +9,19 @@ using ConfigValues = System.Collections.Generic.Dictionary<string, object>;
 namespace CreationEditor.Skyrim.Tests.Config;
 
 public sealed class ConfigOptionAutoDetectorTests {
-    private static ConfigOptionAutoDetector CreateDetector(
-        MockFileSystem fileSystem,
-        string? gamePath = @"C:\Games\Skyrim",
-        string? dataPath = @"C:\Games\Skyrim\Data") => new(
+    private static readonly string GamePath = Path.Combine(Path.GetTempPath(), "Games", "Skyrim");
+    private static readonly string DataPath = Path.Combine(GamePath, "Data");
+
+    private static ConfigOptionAutoDetector CreateDetector(MockFileSystem fileSystem) => new(
         fileSystem,
-        new GameDirectoryInjection(gamePath is null ? (DirectoryPath?) null : new DirectoryPath(gamePath)),
-        new DataDirectoryInjection(new DirectoryPath(dataPath ?? @"C:\Games\Skyrim\Data")),
+        new GameDirectoryInjection(new DirectoryPath(GamePath)),
+        new DataDirectoryInjection(new DirectoryPath(DataPath)),
         Logger.None);
 
     [Fact]
     public void FileOption_FirstExistingCandidateWins() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"C:\Games\Skyrim\Data\tool.exe", new MockFileData([]));
+        fileSystem.AddFile(Path.Combine(DataPath, "tool.exe"), new MockFileData([]));
         var option = new FileConfigOption(
             "Tool",
             autoDetectPaths: [
@@ -32,7 +32,7 @@ public sealed class ConfigOptionAutoDetectorTests {
 
         CreateDetector(fileSystem).AutoDetect(new TestConfigDefinition(option), configValues);
 
-        Assert.Equal(@"C:\Games\Skyrim\Data\tool.exe", configValues[option.Name]);
+        Assert.Equal(Path.Combine(DataPath, "tool.exe"), configValues[option.Name]);
     }
 
     [Fact]
@@ -51,21 +51,22 @@ public sealed class ConfigOptionAutoDetectorTests {
     [Fact]
     public void FileOption_AlreadySet_IsSkipped() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"C:\Games\Skyrim\Data\tool.exe", new MockFileData([]));
+        fileSystem.AddFile(Path.Combine(DataPath, "tool.exe"), new MockFileData([]));
         var option = new FileConfigOption(
             "Tool",
             autoDetectPaths: [new AutoDetectPath(AutoDetectBaseDirectory.Data, "tool.exe")]);
-        var configValues = new ConfigValues { [option.Name] = @"C:\Custom\tool.exe" };
+        var customPath = Path.Combine(Path.GetTempPath(), "Custom", "tool.exe");
+        var configValues = new ConfigValues { [option.Name] = customPath };
 
         CreateDetector(fileSystem).AutoDetect(new TestConfigDefinition(option), configValues);
 
-        Assert.Equal(@"C:\Custom\tool.exe", configValues[option.Name]);
+        Assert.Equal(customPath, configValues[option.Name]);
     }
 
     [Fact]
     public void FileOption_AlreadySetToWhitespace_IsAutoDetected() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"C:\Games\Skyrim\Data\tool.exe", new MockFileData([]));
+        fileSystem.AddFile(Path.Combine(DataPath, "tool.exe"), new MockFileData([]));
         var option = new FileConfigOption(
             "Tool",
             autoDetectPaths: [new AutoDetectPath(AutoDetectBaseDirectory.Data, "tool.exe")]);
@@ -73,13 +74,13 @@ public sealed class ConfigOptionAutoDetectorTests {
 
         CreateDetector(fileSystem).AutoDetect(new TestConfigDefinition(option), configValues);
 
-        Assert.Equal(@"C:\Games\Skyrim\Data\tool.exe", configValues[option.Name]);
+        Assert.Equal(Path.Combine(DataPath, "tool.exe"), configValues[option.Name]);
     }
 
     [Fact]
     public void FolderOption_MatchesDirectories() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory(@"C:\Games\Skyrim\Data\Meshes");
+        fileSystem.AddDirectory(Path.Combine(DataPath, "Meshes"));
         var option = new FolderConfigOption(
             "Meshes",
             autoDetectPaths: [new AutoDetectPath(AutoDetectBaseDirectory.Data, "Meshes")]);
@@ -87,13 +88,13 @@ public sealed class ConfigOptionAutoDetectorTests {
 
         CreateDetector(fileSystem).AutoDetect(new TestConfigDefinition(option), configValues);
 
-        Assert.Equal(@"C:\Games\Skyrim\Data\Meshes", configValues[option.Name]);
+        Assert.Equal(Path.Combine(DataPath, "Meshes"), configValues[option.Name]);
     }
 
     [Fact]
     public void FileOption_DoesNotMatchDirectories() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory(@"C:\Games\Skyrim\Data\Meshes");
+        fileSystem.AddDirectory(Path.Combine(DataPath, "Meshes"));
         var option = new FileConfigOption(
             "Meshes",
             autoDetectPaths: [new AutoDetectPath(AutoDetectBaseDirectory.Data, "Meshes")]);
@@ -107,7 +108,7 @@ public sealed class ConfigOptionAutoDetectorTests {
     [Fact]
     public void GameBaseDirectory_IsResolved() {
         var fileSystem = new MockFileSystem();
-        fileSystem.AddFile(@"C:\Games\Skyrim\SkyrimSE.exe", new MockFileData([]));
+        fileSystem.AddFile(Path.Combine(GamePath, "SkyrimSE.exe"), new MockFileData([]));
         var option = new FileConfigOption(
             "GameExe",
             autoDetectPaths: [new AutoDetectPath(AutoDetectBaseDirectory.Game, "SkyrimSE.exe")]);
@@ -115,7 +116,7 @@ public sealed class ConfigOptionAutoDetectorTests {
 
         CreateDetector(fileSystem).AutoDetect(new TestConfigDefinition(option), configValues);
 
-        Assert.Equal(@"C:\Games\Skyrim\SkyrimSE.exe", configValues[option.Name]);
+        Assert.Equal(Path.Combine(GamePath, "SkyrimSE.exe"), configValues[option.Name]);
     }
 
     [Fact]
@@ -133,7 +134,7 @@ public sealed class ConfigOptionAutoDetectorTests {
         var detector = new ConfigOptionAutoDetector(
             fileSystem,
             new GameDirectoryInjection(null),
-            new DataDirectoryInjection(new DirectoryPath(@"C:\Games\Skyrim\Data")),
+            new DataDirectoryInjection(new DirectoryPath(DataPath)),
             Logger.None);
         detector.AutoDetect(new TestConfigDefinition(option), configValues);
 
