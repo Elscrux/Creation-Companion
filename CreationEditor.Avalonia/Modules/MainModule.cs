@@ -7,6 +7,7 @@ using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.Services.Avalonia.Font;
 using CreationEditor.Avalonia.Services.Busy;
 using CreationEditor.Avalonia.Services.Exceptions;
+using CreationEditor.Avalonia.Services.HotKey;
 using CreationEditor.Avalonia.Services.Record.List;
 using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.Prefix;
@@ -135,6 +136,10 @@ public sealed class MainModule : Module {
         builder.RegisterDecorator<AutoSaveService, IModSaveService>();
         builder.RegisterType<AutoSaveService>()
             .As<IAutoSaveService>();
+
+        builder.RegisterType<HotkeyService>()
+            .As<IHotkeyService>()
+            .SingleInstance();
 
         // Provider
         builder.RegisterType<PluginsFolderAssemblyProvider>()
