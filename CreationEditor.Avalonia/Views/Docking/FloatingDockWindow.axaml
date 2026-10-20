@@ -1,0 +1,19 @@
+﻿<windowing:FAAppWindow xmlns="https://github.com/avaloniaui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:windowing="clr-namespace:FluentAvalonia.UI.Windowing;assembly=FluentAvalonia"
+                       xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
+                       xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
+                       mc:Ignorable="d"
+                       d:DesignWidth="400"
+                       d:DesignHeight="300"
+                       x:Class="CreationEditor.Avalonia.Views.Docking.FloatingDockWindow"
+                       x:DataType="vm:FloatingDockVM"
+                       x:Name="Window"
+                       Title="{Binding Title}"
+                       ShowInTaskbar="True"
+                       MinWidth="200"
+                       MinHeight="150">
+    <docking:DocumentDock DataContext="{Binding Content}"/>
+</windowing:FAAppWindow>

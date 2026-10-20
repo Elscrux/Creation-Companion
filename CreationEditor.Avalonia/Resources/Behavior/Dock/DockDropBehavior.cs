@@ -51,24 +51,31 @@ public class DockDropBehavior : Behavior<Control> {
             dragData.Preview?.HidePreview();
 
             dragData.Preview = null;
-            dragData.Dock = null;
+            dragData.Zone = null;
         }
     }
 
     protected virtual void DragOver(object? sender, DragEventArgs e) {
         if (!CanDock<Control>(sender, e, out var dragData, out var control)) return;
 
-        // Check if the dock type changed or if we aren't the currently previewed object
-        var dock = GetDockType(e, control);
-        if (dragData.Dock == dock && ReferenceEquals(dragData.Preview, AssociatedObject)) return;
+        // Check if the drop zone changed or if we aren't the currently previewed object
+        var zone = GetDropZone(e, control);
+        if (dragData.Zone == zone && ReferenceEquals(dragData.Preview, AssociatedObject)) return;
 
         // Handle preview
         if (control is IDockPreview dockPreview) {
             dragData.Preview?.HidePreview();
 
             dragData.Preview = dockPreview;
-            dragData.Dock = dock;
-            dockPreview.ShowPreview(dock);
+            dragData.Zone = zone;
+
+            if (zone == DockDropZone.Center) {
+                // Dropping in the middle area docks the items as documents,
+                // covering the entire target
+                dockPreview.ShowDocumentPreview();
+            } else {
+                dockPreview.ShowPreview((Dock) zone);
+            }
         }
     }
 
@@ -84,10 +91,73 @@ public class DockDropBehavior : Behavior<Control> {
         (DockContainer as IDockObject).DockRoot
             .StartEdit()
             .StopReporting()
-            .Remove(dragData.Item.DockParent, dragData.Item)
-            .Add(DockContainer, dragData.Item, new DockConfig { Dock = GetDockType(e, control) })
+            .Do(() => PerformDrop(dragData, control, GetDropZone(e, control)))
             .StartReporting()
             .FinishEdit();
+    }
+
+    /// <summary>
+    /// Removes all dragged items from their current parent and docks them into the target container.
+    /// </summary>
+    protected void PerformDrop(DockDragData dragData, Control control, DockDropZone zone) {
+        if (DockContainer is null) return;
+
+        var items = dragData.Items.Count > 0 ? dragData.Items : [dragData.Item];
+        foreach (var item in items) {
+            item.DockParent.Remove(item);
+        }
+
+        // Dropping in the middle area converts the target into a document dock:
+        // layout docks are converted into document docks containing the existing item
+        // as first and the dragged items as following tabs, tabbed docks receive the
+        // dragged items as tabs
+        if (zone == DockDropZone.Center) {
+            if (DockContainer is LayoutDockVM layoutDock
+             && control is DockedControl dockedControl) {
+                layoutDock.ConvertToDocumentDock(dockedControl, items);
+                return;
+            }
+
+            var tabConfig = new DockConfig {
+                DockMode = DockMode.Document,
+            };
+            foreach (var item in items) {
+                DockContainer.Add(item, tabConfig);
+            }
+
+            return;
+        }
+
+        // Edge drops split the target at that side
+        var config = new DockConfig { Dock = (Dock) zone };
+        foreach (var item in items) {
+            DockContainer.Add(item, config);
+        }
+    }
+
+    /// <summary>
+    /// Determines the drop zone of the given position inside the target:
+    /// the middle area docks as documents, the outer areas split at the closest edge.
+    /// </summary>
+    protected virtual DockDropZone GetDropZone(DragEventArgs e, Visual visual) {
+        var position = e.GetPosition(visual);
+        var width = visual.Bounds.Width;
+        var height = visual.Bounds.Height;
+
+        // Dropping in the middle area docks as document (tab) instead of splitting
+        if (position.X > width * 0.3 && position.X < width * 0.7
+         && position.Y > height * 0.3 && position.Y < height * 0.7) {
+            return DockDropZone.Center;
+        }
+
+        var dockPositions = new List<(double Distance, Dock Dock)> {
+            (position.Distance(new Point(0, 0), new Point(0, height)), Dock.Left),
+            (position.Distance(new Point(width, 0), new Point(0, height)), Dock.Right),
+            (position.Distance(new Point(0, 0), new Point(width, 0)), Dock.Top),
+            (position.Distance(new Point(0, height), new Point(width, 0)), Dock.Bottom),
+        };
+
+        return (DockDropZone) dockPositions.MinBy(x => x.Distance).Dock;
     }
 
     [MemberNotNullWhen(true, nameof(DockContainer))]
@@ -111,7 +181,7 @@ public class DockDropBehavior : Behavior<Control> {
         if (!ReferenceEquals(source.FindAncestorOfType<IDockPreview>(), AssociatedObject)) return false;
 
         // Get drag data
-        if (!e.DataTransfer.TryGet<DockDragData>(out var dragData)) return false;
+        if (!DockDragContext.TryGet(e, out var dragData)) return false;
 
         // Don't allow to drop on ourselves
         if (CheckSelf(dragData, control)) return false;
@@ -121,20 +191,5 @@ public class DockDropBehavior : Behavior<Control> {
         return true;
     }
 
-    protected virtual bool CheckSelf(DockDragData dragData, Control control) {
-        return dragData.Item.DockParent == DockContainer;
-    }
-
-    protected virtual Dock GetDockType(DragEventArgs e, Visual visual) {
-        var position = e.GetPosition(visual);
-
-        var dockPositions = new List<(double Distance, Dock Dock)> {
-            (position.Distance(new Point(0, 0), new Point(0, visual.Bounds.Height)), Dock.Left),
-            (position.Distance(new Point(visual.Bounds.Width, 0), new Point(0, visual.Bounds.Height)), Dock.Right),
-            (position.Distance(new Point(0, 0), new Point(visual.Bounds.Width, 0)), Dock.Top),
-            (position.Distance(new Point(0, visual.Bounds.Height), new Point(visual.Bounds.Width, 0)), Dock.Bottom),
-        };
-
-        return dockPositions.MinBy(x => x.Distance).Dock;
-    }
+    protected virtual bool CheckSelf(DockDragData dragData, Control control) => dragData.Item.DockParent == DockContainer;
 }
