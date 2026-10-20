@@ -18,12 +18,6 @@ jobs:
             matrix:
                 dotnet-version: [ '10.0' ]
                 os: [ ubuntu-latest, windows-latest ]
-                renderer: [ "MrTroble/Project-BSE" ]
-                include:
-                -   os: ubuntu-latest
-                    renderer-name: "TGAppLinux"
-                -   os: windows-latest
-                    renderer-name: "TGAppWindows"
         
         steps:
             -   uses: actions/checkout@v4
@@ -40,15 +34,7 @@ jobs:
                 run: dotnet build -c Release --no-restore
 
             -   name: Test
-                run: dotnet test --filter  'FullyQualifiedName!~ProjectBSE.Interop.Test' -c Release --no-build
-
-#            -   name: Download renderer artifact
-#                if: github.ref == 'refs/heads/master'
-#                uses: actions/download-artifact@v4
-#                with:
-#                    repository: ${{ matrix.renderer }}
-#                    name: ${{ matrix.renderer-name }}
-#                    path: CreationEditor.Skyrim.Avalonia/bin/Release/net${{ matrix.dotnet-version }}
+                run: dotnet test -c Release --no-build
 
             -   name: Upload a Build Artifact
                 if: github.ref == 'refs/heads/master'
