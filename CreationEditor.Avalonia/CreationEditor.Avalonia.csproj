@@ -161,6 +161,15 @@
         <Compile Update="ViewModels\Logging\LogVM.cs">
             <DependentUpon>ILogVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Search\RecordSearchSource.cs">
+            <DependentUpon>ISearchItemSource.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Search\AssetSearchSource.cs">
+            <DependentUpon>ISearchItemSource.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Search\GlobalActionSearchSource.cs">
+            <DependentUpon>ISearchItemSource.cs</DependentUpon>
+        </Compile>
         <Compile Update="Services\Actions\Global\EditorGlobalActionsProvider.cs">
             <DependentUpon>IGlobalActionsProvider.cs</DependentUpon>
         </Compile>

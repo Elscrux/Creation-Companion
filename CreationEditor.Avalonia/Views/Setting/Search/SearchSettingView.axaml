@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:setting="clr-namespace:CreationEditor.Avalonia.ViewModels.Setting.Search"
+             xmlns:search="clr-namespace:CreationEditor.Avalonia.ViewModels.Search"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="CreationEditor.Avalonia.Views.Setting.Search.SearchSettingView"
+             x:DataType="setting:SearchSettingVM">
+    <StackPanel Spacing="5">
+        <controls:FASettingsExpander Header="Search Behavior"
+                                     Description="Tuning of the global search (Ctrl+P)"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Find"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem Content="Maximum Results per Category">
+                <controls:FASettingsExpanderItem.Footer>
+                    <NumericUpDown Minimum="1"
+                                   Maximum="50"
+                                   Increment="1"
+                                   Value="{Binding Setting.MaxResultsPerCategory}"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+
+            <controls:FASettingsExpanderItem Content="Search Delay">
+                <controls:FASettingsExpanderItem.Footer>
+                    <NumericUpDown Minimum="0"
+                                   Maximum="1000"
+                                   Increment="10"
+                                   Value="{Binding Setting.SearchDelayInMilliseconds}"
+                                   FormatString="{}{0} ms"/>
+                </controls:FASettingsExpanderItem.Footer>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
+
+        <controls:FASettingsExpander Header="Default Scopes"
+                                     Description="Scopes that are selected when the editor starts"
+                                     IsExpanded="True">
+            <controls:FASettingsExpander.IconSource>
+                <controls:FASymbolIconSource Symbol="Filter"/>
+            </controls:FASettingsExpander.IconSource>
+
+            <controls:FASettingsExpanderItem>
+                <ItemsControl ItemsSource="{Binding Scopes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="search:SelectableSearchScopeVM">
+                            <CheckBox Content="{Binding Title}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </controls:FASettingsExpanderItem>
+        </controls:FASettingsExpander>
+    </StackPanel>
+</UserControl>

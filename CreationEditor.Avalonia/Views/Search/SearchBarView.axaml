@@ -1,0 +1,157 @@
+<UserControl x:Class="CreationEditor.Avalonia.Views.Search.SearchBarView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:search="clr-namespace:CreationEditor.Avalonia.ViewModels.Search"
+             xmlns:avaloniaProgressRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             x:DataType="search:SearchVM"
+             x:Name="SearchBar">
+
+    <Panel>
+        <TextBox x:Name="SearchBox"
+                 Padding="3"
+                 MinHeight="26"
+                 MinWidth="250"
+                 MaxWidth="500"
+                 PlaceholderText="Search (Ctrl+P)"
+                 TextChanged="OnSearchBoxTextChanged"
+                 GotFocus="OnSearchBoxGotFocus"
+                 KeyDown="OnSearchBoxKeyDown"
+                 Text="{Binding SearchText, Mode=TwoWay}">
+            <TextBox.Styles>
+                <Style Selector="TextBox">
+                    <Setter Property="HorizontalContentAlignment"
+                            Value="Center"/>
+                    <Setter Property="MinHeight"
+                            Value="0"/>
+                </Style>
+            </TextBox.Styles>
+        </TextBox>
+
+        <Popup x:Name="ResultsPopup"
+               PlacementAnchor="Bottom"
+               PlacementTarget="{Binding #SearchBox}"
+               IsLightDismissEnabled="True">
+            <Border Width="560"
+                    MaxHeight="800"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}"
+                    Background="{DynamicResource ComboBoxDropDownBackground}"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <Grid Grid.Row="0"
+                          Margin="8,8,8,0"
+                          ColumnDefinitions="*,Auto">
+                        <ItemsControl Grid.Column="0"
+                                      HorizontalAlignment="Center"
+                                      ItemsSource="{Binding Scopes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="4"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="search:SelectableSearchScopeVM">
+                                    <ToggleButton Content="{Binding Title}"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <avaloniaProgressRing:ProgressRing Grid.Column="1"
+                                                           Width="16"
+                                                           Height="16"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding IsBusy}"/>
+                    </Grid>
+                    <Separator Grid.Row="1"
+                               Margin="0,8"/>
+
+                    <ScrollViewer Grid.Row="2"
+                                  Padding="0,0,0,4"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Results}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="search:SearchCategoryResult">
+                                    <StackPanel Margin="0,0,0,4">
+                                        <Grid Margin="8,6,8,2"
+                                              ColumnDefinitions="*,Auto">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Title}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                       FontStyle="Italic"/>
+                                            <Button Grid.Column="1"
+                                                    Content="Clear"
+                                                    Padding="6,0"
+                                                    FontSize="11"
+                                                    MinHeight="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    IsVisible="{Binding IsClearable}"
+                                                    Click="OnClearRecentsClicked"/>
+                                        </Grid>
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="search:SearchItemVM">
+                                                    <Button x:Name="ResultItem"
+                                                            HorizontalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Stretch"
+                                                            Padding="8,4"
+                                                            MinHeight="0"
+                                                            BorderThickness="0"
+                                                            CornerRadius="4"
+                                                            IsEnabled="{Binding IsEnabled}"
+                                                            Classes.selected="{Binding IsSelected}"
+                                                            Click="OnResultItemClicked">
+                                                        <Button.Styles>
+                                                            <Style Selector="Button">
+                                                                <Setter Property="Background"
+                                                                        Value="Transparent"/>
+                                                            </Style>
+                                                            <Style Selector="Button.selected">
+                                                                <Setter Property="Background"
+                                                                        Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                                            </Style>
+                                                        </Button.Styles>
+                                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                                            <ContentControl Grid.Column="0"
+                                                                            Width="20"
+                                                                            Content="{Binding IconControl}"/>
+
+                                                            <StackPanel Grid.Column="1"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Title}"/>
+                                                                <TextBlock Text="{Binding Subtitle}"
+                                                                           FontSize="11"
+                                                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                           IsVisible="{Binding Subtitle, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                                            </StackPanel>
+
+                                                            <Button Grid.Column="2"
+                                                                    Padding="4"
+                                                                    VerticalAlignment="Center"
+                                                                    Background="Transparent"
+                                                                    BorderThickness="0"
+                                                                    IsVisible="{Binding HasContextActions}"
+                                                                    Click="OnContextActionsClicked">
+                                                                <controls:FASymbolIcon Symbol="More"/>
+                                                            </Button>
+                                                        </Grid>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Popup>
+    </Panel>
+</UserControl>

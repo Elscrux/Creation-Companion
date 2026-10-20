@@ -17,6 +17,7 @@ public sealed class EditorModule : Module {
         builder.RegisterModule<SettingsModule>();
         builder.RegisterModule<ConfigModule>();
         builder.RegisterModule<IntegrationsModule>();
+        builder.RegisterModule<SearchModule>();
         builder.RegisterModule<ActionsModule>();
     }
 }

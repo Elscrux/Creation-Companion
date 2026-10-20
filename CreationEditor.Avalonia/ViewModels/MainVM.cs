@@ -12,6 +12,7 @@ using CreationEditor.Avalonia.ViewModels.DataSource;
 using CreationEditor.Avalonia.ViewModels.Integrations;
 using CreationEditor.Avalonia.ViewModels.Mod;
 using CreationEditor.Avalonia.ViewModels.Notification;
+using CreationEditor.Avalonia.ViewModels.Search;
 using CreationEditor.Avalonia.ViewModels.Setting;
 using CreationEditor.Avalonia.Views;
 using CreationEditor.Avalonia.Views.Integrations;
@@ -46,32 +47,7 @@ public sealed partial class MainVM : ViewModel {
 
     public IDockingManagerService DockingManagerService { get; }
     public IPluginService? PluginService { get; }
-    public IObservableCollection<string> Actions { get; } = new ObservableCollectionExtended<string> {
-        "Save",
-        "Save As",
-        "Save All",
-        "Close",
-        "Close All",
-        "Close All But This",
-        "Exit",
-        "Undo",
-        "Redo",
-        "Cut",
-        "Copy",
-        "Paste",
-        "Delete",
-        "Select All",
-        "Find",
-        "Find Next",
-        "Find Previous",
-        "Open Record",
-        "Open Record in New Tab",
-        "Open Record in New Window",
-        "Go to Folder in Asset Browser",
-        "Create Record",
-        "Create Record in New Tab",
-        "Create Record in New Window",
-    };
+    public SearchVM SearchVM { get; }
     [Reactive] public partial IReadOnlyList<MenuItemVM> MenuItems { get; set; }
 
     public MainVM(
@@ -89,7 +65,8 @@ public sealed partial class MainVM : ViewModel {
         IPluginService? pluginService,
         IModSaveService modSaveService,
         IFAApplicationSplashScreen splashScreen,
-        IFileSystem fileSystem) {
+        IFileSystem fileSystem,
+        SearchVM searchVM) {
         _settingsVMFactory = settingsVMFactory;
         _integrationsVMFactory = integrationsVMFactory;
         _editorEnvironment = editorEnvironment;
@@ -99,6 +76,7 @@ public sealed partial class MainVM : ViewModel {
         _modSaveService = modSaveService;
         _fileSystem = fileSystem;
         _splashScreen = splashScreen;
+        SearchVM = searchVM;
         NotificationVM = notificationVM;
         BusyService = busyService;
         ModSelectionVM = modSelectionVM;
