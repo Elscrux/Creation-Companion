@@ -161,6 +161,15 @@
         <Compile Update="ViewModels\Logging\LogVM.cs">
             <DependentUpon>ILogVM.cs</DependentUpon>
         </Compile>
+        <Compile Update="Services\Actions\Global\EditorGlobalActionsProvider.cs">
+            <DependentUpon>IGlobalActionsProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Actions\Global\ViewGlobalActionsProvider.cs">
+            <DependentUpon>IGlobalActionsProvider.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Services\Actions\Global\RecordCreationGlobalActionsProvider.cs">
+            <DependentUpon>IGlobalActionsProvider.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>

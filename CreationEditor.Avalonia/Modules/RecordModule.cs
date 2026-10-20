@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using CreationEditor.Avalonia.Models.Record.Browser;
-using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Record.Browser.Filter;
 using CreationEditor.Avalonia.Services.Record.Editor;
 using CreationEditor.Avalonia.Services.Record.Provider;
@@ -33,14 +32,6 @@ public sealed class RecordModule : Module {
 
         builder.RegisterType<RecordTypeListing>()
             .AsSelf();
-
-        builder.RegisterAssemblyTypes(assemblies)
-            .AssignableTo<IContextActionsProvider>()
-            .As<IContextActionsProvider>()
-            .SingleInstance();
-
-        builder.RegisterType<InjectedContextMenuProvider>()
-            .As<IContextMenuProvider>();
 
         // Record Editor
         builder.RegisterType<RecordEditorController>()
