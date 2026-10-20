@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.State;
 using CreationEditor.Skyrim.Tests.AutoData;
@@ -114,6 +115,7 @@ public sealed class DataSourceServiceTests {
     public void MementoPersistence_NewServiceRestoresDataSources(
         IDataSourceService dataSourceService,
         IFileSystem fileSystem,
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
         IStateRepositoryFactory<DataSourceMemento, DataSourceMemento, NamedGuid> stateRepositoryFactory) {
@@ -124,7 +126,7 @@ public sealed class DataSourceServiceTests {
             dataSourceService.DataDirectoryDataSource);
 
         // A new service with the same state repository restores the registered data sources
-        var restoredService = new DataSourceService(fileSystem, dataDirectoryProvider, archiveService, stateRepositoryFactory);
+        var restoredService = new DataSourceService(fileSystem, ignoredDirectoriesProvider, dataDirectoryProvider, archiveService, stateRepositoryFactory);
 
         Assert.Contains(restoredService.DataDirectoryDataSource, restoredService.ListedOrder);
         var restored = restoredService.ListedOrder.OfType<FileSystemDataSource>().FirstOrDefault(x => x.Path == @"C:\ExtraSource");

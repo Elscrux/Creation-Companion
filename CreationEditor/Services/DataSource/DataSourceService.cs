@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using CreationEditor.Resources.Comparer;
 using CreationEditor.Services.Archive;
+using CreationEditor.Services.Asset;
 using CreationEditor.Services.State;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
@@ -10,6 +11,7 @@ namespace CreationEditor.Services.DataSource;
 
 public sealed class DataSourceService : IDataSourceService {
     private readonly IFileSystem _fileSystem;
+    private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly IArchiveService _archiveService;
     private readonly List<IDataSource> _dataSources = [];
     public IReadOnlyList<IDataSource> ListedOrder => _dataSources.ToArray();
@@ -31,11 +33,13 @@ public sealed class DataSourceService : IDataSourceService {
 
     public DataSourceService(
         IFileSystem fileSystem,
+        IIgnoredDirectoriesProvider ignoredDirectoriesProvider,
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
         IStateRepositoryFactory<DataSourceMemento, DataSourceMemento, NamedGuid> stateRepositoryFactory
     ) {
         _fileSystem = fileSystem;
+        _ignoredDirectoriesProvider = ignoredDirectoriesProvider;
         _archiveService = archiveService;
         _stateRepository = stateRepositoryFactory.Create("DataSource");
 
@@ -82,7 +86,7 @@ public sealed class DataSourceService : IDataSourceService {
 
         // Ensure there is only ever one data directory source - the one based on the current data directory path
         fileSystemDataSources.RemoveAll(x => x.Name == "Data");
-        var dataDirectoryDataSource =new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
+        var dataDirectoryDataSource = new FileSystemDataSource(fileSystem, dataDirectoryProvider.Path);
         fileSystemDataSources.Insert(0, dataDirectoryDataSource);
 
         ActiveDataSource = DataDirectoryDataSource = dataDirectoryDataSource;
@@ -110,7 +114,7 @@ public sealed class DataSourceService : IDataSourceService {
             var archiveDataSourcePath = _fileSystem.Path.GetDirectoryName(path);
             if (archiveDataSourcePath is null) continue;
 
-            var dataSource = fileSystemDataSources.FirstOrDefault(dataSource => dataSource.Path == archiveDataSourcePath);
+            var dataSource = fileSystemDataSources.Find(dataSource => dataSource.Path == archiveDataSourcePath);
             if (dataSource is null) continue;
 
             var archiveLink = new DataSourceFileLink(dataSource, _fileSystem.Path.GetFileName(path));
@@ -166,7 +170,7 @@ public sealed class DataSourceService : IDataSourceService {
             var fileLinks = dataSource.EnumerateFiles(directoryPath, searchPattern, includeSubDirectories);
 
             foreach (var fileLink in fileLinks) {
-                if (dataSource.DeleteDirectoryLink.Contains(fileLink)) continue;
+                if (_ignoredDirectoriesProvider.IsIgnored(fileLink.DataRelativePath)) continue;
                 if (!referencedFiles.Add(fileLink.DataRelativePath)) continue;
 
                 yield return fileLink;
@@ -179,8 +183,9 @@ public sealed class DataSourceService : IDataSourceService {
     }
 
     public void UpdateDataSources(IReadOnlyList<IDataSource> dataSources, IDataSource activeDataSource) {
-        if (!dataSources.Contains(activeDataSource))
+        if (!dataSources.Contains(activeDataSource)) {
             throw new ArgumentException("Active data source must be part of the provided data sources.", nameof(activeDataSource));
+        }
 
         var fileSystemDataSources = dataSources.OfType<FileSystemDataSource>().ToList();
         var archiveDataSources = dataSources.OfType<ArchiveDataSource>().ToList();

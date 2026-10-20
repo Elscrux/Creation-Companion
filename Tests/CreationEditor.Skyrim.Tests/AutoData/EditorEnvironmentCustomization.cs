@@ -94,6 +94,7 @@ public sealed class EditorEnvironmentCustomization(
 
         // Real services over the mock file system
         var fileSystem = fixture.Create<IFileSystem>();
+        var ignoredDirectoriesProvider = fixture.Create<IIgnoredDirectoriesProvider>();
         var dataDirectoryProvider = new DataDirectoryInjection(new DirectoryPath(DataDirectoryPath));
         var archiveService = new ArchiveService(
             fileSystem,
@@ -110,7 +111,7 @@ public sealed class EditorEnvironmentCustomization(
                 fileSystem,
                 stateIds),
             stateIds => new CachedStateRepository<DataSourceMemento, DataSourceMemento, NamedGuid>(stateIds, stateRepositoryFactory));
-        var dataSourceService = new DataSourceService(fileSystem, dataDirectoryProvider, archiveService, stateRepositoryFactory);
+        var dataSourceService = new DataSourceService(fileSystem, ignoredDirectoriesProvider, dataDirectoryProvider, archiveService, stateRepositoryFactory);
 
         fixture.Inject<IDataDirectoryProvider>(dataDirectoryProvider);
         fixture.Inject<IArchiveService>(archiveService);

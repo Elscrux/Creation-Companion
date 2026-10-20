@@ -629,7 +629,6 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
      && (ShowEmptyDirectories || GetFilteredFileSystemChildren(directoryLink).Any());
 
     private bool FilterLink(DataSourceFileLink fileLink) {
-        if (fileLink.DataSource.DeleteDirectoryLink.Contains(fileLink.DataRelativePath)) return false;
         if (_ignoredDirectoriesProvider.IsIgnored(fileLink.DataRelativePath)) return false;
 
         var assetLink = AssetTypeService.GetAssetLink(fileLink.DataRelativePath);
