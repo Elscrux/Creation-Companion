@@ -11,7 +11,7 @@ using Mutagen.Bethesda.Skyrim.Assets;
 namespace CreationEditor.Skyrim.Tests.Asset;
 
 public sealed class AssetControllerTests {
-    private const string DataDirectory = @"C:\GameDirectory\Data";
+    private static readonly string DataDirectory = Path.Combine(Path.GetTempPath(), "GameDirectory", "Data");
 
     private static DataSourceFileLink CreateFile(IDataSourceService dataSourceService, IFileSystem fileSystem, string relativePath, byte[] content) {
         var fullPath = fileSystem.Path.Combine(DataDirectory, relativePath);
@@ -50,7 +50,7 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        var link = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
+        var link = CreateFile(dataSourceService, fileSystem, "meshes/test.nif", [1, 2, 3]);
 
         assetController.Delete(link);
 
@@ -63,13 +63,13 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        CreateFile(dataSourceService, fileSystem, @"meshes\testdir\a.nif", [1]);
-        CreateFile(dataSourceService, fileSystem, @"meshes\testdir\b.nif", [2]);
-        var directoryLink = new DataSourceDirectoryLink(dataSourceService.DataDirectoryDataSource, @"meshes\testdir");
+        CreateFile(dataSourceService, fileSystem, "meshes/testdir/a.nif", [1]);
+        CreateFile(dataSourceService, fileSystem, "meshes/testdir/b.nif", [2]);
+        var directoryLink = new DataSourceDirectoryLink(dataSourceService.DataDirectoryDataSource, "meshes/testdir");
 
         assetController.Delete(directoryLink);
 
-        Assert.False(fileSystem.Directory.Exists(fileSystem.Path.Combine(DataDirectory, @"meshes\testdir")));
+        Assert.False(fileSystem.Directory.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "testdir")));
         Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "_DELETE_", "meshes", "testdir", "a.nif")));
         Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "_DELETE_", "meshes", "testdir", "b.nif")));
     }
@@ -79,8 +79,8 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        var origin = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
-        var destination = CreateFileLink(dataSourceService, @"textures\test.nif");
+        var origin = CreateFile(dataSourceService, fileSystem, "meshes/test.nif", [1, 2, 3]);
+        var destination = CreateFileLink(dataSourceService, "textures/test.nif");
 
         assetController.Copy(origin, destination, overwrite: false);
 
@@ -94,8 +94,8 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        var origin = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
-        var destination = CreateFile(dataSourceService, fileSystem, @"textures\test.nif", [9, 9, 9]);
+        var origin = CreateFile(dataSourceService, fileSystem, "meshes/test.nif", [1, 2, 3]);
+        var destination = CreateFile(dataSourceService, fileSystem, "textures/test.nif", [9, 9, 9]);
 
         assetController.Copy(origin, destination, overwrite: false);
 
@@ -107,8 +107,8 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        var origin = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
-        var destination = CreateFileLink(dataSourceService, @"textures\test.nif");
+        var origin = CreateFile(dataSourceService, fileSystem, "meshes/test.nif", [1, 2, 3]);
+        var destination = CreateFileLink(dataSourceService, "textures/test.nif");
 
         assetController.Move(origin, destination, overwrite: false);
 
@@ -122,13 +122,13 @@ public sealed class AssetControllerTests {
         IAssetController assetController,
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        var origin = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
+        var origin = CreateFile(dataSourceService, fileSystem, "meshes/test.nif", [1, 2, 3]);
 
         assetController.Rename(origin, "renamed.nif", overwrite: false);
 
         Assert.False(fileSystem.File.Exists(origin.FullPath));
-        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, @"meshes\renamed.nif")));
-        Assert.Equal([1, 2, 3], fileSystem.File.ReadAllBytes(fileSystem.Path.Combine(DataDirectory, @"meshes\renamed.nif")));
+        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "renamed.nif")));
+        Assert.Equal([1, 2, 3], fileSystem.File.ReadAllBytes(fileSystem.Path.Combine(DataDirectory, "meshes", "renamed.nif")));
     }
 
     [Theory] [CreationEditorAutoData]
@@ -143,26 +143,26 @@ public sealed class AssetControllerTests {
         // Create a record referencing the asset
         var staticRecord = recordController.CreateRecord<Static, IStaticGetter>();
         recordController.RegisterUpdate(staticRecord, () => staticRecord.Model = new Model {
-            File = new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif"),
+            File = new AssetLink<SkyrimModelAssetType>("Meshes/test.nif"),
         });
 
-        var oldLink = new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif");
+        var oldLink = new AssetLink<SkyrimModelAssetType>("Meshes/test.nif");
         Assert.Contains(staticRecord.FormKey, referenceService.GetRecordReferences(oldLink).Select(x => x.FormKey));
 
         // Create the referenced file and rename it
-        var fileLink = CreateFile(dataSourceService, fileSystem, @"meshes\test.nif", [1, 2, 3]);
+        var fileLink = CreateFile(dataSourceService, fileSystem, "Meshes/test.nif", [1, 2, 3]);
 
         assetController.Rename(fileLink, "renamed.nif", overwrite: false);
 
         // File was moved
         Assert.False(fileSystem.File.Exists(fileLink.FullPath));
-        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, @"meshes\renamed.nif")));
+        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "Meshes", "renamed.nif")));
 
         // Record asset reference was remapped to the new path
-        Assert.Equal(@"meshes\renamed.nif", staticRecord.Model!.File.DataRelativePath.Path, ignoreCase: true);
+        Assert.Equal(Path.Combine("Meshes", "renamed.nif"), staticRecord.Model!.File.DataRelativePath.Path, ignoreCase: true);
 
         // Reference tracking reflects the remap
-        var newLink = new AssetLink<SkyrimModelAssetType>(@"meshes\renamed.nif");
+        var newLink = new AssetLink<SkyrimModelAssetType>("Meshes/renamed.nif");
         Assert.DoesNotContain(staticRecord.FormKey, referenceService.GetRecordReferences(oldLink).Select(x => x.FormKey));
         Assert.Contains(staticRecord.FormKey, referenceService.GetRecordReferences(newLink).Select(x => x.FormKey));
     }

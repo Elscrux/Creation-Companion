@@ -9,7 +9,8 @@ using Mutagen.Bethesda.Environments.DI;
 namespace CreationEditor.Skyrim.Tests.DataSource;
 
 public sealed class DataSourceServiceTests {
-    private const string DataDirectory = @"C:\GameDirectory\Data";
+    private static readonly string DataDirectory = Path.Combine(Path.GetTempPath(), "GameDirectory", "Data");
+    private static readonly string ExtraSource = Path.Combine(Path.GetTempPath(), "ExtraSource");
 
     [Theory] [CreationEditorAutoData]
     public void DataDirectoryDataSource_PointsAtInjectedDataDirectory(
@@ -26,7 +27,7 @@ public sealed class DataSourceServiceTests {
         fileSystem.Directory.CreateDirectory(Path.Combine(DataDirectory, "meshes"));
         fileSystem.File.WriteAllText(Path.Combine(DataDirectory, "meshes", "test.nif"), "content");
 
-        var link = dataSourceService.GetFileLink(new DataRelativePath(@"meshes\test.nif"));
+        var link = dataSourceService.GetFileLink(new DataRelativePath("meshes/test.nif"));
 
         Assert.NotNull(link);
         Assert.Equal(Path.Combine(DataDirectory, "meshes", "test.nif"), link.FullPath);
@@ -36,7 +37,7 @@ public sealed class DataSourceServiceTests {
     [Theory] [CreationEditorAutoData]
     public void GetFileLink_MissingFile_ReturnsNull(
         IDataSourceService dataSourceService) {
-        var link = dataSourceService.GetFileLink(new DataRelativePath(@"meshes\missing.nif"));
+        var link = dataSourceService.GetFileLink(new DataRelativePath("meshes/missing.nif"));
 
         Assert.Null(link);
     }
@@ -57,7 +58,7 @@ public sealed class DataSourceServiceTests {
     [Theory] [CreationEditorAutoData]
     public void GetFileLink_AbsolutePathOutsideDataDirectory_ReturnsNull(
         IDataSourceService dataSourceService) {
-        var link = dataSourceService.GetFileLink(@"C:\Somewhere\Else\test.nif");
+        var link = dataSourceService.GetFileLink(Path.Combine(Path.GetTempPath(), "Somewhere", "Else", "test.nif"));
 
         Assert.Null(link);
     }
@@ -77,8 +78,8 @@ public sealed class DataSourceServiceTests {
     public void UpdateDataSources_FiresDataSourcesChanged(
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
-        fileSystem.Directory.CreateDirectory(@"C:\ExtraSource");
-        var extraSource = new FileSystemDataSource(fileSystem, @"C:\ExtraSource");
+        fileSystem.Directory.CreateDirectory(ExtraSource);
+        var extraSource = new FileSystemDataSource(fileSystem, ExtraSource);
         var received = new List<IReadOnlyList<IDataSource>>();
         using var subscription = dataSourceService.DataSourcesChanged.Subscribe(received.Add);
 
@@ -96,11 +97,11 @@ public sealed class DataSourceServiceTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         fileSystem.Directory.CreateDirectory(DataDirectory);
-        fileSystem.Directory.CreateDirectory(@"C:\ExtraSource");
+        fileSystem.Directory.CreateDirectory(ExtraSource);
         fileSystem.File.WriteAllText(Path.Combine(DataDirectory, "duplicate.nif"), "data directory");
-        fileSystem.File.WriteAllText(@"C:\ExtraSource\duplicate.nif", "extra source");
+        fileSystem.File.WriteAllText(Path.Combine(ExtraSource, "duplicate.nif"), "extra source");
 
-        var extraSource = new FileSystemDataSource(fileSystem, @"C:\ExtraSource");
+        var extraSource = new FileSystemDataSource(fileSystem, ExtraSource);
         dataSourceService.UpdateDataSources(
             [dataSourceService.DataDirectoryDataSource, extraSource],
             dataSourceService.DataDirectoryDataSource);
@@ -108,7 +109,7 @@ public sealed class DataSourceServiceTests {
         var link = dataSourceService.GetFileLink(new DataRelativePath("duplicate.nif"));
 
         Assert.NotNull(link);
-        Assert.Equal(@"C:\ExtraSource", link.DataSource.Path);
+        Assert.Equal(ExtraSource, link.DataSource.Path);
     }
 
     [Theory] [CreationEditorAutoData]
@@ -119,8 +120,8 @@ public sealed class DataSourceServiceTests {
         IDataDirectoryProvider dataDirectoryProvider,
         IArchiveService archiveService,
         IStateRepositoryFactory<DataSourceMemento, DataSourceMemento, NamedGuid> stateRepositoryFactory) {
-        fileSystem.Directory.CreateDirectory(@"C:\ExtraSource");
-        var extraSource = new FileSystemDataSource(fileSystem, @"C:\ExtraSource");
+        fileSystem.Directory.CreateDirectory(ExtraSource);
+        var extraSource = new FileSystemDataSource(fileSystem, ExtraSource);
         dataSourceService.UpdateDataSources(
             [dataSourceService.DataDirectoryDataSource, extraSource],
             dataSourceService.DataDirectoryDataSource);
@@ -129,7 +130,7 @@ public sealed class DataSourceServiceTests {
         var restoredService = new DataSourceService(fileSystem, ignoredDirectoriesProvider, dataDirectoryProvider, archiveService, stateRepositoryFactory);
 
         Assert.Contains(restoredService.DataDirectoryDataSource, restoredService.ListedOrder);
-        var restored = restoredService.ListedOrder.OfType<FileSystemDataSource>().FirstOrDefault(x => x.Path == @"C:\ExtraSource");
+        var restored = restoredService.ListedOrder.OfType<FileSystemDataSource>().FirstOrDefault(x => x.Path == ExtraSource);
         Assert.NotNull(restored);
     }
 
@@ -137,11 +138,11 @@ public sealed class DataSourceServiceTests {
     public void HasDataSource_And_TryGetDataSource_MatchByPath(
         IDataSourceService dataSourceService) {
         Assert.True(dataSourceService.HasDataSource(DataDirectory));
-        Assert.False(dataSourceService.HasDataSource(@"C:\NotASource"));
+        Assert.False(dataSourceService.HasDataSource(Path.Combine(Path.GetTempPath(), "NotASource")));
 
         Assert.True(dataSourceService.TryGetDataSource(DataDirectory, out var dataSource));
         Assert.Equal(dataSourceService.DataDirectoryDataSource, dataSource);
-        Assert.False(dataSourceService.TryGetDataSource(@"C:\NotASource", out var missing));
+        Assert.False(dataSourceService.TryGetDataSource(Path.Combine(Path.GetTempPath(), "NotASource"), out var missing));
         Assert.Null(missing);
     }
 
@@ -150,12 +151,12 @@ public sealed class DataSourceServiceTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         fileSystem.Directory.CreateDirectory(Path.Combine(DataDirectory, "TestAssets"));
-        fileSystem.Directory.CreateDirectory(@"C:\ExtraSource\TestAssets");
+        fileSystem.Directory.CreateDirectory(Path.Combine(ExtraSource, "TestAssets"));
         fileSystem.File.WriteAllText(Path.Combine(DataDirectory, "TestAssets", "duplicate.nif"), "data directory");
         fileSystem.File.WriteAllText(Path.Combine(DataDirectory, "TestAssets", "onlyData.nif"), "data directory");
-        fileSystem.File.WriteAllText(@"C:\ExtraSource\TestAssets\duplicate.nif", "extra source");
+        fileSystem.File.WriteAllText(Path.Combine(ExtraSource, "TestAssets", "duplicate.nif"), "extra source");
 
-        var extraSource = new FileSystemDataSource(fileSystem, @"C:\ExtraSource");
+        var extraSource = new FileSystemDataSource(fileSystem, ExtraSource);
         dataSourceService.UpdateDataSources(
             [dataSourceService.DataDirectoryDataSource, extraSource],
             dataSourceService.DataDirectoryDataSource);
@@ -165,7 +166,7 @@ public sealed class DataSourceServiceTests {
             .ToList();
 
         Assert.Equal(2, links.Count);
-        var duplicate = links.Single(x => x.DataRelativePath.Path == @"TestAssets\duplicate.nif");
-        Assert.Equal(@"C:\ExtraSource", duplicate.DataSource.Path);
+        var duplicate = links.Single(x => x.DataRelativePath.Path == Path.Combine("TestAssets", "duplicate.nif"));
+        Assert.Equal(ExtraSource, duplicate.DataSource.Path);
     }
 }

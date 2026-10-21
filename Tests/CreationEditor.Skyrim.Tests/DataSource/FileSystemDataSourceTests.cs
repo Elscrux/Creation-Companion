@@ -5,7 +5,7 @@ using Mutagen.Bethesda.Assets;
 namespace CreationEditor.Skyrim.Tests.DataSource;
 
 public sealed class FileSystemDataSourceTests {
-    private const string DataSourceDirectory = @"C:\TestDataSource";
+    private static readonly string DataSourceDirectory = Path.Combine(Path.GetTempPath(), "TestDataSource");
 
     [Theory] [CreationEditorAutoData]
     public void FileExists_ChecksUnderlyingFileSystem(
@@ -38,7 +38,7 @@ public sealed class FileSystemDataSourceTests {
         IFileSystem fileSystem) {
         var dataSource = new FileSystemDataSource(fileSystem, DataSourceDirectory);
 
-        using var stream = dataSource.Create(new DataRelativePath(@"meshes\new.nif"));
+        using var stream = dataSource.Create(new DataRelativePath("meshes/new.nif"));
 
         Assert.True(fileSystem.File.Exists(Path.Combine(DataSourceDirectory, "meshes", "new.nif")));
     }
@@ -100,7 +100,7 @@ public sealed class FileSystemDataSourceTests {
         fileSystem.Directory.CreateDirectory(Path.Combine(DataSourceDirectory, "meshes"));
         fileSystem.File.WriteAllText(Path.Combine(DataSourceDirectory, "meshes", "test.nif"), "content");
 
-        var link = new DataSourceFileLink(dataSource, new DataRelativePath(@"meshes\test.nif"));
+        var link = new DataSourceFileLink(dataSource, new DataRelativePath("meshes/test.nif"));
 
         Assert.True(link.Exists());
         Assert.Equal(Path.Combine(DataSourceDirectory, "meshes", "test.nif"), link.FullPath);
@@ -140,11 +140,11 @@ public sealed class FileSystemDataSourceTests {
         IFileSystem fileSystem) {
         var dataSource = new FileSystemDataSource(fileSystem, DataSourceDirectory);
 
-        var directoryLink = new DataSourceDirectoryLink(dataSource, @"meshes\clutter");
+        var directoryLink = new DataSourceDirectoryLink(dataSource, "meshes/clutter");
 
-        Assert.True(directoryLink.Contains(new DataRelativePath(@"meshes\clutter\test.nif")));
-        Assert.False(directoryLink.Contains(new DataRelativePath(@"meshes\other\test.nif")));
-        Assert.False(directoryLink.Contains(new DataRelativePath(@"meshes\clutter")));
+        Assert.True(directoryLink.Contains(new DataRelativePath("meshes/clutter/test.nif")));
+        Assert.False(directoryLink.Contains(new DataRelativePath("meshes/other/test.nif")));
+        Assert.False(directoryLink.Contains(new DataRelativePath("meshes/clutter")));
     }
 
     [Theory] [CreationEditorAutoData]
@@ -152,8 +152,8 @@ public sealed class FileSystemDataSourceTests {
         IFileSystem fileSystem) {
         var dataSource = new FileSystemDataSource(fileSystem, DataSourceDirectory);
 
-        Assert.True(dataSource.DeleteDirectoryLink.Contains(new DataRelativePath(@"_DELETE_\test.nif")));
-        Assert.False(dataSource.DeleteDirectoryLink.Contains(new DataRelativePath(@"meshes\test.nif")));
+        Assert.True(dataSource.DeleteDirectoryLink.Contains(new DataRelativePath("_DELETE_/test.nif")));
+        Assert.False(dataSource.DeleteDirectoryLink.Contains(new DataRelativePath("meshes/test.nif")));
     }
 
     [Theory] [CreationEditorAutoData]

@@ -5,29 +5,29 @@ using Mutagen.Bethesda.Archives;
 namespace CreationEditor.Skyrim.Tests.Archive;
 
 public sealed class ArchiveFileSystemTests {
-    private const string ArchivePath = @"C:\GameDirectory\Data\TestArchive.bsa";
+    private static readonly string ArchivePath = Path.Combine(Path.GetTempPath(), "GameDirectory", "Data", "TestArchive.bsa");
 
     private static ArchiveFileSystem CreateFileSystem(IFileSystem fileSystem, params IArchiveFile[] files) => new(fileSystem, new FakeArchiveReader(files), ArchivePath);
 
     [Theory] [CreationEditorAutoData]
     public void FileExists_FindsFilesInArchive(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif"));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif")));
 
         Assert.True(archiveFileSystem.File.Exists(Path.Combine(ArchivePath, "meshes", "test.nif")));
         Assert.False(archiveFileSystem.File.Exists(Path.Combine(ArchivePath, "meshes", "missing.nif")));
-        Assert.False(archiveFileSystem.File.Exists(@"C:\Somewhere\Else\test.nif"));
+        Assert.False(archiveFileSystem.File.Exists(Path.Combine(Path.GetTempPath(), "Somewhere", "Else", "test.nif")));
     }
 
     [Theory] [CreationEditorAutoData]
     public void FileExists_IsCaseInsensitive(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif"));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif")));
 
         Assert.True(archiveFileSystem.File.Exists(Path.Combine(ArchivePath, "MESHES", "TEST.NIF")));
     }
 
     [Theory] [CreationEditorAutoData]
     public void FileOpen_ReturnsArchiveContent(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif", 1, 2, 3));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1, 2, 3));
 
         using var stream = archiveFileSystem.File.Open(Path.Combine(ArchivePath, "meshes", "test.nif"), FileMode.Open, FileAccess.Read, FileShare.Read);
         using var memoryStream = new MemoryStream();
@@ -46,7 +46,7 @@ public sealed class ArchiveFileSystemTests {
 
     [Theory] [CreationEditorAutoData]
     public void FileOpen_NonSeekableStream_ReturnsSeekableStream(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeCompressedArchiveFile(@"meshes\test.nif", 1, 2, 3));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeCompressedArchiveFile(Path.Combine("meshes", "test.nif"), 1, 2, 3));
         var path = Path.Combine(ArchivePath, "meshes", "test.nif");
 
         using var stream = archiveFileSystem.File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -64,7 +64,7 @@ public sealed class ArchiveFileSystemTests {
 
     [Theory] [CreationEditorAutoData]
     public void FileOpen_WriteAccess_ThrowsNotSupported(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif"));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif")));
 
         Assert.Throws<NotSupportedException>(() =>
             archiveFileSystem.File.Open(Path.Combine(ArchivePath, "meshes", "test.nif"), FileMode.Create, FileAccess.Write, FileShare.None));
@@ -72,7 +72,7 @@ public sealed class ArchiveFileSystemTests {
 
     [Theory] [CreationEditorAutoData]
     public void ReadAllBytes_ReturnsArchiveContent(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif", 1, 2, 3));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1, 2, 3));
 
         Assert.Equal([1, 2, 3], archiveFileSystem.File.ReadAllBytes(Path.Combine(ArchivePath, "meshes", "test.nif")));
     }
@@ -81,8 +81,8 @@ public sealed class ArchiveFileSystemTests {
     public void DirectoryExists_FindsDirectoriesInArchive(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\test.nif", 1),
-            new FakeArchiveFile(@"meshes\clutter\deep\test.nif", 2));
+            new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1),
+            new FakeArchiveFile(Path.Combine("meshes", "clutter", "deep", "test.nif"), 2));
 
         Assert.True(archiveFileSystem.Directory.Exists(ArchivePath));
         Assert.True(archiveFileSystem.Directory.Exists(Path.Combine(ArchivePath, "meshes")));
@@ -95,8 +95,8 @@ public sealed class ArchiveFileSystemTests {
     public void EnumerateFiles_TopDirectoryOnly_ReturnsDirectFiles(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\test.nif", 1),
-            new FakeArchiveFile(@"meshes\clutter\deep.nif", 2));
+            new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1),
+            new FakeArchiveFile(Path.Combine("meshes", "clutter", "deep.nif"), 2));
 
         var files = archiveFileSystem.Directory
             .EnumerateFiles(Path.Combine(ArchivePath, "meshes"), "*", SearchOption.TopDirectoryOnly)
@@ -110,9 +110,9 @@ public sealed class ArchiveFileSystemTests {
     public void EnumerateFiles_AllDirectories_ReturnsNestedFiles(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\test.nif", 1),
-            new FakeArchiveFile(@"meshes\clutter\deep.nif", 2),
-            new FakeArchiveFile(@"textures\test.dds", 3));
+            new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1),
+            new FakeArchiveFile(Path.Combine("meshes", "clutter", "deep.nif"), 2),
+            new FakeArchiveFile(Path.Combine("textures", "test.dds"), 3));
 
         var files = archiveFileSystem.Directory
             .EnumerateFiles(ArchivePath, "*", SearchOption.AllDirectories)
@@ -128,8 +128,8 @@ public sealed class ArchiveFileSystemTests {
     public void EnumerateFiles_WithSearchPattern_FiltersFiles(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\test.nif", 1),
-            new FakeArchiveFile(@"meshes\test.dds", 2));
+            new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1),
+            new FakeArchiveFile(Path.Combine("meshes", "test.dds"), 2));
 
         var files = archiveFileSystem.Directory
             .EnumerateFiles(Path.Combine(ArchivePath, "meshes"), "*.nif", SearchOption.TopDirectoryOnly)
@@ -143,9 +143,9 @@ public sealed class ArchiveFileSystemTests {
     public void EnumerateDirectories_ReturnsSubDirectories(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\test.nif", 1),
-            new FakeArchiveFile(@"meshes\clutter\deep.nif", 2),
-            new FakeArchiveFile(@"textures\test.dds", 3));
+            new FakeArchiveFile(Path.Combine("meshes", "test.nif"), 1),
+            new FakeArchiveFile(Path.Combine("meshes", "clutter", "deep.nif"), 2),
+            new FakeArchiveFile(Path.Combine("textures", "test.dds"), 3));
 
         var directories = archiveFileSystem.Directory
             .EnumerateDirectories(ArchivePath, "*", SearchOption.TopDirectoryOnly)
@@ -160,7 +160,7 @@ public sealed class ArchiveFileSystemTests {
     public void EnumerateDirectories_AllDirectories_ReturnsNestedDirectories(IFileSystem fileSystem) {
         var archiveFileSystem = CreateFileSystem(
             fileSystem,
-            new FakeArchiveFile(@"meshes\clutter\deep\test.nif"));
+            new FakeArchiveFile(Path.Combine("meshes", "clutter", "deep", "test.nif")));
 
         var directories = archiveFileSystem.Directory
             .EnumerateDirectories(ArchivePath, "*", SearchOption.AllDirectories)
@@ -174,7 +174,7 @@ public sealed class ArchiveFileSystemTests {
 
     [Theory] [CreationEditorAutoData]
     public void DirectoryInfo_GetFiles_ReturnsFileInfosWithLength(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif"));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif")));
 
         var directoryInfo = archiveFileSystem.DirectoryInfo.New(Path.Combine(ArchivePath, "meshes"));
         var fileInfos = directoryInfo.GetFiles();
@@ -187,7 +187,7 @@ public sealed class ArchiveFileSystemTests {
 
     [Theory] [CreationEditorAutoData]
     public void WriteOperations_ThrowNotSupportedException(IFileSystem fileSystem) {
-        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(@"meshes\test.nif"));
+        var archiveFileSystem = CreateFileSystem(fileSystem, new FakeArchiveFile(Path.Combine("meshes", "test.nif")));
         var filePath = Path.Combine(ArchivePath, "meshes", "test.nif");
 
         Assert.Throws<NotSupportedException>(() => archiveFileSystem.File.Delete(filePath));
