@@ -8,11 +8,12 @@ using CreationEditor.Skyrim.Tests.AutoData;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Skyrim.Assets;
+using Noggog.Testing.IO;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.References.Query;
 
 public sealed class FileSystemQueryTests {
-    private const string DataDirectory = @"C:\GameDirectory\Data";
+    private static readonly string DataDirectory = Path.Combine(PathingUtil.DrivePrefix, "GameDirectory", "Data");
 
     private static FileSystemQuery<AssetReferenceCache<DataRelativePath>, IAssetLinkGetter> CreateQuery(
         IAssetTypeService assetTypeService,
@@ -34,15 +35,15 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         var query = CreateQuery(assetTypeService, dataSourceService);
-        WriteFile(fileSystem, @"scripts\source\child.psc", "ScriptName Child extends Parent\n");
+        WriteFile(fileSystem, "scripts/source/child.psc", "ScriptName Child extends Parent\n");
 
         var cache = AssetReferenceCache<DataRelativePath>.CreateNew();
         query.FillCache(dataSourceService.DataDirectoryDataSource, cache);
 
-        var sourceReferences = cache.GetReferences(new AssetLink<SkyrimScriptSourceAssetType>(@"Scripts\Source\Parent.psc")).ToList();
-        Assert.Contains(sourceReferences, r => r.Path == @"scripts\source\child.psc");
-        var compiledReferences = cache.GetReferences(new AssetLink<SkyrimScriptCompiledAssetType>(@"Scripts\Parent.pex")).ToList();
-        Assert.Contains(compiledReferences, r => r.Path == @"scripts\source\child.psc");
+        var sourceReferences = cache.GetReferences(new AssetLink<SkyrimScriptSourceAssetType>(Path.Combine("Scripts", "Source", "Parent.psc"))).ToList();
+        Assert.Contains(sourceReferences, r => r.Path == Path.Combine("scripts", "source", "child.psc"));
+        var compiledReferences = cache.GetReferences(new AssetLink<SkyrimScriptCompiledAssetType>("Scripts/Parent.pex")).ToList();
+        Assert.Contains(compiledReferences, r => r.Path == Path.Combine("scripts", "source", "child.psc"));
     }
 
     [Theory] [CreationEditorAutoData]
@@ -51,7 +52,7 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         var query = CreateQuery(assetTypeService, dataSourceService);
-        WriteFile(fileSystem, @"meshes\test.nif", "not a script");
+        WriteFile(fileSystem, "meshes/test.nif", "not a script");
 
         var cache = AssetReferenceCache<DataRelativePath>.CreateNew();
         query.FillCache(dataSourceService.DataDirectoryDataSource, cache);
@@ -65,13 +66,13 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         var query = CreateQuery(assetTypeService, dataSourceService);
-        WriteFile(fileSystem, @"scripts\source\child.psc", "ScriptName Child extends Parent\n");
+        WriteFile(fileSystem, "scripts/source/child.psc", "ScriptName Child extends Parent\n");
 
         var cache = AssetReferenceCache<DataRelativePath>.CreateNew();
-        query.FillCache(new DataRelativePath(@"scripts\source\child.psc"), cache);
+        query.FillCache(new DataRelativePath("scripts/source/child.psc"), cache);
 
-        var references = cache.GetReferences(new AssetLink<SkyrimScriptSourceAssetType>(@"Scripts\Source\Parent.psc")).ToList();
-        Assert.Contains(references, r => r.Path == @"scripts\source\child.psc");
+        var references = cache.GetReferences(new AssetLink<SkyrimScriptSourceAssetType>(Path.Combine("Scripts", "Source", "Parent.psc"))).ToList();
+        Assert.Contains(references, r => r.Path == Path.Combine("scripts", "source", "child.psc"));
     }
 
     [Theory] [CreationEditorAutoData]
@@ -80,10 +81,10 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         var query = CreateQuery(assetTypeService, dataSourceService);
-        WriteFile(fileSystem, @"meshes\test.nif", "not a script");
+        WriteFile(fileSystem, "meshes/test.nif", "not a script");
 
         var cache = AssetReferenceCache<DataRelativePath>.CreateNew();
-        query.FillCache(new DataRelativePath(@"meshes\test.nif"), cache);
+        query.FillCache(new DataRelativePath("meshes/test.nif"), cache);
 
         Assert.Empty(cache.Cache);
     }
@@ -94,12 +95,12 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService,
         IFileSystem fileSystem) {
         var query = CreateQuery(assetTypeService, dataSourceService);
-        WriteFile(fileSystem, @"scripts\source\child.psc", "ScriptName Child\n");
+        WriteFile(fileSystem, "scripts/source/child.psc", "ScriptName Child\n");
 
-        var link = query.ReferenceToSource(new DataRelativePath(@"scripts\source\child.psc"));
+        var link = query.ReferenceToSource(new DataRelativePath("scripts/source/child.psc"));
 
         Assert.NotNull(link);
-        Assert.Equal(@"scripts\source\child.psc", link.DataRelativePath.Path);
+        Assert.Equal(Path.Combine("scripts", "source", "child.psc"), link.DataRelativePath.Path);
     }
 
     [Theory] [CreationEditorAutoData]
@@ -108,7 +109,7 @@ public sealed class FileSystemQueryTests {
         IDataSourceService dataSourceService) {
         var query = CreateQuery(assetTypeService, dataSourceService);
 
-        var link = query.ReferenceToSource(new DataRelativePath(@"scripts\source\missing.psc"));
+        var link = query.ReferenceToSource(new DataRelativePath("scripts/source/missing.psc"));
 
         Assert.Null(link);
     }

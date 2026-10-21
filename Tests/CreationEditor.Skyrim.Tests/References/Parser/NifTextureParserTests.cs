@@ -22,7 +22,7 @@ public sealed class NifTextureParserTests {
     [Fact]
     public void ParseFileTextureStrings_ReturnsTextureSetTextures() {
         var (parser, _, dataSource) = CreateParser();
-        var link = new DataSourceFileLink(dataSource, @"TestAssets\testcube.nif");
+        var link = new DataSourceFileLink(dataSource, "TestAssets/testcube.nif");
         using var stream = link.ReadFileStream();
 
         var textures = parser.ParseFileTextureStrings(stream, link).ToList();
@@ -35,7 +35,7 @@ public sealed class NifTextureParserTests {
     [Fact]
     public void ParseFile_ReturnsTextureAssetLinks() {
         var (parser, _, dataSource) = CreateParser();
-        var link = new DataSourceFileLink(dataSource, @"TestAssets\testcube.nif");
+        var link = new DataSourceFileLink(dataSource, "TestAssets/testcube.nif");
         using var stream = link.ReadFileStream();
 
         var results = parser.ParseFile(stream, link).ToList();
@@ -49,7 +49,7 @@ public sealed class NifTextureParserTests {
     [Fact]
     public void ParseFile_MissingFile_ReturnsNoLinks() {
         var (parser, _, dataSource) = CreateParser();
-        var link = new DataSourceFileLink(dataSource, @"TestAssets\missing.nif");
+        var link = new DataSourceFileLink(dataSource, "TestAssets/missing.nif");
 
         var results = parser.ParseFile(link.ReadFileStream(), link).ToList();
         Assert.Empty(results);
@@ -60,7 +60,7 @@ public sealed class NifTextureParserTests {
         var (parser, fileSystem, dataSource) = CreateParser();
         var invalidPath = TestAssetPath("invalid.nif");
         fileSystem.File.WriteAllText(invalidPath, "this is not a nif file");
-        var link = new DataSourceFileLink(dataSource, @"TestAssets\invalid.nif");
+        var link = new DataSourceFileLink(dataSource, "TestAssets/invalid.nif");
 
         try {
             using var stream = link.ReadFileStream();

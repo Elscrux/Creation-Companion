@@ -5,10 +5,13 @@ using CreationEditor.Services.Mutagen.References.Cache;
 using CreationEditor.Services.Mutagen.References.Cache.Serialization;
 using CreationEditor.Services.Mutagen.References.Query;
 using Mutagen.Bethesda.Assets;
+using Noggog.Testing.IO;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.References.Cache;
 
 public sealed class DictionaryReferenceCacheSerializationTests {
+    private static readonly string TestDataSourcePath = Path.Combine(PathingUtil.DrivePrefix, "TestData");
+
     private sealed class TestQuery
         : IReferenceQuery<IDataSource, DictionaryReferenceCache<string, DataRelativePath>, string, DataRelativePath> {
         public string Name => "Test Dictionary Query";
@@ -36,7 +39,7 @@ public sealed class DictionaryReferenceCacheSerializationTests {
     public void SerializeThenValidate_ReturnsTrue() {
         var fileSystem = new MockFileSystem();
         var serialization = CreateSerialization(fileSystem);
-        var source = new FileSystemDataSource(fileSystem, @"C:\TestData");
+        var source = new FileSystemDataSource(fileSystem, TestDataSourcePath);
         var query = new TestQuery();
 
         serialization.Serialize(source, query, CreateCache());
@@ -48,21 +51,21 @@ public sealed class DictionaryReferenceCacheSerializationTests {
     public void SerializeThenDeserialize_RoundTripsLinksAndReferences() {
         var fileSystem = new MockFileSystem();
         var serialization = CreateSerialization(fileSystem);
-        var source = new FileSystemDataSource(fileSystem, @"C:\TestData");
+        var source = new FileSystemDataSource(fileSystem, TestDataSourcePath);
         var query = new TestQuery();
 
         serialization.Serialize(source, query, CreateCache());
         var deserialized = serialization.Deserialize(source, query);
 
         Assert.True(deserialized.Cache.TryGetValue("globalVariable", out var references));
-        Assert.Contains(references, r => r.Path == @"scripts\test.psc");
+        Assert.Contains(references, r => r.Path == Path.Combine("scripts", "test.psc"));
     }
 
     [Fact]
     public void Validate_MissingCacheFile_ReturnsFalse() {
         var fileSystem = new MockFileSystem();
         var serialization = CreateSerialization(fileSystem);
-        var source = new FileSystemDataSource(fileSystem, @"C:\TestData");
+        var source = new FileSystemDataSource(fileSystem, TestDataSourcePath);
 
         Assert.False(serialization.Validate(source, new TestQuery()));
     }
@@ -71,7 +74,7 @@ public sealed class DictionaryReferenceCacheSerializationTests {
     public void Validate_CorruptedCacheFile_ReturnsFalse() {
         var fileSystem = new MockFileSystem();
         var serialization = CreateSerialization(fileSystem);
-        var source = new FileSystemDataSource(fileSystem, @"C:\TestData");
+        var source = new FileSystemDataSource(fileSystem, TestDataSourcePath);
         var query = new TestQuery();
         serialization.Serialize(source, query, CreateCache());
         var cacheFile = new CacheLocationProvider(fileSystem, "References").CacheFile("Test Dictionary Query", "TestData");
@@ -83,7 +86,7 @@ public sealed class DictionaryReferenceCacheSerializationTests {
 
     private static DictionaryReferenceCache<string, DataRelativePath> CreateCache() {
         var cache = DictionaryReferenceCache<string, DataRelativePath>.CreateNew();
-        cache.Add("globalVariable", new DataRelativePath(@"scripts\test.psc"));
+        cache.Add("globalVariable", new DataRelativePath("scripts/test.psc"));
         return cache;
     }
 }

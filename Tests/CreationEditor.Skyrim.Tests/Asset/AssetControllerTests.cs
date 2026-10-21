@@ -8,10 +8,11 @@ using CreationEditor.Skyrim.Tests.AutoData;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Assets;
+using Noggog.Testing.IO;
 namespace CreationEditor.Skyrim.Tests.Asset;
 
 public sealed class AssetControllerTests {
-    private static readonly string DataDirectory = Path.Combine(Path.GetTempPath(), "GameDirectory", "Data");
+    private static readonly string DataDirectory = Path.Combine(PathingUtil.DrivePrefix, "GameDirectory", "Data");
 
     private static DataSourceFileLink CreateFile(IDataSourceService dataSourceService, IFileSystem fileSystem, string relativePath, byte[] content) {
         var fullPath = fileSystem.Path.Combine(DataDirectory, relativePath);

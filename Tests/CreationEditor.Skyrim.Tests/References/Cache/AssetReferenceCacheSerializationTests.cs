@@ -10,6 +10,7 @@ using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
 using Mutagen.Bethesda.Skyrim.Assets;
+using Noggog.Testing.IO;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.References.Cache;
 
@@ -39,10 +40,10 @@ public sealed class AssetReferenceCacheSerializationTests {
     private static AssetReferenceCache<IFormLinkIdentifier> CreateCache() {
         var cache = AssetReferenceCache<IFormLinkIdentifier>.CreateNew();
         cache.Add(
-            new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif"),
+            new AssetLink<SkyrimModelAssetType>("meshes/test.nif"),
             new FormLinkInformation(new FormKey(ModKey.FromName("Mod0", ModType.Plugin), 0x800), typeof(IStaticGetter)));
         cache.Add(
-            new AssetLink<SkyrimTextureAssetType>(@"textures\test.dds"),
+            new AssetLink<SkyrimTextureAssetType>("textures/test.dds"),
             new FormLinkInformation(new FormKey(ModKey.FromName("Mod0", ModType.Plugin), 0x801), typeof(ITextureSetGetter)));
         return cache;
     }
@@ -86,8 +87,8 @@ public sealed class AssetReferenceCacheSerializationTests {
         var serialization = CreateSerialization(cacheLocationProviderFactory, serializationConfig, assetTypeService, fileSystem);
         var mod = CreateMod();
         var query = new TestQuery();
-        var modelLink = new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif");
-        var textureLink = new AssetLink<SkyrimTextureAssetType>(@"textures\test.dds");
+        var modelLink = new AssetLink<SkyrimModelAssetType>("meshes/test.nif");
+        var textureLink = new AssetLink<SkyrimTextureAssetType>("textures/test.dds");
 
         serialization.Serialize(mod, query, CreateCache());
         var deserialized = serialization.Deserialize(mod, query);
@@ -142,7 +143,7 @@ public sealed class AssetReferenceCacheSerializationTests {
         serialization.Serialize(mod, query, CreateCache());
 
         // Modify the mod file on disk so the stored hash no longer matches
-        fileSystem.File.WriteAllBytes(@"C:\GameDirectory\Data\Mod0.esp", [0xFF, 0xFF, 0xFF]);
+        fileSystem.File.WriteAllBytes(Path.Combine(PathingUtil.DrivePrefix, "GameDirectory", "Data", "Mod0.esp"), [0xFF, 0xFF, 0xFF]);
 
         Assert.False(serialization.Validate(mod, query));
     }

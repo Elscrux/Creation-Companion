@@ -24,7 +24,7 @@ public sealed class SettingPathProviderTests {
 
         var path = pathProvider.GetFullPath(new TestSetting());
 
-        Assert.EndsWith("Settings\\Test-Setting.json", path);
+        Assert.EndsWith(Path.Combine("Settings", "Test-Setting.json"), path);
     }
 }
 

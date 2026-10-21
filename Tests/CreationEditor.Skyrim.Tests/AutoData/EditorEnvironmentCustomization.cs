@@ -32,6 +32,7 @@ using Mutagen.Bethesda.Testing.AutoData;
 using Newtonsoft.Json.Serialization;
 using Noggog;
 using Noggog.Testing.AutoFixture;
+using Noggog.Testing.IO;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.AutoData;
 
@@ -40,7 +41,9 @@ public sealed class EditorEnvironmentCustomization(
     GameRelease release = GameRelease.SkyrimSE,
     TargetFileSystem targetFileSystem = TargetFileSystem.Fake) : ICustomization {
 
-    private static readonly string GameDirectoryPath = Path.Combine(Path.GetTempPath(), "GameDirectory");
+    // Must match Mutagen's fake environment game directory (BaseEnvironmentBuilder.GameDirectory),
+    // which is DrivePrefix-based: "C:\GameDirectory" on Windows, "/GameDirectory" elsewhere.
+    private static readonly string GameDirectoryPath = Path.Combine(PathingUtil.DrivePrefix, "GameDirectory");
     private static readonly string DataDirectoryPath = Path.Combine(GameDirectoryPath, "Data");
 
     public void Customize(IFixture fixture) {

@@ -41,8 +41,10 @@ public sealed class AssetTypeService : IAssetTypeService {
         if (extension.Length == 0) return null;
 
         // Temporary adjustments
-        if (extension is ".xwm" or ".wav" && filePath.Path.StartsWith("music\\", DataRelativePath.PathComparison)) return Provider.Music;
-        if (filePath.Path.Contains("source\\scripts", DataRelativePath.PathComparison)) return null;
+        // Normalize to '/' since DataRelativePath preserves '\' on Unix while file-system-derived paths use '/'
+        var path = filePath.Path.Replace('\\', '/');
+        if (extension is ".xwm" or ".wav" && path.StartsWith("music/", DataRelativePath.PathComparison)) return Provider.Music;
+        if (path.Contains("source/scripts", DataRelativePath.PathComparison)) return null;
 
         _assetTypesExtensions.TryGetValue(extension, out var assetType);
 

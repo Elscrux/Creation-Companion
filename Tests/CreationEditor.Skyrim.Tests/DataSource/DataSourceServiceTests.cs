@@ -6,10 +6,11 @@ using CreationEditor.Services.State;
 using CreationEditor.Skyrim.Tests.AutoData;
 using Mutagen.Bethesda.Assets;
 using Mutagen.Bethesda.Environments.DI;
+using Noggog.Testing.IO;
 namespace CreationEditor.Skyrim.Tests.DataSource;
 
 public sealed class DataSourceServiceTests {
-    private static readonly string DataDirectory = Path.Combine(Path.GetTempPath(), "GameDirectory", "Data");
+    private static readonly string DataDirectory = Path.Combine(PathingUtil.DrivePrefix, "GameDirectory", "Data");
     private static readonly string ExtraSource = Path.Combine(Path.GetTempPath(), "ExtraSource");
 
     [Theory] [CreationEditorAutoData]

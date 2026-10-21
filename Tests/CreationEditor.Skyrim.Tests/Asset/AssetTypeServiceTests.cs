@@ -25,8 +25,8 @@ public sealed class AssetTypeServiceTests {
     [Theory] [CreationEditorAutoData]
     public void GetAssetType_MusicFolder_WavAndXwmAreMusic(AssetTypeService assetTypeService) {
         // .wav and .xwm inside the music folder are music, not sound
-        Assert.Equal(SkyrimMusicAssetType.Instance, assetTypeService.GetAssetType(new DataRelativePath(@"music\test.wav")));
-        Assert.Equal(SkyrimMusicAssetType.Instance, assetTypeService.GetAssetType(new DataRelativePath(@"music\battle\test.xwm")));
+        Assert.Equal(SkyrimMusicAssetType.Instance, assetTypeService.GetAssetType(new DataRelativePath("music/test.wav")));
+        Assert.Equal(SkyrimMusicAssetType.Instance, assetTypeService.GetAssetType(new DataRelativePath("music/battle/test.xwm")));
     }
 
     [Theory] [CreationEditorAutoData]
@@ -39,7 +39,7 @@ public sealed class AssetTypeServiceTests {
     [Theory] [CreationEditorAutoData]
     public void GetAssetType_ScriptsSourceFolder_ReturnsNull(AssetTypeService assetTypeService) {
         // Paths containing "source\scripts" are ignored (temporary adjustment for mod authoring folders)
-        Assert.Null(assetTypeService.GetAssetType(new DataRelativePath(@"source\scripts\test.psc")));
+        Assert.Null(assetTypeService.GetAssetType(new DataRelativePath("source/scripts/test.psc")));
     }
 
     [Theory] [CreationEditorAutoData]

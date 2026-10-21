@@ -23,13 +23,13 @@ public sealed class ModAssetSerializableQueryTests {
         var staticRecord = recordController.CreateRecord<Static, IStaticGetter>();
         recordController.RegisterUpdate(staticRecord,
             () => staticRecord.Model = new Model {
-                File = new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif"),
+                File = new AssetLink<SkyrimModelAssetType>("meshes/test.nif"),
             });
 
         var cache = AssetReferenceCache<IFormLinkIdentifier>.CreateNew();
         query.FillCache(editorEnvironment.ActiveMod, cache);
 
-        var references = cache.GetReferences(new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif")).ToList();
+        var references = cache.GetReferences(new AssetLink<SkyrimModelAssetType>("meshes/test.nif")).ToList();
         Assert.Contains(references, r => r.FormKey == staticRecord.FormKey);
     }
 
@@ -59,11 +59,11 @@ public sealed class ModAssetSerializableQueryTests {
         var staticRecord = recordController.CreateRecord<Static, IStaticGetter>();
         recordController.RegisterUpdate(staticRecord,
             () => staticRecord.Model = new Model {
-                File = new AssetLink<SkyrimModelAssetType>(@"meshes\test.nif"),
+                File = new AssetLink<SkyrimModelAssetType>("meshes/test.nif"),
             });
 
         var links = query.ParseRecord(staticRecord).ToList();
 
-        Assert.Contains(links, l => l.DataRelativePath.Path == @"meshes\test.nif");
+        Assert.Contains(links, l => l.DataRelativePath.Path == Path.Combine("meshes", "test.nif"));
     }
 }

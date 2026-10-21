@@ -4,11 +4,12 @@ using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Mutagen.References.Parser;
 using CreationEditor.Skyrim.Services.Asset;
 using Mutagen.Bethesda.Skyrim.Assets;
+using Noggog.Testing.IO;
 using Serilog.Core;
 namespace CreationEditor.Skyrim.Tests.References.Parser;
 
 public sealed class ScriptFileParserTests {
-    private const string DataSourcePath = @"C:\TestData";
+    private static readonly string DataSourcePath = Path.Combine(PathingUtil.DrivePrefix, "TestData");
 
     private static (ScriptFileParser Parser, MockFileSystem FileSystem, FileSystemDataSource DataSource) CreateParser() {
         var fileSystem = new MockFileSystem();
@@ -28,21 +29,21 @@ public sealed class ScriptFileParserTests {
     [Fact]
     public void ParseFile_WithExtends_ReturnsParentScriptLinks() {
         var (parser, fileSystem, dataSource) = CreateParser();
-        var link = CreateScriptFile(fileSystem, dataSource, @"scripts\source\myscript.psc", "ScriptName MyScript extends ObjectReference\n");
+        var link = CreateScriptFile(fileSystem, dataSource, "scripts/source/myscript.psc", "ScriptName MyScript extends ObjectReference\n");
 
         using var stream = link.ReadFileStream();
 
         var results = parser.ParseFile(stream, link).ToList();
 
         Assert.Equal(2, results.Count);
-        Assert.Contains(results, l => l.DataRelativePath.Path == @"Scripts\Source\ObjectReference.psc");
-        Assert.Contains(results, l => l.DataRelativePath.Path == @"Scripts\ObjectReference.pex");
+        Assert.Contains(results, l => l.DataRelativePath.Path == Path.Combine("Scripts", "Source", "ObjectReference.psc"));
+        Assert.Contains(results, l => l.DataRelativePath.Path == Path.Combine("Scripts", "ObjectReference.pex"));
     }
 
     [Fact]
     public void ParseFile_WithoutExtends_ReturnsNoLinks() {
         var (parser, fileSystem, dataSource) = CreateParser();
-        var link = CreateScriptFile(fileSystem, dataSource, @"scripts\source\myscript.psc", "ScriptName MyScript\n");
+        var link = CreateScriptFile(fileSystem, dataSource, "scripts/source/myscript.psc", "ScriptName MyScript\n");
 
         using var stream = link.ReadFileStream();
 
@@ -54,20 +55,20 @@ public sealed class ScriptFileParserTests {
     [Fact]
     public void ParseFile_ScriptNameOnLaterLine_StillFindsParent() {
         var (parser, fileSystem, dataSource) = CreateParser();
-        var link = CreateScriptFile(fileSystem, dataSource, @"scripts\source\myscript.psc", "; a comment\n{ a block }\nScriptName MyScript extends Form\n");
+        var link = CreateScriptFile(fileSystem, dataSource, "scripts/source/myscript.psc", "; a comment\n{ a block }\nScriptName MyScript extends Form\n");
 
         using var stream = link.ReadFileStream();
 
         var results = parser.ParseFile(stream, link).ToList();
 
         Assert.Equal(2, results.Count);
-        Assert.Contains(results, l => l.DataRelativePath.Path == @"Scripts\Source\Form.psc");
+        Assert.Contains(results, l => l.DataRelativePath.Path == Path.Combine("Scripts", "Source", "Form.psc"));
     }
 
     [Fact]
     public void ParseFile_IsCaseInsensitive() {
         var (parser, fileSystem, dataSource) = CreateParser();
-        var link = CreateScriptFile(fileSystem, dataSource, @"scripts\source\myscript.psc", "scriptname MyScript EXTENDS ObjectReference\n");
+        var link = CreateScriptFile(fileSystem, dataSource, "scripts/source/myscript.psc", "scriptname MyScript EXTENDS ObjectReference\n");
 
         using var stream = link.ReadFileStream();
 
@@ -79,7 +80,7 @@ public sealed class ScriptFileParserTests {
     [Fact]
     public void ParseFile_MissingFile_ReturnsNoLinks() {
         var (parser, _, dataSource) = CreateParser();
-        var link = new DataSourceFileLink(dataSource, @"scripts\source\missing.psc");
+        var link = new DataSourceFileLink(dataSource, "scripts/source/missing.psc");
 
         using var stream = link.ReadFileStream();
 
