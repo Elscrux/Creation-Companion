@@ -28,6 +28,7 @@ public sealed class NifTextureParserTests {
         var textures = parser.ParseFileTextureStrings(stream, link).ToList();
 
         Assert.Equal(2, textures.Count);
+        // Raw strings come straight from the NIF binary and always use backslashes, regardless of OS
         Assert.Contains(@"textures\testcube.dds", textures);
         Assert.Contains(@"textures\testcube_n.dds", textures);
     }
@@ -42,8 +43,8 @@ public sealed class NifTextureParserTests {
 
         Assert.Equal(2, results.Count);
         Assert.All(results, l => Assert.Equal(SkyrimTextureAssetType.Instance, l.Type));
-        Assert.Contains(results, l => l.DataRelativePath.Path == @"textures\testcube.dds");
-        Assert.Contains(results, l => l.DataRelativePath.Path == @"textures\testcube_n.dds");
+        Assert.Contains(results, l => l.DataRelativePath.Path == Path.Combine("textures", "testcube.dds"));
+        Assert.Contains(results, l => l.DataRelativePath.Path == Path.Combine("textures", "testcube_n.dds"));
     }
 
     [Fact]
