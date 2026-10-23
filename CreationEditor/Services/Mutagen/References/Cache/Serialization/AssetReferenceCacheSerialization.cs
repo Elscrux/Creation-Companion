@@ -24,9 +24,8 @@ public sealed class AssetReferenceCacheSerialization<TSource, TReference>(
 
     private string GetCacheFile(
         TSource source,
-        IReferenceQuery<TSource, AssetReferenceCache<TReference>, IAssetLinkGetter, TReference> query) {
-        return _cacheLocationProvider.CacheFile(query.Name, query.GetSourceName(source));
-    }
+        IReferenceQuery<TSource, AssetReferenceCache<TReference>, IAssetLinkGetter, TReference> query) =>
+        _cacheLocationProvider.CacheFile(query.Name, query.GetSourceName(source));
 
     public bool Validate(
         TSource source,
@@ -104,7 +103,7 @@ public sealed class AssetReferenceCacheSerialization<TSource, TReference>(
                     cache.TryAdd(assetType, assets);
                 }
             } catch (Exception e) {
-                logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e);
+                logger.Here().Warning(e, "Failed to read cache file {File}: {Exception}", cacheFile, e.Message);
             }
         }
 

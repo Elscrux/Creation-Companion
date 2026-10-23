@@ -50,41 +50,53 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         if (cancellationToken.IsCancellationRequested) return;
 
         _isLoading.OnNext(true);
-
-        // Remove references from sources that are no longer present
-        foreach (var source in _caches.Keys.Where(source => !sources.Contains(source, _queryConfig.EqualityComparer))) {
-            _caches.TryRemove(source, out _);
-        }
-
-        _referenceSubscriptionManager.UnregisterOutdated();
-
-        // New sources that are not yet cached
         var countingNotifier = new CountingNotifier(_notificationService, $"Loading {_queryConfig.Name} References ", sources.Count);
-        var caches = sources
-            .Where(source => !_caches.ContainsKey(source))
-            .ToDictionary(source => Task.Run(() => _queryConfig.BuildCache(source), cancellationToken), source => source);
+        try {
+            // Remove references from sources that are no longer present
+            foreach (var source in _caches.Keys.Where(source => !sources.Contains(source, _queryConfig.EqualityComparer))) {
+                _caches.TryRemove(source, out _);
+            }
 
-        var cachesCount = caches.Count;
-        for (var i = 0; i < cachesCount; i++) {
-            if (cancellationToken.IsCancellationRequested) break;
+            _referenceSubscriptionManager.UnregisterOutdated();
 
-            var task = await Task.WhenAny(caches.Keys);
-            var source = caches[task];
-            _caches.TryAdd(source, task.Result);
-            caches.Remove(task);
-            countingNotifier.NextStep();
+            // New sources that are not yet cached
+            var caches = sources
+                .Where(source => !_caches.ContainsKey(source))
+                .ToDictionary(source => Task.Run(() => _queryConfig.BuildCache(source), cancellationToken), source => source);
+
+            var cachesCount = caches.Count;
+            for (var i = 0; i < cachesCount; i++) {
+                if (cancellationToken.IsCancellationRequested) return;
+
+                var task = await Task.WhenAny(caches.Keys);
+
+                var source = caches[task];
+                // Await instead of accessing Result so a faulted cache build propagates its original exception
+                _caches.TryAdd(source, await task);
+                caches.Remove(task);
+                countingNotifier.NextStep();
+            }
+
+            // Update existing subscriptions
+            _referenceSubscriptionManager.UpdateAll(link => _cacheController.GetReferences(_caches, link));
+
+            // Handle previous reference creations and deletions  while the reference cache wasn't initialized
+            while (_pendingCreations.TryDequeue(out var record)) {
+                RegisterCreation(record);
+            }
+            while (_pendingDeletions.TryDequeue(out var record)) {
+                RegisterDeletion(record);
+            }
+
+            _isLoading.OnNext(false);
+        } catch (OperationCanceledException) {
+            _isLoading.OnNext(false);
+        } catch (Exception) {
+            _isLoading.OnNext(false);
+            throw;
+        } finally {
+            countingNotifier.Stop();
         }
-
-        countingNotifier.Stop();
-
-        // Update existing subscriptions
-        _referenceSubscriptionManager.UpdateAll(link => _cacheController.GetReferences(_caches, link));
-
-        // Handle previous reference creations and deletions  while the reference cache wasn't initialized
-        while (_pendingCreations.TryDequeue(out var record)) RegisterCreation(record);
-        while (_pendingDeletions.TryDequeue(out var record)) RegisterDeletion(record);
-
-        _isLoading.OnNext(false);
     }
 
     public Action<TSourceElement> RegisterUpdate(TSourceElement old) {
@@ -140,13 +152,9 @@ public sealed class ReferenceController<TSource, TSourceElement, TCache, TLink, 
         RemoveLinks(cache, oldReference, linksToRemove);
     }
 
-    public IEnumerable<TReference> GetReferences(TLink link) {
-        return _cacheController.GetReferences(_caches, link);
-    }
+    public IEnumerable<TReference> GetReferences(TLink link) => _cacheController.GetReferences(_caches, link);
 
-    public IEnumerable<TLink> GetLinks(TSourceElement element) {
-        return _cacheController.GetLinks(_caches.Values, _queryConfig.SourceElementToReference(element));
-    }
+    public IEnumerable<TLink> GetLinks(TSourceElement element) => _cacheController.GetLinks(_caches.Values, _queryConfig.SourceElementToReference(element));
 
     private void AddLinks(
         TCache cache,
