@@ -16,7 +16,7 @@ public sealed class LipFuzerWrapperRegistrationConfig : IConfigDefinition {
     ];
 }
 
-public sealed class LipFuzerWrapperRuntimeRuntimeConfig : IFuzGeneratorRuntimeConfigDefinition {
+public sealed class LipFuzerWrapperRuntimeRuntimeConfig : ILipFuzerRuntimeConfigDefinition {
     public static TextConfigOption AudioExtensionOption { get; } = new(
         "Audio Extension",
         "The audio file extension to package into fuz files",

@@ -3,7 +3,7 @@ using CreationEditor.Services.Config.Options;
 using CreationEditor.Services.DataSource;
 namespace CreationEditor.Services.Integrations.Lip;
 
-public interface IFuzGeneratorRuntimeConfigDefinition : IConfigDefinition {
+public interface ILipFuzerRuntimeConfigDefinition : IConfigDefinition {
     static abstract TextConfigOption AudioExtensionOption { get; }
 }
 

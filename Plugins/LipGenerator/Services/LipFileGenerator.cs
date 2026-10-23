@@ -44,7 +44,7 @@ public sealed class LipFileGenerator(
             ? null
             : integrationRegistry.TryGetIntegration<IAudioEncoder>(audioEncoderConfig.IntegrationId);
 
-        var audioExtensionConfigOption = fuzGenerator.GetRuntimeConfigOption(nameof(IFuzGeneratorRuntimeConfigDefinition.AudioExtensionOption));
+        var audioExtensionConfigOption = fuzGenerator.GetRuntimeConfigOption(nameof(ILipFuzerRuntimeConfigDefinition.AudioExtensionOption));
         if (audioExtensionConfigOption is null) {
             throw new InvalidOperationException($"Lip fuzer integration {fuzGenerator.Descriptor.DisplayName} does not have an audio extension config option");
         }
@@ -116,7 +116,7 @@ public sealed class LipFileGenerator(
 
             // Fallback to audio extension used in the lip generator if the audio encoder is not configured, to ensure that the fuzer has a valid audio extension to use
             if (audioEncoder is null) {
-                var audioExtensionOption = fuzGenerator.GetRuntimeConfigOption(nameof(IFuzGeneratorRuntimeConfigDefinition.AudioExtensionOption));
+                var audioExtensionOption = fuzGenerator.GetRuntimeConfigOption(nameof(ILipFuzerRuntimeConfigDefinition.AudioExtensionOption));
                 if (audioExtensionOption is not null) {
                     fuzGeneratorConfig.ConfigValues.Set(audioExtensionOption.Name, lipGenerator.SupportedAudioExtensions[0]);
                 }
