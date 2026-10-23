@@ -30,7 +30,7 @@ public sealed class AssetControllerTests {
     }
 
     /// <summary>
-    /// Waits until the reference service finished loading all record references,
+    /// Waits until the reference service finished loading all references (records and assets),
     /// so that record mutations are reliably picked up by the reference tracking.
     /// </summary>
     private static async Task WaitForReferenceLoading(IReferenceService referenceService) {

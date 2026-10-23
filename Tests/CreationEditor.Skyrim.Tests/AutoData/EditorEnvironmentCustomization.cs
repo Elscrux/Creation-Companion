@@ -6,6 +6,7 @@ using CreationEditor.Services.Asset;
 using CreationEditor.Services.Cache;
 using CreationEditor.Services.DataSource;
 using CreationEditor.Services.Environment;
+using CreationEditor.Services.FileSystem.Validation;
 using CreationEditor.Services.Mutagen.Mod;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -67,6 +68,15 @@ public sealed class EditorEnvironmentCustomization(
             subDirectories => new CacheLocationProvider(fixture.Create<IFileSystem>(), subDirectories));
         fixture.Register<IReferenceCacheSerializationConfig<IModGetter, IFormLinkIdentifier>>(
             fixture.Create<ModAssetReferenceCacheSerializationConfig>);
+        fixture.Register<IReferenceCacheSerializationConfig<FileSystemDataSource, DataRelativePath>>(
+            fixture.Create<AssetReferenceCacheSerializationConfigString<FileSystemDataSource>>);
+        fixture.Register<IReferenceCacheSerializationConfig<ArchiveDataSource, DataRelativePath>>(
+            fixture.Create<AssetReferenceCacheSerializationConfigString<ArchiveDataSource>>);
+        fixture.Register<IHashFileSystemValidationSerialization>(fixture.Create<BinaryFileSystemValidationSerialization>);
+        fixture.Register<Func<IEnumerable<string>, IFileSystemValidation>>(() =>
+            fileExtensions => new HashFileSystemValidation(
+                fixture.Create<IHashFileSystemValidationSerialization>(),
+                fileExtensions));
         fixture.Register<Func<IEditorEnvironmentUpdater>>(() => fixture.Create<EditorEnvironmentUpdater<ISkyrimMod, ISkyrimModGetter>>);
 
         // AutoFixture creates Func<T> delegates that return null - register factories that create real triggers

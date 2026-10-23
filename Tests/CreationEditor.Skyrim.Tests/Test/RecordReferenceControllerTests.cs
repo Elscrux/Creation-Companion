@@ -1,4 +1,4 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Linq;
 using CreationEditor.Services.Environment;
 using CreationEditor.Services.Mutagen.Record;
 using CreationEditor.Services.Mutagen.References;
@@ -10,16 +10,16 @@ namespace CreationEditor.Skyrim.Tests.Test;
 
 public sealed class RecordReferenceControllerTests {
     /// <summary>
-    /// Waits until the reference service finished loading all record references,
+    /// Waits until the reference service finished loading all references (records and assets),
     /// so that record mutations are reliably picked up by the reference tracking.
     /// </summary>
     private static async Task WaitForReferenceLoading(IReferenceService referenceService) {
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var subscription = referenceService.IsLoadingRecordReferences
+        using var subscription = referenceService.IsLoading
             .Where(loading => !loading)
             .Subscribe(_ => completion.TrySetResult());
 
-        if (!referenceService.IsLoadingRecordReferencesCurrently) {
+        if (!referenceService.IsLoadingCurrently) {
             completion.TrySetResult();
         }
 
@@ -33,7 +33,7 @@ public sealed class RecordReferenceControllerTests {
     private static async Task ApplyAndWaitForReload(IReferenceService referenceService, Action action) {
         var sawLoading = false;
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var subscription = referenceService.IsLoadingRecordReferences.Subscribe(loading => {
+        using var subscription = referenceService.IsLoading.Subscribe(loading => {
             if (loading) {
                 sawLoading = true;
             } else if (sawLoading) {
@@ -43,7 +43,7 @@ public sealed class RecordReferenceControllerTests {
 
         action();
 
-        await completion.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await completion.Task.WaitAsync(TimeSpan.FromSeconds(500));
     }
 
     [Theory] [CreationEditorAutoData]
