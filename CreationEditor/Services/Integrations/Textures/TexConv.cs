@@ -157,4 +157,13 @@ public sealed class TexConv(IFileSystem fileSystem, ILogger logger, ConfigValues
             return TextureProcessResult.Fail($"Failed to process texture: {e.Message}");
         }
     }
+
+    public Task<TextureProcessResult> ConvertToDds(
+        string sourceFilePath,
+        string targetFolder,
+        TextureFormat targetFormat,
+        ConfigValues config,
+        CancellationToken token) {
+        return ProcessTexture(sourceFilePath, targetFolder, targetFormat, null, null, config, token);
+    }
 }

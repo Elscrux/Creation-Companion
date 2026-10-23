@@ -7,6 +7,7 @@ public enum TextureFormat {
     BC4_UNORM,
     BC5_UNORM,
     BC7_UNORM,
+    B8G8R8A8_UNORM,
 }
 
 /// <summary>Result of a texture processing operation.</summary>
@@ -40,6 +41,23 @@ public interface ITextureProcessor : IIntegration {
         TextureFormat? targetFormat,
         long? targetWidth,
         long? targetHeight,
+        ConfigValues config,
+        CancellationToken token);
+
+    /// <summary>
+    /// Converts the texture at <paramref name="sourceFilePath" /> into a DDS file with the given
+    /// <paramref name="targetFormat" />. The output file is written into <paramref name="targetFolder" />
+    /// using the original file name with a .dds extension.
+    /// </summary>
+    /// <param name="sourceFilePath">Path of the source texture</param>
+    /// <param name="targetFolder">Folder the converted DDS file is written to</param>
+    /// <param name="targetFormat">DDS format to convert to</param>
+    /// <param name="config">Universal tool settings, read through the tool's own config definition</param>
+    /// <param name="token">Cancellation token</param>
+    Task<TextureProcessResult> ConvertToDds(
+        string sourceFilePath,
+        string targetFolder,
+        TextureFormat targetFormat,
         ConfigValues config,
         CancellationToken token);
 }
