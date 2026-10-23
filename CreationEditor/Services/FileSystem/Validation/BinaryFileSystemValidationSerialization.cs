@@ -13,6 +13,7 @@ public sealed class BinaryFileSystemValidationSerialization(
     private static readonly IReadOnlyList<string> CacheLocation = ["Validation", "FileSystem"];
     private readonly ICacheLocationProvider _cacheLocationProvider = cacheLocationProviderFactory(CacheLocation);
     private readonly Version _version = new(1, 0);
+    private readonly Lock _cacheFileLock = new();
 
     public bool Validate(string rootDirectoryPath) {
         var cacheFile = _cacheLocationProvider.CacheFile(rootDirectoryPath);
@@ -91,8 +92,11 @@ public sealed class BinaryFileSystemValidationSerialization(
         var info = fileSystem.FileInfo.New(cacheFile);
         info.Directory?.Create();
 
-        using var fileSystemStream = fileSystem.File.OpenWrite(cacheFile);
-        Serialize(fileSystemCacheData, new BinaryWriter(fileSystemStream));
+        // Multiple reference controllers can serialize the validation cache of the same data source concurrently
+        lock (_cacheFileLock) {
+            using var fileSystemStream = fileSystem.File.OpenWrite(cacheFile);
+            Serialize(fileSystemCacheData, new BinaryWriter(fileSystemStream));
+        }
     }
 
     public void Serialize(HashFileSystemCacheData fileSystemCacheData, BinaryWriter writer) {
