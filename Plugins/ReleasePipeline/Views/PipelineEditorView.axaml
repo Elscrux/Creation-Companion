@@ -1,0 +1,148 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:config="clr-namespace:CreationEditor.Avalonia.Views.Config;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:ReleasePipeline.ViewModels"
+             xmlns:avalonia="clr-namespace:Sortable.Avalonia;assembly=Sortable.Avalonia"
+             xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="600"
+             d:DesignHeight="500"
+             x:Class="ReleasePipeline.Views.PipelineEditorView"
+             x:DataType="viewModels:PipelineEditorVM"
+             x:Name="Control">
+    <Grid RowDefinitions="Auto,*"
+          RowSpacing="10">
+        <!-- Pipeline Settings Card -->
+        <basic:Card Grid.Row="0"
+                    Header="Pipeline Settings"
+                    Description="Name the pipeline"
+                    Icon="Settings">
+            <StackPanel Spacing="8">
+                <basic:LabeledContentControl Header="Name"
+                                             HeaderToolTip="The pipeline name, e.g. 'PC'">
+                    <TextBox Text="{Binding Name, Mode=TwoWay}"
+                             MinWidth="220"
+                             CornerRadius="8"
+                             Padding="12,8"/>
+                </basic:LabeledContentControl>
+            </StackPanel>
+        </basic:Card>
+
+        <!-- Actions Card -->
+        <basic:Card Grid.Row="1"
+                    Header="Actions"
+                    Description="Add configurable steps that run in order when the pipeline is released. Drag the handle to reorder."
+                    Icon="List">
+            <Grid RowDefinitions="Auto,*"
+                  RowSpacing="12">
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                    <!-- Save Pipeline -->
+                    <Button Content="Save Pipeline"
+                            Classes="accent"
+                            Command="{Binding SaveCommand}"
+                            Padding="16,10"
+                            CornerRadius="8"/>
+
+                    <!-- Add Action -->
+                    <Button Content="+ Add Action"
+                            HorizontalAlignment="Stretch"
+                            Padding="12,8">
+                        <Button.Flyout>
+                            <Flyout FlyoutPresenterClasses="Flyout750x250">
+                                <ItemsControl ItemsSource="{Binding AvailableActions}"
+                                              HorizontalAlignment="Stretch">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
+                                                        Spacing="4"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding DisplayName}"
+                                                    Command="{Binding #Control.ViewModel.AddActionCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    HorizontalAlignment="Stretch"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+
+                <!-- Actions List -->
+                <ScrollViewer Grid.Row="1">
+                    <ItemsControl x:Name="ActionsList"
+                                  ItemsSource="{Binding ActionVMs}"
+                                  avalonia:Sortable.Sortable="True"
+                                  avalonia:Sortable.UpdateCommand="{x:Static command:SortableCommands.UpdateCommand}"
+                                  Background="Transparent"
+                                  BorderThickness="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="viewModels:PipelineActionVM">
+                                <Expander IsExpanded="False"
+                                          HorizontalAlignment="Stretch"
+                                          Margin="0,4">
+                                    <Expander.Header>
+                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                              ColumnSpacing="8">
+                                            <!-- Drag handle -->
+                                            <Border Grid.Column="0"
+                                                    Cursor="Hand"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,4,0"
+                                                    ToolTip.Tip="Drag to reorder"
+                                                    avalonia:Sortable.IsSortable="True"
+                                                    Background="Transparent"
+                                                    CornerRadius="4"
+                                                    Padding="6">
+                                                <TextBlock Text="⠿"/>
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1"
+                                                        Spacing="2">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Opacity="0.6"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+
+                                            <Button Grid.Column="2"
+                                                    ToolTip.Tip="Remove"
+                                                    Margin="4,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding RemoveCommand}">
+                                                <controls:FASymbolIcon Symbol="Clear"/>
+                                            </Button>
+                                        </Grid>
+                                    </Expander.Header>
+
+                                    <!-- Action configuration (shown when expanded) -->
+                                    <StackPanel Margin="8,8,8,4"
+                                                Spacing="8"
+                                                IsVisible="{Binding HasConfig}">
+                                        <TextBlock Text="Configuration"
+                                                   FontWeight="SemiBold"
+                                                   Opacity="0.7"
+                                                   FontSize="12"/>
+                                        <config:ConfigView DataContext="{Binding ConfigVM}"/>
+                                    </StackPanel>
+                                </Expander>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </basic:Card>
+    </Grid>
+</UserControl>

@@ -1,0 +1,88 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:basic="clr-namespace:CreationEditor.Avalonia.Views.Basic;assembly=CreationEditor.Avalonia"
+             xmlns:dataSource="clr-namespace:CreationEditor.Avalonia.Views.DataSource;assembly=CreationEditor.Avalonia"
+             xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.DataSource;assembly=CreationEditor.Avalonia"
+             xmlns:folder="clr-namespace:CreationEditor.Avalonia.Views.Asset.Picker.Folder;assembly=CreationEditor.Avalonia"
+             xmlns:constants="clr-namespace:CreationEditor.Avalonia.Constants;assembly=CreationEditor.Avalonia"
+             xmlns:viewModels="clr-namespace:ReleasePipeline.ViewModels"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="500"
+             x:Class="ReleasePipeline.Views.DataSourceStepView"
+             x:DataType="viewModels:DataSourceStepVM"
+             x:Name="StepView">
+    <basic:Card Header="Data Source"
+                Description="Select the data source to release. It must contain exactly one plugin (esp/esm/esl) file and holds the mod plus all other assets to be released."
+                Icon="Folder">
+        <StackPanel Spacing="12">
+            <dataSource:DataSourcePicker DataContext="{Binding DataSourcePickerVM}"/>
+
+            <!-- Detected mod -->
+            <Border Classes="CardNested"
+                    CornerRadius="8"
+                    Padding="12"
+                    IsVisible="{Binding !!DetectedModName}">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8">
+                    <TextBlock Text="Detected mod:"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding DetectedModName}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Additional Data Sources -->
+            <basic:Card Header="Additional Data Sources"
+                        Description="Add additional data sources to be included in the release. These data sources will be processed with the main data source. Typically this might be a data source with generated files like LOD."
+                        IsVisible="{Binding !!DetectedModName}">
+                <StackPanel Spacing="8">
+                    <ItemsControl ItemsSource="{Binding AdditionalDataSourcePickers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SingleDataSourcePickerVM">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="4">
+                                    <Button ToolTip.Tip="Remove data source"
+                                            VerticalAlignment="Stretch"
+                                            Command="{Binding #StepView.ViewModel.RemoveAdditionalDataSourceCommand}"
+                                            CommandParameter="{Binding}">
+                                        <controls:FASymbolIcon Symbol="Clear"/>
+                                    </Button>
+                                    <dataSource:DataSourcePicker/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Content="+ Add Data Source"
+                            Command="{Binding AddAdditionalDataSourceCommand}"
+                            HorizontalAlignment="Left"
+                            Padding="12,8"
+                            CornerRadius="8"/>
+                </StackPanel>
+            </basic:Card>
+
+            <!-- Release folder -->
+            <basic:Card Header="Release Folder"
+                        Description="This is where an output folder of a release pipeline will be created"
+                        IsVisible="{Binding !!DetectedModName}">
+                <folder:TextFolderPicker FolderPath="{Binding ReleaseFolder}"
+                                         MinWidth="280"/>
+            </basic:Card>
+
+            <TextBlock Text="{Binding DataSourceError}"
+                       Foreground="{x:Static constants:StandardBrushes.InvalidBrush}"
+                       TextWrapping="Wrap"
+                       IsVisible="{Binding !!DataSourceError}"/>
+        </StackPanel>
+    </basic:Card>
+</UserControl>
