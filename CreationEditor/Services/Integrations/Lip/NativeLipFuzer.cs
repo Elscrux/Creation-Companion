@@ -10,7 +10,7 @@ public sealed class CustomFuzPackagerRegistrationConfig : IConfigDefinition {
     public IReadOnlyList<IConfigOption> Options { get; } = [];
 }
 
-public sealed class CustomFuzPackagerRuntimeRuntimeConfig : IFuzGeneratorRuntimeConfigDefinition {
+public sealed class CustomFuzPackagerRuntimeRuntimeConfig : ILipFuzerRuntimeConfigDefinition {
     public static TextConfigOption AudioExtensionOption { get; } = new(
         "Audio Extension",
         "The audio file extension to package into fuz files",
@@ -55,8 +55,11 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
         return Task.FromResult(new IntegrationRunResult(true, "Fuz files packaged successfully"));
     }
 
-    public Task<IntegrationRunResult> PackageFuz(DataSourceFileLink file, ConfigValues config, CancellationToken token) =>
-        Task.FromResult(new IntegrationRunResult(true, "Fuz file packaged successfully"));
+    public Task<IntegrationRunResult> PackageFuz(DataSourceFileLink file, ConfigValues config, CancellationToken token) {
+        PackageFuz(file.FullPath);
+
+        return Task.FromResult(new IntegrationRunResult(true, "Fuz file packaged successfully"));
+    }
 
     public void PackageFuz(string audioFilePath) {
         var lipFile = fileSystem.Path.ChangeExtension(audioFilePath, LipFileExtension);
@@ -80,7 +83,7 @@ public sealed class NativeLipFuzer(IFileSystem fileSystem, ILogger logger) : ILi
         lipStream.CopyTo(fileStream);
 
         // Write audio
-        using var audioStream = fileSystem.File.OpenRead(lipFile);
+        using var audioStream = fileSystem.File.OpenRead(audioFilePath);
         audioStream.CopyTo(fileStream);
     }
 
