@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
+using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.ViewModels.Docking;
 using CreationEditor.Avalonia.Views.Docking;
@@ -36,6 +37,7 @@ public sealed class DockLayoutPersistence(
                 control,
                 new DockInfo {
                     Header = item.Header ?? string.Empty,
+                    IconSource = await Dispatcher.UIThread.InvokeAsync(() => IconConverters.ToIconSource(dockable.Icon)),
                     Size = item.Size,
                     DockableType = item.Type,
                 });

@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Threading;
+using CreationEditor.Avalonia.Converter;
 using CreationEditor.Avalonia.Models.Docking;
 using CreationEditor.Avalonia.Services.Docking;
-using FluentAvalonia.UI.Controls;
 using Noggog;
 using Serilog;
 namespace CreationEditor.Avalonia.Services;
@@ -69,11 +69,7 @@ public sealed class DockFactory(
         var config = new DockConfig {
             DockInfo = new DockInfo {
                 Header = dockable.Header,
-                IconSource = dockable.Icon switch {
-                    null => null,
-                    FASymbol symbol => new FASymbolIconSource { Symbol = symbol },
-                    _ => new FAFontIconSource { Glyph = dockable.Icon.ToString() },
-                },
+                IconSource = await Dispatcher.UIThread.InvokeAsync(() => IconConverters.ToIconSource(dockable.Icon)),
                 Size = dockable.Size,
                 CanClose = dockable.CanClose,
                 DockableType = dockable.Type,

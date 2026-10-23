@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
-using FluentAvalonia.UI.Controls;
+using CreationEditor.Avalonia.Converter;
 namespace CreationEditor.Avalonia.Services.Actions;
 
 public sealed class InjectedContextMenuProvider : IContextMenuProvider {
@@ -74,9 +74,7 @@ public sealed class InjectedContextMenuProvider : IContextMenuProvider {
             } else {
                 yield return new MenuItem {
                     Header = parentGroup.Key.Header,
-                    Icon = parentGroup.Key.Icon is FASymbol symbol
-                        ? new FASymbolIcon { Symbol = symbol }
-                        : new FAFontIcon { Glyph = parentGroup.Key.Icon?.ToString() },
+                    Icon = IconConverters.ToIcon(parentGroup.Key.Icon),
                     ItemsSource = parentGroup
                         .Select(action => action.MenuItemFactory(context))
                         .ToList(),

@@ -1,8 +1,9 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Controls;
+using Avalonia.Threading;
+using CreationEditor.Avalonia.Converter;
 using CreationEditor.Services.Search;
-using FluentAvalonia.UI.Controls;
 using Noggog;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -36,7 +37,7 @@ public sealed partial class SearchItemVM : ViewModel {
     public SearchItemVM(SearchItem item) {
         _item = item;
 
-        IconControl = CreateIcon(item.Icon);
+        IconControl = Dispatcher.UIThread.Invoke(() => IconConverters.ToIcon(item.Icon));
         HasContextActions = item.ContextFactory is not null;
 
         var canExecute = item.CanExecute ?? Observable.Return(true);
@@ -54,14 +55,5 @@ public sealed partial class SearchItemVM : ViewModel {
         if (_item.Execute is null) return;
 
         _ = _item.Execute();
-    }
-
-    private static Control? CreateIcon(object? icon) {
-        return icon switch {
-            FASymbol symbol => new FASymbolIcon { Symbol = symbol },
-            string glyph => new FAFontIcon { Glyph = glyph },
-            Control control => control,
-            _ => null,
-        };
     }
 }

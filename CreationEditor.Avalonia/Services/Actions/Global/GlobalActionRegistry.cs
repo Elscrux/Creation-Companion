@@ -1,5 +1,6 @@
 using System.Reactive;
 using System.Reactive.Disposables;
+using Avalonia.Threading;
 using CreationEditor.Avalonia.Services.HotKey;
 using CreationEditor.Avalonia.Services.Plugin;
 using CreationEditor.Services.Plugin;
@@ -81,7 +82,7 @@ public sealed class GlobalActionRegistry : IDisposable {
         $"Open {plugin.Name}",
         CreateOpenPluginCommand(plugin),
         "Plugin",
-        plugin.Icon,
+        Dispatcher.UIThread.Invoke(() => plugin.Icon),
         50);
 
     private ReactiveCommand<Unit, Unit> CreateOpenPluginCommand(IMenuPluginDefinition plugin) {

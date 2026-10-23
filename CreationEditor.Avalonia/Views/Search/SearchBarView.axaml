@@ -116,10 +116,11 @@
                                                                         Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
                                                             </Style>
                                                         </Button.Styles>
-                                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                                            <ContentControl Grid.Column="0"
-                                                                            Width="20"
-                                                                            Content="{Binding IconControl}"/>
+                                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                                              ColumnSpacing="4">
+                                                            <ContentPresenter Grid.Column="0"
+                                                                              Width="20"
+                                                                              Content="{Binding IconControl}"/>
 
                                                             <StackPanel Grid.Column="1"
                                                                         HorizontalAlignment="Left"
