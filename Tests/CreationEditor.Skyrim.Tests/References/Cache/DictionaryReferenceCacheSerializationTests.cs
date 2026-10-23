@@ -26,7 +26,7 @@ public sealed class DictionaryReferenceCacheSerializationTests {
         string,
         DataRelativePath> CreateSerialization(MockFileSystem fileSystem) {
         Func<IReadOnlyList<string>, ICacheLocationProvider> cacheLocationProviderFactory =
-            subDirectories => new CacheLocationProvider(fileSystem, subDirectories);
+            subDirectories => new CacheLocationProvider(fileSystem, subDirectories: subDirectories);
         var config = new AssetReferenceCacheSerializationConfigString<IDataSource>();
         return new DictionaryReferenceCacheSerialization<
             IDataSource,
@@ -77,7 +77,7 @@ public sealed class DictionaryReferenceCacheSerializationTests {
         var source = new FileSystemDataSource(fileSystem, TestDataSourcePath);
         var query = new TestQuery();
         serialization.Serialize(source, query, CreateCache());
-        var cacheFile = new CacheLocationProvider(fileSystem, "References").CacheFile("Test Dictionary Query", "TestData");
+        var cacheFile = new CacheLocationProvider(fileSystem, null, "References").CacheFile("Test Dictionary Query", "TestData");
 
         fileSystem.File.WriteAllBytes(cacheFile, [1, 2, 3, 4]);
 

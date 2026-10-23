@@ -9,9 +9,10 @@ public sealed class BinaryFileSystemValidationSerializationTests {
 
     private static (BinaryFileSystemValidationSerialization Serialization, MockFileSystem FileSystem, string CacheFile) CreateSerialization() {
         var fileSystem = new MockFileSystem();
-        ICacheLocationProvider CacheLocationProviderFactory(IReadOnlyList<string> subDirectories) => new CacheLocationProvider(fileSystem, subDirectories);
+        ICacheLocationProvider CacheLocationProviderFactory(IReadOnlyList<string> subDirectories) =>
+            new CacheLocationProvider(fileSystem, subDirectories: subDirectories);
         var serialization = new BinaryFileSystemValidationSerialization(Logger.None, CacheLocationProviderFactory, fileSystem);
-        var cacheFile = new CacheLocationProvider(fileSystem, "Validation", "FileSystem").CacheFile(TestDataPath);
+        var cacheFile = new CacheLocationProvider(fileSystem, null, "Validation", "FileSystem").CacheFile(TestDataPath);
         return (serialization, fileSystem, cacheFile);
     }
 

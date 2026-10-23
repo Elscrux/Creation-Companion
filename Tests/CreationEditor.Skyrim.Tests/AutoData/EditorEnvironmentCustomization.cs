@@ -64,8 +64,15 @@ public sealed class EditorEnvironmentCustomization(
         fixture.Register<IAssetTypeProvider>(fixture.Create<SkyrimAssetTypeProvider>);
         fixture.Register<IAssetTypeService>(fixture.Create<AssetTypeService>);
         fixture.Register<IModelModificationService>(fixture.Create<NifModificationService>);
+        // Isolated cache directory per test: fixture mods share file names and hashes,
+        // so a shared cache directory would leak caches between tests and test runs.
+        // The base directory is captured once so every provider from the factory agrees on the location.
+        var cacheBaseDirectory = Path.Combine(Path.GetTempPath(), "CreationEditorTestCaches", Guid.NewGuid().ToString("N"));
         fixture.Register<Func<IReadOnlyList<string>, ICacheLocationProvider>>(() =>
-            subDirectories => new CacheLocationProvider(fixture.Create<IFileSystem>(), subDirectories));
+            subDirectories => new CacheLocationProvider(
+                fixture.Create<IFileSystem>(),
+                cacheBaseDirectory,
+                subDirectories));
         fixture.Register<IReferenceCacheSerializationConfig<IModGetter, IFormLinkIdentifier>>(
             fixture.Create<ModAssetReferenceCacheSerializationConfig>);
         fixture.Register<IReferenceCacheSerializationConfig<FileSystemDataSource, DataRelativePath>>(

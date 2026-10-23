@@ -20,7 +20,7 @@ public sealed class CacheLocationProviderTests {
     [Fact]
     public void CacheFile_MultipleIdentifiers_BuildsNestedPath() {
         var fileSystem = new MockFileSystem();
-        var provider = new CacheLocationProvider(fileSystem, "plugin");
+        var provider = new CacheLocationProvider(fileSystem, null, "plugin");
 
         var path = provider.CacheFile("records", "armor");
 
@@ -50,7 +50,7 @@ public sealed class CacheLocationProviderTests {
     [Fact]
     public void Constructor_SanitizesIllegalCharactersInSubDirectories() {
         var fileSystem = new MockFileSystem();
-        var provider = new CacheLocationProvider(fileSystem, "x/y:z");
+        var provider = new CacheLocationProvider(fileSystem, null, "x/y:z");
 
         var path = provider.CacheFile("identifier");
 

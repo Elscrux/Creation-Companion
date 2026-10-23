@@ -14,10 +14,13 @@ public sealed partial class CacheLocationProvider : ICacheLocationProvider {
 
     public CacheLocationProvider(
         IFileSystem fileSystem,
+        string? baseDirectory = null,
         params IReadOnlyList<string> subDirectories) {
         _fileSystem = fileSystem;
 
-        var baseDir = _fileSystem.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), CacheDirectory);
+        var baseDir = _fileSystem.Path.Combine(
+            baseDirectory ?? System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
+            CacheDirectory);
         _cacheDirPath = subDirectories.Aggregate(
             baseDir,
             (cur, next) => {

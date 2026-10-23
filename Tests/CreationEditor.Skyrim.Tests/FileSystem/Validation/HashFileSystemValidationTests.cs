@@ -11,7 +11,7 @@ public sealed class HashFileSystemValidationTests {
     private static (HashFileSystemValidation Validation, MockFileSystem FileSystem, FileSystemDataSource Source) CreateValidation() {
         var fileSystem = new MockFileSystem();
         Func<IReadOnlyList<string>, ICacheLocationProvider> cacheLocationProviderFactory =
-            subDirectories => new CacheLocationProvider(fileSystem, subDirectories);
+            subDirectories => new CacheLocationProvider(fileSystem, subDirectories: subDirectories);
         var serialization = new BinaryFileSystemValidationSerialization(Logger.None, cacheLocationProviderFactory, fileSystem);
         var validation = new HashFileSystemValidation(serialization, [".nif"]);
         var source = new FileSystemDataSource(fileSystem, SourcePath);
