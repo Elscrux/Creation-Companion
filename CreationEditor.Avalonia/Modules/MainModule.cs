@@ -13,7 +13,7 @@ using CreationEditor.Avalonia.Services.Record.List.ExtraColumns;
 using CreationEditor.Avalonia.Services.Record.Prefix;
 using CreationEditor.Avalonia.Services.Record.Provider;
 using CreationEditor.Avalonia.Services.Viewport;
-using CreationEditor.Avalonia.Services.Viewport.BSE;
+using CreationEditor.Avalonia.Services.Viewport.SkyRender;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Analyzer;
 using CreationEditor.Avalonia.ViewModels.DataSource;
@@ -230,7 +230,7 @@ public sealed class MainModule : Module {
             .SingleInstance();
 
         // Factory
-        builder.RegisterType<BSEViewportFactory>()
+        builder.RegisterType<SkyRenderViewportFactory>()
             .As<IViewportFactory>()
             .SingleInstance();
 

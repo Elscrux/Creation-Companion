@@ -19,6 +19,7 @@
         </PackageReference>
         <PackageReference Include="Serilog"/>
         <PackageReference Include="SharpCompress"/>
+        <PackageReference Include="SkyRender" />
         <PackageReference Include="System.IO.Hashing"/>
         <PackageReference Include="System.Linq.Async"/>
         <PackageReference Include="ThrowsAnalyzer">
