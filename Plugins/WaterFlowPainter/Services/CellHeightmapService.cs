@@ -41,8 +41,10 @@ public sealed class CellHeightmapService {
             }
         }
 
-        fixed (byte* source = pixels) {
-            Buffer.MemoryCopy(source, (void*) mask.GetPixels(), pixels.Length, pixels.Length);
+        unsafe {
+            fixed (byte* source = pixels) {
+                Buffer.MemoryCopy(source, (void*) mask.GetPixels(), pixels.Length, pixels.Length);
+            }
         }
 
         return mask;
