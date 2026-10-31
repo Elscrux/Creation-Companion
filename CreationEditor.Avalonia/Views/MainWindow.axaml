@@ -133,24 +133,6 @@
                 </StackPanel>
 
                 <Menu HorizontalAlignment="Right"
-                      Margin="0,0,450,0"
-                      Background="{x:Null}">
-                    <MenuItem HorizontalAlignment="Right"
-                              ItemsSource="{Binding MenuItems}">
-                        <MenuItem.DataTemplates>
-                            <DataTemplate DataType="viewModels:MenuItemVM">
-                                <MenuItem Header="{Binding Header}"
-                                          Icon="{Binding Icon}"
-                                          Command="{Binding OpenCommand}"
-                                          HotKey="{Binding HotKey}"
-                                          InputGesture="{Binding InputGesture}"
-                                          ItemsSource="{Binding Children}"/>
-                            </DataTemplate>
-                        </MenuItem.DataTemplates>
-                    </MenuItem>
-                </Menu>
-
-                <Menu HorizontalAlignment="Right"
                       Margin="0,0,150,0"
                       Background="{x:Null}">
                     <MenuItem IsVisible="{Binding !!NotificationVM.LoadingItems.Count}"
