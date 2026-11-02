@@ -51,6 +51,17 @@
     <Application.Styles>
         <FluentTheme />
 
+        <!-- MenuItem Style Edits -->   
+        <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText">
+            <Setter Property="Grid.Column" Value="1"/>
+            <Setter Property="Grid.ColumnSpan" Value="4"/>
+            
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+
         <!-- Base Avalonia Style -->
         <styling:FluentAvaloniaTheme PreferUserAccentColor="True" PreferSystemTheme="True"/>
 
