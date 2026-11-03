@@ -16,30 +16,49 @@
         <behavior:TabReorderBehavior DockContainer="{Binding #Control.DockContainer}"/>
     </Interaction.Behaviors>
 
+    <!-- <UserControl.Styles>
+        <Style Selector="controls|FASymbolIcon">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="Foreground" Value="Blue" />
+        </Style>
+
+        <Style Selector="controls|FAFontIcon">
+            <Setter Property="Width" Value="20"/>
+        </Style>
+    </UserControl.Styles> -->
+
     <Border Classes="Tab"
             Classes.AccentSelected="{Binding IsSelected}"
-            PointerReleased="OnTabPointerReleased">
+            PointerReleased="OnTabPointerReleased"
+            ToolTip.Tip="{Binding Header}">
 
         <StackPanel Orientation="Horizontal">
             <!-- Icon -->
-            <controls:FAIconSourceElement Margin="4, 0,0,0"
+            <!-- <controls:FAIconSourceElement Margin="4,0,0,0"
                                           IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
                                           IconSource="{Binding IconSource}">
                 <controls:FAIconSourceElement.Styles>
                     <Style Selector="controls|FASymbolIcon">
-                        <Setter Property="FontSize"
-                                Value="20"/>
+                        <Setter Property="FontSize" Value="30"/>
                     </Style>
 
                     <Style Selector="controls|FAFontIcon">
-                        <Setter Property="FontSize"
-                                Value="20"/>
+                        <Setter Property="FontSize" Value="30"/>
                     </Style>
                 </controls:FAIconSourceElement.Styles>
-            </controls:FAIconSourceElement>
+            </controls:FAIconSourceElement> -->
+
+            <!-- kemor: swapped to ViewBox which actually respects changed values -->
+            <Viewbox Width="24" Height="24"
+                    Margin="4,0,0,0"
+                    IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
+                
+                <controls:FAIconSourceElement IconSource="{Binding IconSource}" />
+                
+            </Viewbox>
 
             <!-- Header -->
-            <TextBlock Text="{Binding Header}"/>
+            <!-- <TextBlock Text="{Binding Header}"/> -->
 
             <!-- Close -->
             <Button Classes="DockClose"

@@ -95,18 +95,18 @@
                                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
                             </Style>
 
-                            <!-- Aligns Header text to the left -->
+                            <!-- kemor: Aligns Header text to the left -->
                             <Style Selector="MenuItem /template/ ContentPresenter#PART_HeaderPresenter">
                                 <Setter Property="HorizontalAlignment" Value="Left"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             </Style>
 
-                            <!-- Aligns Hotkey text to the right -->
+                            <!-- kemor: Aligns Hotkey text to the right -->
                             <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText">
                                 <Setter Property="HorizontalAlignment" Value="Right"/>
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                                 <Setter Property="Foreground" Value="#FFA0A0A0" />
-                                <!-- Add a right margin to prevent it from hugging the very edge or submenu arrow -->
+                                <!-- kemor: Add a right margin to prevent it from hugging the very edge or submenu arrow -->
                                 <Setter Property="Margin" Value="20,0,10,0"/> 
                             </Style>
                         </Menu.Styles>
