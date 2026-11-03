@@ -15,7 +15,7 @@
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid ColumnDefinitions="*,20"
+    <Grid ColumnDefinitions="*,60"
           Classes="AccentSelected TabGrid">
         <ContentControl Grid.Column="0"
                         VerticalAlignment="Stretch"
@@ -23,16 +23,17 @@
                         Classes="BorderedDock AccentSelected"/>
 
         <LayoutTransformControl Grid.Column="1"
-                                VerticalAlignment="Stretch">
-            <LayoutTransformControl.LayoutTransform>
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Stretch">
+            <!-- <LayoutTransformControl.LayoutTransform>
                 <RotateTransform Angle="90"/>
-            </LayoutTransformControl.LayoutTransform>
+            </LayoutTransformControl.LayoutTransform> -->
 
-            <Border Classes="TabBar">
+            <Border Classes="TabBar" Padding="0,6,0,0">
                 <ItemsControl ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
+                        <ItemsPanelTemplate >
+                            <StackPanel Orientation="Vertical" Spacing="4" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
