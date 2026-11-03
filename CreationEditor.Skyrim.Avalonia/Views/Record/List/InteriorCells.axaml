@@ -8,7 +8,9 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.InteriorCells"
              x:DataType="list:InteriorCellsVM"
              x:Name="Control">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*"
+        RowSpacing="4"
+    >
         <record:RecordBrowserSettingsView
             Grid.Row="0"
             Settings="{Binding InteriorCellsProvider.RecordBrowserSettings}"/>
