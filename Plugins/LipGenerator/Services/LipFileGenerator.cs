@@ -156,15 +156,16 @@ public sealed class LipFileGenerator(
                     }
 
                     // Generate the lip using the configured lip generator integration
-                    var lipResult = lipGenerator.GenerateLip(voiceFullPath, text, lipGeneratorConfig.ConfigValues, CancellationToken.None).GetAwaiter().GetResult();
-                    if (!lipResult.Succeeded) {
-                        logger.Here().Warning("Lip generation failed for {WavPath}: {Message}", voiceFullPath, lipResult.Message);
-                        return;
+                    if (!string.IsNullOrWhiteSpace(text)) {
+                        var lipResult = lipGenerator.GenerateLip(voiceFullPath, text, lipGeneratorConfig.ConfigValues, CancellationToken.None).GetAwaiter().GetResult();
+                        if (!lipResult.Succeeded) {
+                            logger.Here().Warning("Lip generation failed for {WavPath}: {Message}", voiceFullPath, lipResult.Message);
+                            return;
+                        }
                     }
 
                     // Encode audio using the configured encoder integration (skip if none selected)
                     if (audioEncoder is not null && audioEncoderConfig is not null) {
-                        // fuzGeneratorConfig.ConfigValues.TryGet(nameof(IFuzGeneratorRuntimeConfigDefinition.AudioExtensionOption)) as string,
                         var encodedPath = dataSource.FileSystem.Path.ChangeExtension(voiceFullPath, audioEncoder.SupportedEncodedExtensions[0]);
                         var encodeResult = await audioEncoder.Encode(voiceFullPath, encodedPath, audioEncoderConfig.ConfigValues, CancellationToken.None);
                         if (!encodeResult.Succeeded) {
