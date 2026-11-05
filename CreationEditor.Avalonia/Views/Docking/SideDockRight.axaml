@@ -5,6 +5,7 @@
              xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:controls="using:FluentAvalonia.UI.Controls"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:SideDockVM"
@@ -17,10 +18,28 @@
 
     <Grid ColumnDefinitions="*,60"
           Classes="AccentSelected TabGrid">
-        <ContentControl Grid.Column="0"
-                        VerticalAlignment="Stretch"
-                        Content="{Binding ActiveTab.Control}"
-                        Classes="BorderedDock AccentSelected"/>
+        <Grid Grid.Column="0" RowDefinitions="30,*">
+            <Border Grid.Row="0" 
+                    VerticalAlignment="Center"
+                    Padding="0,4"
+                    BorderBrush="#616868">
+                <StackPanel Orientation="Horizontal" 
+                            Spacing="4"
+                            IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
+                >
+                    <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}"/>
+                    <TextBlock Text="{Binding ActiveTab.Header}" 
+                                FontSize="14" 
+                                FontWeight="Medium"
+                    />
+                </StackPanel>
+            </Border>
+        
+            <ContentControl Grid.Row="1"
+                            VerticalAlignment="Stretch"
+                            Content="{Binding ActiveTab.Control}"
+                            Classes="BorderedDock AccentSelected"/>
+        </Grid>
 
         <LayoutTransformControl Grid.Column="1"
                                 VerticalAlignment="Top"

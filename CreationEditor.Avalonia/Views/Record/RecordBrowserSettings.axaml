@@ -13,7 +13,7 @@
             <Button Grid.Column="0"
                     MinWidth="32" MinHeight="32"
                     Margin="0,0,8,0">
-                <controls:FASymbolIcon Symbol="SettingsFilled" FontSize="22"/>
+                <controls:FASymbolIcon Symbol="SettingsFilled" FontSize="16"/>
 
                 <Button.Flyout>
                     <Flyout>
