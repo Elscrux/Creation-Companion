@@ -27,7 +27,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="200"/>
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="25"/>
             <RowDefinition
                 Height="{Binding ShowPlaced, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
                 MinHeight="{Binding ShowPlaced, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=100}"/>
@@ -35,18 +35,22 @@
 
         <!-- kemor: Added vertical spacing -->
         <TabControl Grid.Row="0"
+                    MinHeight="200"
                     SelectedIndex="{Binding SelectedTab}"
-                    Padding="8,0">
+                    Padding="8,0"
+        >
             <TabItem Header="Interior"
-                    Margin="0,0,0,12"
-                    FontSize="18"
+                    Margin="0,0,0,8"
+                    Padding="8,0"
+                    FontSize="16"
             >
                 <list:InteriorCells DataContext="{Binding InteriorCellsVM}"/>
             </TabItem>
 
             <TabItem Header="Exterior"
-                    Margin="0,0,0,12"
-                    FontSize="18"
+                    Margin="0,0,0,8"
+                    Padding="8,0"
+                    FontSize="16"
             >
                 <list:ExteriorCells DataContext="{Binding ExteriorCellsVM}"/>
             </TabItem>
