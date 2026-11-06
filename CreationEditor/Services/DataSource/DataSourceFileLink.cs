@@ -29,25 +29,29 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
 
     public bool Exists() => FileSystem.File.Exists(FullPath);
 
-    public IDataSourceLink WithExtension(string newExtension) {
-        return new DataSourceFileLink(
-            DataSource,
-            FileSystem.Path.ChangeExtension(DataRelativePath.Path, newExtension));
-    }
+    public IDataSourceLink WithExtension(string newExtension) => new DataSourceFileLink(
+        DataSource,
+        FileSystem.Path.ChangeExtension(DataRelativePath.Path, newExtension));
 
     public Stream? ReadFileStream() {
         if (!FileSystem.File.Exists(FullPath)) return null;
 
-        return FileSystem.File.Open(FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        // This was added to hotfix the issue of moving many textures at the same time,
+        // which results in nif files being updated at the same time due to multiple texture paths changing
+        for (var i = 0; i < 20; i++) {
+            try {
+                return FileSystem.File.Open(FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            } catch (IOException) {
+                Thread.Sleep(50);
+            }
+        }
+
+        throw new IOException($"Failed to open file {FullPath} after 1 second of trying");
     }
 
-    public override bool Equals(object? obj) {
-        return obj is DataSourceFileLink other && Equals(other);
-    }
+    public override bool Equals(object? obj) => obj is DataSourceFileLink other && Equals(other);
 
-    public bool Equals(IDataSourceLink? obj) {
-        return obj is DataSourceFileLink other && Equals(other);
-    }
+    public bool Equals(IDataSourceLink? obj) => obj is DataSourceFileLink other && Equals(other);
 
     public bool Equals(DataSourceFileLink? other) {
         if (other is null) return false;
@@ -80,7 +84,5 @@ public sealed class DataSourceFileLink(IDataSource dataSource, DataRelativePath 
         return DataRelativePath.PathComparer.Compare(DataSource.Path, other.DataSource.Path);
     }
 
-    public override string ToString() {
-        return $"[{DataSource.Path}] {DataRelativePath.Path}";
-    }
+    public override string ToString() => $"[{DataSource.Path}] {DataRelativePath.Path}";
 }
