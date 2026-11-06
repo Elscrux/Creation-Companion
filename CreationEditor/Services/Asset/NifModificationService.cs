@@ -41,6 +41,9 @@ public sealed class NifModificationService(
                     TryReplace(bsEffectShaderProperty.EnvMaskTexture, x => bsEffectShaderProperty.EnvMaskTexture = x);
 
                     void TryReplace(NiString4 niString, Func<NiString4, NiString4> update) {
+                        // Null check needed because the library doesn't always initialize the NiString4 properties seemingly
+                        if (niString is null) return;
+
                         var str = niString.Content;
                         if (replace(str) is {} replacement && !string.Equals(str, replacement, DataRelativePath.PathComparison)) {
                             update(new NiString4(replacement));
