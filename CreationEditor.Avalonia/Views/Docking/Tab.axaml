@@ -28,11 +28,12 @@
     </UserControl.Styles> -->
 
     <Border Classes="Tab"
+            Height="34"
             Classes.AccentSelected="{Binding IsSelected}"
             PointerReleased="OnTabPointerReleased"
             ToolTip.Tip="{Binding Header}">
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <!-- Icon -->
             <!-- <controls:FAIconSourceElement Margin="4,0,0,0"
                                           IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -50,10 +51,9 @@
 
             <!-- kemor: swapped to ViewBox which actually respects changed values -->
             <Viewbox Width="24" Height="24"
-                    Margin="4,0,0,0"
                     IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
                 
-                <controls:FAIconSourceElement IconSource="{Binding IconSource}" />
+                <controls:FAIconSourceElement IconSource="{Binding IconSource}" VerticalAlignment="Center" />
                 
             </Viewbox>
 
@@ -61,12 +61,12 @@
             <!-- <TextBlock Text="{Binding Header}"/> -->
 
             <!-- Close -->
-            <Button Classes="DockClose"
+            <!-- <Button Classes="DockClose"
                     Command="{Binding CloseCommand}"
                     IsVisible="{Binding CanClose}">
                 <controls:FASymbolIcon Symbol="Dismiss"
                                        ToolTip.Tip="Close"/>
-            </Button>
+            </Button> -->
         </StackPanel>
     </Border>
 </UserControl>

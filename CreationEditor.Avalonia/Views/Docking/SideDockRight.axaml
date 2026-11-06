@@ -18,20 +18,37 @@
 
     <Grid ColumnDefinitions="*,60"
           Classes="AccentSelected TabGrid">
-        <Grid Grid.Column="0" RowDefinitions="30,*">
+        <Grid Grid.Column="0" RowDefinitions="Auto,*">
             <Border Grid.Row="0" 
                     VerticalAlignment="Center"
                     Padding="0,4"
-                    BorderBrush="#616868">
+                    Background="{DynamicResource ButtonBackground}"
+                    CornerRadius="3,0">
                 <StackPanel Orientation="Horizontal" 
                             Spacing="4"
+                            Margin="6,4,0,0"
                             IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
                 >
-                    <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}"/>
+                    <Viewbox Width="14" Height="14"
+                            IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        
+                        <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}" />
+                        
+                    </Viewbox>
+                
                     <TextBlock Text="{Binding ActiveTab.Header}" 
                                 FontSize="14" 
                                 FontWeight="Medium"
                     />
+                    <!-- Close -->
+                    <Button Classes="DockClose"
+                            Command="{Binding ActiveTab.CloseCommand}"
+                            IsVisible="{Binding ActiveTab.CanClose}"
+                    >
+                        <controls:FASymbolIcon Symbol="Dismiss"
+                                            FontSize="14"
+                                            ToolTip.Tip="Close"/>
+                    </Button>
                 </StackPanel>
             </Border>
         
@@ -48,7 +65,7 @@
                 <RotateTransform Angle="90"/>
             </LayoutTransformControl.LayoutTransform> -->
 
-            <Border Classes="TabBar" Padding="0,6,0,0">
+            <Border Classes="TabBar">
                 <ItemsControl ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate >
