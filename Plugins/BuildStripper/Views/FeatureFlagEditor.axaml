@@ -9,9 +9,9 @@
              xmlns:constants="clr-namespace:CreationEditor.Skyrim.Avalonia.Resources.Constants;assembly=Creation Companion"
              xmlns:attached="clr-namespace:CreationEditor.Avalonia.Attached;assembly=CreationEditor.Avalonia"
              xmlns:command="clr-namespace:CreationEditor.Avalonia.Command;assembly=CreationEditor.Avalonia"
-             xmlns:dragDrop="clr-namespace:CreationEditor.Avalonia.Attached.DragDrop;assembly=CreationEditor.Avalonia"
              xmlns:skyrim="clr-namespace:Mutagen.Bethesda.Skyrim;assembly=Mutagen.Bethesda.Skyrim"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:avalonia="clr-namespace:Sortable.Avalonia;assembly=Sortable.Avalonia"
              mc:Ignorable="d"
              d:DesignWidth="900"
              d:DesignHeight="800"
@@ -142,7 +142,7 @@
                             Spacing="16">
                     <StackPanel.DataTemplates>
                         <DataTemplate DataType="skyrim:IQuestGetter">
-                            <TextBlock>
+                            <TextBlock avalonia:Sortable.IsDroppable="True">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="{}{0}: {1}">
                                         <Binding Path="EditorID"/>
@@ -156,29 +156,33 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="Essential Quests"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding EssentialQuests}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding EssentialQuests}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagQuests"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Unused Quests"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding UnusedQuests}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding UnusedQuests}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagQuests"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
                 </StackPanel>
             </basic:Card>
@@ -190,7 +194,7 @@
                             Spacing="16">
                     <StackPanel.DataTemplates>
                         <DataTemplate DataType="skyrim:ICellGetter">
-                            <TextBlock>
+                            <TextBlock avalonia:Sortable.IsDroppable="True">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="{}{0}: {1}">
                                         <Binding Path="EditorID"/>
@@ -204,29 +208,33 @@
                     <StackPanel Spacing="4">
                         <TextBlock Text="Essential Interior Cells"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding EssentialInteriorCells}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding EssentialInteriorCells}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagInteriorCells"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Unused Interior Cells"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding UnusedInteriorCells}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding UnusedInteriorCells}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagInteriorCells"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
                 </StackPanel>
             </basic:Card>
@@ -238,36 +246,41 @@
                             Spacing="16">
                     <StackPanel.DataTemplates>
                         <DataTemplate DataType="skyrim:ILoadScreenGetter">
-                            <TextBlock Text="{Binding EditorID}"/>
+                            <TextBlock Text="{Binding EditorID}"
+                                       avalonia:Sortable.IsDroppable="True"/>
                         </DataTemplate>
                     </StackPanel.DataTemplates>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Essential Load Screens"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding EssentialLoadScreens}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding EssentialLoadScreens}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagLoadScreens"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Unused Load Screens"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding UnusedLoadScreens}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding UnusedLoadScreens}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagLoadScreens"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
                 </StackPanel>
             </basic:Card>
@@ -279,36 +292,40 @@
                             Spacing="16">
                     <StackPanel.DataTemplates>
                         <DataTemplate DataType="skyrim:IIdleAnimationGetter">
-                            <TextBlock Text="{Binding EditorID}"/>
+                            <TextBlock Text="{Binding EditorID}"
+                                       avalonia:Sortable.IsDroppable="True"/>
                         </DataTemplate>
                     </StackPanel.DataTemplates>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Essential Idle Animations"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding EssentialIdleAnimations}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding EssentialIdleAnimations}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagIdleAnimations"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
                         <TextBlock Text="Unused Idle Animations"
                                    FontWeight="SemiBold"/>
-                        <ListBox ItemsSource="{Binding UnusedIdleAnimations}"
-                                 dragDrop:DragDropExtended.AllowDrag="True"
-                                 dragDrop:DragDropExtended.AllowDrop="True"
-                                 SelectionMode="Multiple"
-                                 Padding="10"
-                                 Width="400"
-                                 Height="400"
-                                 Background="{DynamicResource ControlFillColorSecondary}"
-                                 CornerRadius="4"/>
+                        <ScrollViewer Width="400"
+                                      Height="400"
+                                      Background="{DynamicResource ControlFillColorSecondary}"
+                                      CornerRadius="4">
+                            <ItemsControl ItemsSource="{Binding UnusedIdleAnimations}"
+                                          Padding="10"
+                                          avalonia:Sortable.Droppable="True"
+                                          avalonia:Sortable.Group="FeatureFlagIdleAnimations"
+                                          avalonia:Sortable.DropCommand="{x:Static command:SortableCommands.DropCommand}"/>
+                        </ScrollViewer>
                     </StackPanel>
                 </StackPanel>
             </basic:Card>
