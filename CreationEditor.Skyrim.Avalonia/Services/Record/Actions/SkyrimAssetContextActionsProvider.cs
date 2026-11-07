@@ -413,7 +413,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             IsChecked = false,
         };
         var onlyShowChanges = new CheckBox { Content = "Only Show Changes", IsChecked = true };
-        var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of ) a texture file path to replace" };
+        var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of) a texture file path to replace" };
         var toTextBox = new TextBox { Text = "replacement.dds", PlaceholderText = "Enter a replacement path for what you want to replace" };
 
         var previewObservable = Observable
