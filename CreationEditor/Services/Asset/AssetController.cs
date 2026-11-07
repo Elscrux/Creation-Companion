@@ -151,7 +151,7 @@ public sealed class AssetController(
                     }
                     case DataSourceDirectoryLink directoryLink: {
                         var destinationDirectoryLink = new DataSourceDirectoryLink(directoryLink.DataSource, newPath);
-                        var links = GetRemapLinks(directoryLink, destinationDirectoryLink);
+                        var links = GetRemapLinks(directoryLink, destinationDirectoryLink, true);
                         if (FileSystemMove(directoryLink, destinationDirectoryLink, overwrite, token)) {
                             RemapLinks(links);
                         }
@@ -324,11 +324,11 @@ public sealed class AssetController(
     private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) =>
         [new Update<DataSourceFileLink>(origin, destination)];
 
-    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
+    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, bool rename = false) {
         return origin
             .EnumerateFileLinks(true)
             .Select(fileLink => {
-                var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, fileLink);
+                var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, fileLink, rename);
                 var linkDestination = new DataSourceFileLink(destination.DataSource, destinationPath);
                 return new Update<DataSourceFileLink>(fileLink, linkDestination);
             })
@@ -336,9 +336,15 @@ public sealed class AssetController(
             .ToArray();
     }
 
-    private static DataRelativePath GetDestinationPathOfLinkInDirectory(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, IDataSourceLink fileLink) {
+    private static DataRelativePath GetDestinationPathOfLinkInDirectory(
+        DataSourceDirectoryLink origin,
+        DataSourceDirectoryLink destination,
+        IDataSourceLink fileLink,
+        bool rename = false) {
         var originRelativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-        var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, originRelativePath);
+        var destinationPath = rename
+            ? destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, originRelativePath)
+            : destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, originRelativePath);
         return new DataRelativePath(destinationPath);
     }
 
