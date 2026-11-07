@@ -10,7 +10,7 @@ public sealed class NifModificationService(
     : IModelModificationService {
 
     public void RemapLinks(DataSourceFileLink fileLink, Func<string, string> replace) {
-        if (!fileLink.Exists()) return;
+        if (!Accepts(fileLink)) return;
 
         var fileStream = fileLink.ReadFileStream();
         if (fileStream == null) return;
@@ -66,5 +66,12 @@ public sealed class NifModificationService(
         } else {
             fileStream.Dispose();
         }
+    }
+
+    public bool Accepts(DataSourceFileLink fileLink) {
+        if (!fileLink.Exists()) return false;
+
+        var extension = fileLink.DataRelativePath.Extension;
+        return string.Equals(extension, ".nif", DataRelativePath.PathComparison);
     }
 }
