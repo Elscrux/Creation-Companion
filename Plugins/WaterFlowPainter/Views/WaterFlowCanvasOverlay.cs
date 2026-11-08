@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Avalonia;
@@ -209,6 +210,22 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
         return 1;
     }
 
+    /// <summary>
+    /// Maps a position in the zoom border's viewport (screen space) into canvas coordinates, so
+    /// content can be pinned to a fixed on-screen location while the canvas is zoomed and panned.
+    /// The zoom border transforms the canvas with viewport = matrix * canvas + layoutOffset.
+    /// </summary>
+    private Point GetViewportPositionInCanvas(Point viewportPosition) {
+        Visual? canvas = _zoomBorder?.Child;
+        var matrix = canvas?.RenderTransform?.Value ?? Matrix.Identity;
+        var layoutOffset = canvas?.Bounds.Position ?? default;
+        var inverse = matrix.Invert();
+        return inverse.Transform(new Point(
+            viewportPosition.X - layoutOffset.X,
+            viewportPosition.Y - layoutOffset.Y));
+    }
+
+
     /// <summary>Renders the cell's flowmap color coded into a cached bitmap, so painting on the canvas is visible immediately.</summary>
     private void RefreshCellImage(WaterCellVM cell) {
         var size = _viewModel?.OverviewCellSize ?? FlowmapRenderer.FlowmapPixelSize;
@@ -268,6 +285,33 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
         var radius = _viewModel.BrushSize / FlowmapSize * cellPixelSize;
         var brushPen = new Pen(Brushes.White, 1.5);
         context.DrawEllipse(null, brushPen, _pointerPosition, radius, radius);
+
+        // Hovered cell coordinate pinned to the upper-right corner of the viewport.
+        // The overlay is transformed by the zoom border, so map the desired screen-space
+        // position back into canvas coordinates to keep the label fixed while zooming, and
+        // counter-scale the text so it stays a constant size on screen.
+        if (_hoveredCell is not null) {
+            var scale = GetCanvasScale();
+            var fontSize = 20 / scale;
+            var text = new FormattedText(
+                $"Cell {_hoveredCell.Position.X}.{_hoveredCell.Position.Y}",
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                Typeface.Default,
+                fontSize,
+                Brushes.White);
+            var padding = 6.0 / scale;
+            var margin = 8.0 / scale;
+            var viewportSize = _zoomBorder?.Bounds.Size ?? Bounds.Size;
+            var anchor = GetViewportPositionInCanvas(new Point(viewportSize.Width - margin, margin));
+            var background = new Rect(
+                anchor.X - text.Width - padding * 2,
+                anchor.Y,
+                text.Width + padding * 2,
+                text.Height + padding * 2);
+            context.FillRectangle(new SolidColorBrush(Color.FromArgb(160, 0, 0, 0)), background);
+            context.DrawText(text, new Point(background.X + padding, background.Y + padding));
+        }
     }
 
     private Rect CellRect(P2Int position, int cellPixelSize) {
