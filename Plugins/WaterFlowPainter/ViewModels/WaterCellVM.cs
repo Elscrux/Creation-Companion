@@ -6,10 +6,13 @@ using WaterFlowPainter.Model;
 using WaterFlowPainter.Services;
 namespace WaterFlowPainter.ViewModels;
 
-/// <summary>A cell with flowmap enabled water and its loaded flowmap data.</summary>
+/// <summary>A cell with water and its loaded flowmap data.</summary>
 public sealed partial class WaterCellVM(FlowmapService.FlowmapCell cell, Func<FlowmapData> getFlowmap, Func<SKBitmap?> getLandMask) : ViewModel {
     public P2Int Position { get; } = cell.Position;
     public float WaterHeight { get; } = cell.WaterHeight;
+
+    /// <summary>Whether the cell's water has the flowmap flag enabled and can be painted.</summary>
+    public bool FlowmapEnabled { get; } = cell.FlowmapEnabled;
 
     public FlowmapData Flowmap => field ??= getFlowmap();
 

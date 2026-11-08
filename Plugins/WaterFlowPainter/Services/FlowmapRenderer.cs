@@ -11,7 +11,7 @@ public sealed class FlowmapRenderer {
     public const int FlowmapPixelSize = FlowmapData.Size;
 
     /// <summary>A cell with its flowmap and optional land mask, positioned in cell grid coordinates.</summary>
-    public sealed record RenderCell(P2Int Position, Func<FlowmapData> GetFlowmap, Func<SKBitmap?> GetLandMask);
+    public sealed record RenderCell(P2Int Position, Func<FlowmapData> GetFlowmap, Func<SKBitmap?> GetLandMask, bool FlowmapEnabled);
 
     /// <summary>
     /// Creates a composite flow preview of all cells in the given cell range. Each pixel is color
@@ -37,7 +37,11 @@ public sealed class FlowmapRenderer {
             var y = (topCell - cell.Position.Y) * cellPixelSize;
             if (x < -cellPixelSize || y < -cellPixelSize || x >= width || y >= height) continue;
 
-            DrawFlowmap(canvas, x, y, showArrows, cellPixelSize);
+            if (cell.FlowmapEnabled) {
+                DrawFlowmap(canvas, x, y, showArrows, cellPixelSize);
+            } else {
+                DrawNoFlowmap(canvas, x, y, cellPixelSize);
+            }
         }
 
         DrawCellBorders(canvas, width, height, cellPixelSize);
@@ -78,6 +82,14 @@ public sealed class FlowmapRenderer {
         }
 
         // if (showArrows) DrawArrows(canvas, flowmap, offsetX, offsetY, cellPixelSize);
+    }
+
+    /// <summary>Fills a cell solid red to indicate it has water but no flowmap enabled.</summary>
+    public void DrawNoFlowmap(SKCanvas canvas, int offsetX, int offsetY, int cellPixelSize = FlowmapPixelSize) {
+        using var paint = new SKPaint {
+            Color = SKColors.Red.WithAlpha(220),
+        };
+        canvas.DrawRect(offsetX, offsetY, cellPixelSize, cellPixelSize, paint);
     }
 
     private static void DrawArrows(SKCanvas canvas, FlowmapData flowmap, int offsetX, int offsetY, int cellPixelSize) {

@@ -23,10 +23,12 @@ public sealed class FlowmapService(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment) {
     private static readonly Uri FlowTemplateUri = new("avares://WaterFlowPainter/Assets/FlowTemplate.dds");
 
-    public sealed record FlowmapCell(P2Int Position, float WaterHeight, string? FlowmapPath, ICellGetter Cell);
+    public sealed record FlowmapCell(P2Int Position, float WaterHeight, string? FlowmapPath, ICellGetter Cell, bool FlowmapEnabled);
 
     /// <summary>
-    /// Enumerates all exterior cells of the worldspace that have water with the flowmap flag enabled.
+    /// Enumerates all exterior cells of the worldspace that have water. Cells with the flowmap flag
+    /// enabled are editable.
+    /// Cells with water but no flowmap flag are included so they can be highlighted as not having flowmaps.
     /// </summary>
     public List<FlowmapCell> GetFlowmapCells(FormKey worldspaceFormKey) {
         var cells = new List<FlowmapCell>();
@@ -34,10 +36,10 @@ public sealed class FlowmapService(
             if (cell.Grid is not {} grid) continue;
             if (cell.Water.IsNull) continue;
             if (cell.Water.TryResolve(editorEnvironment.LinkCache) is not {} water) continue;
-            if ((water.Flags & Water.Flag.EnableFlowmap) == 0) continue;
 
+            var flowmapEnabled = (water.Flags & Water.Flag.EnableFlowmap) != 0;
             var flowmapPath = FindFlowmapPath(worldspaceFormKey, grid.Point);
-            cells.Add(new FlowmapCell(grid.Point, cell.WaterHeight ?? 0, flowmapPath, cell));
+            cells.Add(new FlowmapCell(grid.Point, cell.WaterHeight ?? 0, flowmapPath, cell, flowmapEnabled));
         }
 
         return cells;

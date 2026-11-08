@@ -142,7 +142,10 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
                         cells.Max(c => c.Position.Y) + 1);
                 }
 
-                StatusText = $"Found {cells.Count} cells with flowmap enabled water.";
+                var flowmapCells = cells.Count(cell => cell.FlowmapEnabled);
+                StatusText = flowmapCells == cells.Count
+                    ? $"Found {cells.Count} cells with flowmap enabled water."
+                    : $"Found {cells.Count} water cells, {flowmapCells} with flowmap enabled.";
                 BusyTasks--;
             })
             .Subscribe(
@@ -224,7 +227,7 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
     }
 
     private SKBitmap BuildFlowPreview(IReadOnlyList<WaterCellVM> cells) {
-        var renderCells = cells.Select(cell => new FlowmapRenderer.RenderCell(cell.Position, () => cell.Flowmap, () => cell.LandMask));
+        var renderCells = cells.Select(cell => new FlowmapRenderer.RenderCell(cell.Position, () => cell.Flowmap, () => cell.LandMask, cell.FlowmapEnabled));
         return _flowmapRenderer.CreateFlowPreview(renderCells, LeftCell, BottomCell, RightCell, TopCell, ShowArrows, OverviewCellSize);
     }
 

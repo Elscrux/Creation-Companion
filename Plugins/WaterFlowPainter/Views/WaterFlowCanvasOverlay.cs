@@ -235,7 +235,11 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
 
         var bitmap = new SKBitmap(size, size, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         using (var canvas = new SKCanvas(bitmap)) {
-            Renderer.DrawFlowmap(canvas, 0, 0, false, size);
+            if (cell.FlowmapEnabled) {
+                Renderer.DrawFlowmap(canvas, 0, 0, false, size);
+            } else {
+                Renderer.DrawNoFlowmap(canvas, 0, 0, size);
+            }
         }
 
         using var stream = FlowmapRenderer.EncodePng(bitmap);
@@ -398,6 +402,7 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
         var position = e.GetCurrentPoint(this).Position;
         var cell = GetCellAt(position);
         if (cell is null) return;
+        if (!cell.FlowmapEnabled) return;
 
         _isPainting = true;
         _lastPaintPosition = position;
