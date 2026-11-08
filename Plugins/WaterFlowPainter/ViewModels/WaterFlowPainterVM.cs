@@ -304,11 +304,12 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
         try {
             var savedCells = await Task.Run(async () => {
                 var saved = new List<WaterCellVM>();
-                foreach (var cell in modifiedCells) {
-                    if (await _flowmapService.SaveFlowmap(WorldspaceFormKey, cell.Flowmap, cell.Position, processor, processorConfig.ConfigValues)) {
-                        saved.Add(cell);
-                    }
-                }
+                await Parallel.ForEachAsync(modifiedCells,
+                    async (cell, _) => {
+                        if (await _flowmapService.SaveFlowmap(WorldspaceFormKey, cell.Flowmap, cell.Position, processor, processorConfig.ConfigValues)) {
+                            saved.Add(cell);
+                        }
+                    });
 
                 return saved;
             });
