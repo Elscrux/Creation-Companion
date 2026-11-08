@@ -425,7 +425,7 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
 
         var step = Math.Max(1, (int) (_viewModel.BrushSize * 0.1));
         var delta = e.Delta.Y > 0 ? step : -step;
-        _viewModel.BrushSize = Math.Clamp(_viewModel.BrushSize + delta, 1, 80);
+        _viewModel.BrushSize = Math.Clamp(_viewModel.BrushSize + delta, 1, 2000);
         e.Handled = true;
     }
 
