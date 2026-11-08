@@ -235,7 +235,7 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
 
         var bitmap = new SKBitmap(size, size, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         using (var canvas = new SKCanvas(bitmap)) {
-            Renderer.DrawFlowmap(canvas, cell.Flowmap, 0, 0, false, size);
+            Renderer.DrawFlowmap(canvas, 0, 0, false, size);
         }
 
         using var stream = FlowmapRenderer.EncodePng(bitmap);

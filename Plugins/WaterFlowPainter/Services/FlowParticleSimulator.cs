@@ -83,13 +83,13 @@ public sealed class FlowParticleSimulator {
                 continue;
             }
 
-            var direction = simulation.Flowmap.Direction[index];
+            var (x, y) = simulation.Flowmap.Direction[index].ToVector();
             var scale = simulation.Flowmap.Scale[index];
             var velocity = speed * (0.4f + 0.6f * scale) * BaseSpeed * dt;
 
             // Texture Y grows downwards, so invert the Y component to flow north upwards
-            var newX = particle.X + MathF.Cos(direction) * velocity;
-            var newY = particle.Y - MathF.Sin(direction) * velocity;
+            var newX = particle.X + x * velocity;
+            var newY = particle.Y - y * velocity;
 
             DrawLine(pixels, rowBytes, particle.X, particle.Y, newX, newY);
 

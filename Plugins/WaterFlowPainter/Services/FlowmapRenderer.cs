@@ -11,7 +11,7 @@ public sealed class FlowmapRenderer {
     public const int FlowmapPixelSize = FlowmapData.Size;
 
     /// <summary>A cell with its flowmap and optional land mask, positioned in cell grid coordinates.</summary>
-    public sealed record RenderCell(P2Int Position, FlowmapData Flowmap, SKBitmap? LandMask);
+    public sealed record RenderCell(P2Int Position, Func<FlowmapData> GetFlowmap, Func<SKBitmap?> GetLandMask);
 
     /// <summary>
     /// Creates a composite flow preview of all cells in the given cell range. Each pixel is color
@@ -37,7 +37,7 @@ public sealed class FlowmapRenderer {
             var y = (topCell - cell.Position.Y) * cellPixelSize;
             if (x < -cellPixelSize || y < -cellPixelSize || x >= width || y >= height) continue;
 
-            DrawFlowmap(canvas, cell.Flowmap, x, y, showArrows, cellPixelSize);
+            DrawFlowmap(canvas, x, y, showArrows, cellPixelSize);
         }
 
         DrawCellBorders(canvas, width, height, cellPixelSize);
@@ -55,39 +55,29 @@ public sealed class FlowmapRenderer {
 
         using var canvas = new SKCanvas(bitmap);
         foreach (var cell in cells) {
-            if (cell.LandMask is null) continue;
+            if (cell.GetLandMask is null) continue;
 
             var x = (cell.Position.X - leftCell) * cellPixelSize;
             var y = (topCell - cell.Position.Y) * cellPixelSize;
             if (x < -cellPixelSize || y < -cellPixelSize || x >= width || y >= height) continue;
 
-            canvas.DrawBitmap(cell.LandMask, new SKRect(x, y, x + cellPixelSize, y + cellPixelSize));
+            canvas.DrawBitmap(cell.GetLandMask(), new SKRect(x, y, x + cellPixelSize, y + cellPixelSize));
         }
 
         return bitmap;
     }
 
     /// <summary>Draws a single flowmap color coded at the given pixel offset, decimated to <paramref name="cellPixelSize" />.</summary>
-    public void DrawFlowmap(SKCanvas canvas, FlowmapData flowmap, int offsetX, int offsetY, bool showArrows, int cellPixelSize = FlowmapPixelSize) {
-        var step = (float) FlowmapData.Size / cellPixelSize;
+    public void DrawFlowmap(SKCanvas canvas, int offsetX, int offsetY, bool showArrows, int cellPixelSize = FlowmapPixelSize) {
         using var paint = new SKPaint();
         for (var y = 0; y < cellPixelSize; y++) {
             for (var x = 0; x < cellPixelSize; x++) {
-                // Sample the center of the block this overview pixel represents.
-                // Flowmap row 0 is the south edge of the cell, screen row 0 is north.
-                var sampleX = Math.Min(FlowmapData.Size - 1, (int) ((x + 0.5f) * step));
-                var sampleY = Math.Min(FlowmapData.Size - 1, FlowmapData.Size - 1 - (int) ((y + 0.5f) * step));
-                var index = FlowmapData.Index(sampleX, sampleY);
-                var speed = flowmap.Speed[index];
-                if (speed <= 0.01f) continue;
-
-                var hue = flowmap.Direction[index] / MathF.Tau * 360;
-                paint.Color = SKColor.FromHsv(hue, 0.9f, 0.35f + 0.65f * speed).WithAlpha(220);
+                paint.Color = SKColor.FromHsv(0.5f, 0.9f, 0.35f + 0.65f).WithAlpha(220);
                 canvas.DrawRect(offsetX + x, offsetY + y, 1, 1, paint);
             }
         }
 
-        if (showArrows) DrawArrows(canvas, flowmap, offsetX, offsetY, cellPixelSize);
+        // if (showArrows) DrawArrows(canvas, flowmap, offsetX, offsetY, cellPixelSize);
     }
 
     private static void DrawArrows(SKCanvas canvas, FlowmapData flowmap, int offsetX, int offsetY, int cellPixelSize) {
@@ -105,10 +95,10 @@ public sealed class FlowmapRenderer {
                 var speed = flowmap.Speed[index];
                 if (speed <= 0.05f) continue;
 
-                var direction = flowmap.Direction[index];
+                var direction = flowmap.Direction[index].ToVector();
                 // Screen Y grows downwards, so invert the Y component to point north upwards
-                var dx = MathF.Cos(direction);
-                var dy = -MathF.Sin(direction);
+                var dx = direction.X;
+                var dy = -direction.Y;
                 var length = (1.5f + speed * 4f) * scale;
 
                 // Flowmap row 0 is the south edge, so flip Y for the screen position

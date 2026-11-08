@@ -10,8 +10,7 @@ public sealed class FlowmapData {
     public const int Size = 64;
     public const int PixelCount = Size * Size;
 
-    /// <summary>Flow direction per pixel in radians, measured from +X (east) towards +Y (north).</summary>
-    public readonly float[] Direction = new float[PixelCount];
+    public readonly WaterFlowDirection[] Direction = new WaterFlowDirection[PixelCount];
 
     /// <summary>Flow speed per pixel, normalized 0-1.</summary>
     public readonly float[] Speed = new float[PixelCount];
@@ -19,19 +18,11 @@ public sealed class FlowmapData {
     /// <summary>Flow scale per pixel, normalized 0-1.</summary>
     public readonly float[] Scale = new float[PixelCount];
 
-    /// <summary>Raw blue channel per pixel. Unused by the game, but preserved to not corrupt existing flowmaps.</summary>
-    public readonly byte[] Blue = new byte[PixelCount];
-
-    public FlowmapData() {
-        Array.Fill(Blue, (byte) 255);
-    }
-
     public FlowmapData Clone() {
         var clone = new FlowmapData();
         Array.Copy(Direction, clone.Direction, PixelCount);
         Array.Copy(Speed, clone.Speed, PixelCount);
         Array.Copy(Scale, clone.Scale, PixelCount);
-        Array.Copy(Blue, clone.Blue, PixelCount);
         return clone;
     }
 
@@ -39,20 +30,26 @@ public sealed class FlowmapData {
         Array.Copy(other.Direction, Direction, PixelCount);
         Array.Copy(other.Speed, Speed, PixelCount);
         Array.Copy(other.Scale, Scale, PixelCount);
-        Array.Copy(other.Blue, Blue, PixelCount);
     }
 
     public static int Index(int x, int y) => y * Size + x;
 
-    /// <summary>Encodes the flow data into a 64x64 BGRA bitmap (unpremultiplied alpha).</summary>
+    /// <summary>
+    /// Encodes the flow data into a 64x64 BGRA bitmap (unpremultiplied alpha).
+    /// Flowmap row 0 is the south edge, while bitmap row 0 is the top, so the Y axis is flipped.
+    /// </summary>
     public SKBitmap Encode() {
         var bitmap = new SKBitmap(Size, Size, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         var pixels = new byte[PixelCount * 4];
-        for (var i = 0; i < PixelCount; i++) {
-            pixels[i * 4 + 0] = Blue[i];
-            pixels[i * 4 + 1] = (byte) (Scale[i] * 255 + 0.5f);
-            pixels[i * 4 + 2] = (byte) (Direction[i] / MathF.Tau * 255 + 0.5f);
-            pixels[i * 4 + 3] = (byte) (Speed[i] * 255 + 0.5f);
+        for (var y = 0; y < Size; y++) {
+            for (var x = 0; x < Size; x++) {
+                var i = Index(x, y);
+                var bitmapIndex = Index(x, Size - 1 - y) * 4;
+                pixels[bitmapIndex + 0] = (byte) (Scale[i] * 255);
+                pixels[bitmapIndex + 1] = (byte) (Direction[i].DirectionA * 255);
+                pixels[bitmapIndex + 2] = (byte) (Direction[i].DirectionB * 255);
+                pixels[bitmapIndex + 3] = (byte) (Speed[i] * 255);
+            }
         }
 
         unsafe {
@@ -64,7 +61,10 @@ public sealed class FlowmapData {
         return bitmap;
     }
 
-    /// <summary>Decodes a 64x64 BGRA bitmap (unpremultiplied alpha) into flow data.</summary>
+    /// <summary>
+    /// Decodes a 64x64 BGRA bitmap (unpremultiplied alpha) into flow data.
+    /// Bitmap row 0 is the top, while flowmap row 0 is the south edge, so the Y axis is flipped.
+    /// </summary>
     public static FlowmapData Decode(SKBitmap bitmap) {
         var data = new FlowmapData();
         const int byteCount = PixelCount * 4;
@@ -75,11 +75,14 @@ public sealed class FlowmapData {
             }
         }
 
-        for (var i = 0; i < PixelCount; i++) {
-            data.Blue[i] = pixels[i * 4 + 0];
-            data.Scale[i] = pixels[i * 4 + 1] / 255f;
-            data.Direction[i] = pixels[i * 4 + 2] / 255f * MathF.Tau;
-            data.Speed[i] = pixels[i * 4 + 3] / 255f;
+        for (var y = 0; y < Size; y++) {
+            for (var x = 0; x < Size; x++) {
+                var i = Index(x, y);
+                var bitmapIndex = Index(x, Size - 1 - y) * 4;
+                data.Scale[i] = pixels[bitmapIndex + 0] / 255f;
+                data.Direction[i] = new WaterFlowDirection(pixels[bitmapIndex + 1] / 255f, pixels[bitmapIndex + 2] / 255f);
+                data.Speed[i] = pixels[bitmapIndex + 3] / 255f;
+            }
         }
 
         return data;

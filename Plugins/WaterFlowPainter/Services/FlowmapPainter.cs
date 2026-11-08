@@ -76,18 +76,15 @@ public sealed class FlowmapPainter {
     /// Blends a direction angle toward a target direction by blending the underlying unit vectors,
     /// which correctly handles the wrap-around at 0/360°.
     /// </summary>
-    private static float BlendDirection(float currentAngle, float targetX, float targetY, float blend) {
-        var currentX = MathF.Cos(currentAngle);
-        var currentY = MathF.Sin(currentAngle);
+    private static WaterFlowDirection BlendDirection(WaterFlowDirection currentDirection, float targetX, float targetY, float blend) {
+        var (currentX, currentY) = currentDirection.ToVector();
 
         var x = float.Lerp(currentX, targetX, blend);
         var y = float.Lerp(currentY, targetY, blend);
 
         var length = MathF.Sqrt(x * x + y * y);
-        if (length < 0.0001f) return currentAngle;
+        if (length < 0.0001f) return currentDirection;
 
-        var angle = MathF.Atan2(y / length, x / length);
-        if (angle < 0) angle += MathF.Tau;
-        return angle;
+        return WaterFlowDirection.FromAngleRadians(MathF.Atan2(y / length, x / length));
     }
 }
