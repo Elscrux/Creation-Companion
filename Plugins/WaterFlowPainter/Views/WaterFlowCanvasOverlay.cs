@@ -243,15 +243,6 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
 
         var cellPixelSize = _viewModel.OverviewCellSize;
 
-        // Land masks of the zoomed in cells, shown together with the particle animations
-        if (_simulations.Count > 0) {
-            foreach (var (position, entry) in _simulations) {
-                if (GetLandMaskImage(entry.Cell) is not {} mask) continue;
-
-                context.DrawImage(mask, CellRect(position, cellPixelSize));
-            }
-        }
-
         // Live flowmaps of painted cells, drawn over the static preview
         foreach (var (position, image) in _cellImages) {
             var rect = CellRect(position, cellPixelSize);
@@ -262,6 +253,15 @@ public sealed class WaterFlowCanvasOverlay : Control, ICustomHitTest, IDisposabl
         foreach (var (position, entry) in _simulations) {
             var rect = CellRect(position, cellPixelSize);
             context.DrawImage(entry.Simulation.Bitmap, rect);
+        }
+
+        // Land masks of the zoomed in cells, shown together with the particle animations
+        if (_simulations.Count > 0) {
+            foreach (var (position, entry) in _simulations) {
+                if (GetLandMaskImage(entry.Cell) is not {} mask) continue;
+
+                context.DrawImage(mask, CellRect(position, cellPixelSize));
+            }
         }
 
         // Brush cursor
