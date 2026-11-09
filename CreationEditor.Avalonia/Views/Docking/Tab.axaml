@@ -28,7 +28,7 @@
     </UserControl.Styles> -->
 
     <Border Classes="Tab"
-            Height="34"
+           
             Classes.AccentSelected="{Binding IsSelected}"
             PointerReleased="OnTabPointerReleased"
             ToolTip.Tip="{Binding Header}">
@@ -50,7 +50,7 @@
             </controls:FAIconSourceElement> -->
 
             <!-- kemor: swapped to ViewBox which actually respects changed values -->
-            <Viewbox Width="24" Height="24"
+            <Viewbox Width="32" Height="32"
                     IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
                 
                 <controls:FAIconSourceElement IconSource="{Binding IconSource}" VerticalAlignment="Center" />

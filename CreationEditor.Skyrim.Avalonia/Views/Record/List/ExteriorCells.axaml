@@ -27,14 +27,14 @@
 
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal">
-            <TextBlock Text="X: " FontSize="16"
+            <TextBlock Text="X: " FontSize="14"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridXValue}"
                            ShowButtonSpinner="False"
                            Increment="1"
                            Margin="0,0,8,0"/>
 
-            <TextBlock Text="Y: " FontSize="16"
+            <TextBlock Text="Y: " FontSize="14"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridYValue}"
                            ShowButtonSpinner="False"

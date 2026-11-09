@@ -13,22 +13,21 @@
              x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDockLeft"
              x:Name="Dock"
-             Background="{DynamicResource SystemControlTransparentBrush}">
+             Classes="BorderedDockContainer">
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid ColumnDefinitions="60,*"
-          Classes="AccentSelected TabGrid">
+    <Grid ColumnDefinitions="Auto,*"
+        Classes="AccentSelected TabGrid">
 
         <LayoutTransformControl Grid.Column="0"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch">
-                <!-- <LayoutTransformControl.LayoutTransform>
-                    <RotateTransform Angle="-90"/>
-                </LayoutTransformControl.LayoutTransform> -->
 
-            <Border Classes="TabBar">
+            <Border Classes="TabBar"
+                    BorderThickness="0,0,1,0" 
+            >
                 <ItemsControl ItemsSource="{Binding Tabs}"
                                 FlowDirection="LeftToRight">
                     <ItemsControl.ItemsPanel>
@@ -86,4 +85,5 @@
                             Classes="BorderedDock AccentSelected"/>
         </Grid>
     </Grid>
+    
 </UserControl>

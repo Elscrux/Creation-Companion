@@ -14,6 +14,8 @@
                        Title="{Binding WindowTitleObs^}"
                        MinHeight="540"
                        MinWidth="960"
+                       Background="#17191D"
+                       Padding="4,0,4,4"
                        x:DataType="viewModels:MainVM"
                        x:Name="Window">
     <Grid>

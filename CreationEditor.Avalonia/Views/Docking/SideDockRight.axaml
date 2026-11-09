@@ -11,13 +11,13 @@
              x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDockRight"
              x:Name="Dock"
-             Background="{DynamicResource SystemControlTransparentBrush}">
+             Classes="BorderedDockContainer">
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid ColumnDefinitions="*,60"
-          Classes="AccentSelected TabGrid">
+    <Grid ColumnDefinitions="*,Auto"
+        Classes="AccentSelected TabGrid">
         <Grid Grid.Column="0" RowDefinitions="Auto,*">
             <Border Grid.Row="0" 
                     VerticalAlignment="Center"
@@ -31,15 +31,14 @@
                 >
                     <Viewbox Width="14" Height="14"
                             IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        
-                        <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}" />
-                        
+                        <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}" />  
                     </Viewbox>
                 
                     <TextBlock Text="{Binding ActiveTab.Header}" 
                                 FontSize="14" 
                                 FontWeight="Medium"
                     />
+
                     <!-- Close -->
                     <Button Classes="DockClose"
                             Command="{Binding ActiveTab.CloseCommand}"
@@ -59,27 +58,27 @@
         </Grid>
 
         <LayoutTransformControl Grid.Column="1"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch">
-            <!-- <LayoutTransformControl.LayoutTransform>
-                <RotateTransform Angle="90"/>
-            </LayoutTransformControl.LayoutTransform> -->
 
-            <Border Classes="TabBar">
+            <Border Classes="TabBar" 
+                    BorderThickness="1,0,0,0"
+            >
                 <ItemsControl ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate >
-                            <StackPanel Orientation="Vertical" Spacing="4" />
+                            <StackPanel Orientation="Vertical" Spacing="8" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="model:IDockedItem">
                             <docking:Tab DockContainer="{Binding #Dock.DataContext}"
-                                         DockedItem="{Binding}"/>
+                                        DockedItem="{Binding}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Border>
         </LayoutTransformControl>
     </Grid>
+    
 </UserControl>
