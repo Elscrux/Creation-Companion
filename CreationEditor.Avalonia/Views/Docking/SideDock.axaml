@@ -10,15 +10,16 @@
              x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDock"
              x:Name="Dock"
-             Background="{DynamicResource SystemControlTransparentBrush}">
+             Classes="BorderedDockContainer">
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid RowDefinitions="20,*"
+    <Grid RowDefinitions="Auto,*"
           Classes="AccentSelected TabGrid">
         <Border Grid.Row="0"
-                Classes="TabBar">
+                Classes="TabBar"
+                BorderThickness="0,0,0,2">
             <ItemsControl ItemsSource="{Binding Tabs}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

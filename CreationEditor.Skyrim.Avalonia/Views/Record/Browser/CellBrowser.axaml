@@ -27,20 +27,31 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="200"/>
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="25"/>
             <RowDefinition
                 Height="{Binding ShowPlaced, Converter={StaticResource ReturnGridLengthIfTrue}, ConverterParameter=300}"
                 MinHeight="{Binding ShowPlaced, Converter={StaticResource ReturnDoubleIfTrue}, ConverterParameter=100}"/>
         </Grid.RowDefinitions>
 
+        <!-- kemor: Added vertical spacing -->
         <TabControl Grid.Row="0"
+                    MinHeight="200"
                     SelectedIndex="{Binding SelectedTab}"
-                    Padding="4,0">
-            <TabItem Header="Interior">
+                    Padding="8,0"
+        >
+            <TabItem Header="Interior"
+                    Margin="0,0,0,8"
+                    Padding="8,0"
+                    FontSize="16"
+            >
                 <list:InteriorCells DataContext="{Binding InteriorCellsVM}"/>
             </TabItem>
 
-            <TabItem Header="Exterior">
+            <TabItem Header="Exterior"
+                    Margin="0,0,0,8"
+                    Padding="8,0"
+                    FontSize="16"
+            >
                 <list:ExteriorCells DataContext="{Binding ExteriorCellsVM}"/>
             </TabItem>
         </TabControl>
@@ -50,7 +61,7 @@
                       IsEnabled="{Binding ShowPlaced}"/>
 
         <Button Grid.Row="1"
-                Height="15" Width="15"
+                Height="25" Width="25"
                 Padding="0" Margin="0"
                 Classes="DockClose"
                 HorizontalAlignment="Center"
@@ -65,11 +76,15 @@
             </Grid>
         </Button>
 
+        <!-- kemor: Added vertical spacing -->
         <HeaderedContentControl
             Grid.Row="2"
             Header="References"
             IsVisible="{Binding PlacedListVM.PlacedProvider.CellFormKey, Converter={x:Static converter:FormKeyConverter.IsNotNull}}">
-            <list:PlacedList DataContext="{Binding PlacedListVM}"/>
+            <Border Margin="0,8,0,0"
+                    Padding="8,0">
+                <list:PlacedList DataContext="{Binding PlacedListVM}"/>
+            </Border>
         </HeaderedContentControl>
     </Grid>
 </UserControl>

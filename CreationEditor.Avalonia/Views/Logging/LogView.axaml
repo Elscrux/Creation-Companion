@@ -26,34 +26,43 @@
             LevelsVisibility="{Binding LevelsVisibility}"/>
     </UserControl.Resources>
 
-    <Grid ColumnDefinitions="20,*">
+    <Grid ColumnDefinitions="30,*">
         <StackPanel Grid.Column="0"
-                    Spacing="2"
+                    Spacing="4"
+                    
                     Background="{DynamicResource ButtonBackground}">
             <Button Classes="Transparent"
                     Command="{Binding ClearCommand}"
-                    Width="20" Height="20"
+                    Width="24" Height="24"
+                    HorizontalAlignment="Center"
                     Padding="2"
+                    Margin="0,6,2,0"
                     ToolTip.Tip="Clear Log">
-                <controls:FASymbolIcon Symbol="DeleteFilled"/>
+                <controls:FASymbolIcon Symbol="DeleteFilled" FontSize="16"/>
             </Button>
 
             <Button Classes="Transparent"
                     Command="{Binding ToggleAutoScrollCommand}"
-                    Width="20" Height="20"
+                    Width="24" Height="24"
+                    HorizontalAlignment="Center"
                     Padding="2"
+                    Margin="0,0,2,0"
                     ToolTip.Tip="Toggle Auto Scroll">
                 <Grid>
                     <controls:FASymbolIcon Symbol="MapPinFilled"
-                                         IsVisible="{Binding AutoScroll}"/>
+                                        FontSize="16"
+                                        IsVisible="{Binding AutoScroll}"/>
                     <controls:FASymbolIcon Symbol="UnPin"
-                                         IsVisible="{Binding !AutoScroll}"/>
+                                        FontSize="16"
+                                        IsVisible="{Binding !AutoScroll}"/>
                 </Grid>
             </Button>
 
             <Button Classes="Transparent"
-                    Width="20" Height="20"
+                    Width="24" Height="24"
+                    HorizontalAlignment="Center"
                     Padding="2"
+                    Margin="0,0,2,0"
                     ToolTip.Tip="Search">
                 <Button.Flyout>
                     <Flyout>
@@ -63,17 +72,20 @@
 
                 <StackPanel>
                     <controls:FASymbolIcon Symbol="Find"
-                                         IsVisible="{Binding !SearchText.Length}"/>
+                                        FontSize="16"
+                                        IsVisible="{Binding !SearchText.Length}"/>
                     <controls:FASymbolIcon Symbol="Find"
-                                         Foreground="{DynamicResource SystemAccentColor}"
-                                         IsVisible="{Binding !!SearchText.Length}"/>
+                                        FontSize="16"
+                                        Foreground="{DynamicResource SystemAccentColor}"
+                                        IsVisible="{Binding !!SearchText.Length}"/>
                 </StackPanel>
             </Button>
 
             <Button Classes="Transparent"
                     Padding="2"
+                    Margin="0,0,2,0"
                     HorizontalAlignment="Center"
-                    Width="20" Height="20"
+                    Width="24" Height="24"
                     ToolTip.Tip="Toggle Log Levels">
                 <Button.Flyout>
                     <Flyout>
@@ -99,7 +111,7 @@
                     </Flyout>
                 </Button.Flyout>
 
-                <controls:FASymbolIcon Symbol="MoreVertical"/>
+                <controls:FASymbolIcon Symbol="MoreVertical" FontSize="16"/>
             </Button>
         </StackPanel>
 

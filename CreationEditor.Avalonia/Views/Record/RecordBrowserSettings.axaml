@@ -12,8 +12,8 @@
         <Grid Row="0" ColumnDefinitions="Auto,*">
             <Button Grid.Column="0"
                     MinWidth="32" MinHeight="32"
-                    Margin="0,0,5,0">
-                <controls:FASymbolIcon Symbol="SettingsFilled"/>
+                    Margin="0,0,8,0">
+                <controls:FASymbolIcon Symbol="SettingsFilled" FontSize="16"/>
 
                 <Button.Flyout>
                     <Flyout>
@@ -28,12 +28,13 @@
             </Button>
 
             <TextBox Grid.Column="1"
+                        Background="#15171B"
                      Text="{Binding #View.Settings.SearchTerm}"
                      PlaceholderText="Search..."/>
         </Grid>
 
         <CheckBox Grid.Row="1"
-                  Margin="0,5,0,0"
+                  Margin="0,6,0,6"
                   Content="Show Only Active"
                   IsChecked="{Binding #View.OnlyActive}"/>
     </Grid>

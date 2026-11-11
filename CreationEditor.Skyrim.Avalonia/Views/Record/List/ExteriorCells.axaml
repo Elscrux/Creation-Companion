@@ -11,31 +11,35 @@
              x:Class="CreationEditor.Skyrim.Avalonia.Views.Record.List.ExteriorCells"
              x:DataType="list:ExteriorCellsVM"
              x:Name="Control">
-    <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*">
+    <Grid RowDefinitions="Auto,5,Auto,5,Auto,5,Auto,5,*"
+            RowSpacing="4"
+    >
         <HeaderedContentControl Grid.Row="0"
                                 Header="Worldspace">
-            <picker:FormKeyPicker
-                FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
-                ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
-                LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"
-                MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
+            <Border Margin="0,8,0,0">                 
+                <picker:FormKeyPicker
+                    FormKey="{Binding ExteriorCellsProvider.WorldspaceFormKey}"
+                    ScopedTypes="{x:Static constants:RecordTypeConstants.WorldspaceTypes}"
+                    LinkCache="{Binding LinkCacheProvider.LinkCacheChanged^}"
+                    MaxSearchBoxHeight="{Binding #Control.Bounds.Height, Converter={x:Static converter:DoubleConverters.DivideInHalf}}"/>
+            </Border> 
         </HeaderedContentControl>
 
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal">
-            <TextBlock Text="X" FontSize="16"
+            <TextBlock Text="X: " FontSize="14"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridXValue}"
                            ShowButtonSpinner="False"
                            Increment="1"
-                           Margin="0,0,10,0"/>
+                           Margin="0,0,8,0"/>
 
-            <TextBlock Text="Y" FontSize="16"
+            <TextBlock Text="Y: " FontSize="14"
                        VerticalAlignment="Center"/>
             <NumericUpDown Value="{Binding GridYValue}"
                            ShowButtonSpinner="False"
                            Increment="1"
-                           Margin="0,0,5,0"/>
+                           Margin="0,0,8,0"/>
 
             <Button Content="Search"
                     Command="{Binding SelectGridCellCommand}"/>

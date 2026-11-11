@@ -5,6 +5,7 @@
              xmlns:model="clr-namespace:CreationEditor.Avalonia.Models.Docking"
              xmlns:vm="clr-namespace:CreationEditor.Avalonia.ViewModels.Docking"
              xmlns:behavior="clr-namespace:CreationEditor.Avalonia.Behavior"
+             xmlns:controls="using:FluentAvalonia.UI.Controls"
              xmlns:docking="clr-namespace:CreationEditor.Avalonia.Views.Docking"
              mc:Ignorable="d"
              d:DesignWidth="800"
@@ -12,40 +13,77 @@
              x:DataType="vm:SideDockVM"
              x:Class="CreationEditor.Avalonia.Views.Docking.SideDockLeft"
              x:Name="Dock"
-             Background="{DynamicResource SystemControlTransparentBrush}">
+             Classes="BorderedDockContainer">
     <Interaction.Behaviors>
         <behavior:DockDropBehavior DockContainer="{Binding}"/>
     </Interaction.Behaviors>
 
-    <Grid ColumnDefinitions="20,*"
-          Classes="AccentSelected TabGrid">
-        <LayoutTransformControl Grid.Column="0"
-                                VerticalAlignment="Stretch">
-            <LayoutTransformControl.LayoutTransform>
-                <RotateTransform Angle="-90"/>
-            </LayoutTransformControl.LayoutTransform>
+    <Grid ColumnDefinitions="Auto,*"
+        Classes="AccentSelected TabGrid">
 
-            <Border Classes="TabBar">
+        <LayoutTransformControl Grid.Column="0"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+
+            <Border Classes="TabBar"
+                    BorderThickness="0,0,1,0" 
+            >
                 <ItemsControl ItemsSource="{Binding Tabs}"
-                              FlowDirection="RightToLeft">
+                                FlowDirection="LeftToRight">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
+                            <StackPanel Orientation="Vertical" Spacing="4"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="model:IDockedItem">
                             <docking:Tab DockContainer="{Binding #Dock.DataContext}"
-                                         DockedItem="{Binding}"/>
+                                            DockedItem="{Binding}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Border>
         </LayoutTransformControl>
 
-        <ContentControl Grid.Column="1"
-                        VerticalAlignment="Stretch"
-                        Content="{Binding ActiveTab.Control}"
-                        Classes="BorderedDock AccentSelected"/>
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+
+            <Border Grid.Row="0" 
+                    VerticalAlignment="Center"
+                    Padding="8,4"
+                    Background="{DynamicResource ButtonBackground}"
+                    CornerRadius="3,0">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="4"
+                            Margin="0,4,0,0"
+                            IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
+                >
+                    <Viewbox Width="14" Height="14"
+                            IsVisible="{Binding ActiveTab.IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        
+                        <controls:FAIconSourceElement IconSource="{Binding ActiveTab.IconSource}" />
+                        
+                    </Viewbox>
+                    <TextBlock Text="{Binding ActiveTab.Header}" 
+                                FontSize="14" 
+                                FontWeight="Medium"
+                    />
+                    <!-- Close -->
+                    <Button Classes="DockClose"
+                            Command="{Binding ActiveTab.CloseCommand}"
+                            IsVisible="{Binding ActiveTab.CanClose}"
+                    >
+                        <controls:FASymbolIcon Symbol="Dismiss"
+                                                FontSize="14"
+                                                ToolTip.Tip="Close"/>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <ContentControl Grid.Row="1"
+                            VerticalAlignment="Stretch"
+                            Content="{Binding ActiveTab.Control}"
+                            Classes="BorderedDock AccentSelected"/>
+        </Grid>
     </Grid>
+    
 </UserControl>

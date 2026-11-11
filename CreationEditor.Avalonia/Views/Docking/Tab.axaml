@@ -16,38 +16,57 @@
         <behavior:TabReorderBehavior DockContainer="{Binding #Control.DockContainer}"/>
     </Interaction.Behaviors>
 
-    <Border Classes="Tab"
-            Classes.AccentSelected="{Binding IsSelected}"
-            PointerReleased="OnTabPointerReleased">
+    <!-- <UserControl.Styles>
+        <Style Selector="controls|FASymbolIcon">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="Foreground" Value="Blue" />
+        </Style>
 
-        <StackPanel Orientation="Horizontal">
+        <Style Selector="controls|FAFontIcon">
+            <Setter Property="Width" Value="20"/>
+        </Style>
+    </UserControl.Styles> -->
+
+    <Border Classes="Tab"
+           
+            Classes.AccentSelected="{Binding IsSelected}"
+            PointerReleased="OnTabPointerReleased"
+            ToolTip.Tip="{Binding Header}">
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <!-- Icon -->
-            <controls:FAIconSourceElement Margin="4, 0,0,0"
+            <!-- <controls:FAIconSourceElement Margin="4,0,0,0"
                                           IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}"
                                           IconSource="{Binding IconSource}">
                 <controls:FAIconSourceElement.Styles>
                     <Style Selector="controls|FASymbolIcon">
-                        <Setter Property="FontSize"
-                                Value="20"/>
+                        <Setter Property="FontSize" Value="30"/>
                     </Style>
 
                     <Style Selector="controls|FAFontIcon">
-                        <Setter Property="FontSize"
-                                Value="20"/>
+                        <Setter Property="FontSize" Value="30"/>
                     </Style>
                 </controls:FAIconSourceElement.Styles>
-            </controls:FAIconSourceElement>
+            </controls:FAIconSourceElement> -->
+
+            <!-- kemor: swapped to ViewBox which actually respects changed values -->
+            <Viewbox Width="32" Height="32"
+                    IsVisible="{Binding IconSource, Converter={x:Static ObjectConverters.IsNotNull}}">
+                
+                <controls:FAIconSourceElement IconSource="{Binding IconSource}" VerticalAlignment="Center" />
+                
+            </Viewbox>
 
             <!-- Header -->
-            <TextBlock Text="{Binding Header}"/>
+            <!-- <TextBlock Text="{Binding Header}"/> -->
 
             <!-- Close -->
-            <Button Classes="DockClose"
+            <!-- <Button Classes="DockClose"
                     Command="{Binding CloseCommand}"
                     IsVisible="{Binding CanClose}">
                 <controls:FASymbolIcon Symbol="Dismiss"
                                        ToolTip.Tip="Close"/>
-            </Button>
+            </Button> -->
         </StackPanel>
     </Border>
 </UserControl>

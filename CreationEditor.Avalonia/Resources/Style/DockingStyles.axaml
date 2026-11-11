@@ -8,19 +8,24 @@
     </Design.PreviewWith>
 
     <!-- General -->
+     <Style Selector=":is(UserControl).BorderedDockContainer">
+        <Setter Property="Background" Value="#202329" />
+        <Setter Property="BorderBrush" Value="#383D46"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="3"/>
+     </Style>
     <Style
         Selector="
                 docking|DockedControl.BorderedDock,
                 docking|DocumentDock.BorderedDock,
                 ContentControl.BorderedDock">
-        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBackground}"/>
+        <!-- <Setter Property="BorderBrush" Value="{DynamicResource ButtonBackground}"/>
         <Setter Property="BorderThickness" Value="2"/>
-        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="CornerRadius" Value="0,3"/> -->
     </Style>
     <Style Selector="Button.DockClose">
-        <Setter Property="Margin" Value="2"/>
-        <Setter Property="Padding" Value="4"/>
-        <Setter Property="CornerRadius" Value="32"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Button.DockClose:not(:pointerover)">
         <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}"/>
@@ -29,15 +34,28 @@
 
     <!-- Tab -->
     <Style Selector="Border.TabBar">
-        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <!-- <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/> -->
+        <Setter Property="BorderBrush" Value="#383D46" />
+        <!-- <Setter Property="BorderThickness" Value="2,2,0,2" />
+        <Setter Property="CornerRadius" Value="0,0,3,3"/> -->
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>
     <Style Selector="Border.Tab">
-        <Setter Property="CornerRadius" Value="2"/>
+        <!-- <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="30"/> -->
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Background" Value="{StaticResource SystemControlTransparentBrush}"/>
     </Style>
+    <Style Selector="Border.Tab:pointerover">
+        <!-- <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="30"/> -->
+        <Setter Property="Background" Value="Gray"/>
+    </Style>
     <Style Selector="Border.Tab.AccentSelected">
-        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>  
+        <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Grid.TabGrid:focus-within Border.Tab.AccentSelected">
         <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>

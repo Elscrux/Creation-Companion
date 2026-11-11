@@ -14,6 +14,8 @@
                        Title="{Binding WindowTitleObs^}"
                        MinHeight="540"
                        MinWidth="960"
+                       Background="#17191D"
+                       Padding="4,0,4,4"
                        x:DataType="viewModels:MainVM"
                        x:Name="Window">
     <Grid>
@@ -26,24 +28,6 @@
                             HorizontalAlignment="Left">
                     <Menu Background="{x:Null}">
                         <MenuItem Header="_File">
-                            <MenuItem Header="_Data Sources"
-                                      HotKey="Ctrl+Alt+M"
-                                      InputGesture="Ctrl+Alt+D"
-                                      Command="{Binding #DataSourceSelectionPopup.Show}">
-                                <MenuItem.Icon>
-                                    <controls:FASymbolIcon Symbol="Folder"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-
-                            <MenuItem Header="_Mods"
-                                      HotKey="Ctrl+Alt+M"
-                                      InputGesture="Ctrl+Alt+M"
-                                      Command="{Binding #ModSelectionPopup.Show}">
-                                <MenuItem.Icon>
-                                    <controls:FASymbolIcon Symbol="Save"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-
                             <MenuItem Header="_Open">
                                 <MenuItem.Icon>
                                     <controls:FASymbolIcon Symbol="Open"/>
@@ -64,12 +48,30 @@
                                 </MenuItem>
                             </MenuItem>
 
-                            <MenuItem Header="Settings"
-                                      HotKey="Ctrl+Alt+S"
-                                      InputGesture="Ctrl+Alt+S"
-                                      Command="{Binding OpenSettingsCommand}">
+                            <MenuItem Header="Save"
+                                      HotKey="Ctrl+S"
+                                      InputGesture="Ctrl+S"
+                                      Command="{Binding SaveCommand}">
                                 <MenuItem.Icon>
-                                    <controls:FASymbolIcon Symbol="Settings"/>
+                                    <controls:FASymbolIcon Symbol="Save"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+
+                            <MenuItem Header="_Data Sources"
+                                      HotKey="Ctrl+Alt+M"
+                                      InputGesture="Ctrl+Alt+D"
+                                      Command="{Binding #DataSourceSelectionPopup.Show}">
+                                <MenuItem.Icon>
+                                    <controls:FASymbolIcon Symbol="Folder"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+
+                            <MenuItem Header="_Mods"
+                                      HotKey="Ctrl+Alt+M"
+                                      InputGesture="Ctrl+Alt+M"
+                                      Command="{Binding #ModSelectionPopup.Show}">
+                                <MenuItem.Icon>
+                                    <controls:FASymbolIcon Symbol="Save"/>
                                 </MenuItem.Icon>
                             </MenuItem>
 
@@ -80,15 +82,36 @@
                                 </MenuItem.Icon>
                             </MenuItem>
 
-                            <MenuItem Header="Save"
-                                      HotKey="Ctrl+S"
-                                      InputGesture="Ctrl+S"
-                                      Command="{Binding SaveCommand}">
+                            <MenuItem Header="Settings"
+                                      HotKey="Ctrl+Alt+S"
+                                      InputGesture="Ctrl+Alt+S"
+                                      Command="{Binding OpenSettingsCommand}">
                                 <MenuItem.Icon>
-                                    <controls:FASymbolIcon Symbol="Save"/>
+                                    <controls:FASymbolIcon Symbol="Settings"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
+
+                        <Menu.Styles>
+                            <Style Selector="MenuItem">
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            </Style>
+
+                            <!-- kemor: Aligns Header text to the left -->
+                            <Style Selector="MenuItem /template/ ContentPresenter#PART_HeaderPresenter">
+                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            </Style>
+
+                            <!-- kemor: Aligns Hotkey text to the right -->
+                            <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="#FFA0A0A0" />
+                                <!-- kemor: Add a right margin to prevent it from hugging the very edge or submenu arrow -->
+                                <Setter Property="Margin" Value="20,0,10,0"/> 
+                            </Style>
+                        </Menu.Styles>
                     </Menu>
 
                     <Menu Background="{x:Null}"

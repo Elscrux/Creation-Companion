@@ -171,6 +171,7 @@
 
             <Style Selector="^ TextBlock#CellTextBlock">
                 <Setter Property="FontSize" Value="{DynamicResource DataGridFontSizeSmall}"/>
+                <Setter Property="Padding" Value="0,2" />
             </Style>
 
             <Style Selector="^ CheckBox">
