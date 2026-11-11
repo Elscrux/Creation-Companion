@@ -28,6 +28,7 @@
             </Button>
 
             <TextBox Grid.Column="1"
+                        Background="#15171B"
                      Text="{Binding #View.Settings.SearchTerm}"
                      PlaceholderText="Search..."/>
         </Grid>

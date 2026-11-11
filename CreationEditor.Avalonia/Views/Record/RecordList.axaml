@@ -31,11 +31,19 @@
             CanUserReorderColumns="True" CanUserResizeColumns="True"
             AutoGenerateColumns="False"
             KeyDown="RecordGrid_OnKeyDown"
+            GridLinesVisibility="All"
             dragDrop:FormLinkDragDrop.GetFormLink="{x:Static converter:FormLinkConverter.ToFormLinkFunc}"
             dragDrop:DragDropExtended.AllowDrag="True"
             dragDrop:DragDropExtended.DragHandler="{StaticResource FormLinkDragDropHandler}"
             Classes="Small"
             IsReadOnly="True">
+
+            <DataGrid.Styles>
+                <Style Selector="DataGridCell.references-col TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </Style>
+            </DataGrid.Styles>
+
             <Interaction.Behaviors>
                 <behavior:DataGridTextSearchBehavior TextSearchValueSelector="SearchItems"/>
             </Interaction.Behaviors>
@@ -43,8 +51,8 @@
 
         <avaloniaProgressRing:ProgressRing
             IsActive="{Binding IsBusy^, FallbackValue=false}"
-            HorizontalAlignment="Left" VerticalAlignment="Top"
-            Width="100" Height="100"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            Width="50" Height="50"
             Margin="50"/>
     </Grid>
 </UserControl>

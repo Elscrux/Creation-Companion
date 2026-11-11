@@ -28,7 +28,15 @@ public partial class RecordList : ReactiveUserControl<IRecordListVM> {
                 .DisposeWithComposite(disposables);
 
             RecordGrid.Columns.ObserveCollectionChanges()
-                .Subscribe(_ => Sort())
+                .Subscribe(_ => {
+                    foreach (var column in RecordGrid.Columns) {
+                        if (column.Header?.ToString() == "References" && !column.CellStyleClasses.Contains("references-col")) {
+                            column.CellStyleClasses.Add("references-col");
+                        }
+                    }
+
+                    Sort();
+                })
                 .DisposeWithComposite(disposables);
         });
     }
