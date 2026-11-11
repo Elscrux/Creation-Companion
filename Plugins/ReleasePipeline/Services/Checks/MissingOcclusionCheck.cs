@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Skyrim;
+using ReleasePipeline.Models;
 using ReleasePipeline.Models.Check;
 namespace ReleasePipeline.Services.Checks;
 
@@ -9,6 +10,7 @@ namespace ReleasePipeline.Services.Checks;
 /// </summary>
 public sealed class MissingOcclusionCheck : IReleaseCheck, IIsolatedRecordAnalyzer<ICellGetter> {
     public string Name => "Missing Cell Occlusion Data";
+    public PipelineContext? Context { get; set; }
 
     public static readonly TopicDefinition MissingOcclusionData = CheckTopic.Custom("Missing Cell Occlusion Data", Severity.Warning)
         .WithoutFormatting("Cell has no occlusion data");

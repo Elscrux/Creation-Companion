@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Plugins.Records;
+using ReleasePipeline.Models;
 using ReleasePipeline.Models.Check;
 namespace ReleasePipeline.Services.Checks;
 
@@ -9,6 +10,7 @@ namespace ReleasePipeline.Services.Checks;
 /// </summary>
 public sealed class DeletedRecordCheck : IReleaseCheck, IIsolatedRecordAnalyzer<IMajorRecordGetter> {
     public string Name => "Deleted Record";
+    public PipelineContext? Context { get; set; }
 
     public static readonly TopicDefinition DeletedRecord = CheckTopic.Custom("Deleted Record", Severity.Error)
         .WithoutFormatting("Record is marked as deleted");

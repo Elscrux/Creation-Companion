@@ -42,7 +42,7 @@ public sealed partial class ChecksStepVM : ViewModel {
         HasBlockingCheckFailures = false;
         IsRunning = true;
         try {
-            var outcomes = await _pipelineRunner.RunChecksAsync(PipelineContext.Mod, token);
+            var outcomes = await _pipelineRunner.RunChecksAsync(PipelineContext, token);
             foreach (var outcome in outcomes) {
                 var item = CheckItems.FirstOrDefault(i => i.Check == outcome.Check);
                 item?.ApplyResult(outcome.Result);

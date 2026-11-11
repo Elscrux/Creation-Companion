@@ -1,5 +1,6 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
+using ReleasePipeline.Models;
 using ReleasePipeline.Models.Check;
 namespace ReleasePipeline.Services.Checks;
 
@@ -8,6 +9,7 @@ namespace ReleasePipeline.Services.Checks;
 /// </summary>
 public sealed class DuplicateEditorIDCheck : IReleaseCheck, IContextualAnalyzer {
     public string Name => "Duplicate Editor IDs";
+    public PipelineContext? Context { get; set; }
 
     public static readonly TopicDefinition DuplicateEditorID = CheckTopic.Custom("Duplicate Editor ID", Severity.Warning)
         .WithoutFormatting("Editor ID is used by more than one record");
