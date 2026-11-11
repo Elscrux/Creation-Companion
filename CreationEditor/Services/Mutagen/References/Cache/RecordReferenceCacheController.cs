@@ -31,7 +31,8 @@ public sealed class RecordReferenceCacheController(IEditorEnvironment editorEnvi
         }
     }
 
-    public IEnumerable<IFormLinkIdentifier> GetLinks(IEnumerable<RecordReferenceCache> caches, IFormLinkIdentifier reference) => [];
+    public IEnumerable<IFormLinkIdentifier> GetLinks(IEnumerable<RecordReferenceCache> caches, IFormLinkIdentifier reference) =>
+        editorEnvironment.LinkCache.TryResolve(reference, out var record) ? record.EnumerateFormLinks() : [];
 
     public IEnumerable<IFormLinkIdentifier> GetReferences(IReadOnlyDictionary<IModGetter, RecordReferenceCache> caches, IFormLinkIdentifier link) {
         var modKeys = editorEnvironment.LinkCache.PriorityOrder.Select(x => x.ModKey).ToArray();

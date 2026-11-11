@@ -10,7 +10,7 @@ public sealed class NifModificationService(
     : IModelModificationService {
 
     public void RemapLinks(DataSourceFileLink fileLink, Func<string, string> replace) {
-        if (!fileLink.Exists()) return;
+        if (!Accepts(fileLink)) return;
 
         var fileStream = fileLink.ReadFileStream();
         if (fileStream == null) return;
@@ -41,6 +41,9 @@ public sealed class NifModificationService(
                     TryReplace(bsEffectShaderProperty.EnvMaskTexture, x => bsEffectShaderProperty.EnvMaskTexture = x);
 
                     void TryReplace(NiString4 niString, Func<NiString4, NiString4> update) {
+                        // Null check needed because the library doesn't always initialize the NiString4 properties seemingly
+                        if (niString is null) return;
+
                         var str = niString.Content;
                         if (replace(str) is {} replacement && !string.Equals(str, replacement, DataRelativePath.PathComparison)) {
                             update(new NiString4(replacement));
@@ -63,5 +66,12 @@ public sealed class NifModificationService(
         } else {
             fileStream.Dispose();
         }
+    }
+
+    public bool Accepts(DataSourceFileLink fileLink) {
+        if (!fileLink.Exists()) return false;
+
+        var extension = fileLink.DataRelativePath.Extension;
+        return string.Equals(extension, ".nif", DataRelativePath.PathComparison);
     }
 }

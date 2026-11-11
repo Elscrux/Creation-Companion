@@ -140,10 +140,10 @@
                             </StackPanel>
 
                             <basic:LabeledContentControl Header="Size">
-                                <Slider Minimum="1"
-                                        Maximum="80"
-                                        MinWidth="200"
-                                        Value="{Binding BrushSize}"/>
+                                <NumericUpDown Minimum="1"
+                                               Maximum="2000"
+                                               MinWidth="200"
+                                               Value="{Binding BrushSize}"/>
                             </basic:LabeledContentControl>
 
                             <basic:LabeledContentControl Header="Strength">

@@ -1,5 +1,4 @@
 using Mutagen.Bethesda.Skyrim;
-using Noggog;
 using SkiaSharp;
 using WaterFlowPainter.Model;
 namespace WaterFlowPainter.Services;
@@ -21,6 +20,27 @@ public sealed class CellHeightmapService {
         var waterHeight = cell.WaterHeight;
         if (waterHeight is null or float.MaxValue) return null;
 
+        var offset = heightMap.Offset * 8;
+        float rowOffset = 0;
+        var heightmap = new float[33, 33];
+        foreach (var x in heightMap.HeightMap) {
+            float value = x.Value * 8; // signed byte, each unit equals 8 game units
+
+            var row = x.Key.Y;
+            var column = x.Key.X;
+
+            if (column == 0) {
+                // first column value controls height for all remaining points in cell 
+                rowOffset = 0;
+                offset += value;
+            } else {
+                // other col values control height of all points in the same row
+                rowOffset += value;
+            }
+
+            heightmap[column, row] = offset + rowOffset;
+        }
+
         var mask = new SKBitmap(FlowmapData.Size, FlowmapData.Size, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         var pixels = new byte[FlowmapData.PixelCount * 4];
         for (var y = 0; y < FlowmapData.Size; y++) {
@@ -29,14 +49,13 @@ public sealed class CellHeightmapService {
                 // Mask row 0 is north, the vertex Y of the heightmap grows northwards from 0 = south.
                 var vertexX = Math.Min(VertexCount - 1, (int) MathF.Round(x * (VertexCount - 1) / (float) (FlowmapData.Size - 1)));
                 var vertexY = Math.Min(VertexCount - 1, VertexCount - 1 - (int) MathF.Round(y * (VertexCount - 1) / (float) (FlowmapData.Size - 1)));
-                var height = heightMap.Offset + heightMap.HeightMap[new P2Int(vertexX, vertexY)] * 8f;
 
                 var index = (y * FlowmapData.Size + x) * 4;
-                if (height > waterHeight.Value) {
+                if (heightmap[vertexX, vertexY] > waterHeight.Value) {
                     pixels[index + 0] = 60;
                     pixels[index + 1] = 90;
                     pixels[index + 2] = 120;
-                    pixels[index + 3] = 160;
+                    pixels[index + 3] = 255;
                 }
             }
         }

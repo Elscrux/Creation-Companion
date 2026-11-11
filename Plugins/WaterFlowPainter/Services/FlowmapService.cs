@@ -23,10 +23,12 @@ public sealed class FlowmapService(
     IEditorEnvironment<ISkyrimMod, ISkyrimModGetter> editorEnvironment) {
     private static readonly Uri FlowTemplateUri = new("avares://WaterFlowPainter/Assets/FlowTemplate.dds");
 
-    public sealed record FlowmapCell(P2Int Position, float WaterHeight, string? FlowmapPath, ICellGetter Cell);
+    public sealed record FlowmapCell(P2Int Position, float WaterHeight, string? FlowmapPath, ICellGetter Cell, bool FlowmapEnabled);
 
     /// <summary>
-    /// Enumerates all exterior cells of the worldspace that have water with the flowmap flag enabled.
+    /// Enumerates all exterior cells of the worldspace that have water. Cells with the flowmap flag
+    /// enabled are editable.
+    /// Cells with water but no flowmap flag are included so they can be highlighted as not having flowmaps.
     /// </summary>
     public List<FlowmapCell> GetFlowmapCells(FormKey worldspaceFormKey) {
         var cells = new List<FlowmapCell>();
@@ -34,10 +36,10 @@ public sealed class FlowmapService(
             if (cell.Grid is not {} grid) continue;
             if (cell.Water.IsNull) continue;
             if (cell.Water.TryResolve(editorEnvironment.LinkCache) is not {} water) continue;
-            if ((water.Flags & Water.Flag.EnableFlowmap) == 0) continue;
 
-            var flowmapPath = FindFlowmapPath(grid.Point);
-            cells.Add(new FlowmapCell(grid.Point, cell.WaterHeight ?? 0, flowmapPath, cell));
+            var flowmapEnabled = (water.Flags & Water.Flag.EnableFlowmap) != 0;
+            var flowmapPath = FindFlowmapPath(worldspaceFormKey, grid.Point);
+            cells.Add(new FlowmapCell(grid.Point, cell.WaterHeight ?? 0, flowmapPath, cell, flowmapEnabled));
         }
 
         return cells;
@@ -46,10 +48,10 @@ public sealed class FlowmapService(
     /// <summary>
     /// Finds the flowmap file of a cell in the data sources.
     /// </summary>
-    public string? FindFlowmapPath(P2Int position) {
+    public string? FindFlowmapPath(FormKey worldspaceFormKey, P2Int position) {
         var fileName = $"Flow.{position.X}.{position.Y}.dds";
 
-        var activeModPath = Path.Combine("Textures", "Water", editorEnvironment.ActiveMod.ModKey.FileName, fileName);
+        var activeModPath = Path.Combine("Textures", "Water", worldspaceFormKey.ModKey.FileName, fileName);
         if (dataSourceService.GetFileLink(activeModPath) is {} activeLink) return activeLink.FullPath;
 
         return null;
@@ -91,20 +93,22 @@ public sealed class FlowmapService(
     /// texture with the given texture processor integration.
     /// </summary>
     public async Task<bool> SaveFlowmap(
+        FormKey worldspaceFormKey,
         FlowmapData flowmapData,
         P2Int position,
         ITextureProcessor textureProcessor,
         ConfigValues textureProcessorConfig) {
         string? tempDirectory = null;
+        var fileSystem = dataSourceService.ActiveDataSource.FileSystem;
         try {
-            tempDirectory = Path.Combine(Path.GetTempPath(), "WaterFlowPainter", Guid.NewGuid().ToString());
-            Directory.CreateDirectory(tempDirectory);
+            tempDirectory = fileSystem.Path.Combine(fileSystem.Path.GetTempPath(), "WaterFlowPainter", Guid.NewGuid().ToString());
+            fileSystem.Directory.CreateDirectory(tempDirectory);
 
-            var pngPath = Path.Combine(tempDirectory, "Flow.png");
+            var pngPath = fileSystem.Path.Combine(tempDirectory, "Flow.png");
             using (var bitmap = flowmapData.Encode()) {
                 using var image = SKImage.FromBitmap(bitmap);
                 using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-                using var stream = File.Create(pngPath);
+                await using var stream = fileSystem.File.Create(pngPath);
                 data.SaveTo(stream);
             }
 
@@ -114,12 +118,11 @@ public sealed class FlowmapService(
                 return false;
             }
 
-            var fileSystem = dataSourceService.ActiveDataSource.FileSystem;
             var directoryPath = fileSystem.Path.Combine(
                 dataSourceService.ActiveDataSource.Path,
                 "Textures",
                 "Water",
-                editorEnvironment.ActiveMod.ModKey.FileName);
+                worldspaceFormKey.ModKey.FileName);
             var targetPath = fileSystem.Path.Combine(directoryPath, $"Flow.{position.X}.{position.Y}.dds");
 
             fileSystem.Directory.CreateDirectory(directoryPath);
@@ -130,8 +133,8 @@ public sealed class FlowmapService(
             logger.Here().Error(e, "Failed to save flowmap of cell {X}.{Y}: {Message}", position.X, position.Y, e.Message);
             return false;
         } finally {
-            if (tempDirectory is not null && Directory.Exists(tempDirectory)) {
-                Directory.Delete(tempDirectory, true);
+            if (tempDirectory is not null && fileSystem.Directory.Exists(tempDirectory)) {
+                fileSystem.Directory.Delete(tempDirectory, true);
             }
         }
     }

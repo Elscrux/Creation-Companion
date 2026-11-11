@@ -142,7 +142,10 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
                         cells.Max(c => c.Position.Y) + 1);
                 }
 
-                StatusText = $"Found {cells.Count} cells with flowmap enabled water.";
+                var flowmapCells = cells.Count(cell => cell.FlowmapEnabled);
+                StatusText = flowmapCells == cells.Count
+                    ? $"Found {cells.Count} cells with flowmap enabled water."
+                    : $"Found {cells.Count} water cells, {flowmapCells} with flowmap enabled.";
                 BusyTasks--;
             })
             .Subscribe(
@@ -211,9 +214,10 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
         var cells = new List<WaterCellVM>();
         foreach (var flowmapCell in _flowmapService.GetFlowmapCells(worldspaceFormKey)) {
             try {
-                var flowmap = _flowmapService.LoadFlowmap(flowmapCell.FlowmapPath);
-                var landMask = _cellHeightmapService.GetLandMask(flowmapCell.Cell);
-                cells.Add(new WaterCellVM(flowmapCell, flowmap, landMask));
+                cells.Add(new WaterCellVM(
+                    flowmapCell,
+                    () => _flowmapService.LoadFlowmap(flowmapCell.FlowmapPath),
+                    () => _cellHeightmapService.GetLandMask(flowmapCell.Cell)));
             } catch (Exception e) {
                 _logger.Here().Error(e, "Failed to load cell {X}.{Y}: {Message}", flowmapCell.Position.X, flowmapCell.Position.Y, e.Message);
             }
@@ -223,11 +227,11 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
     }
 
     private SKBitmap BuildFlowPreview(IReadOnlyList<WaterCellVM> cells) {
-        var renderCells = cells.Select(cell => new FlowmapRenderer.RenderCell(cell.Position, cell.Flowmap, cell.LandMask));
+        var renderCells = cells.Select(cell => new FlowmapRenderer.RenderCell(cell.Position, () => cell.Flowmap, () => cell.LandMask, cell.FlowmapEnabled));
         return _flowmapRenderer.CreateFlowPreview(renderCells, LeftCell, BottomCell, RightCell, TopCell, ShowArrows, OverviewCellSize);
     }
 
-    private static IImage? ToImage(SKBitmap bitmap) {
+    private static IImage ToImage(SKBitmap bitmap) {
         using var stream = FlowmapRenderer.EncodePng(bitmap);
         return new Bitmap(stream);
     }
@@ -303,11 +307,12 @@ public sealed partial class WaterFlowPainterVM : ViewModel {
         try {
             var savedCells = await Task.Run(async () => {
                 var saved = new List<WaterCellVM>();
-                foreach (var cell in modifiedCells) {
-                    if (await _flowmapService.SaveFlowmap(cell.Flowmap, cell.Position, processor, processorConfig.ConfigValues)) {
-                        saved.Add(cell);
-                    }
-                }
+                await Parallel.ForEachAsync(modifiedCells,
+                    async (cell, _) => {
+                        if (await _flowmapService.SaveFlowmap(WorldspaceFormKey, cell.Flowmap, cell.Position, processor, processorConfig.ConfigValues)) {
+                            saved.Add(cell);
+                        }
+                    });
 
                 return saved;
             });

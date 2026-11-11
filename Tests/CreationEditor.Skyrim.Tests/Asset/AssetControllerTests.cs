@@ -167,4 +167,76 @@ public sealed class AssetControllerTests {
         Assert.DoesNotContain(staticRecord.FormKey, referenceService.GetRecordReferences(oldLink).Select(x => x.FormKey));
         Assert.Contains(staticRecord.FormKey, referenceService.GetRecordReferences(newLink).Select(x => x.FormKey));
     }
+
+    [Theory] [CreationEditorAutoData]
+    public void Rename_Directory_RenamesDirectory(
+        IAssetController assetController,
+        IDataSourceService dataSourceService,
+        IFileSystem fileSystem) {
+        CreateFile(dataSourceService, fileSystem, "meshes/testdir/a.nif", [1]);
+        CreateFile(dataSourceService, fileSystem, "meshes/testdir/sub/b.nif", [2]);
+        var directoryLink = new DataSourceDirectoryLink(dataSourceService.DataDirectoryDataSource, "meshes/testdir");
+
+        assetController.Rename(directoryLink, "renameddir", overwrite: false);
+
+        Assert.False(fileSystem.Directory.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "testdir")));
+        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "renameddir", "a.nif")));
+        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "renameddir", "sub", "b.nif")));
+        Assert.Equal([1], fileSystem.File.ReadAllBytes(fileSystem.Path.Combine(DataDirectory, "meshes", "renameddir", "a.nif")));
+        Assert.Equal([2], fileSystem.File.ReadAllBytes(fileSystem.Path.Combine(DataDirectory, "meshes", "renameddir", "sub", "b.nif")));
+    }
+
+    [Theory] [CreationEditorAutoData]
+    public void Rename_Directory_ExistingDestinationWithoutOverwrite_KeepsOriginal(
+        IAssetController assetController,
+        IDataSourceService dataSourceService,
+        IFileSystem fileSystem) {
+        CreateFile(dataSourceService, fileSystem, "meshes/testdir/a.nif", [1]);
+        CreateFile(dataSourceService, fileSystem, "meshes/renameddir/a.nif", [9]);
+        var directoryLink = new DataSourceDirectoryLink(dataSourceService.DataDirectoryDataSource, "meshes/testdir");
+
+        assetController.Rename(directoryLink, "renameddir", overwrite: false);
+
+        // Destination file was not overwritten
+        Assert.Equal([9], fileSystem.File.ReadAllBytes(fileSystem.Path.Combine(DataDirectory, "meshes", "renameddir", "a.nif")));
+        // Origin file was moved away (integrated into destination)
+        Assert.False(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "meshes", "testdir", "a.nif")));
+    }
+
+    [Theory] [CreationEditorAutoData]
+    public async Task Rename_Directory_RemapsRecordAssetReferences(
+        IAssetController assetController,
+        IDataSourceService dataSourceService,
+        IFileSystem fileSystem,
+        IRecordController recordController,
+        IReferenceService referenceService) {
+        await WaitForReferenceLoading(referenceService);
+
+        // Create a record referencing an asset inside the directory
+        var staticRecord = recordController.CreateRecord<Static, IStaticGetter>();
+        recordController.RegisterUpdate(staticRecord, () => staticRecord.Model = new Model {
+            File = new AssetLink<SkyrimModelAssetType>("Meshes/testdir/test.nif"),
+        });
+
+        var oldLink = new AssetLink<SkyrimModelAssetType>("Meshes/testdir/test.nif");
+        Assert.Contains(staticRecord.FormKey, referenceService.GetRecordReferences(oldLink).Select(x => x.FormKey));
+
+        // Create the referenced file inside the directory and rename the directory
+        CreateFile(dataSourceService, fileSystem, "Meshes/testdir/test.nif", [1, 2, 3]);
+        var directoryLink = new DataSourceDirectoryLink(dataSourceService.DataDirectoryDataSource, "Meshes/testdir");
+
+        assetController.Rename(directoryLink, "renameddir", overwrite: false);
+
+        // Directory was moved
+        Assert.False(fileSystem.Directory.Exists(fileSystem.Path.Combine(DataDirectory, "Meshes", "testdir")));
+        Assert.True(fileSystem.File.Exists(fileSystem.Path.Combine(DataDirectory, "Meshes", "renameddir", "test.nif")));
+
+        // Record asset reference was remapped to the new path
+        Assert.Equal(Path.Combine("Meshes", "renameddir", "test.nif"), staticRecord.Model!.File.DataRelativePath.Path, ignoreCase: true);
+
+        // Reference tracking reflects the remap
+        var newLink = new AssetLink<SkyrimModelAssetType>("Meshes/renameddir/test.nif");
+        Assert.DoesNotContain(staticRecord.FormKey, referenceService.GetRecordReferences(oldLink).Select(x => x.FormKey));
+        Assert.Contains(staticRecord.FormKey, referenceService.GetRecordReferences(newLink).Select(x => x.FormKey));
+    }
 }

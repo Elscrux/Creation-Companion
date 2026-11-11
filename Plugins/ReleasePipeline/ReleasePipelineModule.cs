@@ -71,6 +71,14 @@ public class ReleasePipelineModule : Module {
             .AsImplementedInterfaces()
             .AsSelf();
 
+        builder.RegisterType<MissingAssetsCheck>()
+            .AsImplementedInterfaces()
+            .AsSelf();
+
+        builder.RegisterType<RecordOverridesCheck>()
+            .AsImplementedInterfaces()
+            .AsSelf();
+
         builder.RegisterAssemblyTypes(typeof(ReleasePipelineModule).Assembly)
             .AssignableTo<IAnalyzer>()
             .AsImplementedInterfaces()

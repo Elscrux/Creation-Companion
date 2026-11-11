@@ -1,11 +1,13 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Skyrim;
+using ReleasePipeline.Models;
 using ReleasePipeline.Models.Check;
 namespace ReleasePipeline.Services.Checks;
 
 public sealed class WorldspaceChecks : IReleaseCheck, IIsolatedRecordAnalyzer<IWorldspaceGetter> {
     public string Name => "Worldspace Large References Missing";
+    public PipelineContext? Context { get; set; }
 
     public static readonly TopicDefinition WorldspaceLargeReferencesMissing = CheckTopic.Custom("Worldspace Large References Missing", Severity.Error)
         .WithoutFormatting("Worldspace has no large references generated");

@@ -151,7 +151,7 @@ public sealed class AssetController(
                     }
                     case DataSourceDirectoryLink directoryLink: {
                         var destinationDirectoryLink = new DataSourceDirectoryLink(directoryLink.DataSource, newPath);
-                        var links = GetRemapLinks(directoryLink, destinationDirectoryLink);
+                        var links = GetRemapLinks(directoryLink, destinationDirectoryLink, true);
                         if (FileSystemMove(directoryLink, destinationDirectoryLink, overwrite, token)) {
                             RemapLinks(links);
                         }
@@ -191,15 +191,17 @@ public sealed class AssetController(
 
         foreach (var reference in referenceService.GetAssetReferences(assetLink)) {
             if (dataSourceService.TryGetFileLink(reference, out var referenceFileLink)) {
-                modelModificationService.RemapLinks(
-                    referenceFileLink,
-                    path => {
-                        if (!path.IsNullOrWhitespace() && oldFileLink.DataRelativePath.Path.EndsWith(path, DataRelativePath.PathComparison)) {
-                            return newFileLink.DataRelativePath.Path;
-                        }
+                if (modelModificationService.Accepts(referenceFileLink)) {
+                    modelModificationService.RemapLinks(
+                        referenceFileLink,
+                        path => {
+                            if (!path.IsNullOrWhitespace() && oldFileLink.DataRelativePath.Path.EndsWith(path, DataRelativePath.PathComparison)) {
+                                return newFileLink.DataRelativePath.Path;
+                            }
 
-                        return path;
-                    });
+                            return path;
+                        });
+                }
             } else {
                 logger.Here().Warning("Couldn't find file link {Reference} of {Path}", reference, oldFileLink.FullPath);
             }
@@ -324,11 +326,11 @@ public sealed class AssetController(
     private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceFileLink origin, DataSourceFileLink destination) =>
         [new Update<DataSourceFileLink>(origin, destination)];
 
-    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination) {
+    private static IReadOnlyList<IUpdate<DataSourceFileLink>> GetRemapLinks(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, bool rename = false) {
         return origin
             .EnumerateFileLinks(true)
             .Select(fileLink => {
-                var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, fileLink);
+                var destinationPath = GetDestinationPathOfLinkInDirectory(origin, destination, fileLink, rename);
                 var linkDestination = new DataSourceFileLink(destination.DataSource, destinationPath);
                 return new Update<DataSourceFileLink>(fileLink, linkDestination);
             })
@@ -336,9 +338,15 @@ public sealed class AssetController(
             .ToArray();
     }
 
-    private static DataRelativePath GetDestinationPathOfLinkInDirectory(DataSourceDirectoryLink origin, DataSourceDirectoryLink destination, IDataSourceLink fileLink) {
+    private static DataRelativePath GetDestinationPathOfLinkInDirectory(
+        DataSourceDirectoryLink origin,
+        DataSourceDirectoryLink destination,
+        IDataSourceLink fileLink,
+        bool rename = false) {
         var originRelativePath = origin.FileSystem.Path.GetRelativePath(origin.DataRelativePath.Path, fileLink.DataRelativePath.Path);
-        var destinationPath = destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, originRelativePath);
+        var destinationPath = rename
+            ? destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, originRelativePath)
+            : destination.FileSystem.Path.Combine(destination.DataRelativePath.Path, origin.Name, originRelativePath);
         return new DataRelativePath(destinationPath);
     }
 

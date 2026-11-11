@@ -70,6 +70,9 @@ public sealed class WaterGradientGenerator(
             // Exclude cells outside the specified range
             if (x < 0 || y < 0 || x >= topRightGrid.X - bottomLeftGrid.X || y >= topRightGrid.Y - bottomLeftGrid.Y) continue;
 
+            // Exclude cells where the water is not visible (heightmap always is above water level)
+            if (!IsCellWaterVisible(worldspace, cellGetter)) continue;
+
             var shallowColor = GetAverageColor(shallowMap, x, y, gridSize);
             if (shallowColor is null) continue;
 
@@ -244,5 +247,43 @@ public sealed class WaterGradientGenerator(
         var similarity = 1 - distance / maxDistance;
 
         return similarity;
+    }
+
+    private static bool IsCellWaterVisible(IWorldspaceGetter worldspace, ICellGetter cell) {
+        // Cell water is only visible if the heightmap is below the water level for at least one point in the cell
+        if (cell.Grid is null) return true;
+        if (cell.Water is null) return true;
+        if (cell.Water.IsNull) return true;
+        if (cell.Landscape?.VertexHeightMap is null) return true;
+
+        var waterHeight = cell.WaterHeight == float.MaxValue
+            ? worldspace.LodWaterHeight
+            : cell.WaterHeight;
+
+        var offset = cell.Landscape.VertexHeightMap.Offset * 8;
+        float rowOffset = 0;
+        foreach (var x in cell.Landscape.VertexHeightMap.HeightMap) {
+            // signed byte, each unit equals 8 game units
+            float value = x.Value * 8;
+
+            var column = x.Key.X;
+
+            if (column == 0) {
+                // first column value controls height for all remaining points in cell
+                rowOffset = 0;
+                offset += value;
+            } else {
+                // other col values control height of all points in the same row
+                rowOffset += value;
+            }
+
+            var heightmapValue = offset + rowOffset;
+
+            if (heightmapValue <= waterHeight) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -6,7 +6,6 @@ using CreationEditor.Services.Environment;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Analyzers;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
-using Mutagen.Bethesda.Skyrim;
 using Noggog;
 using ReleasePipeline.Models;
 using ReleasePipeline.Models.Actions;
@@ -30,16 +29,20 @@ public sealed class PipelineRunner(
 
     /// <summary>Runs the fixed check suite against the mod. Checks that don't apply are skipped</summary>
     public async Task<IReadOnlyList<CheckOutcome>> RunChecksAsync(
-        ISkyrimModGetter mod,
+        PipelineContext pipelineContext,
         CancellationToken token) {
 
+        foreach (var check in Checks) {
+            check.Context = pipelineContext;
+        }
+
         var relevantChecks = Checks
-            .Where(check => check.AppliesTo(mod))
+            .Where(check => check.AppliesTo(pipelineContext))
             .ToArray();
 
         var otherModsInLoadOrder = editorEnvironment.LinkCache.PriorityOrder
             .Select(x => x.ModKey)
-            .Where(modKey => modKey != mod.ModKey)
+            .Where(modKey => modKey != pipelineContext.Mod.ModKey)
             .ToArray();
 
         var analyzer = AnalyzerRunnerBuilder.Create(GameRelease.SkyrimSE)
@@ -80,7 +83,7 @@ public sealed class PipelineRunner(
     /// <param name="pipeline">Pipeline to run.</param>
     /// <param name="pipelineContext">Context to pass to each action.</param>
     /// <param name="token">Cancellation token.</param>
-    /// <param name="onlyActionId">
+    /// <param name="progress">Optional observer to report per-action progress.</param>
     /// When set, only that single action is run (advanced debug option); otherwise the whole
     /// ordered pipeline is executed.
     /// </param>
@@ -88,7 +91,6 @@ public sealed class PipelineRunner(
         Pipeline pipeline,
         PipelineContext pipelineContext,
         CancellationToken token,
-        Guid? onlyActionId = null,
         IObserver<ActionRunProgress>? progress = null) {
 
         // Create a dedicated release folder for this pipeline run
@@ -112,7 +114,7 @@ public sealed class PipelineRunner(
             }
 
             var outcomes = new List<ActionRunOutcome>();
-            foreach (var action in pipeline.Actions.Where(ShouldRun).ToArray()) {
+            foreach (var action in pipeline.Actions.ToArray()) {
                 token.ThrowIfCancellationRequested();
 
                 // As soon as the first action wants to modify files in place, create a working directory copy of the data source and switch the context to it
@@ -150,10 +152,6 @@ public sealed class PipelineRunner(
                 context.FileSystem.Directory.Delete(workingDirectory, true);
             }
         }
-
-        // When isolating a single action (debug), run only that action; otherwise run all in order.
-        bool ShouldRun(IPipelineAction action) =>
-            onlyActionId is null || onlyActionId == action.Id;
     }
 
     /// <summary>

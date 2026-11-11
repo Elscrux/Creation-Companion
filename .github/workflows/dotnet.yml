@@ -16,7 +16,7 @@ jobs:
         
         strategy:
             matrix:
-                dotnet-version: [ '10.0' ]
+                dotnet-version: [ '11.0' ]
                 os: [ ubuntu-latest, windows-latest ]
         
         steps:

@@ -78,7 +78,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                         : "Duplicate"),
                 () => menuItemProvider.Duplicate(DuplicateCommand).HotKey
             ),
-            new ContextAction(context => context.SelectedAssets.Count > 0 && context.SelectedRecords.Count > 0,
+            new ContextAction(context => context.SelectedAssets.Count > 0 || context.SelectedRecords.Count > 0,
                 30,
                 ContextActionGroup.Modification,
                 DeleteCommand,
@@ -86,7 +86,7 @@ public sealed partial class GenericContextActionsProvider : IContextActionsProvi
                     DeleteCommand,
                     context,
                     context.Count > 1
-                        ? $"Delete All ({context.SelectedRecords.Count})"
+                        ? $"Delete All ({context.SelectedRecords.Count + context.SelectedAssets.Count})"
                         : "Delete"),
                 () => menuItemProvider.Delete(DeleteCommand).HotKey
             ),

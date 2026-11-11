@@ -93,15 +93,26 @@ public sealed class FeatureProvider(
                         if (enchantment is null) return null;
                     }
 
-                    return enchantment.EditorID?
+                    // Remove everything before to try to remove prefixes no matter if the prefix that is set
+                    // for new records matches the prefix that is used for the enchantment
+                    return ReplaceAndRemoveEverythingBefore(enchantment.EditorID, "EnchArmor", "EnchWeapon", "Ench", "Staff")
                         .TrimStart(recordPrefixService.Prefix, StringComparison.OrdinalIgnoreCase)
                         .Replace("Fortify", string.Empty)
-                        .Replace("EnchArmor", string.Empty)
-                        .Replace("EnchWeapon", string.Empty)
-                        .Replace("Ench", string.Empty)
-                        .Replace("Staff", string.Empty)
                         .Replace("Damage", string.Empty)
                         .Replace("Base", string.Empty);
+
+                    static string ReplaceAndRemoveEverythingBefore(string? input, params IEnumerable<string> toReplace) {
+                        if (input is null) return string.Empty;
+
+                        foreach (var replace in toReplace) {
+                            var index = input.IndexOf(replace, StringComparison.OrdinalIgnoreCase);
+                            if (index < 0) continue;
+
+                            input = input[(index + replace.Length)..];
+                        }
+
+                        return input;
+                    }
                 }),
             EnchantmentLevel => new FeatureWildcard(
                 featureWildcardIdentifier,
@@ -123,7 +134,7 @@ public sealed class FeatureProvider(
                         Mutagen.Bethesda.Skyrim.ArmorType.Clothing => "clothing",
                         Mutagen.Bethesda.Skyrim.ArmorType.LightArmor => "light",
                         Mutagen.Bethesda.Skyrim.ArmorType.HeavyArmor => "heavy",
-                        _ => null
+                        _ => null,
                     };
                 }),
             ArmorSlot => new FeatureWildcard(
@@ -163,7 +174,7 @@ public sealed class FeatureProvider(
             PoisonType => new FeatureWildcard(
                 featureWildcardIdentifier,
                 GetFirstEffectName),
-            _ => throw new ArgumentOutOfRangeException(nameof(featureWildcardIdentifier), featureWildcardIdentifier, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(featureWildcardIdentifier), featureWildcardIdentifier, null),
         };
     }
 

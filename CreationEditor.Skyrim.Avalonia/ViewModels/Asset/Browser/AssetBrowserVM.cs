@@ -7,13 +7,16 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Templates;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using CreationEditor.Avalonia;
 using CreationEditor.Avalonia.Constants;
 using CreationEditor.Avalonia.Services.Actions;
 using CreationEditor.Avalonia.Services.Asset;
+using CreationEditor.Avalonia.Services.Avalonia;
 using CreationEditor.Avalonia.ViewModels;
 using CreationEditor.Avalonia.ViewModels.Asset.Browser;
 using CreationEditor.Avalonia.ViewModels.Setting.AssetBrowser;
@@ -37,6 +40,7 @@ namespace CreationEditor.Skyrim.Avalonia.ViewModels.Asset.Browser;
 
 public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
     private readonly IContextMenuProvider _contextMenuProvider;
+    private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IIgnoredDirectoriesProvider _ignoredDirectoriesProvider;
     private readonly ISearchFilter _searchFilter;
     private readonly IDataSourceWatcherProvider _dataSourceWatcherProvider;
@@ -94,6 +98,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
 
     public AssetBrowserVM(
         IContextMenuProvider contextMenuProvider,
+        IMainWindowProvider mainWindowProvider,
         IDataSourceWatcherProvider dataSourceWatcherProvider,
         IDataSourceService dataSourceService,
         IReferenceService referenceService,
@@ -109,6 +114,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
         IGenericContextActionsProvider genericContextActionsProvider) {
         DataSourceService = dataSourceService;
         _contextMenuProvider = contextMenuProvider;
+        _mainWindowProvider = mainWindowProvider;
         _referenceService = referenceService;
         AssetTypeService = assetTypeService;
         AssetIconService = assetIconService;
@@ -260,14 +266,7 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
                         }
 
                         if (missingLinks.Length > 0) {
-                            stackPanel.Children.Add(
-                                new FASymbolIcon {
-                                    Symbol = FASymbol.ImportantFilled,
-                                    Foreground = StandardBrushes.InvalidBrush,
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    [ToolTip.TipProperty] = "Missing Links\n" + string.Join(",\n", missingLinks),
-                                }
-                            );
+                            stackPanel.Children.Add(CreateMissingLinksButton(fileLink, missingLinks));
                         }
 
                         if (assetLink.Type == SkyrimModelAssetType.Instance) {
@@ -470,6 +469,77 @@ public sealed partial class AssetBrowserVM : ViewModel, IAssetBrowserVM {
             .Where(path => !DataSourceService.FileExists(path.DataRelativePath))
             .Select(x => x.DataRelativePath.Path)
             .Concat(_referenceService.GetMissingRecordLinks(fileLink));
+    }
+
+    private Button CreateMissingLinksButton(DataSourceFileLink fileLink, string[] missingLinks) {
+        var itemsPanel = new StackPanel { Spacing = 2 };
+        foreach (var missingLink in missingLinks) {
+            itemsPanel.Children.Add(CreateMissingLinkItem(fileLink, missingLink));
+        }
+
+        var flyout = new Flyout {
+            Content = new ScrollViewer {
+                MaxHeight = 400,
+                Content = itemsPanel,
+            },
+        };
+
+        var button = new Button {
+            Content = new FASymbolIcon {
+                Symbol = FASymbol.ImportantFilled,
+                Foreground = StandardBrushes.InvalidBrush,
+                VerticalAlignment = VerticalAlignment.Center,
+            },
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Flyout = flyout,
+        };
+
+        flyout.ShowOnHover(button);
+
+        return button;
+    }
+
+    private Button CreateMissingLinkItem(DataSourceFileLink fileLink, string missingLink) {
+        var button = new Button {
+            Content = missingLink,
+            FontSize = 12,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Foreground = StandardBrushes.TextBrush,
+            Padding = new Thickness(0, 2, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Left,
+            Command = ReactiveCommand.Create<string?>(CopyToClipboard),
+            CommandParameter = missingLink,
+            [ToolTip.TipProperty] = "Click to copy - Right click for actions",
+        };
+
+        // Record links like "Sound: XYZ" are not file paths and have no asset context actions
+        if (AssetTypeService.GetAssetType(new DataRelativePath(missingLink)) is null) return button;
+
+        var dataSourceFileLink = new DataSourceFileLink(fileLink.DataSource, new DataRelativePath(missingLink));
+        var assetLink = AssetTypeService.GetAssetLink(dataSourceFileLink.DataRelativePath);
+        IReferencedAsset? referencedAsset;
+        if (assetLink is not null) {
+            using var _ = _referenceService.GetReferencedAsset(assetLink, out referencedAsset);
+        } else {
+            referencedAsset = null;
+        }
+
+        var context = new SelectedListContext([], [new AssetContext(dataSourceFileLink, referencedAsset)]);
+        button.ContextFlyout = new MenuFlyout { ItemsSource = _contextMenuProvider.GetMenuItems(context).ToList() };
+
+        return button;
+    }
+
+    private void CopyToClipboard(string? text) {
+        if (text is null) return;
+
+        var clipboard = _mainWindowProvider.Current is {} mainWindow ? TopLevel.GetTopLevel(mainWindow)?.Clipboard : null;
+        clipboard?.SetTextAsync(text);
     }
 
     private HierarchicalRow<IDataSourceLink>? FindParentRow(IDataSourceLink fileLink) {

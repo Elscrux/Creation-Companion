@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Plugins.Records;
+using ReleasePipeline.Models;
 using ReleasePipeline.Models.Check;
 namespace ReleasePipeline.Services.Checks;
 
@@ -8,10 +9,11 @@ namespace ReleasePipeline.Services.Checks;
 /// Flags records whose editor ID looks unfinished, deletable, or otherwise suspicious.
 /// </summary>
 public sealed class UnfinishedEditorIDCheck : IReleaseCheck, IIsolatedRecordAnalyzer<IMajorRecordGetter> {
-    private static readonly string[] DisallowedFragments = ["delete", "remove"];
+    private static readonly string[] DisallowedFragments = ["delete", "remove", "duplicate"];
     private static readonly string[] DisallowedStarts = ["x"];
 
     public string Name => "Unfinished Editor IDs";
+    public PipelineContext? Context { get; set; }
 
     public static readonly TopicDefinition SuspiciousEditorID = CheckTopic.Custom("Unfinished Editor ID", Severity.Warning)
         .WithoutFormatting("Record has a suspicious editor ID");

@@ -146,7 +146,9 @@ public sealed partial class AssetCleaner(
                     retainedGraph.IncludeVertex(assetLinkIdentifier, assetLinkIdentifier);
 
                     // Also retain the compiled script
-                    var compiledPath = selectedDataSource.FileSystem.Path.ChangeExtension(assetLinkIdentifier.AssetLink.DataRelativePath.Path, ".pex");
+                    var compiledPath = selectedDataSource.FileSystem.Path.Combine(
+                        "Scripts",
+                        selectedDataSource.FileSystem.Path.GetFileNameWithoutExtension(assetLinkIdentifier.AssetLink.DataRelativePath.Path) + ".pex");
                     var compiledAssetLink = assetTypeService.GetAssetLink(compiledPath);
                     if (compiledAssetLink is not null) {
                         var compiledScriptLink = new AssetLinkIdentifier(compiledAssetLink);

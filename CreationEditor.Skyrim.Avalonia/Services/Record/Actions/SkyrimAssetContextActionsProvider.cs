@@ -36,11 +36,14 @@ using Key = Avalonia.Input.Key;
 namespace CreationEditor.Skyrim.Avalonia.Services.Record.Actions;
 
 public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider, IAssetContextActionsProvider {
+    private static readonly ContextActionParent Copy = new("Copy", FASymbol.Copy);
+
     private readonly Lazy<IContextMenuProvider> _contextMenuProviderFactory;
     private readonly IReferenceBrowserVMFactory _referenceBrowserVMFactory;
     private readonly IFileSystem _fileSystem;
     private readonly IMainWindowProvider _mainWindowProvider;
     private readonly IDockFactory _dockFactory;
+    private readonly IDataSourceService _dataSourceService;
     private readonly IDockableDefinition? _assetBrowser;
     private readonly IModelModificationService _modelModificationService;
     private readonly ITaskDialogProvider _taskDialogProvider;
@@ -58,6 +61,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         IMainWindowProvider mainWindowProvider,
         IDockableRegistry dockableRegistry,
         IDockFactory dockFactory,
+        IDataSourceService dataSourceService,
         IModelModificationService modelModificationService,
         ITaskDialogProvider taskDialogProvider,
         IRecordPrefixService recordPrefixService,
@@ -71,6 +75,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         _fileSystem = fileSystem;
         _mainWindowProvider = mainWindowProvider;
         _dockFactory = dockFactory;
+        _dataSourceService = dataSourceService;
         _assetBrowser = dockableRegistry.GetByType(DockableTypes.AssetBrowser);
         _modelModificationService = modelModificationService;
         _taskDialogProvider = taskDialogProvider;
@@ -149,6 +154,17 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
                     context,
                     "Copy Path",
                     false)),
+            new ContextAction(
+                context => context is { SelectedAssets.Count: > 0, SelectedRecords.Count: 0 },
+                40,
+                ContextActionGroup.Copy,
+                CopyMissingLinksCommand,
+                context => menuItemProvider.Custom(
+                    CopyMissingLinksCommand,
+                    "Missing Links",
+                    context,
+                    FASymbol.ImportantFilled),
+                Parent: Copy),
             new ContextAction(
                 context => context.HasAnyAssetOfType(_assetTypeService.Provider.Model),
                 10,
@@ -413,7 +429,7 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
             IsChecked = false,
         };
         var onlyShowChanges = new CheckBox { Content = "Only Show Changes", IsChecked = true };
-        var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of ) a texture file path to replace" };
+        var fromTextBox = new TextBox { Text = firstTexture, PlaceholderText = "Enter (part of) a texture file path to replace" };
         var toTextBox = new TextBox { Text = "replacement.dds", PlaceholderText = "Enter a replacement path for what you want to replace" };
 
         var previewObservable = Observable
@@ -655,6 +671,33 @@ public partial class SkyrimAssetContextActionsProvider : IContextActionsProvider
         if (clipboard is not null) {
             await clipboard.SetTextAsync(dataSourceLink.DataRelativePath.Path);
         }
+    }
+
+    [ReactiveCommand]
+    private async Task CopyMissingLinks(SelectedListContext context) {
+        var missingLinks = context.SelectedAssets
+            .SelectMany(assetContext => assetContext.DataSourceLink.EnumerateAllFileLinks())
+            .SelectMany(GetMissingLinks)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (missingLinks.Length == 0) return;
+
+        var clipboard = _mainWindowProvider.Current is {} mainWindow ? TopLevel.GetTopLevel(mainWindow)?.Clipboard : null;
+        if (clipboard is not null) {
+            await clipboard.SetTextAsync(string.Join(Environment.NewLine, missingLinks));
+        }
+    }
+
+    private IEnumerable<string> GetMissingLinks(DataSourceFileLink fileLink) {
+        var assetLink = _assetTypeService.GetAssetLink(fileLink.DataRelativePath);
+        if (assetLink?.AssetTypeInstance != _assetTypeService.Provider.Model) return [];
+
+        return _referenceService.GetAssetLinks(fileLink)
+            .Where(path => !_dataSourceService.FileExists(path.DataRelativePath))
+            .Select(x => x.DataRelativePath.Path)
+            .Concat(_referenceService.GetMissingRecordLinks(fileLink));
     }
 
     [ReactiveCommand]
